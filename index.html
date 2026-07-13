@@ -181,6 +181,38 @@
     h1{font-size:1.25rem}
     .card{padding:15px 14px 11px}
   }
+
+  /* ---------- debate chat ---------- */
+  #debate{padding-top:14px}
+  .dbt-note{font-size:.82rem;color:var(--ink-dim);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+  .dbt-note b{color:var(--gold)}
+  details.dbt-settings{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+  details.dbt-settings>summary{padding:12px 14px;cursor:pointer;color:var(--gold);font-family:system-ui,sans-serif;font-size:.9rem;list-style:none}
+  details.dbt-settings>summary::-webkit-details-marker{display:none}
+  .dbt-set-body{padding:4px 14px 14px;border-top:1px solid var(--line)}
+  .dbt-set-body label{display:block;font-size:.82rem;color:var(--ink-dim);margin:10px 0 4px;font-family:system-ui,sans-serif}
+  .dbt-set-body input,.dbt-set-body select{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:.92rem;font-family:inherit;outline:none}
+  .dbt-set-body input:focus,.dbt-set-body select:focus{border-color:var(--violet)}
+  .dbt-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .dbt-btn{padding:9px 15px;border-radius:9px;border:1px solid var(--gold-soft);background:#d4a94e18;color:var(--gold);font-family:system-ui,sans-serif;font-size:.86rem;cursor:pointer}
+  .dbt-btn.sec{border-color:var(--line);color:var(--ink-dim);background:none}
+  .dbt-log{min-height:200px;display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
+  .dbt-msg{max-width:92%;padding:12px 15px;border-radius:14px;font-size:.95rem;line-height:1.6}
+  .dbt-msg.user{align-self:flex-end;background:linear-gradient(160deg,#2a2350,#241d3d);border:1px solid var(--violet);border-bottom-right-radius:4px}
+  .dbt-msg.ai{align-self:flex-start;background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line);border-bottom-left-radius:4px}
+  .dbt-msg.err{align-self:flex-start;background:#e0785a18;border:1px solid #e0785a66;color:#ffd9cc;font-size:.86rem;font-family:system-ui,sans-serif}
+  .dbt-msg strong{color:#efe7ff}.dbt-msg.user strong{color:#fff}
+  .dbt-msg code{background:#0d0b14;padding:1px 5px;border-radius:4px;font-size:.86em}
+  .dbt-who{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-family:system-ui,sans-serif;opacity:.6;margin-bottom:4px}
+  .dbt-typing{align-self:flex-start;color:var(--ink-faint);font-size:.85rem;font-style:italic;padding:6px 4px}
+  .dbt-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .dbt-chip{font-size:.83rem;color:#cdbff0;border:1px solid var(--line);border-radius:16px;padding:7px 12px;cursor:pointer;background:var(--bg2);text-align:left}
+  .dbt-chip:hover{border-color:var(--violet)}
+  .dbt-bar{display:flex;gap:8px;align-items:flex-end;position:sticky;bottom:8px;background:#0d0b14ee;padding:8px;border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(8px)}
+  .dbt-bar textarea{flex:1;resize:none;min-height:24px;max-height:140px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:.95rem;font-family:inherit;outline:none;line-height:1.4}
+  .dbt-bar textarea:focus{border-color:var(--violet)}
+  .dbt-send{flex:0 0 auto;width:44px;height:44px;border-radius:11px;border:none;background:linear-gradient(160deg,var(--violet),#6a52b0);color:#fff;font-size:1.1rem;cursor:pointer}
+  .dbt-send:disabled{opacity:.4}
 </style>
 </head>
 <body>
@@ -217,6 +249,7 @@
   <button class="tab" data-t="coche">⚙ Cơ chế ★</button>
   <button class="tab" data-t="magic">🔮 Có phép thuật?</button>
   <button class="tab" data-t="apply">🎯 Dùng cơ chế</button>
+  <button class="tab" data-t="debate">💬 Tranh luận ★</button>
   <button class="tab" data-t="myth">Thật ↔ Huyền thoại</button>
   <button class="tab" data-t="tarot">Tarot &amp; Bói bài</button>
   <button class="tab" data-t="disan">Di sản</button>
@@ -1119,6 +1152,75 @@
   </div>
 </section>
 
+<!-- ============ TRANH LUAN (AI) ============ -->
+<section id="debate">
+  <h2 style="color:var(--gold);font-weight:normal;letter-spacing:.06em;margin-bottom:4px">💬 PHÒNG TRANH LUẬN</h2>
+  <p class="dim" style="margin-bottom:12px">Hỏi / phản biện / làm rõ bất kỳ thắc mắc logic nào — về phép thuật, may mắn, bùa chú, trùng hợp, "chuyện vượt ngoài khoa học". Trang này gọi thẳng AI của bạn để trả lời hai chiều, trọng chứng.</p>
+
+  <div class="dbt-note">🔑 Cần <b>API key</b> của riêng bạn (một lần). Mở <b>Cài đặt</b> bên dưới, chọn nhà cung cấp, dán key. Key chỉ lưu <b>trong trình duyệt này</b> — không nằm trên GitHub, không ai khác thấy. Mẹo an toàn: tạo key có giới hạn chi tiêu.</div>
+
+  <details class="dbt-settings" id="dbt-settings">
+    <summary>⚙️ Cài đặt API key (bấm mở) — <span id="dbt-status">chưa có key</span></summary>
+    <div class="dbt-set-body">
+      <label>Nhà cung cấp</label>
+      <select id="dbt-prov">
+        <option value="anthropic">Anthropic (Claude) — khuyến nghị</option>
+        <option value="openai">OpenAI (GPT)</option>
+      </select>
+      <label>API key</label>
+      <input id="dbt-key" type="password" placeholder="dán key vào đây (sk-... hoặc sk-ant-...)" autocomplete="off">
+      <label>Model <span style="color:var(--ink-faint)">(đổi nếu báo lỗi model)</span></label>
+      <input id="dbt-model" type="text" placeholder="claude-3-5-sonnet-latest">
+      <div class="dbt-row">
+        <button class="dbt-btn" id="dbt-save">Lưu</button>
+        <button class="dbt-btn sec" id="dbt-clearkey">Xóa key</button>
+        <a class="dbt-btn sec" href="https://console.anthropic.com/settings/keys" target="_blank" style="text-decoration:none">Lấy key Anthropic ↗</a>
+        <a class="dbt-btn sec" href="https://platform.openai.com/api-keys" target="_blank" style="text-decoration:none">Lấy key OpenAI ↗</a>
+      </div>
+      <p style="font-size:.78rem;color:var(--ink-faint);margin-top:10px">Trang gọi API trực tiếp từ trình duyệt. Nếu báo lỗi mạng/CORS, thử nhà cung cấp kia. Nếu lỗi "model", sửa tên model (vd Anthropic: claude-3-5-sonnet-latest / claude-3-5-haiku-latest; OpenAI: gpt-4o / gpt-4o-mini).</p>
+    </div>
+  </details>
+
+  <div class="dbt-chips" id="dbt-chips">
+    <div class="dbt-chip">Đôi giày tôi thích tự đến dù tôi không bỏ tiền mua — nếu chỉ là đòn bẩy tâm lý thì giải thích sao?</div>
+    <div class="dbt-chip">Amulet Thái / nuôi kumanthong lại mang tài lộc thật, cơ hội tự tới dù tôi hành động bình thường?</div>
+    <div class="dbt-chip">Nếu tất cả là tâm lý, tại sao sự việc xảy ra đúng lúc tôi mong cầu?</div>
+    <div class="dbt-chip">Làm sao phân biệt "phép thuật thật" với trùng hợp ngẫu nhiên?</div>
+  </div>
+
+  <div class="dbt-log" id="dbt-log"></div>
+
+  <div class="dbt-bar">
+    <textarea id="dbt-input" rows="1" placeholder="Nhập câu hỏi / phản biện của bạn…"></textarea>
+    <button class="dbt-send" id="dbt-send" title="Gửi">➤</button>
+  </div>
+  <div class="dbt-row" style="margin-top:8px">
+    <button class="dbt-btn sec" id="dbt-clearconv">🗑 Xóa hội thoại</button>
+  </div>
+
+  <script type="text/plain" id="dbt-sysprompt">
+Bạn là "Người Tranh Luận" — đối tác đối thoại trí tuệ cho BaoMinh về ranh giới giữa huyền học/phép thuật/may mắn và cơ chế tâm lý–khoa học.
+
+BỐI CẢNH: BaoMinh làm đa lĩnh vực — tư vấn tâm lý, y khoa & dược (gồm y học cổ truyền), nghiên cứu học thuật, báo chí, kinh doanh, và huyền học (Tarot/Lenormand, tâm linh). Anh vừa yêu huyền học vừa trọng bằng chứng; muốn được tranh luận nghiêm túc, KHÔNG bị dỗ dành cũng KHÔNG bị chế giễu.
+
+NHIỆM VỤ: giúp BaoMinh HIỂU và TIN qua lập luận chặt + bằng chứng; làm rõ mọi thắc mắc logic ("vì sao điều mong cầu lại xảy ra", "bùa/kumanthong/amulet có thật không", "trùng hợp", "chuyện vượt ngoài khoa học").
+
+NGUYÊN TẮC BẤT DI BẤT DỊCH:
+1. Trọng chứng hơn trọng cung. Tách rõ DỮ KIỆN có nguồn vs SUY LUẬN/giả thuyết. Không chắc thì nói "tôi không chắc". TUYỆT ĐỐI không bịa nghiên cứu, số liệu, tên tác giả.
+2. Khiêm tốn nhận thức luận. Phân ba tầng: (a) có bằng chứng vững; (b) câu hỏi mở thật sự (vd bản chất ý thức); (c) đã kiểm nghiệm & thất bại (vd psi qua parapsychology). "Chưa chứng minh được" KHÁC "chứng minh là không".
+3. LUÔN đưa cả hai phía. Không chế giễu huyền học, không khẳng định bừa điều siêu nhiên. Trình bày lời giải tâm lý mạnh nhất, RỒI thành thật nhượng bộ phần không thể phủ chứng.
+4. Với mỗi giai thoại "ứng nghiệm": phân tích qua bộ cơ chế bên dưới, rồi chỉ ra "phép thử phân biệt" (theo dõi TRƯỚC, đếm cả trật lẫn trúng, so base rate, đối chứng) để biết đó là phép thuật hay bình-thường-nhưng-nổi-bật.
+5. Tôn trọng nghề của BaoMinh: tarot/huyền học có giá trị thật như công cụ phản tư & trực giác, dù cơ chế là tâm lý.
+6. Khuyến khích anh phản biện lại; nếu anh chỉ ra lỗ hổng, thừa nhận & tinh chỉnh. Đây là TRANH LUẬN, không phải giảng bài một chiều.
+
+BỘ CƠ CHẾ (rút ra khi hợp, giải thích ngắn): thiên kiến xác nhận; thiên kiến sống sót (chỉ người thắng kể chuyện, người thất bại lặng lẽ bỏ); hồi quy về trung bình (tìm bùa khi đang đáy → sau tự hồi phục, công gán cho bùa); luật số lớn (điều 1-trên-triệu vẫn xảy ra hằng ngày ở quy mô lớn); trí nhớ tái dựng (nhớ trúng quên trật; mài sắc mong cầu sau khi việc xảy ra); chú ý chọn lọc/salience (tin gì thì thấy nấy — ảo giác tần số Baader-Meinhof); tự-hiệu-quả (self-efficacy) + nghi thức giảm lo & cảm giác kiểm soát → người tự tin, điềm tĩnh chớp cơ hội tốt hơn nên "cơ hội tự đến"; placebo (kỳ vọng tốt → sinh lý thật: opioid/dopamine) & nocebo (kỳ vọng xấu/lời nguyền → hại thật); hiệu ứng Barnum/Forer & đọc nguội (bói toán); ideomotor (cầu cơ/con lắc — vi cử động vô thức); bóng đè + hạ âm + HADD (ma/quỷ/hiện diện). Đòn bẩy CÓ bằng chứng để đạt mục tiêu: kế hoạch nếu–thì (implementation intentions, d≈0,65), WOOP, hình dung TIẾN TRÌNH (không phải kết quả), self-affirmation giá trị.
+
+RANH GIỚI TRUNG THỰC: parapsychology >130 năm chưa cho hiệu ứng lặp lại được (NAS 1988; Bem 2011 thất bại lặp lại). Placebo/nocebo điều biến trải nghiệm & một số hệ sinh lý, KHÔNG sửa vật lý khách quan (khối u, gãy xương, tài khoản ngân hàng của người khác). Bùa/amulet nếu "hiệu nghiệm" thì QUA tâm lý–hành vi người đeo (bớt lo, tự tin, chú ý, kiên trì), không phải lực siêu nhiên từ xa. Nhưng luôn thừa nhận: một ca đơn lẻ không thể phủ chứng tuyệt đối; điều trung thực là "mọi mô-típ đó được dự đoán trước mà không cần siêu nhiên".
+
+PHONG CÁCH: trả lời TIẾNG VIỆT, gọi người dùng là BaoMinh, giọng ấm, mạch lạc, thẳng thắn, không lan man. Độ dài vừa đủ (thường 5–10 câu; đào sâu khi cần). Có thể trích nghiên cứu song ngữ (nguyên văn Anh + dịch Việt) khi hữu ích — nhưng chỉ khi bạn THỰC SỰ biết nguồn, không bịa. Kết bằng một câu mời BaoMinh đào sâu hoặc phản biện tiếp.
+  </script>
+</section>
+
 <!-- ============ ĐỌC SÂU VÒNG 2 ============ -->
 <section id="docsau">
   <p class="dim" style="margin-bottom:14px">Vòng đọc sâu thứ hai (12/7/2026): mở toàn văn 8 nguồn bị bỏ dở ở vòng 1 do sự cố limit. Kết quả: <strong>4 nguồn đọc trọn</strong>, 4 nguồn bị chặn kỹ thuật (đã bù bằng đường khác). Mỗi phân tích dưới đây gồm: nội dung cốt lõi → dữ kiện MỚI cho hồ sơ → đánh giá độ tin cậy.</p>
@@ -1276,6 +1378,135 @@
       ? '☽ ' + hits + ' mục khớp "' + term + '" — đang hiển thị tất cả các tab có kết quả'
       : 'Không tìm thấy "' + term + '" trong hồ sơ.';
   }
+})();
+</script>
+<script>
+(function(){
+  var LS={key:'dbt_key',prov:'dbt_prov',model:'dbt_model',conv:'dbt_conv'};
+  var provEl=document.getElementById('dbt-prov'),keyEl=document.getElementById('dbt-key'),modelEl=document.getElementById('dbt-model');
+  var statusEl=document.getElementById('dbt-status'),logEl=document.getElementById('dbt-log'),inputEl=document.getElementById('dbt-input');
+  var sendBtn=document.getElementById('dbt-send'),chipsEl=document.getElementById('dbt-chips');
+  var sys=(document.getElementById('dbt-sysprompt').textContent||'').trim();
+  var conv=[]; try{conv=JSON.parse(localStorage.getItem(LS.conv)||'[]')}catch(e){conv=[]}
+  var defModel={anthropic:'claude-3-5-sonnet-latest',openai:'gpt-4o'};
+
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function md(s){s=esc(s);
+    s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+    s=s.replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<em>$2</em>');
+    s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+    s=s.replace(/\n/g,'<br>');return s;}
+
+  function loadSettings(){
+    var p=localStorage.getItem(LS.prov)||'anthropic';
+    provEl.value=p;
+    keyEl.value=localStorage.getItem(LS.key)||'';
+    modelEl.value=localStorage.getItem(LS.model)||defModel[p];
+    updStatus();
+  }
+  function updStatus(){
+    var has=!!(localStorage.getItem(LS.key)||'').trim();
+    statusEl.textContent=has?('đã lưu key · '+(localStorage.getItem(LS.prov)||'anthropic')):'chưa có key';
+    statusEl.style.color=has?'var(--ok)':'var(--warn)';
+  }
+  provEl.addEventListener('change',function(){ if(!modelEl.value.trim()||modelEl.value===defModel.anthropic||modelEl.value===defModel.openai) modelEl.value=defModel[provEl.value]; });
+  document.getElementById('dbt-save').addEventListener('click',function(){
+    localStorage.setItem(LS.prov,provEl.value);
+    localStorage.setItem(LS.key,keyEl.value.trim());
+    localStorage.setItem(LS.model,(modelEl.value.trim()||defModel[provEl.value]));
+    updStatus();
+    var d=document.getElementById('dbt-settings'); if(d) d.open=false;
+    if(!logEl.children.length) greet();
+  });
+  document.getElementById('dbt-clearkey').addEventListener('click',function(){
+    localStorage.removeItem(LS.key); keyEl.value=''; updStatus();
+  });
+  document.getElementById('dbt-clearconv').addEventListener('click',function(){
+    conv=[]; localStorage.removeItem(LS.conv); logEl.innerHTML=''; if(chipsEl)chipsEl.style.display='flex'; greet();
+  });
+
+  function bubble(role,textHtml){
+    var d=document.createElement('div'); d.className='dbt-msg '+role;
+    var who=document.createElement('div'); who.className='dbt-who'; who.textContent=role==='user'?'BaoMinh':(role==='err'?'Lỗi':'Người tranh luận');
+    d.appendChild(who);
+    var b=document.createElement('div'); b.innerHTML=textHtml; d.appendChild(b);
+    logEl.appendChild(d); d.scrollIntoView({block:'end'}); return d;
+  }
+  function greet(){
+    if(logEl.querySelector('.greet'))return;
+    var d=bubble('ai','Chào <strong>BaoMinh</strong>. Đây là phòng tranh luận riêng của bạn — hỏi hoặc phản biện bất kỳ thắc mắc logic nào về phép thuật, may mắn, bùa chú, trùng hợp, hay "chuyện vượt ngoài khoa học". Tôi trả lời hai chiều, trọng chứng — không dỗ dành cũng không chế giễu. Chọn một gợi ý bên trên, hoặc gõ câu hỏi của bạn.');
+    d.classList.add('greet');
+  }
+
+  // render saved conversation
+  if(conv.length){ if(chipsEl)chipsEl.style.display='none'; conv.forEach(function(m){ bubble(m.role==='user'?'user':'ai', md(m.content)); }); }
+  else { greet(); }
+
+  function save(){ localStorage.setItem(LS.conv, JSON.stringify(conv.slice(-40))); }
+
+  function auto(){ inputEl.style.height='auto'; inputEl.style.height=Math.min(inputEl.scrollHeight,140)+'px'; }
+  inputEl.addEventListener('input',auto);
+  inputEl.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); doSend(); } });
+  sendBtn.addEventListener('click',doSend);
+  Array.prototype.forEach.call(chipsEl.querySelectorAll('.dbt-chip'),function(c){ c.addEventListener('click',function(){ inputEl.value=c.textContent; doSend(); }); });
+
+  var busy=false;
+  function doSend(){
+    var text=(inputEl.value||'').trim(); if(!text||busy) return;
+    var key=(localStorage.getItem(LS.key)||'').trim();
+    if(!key){ bubble('err','Chưa có API key. Mở ⚙️ Cài đặt phía trên, chọn nhà cung cấp và dán key (một lần).'); var d=document.getElementById('dbt-settings'); if(d)d.open=true; return; }
+    if(chipsEl)chipsEl.style.display='none';
+    inputEl.value=''; auto();
+    conv.push({role:'user',content:text}); bubble('user',md(text)); save();
+    ask();
+  }
+
+  function typing(on){
+    var t=document.getElementById('dbt-typing');
+    if(on){ if(!t){ t=document.createElement('div'); t.id='dbt-typing'; t.className='dbt-typing'; t.textContent='đang suy nghĩ…'; logEl.appendChild(t); t.scrollIntoView({block:'end'});} }
+    else if(t){ t.remove(); }
+  }
+
+  function ask(){
+    busy=true; sendBtn.disabled=true; typing(true);
+    var prov=localStorage.getItem(LS.prov)||'anthropic';
+    var key=(localStorage.getItem(LS.key)||'').trim();
+    var model=(localStorage.getItem(LS.model)||defModel[prov]).trim();
+    var msgs=conv.slice(-24).map(function(m){return {role:m.role,content:m.content};});
+    var p = prov==='openai' ? callOpenAI(key,model,msgs) : callAnthropic(key,model,msgs);
+    p.then(function(reply){
+      typing(false); busy=false; sendBtn.disabled=false;
+      reply=(reply||'').trim()||'(không có nội dung trả về)';
+      conv.push({role:'assistant',content:reply}); bubble('ai',md(reply)); save();
+    }).catch(function(err){
+      typing(false); busy=false; sendBtn.disabled=false;
+      bubble('err','Không gọi được API: '+esc(err.message||String(err))+' — Kiểm tra key/model trong ⚙️ Cài đặt, hoặc thử nhà cung cấp kia (một số mạng chặn CORS).');
+    });
+  }
+
+  function callAnthropic(key,model,msgs){
+    return fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:model||'claude-3-5-sonnet-latest',max_tokens:1600,system:sys,messages:msgs})
+    }).then(function(r){ return r.text().then(function(t){
+      if(!r.ok) throw new Error(r.status+' '+t.slice(0,300));
+      var d=JSON.parse(t); return (d.content||[]).map(function(b){return b.text||'';}).join('');
+    });});
+  }
+  function callOpenAI(key,model,msgs){
+    var full=[{role:'system',content:sys}].concat(msgs);
+    return fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'content-type':'application/json','authorization':'Bearer '+key},
+      body:JSON.stringify({model:model||'gpt-4o',messages:full,max_tokens:1600,temperature:0.7})
+    }).then(function(r){ return r.text().then(function(t){
+      if(!r.ok) throw new Error(r.status+' '+t.slice(0,300));
+      var d=JSON.parse(t); return d.choices[0].message.content;
+    });});
+  }
+
+  loadSettings();
 })();
 </script>
 </body>
