@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bói Toán">
+<meta name="theme-color" content="#0d0b14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Bói Toán — Tra cứu &amp; Thực hành</title>
+<style>
+  :root{
+    --bg:#0d0b14; --bg2:#161226; --card:#1c1730; --card2:#241d3d;
+    --ink:#e8e2f4; --ink-dim:#a89fc4; --ink-faint:#6f668f;
+    --gold:#d4a94e; --gold-soft:#b8933f;
+    --violet:#8b6fd0; --line:#332a52;
+    --ok:#5fbf8a; --mid:#d4a94e; --warn:#e0785a;
+    --radius:14px;
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #241d3d55, transparent),
+      radial-gradient(900px 500px at -10% 30%, #1c173055, transparent),
+      var(--bg);
+    color:var(--ink); line-height:1.6; min-height:100vh;
+    padding-top:var(--safe-top);
+    padding-bottom:calc(84px + var(--safe-bottom));
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:none;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 14px}
+
+  header{padding:22px 0 8px;text-align:center}
+  h1{font-size:1.32rem;letter-spacing:.13em;color:var(--gold);font-weight:normal;text-transform:uppercase}
+  .sub{color:var(--ink-dim);font-size:.85rem;margin-top:4px;font-style:italic}
+
+  /* ---- screens ---- */
+  .screen{display:none;animation:fadein .25s ease}
+  .screen.active{display:block}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---- home grid ---- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .tile{
+    background:linear-gradient(160deg,var(--card),var(--card2));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 14px;text-align:center;cursor:pointer;
+    transition:transform .12s ease,border-color .12s ease;
+  }
+  .tile:active{transform:scale(.97);border-color:var(--gold)}
+  .tile .em{font-size:1.9rem;display:block;margin-bottom:6px}
+  .tile .t{color:var(--gold);font-size:1rem;letter-spacing:.04em}
+  .tile .d{color:var(--ink-faint);font-size:.75rem;margin-top:3px;line-height:1.35}
+
+  /* ---- today card on home ---- */
+  .today{
+    background:linear-gradient(160deg,var(--card),var(--card2));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;margin-top:16px;
+  }
+  .today h3{color:var(--gold);font-size:.95rem;letter-spacing:.08em;font-weight:normal;margin-bottom:8px}
+  .today .row{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;padding:3px 0;border-bottom:1px dashed #332a5266}
+  .today .row:last-child{border-bottom:none}
+  .today .k{color:var(--ink-dim)}
+  .today .v{color:var(--ink);text-align:right}
+
+  /* ---- section head with back ---- */
+  .shead{display:flex;align-items:center;gap:10px;padding:14px 0 8px;position:sticky;top:var(--safe-top);background:var(--bg);z-index:5}
+  .back{
+    border:1px solid var(--line);background:var(--bg2);color:var(--gold);
+    border-radius:10px;padding:7px 13px;font-size:.9rem;cursor:pointer;font-family:inherit;
+  }
+  .shead h2{font-size:1.08rem;color:var(--gold);font-weight:normal;letter-spacing:.06em}
+
+  /* ---- panels/forms ---- */
+  .panel{
+    background:linear-gradient(160deg,var(--card),var(--card2));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;margin:10px 0;
+  }
+  .panel h3{color:var(--gold);font-weight:normal;font-size:.98rem;margin-bottom:10px;letter-spacing:.05em}
+  label{display:block;color:var(--ink-dim);font-size:.82rem;margin:10px 0 4px}
+  input,select,textarea{
+    width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);
+    background:var(--bg2);color:var(--ink);font-size:16px;font-family:inherit;outline:none;
+    -webkit-appearance:none;appearance:none;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--violet)}
+  .btn{
+    display:inline-block;width:100%;margin-top:14px;padding:13px;border-radius:12px;
+    border:1px solid var(--gold-soft);
+    background:linear-gradient(160deg,#3a2f1a,#2a2213);
+    color:var(--gold);font-size:1rem;font-family:inherit;cursor:pointer;
+    letter-spacing:.06em;transition:transform .1s ease;
+  }
+  .btn:active{transform:scale(.98)}
+  .btn.ghost{background:var(--bg2);border-color:var(--line);color:var(--ink-dim);font-size:.9rem;padding:10px}
+  .btnrow{display:flex;gap:8px}
+  .btnrow .btn{margin-top:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+  .chip{
+    border:1px solid var(--line);border-radius:20px;padding:6px 14px;font-size:.85rem;
+    color:var(--ink-dim);cursor:pointer;background:var(--bg2);font-family:inherit;
+  }
+  .chip.on{border-color:var(--gold);color:var(--gold);background:#d4a94e14}
+
+  /* ---- results ---- */
+  .result{margin-top:6px}
+  .cardrow{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:12px 0}
+  .tcard{
+    width:92px;min-height:140px;border-radius:10px;border:1px solid var(--gold-soft);
+    background:linear-gradient(160deg,#241d3d,#161226);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:8px 5px;position:relative;
+    animation:flip .5s ease;
+  }
+  @keyframes flip{from{transform:rotateY(90deg);opacity:0}to{transform:none;opacity:1}}
+  .tcard .glyph{font-size:1.7rem;margin-bottom:6px}
+  .tcard .nm{font-size:.68rem;color:var(--gold);line-height:1.25}
+  .tcard .pos{position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+    background:var(--violet);color:#fff;font-size:.6rem;border-radius:8px;padding:1px 8px;white-space:nowrap}
+  .tcard.rev{border-color:var(--warn)}
+  .tcard.rev .glyph{transform:rotate(180deg)}
+  .tcard .rv{font-size:.6rem;color:var(--warn)}
+  .meaning{border-left:2px solid var(--gold-soft);padding:8px 12px;margin:10px 0;background:#d4a94e0a;border-radius:0 8px 8px 0}
+  .meaning .mt{color:var(--gold);font-size:.9rem}
+  .meaning .mp{color:var(--ink-dim);font-size:.75rem;font-style:italic}
+  .meaning .mb{font-size:.88rem;margin-top:4px}
+  .note{color:var(--ink-faint);font-size:.78rem;font-style:italic;margin-top:8px;line-height:1.5}
+
+  /* ---- iching ---- */
+  .hexbig{font-size:4.2rem;text-align:center;line-height:1.1;color:var(--gold)}
+  .hexname{text-align:center;color:var(--gold);font-size:1.05rem;margin-top:2px}
+  .hexsub{text-align:center;color:var(--ink-faint);font-size:.8rem}
+  .lines{display:flex;flex-direction:column-reverse;gap:6px;width:150px;margin:14px auto}
+  .hline{height:12px;display:flex;gap:10px;justify-content:center;position:relative}
+  .hline .bar{flex:1;background:var(--gold);border-radius:3px}
+  .hline.moving .bar{background:var(--warn)}
+  .hline .gap{width:26px}
+  .hline .mark{position:absolute;right:-22px;top:-2px;color:var(--warn);font-size:.75rem}
+  .coins{display:flex;gap:14px;justify-content:center;margin:10px 0;font-size:1.8rem;min-height:2.2rem}
+
+  /* ---- tuvi chart ---- */
+  .tvgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:12px 0}
+  .tvcell{
+    background:var(--bg2);border:1px solid var(--line);border-radius:8px;
+    min-height:104px;padding:5px 5px;font-size:.62rem;line-height:1.3;position:relative;
+  }
+  .tvcell .chi{color:var(--ink-faint);font-size:.58rem;position:absolute;bottom:3px;right:5px}
+  .tvcell .cung{color:var(--violet);font-size:.62rem;letter-spacing:.02em}
+  .tvcell .cung.menh{color:var(--gold)}
+  .tvcell .maj{color:var(--gold);font-size:.66rem}
+  .tvcell .min{color:var(--ink-dim)}
+  .tvcell .hoa{color:var(--warn)}
+  .tvcell .van{color:var(--ink-faint);font-size:.56rem}
+  .tvcenter{
+    grid-column:2/4;grid-row:2/4;background:linear-gradient(160deg,var(--card),var(--card2));
+    border:1px solid var(--gold-soft);border-radius:8px;padding:8px;font-size:.72rem;line-height:1.5;
+    display:flex;flex-direction:column;justify-content:center;text-align:center;
+  }
+  .tvcenter .nm{color:var(--gold);font-size:.85rem}
+
+  /* ---- tables in browse ---- */
+  .list{margin-top:6px}
+  .litem{
+    display:flex;gap:12px;align-items:flex-start;padding:10px 4px;
+    border-bottom:1px solid #332a5255;font-size:.88rem;
+  }
+  .litem .lg{font-size:1.3rem;width:34px;text-align:center;flex-shrink:0;color:var(--gold)}
+  .litem .ln{color:var(--gold);font-size:.85rem}
+  .litem .lm{color:var(--ink-dim);font-size:.8rem;margin-top:2px}
+  .searchbox{margin:10px 0 4px;position:relative}
+  .searchbox input{padding-right:40px}
+  .searchbox .icon{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--ink-faint)}
+
+  /* ---- history ---- */
+  .hitem{padding:10px 4px;border-bottom:1px solid #332a5255;font-size:.85rem}
+  .hitem .hd{color:var(--ink-faint);font-size:.72rem}
+  .hitem .hq{color:var(--ink-dim);font-style:italic}
+
+  /* ---- bottom nav ---- */
+  nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:20;
+    background:#13101fee;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--line);
+    padding:8px 6px calc(8px + var(--safe-bottom));
+    display:flex;justify-content:space-around;
+  }
+  nav button{
+    background:none;border:none;color:var(--ink-faint);font-family:inherit;
+    font-size:.68rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:2px 10px;
+  }
+  nav button .i{font-size:1.25rem}
+  nav button.on{color:var(--gold)}
+
+  .tag{display:inline-block;border:1px solid var(--line);border-radius:14px;padding:1px 10px;font-size:.7rem;color:var(--ink-dim);margin:2px 2px 2px 0}
+  .tag.good{border-color:var(--ok);color:var(--ok)}
+  .tag.bad{border-color:var(--warn);color:var(--warn)}
+  .divider{border:none;border-top:1px dashed var(--line);margin:12px 0}
+  .big-day{font-size:1.5rem;color:var(--gold);text-align:center}
+  .kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed #332a5266;font-size:.88rem}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--ink-dim);flex-shrink:0}
+  .kv .v{text-align:right}
+  .center{text-align:center}
+  .goldtxt{color:var(--gold)}
+  .warntxt{color:var(--warn)}
+  .oktxt{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>✦ Bói Toán ✦</h1>
+    <div class="sub">Tra cứu &amp; thực hành — tarot · lenormand · bài tây · kinh dịch · tử vi · xem ngày · chiêm tinh</div>
+  </header>
+
+  <!-- ============ HOME ============ -->
+  <div class="screen active" id="scr-home">
+    <div class="today" id="todayBox"></div>
+    <div class="grid">
+      <div class="tile" data-go="tarot"><span class="em">🃏</span><span class="t">Tarot</span><div class="d">78 lá · rút 1, 3, Celtic Cross</div></div>
+      <div class="tile" data-go="lenormand"><span class="em">🕊️</span><span class="t">Lenormand</span><div class="d">36 lá · rút 1, 3, 9 lá</div></div>
+      <div class="tile" data-go="baitay"><span class="em">♠️</span><span class="t">Bài Tây</span><div class="d">52 lá · bói bài truyền thống</div></div>
+      <div class="tile" data-go="kinhdich"><span class="em">☯️</span><span class="t">Kinh Dịch</span><div class="d">Gieo 3 đồng xu · 64 quẻ</div></div>
+      <div class="tile" data-go="tuvi"><span class="em">🌌</span><span class="t">Tử Vi</span><div class="d">Lập lá số từ ngày giờ sinh</div></div>
+      <div class="tile" data-go="xemngay"><span class="em">📅</span><span class="t">Xem Ngày</span><div class="d">Can chi · hoàng đạo · giờ tốt</div></div>
+      <div class="tile" data-go="chiemtinh"><span class="em">✨</span><span class="t">Chiêm Tinh</span><div class="d">Cung mặt trời · mặt trăng</div></div>
+      <div class="tile" data-go="tracuu"><span class="em">📖</span><span class="t">Tra Cứu</span><div class="d">Ý nghĩa mọi lá bài &amp; quẻ</div></div>
+    </div>
+    <p class="note center" style="margin-top:14px">Mở bằng Safari → nút Chia sẻ → «Thêm vào MH chính» để dùng như app. Mọi dữ liệu lưu trên máy, không gửi đi đâu.</p>
+  </div>
+
+  <!-- ============ TAROT ============ -->
+  <div class="screen" id="scr-tarot">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>🃏 Tarot</h2></div>
+    <div class="panel">
+      <label>Câu hỏi của bạn (tuỳ chọn)</label>
+      <input id="tarotQ" placeholder="Ví dụ: Chuyện tình cảm sắp tới thế nào?">
+      <label>Kiểu trải bài</label>
+      <div class="chips" id="tarotSpread">
+        <button class="chip on" data-v="1">1 lá</button>
+        <button class="chip" data-v="3">3 lá (QK–HT–TL)</button>
+        <button class="chip" data-v="cc">Celtic Cross (10 lá)</button>
+      </div>
+      <label>Bộ bài</label>
+      <div class="chips" id="tarotDeck">
+        <button class="chip on" data-v="full">Đủ 78 lá</button>
+        <button class="chip" data-v="major">Chỉ 22 Ẩn chính</button>
+      </div>
+      <button class="btn" id="tarotDraw">✦ Xáo &amp; rút bài</button>
+    </div>
+    <div class="result" id="tarotResult"></div>
+  </div>
+
+  <!-- ============ LENORMAND ============ -->
+  <div class="screen" id="scr-lenormand">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>🕊️ Lenormand</h2></div>
+    <div class="panel">
+      <label>Câu hỏi của bạn (tuỳ chọn)</label>
+      <input id="lenQ" placeholder="Ví dụ: Công việc tháng này ra sao?">
+      <label>Kiểu trải bài</label>
+      <div class="chips" id="lenSpread">
+        <button class="chip on" data-v="1">1 lá</button>
+        <button class="chip" data-v="3">3 lá</button>
+        <button class="chip" data-v="9">9 lá (3×3)</button>
+      </div>
+      <button class="btn" id="lenDraw">✦ Xáo &amp; rút bài</button>
+    </div>
+    <div class="result" id="lenResult"></div>
+  </div>
+
+  <!-- ============ BÀI TÂY ============ -->
+  <div class="screen" id="scr-baitay">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>♠️ Bài Tây</h2></div>
+    <div class="panel">
+      <label>Câu hỏi của bạn (tuỳ chọn)</label>
+      <input id="btQ" placeholder="Điều bạn muốn hỏi…">
+      <label>Kiểu trải bài</label>
+      <div class="chips" id="btSpread">
+        <button class="chip on" data-v="1">1 lá</button>
+        <button class="chip" data-v="3">3 lá</button>
+        <button class="chip" data-v="5">5 lá (móng ngựa)</button>
+      </div>
+      <button class="btn" id="btDraw">✦ Xáo &amp; rút bài</button>
+    </div>
+    <div class="result" id="btResult"></div>
+  </div>
+
+  <!-- ============ KINH DỊCH ============ -->
+  <div class="screen" id="scr-kinhdich">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>☯️ Kinh Dịch</h2></div>
+    <div class="panel">
+      <label>Điều bạn muốn hỏi (nên nghĩ kỹ trước khi gieo)</label>
+      <input id="kdQ" placeholder="Ví dụ: Việc hợp tác này nên hay không?">
+      <div class="btnrow">
+        <button class="btn" id="kdToss">🪙 Gieo từng hào (6 lần)</button>
+        <button class="btn ghost" id="kdQuick">Gieo nhanh cả quẻ</button>
+      </div>
+      <div class="coins" id="kdCoins"></div>
+      <p class="note center" id="kdStatus"></p>
+    </div>
+    <div class="result" id="kdResult"></div>
+  </div>
+
+  <!-- ============ TỬ VI ============ -->
+  <div class="screen" id="scr-tuvi">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>🌌 Tử Vi</h2></div>
+    <div class="panel">
+      <h3>Thông tin người xem (theo dương lịch)</h3>
+      <label>Họ tên (tuỳ chọn)</label>
+      <input id="tvName" placeholder="Nguyễn Văn A">
+      <label>Ngày sinh dương lịch</label>
+      <input id="tvDate" type="date">
+      <label>Giờ sinh</label>
+      <select id="tvHour"></select>
+      <label>Giới tính</label>
+      <div class="chips" id="tvGender">
+        <button class="chip on" data-v="nam">Nam</button>
+        <button class="chip" data-v="nu">Nữ</button>
+      </div>
+      <button class="btn" id="tvGo">✦ Lập lá số</button>
+    </div>
+    <div class="result" id="tvResult"></div>
+  </div>
+
+  <!-- ============ XEM NGÀY ============ -->
+  <div class="screen" id="scr-xemngay">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>📅 Xem Ngày</h2></div>
+    <div class="panel">
+      <label>Chọn ngày dương lịch</label>
+      <input id="xnDate" type="date">
+      <label>Tuổi người xem (năm sinh, tuỳ chọn — để xét xung tuổi)</label>
+      <input id="xnBirth" type="number" inputmode="numeric" placeholder="Ví dụ: 1991">
+      <button class="btn" id="xnGo">✦ Xem ngày</button>
+    </div>
+    <div class="result" id="xnResult"></div>
+  </div>
+
+  <!-- ============ CHIÊM TINH ============ -->
+  <div class="screen" id="scr-chiemtinh">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>✨ Chiêm Tinh</h2></div>
+    <div class="panel">
+      <label>Ngày sinh dương lịch</label>
+      <input id="ctDate" type="date">
+      <label>Giờ sinh (giờ địa phương, để tính cung Mặt Trăng chính xác hơn)</label>
+      <input id="ctTime" type="time" value="12:00">
+      <button class="btn" id="ctGo">✦ Xem bản đồ sao</button>
+    </div>
+    <div class="result" id="ctResult"></div>
+  </div>
+
+  <!-- ============ TRA CỨU ============ -->
+  <div class="screen" id="scr-tracuu">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>📖 Tra Cứu</h2></div>
+    <div class="chips" id="browseTabs">
+      <button class="chip on" data-v="tarot">Tarot</button>
+      <button class="chip" data-v="lenormand">Lenormand</button>
+      <button class="chip" data-v="baitay">Bài Tây</button>
+      <button class="chip" data-v="kinhdich">Kinh Dịch</button>
+      <button class="chip" data-v="sao">Sao Tử Vi</button>
+      <button class="chip" data-v="cung">12 Cung</button>
+    </div>
+    <div class="searchbox"><input id="browseSearch" placeholder="Tìm tên lá bài, quẻ, sao…"><span class="icon">🔍</span></div>
+    <div class="list" id="browseList"></div>
+  </div>
+
+  <!-- ============ LỊCH SỬ ============ -->
+  <div class="screen" id="scr-lichsu">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>🗂 Lịch sử gieo quẻ</h2></div>
+    <div id="histList"></div>
+    <button class="btn ghost" id="histClear">Xoá toàn bộ lịch sử</button>
+  </div>
+</div>
+
+<nav>
+  <button data-go="home" class="on"><span class="i">🏠</span>Trang chủ</button>
+  <button data-go="tracuu"><span class="i">📖</span>Tra cứu</button>
+  <button data-go="lichsu"><span class="i">🗂</span>Lịch sử</button>
+</nav>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+</script>
+</body>
+</html>
