@@ -1,7 +1,7 @@
 name: Cài đặt Backend Lớp C (bấm 1 lần)
 
-# Bấm "Run workflow" một lần để TỰ ĐỘNG: tạo D1, nạp schema, đặt bí mật,
-# deploy Worker, nối Telegram webhook. Bạn KHÔNG cần gõ lệnh.
+# Bấm "Run workflow" một lần để TỰ ĐỘNG: tạo KV, đặt bí mật, deploy Worker,
+# nối Telegram webhook. Bạn KHÔNG cần gõ lệnh.
 # Yêu cầu: đã thêm 4 secret repo — CLOUDFLARE_API_TOKEN, TELEGRAM_BOT_TOKEN,
 #          TELEGRAM_CHAT_ID, DECRYPT_KEY (xem backend/HUONG-DAN.md).
 on:
@@ -31,22 +31,21 @@ jobs:
           done
           [ "$miss" = "0" ] || { echo "Hãy thêm đủ 4 secret rồi chạy lại (xem backend/HUONG-DAN.md)."; exit 1; }
 
-      - name: Tạo D1 (nếu chưa có) + điền cấu hình
+      - name: Tạo KV (nếu chưa có) + điền cấu hình
         run: |
           set -e
-          ID=$(npx --yes wrangler@latest d1 list --json 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{let a=JSON.parse(s);let r=a.find(x=>x.name==='hiennhi89-gate');process.stdout.write(r?(r.uuid||r.database_id||''):'')}catch(e){process.stdout.write('')}})")
+          TITLE="hiennhi89-gate-KV"
+          LIST=$(npx --yes wrangler@latest kv namespace list 2>/dev/null || echo '[]')
+          ID=$(printf '%s' "$LIST" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{let a=JSON.parse(s);let r=a.find(x=>(x.title||'').includes('$TITLE'));process.stdout.write(r?r.id:'')}catch(e){process.stdout.write('')}})")
           if [ -z "$ID" ]; then
-            OUT=$(npx --yes wrangler@latest d1 create hiennhi89-gate 2>&1 || true)
+            OUT=$(npx --yes wrangler@latest kv namespace create "$TITLE" 2>&1)
             echo "$OUT"
-            ID=$(echo "$OUT" | grep -oiE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+            ID=$(printf '%s' "$OUT" | grep -oiE '[0-9a-f]{32}' | head -1)
           fi
-          [ -n "$ID" ] || { echo "::error::Không lấy được database_id (token có quyền D1 không?)"; exit 1; }
-          echo "Dùng D1 id: $ID"
-          sed -i "s/PUT_D1_DATABASE_ID/$ID/" wrangler.toml
+          [ -n "$ID" ] || { echo "::error::Không lấy được KV id (token có quyền Workers KV Storage:Edit không?)"; exit 1; }
+          echo "Dùng KV id: $ID"
+          sed -i "s/PUT_KV_NAMESPACE_ID/$ID/" wrangler.toml
           sed -i "s|PUT_YOUR_CHAT_ID|$TG_CHAT|" wrangler.toml
-
-      - name: Nạp bảng dữ liệu (schema)
-        run: npx --yes wrangler@latest d1 execute hiennhi89-gate --remote --file=schema.sql
 
       - name: Đặt các bí mật cho Worker
         run: |
