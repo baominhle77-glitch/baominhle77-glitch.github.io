@@ -1,5 +1,5 @@
 -- schema.sql — bảng cho cổng duyệt truy cập (Cloudflare D1 / SQLite)
--- Áp dụng:  npx wrangler d1 execute baominh-gate --remote --file=backend/schema.sql
+-- Áp dụng:  npx wrangler d1 execute hiennhi89-gate --remote --file=backend/schema.sql
 
 CREATE TABLE IF NOT EXISTS requests (
   id          TEXT PRIMARY KEY,

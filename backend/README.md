@@ -21,8 +21,8 @@ và duyệt bằng **bot Telegram** hoặc **trang admin trên máy bạn**.
 ```bash
 cd backend
 npx wrangler login
-npx wrangler d1 create baominh-gate         # copy database_id trả về -> dán vào wrangler.toml
-npx wrangler d1 execute baominh-gate --remote --file=schema.sql
+npx wrangler d1 create hiennhi89-gate         # copy database_id trả về -> dán vào wrangler.toml
+npx wrangler d1 execute hiennhi89-gate --remote --file=schema.sql
 ```
 Sửa `wrangler.toml`: điền `TELEGRAM_CHAT_ID`, `database_id`, và `ALLOWED_ORIGINS` (đúng domain web của bạn).
 
@@ -37,7 +37,7 @@ Gợi ý tạo chuỗi ngẫu nhiên: `openssl rand -hex 32`
 
 ## 4. Deploy & nối Telegram webhook
 ```bash
-npx wrangler deploy                                # -> in ra URL dạng https://baominh-gate.<bạn>.workers.dev
+npx wrangler deploy                                # -> in ra URL dạng https://hiennhi89-gate.<bạn>.workers.dev
 # Nối webhook (thay <TOKEN>, <URL>, <SECRET> cho khớp):
 curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<URL>/telegram/webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"
 ```
@@ -46,10 +46,10 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<URL>/telegram/webhook&
 Trong `window.GATE` của mỗi app, đổi:
 ```js
 mode: 'approval',
-backend: 'https://baominh-gate.<bạn>.workers.dev',
+backend: 'https://hiennhi89-gate.<bạn>.workers.dev',
 ```
 Xong! Từ giờ ai mở web sẽ phải xin phép; bạn nhận Telegram, bấm ✅/❌ là xong.
-Trang quản trị trên máy bạn: `https://baominh-gate.<bạn>.workers.dev/admin`
+Trang quản trị trên máy bạn: `https://hiennhi89-gate.<bạn>.workers.dev/admin`
 
 ## Tự động deploy về sau
 Đã có sẵn workflow `.github/workflows/deploy-worker.yml`: mỗi lần push thay đổi trong `backend/`
@@ -66,7 +66,7 @@ nó tự deploy lại, **miễn là** bạn đã thêm 1 secret repo tên `CLOUD
 2. Trong `window.GATE` của mỗi app, đổi:
    ```js
    mode: 'approval',
-   backend: 'https://baominh-gate.<ban>.workers.dev',
+   backend: 'https://hiennhi89-gate.<ban>.workers.dev',
    ```
    (Tôi có thể tự lật công tắc này sau khi bạn báo backend đã chạy.)
 3. Khi đó: khách mở web → xin phép → bạn duyệt qua Telegram → Worker trả khóa →
