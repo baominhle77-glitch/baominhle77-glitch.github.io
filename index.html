@@ -3,8 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="referrer" content="no-referrer">
 <title>SPARE — Kho tra cứu riêng của BaoMinh</title>
+<!-- ===== Cổng truy cập (gate) — chặn người lạ đọc nội dung ===== -->
+<script>document.documentElement.className += ' gate-locked';</script>
+<link rel="stylesheet" href="assets/gate.css">
+<script>
+window.GATE = {
+  app: 'spare',
+  mode: 'local',            // local | encrypted | approval  (xem docs/ARCHITECTURE.md)
+  title: 'SPARE · Kho riêng',
+  subtitle: 'Khu vực riêng tư của BaoMinh. Nhập mật khẩu để mở.',
+  pbkdf2: { saltB64: '+S1GmM9HJHXS1hxF47RQHw==', hashB64: 'Vty6Sw8Lh5qynoGtmA4c9sHKQ+9Qe/O6C5l9VAbf1cY=', iterations: 200000, keylen: 32 },
+  backend: ''               // để trống = khóa cục bộ. Điền URL Worker để bật duyệt Telegram.
+};
+</script>
+<script src="assets/gate.js" defer></script>
 <style>
   :root{
     --bg:#0d0b14; --bg2:#161226; --card:#1c1730; --card2:#241d3d;

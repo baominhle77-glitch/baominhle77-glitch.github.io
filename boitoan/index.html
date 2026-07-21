@@ -3,7 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="referrer" content="no-referrer">
+<script>document.documentElement.className += ' gate-locked';</script>
+<link rel="stylesheet" href="gate.css">
+<script>
+window.GATE = {
+  app: 'boitoan',
+  mode: 'local',            // local | encrypted | approval
+  title: 'Bói Toán · Riêng tư',
+  subtitle: 'Nhập mật khẩu để mở kho tra cứu.',
+  pbkdf2: { saltB64: '+S1GmM9HJHXS1hxF47RQHw==', hashB64: 'Vty6Sw8Lh5qynoGtmA4c9sHKQ+9Qe/O6C5l9VAbf1cY=', iterations: 200000, keylen: 32 },
+  backend: ''
+};
+</script>
+<script src="gate.js" defer></script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bói Toán">

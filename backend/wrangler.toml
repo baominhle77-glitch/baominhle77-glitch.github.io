@@ -1,0 +1,25 @@
+# wrangler.toml — cấu hình Cloudflare Worker "cổng duyệt truy cập"
+# Deploy:  cd backend && npx wrangler deploy
+name = "baominh-gate"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Biến thường (không bí mật). Có thể sửa trực tiếp hoặc đặt qua dashboard.
+[vars]
+# Danh sách origin được phép gọi API (CORS). Điền đúng domain của bạn:
+ALLOWED_ORIGINS = "https://baominhle77-glitch.github.io"
+# Chat ID Telegram của bạn (số). Lấy bằng cách nhắn cho bot rồi gọi getUpdates (xem README).
+TELEGRAM_CHAT_ID = "PUT_YOUR_CHAT_ID"
+
+# CSDL D1 để lưu yêu cầu + nhật ký. Tạo bằng:  npx wrangler d1 create baominh-gate
+# Rồi dán database_id trả về vào đây.
+[[d1_databases]]
+binding = "DB"
+database_name = "baominh-gate"
+database_id = "PUT_D1_DATABASE_ID"
+
+# Các BÍ MẬT (KHÔNG ghi vào file này). Đặt bằng lệnh:
+#   npx wrangler secret put TELEGRAM_BOT_TOKEN
+#   npx wrangler secret put TELEGRAM_WEBHOOK_SECRET
+#   npx wrangler secret put ADMIN_TOKEN
+#   npx wrangler secret put SESSION_SECRET

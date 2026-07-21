@@ -1,0 +1,43 @@
+name: Deploy Cloudflare Worker
+
+# Tự động deploy backend/worker.js mỗi khi có thay đổi trong backend/.
+# Chỉ chạy thật khi đã đặt secret repo CLOUDFLARE_API_TOKEN (nếu chưa có -> bỏ qua êm).
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-worker.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Kiểm tra secret
+        id: check
+        run: |
+          if [ -z "$CF_TOKEN" ]; then
+            echo "::notice::Chưa đặt CLOUDFLARE_API_TOKEN — bỏ qua deploy worker (xem backend/README.md)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Deploy với Wrangler
+        if: steps.check.outputs.skip != 'true'
+        working-directory: backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx --yes wrangler@latest deploy
