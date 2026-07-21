@@ -1,0 +1,53 @@
+name: Deploy lên Cloudflare Pages (hiennhi89.pages.dev)
+
+# Mỗi lần push lên main (bởi Claude, Codex, hay bất kỳ ai) -> tự deploy lại
+# hiennhi89.pages.dev, GỘP cả MEDORA (repo kia) vào /medora/.
+# Cần 1 secret repo: CLOUDFLARE_API_TOKEN (nếu chưa có -> bỏ qua êm).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: "997944c1bfcc2dcaca32718124cd718c"
+    steps:
+      - name: Kiểm tra secret
+        id: check
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::notice::Chưa đặt CLOUDFLARE_API_TOKEN — bỏ qua deploy pages.dev (xem README)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout repo chính
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - name: Gộp site (SPARE + Bói toán + MEDORA)
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          set -e
+          rm -rf _site && mkdir -p _site/boitoan _site/assets _site/medora/assets
+          cp index.html _site/index.html
+          cp assets/gate.js assets/gate.css _site/assets/
+          cp robots.txt _site/robots.txt
+          cp boitoan/index.html boitoan/gate.js boitoan/gate.css boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon.png _site/boitoan/
+          # MEDORA từ repo công khai kia
+          git clone --depth 1 https://github.com/baominhle77-glitch/baominhle77-glitch.github.io- _medora
+          cp _medora/index.html _site/medora/index.html
+          cp _medora/assets/gate.js _medora/assets/gate.css _site/medora/assets/
+
+      - name: Deploy lên Cloudflare Pages
+        if: steps.check.outputs.skip != 'true'
+        run: npx --yes wrangler@latest pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
