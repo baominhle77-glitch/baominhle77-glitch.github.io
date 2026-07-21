@@ -1,5 +1,5 @@
 /*!
- * worker.js — Cổng DUYỆT TRUY CẬP (Cloudflare Worker) cho các webapp của BaoMinh
+ * worker.js — Cổng DUYỆT TRUY CẬP (Cloudflare Worker) cho các webapp của Hiên Nhi Hiên 89
  * =============================================================================
  * Chức năng (đáp ứng yêu cầu "chỉ tôi phê duyệt + thấy IP/thiết bị/dữ liệu"):
  *   • Khách bấm vào web -> gửi yêu cầu truy cập (kèm dấu vết thiết bị).
