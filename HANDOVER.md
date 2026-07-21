@@ -3,7 +3,9 @@
 > Đọc file này đầu tiên. Nó cho bất kỳ ai (hoặc AI nick khác) nối vào GitHub nắm ngay
 > toàn bộ tình hình để tiếp tục mà không tốn nhiều limit.
 
-**Cập nhật:** 2026-07-21 · **Nhánh làm việc:** `claude/webapp-automation-access-control-3sierx`
+**Cập nhật:** 2026-07-21 · **Nhánh nền:** `main`
+
+PR #9 từ `claude/webapp-automation-access-control-3sierx` đã merge vào `main` tại commit `b141644`. Cloudflare Worker và Telegram webhook đã được kiểm tra ngày 2026-07-21; luồng duyệt đầu-cuối chưa được chạy thử trong phiên này.
 
 ---
 
@@ -27,7 +29,7 @@
 
 ### ✅ Lớp B — Mã hóa nội dung AES (ĐÃ ÁP DỤNG CẢ 3 APP)
 - Nội dung 3 app đã được **mã hóa AES-256-GCM** (`mode:'encrypted'`). Tải mã nguồn
-  về chỉ thấy chuỗi mã hóa; không mật khẩu = không đọc được gì. Vẫn chạy offline.
+  về chỉ thấy chuỗi mã hóa, không chứa nội dung plaintext. Vẫn chạy offline; độ an toàn phụ thuộc độ mạnh mật khẩu vì người có payload có thể thử đoán ngoại tuyến.
 - Với **boitoan**: đã GỘP `data*.js` + `app.js` vào trong rồi mã hóa, và **xóa 6 file
   plaintext** (giờ `boitoan/data.js`… trả 404 — không tải về được nữa).
 - Công cụ: `tools/encrypt.mjs` (mã hóa), `tools/decrypt.mjs` (khôi phục để sửa),
@@ -38,37 +40,41 @@
 - ✅ Đã test trình duyệt thật (Chromium): mở đúng mật khẩu hiện nội dung, sai mật khẩu
   bị chặn, không lỗi console; boitoan chạy đủ chức năng sau giải mã.
 
-### 🟡 Lớp C — Backend duyệt + Telegram bot (CÓ SẴN, CẦN 5 PHÚT CÀI)
+### 🟡 Lớp C — Backend duyệt + Telegram bot (ĐÃ BẬT, CHƯA TEST ĐẦU-CUỐI)
 - `backend/worker.js`: Cloudflare Worker. Ghi IP/quốc gia/thiết bị của khách,
   gửi Telegram cho chủ với nút ✅ Duyệt / ❌ Từ chối, cấp phiên JWT khi duyệt.
 - Duyệt được bằng **bot Telegram** HOẶC **trang `/admin`** (mật khẩu ADMIN_TOKEN).
-- `backend/README.md`: hướng dẫn cài từng bước (~5 phút, việc một-lần của bạn).
-- Đây là bước DUY NHẤT cần bạn tự làm (vì gắn với token/tài khoản của bạn).
+- `/` và `/boitoan/` đang dùng `mode: 'approval'`, trỏ tới `https://hiennhi89-gate.hiennhi89.workers.dev`.
+- Worker trả HTTP 200 với `gate backend OK`; repo cấu hình binding `KV`, Workers API xác nhận 5 secret binding bắt buộc đã tồn tại.
+- Bot `@Appwebcuatoi_bot` hoạt động; webhook trỏ đúng Worker, không có lỗi hoặc bản cập nhật chờ tại lúc kiểm tra.
+- ⚠️ Chưa kiểm thử trọn luồng khách gửi yêu cầu → Telegram duyệt → nhận phiên/khóa giải mã. MEDORA ở repo riêng cũng chưa được kiểm tra trong phiên này.
+- `backend/README.md`: hướng dẫn vận hành; không ghi giá trị bí mật vào repo.
 
 ### ✅ Tự động hóa
 - `.github/workflows/deploy-worker.yml`: tự deploy Worker khi push (cần secret `CLOUDFLARE_API_TOKEN`).
-- `.github/workflows/handover.yml`: sau mỗi push tự cập nhật `docs/handover/STATUS.md`.
+- `.github/workflows/handover.yml`: được thiết kế để cập nhật `docs/handover/STATUS.md`; hiện chưa tạo được file này trên `main`.
 - Đẩy lên web: repo là GitHub Pages. **Merge nhánh vào `main` → tự lên web.**
 
 ## 3. Việc bạn cần làm (một lần, tùy chọn mức bảo vệ)
 
 | Muốn mức nào | Bạn cần làm |
 |--------------|-------------|
-| Chỉ chống dò tìm + khóa (Lớp A) | **Không cần gì.** Chỉ merge PR vào `main`. |
-| Thêm mã hóa thật (Lớp B) | Báo tôi, hoặc tự chạy `tools/encrypt.mjs` theo README. |
-| Duyệt từng người + Telegram (Lớp C) | Làm theo `backend/README.md` (~5 phút). |
-| Deploy Worker tự động | Thêm secret repo `CLOUDFLARE_API_TOKEN`. |
+| Chỉ chống dò tìm + khóa (Lớp A) | Đã có trong `main`; kiểm tra web thật trước khi kết luận. |
+| Thêm mã hóa thật (Lớp B) | Đã có trong `main`; dùng `tools/encrypt.mjs` khi cần sửa nội dung. |
+| Duyệt từng người + Telegram (Lớp C) | Đã bật cho `/` và `/boitoan/`; cần test đầu-cuối và kiểm tra MEDORA riêng. |
+| Deploy Worker tự động | Worker đang hoạt động; workflow deploy gần nhất trên `main` kết thúc thành công. |
 
 ## 4. Cách tiếp tục công việc (cho nick/AI khác)
 1. Đọc file này + `docs/ARCHITECTURE.md`.
-2. Xem `docs/handover/STATUS.md` để biết commit mới nhất.
-3. Làm trên nhánh `claude/webapp-automation-access-control-3sierx`, mở PR nháp.
+2. Xem `git log` và GitHub Actions. `docs/handover/STATUS.md` hiện chưa tồn tại trên `main` dù workflow bàn giao gần nhất báo thành công.
+3. Tạo nhánh mới từ `main`, mở PR nháp; không tiếp tục trên nhánh đã merge.
 4. Đổi mật khẩu: `node tools/set-password.mjs "mk-moi"` rồi dán khối in ra vào `window.GATE`.
 
 ## 5. Bí mật / mật khẩu
 - **Mật khẩu cổng hiện tại** được bàn giao RIÊNG trong hội thoại, **không lưu trong repo**.
-  Repo chỉ chứa hash PBKDF2 (không thể đảo ngược). Đổi bất cứ lúc nào bằng `tools/set-password.mjs`.
-- Token Telegram, ADMIN_TOKEN, SESSION_SECRET: bạn tự đặt qua `wrangler secret`, **không vào repo**.
+  Repo chỉ chứa hash PBKDF2; vẫn có rủi ro bị thử đoán ngoại tuyến nếu mật khẩu yếu. Đổi bất cứ lúc nào bằng `tools/set-password.mjs`.
+- Cloudflare API xác thực thành công. Worker có các secret binding: `ADMIN_TOKEN`, `DECRYPT_KEY`, `SESSION_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`.
+- Giá trị token, mật khẩu và secret chỉ giữ ngoài repo; **không chép vào tài liệu hoặc commit**.
 
 ---
 _Xem thiết kế chi tiết & lý do kỹ thuật trong `docs/ARCHITECTURE.md`._
