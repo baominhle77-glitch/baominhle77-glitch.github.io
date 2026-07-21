@@ -246,6 +246,60 @@ function sunLongAt(jdReal){
   DL+=(0.019993-0.000101*T)*Math.sin(dr*2*M)+0.000290*Math.sin(dr*3*M);
   var L=(L0+DL)%360;if(L<0)L+=360;return L;
 }
+var DEG=Math.PI/180;
+function norm360(x){x=x%360;return x<0?x+360:x;}
+/* Phần tử quỹ đạo Kepler J2000 (Standish/JPL) + biến thiên/thế kỷ:
+   [a, e, I(°), L(°), ϖ(°), Ω(°)] và tốc độ tương ứng */
+var KEP={
+  mercury:[[0.38709927,0.20563593,7.00497902,252.25032350,77.45779628,48.33076593],
+           [0.00000037,0.00001906,-0.00594749,149472.67411175,0.16047689,-0.12534081]],
+  venus:  [[0.72333566,0.00677672,3.39467605,181.97909950,131.60246718,76.67984255],
+           [0.00000390,-0.00004107,-0.00078890,58517.81538729,0.00268329,-0.27769418]],
+  earth:  [[1.00000261,0.01671123,-0.00001531,100.46457166,102.93768193,0.0],
+           [0.00000562,-0.00004392,-0.01294668,35999.37244981,0.32327364,0.0]],
+  mars:   [[1.52371034,0.09339410,1.84969142,-4.55343205,-23.94362959,49.55953891],
+           [0.00001847,0.00007882,-0.00813131,19140.30268499,0.44441088,-0.29257343]]
+};
+/* Toạ độ nhật tâm sinh thái (x,y,z) của một hành tinh tại thời điểm T (thế kỷ Julian) */
+function helioXYZ(pl,T){
+  var e0=KEP[pl][0],r=KEP[pl][1];
+  var a=e0[0]+r[0]*T, e=e0[1]+r[1]*T, I=(e0[2]+r[2]*T)*DEG;
+  var L=e0[3]+r[3]*T, wbar=e0[4]+r[4]*T, Om=(e0[5]+r[5]*T)*DEG;
+  var w=(wbar-(e0[5]+r[5]*T))*DEG; /* argument cận điểm */
+  var M=norm360(L-wbar); if(M>180)M-=360; M*=DEG;
+  /* Giải phương trình Kepler */
+  var E=M+e*Math.sin(M);
+  for(var it=0;it<8;it++){var dE=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));E-=dE;if(Math.abs(dE)<1e-8)break;}
+  var xp=a*(Math.cos(E)-e), yp=a*Math.sqrt(1-e*e)*Math.sin(E);
+  var cw=Math.cos(w),sw=Math.sin(w),cO=Math.cos(Om),sO=Math.sin(Om),cI=Math.cos(I),sI=Math.sin(I);
+  var x=(cw*cO-sw*sO*cI)*xp+(-sw*cO-cw*sO*cI)*yp;
+  var y=(cw*sO+sw*cO*cI)*xp+(-sw*sO+cw*cO*cI)*yp;
+  var z=(sw*sI)*xp+(cw*sI)*yp;
+  return [x,y,z];
+}
+/* Hoàng kinh địa tâm (0–360°, 0=Bạch Dương) của hành tinh trong (thuỷ/kim/hoả) */
+function planetLon(pl,jdReal){
+  var T=(jdReal-2451545.0)/36525;
+  var p=helioXYZ(pl,T), earth=helioXYZ("earth",T);
+  var gx=p[0]-earth[0], gy=p[1]-earth[1];
+  return norm360(Math.atan2(gy,gx)/DEG);
+}
+/* Điểm Mọc (Ascendant) & Thiên đỉnh (MC), cần jd thực (UT), vĩ độ, kinh độ đông */
+function ascMc(jdReal,latDeg,lonEastDeg){
+  var T=(jdReal-2451545.0)/36525;
+  /* GMST (Meeus 12.4) theo độ */
+  var gmst=280.46061837+360.98564736629*(jdReal-2451545.0)+0.000387933*T*T-T*T*T/38710000.0;
+  var lst=norm360(gmst+lonEastDeg);
+  var ramc=lst*DEG;
+  var eps=(23.4392911-0.0130042*T)*DEG; /* độ nghiêng hoàng đạo */
+  var phi=latDeg*DEG;
+  /* MC */
+  var mc=norm360(Math.atan2(Math.sin(ramc),Math.cos(ramc)*Math.cos(eps))/DEG);
+  /* Ascendant */
+  var asc=Math.atan2(Math.cos(ramc), -(Math.sin(ramc)*Math.cos(eps)+Math.tan(phi)*Math.sin(eps)));
+  asc=norm360(asc/DEG);
+  return {asc:asc,mc:mc};
+}
 
 /* ================= GIAO DIỆN ================= */
 function $(id){return document.getElementById(id);}
@@ -819,34 +873,107 @@ $("calGrid").addEventListener("click",function(e){
 (function(){var t=new Date();calY=t.getFullYear();calM=t.getMonth()+1;renderCal();})();
 
 /* ---------- CHIÊM TINH ---------- */
+(function(){var sel=$("ctCity");if(sel)CITIES.forEach(function(c,i){var o=document.createElement("option");o.value=i;o.textContent=c[0];o.disabled=(c[3]===99);sel.appendChild(o);});sel.value="0";})();
+function signName(idx){return ZODIAC[idx].n.split(" (")[0];}
+function elemPair(a,b){/* 0 hợp nếu cùng cực (Hỏa-Khí dương, Đất-Nước âm), xung nếu khác */
+  var yang=[0,2],ok=(yang.indexOf(a)>=0)===(yang.indexOf(b)>=0);return a===b?"same":(ok?"harmony":"tension");}
 $("ctGo").addEventListener("click",function(){
   var dv=$("ctDate").value;
   if(!dv){$("ctResult").innerHTML='<p class="note center warntxt">Hãy chọn ngày sinh.</p>';return;}
   var p=dv.split("-"),yy=+p[0],mm=+p[1],dd=+p[2];
   var tv=($("ctTime").value||"12:00").split(":"),hh=+tv[0],mi=+tv[1];
-  var jdt=jdFromDate(dd,mm,yy)-0.5+((hh-TZ)+mi/60)/24;
-  var sunLon=sunLongAt(jdt);
-  /* 0° Bạch Dương = xuân phân → cung = (kinh độ)/30 */
-  var sIdx=INT(sunLon/30)%12;
-  var mIdx=moonSign(jdt);
-  var sz=ZODIAC[sIdx],mz=ZODIAC[mIdx];
-  var html='<div class="panel"><h3>Cung Mặt Trời — con người bên ngoài</h3>';
-  html+='<div class="center" style="font-size:2.6rem">'+sz.g+'</div>';
-  html+='<div class="center goldtxt" style="font-size:1.1rem">'+sz.n+'</div>';
-  html+='<p class="center" style="color:var(--ink-dim);font-size:.82rem">'+sz.d+" · Nguyên tố "+sz.e+" · "+sz.q+" · Chủ tinh: "+sz.p+'</p>';
-  html+='<p style="font-size:.9rem;margin-top:8px">'+sz.m+'</p></div>';
-  html+='<div class="panel"><h3>Cung Mặt Trăng — thế giới cảm xúc</h3>';
-  html+='<div class="center" style="font-size:2rem">'+mz.g+'</div>';
-  html+='<div class="center goldtxt">'+mz.n+'</div>';
-  html+='<p style="font-size:.9rem;margin-top:8px">'+MOON_SIGN_NOTE[mz.e]+'</p>';
-  html+='<p style="font-size:.88rem;margin-top:6px">Nét Trăng '+mz.n.split(" (")[0]+': '+mz.m+'</p>';
-  html+='<p class="note">Vị trí Mặt Trăng tính gần đúng (±1°); nếu sinh lúc Trăng đổi cung trong ngày, kết quả có thể là cung kề bên.</p></div>';
-  var same=sz.e===mz.e;
-  html+='<div class="panel"><h3>Kết hợp Trời – Trăng</h3><p style="font-size:.9rem">'+
-    (same?"Mặt Trời và Mặt Trăng cùng nguyên tố "+sz.e+": con người bên ngoài và cảm xúc bên trong khá nhất quán — bạn hành xử đúng như bạn cảm nhận.":
-    "Mặt Trời "+sz.e+" nhưng Mặt Trăng "+mz.e+": vẻ ngoài và nội tâm vận hành theo hai chất liệu khác nhau — hiểu điều này giúp bạn bớt thấy mâu thuẫn với chính mình.")+'</p></div>';
+  var hasTime=!!$("ctTime").value;
+  var city=CITIES[parseInt($("ctCity").value,10)||0];
+  var tz=(city&&city[3]!==99)?city[3]:7;
+  var jdUT=jdFromDate(dd,mm,yy)-0.5+((hh-tz)+mi/60)/24;
+  /* Vị trí các điểm (chỉ số cung 0–11) */
+  var P={
+    sun:INT(sunLongAt(jdUT)/30)%12,
+    moon:moonSign(jdUT),
+    mercury:INT(planetLon("mercury",jdUT)/30)%12,
+    venus:INT(planetLon("venus",jdUT)/30)%12,
+    mars:INT(planetLon("mars",jdUT)/30)%12
+  };
+  var ascObj=null;
+  if(hasTime&&city&&city[3]!==99){var am=ascMc(jdUT,city[1],city[2]);ascObj=am;P.asc=INT(am.asc/30)%12;}
+  var order=ascObj?["sun","moon","asc","mercury","venus","mars"]:["sun","moon","mercury","venus","mars"];
+  var GL={sun:"☉",moon:"☽",asc:"↑",mercury:"☿",venus:"♀",mars:"♂"};
+  var SIGNTXT={mercury:MERCURY_SIGN,venus:VENUS_SIGN,mars:MARS_SIGN,asc:ASC_SIGN};
+
+  var html='<div class="panel"><h3>Bản đồ sao — '+(dd+"/"+mm+"/"+yy)+(hasTime?" "+$("ctTime").value:"")+(ascObj?" · "+city[0]:"")+'</h3>';
+  html+='<div class="pillars" style="grid-template-columns:repeat(3,1fr)">';
+  order.forEach(function(k){
+    var z=ZODIAC[P[k]];
+    html+='<div class="pillar"><div class="pt">'+GL[k]+' '+POINT_ROLE[k].split("—")[0].trim()+'</div>'+
+      '<div class="pc" style="font-size:1.4rem">'+z.g+'</div><div class="pn" style="color:var(--gold)">'+signName(P[k])+'</div>'+
+      '<div class="ps">'+ELEM_NAME[SIGN_ELEM[P[k]]]+'</div></div>';
+  });
+  html+='</div>';
+  if(!ascObj)html+='<p class="note">Chưa có Điểm Mọc: hãy nhập giờ sinh và chọn nơi sinh (thành phố VN hoặc nước ngoài) để tính. Điểm Mọc đổi ~2 giờ một cung nên cần giờ càng chính xác càng tốt.</p>';
+  html+='<p class="note">Vị trí hành tinh tính bằng cơ học quỹ đạo Kepler (chính xác cỡ cung); nếu sinh sát ngày/giờ một hành tinh đổi cung, hãy lập thêm lá kề bên để so.</p></div>';
+
+  /* ---- BỘ BA CỐT LÕI ---- */
+  var sz=ZODIAC[P.sun],mz=ZODIAC[P.moon];
+  html+='<div class="answer"><h3>❖ Bộ ba cốt lõi — bạn là ai</h3>';
+  var triad="Về bản chất (Mặt Trời) bạn là một <b>"+signName(P.sun)+"</b> — "+sz.m.split(".")[0].toLowerCase()+". ";
+  triad+="Nhưng thế giới cảm xúc bên trong (Mặt Trăng ở <b>"+signName(P.moon)+"</b>) lại vận hành theo chất "+ELEM_NAME[SIGN_ELEM[P.moon]]+": khi không phòng bị, bạn "+
+    (["cần được truyền lửa, phản ứng nhanh và bốc","cần sự ổn định vật chất và chỗ dựa chắc chắn","xử lý cảm xúc bằng lý trí, cần được trò chuyện","cảm nhận sâu, thấm lâu và cần không gian riêng để lắng"][SIGN_ELEM[P.moon]])+". ";
+  if(ascObj)triad+="Còn lớp vỏ người khác gặp đầu tiên (Điểm Mọc <b>"+signName(P.asc)+"</b>) khiến bạn "+ASC_SIGN[P.asc].split(";")[0]+".";
+  else triad+="(Thêm giờ &amp; nơi sinh để biết lớp vỏ Điểm Mọc — mảnh ghép thứ ba của bộ ba.)";
+  html+='<p>'+triad+'</p>';
+  /* Mặt Trời vs Mặt Trăng: nội tâm nhất quán hay giằng xé */
+  var smRel=elemPair(SIGN_ELEM[P.sun],SIGN_ELEM[P.moon]);
+  html+='<p><b>Ý chí và cảm xúc:</b> '+
+    (smRel==="same"?"Mặt Trời và Mặt Trăng cùng chất "+ELEM_NAME[SIGN_ELEM[P.sun]]+" — con người bạn muốn trở thành và con người bạn thật sự cảm nhận rất thống nhất; bạn hành xử đúng như bạn cảm, ít giằng xé nội tâm (mặt trái: thiếu góc nhìn phản biện về chính mình).":
+     smRel==="harmony"?"Mặt Trời ("+ELEM_NAME[SIGN_ELEM[P.sun]]+") và Mặt Trăng ("+ELEM_NAME[SIGN_ELEM[P.moon]]+") là hai chất hỗ trợ nhau — lý trí và cảm xúc phối hợp khá ăn ý, cho bạn sự linh hoạt tự nhiên.":
+     "Mặt Trời chất "+ELEM_NAME[SIGN_ELEM[P.sun]]+" nhưng Mặt Trăng chất "+ELEM_NAME[SIGN_ELEM[P.moon]]+" — hai chất liệu nghịch nhau: điều bạn MUỐN và điều bạn CẦN thường kéo về hai phía. Đây chính là nguồn giằng co nội tâm của bạn, nhưng cũng là động cơ khiến bạn sâu sắc và luôn tự vấn.")+'</p>';
+  /* Góc Mặt Trời - Mặt Trăng chính xác */
+  var sunDeg=sunLongAt(jdUT),moonDeg=(function(){var d=jdUT-2451545.0;var L=218.316+13.176396*d,M=134.963+13.064993*d;var lon=(L+6.289*Math.sin(M*DEG))%360;return lon<0?lon+360:lon;})();
+  var sep=Math.abs(sunDeg-moonDeg);if(sep>180)sep=360-sep;
+  var asp=null;SUNMOON_ASPECT.forEach(function(a){if(Math.abs(sep-a[0])<=a[1]&&!asp)asp=a;});
+  if(asp)html+='<p><b>Góc Mặt Trời–Mặt Trăng ('+Math.round(sep)+'°, '+asp[2]+'):</b> '+asp[3]+'</p>';
+  html+='</div>';
+
+  /* ---- CÂN BẰNG NGUYÊN TỐ & THỂ ---- */
+  var ecount=[0,0,0,0],mcount=[0,0,0],pcount=[0,0];
+  var wmap={sun:3,moon:3,asc:3,mercury:1,venus:1,mars:1};
+  order.forEach(function(k){var w=wmap[k];ecount[SIGN_ELEM[P[k]]]+=w;mcount[SIGN_MODE[P[k]]]+=w;pcount[SIGN_POL[P[k]]]+=w;});
+  var domE=0,lowE=0;for(var i=1;i<4;i++){if(ecount[i]>ecount[domE])domE=i;if(ecount[i]<ecount[lowE])lowE=i;}
+  var domM=0;for(i=1;i<3;i++)if(mcount[i]>mcount[domM])domM=i;
+  var colE=["#e0785a","#d4a94e","#8bd0c0","#6f9fd8"];
+  html+='<div class="panel"><h3>Cân bằng nguyên tố trong bản đồ</h3>';
+  for(i=0;i<4;i++)html+='<div class="nhrow"><span class="lb">'+ELEM_NAME[i]+'</span><div class="track"><div class="fill" style="width:'+(ecount[i]/order.length/3*100)+'%;background:'+colE[i]+'"></div></div><span class="ct">'+ecount[i]+'</span></div>';
+  html+='<p style="font-size:.9rem;margin-top:8px"><b>Chất trội: '+ELEM_NAME[domE]+'.</b> '+ELEM_DESC[domE]+'</p>';
+  if(ecount[lowE]===0)html+='<p style="font-size:.9rem;margin-top:6px"><b>Khuyết hẳn chất '+ELEM_NAME[lowE]+'.</b> Đây là "vùng mù" bẩm sinh của bạn: '+
+    (["thiếu Hỏa nên đôi khi thiếu lửa hành động và sự tự khẳng định — cần chủ động nuôi đam mê và dám bắt đầu.","thiếu Đất nên dễ xa rời thực tế, hay quên chi tiết vật chất — cần kỷ luật và bám mặt đất.","thiếu Khí nên đôi khi khó lùi lại phân tích khách quan, dễ bị cảm xúc/thói quen cuốn — cần rèn tư duy phản biện và giao tiếp.","thiếu Nước nên có thể khó chạm và diễn đạt cảm xúc, hơi khô khan — cần học lắng nghe trái tim mình và người khác."][lowE])+' Người ta thường vô thức bị hút về người/việc mang chất mình thiếu.</p>';
+  html+='<p style="font-size:.9rem;margin-top:6px"><b>Cách vận hành trội: '+MODE_NAME[domM]+'.</b> '+MODE_DESC[domM]+'</p>';
+  html+='<p style="font-size:.88rem;margin-top:6px">Xu hướng '+(pcount[0]>pcount[1]?"HƯỚNG NGOẠI (dương) trội — bạn nghiêng về chủ động, biểu lộ, hành động ra bên ngoài":pcount[1]>pcount[0]?"HƯỚNG NỘI (âm) trội — bạn nghiêng về tiếp nhận, chiêm nghiệm, đời sống bên trong":"cân bằng âm–dương — bạn linh hoạt giữa chủ động và tiếp nhận")+'.</p></div>';
+
+  /* ---- TÂM TRÍ · TÌNH YÊU · ĐỘNG LỰC ---- */
+  html+='<div class="panel"><h3>Ba mảng đời sống</h3>';
+  html+=meaningHTML("☿ Tâm trí (Sao Thuỷ ở "+signName(P.mercury)+")","cách nghĩ, học và nói","Bạn "+MERCURY_SIGN[P.mercury]+".");
+  html+=meaningHTML("♀ Tình yêu (Sao Kim ở "+signName(P.venus)+")","cách yêu và điều bạn trân trọng","Trong tình cảm, bạn "+VENUS_SIGN[P.venus]+".");
+  html+=meaningHTML("♂ Động lực (Sao Hoả ở "+signName(P.mars)+")","cách hành động và biểu lộ cơn giận","Khi hành động, bạn "+MARS_SIGN[P.mars]+".");
+  /* Tổng hợp Kim–Hoả: phong cách yêu vs phong cách theo đuổi */
+  var vmRel=elemPair(SIGN_ELEM[P.venus],SIGN_ELEM[P.mars]);
+  html+='<p style="font-size:.9rem;margin-top:4px"><b>Sao Kim ↔ Sao Hoả (bạn muốn gì vs bạn theo đuổi thế nào trong tình yêu):</b> '+
+    (vmRel==="tension"?"hai sao lệch chất — thứ bạn bị thu hút (Kim "+ELEM_NAME[SIGN_ELEM[P.venus]]+") và cách bạn chủ động chinh phục (Hoả "+ELEM_NAME[SIGN_ELEM[P.mars]]+") không cùng nhịp; bạn có thể mê kiểu người này nhưng lại hành xử theo kiểu khác, dễ tự mâu thuẫn trong chuyện tình cảm — nhận ra điều này giúp bạn bớt tự phá.":
+     "hai sao hoà nhịp — điều bạn mê và cách bạn theo đuổi khá thống nhất, nên trong tình yêu bạn hành động đúng với mong muốn thật của mình, ít giằng xé.")+'</p></div>';
+
+  /* ---- CHÂN DUNG TỔNG HỢP CÁ NHÂN HOÁ ---- */
+  html+='<div class="answer"><h3>❖ Chân dung tổng hợp — con người riêng của bạn</h3>';
+  var por="Ghép tất cả lại: bạn tiếp cận cuộc đời "+(ascObj?"với vẻ ngoài "+ASC_SIGN[P.asc].split(";")[0]:"bằng bản chất "+signName(P.sun))+", nhưng động cơ sâu xa là một "+signName(P.sun)+" "+ELEM_NAME[SIGN_ELEM[P.sun]].toLowerCase()+" — "+
+    (["khát khao hành động và ý nghĩa","cần xây điều gì vững chắc và thực","sống bằng ý tưởng và kết nối","đi theo tiếng gọi của cảm xúc và chiều sâu"][SIGN_ELEM[P.sun]])+". ";
+  por+="Trội chất "+ELEM_NAME[domE]+" và cách vận hành "+MODE_NAME[domM].split(" ")[0].toLowerCase()+" khiến điểm mạnh lớn nhất của bạn là "+
+    (["dám khởi xướng và truyền lửa","kiên trì tạo ra kết quả bền","linh hoạt xoay chuyển và kết nối"][domM])+", còn "+ELEM_DESC[domE].split("điểm mù là ")[1]+" ";
+  if(ecount[lowE]===0)por+="Vùng cần bồi đắp cả đời là chất "+ELEM_NAME[lowE]+". ";
+  por+="Trong tình yêu bạn "+VENUS_SIGN[P.venus].split(";")[0]+", và khi cần bảo vệ mình bạn "+MARS_SIGN[P.mars].split(";")[0]+".";
+  html+='<p>'+por+'</p>';
+  if(smRel==="tension")html+='<p><b>Nút thắt trung tâm của bạn</b> là căng thẳng giữa lý trí ('+signName(P.sun)+') và cảm xúc ('+signName(P.moon)+'): học cách để hai phần này thương lượng thay vì lấn át nhau chính là hành trình trưởng thành lớn nhất của đời bạn.</p>';
+  html+='<p class="note">Bản đọc được suy ra bằng logic tổng hợp các vị trí thật trong bản đồ của riêng bạn — không phải mô tả chung của một cung. Đây là công cụ soi chiếu bản thân, không phải định mệnh cố định.</p></div>';
+
   $("ctResult").innerHTML=html;
-  saveHistory("Chiêm Tinh","","Mặt Trời "+sz.n+" · Mặt Trăng "+mz.n);
+  saveHistory("Chiêm Tinh","","☉"+signName(P.sun)+" ☽"+signName(P.moon)+(ascObj?" ↑"+signName(P.asc):"")+" ☿"+signName(P.mercury)+" ♀"+signName(P.venus)+" ♂"+signName(P.mars));
 });
 
 /* ---------- TRA CỨU ---------- */
@@ -1015,12 +1142,13 @@ function renderProfiles(){
 (function(){
   var sel=$("hsHour");GIO_LABEL.forEach(function(g,i){var o=document.createElement("option");o.value=i;o.textContent=g;sel.appendChild(o);});
   var sel2=$("btpHour");GIO_LABEL.forEach(function(g,i){var o=document.createElement("option");o.value=i;o.textContent=g;sel2.appendChild(o);});
+  var sel3=$("hsCity");if(sel3&&typeof CITIES!=="undefined")CITIES.forEach(function(c,i){var o=document.createElement("option");o.value=i;o.textContent=c[0];o.disabled=(c[3]===99);sel3.appendChild(o);});
 })();
 $("hsSave").addEventListener("click",function(){
   var name=$("hsName").value.trim(),date=$("hsDate").value;
   if(!name||!date){alert("Cần nhập tên và ngày sinh.");return;}
   var profs=getProfiles();
-  profs.push({name:name,date:date,hour:parseInt($("hsHour").value,10),gender:chipVal("hsGender")});
+  profs.push({name:name,date:date,hour:parseInt($("hsHour").value,10),gender:chipVal("hsGender"),city:parseInt($("hsCity").value,10)||0});
   setProfiles(profs);
   $("hsName").value="";
   renderProfiles();
@@ -1038,7 +1166,7 @@ function bindProfileSelect(selId,fill){
 }
 bindProfileSelect("tvProfile",function(p){$("tvName").value=p.name;$("tvDate").value=p.date;$("tvHour").value=p.hour;
   $("tvGender").querySelectorAll(".chip").forEach(function(c){c.classList.toggle("on",c.dataset.v===p.gender);});});
-bindProfileSelect("ctProfile",function(p){$("ctDate").value=p.date;var hh=(p.hour*2+24)%24;$("ctTime").value=(hh<10?"0":"")+hh+":00";});
+bindProfileSelect("ctProfile",function(p){$("ctDate").value=p.date;var hh=(p.hour*2+23)%24;$("ctTime").value=(hh<10?"0":"")+hh+":00";if(p.city!==undefined&&$("ctCity"))$("ctCity").value=p.city;});
 bindProfileSelect("btpProfile",function(p){$("btpDate").value=p.date;$("btpHour").value=p.hour;
   $("btpGender").querySelectorAll(".chip").forEach(function(c){c.classList.toggle("on",c.dataset.v===p.gender);});});
 bindProfileSelect("tsProfile",function(p){$("tsName").value=p.name;$("tsDate").value=p.date;});
@@ -1200,8 +1328,50 @@ $("tsGo").addEventListener("click",function(){
   }else{
     html+='<p class="note center">Nhập họ tên để xem thêm Số sứ mệnh, Số linh hồn, Số nhân cách.</p>';
   }
+  /* Số trưởng thành + cầu nối + nghiệp số + đam mê ẩn — chỉ khi có tên */
+  var expr2=null,soul2=null,pers2=null,maturity=null,hidden=null,karmic=[];
+  if(name){
+    var st2=stripVN(name),all2=0,vow2=0,con2=0,freq={};
+    "AEIOU".length;
+    st2.split("").forEach(function(ch){var v=letterVal(ch);all2+=v;freq[v]=(freq[v]||0)+1;if("AEIOU".indexOf(ch)>=0)vow2+=v;else con2+=v;});
+    expr2=reduceNum(all2,true);soul2=reduceNum(vow2,true);pers2=reduceNum(con2,true);
+    maturity=reduceNum(reduceNum(lifePath,false)+reduceNum(expr2,false),true);
+    var mx=0;for(var d in freq){if(freq[d]>mx){mx=freq[d];hidden=+d;}}
+    /* nghiệp số: kiểm tra tổng hai chữ số trước khi rút của các phần cốt lõi */
+    [all2,vow2,con2].forEach(function(t){var tt=t;while(tt>19)tt=String(tt).split("").reduce(function(a,c){return a+ +c;},0);if([13,14,16,19].indexOf(tt)>=0&&karmic.indexOf(tt)<0)karmic.push(tt);});
+    var lpTotal=dpart+mpart+ypart;if([13,14,16,19].indexOf(lpTotal)>=0&&karmic.indexOf(lpTotal)<0)karmic.push(lpTotal);
+  }
   html+='<div class="panel"><h3>Năm cá nhân '+now.getFullYear()+': số '+py+'</h3><p style="font-size:.9rem">'+PY_INFO[py]+'</p>';
-  html+='<p class="note">Năm cá nhân = ngày sinh + tháng sinh + năm hiện tại (rút gọn 1–9); chu kỳ lặp 9 năm.</p></div>';
+  var pm=reduceNum(reduceNum(dd,false)+reduceNum(mm,false)+py+ (now.getMonth()+1),false);
+  html+='<p style="font-size:.88rem;margin-top:6px"><b>Tháng cá nhân này (số '+pm+'):</b> '+PERSONAL_MONTH_HINT[pm]+'.</p>';
+  html+='<p class="note">Năm cá nhân = ngày + tháng sinh + năm hiện tại (rút gọn 1–9); chu kỳ lặp 9 năm.</p></div>';
+
+  /* ---- MÁY TỔNG HỢP CHÂN DUNG THẦN SỐ ---- */
+  if(name){
+    if(maturity!==null)html+='<div class="panel"><h3>Số trưởng thành: '+maturity+'</h3><p style="font-size:.88rem">Mục tiêu chín muồi nửa sau cuộc đời (rõ dần sau tuổi 35), khi số chủ đạo và số sứ mệnh hoà làm một: '+(SO_INFO[maturity]||"").split(".")[0]+'. Đây là "phiên bản trưởng thành" mà cả đời bạn đang hướng tới.</p></div>';
+    if(karmic.length)html+='<div class="panel"><h3 class="warntxt">Nợ nghiệp số</h3>'+karmic.map(function(k){return '<p style="font-size:.88rem;margin-bottom:8px">'+KARMIC_DEBT[k]+'</p>';}).join("")+'</div>';
+    if(hidden!==null)html+='<div class="panel"><h3>Đam mê tiềm ẩn: số '+hidden+'</h3><p style="font-size:.88rem">Con số xuất hiện nhiều nhất trong tên bạn — một tài năng/khát khao trội bạn mang theo và dễ bị cuốn vào: '+(SO_INFO[hidden]||"").split(".")[0]+'.</p></div>';
+
+    html+='<div class="answer"><h3>❖ Chân dung tổng hợp — con người riêng của bạn</h3>';
+    var fLP=NUM_FAMILY[lifePath],fEX=NUM_FAMILY[expr2];
+    var por="Hành trình đời bạn (số chủ đạo <b>"+lifePath+"</b>) là con đường của "+FAMILY_DESC[fLP].split(":")[0].toLowerCase()+", cụ thể: "+(SO_INFO[lifePath]||"").split(".")[0].replace(/^[^.]*\. /,"")+". ";
+    por+="Trong khi đó, bộ công cụ tự nhiên bạn sinh ra đã có (số sứ mệnh <b>"+expr2+"</b>) thuộc "+FAMILY_DESC[fEX].split(":")[0].toLowerCase()+". ";
+    var rel=familyRelation(fLP,fEX);
+    por+="Con đường và năng lực của bạn "+rel[0].toUpperCase()+": "+rel[1]+". ";
+    html+='<p>'+por+'</p>';
+    /* Nội tâm vs vẻ ngoài */
+    var gap=Math.abs((soul2>9?soul2-9:soul2)-(pers2>9?pers2-9:pers2));
+    html+='<p><b>Bên trong vs bên ngoài:</b> Trái tim bạn khát khao sâu kín (số linh hồn '+soul2+') là '+(SO_INFO[soul2]||"").split(".")[0].toLowerCase()+', nhưng vẻ ngoài người khác thấy (số nhân cách '+pers2+') lại là '+(SO_INFO[pers2]||"").split(".")[0].toLowerCase()+'. '+
+      (soul2===pers2?"Hai mặt này trùng khớp — bạn sống rất thật, trong sao ngoài vậy, người khác nhìn bạn đúng như con người thật.":
+       gap<=1?"Hai mặt khá gần nhau — bạn thể hiện ra ngoài tương đối đúng với lòng mình.":
+       "Có một khoảng cách rõ giữa điều bạn thật sự muốn và hình ảnh bạn phóng ra — người ngoài dễ hiểu lầm bạn; thu hẹp khoảng này bằng cách để hành động khớp hơn với khát khao thật sẽ khiến bạn nhẹ nhõm hơn nhiều.")+'</p>';
+    /* Cầu nối chủ đạo - sứ mệnh */
+    var bridge=Math.min(4,Math.abs(reduceNum(lifePath,false)-reduceNum(expr2,false)));
+    html+='<p><b>Cầu nối chủ đạo–sứ mệnh:</b> '+BRIDGE_DESC[bridge]+'. '+
+      (rel[0].indexOf("căng")>=0?"Vì con đường và năng lực của bạn hơi nghịch nhau, đây là chỗ cần ý thức dung hoà: đừng ép mình chỉ sống theo một cực.":"Đây là lợi thế: hãy để năng lực tự nhiên phục vụ thẳng cho con đường đời bạn.")+'</p>';
+    html+='<p><b>Số ngày sinh '+birthday+'</b> là món quà bẩm sinh tô điểm thêm: '+(SO_INFO[birthday]||"").split(".")[0].toLowerCase()+' — dùng nó như "vũ khí phụ" hỗ trợ con đường chính.</p>';
+    html+='<p class="note">Chân dung này được suy ra bằng cách kết hợp năm con số cốt lõi của riêng bạn theo logic nhóm bản chất số — không phải mô tả chung của một con số đơn lẻ.</p></div>';
+  }
   $("tsResult").innerHTML=html;
-  saveHistory("Thần Số",name,"Chủ đạo "+lifePath+" · Năm cá nhân "+py);
+  saveHistory("Thần Số",name,"Chủ đạo "+lifePath+(expr2?" · Sứ mệnh "+expr2+" · Linh hồn "+soul2:"")+" · Năm "+py);
 });

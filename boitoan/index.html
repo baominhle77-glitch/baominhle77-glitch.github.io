@@ -426,9 +426,11 @@
       <select id="ctProfile" class="profSel"><option value="">— chọn hồ sơ —</option></select>
       <label>Ngày sinh dương lịch</label>
       <input id="ctDate" type="date">
-      <label>Giờ sinh (giờ địa phương, để tính cung Mặt Trăng chính xác hơn)</label>
+      <label>Giờ sinh (giờ địa phương — bắt buộc nếu muốn có Điểm Mọc chính xác)</label>
       <input id="ctTime" type="time" value="12:00">
-      <button class="btn" id="ctGo">✦ Xem bản đồ sao</button>
+      <label>Nơi sinh (để tính Điểm Mọc / Ascendant)</label>
+      <select id="ctCity"></select>
+      <button class="btn" id="ctGo">✦ Lập bản đồ sao cá nhân</button>
     </div>
     <div class="result" id="ctResult"></div>
   </div>
@@ -506,6 +508,8 @@
         <button class="chip on" data-v="nam">Nam</button>
         <button class="chip" data-v="nu">Nữ</button>
       </div>
+      <label>Nơi sinh (cho Điểm Mọc chiêm tinh)</label>
+      <select id="hsCity"></select>
       <button class="btn" id="hsSave">✦ Lưu hồ sơ</button>
       <p class="note">Hồ sơ lưu trên máy của bạn (không gửi đi đâu); dùng lại được ở Tử Vi, Bát Tự, Thần Số, Chiêm Tinh.</p>
     </div>
@@ -544,6 +548,7 @@
 <script src="data.js"></script>
 <script src="data2.js"></script>
 <script src="data3.js"></script>
+<script src="data4.js"></script>
 <script src="app.js"></script>
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
