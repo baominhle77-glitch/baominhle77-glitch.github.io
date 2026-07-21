@@ -5,7 +5,7 @@ compatibility_date = "2025-01-01"
 
 [vars]
 # Domain web của bạn (CORS). Sửa nếu đổi tên tài khoản.
-ALLOWED_ORIGINS = "https://baominhle77-glitch.github.io"
+ALLOWED_ORIGINS = "https://baominhle77-glitch.github.io,https://hiennhi89.github.io"
 # Chat ID Telegram của bạn (workflow tự điền).
 TELEGRAM_CHAT_ID = "8877812376"
 
