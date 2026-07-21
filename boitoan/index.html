@@ -240,6 +240,25 @@
   .hrtable td{padding:4px 6px;border-bottom:1px dashed #332a5255}
   .hrtable .g{color:var(--ok)}
   .hrtable .b{color:var(--warn)}
+
+  /* ---- bát tự ---- */
+  .pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+  .pillar{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 4px;text-align:center;font-size:.68rem}
+  .pillar .pt{color:var(--ink-faint);font-size:.62rem;margin-bottom:3px}
+  .pillar .pc{color:var(--gold);font-size:.92rem;line-height:1.3}
+  .pillar .pn{color:var(--ink-dim);font-size:.6rem;margin-top:3px}
+  .pillar .ps{color:var(--violet);font-size:.62rem;margin-top:3px}
+  .nhrow{display:flex;align-items:center;gap:8px;font-size:.8rem;margin:4px 0}
+  .nhrow .lb{width:44px;color:var(--ink-dim);flex-shrink:0}
+  .nhrow .track{flex:1;background:var(--bg2);border-radius:5px;height:12px;overflow:hidden}
+  .nhrow .fill{height:100%;border-radius:5px}
+  .nhrow .ct{width:20px;text-align:right;color:var(--ink-dim)}
+  .numbig{text-align:center;font-size:2.6rem;color:var(--gold);line-height:1.2}
+  .answer{border:1px solid var(--gold-soft);background:#d4a94e10;border-radius:var(--radius);padding:14px 16px;margin:10px 0}
+  .answer h3{color:var(--gold);font-weight:normal;font-size:.98rem;margin-bottom:8px;letter-spacing:.05em}
+  .answer p{font-size:.92rem;margin-bottom:8px}
+  .answer p:last-child{margin-bottom:0}
+  .profSel{margin-bottom:2px}
 </style>
 </head>
 <body>
@@ -261,6 +280,9 @@
       <div class="tile" data-go="xemngay"><span class="em">📅</span><span class="t">Xem Ngày</span><div class="d">Can chi · hoàng đạo · giờ tốt</div></div>
       <div class="tile" data-go="lich"><span class="em">🗓️</span><span class="t">Lịch Âm Dương</span><div class="d">Lịch tháng · ngày tốt xấu</div></div>
       <div class="tile" data-go="chiemtinh"><span class="em">✨</span><span class="t">Chiêm Tinh</span><div class="d">Cung mặt trời · mặt trăng</div></div>
+      <div class="tile" data-go="battu"><span class="em">🎋</span><span class="t">Bát Tự</span><div class="d">Tứ trụ · thập thần · ngũ hành</div></div>
+      <div class="tile" data-go="thanso"><span class="em">🔢</span><span class="t">Thần Số Học</span><div class="d">Số chủ đạo · sứ mệnh · năm cá nhân</div></div>
+      <div class="tile" data-go="hoso"><span class="em">👤</span><span class="t">Hồ Sơ</span><div class="d">Lưu ngày sinh, dùng lại mọi nơi</div></div>
       <div class="tile" data-go="tracuu"><span class="em">📖</span><span class="t">Tra Cứu</span><div class="d">Ý nghĩa mọi lá bài &amp; quẻ</div></div>
     </div>
     <p class="note center" style="margin-top:14px">Mở bằng Safari → nút Chia sẻ → «Thêm vào MH chính» để dùng như app. Mọi dữ liệu lưu trên máy, không gửi đi đâu.</p>
@@ -365,6 +387,8 @@
     <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>🌌 Tử Vi</h2></div>
     <div class="panel">
       <h3>Thông tin người xem (theo dương lịch)</h3>
+      <label>Dùng hồ sơ đã lưu</label>
+      <select id="tvProfile" class="profSel"><option value="">— chọn hồ sơ —</option></select>
       <label>Họ tên (tuỳ chọn)</label>
       <input id="tvName" placeholder="Nguyễn Văn A">
       <label>Ngày sinh dương lịch</label>
@@ -398,6 +422,8 @@
   <div class="screen" id="scr-chiemtinh">
     <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>✨ Chiêm Tinh</h2></div>
     <div class="panel">
+      <label>Dùng hồ sơ đã lưu</label>
+      <select id="ctProfile" class="profSel"><option value="">— chọn hồ sơ —</option></select>
       <label>Ngày sinh dương lịch</label>
       <input id="ctDate" type="date">
       <label>Giờ sinh (giờ địa phương, để tính cung Mặt Trăng chính xác hơn)</label>
@@ -417,9 +443,73 @@
       <button class="chip" data-v="kinhdich">Kinh Dịch</button>
       <button class="chip" data-v="sao">Sao Tử Vi</button>
       <button class="chip" data-v="cung">12 Cung</button>
+      <button class="chip" data-v="canchi">Can Chi</button>
+      <button class="chip" data-v="nguhanh">Ngũ Hành</button>
+      <button class="chip" data-v="batquai">Bát Quái</button>
+      <button class="chip" data-v="thapthan">Thập Thần</button>
+      <button class="chip" data-v="so">Thần Số</button>
+      <button class="chip" data-v="lenpairs">Bộ đôi Lenormand</button>
+      <button class="chip" data-v="tarotnum">Số học Tarot</button>
     </div>
     <div class="searchbox"><input id="browseSearch" placeholder="Tìm tên lá bài, quẻ, sao…"><span class="icon">🔍</span></div>
     <div class="list" id="browseList"></div>
+  </div>
+
+  <!-- ============ BÁT TỰ ============ -->
+  <div class="screen" id="scr-battu">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>🎋 Bát Tự (Tứ Trụ)</h2></div>
+    <div class="panel">
+      <label>Dùng hồ sơ đã lưu</label>
+      <select id="btpProfile" class="profSel"><option value="">— chọn hồ sơ —</option></select>
+      <label>Ngày sinh dương lịch</label>
+      <input id="btpDate" type="date">
+      <label>Giờ sinh</label>
+      <select id="btpHour"></select>
+      <label>Giới tính</label>
+      <div class="chips" id="btpGender">
+        <button class="chip on" data-v="nam">Nam</button>
+        <button class="chip" data-v="nu">Nữ</button>
+      </div>
+      <button class="btn" id="btpGo">✦ Lập bát tự</button>
+    </div>
+    <div class="result" id="btpResult"></div>
+  </div>
+
+  <!-- ============ THẦN SỐ HỌC ============ -->
+  <div class="screen" id="scr-thanso">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>🔢 Thần Số Học</h2></div>
+    <div class="panel">
+      <label>Dùng hồ sơ đã lưu</label>
+      <select id="tsProfile" class="profSel"><option value="">— chọn hồ sơ —</option></select>
+      <label>Họ tên đầy đủ (theo giấy khai sinh)</label>
+      <input id="tsName" placeholder="Ví dụ: Nguyễn Văn An">
+      <label>Ngày sinh dương lịch</label>
+      <input id="tsDate" type="date">
+      <button class="btn" id="tsGo">✦ Xem thần số</button>
+    </div>
+    <div class="result" id="tsResult"></div>
+  </div>
+
+  <!-- ============ HỒ SƠ ============ -->
+  <div class="screen" id="scr-hoso">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>👤 Hồ Sơ Ngày Sinh</h2></div>
+    <div class="panel">
+      <h3>Thêm hồ sơ mới</h3>
+      <label>Họ tên</label>
+      <input id="hsName" placeholder="Tên người cần lưu">
+      <label>Ngày sinh dương lịch</label>
+      <input id="hsDate" type="date">
+      <label>Giờ sinh</label>
+      <select id="hsHour"></select>
+      <label>Giới tính</label>
+      <div class="chips" id="hsGender">
+        <button class="chip on" data-v="nam">Nam</button>
+        <button class="chip" data-v="nu">Nữ</button>
+      </div>
+      <button class="btn" id="hsSave">✦ Lưu hồ sơ</button>
+      <p class="note">Hồ sơ lưu trên máy của bạn (không gửi đi đâu); dùng lại được ở Tử Vi, Bát Tự, Thần Số, Chiêm Tinh.</p>
+    </div>
+    <div id="hsList"></div>
   </div>
 
   <!-- ============ LỊCH ÂM DƯƠNG ============ -->
@@ -453,6 +543,7 @@
 
 <script src="data.js"></script>
 <script src="data2.js"></script>
+<script src="data3.js"></script>
 <script src="app.js"></script>
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}

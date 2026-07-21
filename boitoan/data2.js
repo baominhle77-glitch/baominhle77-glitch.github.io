@@ -275,22 +275,25 @@ const SAO_NGAY_INFO={
 "Câu Trận":"Hắc đạo — sao trói buộc: việc dễ dây dưa kéo dài, vướng víu; kỵ khởi công, kiện tụng, đi xa."
 };
 
-/* Lục diệu (phép Lý Thuần Phong): (tháng âm + ngày âm + số giờ) mod 6 */
+/* Lục diệu (Khổng Minh lục diệu / tiểu lục nhâm): tháng Giêng khởi Đại An,
+   ngày mùng 1 khởi từ cung tháng, giờ Tý khởi từ cung ngày — đếm thuận.
+   Chỉ số cung = (tháng-1 + ngày-1 + số_giờ) mod 6, với giờ Tý = 0. */
 const LUCDIEU=[
-["Không Vong","xấu","Tuyệt lộ — vạn sự không thành, dễ mất mát hao tổn; đại kỵ xuất hành, khởi sự, giao dịch."],
 ["Đại An","tốt","Mọi việc bình an thuận lợi; cầu tài đi hướng Tây Nam; gia đạo yên ấm — hợp khởi sự bền vững."],
 ["Lưu Niên","xấu","Việc trì trệ dây dưa, mưu sự khó thành; nên hoãn việc lớn, cẩn thận lời tiếng thị phi."],
 ["Tốc Hỷ","tốt","Tin vui đến nhanh, niềm vui bất ngờ; cầu tài hướng Nam; xuất hành gặp may — làm việc gấp rất hợp."],
 ["Xích Khẩu","xấu","Khẩu thiệt cãi vã, dễ va chạm tranh chấp; kỵ đàm phán, cưới hỏi, gặp gỡ quan trọng; giữ mồm giữ miệng."],
-["Tiểu Cát","tốt","May mắn nhỏ mà chắc; người đi sắp về, việc hanh thông; hợp giao dịch, cầu tài, gặp gỡ."]
+["Tiểu Cát","tốt","May mắn nhỏ mà chắc; người đi sắp về, việc hanh thông; hợp giao dịch, cầu tài, gặp gỡ."],
+["Không Vong","xấu","Tuyệt lộ — vạn sự không thành, dễ mất mát hao tổn; đại kỵ xuất hành, khởi sự, giao dịch."]
 ];
 
 /* 24 tiết khí — tính từ kinh độ mặt trời, 0° = Xuân phân */
 const TIETKHI=["Xuân phân","Thanh minh","Cốc vũ","Lập hạ","Tiểu mãn","Mang chủng","Hạ chí","Tiểu thử","Đại thử","Lập thu","Xử thử","Bạch lộ","Thu phân","Hàn lộ","Sương giáng","Lập đông","Tiểu tuyết","Đại tuyết","Đông chí","Tiểu hàn","Đại hàn","Lập xuân","Vũ thủy","Kinh trập"];
 
-/* Hỷ thần / Tài thần theo can ngày (lịch vạn sự cổ truyền) */
+/* Hỷ thần theo ca quyết cổ: Giáp Kỷ tại Cấn (ĐB), Ất Canh Càn (TB), Bính Tân Khôn (TN), Đinh Nhâm Ly (Nam), Mậu Quý Tốn (ĐN) */
 const HY_THAN=["Đông Bắc","Tây Bắc","Tây Nam","Chính Nam","Đông Nam","Đông Bắc","Tây Bắc","Tây Nam","Chính Nam","Đông Nam"];
-const TAI_THAN=["Đông Nam","Đông Nam","Chính Tây","Chính Tây","Chính Bắc","Chính Bắc","Chính Đông","Chính Đông","Chính Nam","Chính Nam"];
+/* Tài thần theo lịch vạn niên: Giáp/Ất ĐN, Bính/Đinh Đông, Mậu Bắc, Kỷ Nam, Canh/Tân TN, Nhâm Tây, Quý TB */
+const TAI_THAN=["Đông Nam","Đông Nam","Chính Đông","Chính Đông","Chính Bắc","Chính Nam","Tây Nam","Tây Nam","Chính Tây","Tây Bắc"];
 
 /* Ngày âm kỵ phổ biến */
 const TAM_NUONG=[3,7,13,18,22,27];

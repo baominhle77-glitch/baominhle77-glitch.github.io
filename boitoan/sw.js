@@ -1,5 +1,5 @@
-var CACHE="boitoan-v2";
-var ASSETS=["./","index.html","data.js","data2.js","app.js","manifest.webmanifest","icon.png"];
+var CACHE="boitoan-v3";
+var ASSETS=["./","index.html","data.js","data2.js","data3.js","app.js","manifest.webmanifest","icon.png"];
 self.addEventListener("install",function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(ASSETS);}).then(function(){return self.skipWaiting();}));
 });
