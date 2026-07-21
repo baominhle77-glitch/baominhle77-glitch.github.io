@@ -13,11 +13,11 @@
 window.GATE = {
   app: 'spare',
   owner: 'Hiên Nhi Hiên 89',
-  mode: 'encrypted',            // local | encrypted | approval  (xem docs/ARCHITECTURE.md)
+  mode: 'approval',            // local | encrypted | approval  (xem docs/ARCHITECTURE.md)
   title: 'SPARE · Kho riêng',
   subtitle: 'Khu vực riêng tư của Hiên Nhi Hiên 89. Nhập mật khẩu để mở.',
   pbkdf2: { saltB64: '+S1GmM9HJHXS1hxF47RQHw==', hashB64: 'Vty6Sw8Lh5qynoGtmA4c9sHKQ+9Qe/O6C5l9VAbf1cY=', iterations: 200000, keylen: 32 },
-  backend: ''               // để trống = khóa cục bộ. Điền URL Worker để bật duyệt Telegram.
+  backend: 'https://hiennhi89-gate.hiennhi89.workers.dev'               // để trống = khóa cục bộ. Điền URL Worker để bật duyệt Telegram.
 };
 </script>
 <script src="assets/gate.js" defer></script>
