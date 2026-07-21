@@ -9,4 +9,11 @@
 - Thêm tài liệu: `HANDOVER.md`, `docs/ARCHITECTURE.md`.
 - Đã kiểm chứng: PBKDF2 mở khóa đúng/sai; round-trip mã hóa AES; gate render trên Chromium.
 
+## 2026-07-21 (b) — Bật Lớp B (mã hóa) cho cả 3 app + chuẩn bị B+C
+- Mã hóa AES-256-GCM nội dung SPARE, boitoan (đã gộp data*.js+app.js, xóa 6 file plaintext), MEDORA.
+- Thêm `tools/decrypt.mjs` (khôi phục để sửa); `.gitignore` chặn `*.src.html`.
+- Vá `gate.js`: giữ đúng thứ tự chạy script sau giải mã (async=false cho script ngoài).
+- `worker.js`: khi duyệt trả `key` giải mã (dùng secret `DECRYPT_KEY`) — sẵn sàng chế độ B+C.
+- Đã test trình duyệt thật (Chromium headless) cả 3 app: mở/khóa/sai-mật-khẩu/không-lỗi.
+
 <!-- Các mục mới sẽ được thêm phía trên dòng này. STATUS.md được máy tự sinh sau mỗi push. -->

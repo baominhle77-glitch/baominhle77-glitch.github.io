@@ -134,7 +134,13 @@ async function handleStatus(env, url) {
   if (!id) return json({ error: "missing id" }, 400);
   const row = await env.DB.prepare("SELECT status, token FROM requests WHERE id=?").bind(id).first();
   if (!row) return json({ status: "unknown" });
-  return json({ status: row.status, token: row.status === "approved" ? row.token : undefined });
+  var approved = row.status === "approved";
+  return json({
+    status: row.status,
+    token: approved ? row.token : undefined,
+    // B+C: chỉ phiên ĐÃ DUYỆT mới nhận khóa giải mã nội dung (nếu có đặt DECRYPT_KEY).
+    key: approved && env.DECRYPT_KEY ? env.DECRYPT_KEY : undefined,
+  });
 }
 
 // Web gọi để lưu lại "dữ kiện khách nhập" (tùy app). Cần token phiên hợp lệ.

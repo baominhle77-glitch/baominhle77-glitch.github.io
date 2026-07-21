@@ -56,6 +56,22 @@ Trang quản trị trên máy bạn: `https://baominh-gate.<bạn>.workers.dev/a
 nó tự deploy lại, **miễn là** bạn đã thêm 1 secret repo tên `CLOUDFLARE_API_TOKEN`
 (tạo tại Cloudflare → My Profile → API Tokens → template "Edit Cloudflare Workers").
 
+## Bật B+C — mã hóa nội dung + duyệt Telegram (mạnh nhất)
+3 app hiện đã **mã hóa nội dung** (Lớp B, mở bằng mật khẩu cục bộ). Để chuyển sang
+"phải được bạn duyệt mới có khóa giải mã":
+1. Đặt thêm 1 bí mật = ĐÚNG mật khẩu đã mã hóa nội dung:
+   ```bash
+   npx wrangler secret put DECRYPT_KEY      # nhập: minh-bao-2929-khoa (hoặc mật khẩu bạn đã đổi)
+   ```
+2. Trong `window.GATE` của mỗi app, đổi:
+   ```js
+   mode: 'approval',
+   backend: 'https://baominh-gate.<ban>.workers.dev',
+   ```
+   (Tôi có thể tự lật công tắc này sau khi bạn báo backend đã chạy.)
+3. Khi đó: khách mở web → xin phép → bạn duyệt qua Telegram → Worker trả khóa →
+   nội dung tự giải mã. Người chưa được duyệt: không có khóa = không đọc được gì.
+
 ## Ghi lại dữ liệu khách nhập (tùy chọn)
 Trong app, sau khi có phiên, gọi:
 ```js

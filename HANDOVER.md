@@ -25,13 +25,18 @@
 - ⚠️ Bản chất: đây là lớp **ngăn chặn**. Nội dung vẫn nằm trong mã nguồn (chỉ bị che).
   Muốn "tải về cũng không đọc được" → bật Lớp B. Muốn "duyệt từng người" → bật Lớp C.
 
-### 🟡 Lớp B — Mã hóa nội dung AES (CÓ SẴN, CHƯA ÁP DỤNG)
-- `tools/encrypt.mjs`: mã hóa nội dung trang bằng AES-GCM (khóa từ mật khẩu).
-  Sau khi mã hóa, mã nguồn chỉ còn chuỗi mã hóa — không mật khẩu = không đọc được.
-- `gate.js` chế độ `mode:'encrypted'` tự giải mã trong trình duyệt, vẫn chạy offline.
-- Đã kiểm chứng round-trip encrypt↔decrypt khớp WebCrypto trình duyệt.
-- **Chưa áp dụng lên app** để tránh làm hỏng (app có script/dữ liệu phức tạp).
-  Muốn bật: xem `docs/ARCHITECTURE.md` mục "Bật Lớp B".
+### ✅ Lớp B — Mã hóa nội dung AES (ĐÃ ÁP DỤNG CẢ 3 APP)
+- Nội dung 3 app đã được **mã hóa AES-256-GCM** (`mode:'encrypted'`). Tải mã nguồn
+  về chỉ thấy chuỗi mã hóa; không mật khẩu = không đọc được gì. Vẫn chạy offline.
+- Với **boitoan**: đã GỘP `data*.js` + `app.js` vào trong rồi mã hóa, và **xóa 6 file
+  plaintext** (giờ `boitoan/data.js`… trả 404 — không tải về được nữa).
+- Công cụ: `tools/encrypt.mjs` (mã hóa), `tools/decrypt.mjs` (khôi phục để sửa),
+  `tools/set-password.mjs` (đổi mật khẩu).
+- ⚠️ **File `*.src.html` (bản gốc plaintext) KHÔNG commit** (đã `.gitignore`). Muốn sửa
+  nội dung: `node tools/decrypt.mjs index.html "mật-khẩu" > index.src.html` → sửa →
+  `node tools/encrypt.mjs index.src.html index.html "mật-khẩu"`.
+- ✅ Đã test trình duyệt thật (Chromium): mở đúng mật khẩu hiện nội dung, sai mật khẩu
+  bị chặn, không lỗi console; boitoan chạy đủ chức năng sau giải mã.
 
 ### 🟡 Lớp C — Backend duyệt + Telegram bot (CÓ SẴN, CẦN 5 PHÚT CÀI)
 - `backend/worker.js`: Cloudflare Worker. Ghi IP/quốc gia/thiết bị của khách,

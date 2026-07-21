@@ -23,3 +23,4 @@ database_id = "PUT_D1_DATABASE_ID"
 #   npx wrangler secret put TELEGRAM_WEBHOOK_SECRET
 #   npx wrangler secret put ADMIN_TOKEN
 #   npx wrangler secret put SESSION_SECRET
+#   npx wrangler secret put DECRYPT_KEY          # (tùy chọn, cho B+C) = mật khẩu đã mã hóa nội dung
