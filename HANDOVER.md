@@ -11,11 +11,16 @@ PR #9 từ `claude/webapp-automation-access-control-3sierx` đã merge vào `mai
 
 ## 1. Ba webapp & vị trí
 
-| App | Mô tả | Repo | Đường dẫn |
-|-----|-------|------|-----------|
-| 🔮 Bói toán | PWA tra cứu + chat AI | `baominhle77-glitch.github.io` | `/boitoan/` |
-| 🕯️ SPARE (Tâm linh) | Kho tra cứu riêng + chat AI | `baominhle77-glitch.github.io` | `/` (root) |
-| ⚕️ MEDORA (Y đa khoa) | Học y khoa | `baominhle77-glitch.github.io-` | `/` (root) |
+Repo `baominhle77-glitch.github.io` là **nguồn chuẩn duy nhất** cho cả ba app.
+
+| App | Mô tả | Nguồn trong repo | URL production |
+|-----|-------|------------------|----------------|
+| 🔮 Bói toán | PWA tra cứu + chat AI | `boitoan/` | `https://hiennhi89.pages.dev/boitoan/` |
+| 🕯️ SPARE (Tâm linh) | Kho tra cứu riêng + chat AI | root | `https://hiennhi89.pages.dev/` |
+| ⚕️ MEDORA (Y đa khoa) | Học y khoa | `medora/` | `https://hiennhi89.pages.dev/medora/` |
+
+MEDORA đã được nhập từ commit `84a8632` của repo cũ `baominhle77-glitch.github.io-`.
+Repo cũ không còn là nguồn deploy production.
 
 ## 2. Đã làm gì (trạng thái hiện tại)
 
@@ -44,16 +49,17 @@ PR #9 từ `claude/webapp-automation-access-control-3sierx` đã merge vào `mai
 - `backend/worker.js`: Cloudflare Worker. Ghi IP/quốc gia/thiết bị của khách,
   gửi Telegram cho chủ với nút ✅ Duyệt / ❌ Từ chối, cấp phiên JWT khi duyệt.
 - Duyệt được bằng **bot Telegram** HOẶC **trang `/admin`** (mật khẩu ADMIN_TOKEN).
-- `/` và `/boitoan/` đang dùng `mode: 'approval'`, trỏ tới `https://hiennhi89-gate.hiennhi89.workers.dev`.
+- `/`, `/boitoan/` và `/medora/` dùng `mode: 'approval'`, trỏ tới `https://hiennhi89-gate.hiennhi89.workers.dev`.
 - Worker trả HTTP 200 với `gate backend OK`; repo cấu hình binding `KV`, Workers API xác nhận 5 secret binding bắt buộc đã tồn tại.
 - Bot `@Appwebcuatoi_bot` hoạt động; webhook trỏ đúng Worker, không có lỗi hoặc bản cập nhật chờ tại lúc kiểm tra.
-- ⚠️ Chưa kiểm thử trọn luồng khách gửi yêu cầu → Telegram duyệt → nhận phiên/khóa giải mã. MEDORA ở repo riêng cũng chưa được kiểm tra trong phiên này.
+- ⚠️ Chưa kiểm thử trọn luồng khách gửi yêu cầu → Telegram duyệt → nhận phiên/khóa giải mã trong phiên này.
 - `backend/README.md`: hướng dẫn vận hành; không ghi giá trị bí mật vào repo.
 
 ### ✅ Tự động hóa
 - `.github/workflows/deploy-worker.yml`: tự deploy Worker khi push (cần secret `CLOUDFLARE_API_TOKEN`).
+- `.github/workflows/deploy-pages.yml`: khi source đổi trên `main`, gộp ba app từ chính repo này và Direct Upload lên Cloudflare Pages project `hiennhi89`; thiếu token làm workflow thất bại rõ ràng.
 - `.github/workflows/handover.yml`: được thiết kế để cập nhật `docs/handover/STATUS.md`; hiện chưa tạo được file này trên `main`.
-- Đẩy lên web: repo là GitHub Pages. **Merge nhánh vào `main` → tự lên web.**
+- Đích web là Cloudflare Pages, không phải GitHub Pages. Wrangler được pin tại `4.112.0` để giảm biến động phiên bản CLI.
 
 ## 3. Việc bạn cần làm (một lần, tùy chọn mức bảo vệ)
 
@@ -61,12 +67,13 @@ PR #9 từ `claude/webapp-automation-access-control-3sierx` đã merge vào `mai
 |--------------|-------------|
 | Chỉ chống dò tìm + khóa (Lớp A) | Đã có trong `main`; kiểm tra web thật trước khi kết luận. |
 | Thêm mã hóa thật (Lớp B) | Đã có trong `main`; dùng `tools/encrypt.mjs` khi cần sửa nội dung. |
-| Duyệt từng người + Telegram (Lớp C) | Đã bật cho `/` và `/boitoan/`; cần test đầu-cuối và kiểm tra MEDORA riêng. |
+| Duyệt từng người + Telegram (Lớp C) | Đã bật cho cả ba URL; cần test đầu-cuối. |
 | Deploy Worker tự động | Worker đang hoạt động; workflow deploy gần nhất trên `main` kết thúc thành công. |
+| Deploy ba app tự động | Giữ secret `CLOUDFLARE_API_TOKEN`; push source lên `main` rồi kiểm tra workflow và ba URL production. |
 
 ## 4. Cách tiếp tục công việc (cho nick/AI khác)
-1. Đọc file này + `docs/ARCHITECTURE.md`.
-2. Xem `git log` và GitHub Actions. `docs/handover/STATUS.md` hiện chưa tồn tại trên `main` dù workflow bàn giao gần nhất báo thành công.
+1. Đọc file này trước. `docs/ARCHITECTURE.md` và `docs/handover/DOI-TEN-VA-TIEP-TUC.md` còn hướng dẫn cũ về GitHub Pages/D1/repo phụ; production hiện dùng một repo, Cloudflare Pages và Workers KV như code/cấu hình hiện tại.
+2. Xem `git log`, GitHub Actions và deployment Cloudflare Pages. `docs/handover/STATUS.md` hiện chưa tồn tại trên `main` dù workflow bàn giao gần nhất báo thành công.
 3. Tạo nhánh mới từ `main`, mở PR nháp; không tiếp tục trên nhánh đã merge.
 4. Đổi mật khẩu: `node tools/set-password.mjs "mk-moi"` rồi dán khối in ra vào `window.GATE`.
 
