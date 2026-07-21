@@ -17,14 +17,13 @@ và duyệt bằng **bot Telegram** hoặc **trang admin trên máy bạn**.
 3. Lấy **CHAT_ID** của bạn: mở trình duyệt vào
    `https://api.telegram.org/bot<TOKEN>/getUpdates` → tìm `"chat":{"id":<SỐ>}`. Số đó là CHAT_ID.
 
-## 2. Đăng nhập & tạo cơ sở dữ liệu
+## 2. Đăng nhập & tạo bộ nhớ KV
 ```bash
 cd backend
 npx wrangler login
-npx wrangler d1 create hiennhi89-gate         # copy database_id trả về -> dán vào wrangler.toml
-npx wrangler d1 execute hiennhi89-gate --remote --file=schema.sql
+npx wrangler kv namespace create hiennhi89-gate-KV   # copy id trả về -> dán vào wrangler.toml
 ```
-Sửa `wrangler.toml`: điền `TELEGRAM_CHAT_ID`, `database_id`, và `ALLOWED_ORIGINS` (đúng domain web của bạn).
+Sửa `wrangler.toml`: điền `TELEGRAM_CHAT_ID`, KV `id`, và `ALLOWED_ORIGINS` (đúng domain web của bạn).
 
 ## 3. Đặt các bí mật
 ```bash
@@ -81,4 +80,4 @@ fetch(backend + '/api/log', {
   body: JSON.stringify({ app:'<app>', kind:'form', data:{ ...dữ liệu khách nhập } })
 });
 ```
-Xem lại tại `/admin` hoặc truy vấn D1.
+Xem lại tại `/admin` (dữ liệu lưu trong KV).

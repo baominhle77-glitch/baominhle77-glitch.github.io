@@ -1,21 +1,16 @@
 /*!
  * worker.js — Cổng DUYỆT TRUY CẬP (Cloudflare Worker) cho các webapp của Hiên Nhi Hiên 89
  * =============================================================================
- * Chức năng (đáp ứng yêu cầu "chỉ tôi phê duyệt + thấy IP/thiết bị/dữ liệu"):
- *   • Khách bấm vào web -> gửi yêu cầu truy cập (kèm dấu vết thiết bị).
- *   • Worker GHI LẠI: IP thật (cf-connecting-ip), quốc gia, User-Agent, thiết bị.
- *   • Worker gửi tin nhắn Telegram cho CHỦ, có nút ✅ Duyệt / ❌ Từ chối.
- *   • CHỦ duyệt bằng: (a) bot Telegram, hoặc (b) trang /admin trên máy mình.
- *   • Khi được duyệt -> cấp phiên (JWT ký HMAC). Web mới hiển thị nội dung.
- *   • Mọi dữ liệu khách nhập trong web có thể POST /api/log để chủ xem lại.
+ * Chức năng: khách xin truy cập -> ghi IP/thiết bị -> gửi Telegram cho chủ
+ * (nút ✅/❌) -> khi duyệt thì cấp phiên (JWT) + trả khóa giải mã (B+C).
+ * Chủ cũng duyệt được ở trang /admin (ADMIN_TOKEN).
  *
- * Runtime: Cloudflare Workers (WebCrypto sẵn có, KHÔNG cần npm). Lưu trữ: D1.
- * Bí mật cần đặt (wrangler secret): TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET,
- *   ADMIN_TOKEN, SESSION_SECRET. Biến thường: TELEGRAM_CHAT_ID, ALLOWED_ORIGINS.
- * Xem backend/README.md để cài đặt trong ~5 phút.
+ * Lưu trữ: Workers KV (binding "KV") — khớp mẫu token "Edit Cloudflare Workers"
+ * nên KHÔNG cần quyền đặc biệt, cài đặt dễ hơn D1.
+ * Bí mật (wrangler secret): TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET,
+ *   ADMIN_TOKEN, SESSION_SECRET, DECRYPT_KEY. Biến: TELEGRAM_CHAT_ID, ALLOWED_ORIGINS.
  */
 
-/* ----------------------------- tiện ích ----------------------------- */
 const json = (obj, status = 200, extra = {}) =>
   new Response(JSON.stringify(obj), {
     status,
@@ -65,6 +60,8 @@ async function verifyJWT(secret, token) {
 function uuid() { return crypto.randomUUID(); }
 function esc(s) { return String(s || "").replace(/[<&>]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])); }
 
+const REQ_TTL = 7 * 24 * 3600; // yêu cầu tự xóa sau 7 ngày
+
 /* ----------------------------- Telegram ----------------------------- */
 async function tg(env, method, body) {
   const r = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`, {
@@ -98,33 +95,43 @@ async function notifyOwner(env, req) {
   });
 }
 
-/* ----------------------------- D1 helpers ----------------------------- */
+/* ----------------------------- KV helpers ----------------------------- */
+const reqKey = (id) => "req:" + id;
+const evtKey = (id) => "evt:" + id;
+
+async function getReq(env, id) {
+  const s = await env.KV.get(reqKey(id));
+  return s ? JSON.parse(s) : null;
+}
+async function putReq(env, rec) {
+  await env.KV.put(reqKey(rec.id), JSON.stringify(rec), { expirationTtl: REQ_TTL });
+}
 async function decide(env, id, status) {
-  const token = status === "approved" ? await makeJWT(env.SESSION_SECRET, { sub: id }) : null;
-  await env.DB.prepare("UPDATE requests SET status=?, decided_at=?, token=? WHERE id=?")
-    .bind(status, Date.now(), token, id).run();
-  return token;
+  const rec = await getReq(env, id);
+  if (!rec) return null;
+  rec.status = status;
+  rec.decided_at = Date.now();
+  rec.token = status === "approved" ? await makeJWT(env.SESSION_SECRET, { sub: id }) : null;
+  await putReq(env, rec);
+  return rec.token;
 }
 
 /* ----------------------------- routes ----------------------------- */
-async function handleRequest(request, env, url) {
+async function handleRequest(request, env) {
   const body = await request.json().catch(() => ({}));
-  const ip = request.headers.get("cf-connecting-ip") || "";
-  const country = request.cf ? request.cf.country || "" : "";
-  const ua = request.headers.get("user-agent") || "";
   const rec = {
     id: uuid(),
     app: String(body.app || "app").slice(0, 40),
     name: String(body.name || "").slice(0, 80),
     note: String(body.note || "").slice(0, 300),
-    ip, country, ua,
+    ip: request.headers.get("cf-connecting-ip") || "",
+    country: request.cf ? request.cf.country || "" : "",
+    ua: request.headers.get("user-agent") || "",
     device: body.device || {},
     status: "pending",
     created_at: Date.now(),
   };
-  await env.DB.prepare(
-    "INSERT INTO requests (id,app,name,note,ip,country,ua,device,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)"
-  ).bind(rec.id, rec.app, rec.name, rec.note, rec.ip, rec.country, rec.ua, JSON.stringify(rec.device), rec.status, rec.created_at).run();
+  await putReq(env, rec);
   await notifyOwner(env, rec).catch(() => {});
   return json({ id: rec.id, status: "pending" });
 }
@@ -132,32 +139,35 @@ async function handleRequest(request, env, url) {
 async function handleStatus(env, url) {
   const id = url.searchParams.get("id");
   if (!id) return json({ error: "missing id" }, 400);
-  const row = await env.DB.prepare("SELECT status, token FROM requests WHERE id=?").bind(id).first();
-  if (!row) return json({ status: "unknown" });
-  var approved = row.status === "approved";
+  const rec = await getReq(env, id);
+  if (!rec) return json({ status: "unknown" });
+  const approved = rec.status === "approved";
   return json({
-    status: row.status,
-    token: approved ? row.token : undefined,
-    // B+C: chỉ phiên ĐÃ DUYỆT mới nhận khóa giải mã nội dung (nếu có đặt DECRYPT_KEY).
+    status: rec.status,
+    token: approved ? rec.token : undefined,
     key: approved && env.DECRYPT_KEY ? env.DECRYPT_KEY : undefined,
   });
 }
 
-// Web gọi để lưu lại "dữ kiện khách nhập" (tùy app). Cần token phiên hợp lệ.
+// Ghi lại dữ liệu khách nhập (cần phiên hợp lệ).
 async function handleLog(request, env) {
   const auth = (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
   const claims = await verifyJWT(env.SESSION_SECRET, auth);
   if (!claims) return json({ error: "unauthorized" }, 401);
   const body = await request.json().catch(() => ({}));
-  const ip = request.headers.get("cf-connecting-ip") || "";
-  await env.DB.prepare("INSERT INTO events (id, request_id, app, kind, data, ip, created_at) VALUES (?,?,?,?,?,?,?)")
-    .bind(uuid(), claims.sub, String(body.app || "").slice(0, 40), String(body.kind || "input").slice(0, 40),
-      JSON.stringify(body.data || {}).slice(0, 4000), ip, Date.now()).run();
+  const ev = {
+    id: uuid(), request_id: claims.sub,
+    app: String(body.app || "").slice(0, 40),
+    kind: String(body.kind || "input").slice(0, 40),
+    data: JSON.stringify(body.data || {}).slice(0, 4000),
+    ip: request.headers.get("cf-connecting-ip") || "",
+    created_at: Date.now(),
+  };
+  await env.KV.put(evtKey(ev.id), JSON.stringify(ev), { expirationTtl: REQ_TTL });
   return json({ ok: true });
 }
 
 async function handleTelegramWebhook(request, env) {
-  // Xác thực webhook đến từ Telegram bằng secret token.
   if (request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== env.TELEGRAM_WEBHOOK_SECRET) {
     return json({ error: "forbidden" }, 403);
   }
@@ -178,7 +188,22 @@ async function handleTelegramWebhook(request, env) {
   return json({ ok: true });
 }
 
-/* ----------------------------- admin page (máy của chủ) ----------------------------- */
+/* ----------------------------- admin ----------------------------- */
+async function listRequests(env) {
+  const out = [];
+  let cursor;
+  do {
+    const page = await env.KV.list({ prefix: "req:", cursor, limit: 1000 });
+    for (const k of page.keys) {
+      const s = await env.KV.get(k.name);
+      if (s) out.push(JSON.parse(s));
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  out.sort((a, b) => b.created_at - a.created_at);
+  return out.slice(0, 100);
+}
+
 function adminHtml() {
   return `<!doctype html><html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Bảng duyệt truy cập</title>
@@ -208,30 +233,23 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const cors = corsHeaders(request, env);
-
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
     try {
-      // Public API cho web
       if (url.pathname === "/api/request" && request.method === "POST")
-        return withCors(await handleRequest(request, env, url), cors);
+        return withCors(await handleRequest(request, env), cors);
       if (url.pathname === "/api/status" && request.method === "GET")
         return withCors(await handleStatus(env, url), cors);
       if (url.pathname === "/api/log" && request.method === "POST")
         return withCors(await handleLog(request, env), cors);
 
-      // Telegram webhook
       if (url.pathname === "/telegram/webhook" && request.method === "POST")
         return handleTelegramWebhook(request, env);
 
-      // Admin (máy của chủ)
       if (url.pathname === "/admin") return new Response(adminHtml(), { headers: { "content-type": "text/html; charset=utf-8" } });
       if (url.pathname.startsWith("/api/admin/")) {
         if (!(await requireAdmin(request, env))) return json({ error: "unauthorized" }, 401);
-        if (url.pathname === "/api/admin/list") {
-          const { results } = await env.DB.prepare("SELECT id,app,name,note,ip,country,ua,status,created_at FROM requests ORDER BY created_at DESC LIMIT 100").all();
-          return json({ requests: results });
-        }
+        if (url.pathname === "/api/admin/list") return json({ requests: await listRequests(env) });
         const bodyA = await request.json().catch(() => ({}));
         if (url.pathname === "/api/admin/approve") { await decide(env, bodyA.id, "approved"); return json({ ok: true }); }
         if (url.pathname === "/api/admin/deny") { await decide(env, bodyA.id, "denied"); return json({ ok: true }); }

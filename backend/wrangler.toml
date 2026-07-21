@@ -1,26 +1,18 @@
 # wrangler.toml — cấu hình Cloudflare Worker "cổng duyệt truy cập"
-# Deploy:  cd backend && npx wrangler deploy
 name = "hiennhi89-gate"
 main = "worker.js"
 compatibility_date = "2025-01-01"
 
-# Biến thường (không bí mật). Có thể sửa trực tiếp hoặc đặt qua dashboard.
 [vars]
-# Danh sách origin được phép gọi API (CORS). Điền đúng domain của bạn:
+# Domain web của bạn (CORS). Sửa nếu đổi tên tài khoản.
 ALLOWED_ORIGINS = "https://baominhle77-glitch.github.io"
-# Chat ID Telegram của bạn (số). Lấy bằng cách nhắn cho bot rồi gọi getUpdates (xem README).
+# Chat ID Telegram của bạn (workflow tự điền).
 TELEGRAM_CHAT_ID = "PUT_YOUR_CHAT_ID"
 
-# CSDL D1 để lưu yêu cầu + nhật ký. Tạo bằng:  npx wrangler d1 create hiennhi89-gate
-# Rồi dán database_id trả về vào đây.
-[[d1_databases]]
-binding = "DB"
-database_name = "hiennhi89-gate"
-database_id = "PUT_D1_DATABASE_ID"
+# Bộ nhớ KV để lưu yêu cầu + nhật ký (workflow tự tạo & điền id).
+[[kv_namespaces]]
+binding = "KV"
+id = "PUT_KV_NAMESPACE_ID"
 
-# Các BÍ MẬT (KHÔNG ghi vào file này). Đặt bằng lệnh:
-#   npx wrangler secret put TELEGRAM_BOT_TOKEN
-#   npx wrangler secret put TELEGRAM_WEBHOOK_SECRET
-#   npx wrangler secret put ADMIN_TOKEN
-#   npx wrangler secret put SESSION_SECRET
-#   npx wrangler secret put DECRYPT_KEY          # (tùy chọn, cho B+C) = mật khẩu đã mã hóa nội dung
+# Bí mật (KHÔNG ghi ở đây) — workflow tự đặt:
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, ADMIN_TOKEN, SESSION_SECRET, DECRYPT_KEY
