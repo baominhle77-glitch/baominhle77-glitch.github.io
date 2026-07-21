@@ -1,0 +1,80 @@
+name: Cài đặt Backend Lớp C (bấm 1 lần)
+
+# Bấm "Run workflow" một lần để TỰ ĐỘNG: tạo D1, nạp schema, đặt bí mật,
+# deploy Worker, nối Telegram webhook. Bạn KHÔNG cần gõ lệnh.
+# Yêu cầu: đã thêm 4 secret repo — CLOUDFLARE_API_TOKEN, TELEGRAM_BOT_TOKEN,
+#          TELEGRAM_CHAT_ID, DECRYPT_KEY (xem backend/HUONG-DAN.md).
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+      DECRYPT_KEY: ${{ secrets.DECRYPT_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - name: Kiểm tra đã có đủ secret chưa
+        run: |
+          miss=0
+          for v in CLOUDFLARE_API_TOKEN TG_TOKEN TG_CHAT DECRYPT_KEY; do
+            if [ -z "${!v}" ]; then echo "::error::Thiếu secret: $v"; miss=1; fi
+          done
+          [ "$miss" = "0" ] || { echo "Hãy thêm đủ 4 secret rồi chạy lại (xem backend/HUONG-DAN.md)."; exit 1; }
+
+      - name: Tạo D1 (nếu chưa có) + điền cấu hình
+        run: |
+          set -e
+          ID=$(npx --yes wrangler@latest d1 list --json 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{let a=JSON.parse(s);let r=a.find(x=>x.name==='hiennhi89-gate');process.stdout.write(r?(r.uuid||r.database_id||''):'')}catch(e){process.stdout.write('')}})")
+          if [ -z "$ID" ]; then
+            OUT=$(npx --yes wrangler@latest d1 create hiennhi89-gate 2>&1 || true)
+            echo "$OUT"
+            ID=$(echo "$OUT" | grep -oiE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
+          fi
+          [ -n "$ID" ] || { echo "::error::Không lấy được database_id (token có quyền D1 không?)"; exit 1; }
+          echo "Dùng D1 id: $ID"
+          sed -i "s/PUT_D1_DATABASE_ID/$ID/" wrangler.toml
+          sed -i "s|PUT_YOUR_CHAT_ID|$TG_CHAT|" wrangler.toml
+
+      - name: Nạp bảng dữ liệu (schema)
+        run: npx --yes wrangler@latest d1 execute hiennhi89-gate --remote --file=schema.sql
+
+      - name: Đặt các bí mật cho Worker
+        run: |
+          set -e
+          gen(){ openssl rand -hex 32; }
+          printf '%s' "$TG_TOKEN"    | npx --yes wrangler@latest secret put TELEGRAM_BOT_TOKEN
+          printf '%s' "$DECRYPT_KEY" | npx --yes wrangler@latest secret put DECRYPT_KEY
+          SS=$(gen); printf '%s' "$SS" | npx --yes wrangler@latest secret put SESSION_SECRET
+          AT=$(gen); printf '%s' "$AT" | npx --yes wrangler@latest secret put ADMIN_TOKEN
+          WS=$(gen); printf '%s' "$WS" | npx --yes wrangler@latest secret put TELEGRAM_WEBHOOK_SECRET
+          echo "WEBHOOK_SECRET=$WS" >> "$GITHUB_ENV"
+          echo "ADMIN_TOKEN_VALUE=$AT" >> "$GITHUB_ENV"
+
+      - name: Deploy Worker
+        run: npx --yes wrangler@latest deploy 2>&1 | tee deploy.log
+
+      - name: Lấy URL + nối Telegram webhook
+        run: |
+          URL=$(grep -oE 'https://[a-z0-9._-]+workers\.dev' deploy.log | head -1)
+          [ -n "$URL" ] || { echo "::error::Không đọc được URL Worker"; exit 1; }
+          curl -s "https://api.telegram.org/bot${TG_TOKEN}/setWebhook?url=${URL}/telegram/webhook&secret_token=${WEBHOOK_SECRET}" | tee -a deploy.log
+          {
+            echo "## ✅ Backend đã sẵn sàng"
+            echo ""
+            echo "**URL Worker:** \`$URL\`  ← gửi URL này cho Claude để bật chế độ duyệt."
+            echo ""
+            echo "**Trang duyệt trên máy bạn:** $URL/admin"
+            echo "**Mật khẩu vào trang /admin (ADMIN_TOKEN):** \`$ADMIN_TOKEN_VALUE\`"
+            echo ""
+            echo "> Bot Telegram đã được nối. Từ giờ ai xin truy cập, bạn nhận tin nhắn kèm nút Duyệt/Từ chối."
+          } >> "$GITHUB_STEP_SUMMARY"
