@@ -363,6 +363,65 @@ var TAROT_POS={ "1":["Thông điệp"], "3":["Quá khứ","Hiện tại","Tươn
   "cc":["1. Hiện trạng","2. Thách thức","3. Nền tảng","4. Quá khứ","5. Mục tiêu","6. Tương lai gần","7. Bản thân","8. Ngoại cảnh","9. Hy vọng / nỗi sợ","10. Kết quả"]};
 var DOM_LABEL={ty:"Tình yêu",cv:"Công việc",tc:"Tài chính",sk:"Sức khoẻ"};
 function firstClause(s){return s.split(/[;,.—]/)[0].trim();}
+function shortCardName(n){var s=n.split("(")[0].split("—").pop().trim();return s||n.split("(")[0].trim();}
+/* ---- Golden Dawn: nguyên tố & elemental dignity ---- */
+function tarotElement(gi){
+  if(gi<22)return MAJOR_ASTRO[gi].el;
+  if(gi<36)return "Hỏa"; if(gi<50)return "Nước"; if(gi<64)return "Khí"; return "Đất";
+}
+function tarotSuitName(gi){
+  if(gi<22)return "Ẩn Chính"; if(gi<36)return "Gậy"; if(gi<50)return "Cốc"; if(gi<64)return "Kiếm"; return "Tiền";
+}
+function elemDignity(a,b){
+  if(a===b)return "strong";
+  if((a==="Hỏa"&&b==="Khí")||(a==="Khí"&&b==="Hỏa")||(a==="Nước"&&b==="Đất")||(a==="Đất"&&b==="Nước"))return "friend";
+  if((a==="Hỏa"&&b==="Nước")||(a==="Nước"&&b==="Hỏa")||(a==="Khí"&&b==="Đất")||(a==="Đất"&&b==="Khí"))return "enemy";
+  return "neutral";
+}
+function tarotYesNo(gi){
+  var s=TAROT_SCORE[gi];
+  return s>=2?"CÓ (mạnh)":s===1?"CÓ / nghiêng thuận":s===0?"Trung tính — tuỳ ngữ cảnh":s===-1?"KHÔNG / nghiêng nghịch":"KHÔNG (mạnh)";
+}
+function tarotTiming(gi){
+  if(gi<22)return "Bước ngoặt: khoảng 1–3 tháng, nhanh hơn khi bạn đổi cách nhìn.";
+  if(gi<36)return "Nhanh: vài ngày đến vài tuần (Gậy · Hỏa).";
+  if(gi<50)return "Vừa: vài tuần đến 1–2 tháng, chín theo cảm xúc (Cốc · Nước).";
+  if(gi<64)return "Rất nhanh: tính bằng ngày, tin tức tới gấp (Kiếm · Khí).";
+  return "Chậm mà chắc: khoảng 1–6 tháng (Tiền · Đất).";
+}
+/* Panel đối trọng nguyên tố cho một trải bài (items:[{c,rev,gi}]) */
+function buildDignityPanel(items){
+  if(items.length<2)return "";
+  var nStrong=0,nFriend=0,nEnemy=0,rows="";
+  for(var i=0;i<items.length-1;i++){
+    var a=items[i],b=items[i+1],ea=tarotElement(a.gi),eb=tarotElement(b.gi),rel=elemDignity(ea,eb),txt,cls="";
+    if(rel==="strong"){txt="cùng nguyên tố "+ea+" → CỘNG HƯỞNG, hai lá tăng lực cho nhau";cls="goldtxt";nStrong++;}
+    else if(rel==="friend"){txt=ea+" hợp "+eb+" → hỗ trợ, cùng chiều";cls="goldtxt";nFriend++;}
+    else if(rel==="enemy"){txt=ea+" kỵ "+eb+" → ghìm nhau, làm suy yếu hoặc trung hoà";cls="warntxt";nEnemy++;}
+    else txt=ea+" và "+eb+" → trung tính, ít tác động chéo";
+    rows+='<p style="font-size:.86rem;margin-bottom:6px"><b>'+esc(shortCardName(a.c.n))+' ('+ea+') — '+esc(shortCardName(b.c.n))+' ('+eb+')</b>: <span class="'+cls+'">'+esc(txt)+'</span></p>';
+  }
+  var sum;
+  if(nEnemy>nStrong+nFriend)sum="Bàn bài nhiều cặp KỴ nhau: các lực đang triệt tiêu lẫn nhau — năng lượng phân tán, cần bạn chọn một hướng dứt khoát để phá thế giằng co.";
+  else if(nStrong+nFriend>=nEnemy&&(nStrong+nFriend)>0)sum="Bàn bài nhiều cặp HỢP/cộng hưởng: các lá tiếp sức cho nhau — dòng chảy thông suốt, thuận cho hành động liền mạch.";
+  else sum="Các cặp phần lớn trung tính: mỗi lá giữ nghĩa riêng, ít bị lá cạnh kéo lệch — đọc từng vị trí theo đúng vai của nó.";
+  return '<div class="panel"><h3>⚗️ Đối trọng nguyên tố (Golden Dawn)</h3>'+
+    '<p class="note">Cùng nguyên tố = cộng hưởng · Hỏa↔Khí và Nước↔Đất = hợp · Hỏa↔Nước và Khí↔Đất = kỵ.</p>'+
+    rows+'<p style="font-size:.9rem;margin-top:6px">'+esc(sum)+'</p></div>';
+}
+/* Panel đọc theo cặp vị trí có nghĩa của Celtic Cross (items dài 10) */
+function buildCelticPairs(items){
+  function cl(it){return firstClause(it.rev?it.c.r:it.c.u);}
+  function pair(iA,iB,label,note){
+    var a=items[iA],b=items[iB];
+    return '<p style="font-size:.9rem;margin-bottom:8px"><b>'+label+':</b> '+esc(shortCardName(a.c.n))+' («'+esc(cl(a))+'») ⟷ '+esc(shortCardName(b.c.n))+' («'+esc(cl(b))+'»). '+esc(note)+'</p>';
+  }
+  return '<div class="panel"><h3>✚ Đọc theo cặp vị trí (Celtic Cross)</h3>'+
+    pair(0,1,"Nút thắt trung tâm (hiện trạng ⟷ thách thức)","Đây là trái tim của quẻ: lá thách thức cắt ngang hiện trạng — gỡ được mâu thuẫn này thì cả bàn được cởi.")+
+    pair(6,7,"Bản thân ⟷ ngoại cảnh","So con người bạn với môi trường: hai lá cùng chiều nghĩa là bạn đang thuận dòng; ngược chiều nghĩa là bạn đang bơi ngược nước, cần điều chỉnh kỳ vọng hoặc chiến thuật.")+
+    pair(8,9,"Hy vọng/nỗi sợ ⟷ kết quả","Lá 9 nói hộ điều bạn vừa mong vừa sợ; đặt cạnh lá 10 để thấy khoảng cách giữa nỗi lòng và kết cục — nếu chúng đồng điệu, điều bạn mong đang thành hình.")+
+    '</div>';
+}
 $("tarotDraw").addEventListener("click",function(){
   var spread=chipVal("tarotSpread"),deckType=chipVal("tarotDeck"),domain=chipVal("tarotDomain");
   var deck=deckType==="major"?TAROT.slice(0,22):TAROT;
@@ -381,6 +440,7 @@ $("tarotDraw").addEventListener("click",function(){
     var body=it.rev?it.c.r:it.c.u;
     var block='<div class="meaning"><div class="mt">'+esc(it.c.n)+(it.rev?' — <span class="warntxt">ngược</span>':' — xuôi')+'</div>'+
       '<div class="mp">'+esc(it.p)+'</div><div class="mb">'+esc(body)+'</div>';
+    block+='<div class="mb" style="margin-top:4px;font-size:.8rem;color:var(--ink-dim)"><span class="goldtxt">Nguyên tố '+tarotElement(it.gi)+':</span> '+esc(it.gi<22?MAJOR_ASTRO[it.gi].astro:SUIT_ELEM_NOTE[tarotElement(it.gi)])+' · Yes/No: '+esc(tarotYesNo(it.gi))+'</div>';
     var doms=n<=3?["ty","cv","tc","sk"]:(domain!=="all"?[domain]:[]);
     doms.forEach(function(d){
       if(it.ext&&it.ext[d])block+='<div class="mb" style="margin-top:6px"><span class="goldtxt">'+DOM_LABEL[d]+':</span> '+esc(it.ext[d])+'</div>';
@@ -430,11 +490,24 @@ $("tarotDraw").addEventListener("click",function(){
   }
   if(n===1)paras.push("Một lá là một tấm gương soi thẳng vào câu hỏi: đọc cả nghĩa chính lẫn nghĩa lĩnh vực, và để ý cảm giác đầu tiên khi lật lá — trực giác của bạn là một nửa của quẻ bài.");
   html+='<div class="panel"><h3>Tổng luận phối hợp</h3>'+paras.map(function(p){return '<p style="font-size:.9rem;margin-bottom:8px">'+esc(p)+'</p>';}).join("")+'</div>';
+  if(spread==="cc")html+=buildCelticPairs(items);
+  html+=buildDignityPanel(items);
   $("tarotResult").innerHTML=html;
   saveHistory("Tarot",q,items.map(function(i){return i.c.n.split("(")[0].trim()+(i.rev?"(ng)":"");}).join(" · "));
 });
 
-/* ---------- LENORMAND ---------- */
+/* ---------- LENORMAND — máy tự ghép câu (danh từ + tính từ) ---------- */
+function lenCap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+/* Cix = lá chủ thể (danh từ trung tâm); Lix/Rix = lá bổ nghĩa (tính từ). picks-index vào LENORMAND. */
+function lenSentence(Lix,Cix,Rix){
+  var C=LEN_NA[Cix],L=(Lix!=null?LEN_NA[Lix]:null),R=(Rix!=null?LEN_NA[Rix]:null);
+  var s=lenCap(C.noun);
+  if(L&&R)s+=" — "+L.adj+"; đồng thời "+R.adj+".";
+  else if(R)s+=" — "+R.adj+".";
+  else if(L)s+=" — "+L.adj+".";
+  else s+=" — "+C.adj+".";
+  return s;
+}
 $("lenDraw").addEventListener("click",function(){
   var n=parseInt(chipVal("lenSpread"),10),domain=chipVal("lenDomain");
   var poss=n===1?["Thông điệp"]:n===3?["Chủ đề","Diễn biến","Kết quả"]:
@@ -446,9 +519,10 @@ $("lenDraw").addEventListener("click",function(){
   picks.forEach(function(ix,i){html+=cardHTML(LENORMAND[ix].g,LENORMAND[ix].i+". "+LENORMAND[ix].n,poss[i],false);});
   html+='</div>';
   picks.forEach(function(ix,i){
-    var c=LENORMAND[ix],ext=LEN_EXT[ix];
+    var c=LENORMAND[ix],ext=LEN_EXT[ix],na=LEN_NA[ix];
     var block='<div class="meaning"><div class="mt">'+c.i+". "+esc(c.n)+' — '+esc(c.k)+'</div>'+
       '<div class="mp">'+esc(poss[i])+'</div><div class="mb">'+esc(c.m)+'</div>';
+    block+='<div class="mb" style="margin-top:4px;font-size:.8rem;color:var(--ink-dim)"><span class="goldtxt">Là chủ thể:</span> '+esc(na.noun)+' · <span class="goldtxt">Là bổ nghĩa:</span> '+esc(na.adj)+'</div>';
     var doms=n<=3?["ty","cv","tc"]:(domain!=="all"?[domain]:[]);
     doms.forEach(function(d){
       if(ext&&ext[d])block+='<div class="mb" style="margin-top:6px"><span class="goldtxt">'+DOM_LABEL[d]+':</span> '+esc(ext[d])+'</div>';
@@ -473,18 +547,22 @@ $("lenDraw").addEventListener("click",function(){
     storyMode:n===3?"qkhttl":null,
     timing:"Lenormand vốn trả lời việc gần: khung thời gian mặc định là vài ngày đến vài tuần; lá "+(LEN_SCORE[picks[n-1]]>=0?"kết thuận — tin đến sớm":"kết nghịch — sẽ chậm hơn dự tính")+"."});
   var paras=[];
+  if(n===1){
+    paras.push("🔗 Máy ghép câu — "+lenSentence(null,picks[0],null));
+    paras.push("Một lá Lenormand trả lời trực diện: lá vừa là CHỦ THỂ (danh từ), vừa tự mang sắc thái (tính từ) của chính nó. Nếu cần thêm ngữ cảnh, rút trải 3 lá để có hai lá bổ nghĩa hai bên.");
+  }
   if(n===3){
-    paras.push("Đọc thành câu chuyện: chủ đề mang năng lượng «"+kw(picks[0])+"», đang diễn biến qua «"+kw(picks[1])+"», và chảy về «"+kw(picks[2])+"». Trong Lenormand, lá giữa là trục — hai lá hai bên bổ nghĩa cho nó: hãy tự ghép thành một câu duy nhất mô tả tình huống của bạn.");
-    paras.push("Cặp mở («"+kw(picks[0])+"» + «"+kw(picks[1])+"») cho biết việc đã và đang xảy ra thế nào; cặp đóng («"+kw(picks[1])+"» + «"+kw(picks[2])+"») cho biết chiều hướng sắp tới. Nếu lá cuối thuộc nhóm khó (Mây, Rắn, Quan Tài, Lưỡi Hái, Roi, Chuột, Núi, Thập Giá) — đó là lời nhắc phòng bị, không phải phán quyết.");
+    paras.push("🔗 Máy ghép câu (chủ thể trung tâm + 2 lá bổ nghĩa): "+lenSentence(picks[0],picks[1],picks[2]));
+    paras.push("Cách đọc: lá GIỮA «"+LENORMAND[picks[1]].n.split("(")[0].trim()+"» là chủ thể (danh từ trung tâm); lá TRÁI «"+LENORMAND[picks[0]].n.split("(")[0].trim()+"» và lá PHẢI «"+LENORMAND[picks[2]].n.split("(")[0].trim()+"» đứng làm tính từ, tô màu cho chủ thể ở hai phía. Đọc trái→phải cũng là mạch quá khứ → tương lai.");
   }
   if(n===9){
-    var rows=[[0,1,2,"Hàng trên — tầng suy nghĩ, điều đang lởn vởn trong tâm trí"],[3,4,5,"Hàng giữa — mạch chính của sự việc, diễn tiến thực tế"],[6,7,8,"Hàng dưới — tầng nền tảng, điều đang diễn ra ngầm bên dưới"]];
-    rows.forEach(function(r){
-      paras.push(r[3]+": «"+kw(picks[r[0]])+" → "+kw(picks[r[1]])+" → "+kw(picks[r[2]])+"» (đọc trái sang phải là quá khứ → tương lai).");
-    });
-    paras.push("Lá TÂM ĐIỂM «"+LENORMAND[picks[4]].n+"» là trái tim của cả bàn: mọi lá khác xoay quanh nó. Cột giữa (trên–tâm–dưới: "+kw(picks[1])+" / "+kw(picks[4])+" / "+kw(picks[7])+") cho thấy trạng thái hiện tại từ suy nghĩ đến gốc rễ.");
+    var rowLabels=["Hàng trên (tầng suy nghĩ — điều đang lởn vởn trong tâm trí)","Hàng giữa (mạch chính — diễn tiến thực tế của sự việc)","Hàng dưới (tầng nền tảng — điều đang diễn ra ngầm bên dưới)"];
+    for(var r=0;r<3;r++){
+      paras.push("🔗 "+rowLabels[r]+": "+lenSentence(picks[r*3],picks[r*3+1],picks[r*3+2]));
+    }
+    paras.push("★ TÂM ĐIỂM «"+LENORMAND[picks[4]].n.split("(")[0].trim()+"» là trái tim cả bàn — mọi lá xoay quanh nó. Ghép cột giữa (trên–tâm–dưới) thành câu: "+lenSentence(picks[1],picks[4],picks[7]));
+    paras.push("Mỗi lá trong bàn 9 lá đều đóng vai kép: khi ở tâm hàng/tâm cột thì là chủ thể; khi ở bên cạnh thì là tính từ bổ nghĩa cho lá trung tâm gần nó nhất.");
   }
-  if(n===1)paras.push("Một lá Lenormand trả lời trực diện và cụ thể — đối chiếu nghĩa lá với đúng câu hỏi bạn đặt; nếu cần thêm ngữ cảnh, rút thêm trải 3 lá.");
   if(paras.length)html+='<div class="panel"><h3>Tổng luận phối hợp</h3>'+paras.map(function(p){return '<p style="font-size:.9rem;margin-bottom:8px">'+esc(p)+'</p>';}).join("")+'</div>';
   $("lenResult").innerHTML=html;
   saveHistory("Lenormand",q,picks.map(function(ix){return LENORMAND[ix].n.split("(")[0].trim();}).join(" · "));
@@ -980,7 +1058,18 @@ $("ctGo").addEventListener("click",function(){
 function renderBrowse(){
   var tab=chipVal("browseTabs"),q=($("browseSearch").value||"").toLowerCase();
   var items=[];
-  if(tab==="tarot"){items=TAROT.map(function(c){return {g:c.g,n:c.n,m:"Xuôi: "+c.u+" — Ngược: "+c.r};});}
+  if(tab==="tarot"){items=TAROT.map(function(c,gi){
+    var el=tarotElement(gi),astro=gi<22?MAJOR_ASTRO[gi].astro:SUIT_ELEM_NOTE[el],ext=TAROT_EXT[gi]||{};
+    var dom=["ty","cv","tc","sk"].map(function(d){return ext[d]?DOM_LABEL[d]+": "+ext[d]:null;}).filter(Boolean).join("  ·  ");
+    var m="Xuôi: "+c.u+"  —  Ngược: "+c.r+
+      "  ◆ Nguyên tố "+el+" · "+astro+
+      "  ◆ Yes/No: "+tarotYesNo(gi)+
+      "  ◆ Thời điểm: "+tarotTiming(gi)+
+      (dom?"  ◆ "+dom:"");
+    return {g:c.g,n:c.n,m:m};
+  });}
+  else if(tab==="art"){items=READING_ART.map(function(p){return {g:"📜",n:p.n,m:p.m};});}
+  else if(tab==="court"){items=COURT_META.map(function(c){return {g:"👑",n:c.n,m:"Người: "+c.person+"  ◆ Tình huống: "+c.situation+"  ◆ Thông điệp: "+c.message};});}
   else if(tab==="lenormand"){items=LENORMAND.map(function(c){return {g:c.g,n:c.i+". "+c.n+" ("+c.k+")",m:c.m};});}
   else if(tab==="baitay"){items=BAITAY.map(function(c){return {g:c.g,n:c.n,m:c.m};});}
   else if(tab==="kinhdich"){items=Object.keys(KINHDICH).map(function(k){var h=KINHDICH[k];return {g:String.fromCodePoint(0x4DBF+ +k),n:k+". "+h.n,m:h.y+" — "+h.a};});}
