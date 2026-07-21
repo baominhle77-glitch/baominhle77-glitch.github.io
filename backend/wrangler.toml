@@ -7,12 +7,12 @@ compatibility_date = "2025-01-01"
 # Domain web của bạn (CORS). Sửa nếu đổi tên tài khoản.
 ALLOWED_ORIGINS = "https://baominhle77-glitch.github.io"
 # Chat ID Telegram của bạn (workflow tự điền).
-TELEGRAM_CHAT_ID = "PUT_YOUR_CHAT_ID"
+TELEGRAM_CHAT_ID = "8877812376"
 
 # Bộ nhớ KV để lưu yêu cầu + nhật ký (workflow tự tạo & điền id).
 [[kv_namespaces]]
 binding = "KV"
-id = "PUT_KV_NAMESPACE_ID"
+id = "1030b053db194312be8adbfc24e73a85"
 
 # Bí mật (KHÔNG ghi ở đây) — workflow tự đặt:
 #   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, ADMIN_TOKEN, SESSION_SECRET, DECRYPT_KEY
