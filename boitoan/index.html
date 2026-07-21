@@ -215,6 +215,31 @@
   .goldtxt{color:var(--gold)}
   .warntxt{color:var(--warn)}
   .oktxt{color:var(--ok)}
+
+  /* ---- lịch âm dương ---- */
+  .calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0}
+  .calhead button{border:1px solid var(--line);background:var(--bg2);color:var(--gold);border-radius:10px;padding:8px 16px;font-size:1rem;cursor:pointer;font-family:inherit}
+  .calhead .cm{color:var(--gold);font-size:1.02rem;letter-spacing:.04em;text-align:center}
+  .calhead .cm small{display:block;color:var(--ink-faint);font-size:.72rem;letter-spacing:.02em}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+  .calgrid .wd{text-align:center;color:var(--ink-faint);font-size:.7rem;padding:4px 0}
+  .calcell{
+    background:var(--bg2);border:1px solid var(--line);border-radius:8px;
+    min-height:52px;padding:3px 2px;text-align:center;cursor:pointer;position:relative;
+  }
+  .calcell.empty{background:none;border:none;cursor:default}
+  .calcell .sd{font-size:.95rem;color:var(--ink)}
+  .calcell .ld{font-size:.62rem;color:var(--ink-faint)}
+  .calcell.hd{border-color:var(--gold-soft)}
+  .calcell.hd .sd{color:var(--gold)}
+  .calcell.today{background:#d4a94e1e;border-color:var(--gold)}
+  .calcell .bad{position:absolute;top:2px;right:4px;color:var(--warn);font-size:.6rem}
+  .callegend{display:flex;gap:14px;justify-content:center;margin:8px 0;color:var(--ink-faint);font-size:.72rem;flex-wrap:wrap}
+  .hrtable{width:100%;border-collapse:collapse;font-size:.76rem;overflow-x:auto}
+  .hrtable th{color:var(--ink-faint);font-weight:normal;text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);font-size:.7rem}
+  .hrtable td{padding:4px 6px;border-bottom:1px dashed #332a5255}
+  .hrtable .g{color:var(--ok)}
+  .hrtable .b{color:var(--warn)}
 </style>
 </head>
 <body>
@@ -234,6 +259,7 @@
       <div class="tile" data-go="kinhdich"><span class="em">☯️</span><span class="t">Kinh Dịch</span><div class="d">Gieo 3 đồng xu · 64 quẻ</div></div>
       <div class="tile" data-go="tuvi"><span class="em">🌌</span><span class="t">Tử Vi</span><div class="d">Lập lá số từ ngày giờ sinh</div></div>
       <div class="tile" data-go="xemngay"><span class="em">📅</span><span class="t">Xem Ngày</span><div class="d">Can chi · hoàng đạo · giờ tốt</div></div>
+      <div class="tile" data-go="lich"><span class="em">🗓️</span><span class="t">Lịch Âm Dương</span><div class="d">Lịch tháng · ngày tốt xấu</div></div>
       <div class="tile" data-go="chiemtinh"><span class="em">✨</span><span class="t">Chiêm Tinh</span><div class="d">Cung mặt trời · mặt trăng</div></div>
       <div class="tile" data-go="tracuu"><span class="em">📖</span><span class="t">Tra Cứu</span><div class="d">Ý nghĩa mọi lá bài &amp; quẻ</div></div>
     </div>
@@ -257,6 +283,14 @@
         <button class="chip on" data-v="full">Đủ 78 lá</button>
         <button class="chip" data-v="major">Chỉ 22 Ẩn chính</button>
       </div>
+      <label>Lĩnh vực muốn hỏi</label>
+      <div class="chips" id="tarotDomain">
+        <button class="chip on" data-v="all">Tổng quát</button>
+        <button class="chip" data-v="ty">Tình yêu</button>
+        <button class="chip" data-v="cv">Công việc</button>
+        <button class="chip" data-v="tc">Tài chính</button>
+        <button class="chip" data-v="sk">Sức khoẻ</button>
+      </div>
       <button class="btn" id="tarotDraw">✦ Xáo &amp; rút bài</button>
     </div>
     <div class="result" id="tarotResult"></div>
@@ -274,6 +308,13 @@
         <button class="chip" data-v="3">3 lá</button>
         <button class="chip" data-v="9">9 lá (3×3)</button>
       </div>
+      <label>Lĩnh vực muốn hỏi</label>
+      <div class="chips" id="lenDomain">
+        <button class="chip on" data-v="all">Tổng quát</button>
+        <button class="chip" data-v="ty">Tình yêu</button>
+        <button class="chip" data-v="cv">Công việc</button>
+        <button class="chip" data-v="tc">Tiền bạc</button>
+      </div>
       <button class="btn" id="lenDraw">✦ Xáo &amp; rút bài</button>
     </div>
     <div class="result" id="lenResult"></div>
@@ -290,6 +331,13 @@
         <button class="chip on" data-v="1">1 lá</button>
         <button class="chip" data-v="3">3 lá</button>
         <button class="chip" data-v="5">5 lá (móng ngựa)</button>
+      </div>
+      <label>Lĩnh vực muốn hỏi</label>
+      <div class="chips" id="btDomain">
+        <button class="chip on" data-v="all">Tổng quát</button>
+        <button class="chip" data-v="ty">Tình yêu</button>
+        <button class="chip" data-v="cv">Công việc</button>
+        <button class="chip" data-v="tc">Tiền bạc</button>
       </div>
       <button class="btn" id="btDraw">✦ Xáo &amp; rút bài</button>
     </div>
@@ -374,6 +422,20 @@
     <div class="list" id="browseList"></div>
   </div>
 
+  <!-- ============ LỊCH ÂM DƯƠNG ============ -->
+  <div class="screen" id="scr-lich">
+    <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>🗓️ Lịch Âm Dương</h2></div>
+    <div class="calhead">
+      <button id="calPrev">‹</button>
+      <div class="cm" id="calTitle"></div>
+      <button id="calNext">›</button>
+    </div>
+    <div class="calgrid" id="calGrid"></div>
+    <div class="callegend"><span><span class="goldtxt">■</span> ngày hoàng đạo</span><span><span class="warntxt">•</span> tam nương / nguyệt kỵ</span><span>chữ nhỏ: ngày âm</span></div>
+    <p class="note center">Chạm vào một ngày để xem chi tiết tốt xấu.</p>
+    <div id="calDetail"></div>
+  </div>
+
   <!-- ============ LỊCH SỬ ============ -->
   <div class="screen" id="scr-lichsu">
     <div class="shead"><button class="back" data-go="home">‹ Về</button><h2>🗂 Lịch sử gieo quẻ</h2></div>
@@ -384,11 +446,13 @@
 
 <nav>
   <button data-go="home" class="on"><span class="i">🏠</span>Trang chủ</button>
+  <button data-go="lich"><span class="i">🗓️</span>Lịch</button>
   <button data-go="tracuu"><span class="i">📖</span>Tra cứu</button>
   <button data-go="lichsu"><span class="i">🗂</span>Lịch sử</button>
 </nav>
 
 <script src="data.js"></script>
+<script src="data2.js"></script>
 <script src="app.js"></script>
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}

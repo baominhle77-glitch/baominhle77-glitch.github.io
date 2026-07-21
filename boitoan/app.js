@@ -111,7 +111,22 @@ function xemNgay(dd,mm,yy,birthYear){
   var gio=GIO_HD[dayChi%6];
   var xungChi=(dayChi+6)%12;
   var res={lu:lu,dayCC:canChiDay(jd),monthCC:canChiMonth(lu.m,lu.y),yearCC:canChiYear(lu.y),
-    napam:napAm((jd+9)%10,(jd+1)%12),sao:sao,truc:truc,gio:gio,dayChi:dayChi,xungChi:xungChi,xungTuoi:null};
+    napam:napAm((jd+9)%10,(jd+1)%12),sao:sao,truc:truc,gio:gio,dayChi:dayChi,dayCan:dayCan,xungChi:xungChi,xungTuoi:null};
+  /* Tiết khí: ngày mặt trời đạt mốc 15° nào trong ngày (tính đến hết ngày) thì thuộc tiết đó */
+  res.tietkhi=TIETKHI[INT(getSunLongitudeDeg(jd+1,TZ)/15)%24];
+  /* Hỷ thần / Tài thần theo can ngày */
+  res.hythan=HY_THAN[dayCan]; res.taithan=TAI_THAN[dayCan];
+  /* Ngày âm kỵ */
+  res.tamnuong=TAM_NUONG.indexOf(lu.d)>=0;
+  res.nguyetky=NGUYET_KY.indexOf(lu.d)>=0;
+  /* Sao từng giờ (khởi Thanh Long theo nhóm chi ngày) + lục diệu Lý Thuần Phong */
+  var hstart=((dayChi%6)*2+8)%12;
+  res.hours=[];
+  for(var h=0;h<12;h++){
+    var hsao=SAO_NGAY[(h-hstart+24)%12];
+    var ld=LUCDIEU[(lu.m+lu.d+h+1)%6];
+    res.hours.push({chi:h,sao:hsao[0],good:hsao[1]===1,luc:ld[0],lucGood:ld[1]==="tốt",lucInfo:ld[2]});
+  }
   if(birthYear&&birthYear>1900){
     var bChi=(birthYear+8)%12;
     res.birthCC=canChiYear(birthYear);
@@ -290,51 +305,101 @@ function meaningHTML(title,posLabel,body){
 /* ---------- TAROT ---------- */
 var TAROT_POS={ "1":["Thông điệp"], "3":["Quá khứ","Hiện tại","Tương lai"],
   "cc":["1. Hiện trạng","2. Thách thức","3. Nền tảng","4. Quá khứ","5. Mục tiêu","6. Tương lai gần","7. Bản thân","8. Ngoại cảnh","9. Hy vọng / nỗi sợ","10. Kết quả"]};
+var DOM_LABEL={ty:"Tình yêu",cv:"Công việc",tc:"Tài chính",sk:"Sức khoẻ"};
+function firstClause(s){return s.split(/[;,.—]/)[0].trim();}
 $("tarotDraw").addEventListener("click",function(){
-  var spread=chipVal("tarotSpread"),deckType=chipVal("tarotDeck");
+  var spread=chipVal("tarotSpread"),deckType=chipVal("tarotDeck"),domain=chipVal("tarotDomain");
   var deck=deckType==="major"?TAROT.slice(0,22):TAROT;
   var poss=TAROT_POS[spread],n=poss.length;
   var picks=shuffleDraw(deck,n);
   var q=$("tarotQ").value.trim();
-  var html=q?'<p class="note center">Câu hỏi: «'+esc(q)+'»</p>':'';
+  var html=q?'<p class="note center">Câu hỏi: «'+esc(q)+'»'+(domain!=="all"?' — lĩnh vực: '+DOM_LABEL[domain]:'')+'</p>':'';
   html+='<div class="cardrow">';
   var items=picks.map(function(ix,i){
-    var c=deck[ix],rev=rnd(2)===1;
+    var c=deck[ix],rev=rnd(2)===1,gi=TAROT.indexOf(c);
     html+=cardHTML(c.g,c.n,poss[i],rev);
-    return {c:c,rev:rev,p:poss[i]};
+    return {c:c,ext:TAROT_EXT[gi],rev:rev,p:poss[i],gi:gi};
   });
   html+='</div>';
   items.forEach(function(it){
-    html+=meaningHTML(it.c.n+(it.rev?" — ngược":" — xuôi"),it.p,it.rev?it.c.r:it.c.u);
+    var body=it.rev?it.c.r:it.c.u;
+    var block='<div class="meaning"><div class="mt">'+esc(it.c.n)+(it.rev?' — <span class="warntxt">ngược</span>':' — xuôi')+'</div>'+
+      '<div class="mp">'+esc(it.p)+'</div><div class="mb">'+esc(body)+'</div>';
+    var doms=n<=3?["ty","cv","tc","sk"]:(domain!=="all"?[domain]:[]);
+    doms.forEach(function(d){
+      if(it.ext&&it.ext[d])block+='<div class="mb" style="margin-top:6px"><span class="goldtxt">'+DOM_LABEL[d]+':</span> '+esc(it.ext[d])+'</div>';
+    });
+    if(it.rev&&doms.length)block+='<div class="mb" style="margin-top:6px;color:var(--ink-dim);font-style:italic">Lá ngược: các nghĩa lĩnh vực trên đang bị chặn, chậm trễ hoặc vận hành ngầm — đọc như tiềm năng chưa thông thay vì kết quả sẵn có.</div>';
+    block+='</div>';
+    html+=block;
   });
+  /* ---- Tổng luận phối hợp ---- */
   var nRev=items.filter(function(i){return i.rev;}).length;
-  var tone=nRev===0?"Toàn bài xuôi: năng lượng thuận dòng, cứ mạnh dạn tiến hành.":
-    nRev===items.length?"Toàn bài ngược: mọi thứ đang bị chặn hoặc hướng vào nội tâm — chậm lại, xem xét lại từ gốc.":
-    "Bài có "+nRev+"/"+items.length+" lá ngược: có trở lực hoặc bài học nội tâm ở các vị trí ngược — chú ý các lá đó trước.";
-  html+='<div class="panel"><h3>Tổng luận</h3><p style="font-size:.9rem">'+tone+' Hãy đọc các lá theo mạch vị trí: quá khứ tạo đà, hiện tại là điểm hành động, các lá cuối là xu hướng nếu bạn giữ nguyên cách hiện tại — tarot chỉ đường, lựa chọn vẫn ở bạn.</p></div>';
+  var nMajor=items.filter(function(i){return i.gi<22;}).length;
+  var suitOf=function(gi){return gi<22?"major":gi<36?"Gậy":gi<50?"Cốc":gi<64?"Kiếm":"Tiền";};
+  var suitCount={"Gậy":0,"Cốc":0,"Kiếm":0,"Tiền":0};
+  items.forEach(function(i){var s=suitOf(i.gi);if(suitCount[s]!==undefined)suitCount[s]++;});
+  var paras=[];
+  if(n>1){
+    if(nMajor>=Math.ceil(n/2))paras.push("Có "+nMajor+"/"+n+" lá Ẩn chính — vấn đề bạn hỏi mang tính bước ngoặt lớn của cả giai đoạn, ít phụ thuộc vào tiểu tiết hằng ngày; các lực đang vận hành sâu hơn ý muốn nhất thời.");
+    else if(nMajor===0)paras.push("Không có lá Ẩn chính nào — chuyện này nằm trong tầm tay bạn, xoay chuyển được bằng hành động cụ thể hằng ngày, không phải 'số phận an bài'.");
+    var domSuit=null,domMax=0;
+    for(var s in suitCount){if(suitCount[s]>domMax){domMax=suitCount[s];domSuit=s;}}
+    var suitMsg={"Gậy":"chất Gậy (Lửa) trội: động lực, hành động và đam mê là trục chính — câu trả lời nằm ở việc DÁM LÀM.","Cốc":"chất Cốc (Nước) trội: cảm xúc và các mối quan hệ là trục chính — câu trả lời nằm ở TRÁI TIM và cách kết nối.","Kiếm":"chất Kiếm (Khí) trội: suy nghĩ, sự thật và xung đột là trục chính — câu trả lời nằm ở sự RÕ RÀNG trong tư duy và lời nói.","Tiền":"chất Tiền (Đất) trội: vật chất, sức khoẻ, nền tảng thực tế là trục chính — câu trả lời nằm ở sự KIÊN TRÌ xây từng viên gạch."};
+    if(domSuit&&domMax>=2)paras.push("Về chất liệu: "+suitMsg[domSuit]);
+    if(nRev===0)paras.push("Toàn bộ lá đều xuôi: năng lượng thuận dòng, ngoại cảnh ủng hộ — thời điểm hành động đã chín.");
+    else if(nRev===n)paras.push("Toàn bộ lá đều ngược: mọi lực đang hướng vào trong hoặc bị chặn — đây là kỳ nhìn lại nội tâm và tháo gỡ từ gốc, chưa phải kỳ bung ra ngoài.");
+    else paras.push("Có "+nRev+"/"+n+" lá ngược: trở lực tập trung ở đúng các vị trí ấy — nơi cần bạn chú tâm gỡ trước khi phần còn lại tự chảy.");
+  }
+  if(spread==="3"){
+    paras.push("Mạch chuyện: «"+firstClause(items[0].rev?items[0].c.r:items[0].c.u)+"» (quá khứ tạo đà) → «"+firstClause(items[1].rev?items[1].c.r:items[1].c.u)+"» (hiện tại — điểm hành động) → «"+firstClause(items[2].rev?items[2].c.r:items[2].c.u)+"» (xu hướng nếu giữ nguyên hướng đi). Tương lai trong tarot là dòng chảy, không phải bản án: đổi cách hành động ở lá giữa sẽ đổi lá cuối.");
+  }
+  if(spread==="cc"){
+    paras.push("Trục chính Celtic Cross: lá 1 (hiện trạng) bị lá 2 cắt ngang (thách thức) — đây là nút thắt trung tâm. Lá 10 («"+firstClause(items[9].rev?items[9].c.r:items[9].c.u)+"») là kết quả nếu mọi thứ giữ nhịp hiện tại; đối chiếu lá 7 (con người bạn) với lá 8 (ngoại cảnh) để biết mình đang thuận hay nghịch dòng; lá 9 nói hộ điều bạn vừa mong vừa sợ.");
+  }
+  if(n===1)paras.push("Một lá là một tấm gương soi thẳng vào câu hỏi: đọc cả nghĩa chính lẫn nghĩa lĩnh vực, và để ý cảm giác đầu tiên khi lật lá — trực giác của bạn là một nửa của quẻ bài.");
+  html+='<div class="panel"><h3>Tổng luận phối hợp</h3>'+paras.map(function(p){return '<p style="font-size:.9rem;margin-bottom:8px">'+esc(p)+'</p>';}).join("")+'</div>';
   $("tarotResult").innerHTML=html;
   saveHistory("Tarot",q,items.map(function(i){return i.c.n.split("(")[0].trim()+(i.rev?"(ng)":"");}).join(" · "));
 });
 
 /* ---------- LENORMAND ---------- */
 $("lenDraw").addEventListener("click",function(){
-  var n=parseInt(chipVal("lenSpread"),10);
+  var n=parseInt(chipVal("lenSpread"),10),domain=chipVal("lenDomain");
   var poss=n===1?["Thông điệp"]:n===3?["Chủ đề","Diễn biến","Kết quả"]:
     ["Quá khứ ↑","Hiện tại ↑","Tương lai ↑","Quá khứ •","TÂM ĐIỂM","Tương lai •","Quá khứ ↓","Hiện tại ↓","Tương lai ↓"];
   var picks=shuffleDraw(LENORMAND,n);
   var q=$("lenQ").value.trim();
-  var html=q?'<p class="note center">Câu hỏi: «'+esc(q)+'»</p>':'';
+  var html=q?'<p class="note center">Câu hỏi: «'+esc(q)+'»'+(domain!=="all"?' — lĩnh vực: '+DOM_LABEL[domain]:'')+'</p>':'';
   html+='<div class="cardrow">';
   picks.forEach(function(ix,i){html+=cardHTML(LENORMAND[ix].g,LENORMAND[ix].i+". "+LENORMAND[ix].n,poss[i],false);});
   html+='</div>';
   picks.forEach(function(ix,i){
-    var c=LENORMAND[ix];
-    html+=meaningHTML(c.i+". "+c.n+" — "+c.k,poss[i],c.m);
+    var c=LENORMAND[ix],ext=LEN_EXT[ix];
+    var block='<div class="meaning"><div class="mt">'+c.i+". "+esc(c.n)+' — '+esc(c.k)+'</div>'+
+      '<div class="mp">'+esc(poss[i])+'</div><div class="mb">'+esc(c.m)+'</div>';
+    var doms=n<=3?["ty","cv","tc"]:(domain!=="all"?[domain]:[]);
+    doms.forEach(function(d){
+      if(ext&&ext[d])block+='<div class="mb" style="margin-top:6px"><span class="goldtxt">'+DOM_LABEL[d]+':</span> '+esc(ext[d])+'</div>';
+    });
+    block+='</div>';
+    html+=block;
   });
-  if(n>1){
-    var chain=picks.map(function(ix){return LENORMAND[ix].k.split(",")[0].trim();}).join(" → ");
-    html+='<div class="panel"><h3>Tổng luận</h3><p style="font-size:.9rem">Chuỗi ý chính: <b>'+esc(chain)+'</b>. Lenormand đọc như một câu chuyện liền mạch: lá trước bổ nghĩa cho lá sau'+(n===9?'; hàng giữa là mạch chính, hàng trên là suy nghĩ, hàng dưới là nền tảng thực tế; lá trung tâm là trái tim của vấn đề':'')+'.</p></div>';
+  var kw=function(ix){return LENORMAND[ix].k.split(",")[0].trim();};
+  var paras=[];
+  if(n===3){
+    paras.push("Đọc thành câu chuyện: chủ đề mang năng lượng «"+kw(picks[0])+"», đang diễn biến qua «"+kw(picks[1])+"», và chảy về «"+kw(picks[2])+"». Trong Lenormand, lá giữa là trục — hai lá hai bên bổ nghĩa cho nó: hãy tự ghép thành một câu duy nhất mô tả tình huống của bạn.");
+    paras.push("Cặp mở («"+kw(picks[0])+"» + «"+kw(picks[1])+"») cho biết việc đã và đang xảy ra thế nào; cặp đóng («"+kw(picks[1])+"» + «"+kw(picks[2])+"») cho biết chiều hướng sắp tới. Nếu lá cuối thuộc nhóm khó (Mây, Rắn, Quan Tài, Lưỡi Hái, Roi, Chuột, Núi, Thập Giá) — đó là lời nhắc phòng bị, không phải phán quyết.");
   }
+  if(n===9){
+    var rows=[[0,1,2,"Hàng trên — tầng suy nghĩ, điều đang lởn vởn trong tâm trí"],[3,4,5,"Hàng giữa — mạch chính của sự việc, diễn tiến thực tế"],[6,7,8,"Hàng dưới — tầng nền tảng, điều đang diễn ra ngầm bên dưới"]];
+    rows.forEach(function(r){
+      paras.push(r[3]+": «"+kw(picks[r[0]])+" → "+kw(picks[r[1]])+" → "+kw(picks[r[2]])+"» (đọc trái sang phải là quá khứ → tương lai).");
+    });
+    paras.push("Lá TÂM ĐIỂM «"+LENORMAND[picks[4]].n+"» là trái tim của cả bàn: mọi lá khác xoay quanh nó. Cột giữa (trên–tâm–dưới: "+kw(picks[1])+" / "+kw(picks[4])+" / "+kw(picks[7])+") cho thấy trạng thái hiện tại từ suy nghĩ đến gốc rễ.");
+  }
+  if(n===1)paras.push("Một lá Lenormand trả lời trực diện và cụ thể — đối chiếu nghĩa lá với đúng câu hỏi bạn đặt; nếu cần thêm ngữ cảnh, rút thêm trải 3 lá.");
+  if(paras.length)html+='<div class="panel"><h3>Tổng luận phối hợp</h3>'+paras.map(function(p){return '<p style="font-size:.9rem;margin-bottom:8px">'+esc(p)+'</p>';}).join("")+'</div>';
   $("lenResult").innerHTML=html;
   saveHistory("Lenormand",q,picks.map(function(ix){return LENORMAND[ix].n.split("(")[0].trim();}).join(" · "));
 });
@@ -353,12 +418,27 @@ $("btDraw").addEventListener("click",function(){
     html+='<div class="tcard"><span class="pos">'+esc(poss[i])+'</span><span class="glyph" style="color:'+(red?"#e0785a":"#e8e2f4")+'">'+c.g+'</span><span class="nm">'+esc(c.n)+'</span></div>';
   });
   html+='</div>';
-  picks.forEach(function(ix,i){html+=meaningHTML(BAITAY[ix].n,poss[i],BAITAY[ix].m);});
+  var domain=chipVal("btDomain");
+  picks.forEach(function(ix,i){
+    var ext=BT_EXT[ix];
+    var block='<div class="meaning"><div class="mt">'+esc(BAITAY[ix].n)+'</div><div class="mp">'+esc(poss[i])+'</div><div class="mb">'+esc(BAITAY[ix].m)+'</div>';
+    var doms=n<=3?["ty","cv","tc"]:(domain!=="all"?[domain]:[]);
+    doms.forEach(function(d){
+      if(ext&&ext[d])block+='<div class="mb" style="margin-top:6px"><span class="goldtxt">'+DOM_LABEL[d]+':</span> '+esc(ext[d])+'</div>';
+    });
+    block+='</div>';
+    html+=block;
+  });
   var suits={"♥":0,"♦":0,"♣":0,"♠":0};
   picks.forEach(function(ix){for(var s in suits){if(BAITAY[ix].g.indexOf(s)>=0)suits[s]++;}});
   var domi=Object.keys(suits).sort(function(a,b){return suits[b]-suits[a];})[0];
-  var suitMsg={"♥":"Cơ chiếm ưu thế — trọng tâm nằm ở tình cảm, gia đình.","♦":"Rô chiếm ưu thế — trọng tâm là tiền bạc, giấy tờ, tin tức.","♣":"Chuồn chiếm ưu thế — trọng tâm là công việc, bạn bè, cơ hội.","♠":"Bích chiếm ưu thế — cần thận trọng: thử thách và bài học đang chờ."};
-  if(n>1)html+='<div class="panel"><h3>Tổng luận</h3><p style="font-size:.9rem">'+suitMsg[domi]+'</p></div>';
+  var suitMsg={"♥":"Chất Cơ chiếm ưu thế — trọng tâm câu chuyện nằm ở tình cảm, gia đình, những người thân yêu; quyết định nên nghiêng về phía giữ ấm các mối quan hệ.","♦":"Chất Rô chiếm ưu thế — trọng tâm là tiền bạc, giấy tờ, tin tức; mọi thoả thuận nên rõ ràng trên văn bản, tài chính là chìa khoá của tình huống.","♣":"Chất Chuồn chiếm ưu thế — trọng tâm là công việc, bạn bè, cơ hội làm ăn; quý nhân của bạn nằm trong vòng quan hệ, hãy chủ động kết nối.","♠":"Chất Bích chiếm ưu thế — giai đoạn thử thách: đi chậm, kiểm tra kỹ, tránh quyết định lớn lúc dao động; bài học qua rồi sẽ thành kinh nghiệm quý."};
+  var courts=picks.filter(function(ix){return /^(Bồi|Đầm|Già)/.test(BAITAY[ix].n);}).length;
+  if(n>1){
+    var extra=courts>=2?" Có "+courts+" lá người (Bồi/Đầm/Già): sự việc xoay quanh những con người cụ thể nhiều hơn hoàn cảnh — xem kỹ các nhân vật được mô tả ở trên, họ là chìa khoá.":"";
+    html+='<div class="panel"><h3>Tổng luận phối hợp</h3><p style="font-size:.9rem">'+suitMsg[domi]+extra+'</p>'+
+      (n===5?'<p style="font-size:.9rem;margin-top:6px">Trải móng ngựa đọc theo cung: quá khứ đẩy vào hiện tại, lá «Điều ẩn giấu» là yếu tố bạn chưa thấy — thường quan trọng nhất bàn; «Trở ngại» cho biết phải vượt gì, và «Kết quả» là hướng đến nếu bạn xử lý được trở ngại đó.</p>':'')+'</div>';
+  }
   $("btResult").innerHTML=html;
   saveHistory("Bài Tây",q,picks.map(function(ix){return BAITAY[ix].n;}).join(" · "));
 });
@@ -379,17 +459,42 @@ function kdRender(final){
         (l.v?'<div class="bar"></div>':'<div class="bar"></div><div class="gap"></div><div class="bar"></div>')+
         (l.moving?'<span class="mark">động</span>':'')+'</div>';
     }).join("")+'</div>';
+    var ext=KD_EXT[hx.no];
+    if(ext)html+=meaningHTML("Thoán từ (lời kinh)","nguyên văn dịch nghĩa",ext.tf);
     html+=meaningHTML("Ý quẻ","",hex.y);
     html+=meaningHTML("Lời khuyên","",hex.a);
+    if(ext){
+      html+='<hr class="divider">';
+      [["ty","Tình cảm"],["cv","Công việc"],["tc","Tài lộc"],["sk","Sức khoẻ"]].forEach(function(d){
+        if(ext[d[0]])html+=meaningHTML(d[1],"",ext[d[0]]);
+      });
+    }
     if(movingIdx.length){
       var lines2=kdLines.map(function(l){return {v:l.moving?1-l.v:l.v};});
       var hx2=hexFromLines(lines2),hex2=KINHDICH[hx2.no];
-      html+='<hr class="divider"><p class="center" style="font-size:.85rem;color:var(--ink-dim)">Hào động: '+movingIdx.join(", ")+' → quẻ biến:</p>';
+      html+='<hr class="divider"><p class="center" style="font-size:.85rem;color:var(--ink-dim)">Có '+movingIdx.length+' hào động (hào '+movingIdx.join(", ")+'):</p>';
+      movingIdx.forEach(function(mi){
+        html+=meaningHTML("Hào "+mi+" động","",HAO_Y[mi-1]);
+      });
+      html+='<p class="center" style="font-size:.85rem;color:var(--ink-dim);margin-top:8px">Quẻ biến (hướng chuyển hoá của sự việc):</p>';
       html+='<div class="hexbig" style="font-size:2.6rem">'+String.fromCodePoint(0x4DBF+hx2.no)+'</div>';
       html+='<div class="hexname">Quẻ '+hx2.no+' — '+esc(hex2.n)+'</div>';
-      html+=meaningHTML("Xu hướng chuyển hoá","Quẻ chủ nói hiện tại, quẻ biến nói việc sẽ chuyển về hướng này",hex2.y);
+      html+=meaningHTML("Xu hướng chuyển hoá","quẻ chủ nói hiện tại, quẻ biến nói việc sẽ chuyển về hướng này",hex2.y);
+      if(KD_EXT[hx2.no])html+=meaningHTML("Thoán từ quẻ biến","",KD_EXT[hx2.no].tf);
+      var mvNote=movingIdx.length===1?"Một hào động: trọng tâm lời giải nằm ở chính hào ấy — vị trí của nó (xem trên) cho biết biến động rơi vào tầng nào của sự việc.":
+        movingIdx.length>=4?"Nhiều hào động ("+movingIdx.length+"): thời cuộc đang chuyển mạnh — nên đọc quẻ biến làm chính, quẻ chủ chỉ là điểm xuất phát.":
+        "Vài hào động: đọc quẻ chủ làm nền, các hào động là điểm nút, quẻ biến là hướng đến; ba tầng ấy hợp lại thành lời giải trọn vẹn.";
+      html+='<p class="note">'+mvNote+'</p>';
     }else{
-      html+='<p class="note center">Không có hào động — tình thế ổn định, đọc trọn ý quẻ chủ.</p>';
+      html+='<p class="note center">Không có hào động — tình thế ổn định trong thời của quẻ; đọc trọn thoán từ và ý quẻ chủ.</p>';
+    }
+    /* Quẻ hỗ — bối cảnh ẩn bên trong (hào 2-3-4 làm hạ quái, 3-4-5 làm thượng quái) */
+    var holo=kdLines[1].v+kdLines[2].v*2+kdLines[3].v*4;
+    var hohi=kdLines[2].v+kdLines[3].v*2+kdLines[4].v*4;
+    var hoNo=HEXMAP[holo][hohi];
+    if(hoNo!==hx.no){
+      html+='<hr class="divider">';
+      html+=meaningHTML("Quẻ hỗ: "+String.fromCodePoint(0x4DBF+hoNo)+" "+KINHDICH[hoNo].n,"bối cảnh ẩn bên trong sự việc",KINHDICH[hoNo].y);
     }
     html+='</div>';
     var q=$("kdQ").value.trim();
@@ -482,37 +587,90 @@ $("tvGo").addEventListener("click",function(){
 });
 
 /* ---------- XEM NGÀY ---------- */
-$("xnGo").addEventListener("click",function(){
-  var dv=$("xnDate").value;
-  if(!dv){$("xnResult").innerHTML='<p class="note center warntxt">Hãy chọn ngày cần xem.</p>';return;}
-  var p=dv.split("-"),yy=+p[0],mm=+p[1],dd=+p[2];
-  var by=parseInt($("xnBirth").value,10)||null;
+function renderDayDetail(dd,mm,yy,by){
   var r=xemNgay(dd,mm,yy,by);
   var good=r.sao[1]===1,trucIdx=TRUC.indexOf(r.truc);
   var html='<div class="panel"><div class="big-day">'+dd+"/"+mm+"/"+yy+'</div>';
-  html+='<p class="center" style="color:var(--ink-dim);font-size:.88rem">Âm lịch: '+r.lu.d+"/"+r.lu.m+(r.lu.leap?" (nhuận)":"")+"/"+r.lu.y+'</p>';
+  html+='<p class="center" style="color:var(--ink-dim);font-size:.88rem">Âm lịch: <b>'+r.lu.d+"/"+r.lu.m+(r.lu.leap?" (nhuận)":"")+"/"+r.lu.y+'</b> · Tiết '+r.tietkhi+'</p>';
   html+='<div class="kv"><span class="k">Ngày</span><span class="v">'+r.dayCC+" ("+r.napam+")"+'</span></div>';
   html+='<div class="kv"><span class="k">Tháng</span><span class="v">'+r.monthCC+'</span></div>';
   html+='<div class="kv"><span class="k">Năm</span><span class="v">'+r.yearCC+'</span></div>';
   html+='<div class="kv"><span class="k">Sao ngày</span><span class="v">'+r.sao[0]+' <span class="tag '+(good?"good":"bad")+'">'+(good?"Hoàng đạo":"Hắc đạo")+'</span></span></div>';
   html+='<div class="kv"><span class="k">Trực</span><span class="v">'+r.truc[0]+'</span></div>';
+  html+='<div class="kv"><span class="k">Hỷ thần</span><span class="v">hướng '+r.hythan+'</span></div>';
+  html+='<div class="kv"><span class="k">Tài thần</span><span class="v">hướng '+r.taithan+'</span></div>';
   html+='</div>';
+  if(r.tamnuong||r.nguyetky){
+    html+='<div class="panel"><h3 class="warntxt">⚠ Ngày kỵ dân gian</h3><p style="font-size:.88rem">'+
+      (r.tamnuong?"Ngày <b>Tam nương</b> (mùng "+r.lu.d+" âm) — dân gian kiêng khởi công, cưới hỏi, xuất hành, khai trương. ":"")+
+      (r.nguyetky?"Ngày <b>Nguyệt kỵ</b> (mùng "+r.lu.d+" âm — «mùng năm, mười bốn, hai ba; đi chơi cũng lỗ nữa là đi buôn») — kiêng xuất hành, giao dịch lớn.":"")+
+      '</p></div>';
+  }
+  html+='<div class="panel"><h3>Sao '+r.sao[0]+'</h3><p style="font-size:.88rem">'+(SAO_NGAY_INFO[r.sao[0]]||"")+'</p></div>';
   html+='<div class="panel"><h3>Trực '+r.truc[0]+'</h3><p style="font-size:.88rem">'+r.truc[1]+'</p></div>';
-  html+='<div class="panel"><h3>Giờ hoàng đạo</h3><div>'+r.gio.map(function(g){return '<span class="tag good">'+GIO_LABEL[g]+'</span>';}).join("")+'</div>';
-  html+='<p class="note">Ngày này xung với tuổi <b>'+CHI[r.xungChi]+'</b> (lục xung với chi ngày '+CHI[r.dayChi]+').</p>';
+  /* Bảng 12 giờ */
+  html+='<div class="panel"><h3>Giờ tốt xấu trong ngày</h3><table class="hrtable"><tr><th>Giờ</th><th>Sao</th><th>Lục diệu</th></tr>';
+  r.hours.forEach(function(h){
+    html+='<tr><td>'+GIO_LABEL[h.chi]+'</td><td class="'+(h.good?"g":"b")+'">'+h.sao+(h.good?" ✓":"")+'</td><td class="'+(h.lucGood?"g":"b")+'">'+h.luc+'</td></tr>';
+  });
+  html+='</table><p class="note">Sao giờ: ✓ = giờ hoàng đạo. Lục diệu (phép Lý Thuần Phong) dùng chọn giờ xuất hành: Đại An – Tốc Hỷ – Tiểu Cát là tốt; giờ vừa hoàng đạo vừa lục diệu tốt là giờ đẹp nhất.</p></div>';
+  html+='<div class="panel"><h3>Xung tuổi</h3><p class="note" style="margin-top:0">Chi ngày là '+CHI[r.dayChi]+' — lục xung với tuổi <b>'+CHI[r.xungChi]+'</b>: người tuổi '+CHI[r.xungChi]+' nên tránh làm việc trọng đại trong ngày này.</p>';
   if(by){
-    html+=r.xungTuoi?'<p class="warntxt" style="font-size:.88rem">⚠ Tuổi '+r.birthCC+' của bạn XUNG với ngày này — nên tránh làm việc lớn.</p>'
+    html+=r.xungTuoi?'<p class="warntxt" style="font-size:.88rem">⚠ Tuổi '+r.birthCC+' của bạn XUNG với ngày này — nên tránh cưới hỏi, khai trương, ký kết, xuất hành xa.</p>'
       :'<p class="oktxt" style="font-size:.88rem">✓ Tuổi '+r.birthCC+' của bạn không xung với chi ngày.</p>';
   }
   html+='</div>';
-  var verdict=(good?1:0)+([0,2,4,8,10].indexOf(trucIdx)>=0?1:0);
+  var trucGood=[0,2,4,8,10].indexOf(trucIdx)>=0;
+  var score=(good?2:0)+(trucGood?1:0)-((r.tamnuong||r.nguyetky)?2:0)-(by&&r.xungTuoi?2:0);
   html+='<div class="panel"><h3>Đánh giá chung</h3><p style="font-size:.9rem">'+
-    (good&&verdict>1?"Ngày khá tốt cho các việc trọng đại (hợp với ghi chú của Trực ở trên). Chọn thêm giờ hoàng đạo để khởi sự.":
-     good?"Ngày hoàng đạo nhưng Trực không thuận cho mọi việc — đối chiếu kỹ mục Trực trước khi quyết.":
-     "Ngày hắc đạo — việc lớn (cưới hỏi, khai trương, động thổ, xuất hành xa) nên chọn ngày khác; việc thường vẫn làm được, ưu tiên giờ hoàng đạo.")+
-    '</p><p class="note">Trực và sao ngày tính theo tháng âm lịch — sát ngày đầu/cuối tháng âm có thể lệch một bậc so với lịch tiết khí.</p></div>';
-  $("xnResult").innerHTML=html;
+    (score>=3?"Ngày tốt cho các việc trọng đại — sao hoàng đạo, trực thuận. Chọn thêm giờ vừa hoàng đạo vừa lục diệu tốt (bảng trên) để khởi sự là đẹp trọn vẹn.":
+     score>=1?"Ngày khá: có yếu tố thuận (xem sao và trực ở trên) nhưng không trọn vẹn — hợp việc vừa và nhỏ; việc đại sự nên đối chiếu kỹ mục Trực hoặc chọn ngày khác tốt hơn.":
+     "Ngày kém thuận — việc lớn (cưới hỏi, khai trương, động thổ, xuất hành xa, ký kết quan trọng) nên chọn ngày khác; việc thường vẫn làm được, ưu tiên khung giờ hoàng đạo.")+
+    '</p><p class="note">Phép tính theo lịch vạn sự cổ truyền: sao ngày – trực tính theo tháng âm lịch (sát ngày chuyển tháng âm có thể lệch một bậc so với phép tính theo tiết khí); tiết khí tính theo kinh độ mặt trời thực (thiên văn).</p></div>';
+  return html;
+}
+$("xnGo").addEventListener("click",function(){
+  var dv=$("xnDate").value;
+  if(!dv){$("xnResult").innerHTML='<p class="note center warntxt">Hãy chọn ngày cần xem.</p>';return;}
+  var p=dv.split("-"),yy=+p[0],mm=+p[1],dd=+p[2];
+  var by=parseInt($("xnBirth").value,10)||null;
+  $("xnResult").innerHTML=renderDayDetail(dd,mm,yy,by);
 });
+
+/* ---------- LỊCH ÂM DƯƠNG ---------- */
+var calY,calM; /* tháng đang xem */
+function renderCal(){
+  var first=new Date(calY,calM-1,1);
+  var startDow=(first.getDay()+6)%7; /* Thứ 2 = 0 */
+  var days=new Date(calY,calM,0).getDate();
+  var today=new Date(),isThisMonth=(today.getFullYear()===calY&&today.getMonth()+1===calM);
+  var luFirst=solar2lunar(1,calM,calY),luLast=solar2lunar(days,calM,calY);
+  $("calTitle").innerHTML="Tháng "+calM+"/"+calY+"<small>ÂL: "+luFirst.d+"/"+luFirst.m+(luFirst.leap?"n":"")+" – "+luLast.d+"/"+luLast.m+(luLast.leap?"n":"")+" · "+canChiYear(luLast.y)+"</small>";
+  var html="";
+  ["T2","T3","T4","T5","T6","T7","CN"].forEach(function(w){html+='<div class="wd">'+w+'</div>';});
+  for(var i=0;i<startDow;i++)html+='<div class="calcell empty"></div>';
+  for(var d=1;d<=days;d++){
+    var lu=solar2lunar(d,calM,calY);
+    var jd=lu.jd,dayChi=(jd+1)%12,monthChi=(lu.m+1)%12;
+    var startChi=((monthChi-2+12)*2)%12;
+    var sao=SAO_NGAY[(dayChi-startChi+24)%12];
+    var bad=TAM_NUONG.indexOf(lu.d)>=0||NGUYET_KY.indexOf(lu.d)>=0;
+    html+='<div class="calcell'+(sao[1]===1?" hd":"")+(isThisMonth&&d===today.getDate()?" today":"")+'" data-d="'+d+'">'+
+      (bad?'<span class="bad">•</span>':'')+
+      '<div class="sd">'+d+'</div><div class="ld">'+(lu.d===1?lu.d+"/"+lu.m+(lu.leap?"n":""):lu.d)+'</div></div>';
+  }
+  $("calGrid").innerHTML=html;
+}
+$("calPrev").addEventListener("click",function(){calM--;if(calM<1){calM=12;calY--;}$("calDetail").innerHTML="";renderCal();});
+$("calNext").addEventListener("click",function(){calM++;if(calM>12){calM=1;calY++;}$("calDetail").innerHTML="";renderCal();});
+$("calGrid").addEventListener("click",function(e){
+  var cell=e.target.closest(".calcell");
+  if(!cell||cell.classList.contains("empty"))return;
+  var d=parseInt(cell.dataset.d,10);
+  $("calDetail").innerHTML=renderDayDetail(d,calM,calY,null);
+  $("calDetail").scrollIntoView({behavior:"smooth",block:"start"});
+});
+(function(){var t=new Date();calY=t.getFullYear();calM=t.getMonth()+1;renderCal();})();
 
 /* ---------- CHIÊM TINH ---------- */
 $("ctGo").addEventListener("click",function(){
