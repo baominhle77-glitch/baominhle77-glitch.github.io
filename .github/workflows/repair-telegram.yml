@@ -1,0 +1,94 @@
+name: Sửa kết nối Telegram production
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/repair-telegram.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+      WORKER_URL: https://hiennhi89-gate.hiennhi89.workers.dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - name: Kiểm tra secret và Telegram
+        run: |
+          set -euo pipefail
+          for name in CLOUDFLARE_API_TOKEN TG_TOKEN TG_CHAT; do
+            [ -n "${!name}" ] || { echo "::error::Thiếu secret: $name"; exit 1; }
+          done
+          curl --fail-with-body --silent --show-error \
+            "https://api.telegram.org/bot${TG_TOKEN}/getMe" > "$RUNNER_TEMP/get-me.json"
+          curl --fail-with-body --silent --show-error --request POST \
+            --data-urlencode "chat_id=${TG_CHAT}" \
+            --data-urlencode "text=Kiểm tra kết nối production: bot đã sẵn sàng." \
+            "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" > "$RUNNER_TEMP/send-message.json"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          for (const file of ['get-me.json', 'send-message.json']) {
+            const result = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/${file}`, 'utf8'));
+            if (!result.ok) throw new Error(`Telegram từ chối ${file}`);
+          }
+          NODE
+
+      - name: Cập nhật Worker secrets
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          printf '%s' "$TG_TOKEN" | npx --yes wrangler@4.112.0 secret put TELEGRAM_BOT_TOKEN
+          printf '%s' "$TG_CHAT" | npx --yes wrangler@4.112.0 secret put TELEGRAM_CHAT_ID
+          WEBHOOK_SECRET=$(openssl rand -hex 32)
+          echo "::add-mask::$WEBHOOK_SECRET"
+          printf '%s' "$WEBHOOK_SECRET" | npx --yes wrangler@4.112.0 secret put TELEGRAM_WEBHOOK_SECRET
+          printf 'WEBHOOK_SECRET=%s\n' "$WEBHOOK_SECRET" >> "$GITHUB_ENV"
+
+      - name: Kiểm tra và deploy Worker
+        working-directory: backend
+        run: |
+          node --check worker.js
+          node worker.test.mjs
+          npx --yes wrangler@4.112.0 deploy
+
+      - name: Nối webhook và kiểm approval
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --request POST \
+            --data-urlencode "url=${WORKER_URL}/telegram/webhook" \
+            --data-urlencode "secret_token=${WEBHOOK_SECRET}" \
+            "https://api.telegram.org/bot${TG_TOKEN}/setWebhook" > "$RUNNER_TEMP/set-webhook.json"
+          curl --fail-with-body --silent --show-error \
+            "https://api.telegram.org/bot${TG_TOKEN}/getWebhookInfo" > "$RUNNER_TEMP/webhook-info.json"
+          DEVICE_ID=$(node -e "console.log(crypto.randomUUID())")
+          curl --fail-with-body --silent --show-error --request POST \
+            --header 'content-type: application/json' \
+            --header 'origin: https://hiennhi89.pages.dev' \
+            --data "{\"app\":\"spare\",\"name\":\"Kiểm tra production\",\"note\":\"Xác minh Telegram sau repair\",\"device_id\":\"${DEVICE_ID}\",\"device\":{\"lang\":\"vi\",\"tz\":\"Asia/Ho_Chi_Minh\",\"platform\":\"GitHub Actions\"}}" \
+            "${WORKER_URL}/api/request" > "$RUNNER_TEMP/approval.json"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const read = (name) => JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/${name}`, 'utf8'));
+          const setWebhook = read('set-webhook.json');
+          const webhookInfo = read('webhook-info.json');
+          const approval = read('approval.json');
+          const expectedUrl = `${process.env.WORKER_URL}/telegram/webhook`;
+          if (!setWebhook.ok) throw new Error('Telegram từ chối setWebhook');
+          if (!webhookInfo.ok || webhookInfo.result?.url !== expectedUrl) throw new Error('Webhook URL chưa khớp');
+          if (approval.status !== 'pending' || !approval.id) throw new Error('Approval production chưa gửi được');
+          console.log('Telegram token/chat/webhook/approval production PASS');
+          NODE
