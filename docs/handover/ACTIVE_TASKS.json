@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-07-23T04:31:00+07:00",
+  "lock_timeout_hours": 24,
+  "active_tasks": [],
+  "recently_completed": [
+    {
+      "id": "COORD-20260723-01",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "chore/multi-agent-coordination-20260723",
+      "base_sha": "fc5a147596b34d62ed2464fbcaea038530be83cc",
+      "paths": [
+        "AGENTS.md",
+        ".github/copilot-instructions.md",
+        ".github/pull_request_template.md",
+        ".github/workflows/coordination-guard.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/PHOI-HOP-DA-AGENT.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md",
+        "tools/validate-coordination.mjs"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-23T04:24:00+07:00",
+      "completed_at": "2026-07-23T04:31:00+07:00",
+      "summary": "Thiết lập quy tắc, khóa phạm vi, mẫu PR và CI điều phối nhiều agent; hai workflow PR đạt; không thay đổi logic ứng dụng."
+    }
+  ]
+}

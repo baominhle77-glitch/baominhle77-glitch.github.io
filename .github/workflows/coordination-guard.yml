@@ -1,0 +1,99 @@
+name: Kiểm tra điều phối đa-agent
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - AGENTS.md
+      - HANDOVER.md
+      - docs/handover/**
+      - tools/validate-coordination.mjs
+      - .github/copilot-instructions.md
+      - .github/pull_request_template.md
+      - .github/workflows/coordination-guard.yml
+
+permissions:
+  contents: read
+
+jobs:
+  coordination-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout đầy đủ lịch sử
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Kiểm tra sổ khóa phạm vi
+        run: node tools/validate-coordination.mjs
+
+      - name: Kiểm tra hợp đồng PR
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > "$RUNNER_TEMP/changed-files.txt"
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+
+          const body = process.env.PR_BODY || "";
+          const branch = process.env.PR_BRANCH || "";
+          const ledger = JSON.parse(fs.readFileSync("docs/handover/ACTIVE_TASKS.json", "utf8"));
+          const changed = fs.readFileSync(process.env.RUNNER_TEMP + "/changed-files.txt", "utf8")
+            .split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+
+          const match = body.match(/^Task-ID:\s*([A-Z][A-Z0-9-]{5,})\s*$/m);
+          if (!match) throw new Error("PR phải có một dòng 'Task-ID: AREA-YYYYMMDD-NN'");
+          const taskId = match[1];
+          const tasks = [...ledger.active_tasks, ...ledger.recently_completed];
+          const task = tasks.find((item) => item.id === taskId);
+          if (!task) throw new Error(`Task-ID ${taskId} không có trong ACTIVE_TASKS.json`);
+          if (task.branch && task.branch !== branch) {
+            throw new Error(`Branch PR '${branch}' không khớp branch đã đăng ký '${task.branch}'`);
+          }
+          if (!Array.isArray(task.paths) || task.paths.length === 0) {
+            throw new Error(`${taskId} không có phạm vi paths để đối chiếu`);
+          }
+
+          function covers(scope, file) {
+            const normalized = scope.replaceAll("\\", "/").replace(/^\.\//, "");
+            if (normalized.endsWith("/**")) {
+              const prefix = normalized.slice(0, -3).replace(/\/$/, "");
+              return file === prefix || file.startsWith(prefix + "/");
+            }
+            if (normalized.endsWith("/*")) {
+              const prefix = normalized.slice(0, -2).replace(/\/$/, "");
+              return file === prefix || file.startsWith(prefix + "/");
+            }
+            if (normalized.endsWith("/")) {
+              const prefix = normalized.slice(0, -1);
+              return file === prefix || file.startsWith(prefix + "/");
+            }
+            return file === normalized;
+          }
+
+          const outside = changed.filter((file) => !task.paths.some((scope) => covers(scope, file)));
+          if (outside.length) {
+            throw new Error(`Các file ngoài phạm vi khóa của ${taskId}:\n- ${outside.join("\n- ")}`);
+          }
+
+          const handoverUpdated = changed.some((file) =>
+            file === "HANDOVER.md" ||
+            file === "docs/handover/ACTIVE_TASKS.json" ||
+            file === "docs/handover/NHAT-KY-PHOI-HOP.md" ||
+            file.startsWith("docs/handover/")
+          );
+          if (!handoverUpdated) throw new Error("PR phải cập nhật file bàn giao/nhật ký");
+
+          console.log(`coordination-pr-ok: ${taskId}, ${changed.length} file(s), branch ${branch}`);
+          NODE
