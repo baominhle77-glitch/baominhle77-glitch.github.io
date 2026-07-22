@@ -2,6 +2,16 @@ import assert from "node:assert/strict";
 import vm from "node:vm";
 import { readFile } from "node:fs/promises";
 
+const rootManifest = JSON.parse(await readFile(new URL("./manifest.webmanifest", import.meta.url), "utf8"));
+const boitoanManifest = JSON.parse(await readFile(new URL("./boitoan/manifest.webmanifest", import.meta.url), "utf8"));
+const icon192 = await readFile(new URL("./boitoan/icon-192.png", import.meta.url));
+assert.equal(icon192.readUInt32BE(16), 192);
+assert.equal(icon192.readUInt32BE(20), 192);
+for (const manifest of [rootManifest, boitoanManifest]) {
+  assert(manifest.icons.some((icon) => icon.sizes === "192x192" && icon.type === "image/png"));
+  assert(manifest.icons.some((icon) => icon.sizes === "512x512" && icon.type === "image/png"));
+}
+
 const handlers = {};
 const entries = new Map();
 let fetchCalls = 0;

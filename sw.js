@@ -1,5 +1,5 @@
-var CACHE="hiennhi89-v1";
-var ASSETS=["/manifest.webmanifest","/boitoan/icon.png","/assets/gate.css","/assets/gate.js"];
+var CACHE="hiennhi89-v2";
+var ASSETS=["/manifest.webmanifest","/boitoan/icon-192.png","/boitoan/icon.png","/assets/gate.css","/assets/gate.js"];
 var ASSET_URLS=ASSETS.map(function(path){return new URL(path,self.registration.scope).href;});
 self.addEventListener("install",function(event){
   event.waitUntil(caches.open(CACHE).then(function(cache){return cache.addAll(ASSETS);}).then(function(){return self.skipWaiting();}));

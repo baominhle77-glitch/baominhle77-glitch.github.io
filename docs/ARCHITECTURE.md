@@ -68,7 +68,7 @@ Tin khách được gửi tới Telegram. Chủ reply đúng tin bot để trả
 
 Root và Bói toán có manifest cùng Service Worker. Service Worker chỉ cache static allowlist; bỏ qua navigation, HTML mã hóa và API. Vì vậy offline shell có giới hạn nhưng không giữ payload nhạy cảm trong Cache Storage.
 
-Manifest hiện chỉ khai icon PNG 512×512 đúng kích thước thật. Chưa tuyên bố sẵn sàng quảng bá cài đặt trên Chrome cho tới khi có icon 192×192 thật. ChPlay/App Store cần bước đóng gói, tài khoản developer, listing và quy trình review riêng.
+Manifest khai icon PNG 192×192 và 512×512 đúng kích thước thật. ChPlay/App Store vẫn cần bước đóng gói, tài khoản developer, listing và quy trình review riêng.
 
 ## Retention
 

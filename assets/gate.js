@@ -169,8 +169,12 @@
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ app: APP, name: name, note: note, device_id: deviceId(), device: fingerprint() })
     }).then(function (r) {
-      if (!r.ok) throw new Error("Không gửi được yêu cầu (" + r.status + ").");
-      return r.json();
+      return r.json().then(function (data) {
+        if (!r.ok) throw new Error(data.error === "telegram_unavailable"
+          ? "Bot Telegram chưa sẵn sàng. Báo chủ app kiểm tra bot."
+          : "Không gửi được yêu cầu (" + r.status + ").");
+        return data;
+      });
     });
   }
 

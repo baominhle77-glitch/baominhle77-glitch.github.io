@@ -58,7 +58,7 @@ jobs:
           cp index.html manifest.webmanifest sw.js _site/
           cp assets/gate.js assets/gate.css _site/assets/
           cp robots.txt _site/robots.txt
-          cp boitoan/index.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon.png _site/boitoan/
+          cp boitoan/index.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
           cp medora/index.html _site/medora/index.html
 
       - name: Deploy lên Cloudflare Pages

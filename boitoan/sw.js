@@ -1,6 +1,6 @@
-var CACHE="boitoan-v10";
+var CACHE="boitoan-v11";
 // Không cache HTML/navigation: index chứa payload mã hóa và phải luôn lấy từ mạng.
-var ASSETS=["manifest.webmanifest","icon.png","/assets/gate.css","/assets/gate.js"];
+var ASSETS=["manifest.webmanifest","icon-192.png","icon.png","/assets/gate.css","/assets/gate.js"];
 var ASSET_URLS=ASSETS.map(function(path){return new URL(path,self.registration.scope).href;});
 self.addEventListener("install",function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(ASSETS);}).then(function(){return self.skipWaiting();}));

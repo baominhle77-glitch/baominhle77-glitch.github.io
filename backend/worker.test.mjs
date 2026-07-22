@@ -394,7 +394,10 @@ try {
     method: "POST",
     body: { app: "spare", name: "Khách", device_id: DID },
   });
-  assert.equal(response.status, 200, "approval request survives Telegram outage");
+  assert.equal(response.status, 503, "approval request must report Telegram outage");
+  assert.deepEqual(await body(response), { error: "telegram_unavailable" });
+  assert.equal((await failureEnv.KV.list({ prefix: "req:" })).keys.length, 0,
+    "failed Telegram notification must not leave a pending request");
 
   console.log("Worker security and feature tests PASS");
 } finally {

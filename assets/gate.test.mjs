@@ -20,6 +20,8 @@ assert.match(gate, /textContent = String\(message\.text \|\| ""\)/, "chat messag
 assert.match(gate, /data\.status === "expired"/, "expired approval must stop polling and stay locked");
 assert.doesNotMatch(gate, /catch\(function \(\) \{ reveal\("approved"\); \}\)/, "decryption failure must not reveal content");
 assert.match(gate, /if \(!data\.key\)[\s\S]*Backend chưa có khóa giải mã/, "encrypted approval must fail closed without a key");
+assert.match(gate, /data\.error === "telegram_unavailable"[\s\S]*Bot Telegram chưa sẵn sàng/,
+  "Telegram outage must be explained without reporting a pending approval");
 
 const deviceSectionEnd = gate.indexOf("/* -------------------------- tiện ích mã hóa");
 const instrumentedDeviceId = gate.slice(0, deviceSectionEnd)

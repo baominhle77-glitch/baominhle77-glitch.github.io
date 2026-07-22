@@ -58,7 +58,7 @@ Repo cũ không còn là nguồn deploy production.
 
 ### PWA và cửa hàng ứng dụng
 - Root và Bói toán có manifest/SW; SW không cache navigation, HTML mã hóa hoặc API.
-- Chỉ có icon 512×512 thật. Còn thiếu icon 192×192 thật, nên chưa tuyên bố đạt điều kiện quảng bá cài đặt Chrome.
+- Có icon PNG 192×192 và 512×512 thật trong cả hai manifest.
 - ChPlay/App Store chưa hoàn tất. Cần tài khoản developer, đóng gói, listing, privacy disclosure, test và submission riêng.
 
 ### Tự động hóa — production đã rollout
@@ -75,7 +75,7 @@ Repo cũ không còn là nguồn deploy production.
 |--------------|-------------|
 | Gate/mã hóa | Đã rollout production; giữ khóa và payload đồng bộ khi đổi mật khẩu. |
 | Telemetry/approval/chat | Đã rollout, chat vẫn tắt; còn test đầu-cuối approval/Telegram/telemetry có ghi dữ liệu. |
-| PWA | Nền tảng an toàn xong; thiếu icon 192 thật. |
+| PWA | Nền tảng an toàn và icon 192/512 đã xong. |
 | ChPlay/App Store | Chưa đóng gói hoặc submit. |
 
 ## 4. Cách tiếp tục công việc (cho nick/AI khác)

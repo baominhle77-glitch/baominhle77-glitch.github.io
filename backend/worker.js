@@ -332,7 +332,12 @@ async function handleRequest(request, env) {
     created_at: Date.now(),
   };
   await putReq(env, rec);
-  await notifyOwner(env, rec).catch(() => {});
+  try {
+    await notifyOwner(env, rec);
+  } catch (_) {
+    await env.KV.delete(reqKey(rec.id));
+    return json({ error: "telegram_unavailable" }, 503);
+  }
   return json({ id: rec.id, status: "pending" });
 }
 

@@ -8,6 +8,7 @@
   "background_color": "#0d0b14",
   "theme_color": "#0d0b14",
   "icons": [
+    {"src": "/boitoan/icon-192.png", "sizes": "192x192", "type": "image/png"},
     {"src": "/boitoan/icon.png", "sizes": "512x512", "type": "image/png"}
   ]
 }
