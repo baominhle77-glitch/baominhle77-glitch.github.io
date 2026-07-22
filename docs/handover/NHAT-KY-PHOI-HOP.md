@@ -30,9 +30,9 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-23 04:24 GMT+7 — ChatGPT GPT-5.6 — COORD-20260723-01 — ĐIỀU PHỐI ĐA-AGENT ⏳
+### 2026-07-23 04:31 GMT+7 — ChatGPT GPT-5.6 — COORD-20260723-01 — ĐIỀU PHỐI ĐA-AGENT ✅
 
-- Base: `fc5a147596b34d62ed2464fbcaea038530be83cc`; branch `chore/multi-agent-coordination-20260723`.
+- Base: `fc5a147596b34d62ed2464fbcaea038530be83cc`; branch `chore/multi-agent-coordination-20260723`; PR #18.
 - Lý do: trong lúc luồng role-system/deploy đang được theo dõi, agent khác merge thêm thay đổi Bát Tự vào `main`. Thay đổi đó được giữ nguyên; task này không sửa logic app.
 - Đã tạo:
   - `AGENTS.md` — quy tắc bắt buộc cho mọi agent.
@@ -42,7 +42,10 @@
   - `.github/pull_request_template.md`, `.github/copilot-instructions.md`.
   - `docs/handover/PHOI-HOP-DA-AGENT.md` — thỏa thuận vận hành chi tiết.
 - Đã cập nhật `HANDOVER.md`: tách source mới nhất khỏi production đã xác nhận; ghi rõ role system đã merge nhưng hậu kiểm production mới chưa có `PRODUCTION_STATUS.md`.
-- Chờ: chạy CI trên PR, chuyển task sang `completed`, giải phóng khóa và merge nếu mọi check đạt.
+- Kiểm thử GitHub Actions:
+  - Run `29959470437` — kiểm tra role-system/frontend/Worker: **success**.
+  - Run `29959470476` — validator khóa phạm vi + hợp đồng PR: **success**.
+- Task đã chuyển sang `completed`, `active_tasks` đã rỗng và toàn bộ phạm vi được giải phóng. Chờ lượt CI cuối sau commit bàn giao rồi merge PR #18.
 
 ### 2026-07-22 — Claude Code — THÊM THAI NGUYÊN · CUNG MỆNH · THÂN CUNG (Tứ trụ) ✅
 
