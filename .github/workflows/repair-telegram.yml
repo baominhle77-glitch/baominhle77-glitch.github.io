@@ -1,9 +1,6 @@
 name: Sửa kết nối Telegram production
 
 on:
-  push:
-    branches: [main]
-    paths: [.github/workflows/repair-telegram.yml]
   workflow_dispatch:
 
 permissions:
@@ -20,7 +17,6 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
       WORKER_URL: https://hiennhi89-gate.hiennhi89.workers.dev
     steps:
       - uses: actions/checkout@v4
@@ -30,29 +26,18 @@ jobs:
       - name: Kiểm tra secret và Telegram
         run: |
           set -euo pipefail
-          for name in CLOUDFLARE_API_TOKEN TG_TOKEN TG_CHAT; do
+          for name in CLOUDFLARE_API_TOKEN TG_TOKEN; do
             [ -n "${!name}" ] || { echo "::error::Thiếu secret: $name"; exit 1; }
           done
           curl --fail-with-body --silent --show-error \
             "https://api.telegram.org/bot${TG_TOKEN}/getMe" > "$RUNNER_TEMP/get-me.json"
-          curl --fail-with-body --silent --show-error --request POST \
-            --data-urlencode "chat_id=${TG_CHAT}" \
-            --data-urlencode "text=Kiểm tra kết nối production: bot đã sẵn sàng." \
-            "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" > "$RUNNER_TEMP/send-message.json"
-          node - <<'NODE'
-          const fs = require('node:fs');
-          for (const file of ['get-me.json', 'send-message.json']) {
-            const result = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/${file}`, 'utf8'));
-            if (!result.ok) throw new Error(`Telegram từ chối ${file}`);
-          }
-          NODE
+          node -e "const r=require(process.argv[1]);if(!r.ok)throw new Error('Telegram từ chối xác minh bot')" "$RUNNER_TEMP/get-me.json"
 
       - name: Cập nhật Worker secrets
         working-directory: backend
         run: |
           set -euo pipefail
           printf '%s' "$TG_TOKEN" | npx --yes wrangler@4.112.0 secret put TELEGRAM_BOT_TOKEN
-          printf '%s' "$TG_CHAT" | npx --yes wrangler@4.112.0 secret put TELEGRAM_CHAT_ID
           WEBHOOK_SECRET=$(openssl rand -hex 32)
           echo "::add-mask::$WEBHOOK_SECRET"
           printf '%s' "$WEBHOOK_SECRET" | npx --yes wrangler@4.112.0 secret put TELEGRAM_WEBHOOK_SECRET
