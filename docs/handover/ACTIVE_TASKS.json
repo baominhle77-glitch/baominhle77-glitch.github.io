@@ -1,8 +1,33 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T04:31:00+07:00",
+  "updated_at": "2026-07-23T05:02:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-02",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "feat/mobile-branding-research-20260723",
+      "base_sha": "a5d3f7afa78f62e7002e151b48121bb4894d2e1f",
+      "paths": [
+        "assets/community.css",
+        "assets/community.js",
+        "boitoan/community.html",
+        "boitoan/index.html",
+        "boitoan/manifest.webmanifest",
+        "boitoan/icon.png",
+        "boitoan/icon-192.png",
+        "tools/apply-role-system.mjs",
+        "docs/research/**",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T05:02:00+07:00",
+      "heartbeat_at": "2026-07-23T05:02:00+07:00",
+      "summary": "Sửa giao diện mobile cộng đồng, đổi nhận diện thành Cái Chợ của Hiên Nhi, bỏ OpenAI Developers khỏi luồng, rà tài liệu Drive/Canva và lập kế hoạch nâng cấp nội dung bói toán."
+    }
+  ],
   "recently_completed": [
     {
       "id": "COORD-20260723-01",
