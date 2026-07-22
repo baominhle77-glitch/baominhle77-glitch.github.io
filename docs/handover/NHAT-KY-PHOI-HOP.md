@@ -30,9 +30,22 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-23 05:14 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-02 — MOBILE + BRANDING + KHO LUẬN ⏳
+### 2026-07-23 05:26 GMT+7 — ChatGPT GPT-5.6 — DEPLOY-20260723-03 — CHẨN ĐOÁN PRODUCTION ⏳
 
-- Base `a5d3f7afa78f62e7002e151b48121bb4894d2e1f`; branch `agent/BOITOAN-20260723-02-mobile-brand-knowledge`; PR #19.
+- Base/source cần triển khai: `ed63ad7dfd8cf85dd58135095175d40a0a913e42`; branch `agent/DEPLOY-20260723-03-production-diagnostics`.
+- Sau hơn 5 phút kể từ merge PR #19, `main` chưa có commit/file `docs/handover/PRODUCTION_STATUS.md`; connector không liệt kê được push-run và môi trường hiện tại không thể tự xác minh DNS production.
+- Không tuyên bố Cloudflare đã cập nhật. Task source `BOITOAN-20260723-02` được đóng tại commit merge; phần deploy tách riêng sang task này.
+- Đã sửa `.github/workflows/deploy-pages.yml`:
+  - gắn ID cho từng bước preflight, tích hợp, test, build, Pages, Worker và smoke test;
+  - hậu kiểm branding `Cái Chợ của Hiên Nhi`, role cards, CSS mobile, gate runtime và API 401;
+  - ghi `PRODUCTION_STATUS.md` khi **SUCCESS** hoặc **FAILED**;
+  - trạng thái lỗi chứa outcome từng bước, HTTP codes và đường dẫn workflow run;
+  - vẫn giữ thứ tự Pages trước, Worker sau và concurrency production.
+- Chờ: PR kiểm tra workflow → merge → workflow tự triển khai và ghi status máy đọc được.
+
+### 2026-07-23 05:16 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-02 — MOBILE + BRANDING + KHO LUẬN ✅ SOURCE MERGED
+
+- Base `a5d3f7afa78f62e7002e151b48121bb4894d2e1f`; branch `agent/BOITOAN-20260723-02-mobile-brand-knowledge`; PR #19; merge commit `ed63ad7dfd8cf85dd58135095175d40a0a913e42`.
 - Phản hồi từ ảnh iPhone: nút Cộng đồng nổi che thanh điều hướng; loại tài khoản Reader bị xuống dòng dọc; branding cũ và dòng “khu vực riêng tư” cần bỏ.
 - Đã sửa:
   - `assets/community.css`: layout mobile, role cards, system-font stack, serif fallback, logo sigil CSS, watermark lặp.
@@ -45,28 +58,20 @@
   - Google Drive: giáo trình của chủ, Tarot, Lenormand, cartomancy/Bài Tây, Tử Vi; chưa tìm thấy giáo trình Kinh Dịch chuyên biệt đủ rõ.
   - Canva: `Giáo trình tarot hình ảnh`, 63 trang; không có thiết kế Lenormand phù hợp trong lượt tìm.
 - OpenAI Developers: người dùng yêu cầu bỏ; plugin trả `not_installed`, repo không có cấu hình OPENAI; task không phụ thuộc API key.
-- Kiểm thử GitHub Actions:
-  - Run `29962090012` — role system/frontend/SW/Worker: **success**.
-  - Run `29962089978` — coordination guard: **success**.
-- Trạng thái: source đã kiểm thử; PR #19 chưa merge; chưa xác nhận production và chưa test trực tiếp E2E trên iPhone sau deploy.
+- Kiểm thử GitHub Actions cuối PR:
+  - Run `29962272374` — role system/frontend/SW/Worker: **success**.
+  - Run `29962272408` — coordination guard: **success**.
+- Production chưa được task này xác nhận; chuyển sang `DEPLOY-20260723-03`.
 
 ### 2026-07-23 04:31 GMT+7 — ChatGPT GPT-5.6 — COORD-20260723-01 — ĐIỀU PHỐI ĐA-AGENT ✅
 
 - Base: `fc5a147596b34d62ed2464fbcaea038530be83cc`; branch `chore/multi-agent-coordination-20260723`; PR #18.
-- Lý do: trong lúc luồng role-system/deploy đang được theo dõi, agent khác merge thêm thay đổi Bát Tự vào `main`. Thay đổi đó được giữ nguyên; task này không sửa logic app.
-- Đã tạo:
-  - `AGENTS.md` — quy tắc bắt buộc cho mọi agent.
-  - `docs/handover/ACTIVE_TASKS.json` — khóa phạm vi máy đọc được.
-  - `tools/validate-coordination.mjs` — phát hiện Task-ID, branch hoặc paths trùng nhau.
-  - `.github/workflows/coordination-guard.yml` — PR phải có Task-ID, đúng branch, chỉ sửa paths đã khóa và cập nhật bàn giao.
-  - `.github/pull_request_template.md`, `.github/copilot-instructions.md`.
-  - `docs/handover/PHOI-HOP-DA-AGENT.md` — thỏa thuận vận hành chi tiết.
+- Đã tạo `AGENTS.md`, task ledger, validator, coordination guard, mẫu PR và thỏa thuận vận hành.
 - Kiểm thử GitHub Actions đạt; PR #18 merge thành `a5d3f7afa78f62e7002e151b48121bb4894d2e1f`.
 
 ### 2026-07-22 — Claude Code — THÊM THAI NGUYÊN · CUNG MỆNH · THÂN CUNG (Tứ trụ) ✅
 
 - Thêm vào phần Bát Tự trong `boitoan/index.html` ba cung: Thai nguyên, Cung mệnh, Thân cung; hiển thị can-chi, ngũ hành, nạp âm, tàng can.
-- Công thức và ví dụ được agent thực hiện đối chiếu theo tài liệu Tử Bình được ghi trong phiên đó.
 - Test Chromium không lỗi JS; chỉ sửa `boitoan/index.html` và nhật ký; không sửa backend/workflow.
 - Commit merge: `fc5a147596b34d62ed2464fbcaea038530be83cc`.
 
@@ -81,19 +86,16 @@
 
 - Sửa Tháng cá nhân thành rút gọn của Năm cá nhân + tháng dương lịch.
 - Cân bằng ngũ hành và thập thần xét tàng can; test Chromium không lỗi JS.
-- Chỉ sửa `boitoan/index.html` và nhật ký.
 
 ### 2026-07-21 — Claude Code — ĐỔI MẬT KHẨU RIÊNG CHO SPARE ✅
 
 - Worker trả khóa theo app bằng `DECRYPT_KEY_<APP>` rồi fallback `DECRYPT_KEY`.
 - Đặt `DECRYPT_KEY_SPARE`, mã hóa lại chỉ SPARE; Bói toán/MEDORA giữ mật khẩu cũ.
-- Kiểm chứng SPARE mở bằng mật khẩu mới, mật khẩu cũ vô hiệu; hai app còn lại không đổi.
 
 ### 2026-07-21 — Claude Code — TRỌNG SỐ TÀNG CAN VÀ BẢNG PHÂN DÃ ✅
 
 - Thay trọng số chung bằng bảng Nhân nguyên tư lệnh phân dã theo tài liệu cổ điển đã ghi trong app.
 - Thiên can lộ = 1.0; nguyệt lệnh đương quyền ×1.5; hiển thị điểm một chữ số thập phân.
-- Chỉ sửa `boitoan/index.html` và nhật ký; đã test Chromium.
 
 ### Giai đoạn nền tảng — nhiều agent ✅
 
