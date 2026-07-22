@@ -56,3 +56,8 @@ Trước khi push: hãy `git fetch` + rebase lên `main` mới nhất để **kh
   tính năng "Ghi nhớ máy này", link `hiennhi89.pages.dev`, tự-động-deploy. Chi tiết trong `HANDOVER.md`.
 
 > Công cụ khác (VSCode…) khi thay đổi hãy **thêm một mục nhật ký** vào đây để Claude & Codex nắm được.
+
+### 2026-07-21 — Claude Code — TRỌNG SỐ TÀNG CAN (Tứ trụ)  ✅ *(chủ yêu cầu)*
+- Chủ yêu cầu: cân bằng ngũ hành dùng TRỌNG SỐ tàng can thay vì đếm ngang.
+- boitoan/index.html: bản khí [1] · 2 can [0.7,0.3] · 3 can [0.6,0.3,0.1]; can lộ =1.0;
+  địa chi lệnh tháng ×1.5. Hiển thị điểm 1 chữ số thập phân + ghi chú. Đã test Chromium.
