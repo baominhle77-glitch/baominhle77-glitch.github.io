@@ -1,8 +1,34 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T04:31:00+07:00",
+  "updated_at": "2026-07-23T05:04:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-02",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-02-mobile-brand-knowledge",
+      "base_sha": "a5d3f7afa78f62e7002e151b48121bb4894d2e1f",
+      "paths": [
+        "assets/community.css",
+        "assets/community.js",
+        "assets/gate.css",
+        "assets/gate.js",
+        "assets/cho-hien-nhi-sigil.svg",
+        "boitoan/community.html",
+        "boitoan/community-admin.html",
+        "boitoan/index.html",
+        "tools/apply-role-system.mjs",
+        "docs/research/DIVINATION_SOURCES.md",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T04:55:00+07:00",
+      "heartbeat_at": "2026-07-23T05:04:00+07:00",
+      "summary": "Sửa lỗi giao diện mobile cộng đồng, đổi nhận diện thành Cái Chợ của Hiên Nhi, bỏ nhắc riêng tư, cải thiện font/logo và tổng hợp tài liệu Drive/Canva để nâng cấp nội dung bói toán bằng lớp tích hợp sau giải mã."
+    }
+  ],
   "recently_completed": [
     {
       "id": "COORD-20260723-01",
