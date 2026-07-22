@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: cloudflare-production
@@ -74,3 +74,44 @@ jobs:
       - name: Deploy Worker sau Pages
         working-directory: backend
         run: npx --yes wrangler@4.112.0 deploy
+
+      - name: Hậu kiểm production
+        run: |
+          set -euo pipefail
+          page_code=""
+          worker_code=""
+          for attempt in $(seq 1 20); do
+            page_code=$(curl -sS -o "$RUNNER_TEMP/community.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community.html" || true)
+            worker_code=$(curl -sS -o "$RUNNER_TEMP/community-api.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/readers" || true)
+            if [ "$page_code" = "200" ] && grep -q "Cộng đồng luận giải" "$RUNNER_TEMP/community.html" && [ "$worker_code" = "401" ] && grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json"; then
+              break
+            fi
+            sleep 3
+          done
+          test "$page_code" = "200"
+          grep -q "Cộng đồng luận giải" "$RUNNER_TEMP/community.html"
+          test "$worker_code" = "401"
+          grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json"
+
+      - name: Ghi trạng thái triển khai
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          rm -rf _site
+          mkdir -p docs/handover
+          completed_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          cat > docs/handover/PRODUCTION_STATUS.md <<EOF
+          # Trạng thái production
+
+          - Source commit: \`$GITHUB_SHA\`
+          - Hoàn tất UTC: \`$completed_utc\`
+          - Cloudflare Pages: \`200 OK\` tại \`/boitoan/community.html\`
+          - Cloudflare Worker: \`401 unauthorized\` khi gọi API Reader không có phiên
+          - Thứ tự triển khai: Pages trước, Worker sau
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/handover/PRODUCTION_STATUS.md
+          git commit -m "docs: record successful production deployment" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
