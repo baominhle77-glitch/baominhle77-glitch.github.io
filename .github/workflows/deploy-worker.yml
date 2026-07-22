@@ -1,16 +1,19 @@
 name: Deploy Cloudflare Worker
 
-# Tự động deploy backend/worker.js mỗi khi có thay đổi trong backend/.
-# Chỉ chạy thật khi đã đặt secret repo CLOUDFLARE_API_TOKEN (nếu chưa có -> bỏ qua êm).
+# Khôi phục thủ công khi cần. Rollout thường dùng deploy-pages.yml để Pages hoàn tất trước Worker.
 on:
-  push:
-    paths:
-      - "backend/**"
-      - ".github/workflows/deploy-worker.yml"
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

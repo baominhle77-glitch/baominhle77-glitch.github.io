@@ -2,13 +2,21 @@ name: Cài đặt Backend Lớp C (bấm 1 lần)
 
 # Bấm "Run workflow" một lần để TỰ ĐỘNG: tạo KV, đặt bí mật, deploy Worker,
 # nối Telegram webhook. Bạn KHÔNG cần gõ lệnh.
-# Yêu cầu: đã thêm 5 secret repo — CLOUDFLARE_API_TOKEN, TELEGRAM_BOT_TOKEN,
-#          TELEGRAM_CHAT_ID, DECRYPT_KEY, ADMIN_TOKEN (xem backend/HUONG-DAN.md).
+# Yêu cầu: đã thêm 6 secret repo — CLOUDFLARE_API_TOKEN, TELEGRAM_BOT_TOKEN,
+#          TELEGRAM_CHAT_ID, DECRYPT_KEY, DECRYPT_KEY_SPARE, ADMIN_TOKEN.
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+
 jobs:
   setup:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -18,6 +26,7 @@ jobs:
       TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
       DECRYPT_KEY: ${{ secrets.DECRYPT_KEY }}
+      DECRYPT_KEY_SPARE: ${{ secrets.DECRYPT_KEY_SPARE }}
       ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
     steps:
       - uses: actions/checkout@v4
@@ -27,10 +36,10 @@ jobs:
       - name: Kiểm tra đã có đủ secret chưa
         run: |
           miss=0
-          for v in CLOUDFLARE_API_TOKEN TG_TOKEN TG_CHAT DECRYPT_KEY ADMIN_TOKEN; do
+          for v in CLOUDFLARE_API_TOKEN TG_TOKEN TG_CHAT DECRYPT_KEY DECRYPT_KEY_SPARE ADMIN_TOKEN; do
             if [ -z "${!v}" ]; then echo "::error::Thiếu secret: $v"; miss=1; fi
           done
-          [ "$miss" = "0" ] || { echo "Hãy thêm đủ 5 secret rồi chạy lại (xem backend/HUONG-DAN.md)."; exit 1; }
+          [ "$miss" = "0" ] || { echo "Hãy thêm đủ 6 secret rồi chạy lại (xem backend/HUONG-DAN.md)."; exit 1; }
 
       - name: Tạo KV (nếu chưa có) + điền cấu hình
         run: |
@@ -71,6 +80,7 @@ jobs:
           printf '%s' "$TG_TOKEN"    | npx --yes wrangler@4.112.0 secret put TELEGRAM_BOT_TOKEN
           printf '%s' "$TG_CHAT"     | npx --yes wrangler@4.112.0 secret put TELEGRAM_CHAT_ID
           printf '%s' "$DECRYPT_KEY" | npx --yes wrangler@4.112.0 secret put DECRYPT_KEY
+          printf '%s' "$DECRYPT_KEY_SPARE" | npx --yes wrangler@4.112.0 secret put DECRYPT_KEY_SPARE
           printf '%s' "$ADMIN_TOKEN" | npx --yes wrangler@4.112.0 secret put ADMIN_TOKEN
           SS=$(gen); printf '%s' "$SS" | npx --yes wrangler@4.112.0 secret put SESSION_SECRET
           WS=$(gen); printf '%s' "$WS" | npx --yes wrangler@4.112.0 secret put TELEGRAM_WEBHOOK_SECRET

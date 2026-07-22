@@ -3,9 +3,9 @@
 > Đọc file này đầu tiên. Nó cho bất kỳ ai (hoặc AI nick khác) nối vào GitHub nắm ngay
 > toàn bộ tình hình để tiếp tục mà không tốn nhiều limit.
 
-**Cập nhật:** 2026-07-21 · **commit production nền:** `b539612740f56aa00a0c3863706aad005486eaa5`
+**Cập nhật:** 2026-07-22 · **commit rollout nền:** `7cd46c5dd27fca6376bbfcca7ab762087257644b`
 
-Backend, frontend, PWA và tài liệu mới đang ở checkpoint worktree cách ly. Chưa commit, push hoặc deploy. Production cũ tại commit nền vẫn giữ nguyên.
+Backend, frontend, PWA và tài liệu mới đang ở branch rollout trong checkpoint worktree cách ly. Remote mới đã được tích hợp mà không đổi payload SPARE/Bói toán. Bản vá workflow cuối chưa commit, push hoặc deploy; production cũ vẫn giữ nguyên.
 
 ---
 
@@ -44,7 +44,7 @@ Repo cũ không còn là nguồn deploy production.
 - ✅ Đã test trình duyệt thật (Chromium): mở đúng mật khẩu hiện nội dung, sai mật khẩu
   bị chặn, không lỗi console; boitoan chạy đủ chức năng sau giải mã.
 
-### Backend, telemetry và chat — chưa deploy
+### Backend, telemetry và chat — chờ rollout
 - `backend/worker.js`: Cloudflare Worker. Ghi telemetry browser-profile best-effort,
   gửi Telegram cho chủ với nút duyệt/từ chối, cấp phiên JWT v2 khi duyệt.
 - Duyệt được bằng **bot Telegram** HOẶC **trang `/admin`** (mật khẩu ADMIN_TOKEN).
@@ -52,6 +52,7 @@ Repo cũ không còn là nguồn deploy production.
 - Worker lưu IP đã rút gọn `/24` hoặc `/64`, không nhận mật khẩu. Browser ID không phải định danh thiết bị vật lý tuyệt đối.
 - Chat chỉ dành cho phiên approval; mặc định `CHAT_ENABLED=false`. Tin chat giữ 30 ngày trong KV và có bản sao Telegram.
 - Telemetry giữ 90 ngày; yêu cầu/log 7 ngày; phiên 12 giờ.
+- SPARE ưu tiên Worker secret `DECRYPT_KEY_SPARE`; Bói toán và MEDORA dùng fallback `DECRYPT_KEY`.
 - Chưa kiểm thử production trọn luồng khách gửi yêu cầu, Telegram duyệt, nhận phiên/khóa, telemetry và chat.
 - `backend/README.md`: hướng dẫn vận hành; không ghi giá trị bí mật vào repo.
 
@@ -64,9 +65,10 @@ Repo cũ không còn là nguồn deploy production.
 - Chỉ có icon 512×512 thật. Còn thiếu icon 192×192 thật, nên chưa tuyên bố đạt điều kiện quảng bá cài đặt Chrome.
 - ChPlay/App Store chưa hoàn tất. Cần tài khoản developer, đóng gói, listing, privacy disclosure, test và submission riêng.
 
-### Tự động hóa — chưa chạy deploy cho checkpoint này
-- `.github/workflows/deploy-worker.yml`: tự deploy Worker khi push (cần secret `CLOUDFLARE_API_TOKEN`).
-- `.github/workflows/deploy-pages.yml`: khi source đổi trên `main`, gộp ba app từ chính repo này và Direct Upload lên Cloudflare Pages project `hiennhi89`; thiếu token làm workflow thất bại rõ ràng.
+### Tự động hóa — chưa chạy deploy cho rollout này
+- `.github/workflows/deploy-pages.yml`: trên `main`, kiểm tra token/khóa SPARE, test cả frontend/Worker, deploy Pages trước, đồng bộ `DECRYPT_KEY_SPARE`, rồi mới deploy Worker. Worker không chạy nếu Pages lỗi.
+- `.github/workflows/deploy-worker.yml`: chỉ chạy thủ công từ `main`, dùng cho khôi phục; không còn tự deploy từ branch khác.
+- `.github/workflows/setup-backend.yml`: nhận `DECRYPT_KEY_SPARE` riêng cho SPARE.
 - `.github/workflows/handover.yml`: được thiết kế để cập nhật `docs/handover/STATUS.md`; hiện chưa tạo được file này trên `main`.
 - Đích web là Cloudflare Pages, không phải GitHub Pages. Wrangler được pin tại `4.112.0` để giảm biến động phiên bản CLI.
 
@@ -81,10 +83,10 @@ Repo cũ không còn là nguồn deploy production.
 | ChPlay/App Store | Chưa đóng gói hoặc submit. |
 
 ## 4. Cách tiếp tục công việc (cho nick/AI khác)
-1. Làm trong checkpoint worktree hiện tại; không sửa nhầm working tree production.
+1. Làm trong branch rollout của checkpoint worktree hiện tại; không sửa nhầm working tree production.
 2. Chạy full suite trong `backend/`, `assets/`, root và `boitoan/`.
 3. Validate manifest/icon dimensions và Wrangler config nhưng không deploy.
-4. Independent review diff và bằng chứng test; sửa finding trước rollout.
+4. Independent review đã trả `BLOCK` vì Worker từng tự deploy từ mọi branch và song song Pages. Hai blocker đã vá; cần validation cuối trước push.
 5. Trước deploy, xác nhận rate-limit namespace `89001`/`89002` không trùng trong tài khoản Cloudflare.
 6. Rotate/revoke mọi credential từng lộ. `TELEGRAM_CHAT_ID` hiện là Worker secret, không còn trong `wrangler.toml`.
 7. Chỉ commit, push hoặc deploy khi chủ app cho phép rõ ràng. Deploy frontend và Worker phối hợp.
@@ -92,7 +94,7 @@ Repo cũ không còn là nguồn deploy production.
 ## 5. Bí mật / mật khẩu
 - **Mật khẩu cổng hiện tại** được bàn giao RIÊNG trong hội thoại, **không lưu trong repo**.
   Repo chỉ chứa hash PBKDF2; vẫn có rủi ro bị thử đoán ngoại tuyến nếu mật khẩu yếu. Đổi bất cứ lúc nào bằng `tools/set-password.mjs`.
-- Worker cần secret binding: `ADMIN_TOKEN`, `DECRYPT_KEY`, `SESSION_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET`.
+- Worker cần secret binding: `ADMIN_TOKEN`, `DECRYPT_KEY`, `DECRYPT_KEY_SPARE`, `SESSION_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET`.
 - Giá trị token, mật khẩu và secret chỉ giữ ngoài repo; **không chép vào tài liệu hoặc commit**.
 
 ---

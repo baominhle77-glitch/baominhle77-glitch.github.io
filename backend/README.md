@@ -8,6 +8,7 @@ Cloudflare Worker xử lý duyệt người dùng, telemetry truy cập best-eff
 - Telemetry chỉ gửi khi trình duyệt online và request tới Worker thành công. Không thể thống kê tuyệt đối mọi lượt truy cập.
 - Worker không nhận mật khẩu cổng. IP được rút gọn thành IPv4 `/24` hoặc IPv6 `/64` trước khi lưu và hiển thị.
 - Yêu cầu và log giữ 7 ngày; phiên duyệt 12 giờ; sự kiện truy cập 90 ngày; tin nhắn chat 30 ngày.
+- `/admin` phân trang toàn bộ hồ sơ trình duyệt; danh sách yêu cầu duyệt chỉ quét tối đa 500 khóa KV mỗi lần tải.
 - Workers KV và rate limit native đều best-effort; không dùng chúng làm ranh giới bảo mật duy nhất.
 
 ## Tính năng
@@ -30,7 +31,7 @@ Cloudflare Worker xử lý duyệt người dùng, telemetry truy cập best-eff
 
 Hai `namespace_id` rate limit phải là chuỗi số nguyên dương và không trùng binding khác trong cùng tài khoản Cloudflare. Kiểm tra trước deploy.
 
-Worker cần sáu secret, không ghi giá trị vào repo:
+Worker cần bảy secret, không ghi giá trị vào repo:
 
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
@@ -38,12 +39,13 @@ Worker cần sáu secret, không ghi giá trị vào repo:
 - `ADMIN_TOKEN`
 - `SESSION_SECRET`
 - `DECRYPT_KEY`
+- `DECRYPT_KEY_SPARE`
 
 `SESSION_SECRET` phải dài ít nhất 32 ký tự; workflow setup sinh 32 byte ngẫu nhiên và mã hóa thành 64 ký tự hex.
 
 ## Cài tự động
 
-Thêm năm GitHub Actions secret theo `HUONG-DAN.md`, rồi chạy `.github/workflows/setup-backend.yml` thủ công. Workflow:
+Thêm sáu GitHub Actions secret theo `HUONG-DAN.md`, rồi chạy `.github/workflows/setup-backend.yml` thủ công. Workflow:
 
 1. Tạo hoặc tìm KV namespace.
 2. Chạy `worker.test.mjs`.
@@ -55,7 +57,7 @@ Chạy lại workflow setup sẽ xoay `SESSION_SECRET` và `TELEGRAM_WEBHOOK_SEC
 
 ## Deploy thường xuyên
 
-`.github/workflows/deploy-worker.yml` chạy test rồi deploy khi `backend/**` đổi. Workflow này chỉ cần GitHub secret `CLOUDFLARE_API_TOKEN` và không xoay Worker secrets.
+`.github/workflows/deploy-pages.yml` kiểm tra `CLOUDFLARE_API_TOKEN` và `DECRYPT_KEY_SPARE` trước khi đổi production, chạy test, deploy Pages, đồng bộ khóa SPARE rồi mới deploy Worker trên `main`. `.github/workflows/deploy-worker.yml` chỉ dùng khôi phục thủ công từ `main` và không xoay Worker secrets.
 
 Không deploy Worker mới riêng lẻ khi frontend production còn dùng contract cũ. Rollout frontend và Worker phối hợp.
 

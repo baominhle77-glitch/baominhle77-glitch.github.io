@@ -188,9 +188,11 @@ try {
     body: { id: approval.id },
   });
   assert.equal(response.status, 200);
+  e.DECRYPT_KEY_SPARE = "spare-decrypt-secret";
   response = await call(e, `/api/status?id=${approval.id}&did=${DID}`);
   const status = await body(response);
   assert.equal(status.status, "approved");
+  assert.equal(status.key, "spare-decrypt-secret", "app-specific decryption key must override the fallback key");
   assert(status.token);
   const claims = await __test.verifyJWT(SECRET, status.token);
   assert.equal(claims.ver, 2);

@@ -18,7 +18,7 @@ Bot token đã từng lộ phải được thu hồi bằng BotFather `/revoke` 
 3. Giới hạn token vào tài khoản/tài nguyên cần dùng nếu giao diện cho phép.
 4. Copy token vào GitHub secret; không lưu trong file hoặc ứng dụng nhắn tin.
 
-## 3. Thêm năm GitHub Actions secret
+## 3. Thêm sáu GitHub Actions secret
 
 Mở `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/settings/secrets/actions`, chọn **New repository secret**, rồi thêm:
 
@@ -27,17 +27,18 @@ Mở `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/setting
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token |
 | `TELEGRAM_BOT_TOKEN` | bot token mới, chưa lộ |
 | `TELEGRAM_CHAT_ID` | chat ID của chủ app |
-| `DECRYPT_KEY` | khóa mới dùng để mã hóa nội dung ba app |
+| `DECRYPT_KEY` | khóa khớp payload Bói toán và MEDORA |
+| `DECRYPT_KEY_SPARE` | khóa riêng khớp payload SPARE |
 | `ADMIN_TOKEN` | mật khẩu quản trị dài, ngẫu nhiên và riêng biệt |
 
-Không dùng lại ví dụ hoặc giá trị từng xuất hiện trong Git history. `DECRYPT_KEY` mới phải khớp payload đã mã hóa và cấu hình PBKDF2 frontend; nếu chưa xoay đồng bộ, dừng trước deploy.
+Không dùng lại ví dụ hoặc giá trị từng xuất hiện trong Git history. Hai khóa giải mã phải khớp payload và cấu hình PBKDF2 frontend tương ứng; nếu chưa xoay đồng bộ, dừng trước deploy.
 
 ## 4. Kiểm tra trước khi chạy
 
 1. Xác nhận `ALLOWED_ORIGINS` trong `backend/wrangler.toml` chỉ có domain frontend thật.
 2. Xác nhận `namespace_id` `89001` và `89002` không trùng rate-limit binding khác trong tài khoản Cloudflare.
 3. Giữ `CHAT_ENABLED="false"` cho tới khi chấp nhận Telegram giữ bản sao chat 30 ngày.
-4. Chuẩn bị rollout frontend và Worker cùng đợt; không deploy riêng Worker contract mới trước frontend.
+4. Dùng workflow phối hợp: deploy Pages hoàn tất trước rồi mới deploy Worker.
 
 ## 5. Chạy setup
 

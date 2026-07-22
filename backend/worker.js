@@ -1,7 +1,7 @@
 /*!
  * Cloudflare Worker: approval gate, best-effort access telemetry and owner chat.
  * Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, ADMIN_TOKEN,
- * SESSION_SECRET, DECRYPT_KEY. Storage: Workers KV binding "KV".
+ * SESSION_SECRET, DECRYPT_KEY and optional DECRYPT_KEY_<APP>. Storage: Workers KV binding "KV".
  */
 
 const APPS = new Set(["spare", "boitoan", "medora"]);

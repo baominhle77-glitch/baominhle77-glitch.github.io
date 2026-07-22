@@ -372,6 +372,7 @@
       input.rows = 2;
       input.required = true;
       input.placeholder = "Nhập tin nhắn…";
+      input.setAttribute("aria-label", "Tin nhắn");
       var send = document.createElement("button");
       send.className = "gate-btn";
       send.type = "submit";
@@ -419,6 +420,7 @@
       name.required = true;
       name.maxLength = 80;
       name.placeholder = "Tên của bạn";
+      name.setAttribute("aria-label", "Tên của bạn");
       var submit = document.createElement("button");
       submit.className = "gate-btn";
       submit.type = "submit";
@@ -546,11 +548,11 @@
         '<p class="gate-sub"></p>' +
         '<form class="gate-form" autocomplete="off">' +
           '<div class="gate-approval-fields" style="display:none">' +
-            '<input class="gate-input" name="gname" type="text" placeholder="Tên của bạn" autocomplete="off">' +
-            '<input class="gate-input" name="gnote" type="text" placeholder="Lý do truy cập (tùy chọn)" autocomplete="off">' +
+            '<input class="gate-input" name="gname" type="text" placeholder="Tên của bạn" aria-label="Tên của bạn" autocomplete="off">' +
+            '<input class="gate-input" name="gnote" type="text" placeholder="Lý do truy cập (tùy chọn)" aria-label="Lý do truy cập (tùy chọn)" autocomplete="off">' +
           '</div>' +
           '<div class="gate-pass-field">' +
-            '<input class="gate-input" name="gpass" type="password" placeholder="Mật khẩu" autocomplete="off" autofocus>' +
+            '<input class="gate-input" name="gpass" type="password" placeholder="Mật khẩu" aria-label="Mật khẩu" autocomplete="off" autofocus>' +
           '</div>' +
           '<label class="gate-remember"><input type="checkbox" name="gremember" checked> Ghi nhớ máy này (tự mở lần sau)</label>' +
           '<button class="gate-btn" type="submit">Mở khóa</button>' +
