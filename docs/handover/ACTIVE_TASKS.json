@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T05:04:00+07:00",
+  "updated_at": "2026-07-23T05:26:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-02-mobile-brand-knowledge",
-      "base_sha": "a5d3f7afa78f62e7002e151b48121bb4894d2e1f",
+      "branch": "agent/BOITOAN-20260723-02-production-handoff",
+      "base_sha": "ed63ad7dfd8cf85dd58135095175d40a0a913e42",
       "paths": [
         "assets/community.css",
         "assets/community.js",
@@ -23,10 +23,10 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "blocked",
       "started_at": "2026-07-23T04:55:00+07:00",
-      "heartbeat_at": "2026-07-23T05:04:00+07:00",
-      "summary": "Sửa lỗi giao diện mobile cộng đồng, đổi nhận diện thành Cái Chợ của Hiên Nhi, bỏ nhắc riêng tư, cải thiện font/logo và tổng hợp tài liệu Drive/Canva để nâng cấp nội dung bói toán bằng lớp tích hợp sau giải mã."
+      "heartbeat_at": "2026-07-23T05:26:00+07:00",
+      "summary": "Source UI/branding/kho luận đã merge qua PR #19 và CI đạt. Đang chờ bằng chứng deploy Cloudflare cùng smoke test production trên iPhone; không sửa thêm các file ứng dụng cho đến khi xác nhận trạng thái này."
     }
   ],
   "recently_completed": [
