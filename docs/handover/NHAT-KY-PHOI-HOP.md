@@ -32,6 +32,18 @@ Trước khi push: hãy `git fetch` + rebase lên `main` mới nhất để **kh
 
 ## Nhật ký thay đổi (mới nhất trên cùng)
 
+### 2026-07-22 — Claude Code — THÊM THAI NGUYÊN · CUNG MỆNH · THÂN CUNG (Tứ trụ)  ✅ *(chủ yêu cầu)*
+- Chủ yêu cầu (khác nhiệm vụ đang giao VSCode): "lá số nào cũng phải có thai nguyên và cung mệnh — app còn thiếu, thêm hết đi. Đừng làm ảnh hưởng agent khác."
+- Đã thêm vào phần **Bát Tự** (`boitoan/index.html`) một khối 3 cung ngay dưới bảng Tứ trụ, hiển thị can-chi, ngũ hành, nạp âm, tàng can (giao diện y hệt thẻ trụ, lưới 3 cột `.pillars.pal3`):
+  1. **Thai nguyên (胎元)**: can nguyệt +1, chi nguyệt +3 (干前一位, 支前三位) — dựa trên trụ tháng tiết khí.
+  2. **Cung mệnh (命宮)**: cơ số (14 nếu tổng<14, ngược lại 26) − (số tháng-tiết-khí + số giờ), an tại cung Mão 卯. Số địa chi kiểu Dần=1…Sửu=12.
+  3. **Thân cung (身宮)**: thuận số tháng, nghịch giờ về cung Dậu 酉 ⇔ `(số tháng + chi giờ − 10) mod 12`.
+  - Thiên can 3 cung lấy theo **Ngũ hổ độn (五虎遁)** từ can năm (khớp cách app đã tính can tháng).
+- Nguồn công thức: 《三命通會》/ giáo trình Tử Bình (masterso.com, ppfocus). Đã đối chiếu ví dụ chuẩn:
+  酉月辰時 → Mệnh **Bính Thìn (丙辰)**; 辰月丑時 → Mệnh **Nhâm Tý (壬子)** + Thân **Bính Ngọ (丙午)**; 辛酉月 → Thai **Nhâm Tý (壬子)**. Khớp 100%.
+- Đã test **Chromium (CDP)**: 1990-05-20 giờ Ngọ → Thai **Nhâm Thân**, Mệnh **Nhâm Ngọ**, Thân **Mậu Tý** (khớp tính tay); không lỗi JS; các mục sau vẫn render đủ.
+- ⚠️ Chỉ đụng `boitoan/index.html` + file nhật ký này. **Không** đụng SPARE, MEDORA, `sw.js`, `backend/**`, workflow. Mật khẩu boitoan **giữ nguyên** (hiennhi89), chỉ giải mã → sửa JS → mã hóa lại.
+
 ### 2026-07-21 — Claude Code — SỬA THUẬT TOÁN BÓI TOÁN (Thần số + Tứ trụ)  ✅ *(chủ yêu cầu)*
 - Chủ yêu cầu (khác nhiệm vụ đang giao VSCode): sửa "Tháng cá nhân" tính sai + Tứ trụ chưa dùng tàng can.
 - Đã sửa trong `boitoan/index.html` (giải mã bằng mật khẩu boitoan → sửa JS → mã hóa lại, mật khẩu KHÔNG đổi):
