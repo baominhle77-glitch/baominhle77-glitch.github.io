@@ -1,97 +1,130 @@
 # Bàn giao hệ thống ba webapp
 
-> Đọc file này đầu tiên. Nó cho bất kỳ ai (hoặc AI nick khác) nối vào GitHub nắm ngay
-> toàn bộ tình hình để tiếp tục mà không tốn nhiều limit.
+> **Mọi agent phải đọc `AGENTS.md` trước file này.** Sau đó đọc
+> `docs/handover/ACTIVE_TASKS.json` và `docs/handover/NHAT-KY-PHOI-HOP.md` trước khi sửa.
 
-**Cập nhật:** 2026-07-22 · **commit production:** `8790f37f429987a716d62ab1e3d43ceb1053a3d7`
+**Cập nhật:** 23/07/2026 04:24 (GMT+7)  
+**`main` mới nhất khi lập bàn giao:** `fc5a147596b34d62ed2464fbcaea038530be83cc`  
+**Production đã xác nhận gần nhất:** `8790f37f429987a716d62ab1e3d43ceb1053a3d7`
 
-Backend, frontend và PWA mới đã rollout lên Cloudflare production. GitHub Actions run `#9` hoàn tất Pages trước Worker; smoke test read-only ba app, manifest/icon, Worker, `/admin` và CORS đều đạt. Payload SPARE/Bói toán giữ nguyên Git blob hash.
+Hệ thống Khách/Reader/Admin đã merge vào source tại commit `489b751391007976a2a39c4f25bfdcd36db99e25`. Workflow đã được bổ sung hậu kiểm và cơ chế ghi `docs/handover/PRODUCTION_STATUS.md`, nhưng tại thời điểm cập nhật file này **chưa có file trạng thái production mới trên `main`**; vì vậy không được tuyên bố phần cộng đồng đã xác nhận production cho đến khi hậu kiểm tạo file hoặc có bằng chứng tương đương.
 
 ---
 
-## 1. Ba webapp & vị trí
+## 1. Ba webapp và vị trí
 
-Repo `baominhle77-glitch.github.io` là **nguồn chuẩn duy nhất** cho cả ba app.
+Repository `baominhle77-glitch.github.io` là **nguồn chuẩn duy nhất** cho cả ba app.
 
 | App | Mô tả | Nguồn trong repo | URL production |
-|-----|-------|------------------|----------------|
-| 🔮 Bói toán | PWA tra cứu + chat AI | `boitoan/` | `https://hiennhi89.pages.dev/boitoan/` |
-| 🕯️ SPARE (Tâm linh) | Kho tra cứu riêng + chat AI | root | `https://hiennhi89.pages.dev/` |
-| ⚕️ MEDORA (Y đa khoa) | Học y khoa | `medora/` | `https://hiennhi89.pages.dev/medora/` |
+|---|---|---|---|
+| 🔮 Bói toán | PWA tra cứu, luận giải và cộng đồng Reader | `boitoan/` | `https://hiennhi89.pages.dev/boitoan/` |
+| 🕯️ SPARE | Kho tra cứu tâm linh riêng + chat | root | `https://hiennhi89.pages.dev/` |
+| ⚕️ MEDORA | Học y khoa | `medora/` | `https://hiennhi89.pages.dev/medora/` |
 
-MEDORA đã được nhập từ commit `84a8632` của repo cũ `baominhle77-glitch.github.io-`.
-Repo cũ không còn là nguồn deploy production.
+MEDORA được nhập từ commit `84a8632` của repository cũ `baominhle77-glitch.github.io-`. Repository cũ không còn là nguồn deploy production.
 
-## 2. Đã làm gì (trạng thái hiện tại)
+## 2. Gate, mã hóa và quyền truy cập
 
-### Gate và mã hóa
-- `robots.txt` chặn Google/Bing + bot AI (GPTBot, ClaudeBot, CCBot…).
-- Mọi trang thêm `noindex, nofollow, noarchive, nosnippet` + `referrer: no-referrer`.
-- `assets/gate.js` + `assets/gate.css`: màn hình khóa mật khẩu (PBKDF2-SHA256, chạy offline).
-- Đã wire vào cả 3 app bằng shared `assets/gate.js` và `assets/gate.css`.
-- Bốn bản gate trùng trong `boitoan/` và `medora/assets/` đã xóa; không khôi phục nếu không có lý do tương thích rõ ràng.
+### Gate
 
-### Mã hóa nội dung
-- Nội dung 3 app là payload **AES-256-GCM**; gate checkpoint hiện chạy `mode:'approval'` và nhận khóa sau khi duyệt. Tải mã nguồn
-  về chỉ thấy chuỗi mã hóa, không chứa nội dung plaintext. Chế độ mật khẩu cục bộ có thể chạy offline; độ an toàn phụ thuộc độ mạnh mật khẩu vì người có payload có thể thử đoán ngoại tuyến.
-- Với **boitoan**: đã GỘP `data*.js` + `app.js` vào trong rồi mã hóa, và **xóa 6 file
-  plaintext** (giờ `boitoan/data.js`… trả 404 — không tải về được nữa).
-- Công cụ: `tools/encrypt.mjs` (mã hóa), `tools/decrypt.mjs` (khôi phục để sửa),
-  `tools/set-password.mjs` (đổi mật khẩu).
-- ⚠️ **File `*.src.html` (bản gốc plaintext) KHÔNG commit** (đã `.gitignore`). Muốn sửa
-  nội dung: `node tools/decrypt.mjs index.html "mật-khẩu" > index.src.html` → sửa →
-  `node tools/encrypt.mjs index.src.html index.html "mật-khẩu"`.
-- ✅ Đã test trình duyệt thật (Chromium): mở đúng mật khẩu hiện nội dung, sai mật khẩu
-  bị chặn, không lỗi console; boitoan chạy đủ chức năng sau giải mã.
+- `robots.txt` chặn công cụ tìm kiếm và bot AI đã khai báo.
+- Trang dùng `noindex, nofollow, noarchive, nosnippet` và `referrer: no-referrer`.
+- `assets/gate.js` + `assets/gate.css` là lớp gate dùng chung.
+- Ba app chạy `mode: 'approval'` và nhận khóa giải mã sau khi chủ duyệt.
 
-### Backend, telemetry và chat
-- `backend/worker.js`: Cloudflare Worker. Ghi telemetry browser-profile best-effort,
-  gửi Telegram cho chủ với nút duyệt/từ chối, cấp phiên JWT v2 khi duyệt.
-- Duyệt được bằng **bot Telegram** HOẶC **trang `/admin`** (mật khẩu ADMIN_TOKEN).
-- `/`, `/boitoan/` và `/medora/` dùng `mode: 'approval'`, trỏ tới `https://hiennhi89-gate.hiennhi89.workers.dev`.
-- Worker lưu IP đã rút gọn `/24` hoặc `/64`, không nhận mật khẩu. Browser ID không phải định danh thiết bị vật lý tuyệt đối.
-- Chat chỉ dành cho phiên approval; cấu hình production đặt `CHAT_ENABLED=true`. Tin chat giữ 30 ngày trong KV và có bản sao Telegram.
-- Telemetry giữ 90 ngày; yêu cầu/log 7 ngày; phiên 12 giờ.
-- SPARE ưu tiên Worker secret `DECRYPT_KEY_SPARE`; Bói toán và MEDORA dùng fallback `DECRYPT_KEY`.
-- Chưa kiểm thử production trọn luồng khách gửi yêu cầu, Telegram duyệt, nhận phiên/khóa, telemetry và chat.
-- `backend/README.md`: hướng dẫn vận hành; không ghi giá trị bí mật vào repo.
+### Payload mã hóa
 
-### PWA và cửa hàng ứng dụng
-- Root và Bói toán có manifest/SW; SW không cache navigation, HTML mã hóa hoặc API.
-- Có icon PNG 192×192 và 512×512 thật trong cả hai manifest.
-- ChPlay/App Store chưa hoàn tất. Cần tài khoản developer, đóng gói, listing, privacy disclosure, test và submission riêng.
+- Nội dung app được đóng trong payload **AES-256-GCM**; source public không chứa plaintext nội dung chính.
+- Bói toán đã gộp các file dữ liệu/app cũ vào payload; không khôi phục các file plaintext đã xóa.
+- Công cụ: `tools/encrypt.mjs`, `tools/decrypt.mjs`, `tools/set-password.mjs`.
+- File `*.src.html` không được commit.
+- SPARE dùng secret riêng `DECRYPT_KEY_SPARE`; Bói toán và MEDORA dùng `DECRYPT_KEY` chung, trừ khi có binding app-specific mới.
+- Đổi mật khẩu app phải đồng bộ payload mã hóa, gate và Worker secret của đúng app.
 
-### Tự động hóa — production đã rollout
-- `.github/workflows/deploy-pages.yml`: trên `main`, kiểm tra token và tên binding `DECRYPT_KEY_SPARE` trên Worker, test cả frontend/Worker, deploy Pages trước rồi mới deploy Worker. Wrangler giữ nguyên Worker secrets; Worker không chạy nếu preflight hoặc Pages lỗi.
-- `.github/workflows/deploy-worker.yml`: chỉ chạy thủ công từ `main`, dùng cho khôi phục; không còn tự deploy từ branch khác.
-- `.github/workflows/setup-backend.yml`: nhận `DECRYPT_KEY_SPARE` riêng cho SPARE.
-- `.github/workflows/handover.yml`: được thiết kế để cập nhật `docs/handover/STATUS.md`; hiện chưa tạo được file này trên `main`.
-- Đích web là Cloudflare Pages, không phải GitHub Pages. Wrangler được pin tại `4.112.0` để giảm biến động phiên bản CLI.
-- Production run `#9` cho commit `8790f37` thành công. Smoke test xác nhận HTTP 200 cho `/`, `/boitoan/`, `/medora/`, hai manifest, icon Bói, Worker root và `/admin`; CORS OPTIONS trả HTTP 204 đúng origin Pages.
+### Backend approval
 
-## 3. Việc bạn cần làm (một lần, tùy chọn mức bảo vệ)
+- `backend/worker.js` là Cloudflare Worker cho telemetry, duyệt Telegram/trang Admin, session và API.
+- Worker production: `hiennhi89-gate.hiennhi89.workers.dev`.
+- Phiên approval hiện có thời hạn 12 giờ; chat cũ của hệ thống gốc lưu tối đa 30 ngày trong KV.
+- Telemetry/browser ID là best-effort, không phải định danh thiết bị vật lý tuyệt đối.
 
-| Muốn mức nào | Bạn cần làm |
-|--------------|-------------|
-| Gate/mã hóa | Đã rollout production; giữ khóa và payload đồng bộ khi đổi mật khẩu. |
-| Telemetry/approval/chat | Approval/Telegram đã xác minh; cấu hình tiếp theo bật chat. Còn test chat gửi/reply đầu-cuối sau rollout. |
-| PWA | Nền tảng an toàn và icon 192/512 đã xong. |
-| ChPlay/App Store | Chưa đóng gói hoặc submit. |
+## 3. Hệ thống tài khoản Bói toán
 
-## 4. Cách tiếp tục công việc (cho nick/AI khác)
-1. Bắt đầu từ `main` sạch tại hoặc sau commit production `8790f37`; không dùng worktree có sửa đổi dở.
-2. Chạy full suite trong `backend/`, `assets/`, root và `boitoan/`.
-3. Independent Reviewer từng trả `BLOCK` vì Worker tự deploy từ mọi branch và chạy song song Pages. Hai blocker đã sửa trước rollout; không có verdict Reviewer lần hai.
-4. Trước lần setup hoặc đổi rate-limit binding, xác nhận namespace `89001`/`89002` không trùng trong tài khoản Cloudflare.
-5. Test E2E production có ghi KV/Telegram cần chủ động tạo dữ liệu thử và dọn dữ liệu nếu cần; smoke test hiện tại chỉ đọc.
-6. Rotate/revoke mọi credential từng lộ. `TELEGRAM_CHAT_ID` hiện là Worker secret, không còn trong `wrangler.toml`.
-7. Deploy frontend và Worker bằng workflow phối hợp; không chạy Worker riêng nếu contract frontend thay đổi.
+Source đã có:
 
-## 5. Bí mật / mật khẩu
-- **Mật khẩu cổng hiện tại** được bàn giao RIÊNG trong hội thoại, **không lưu trong repo**.
-  Repo chỉ chứa hash PBKDF2; vẫn có rủi ro bị thử đoán ngoại tuyến nếu mật khẩu yếu. Đổi bất cứ lúc nào bằng `tools/set-password.mjs`.
-- Worker cần secret binding: `ADMIN_TOKEN`, `DECRYPT_KEY`, `DECRYPT_KEY_SPARE`, `SESSION_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET`.
-- Giá trị token, mật khẩu và secret chỉ giữ ngoài repo; **không chép vào tài liệu hoặc commit**.
+- Vai trò người dùng: **Khách** và **Reader/Người luận giải**; quản trị qua `ADMIN_TOKEN`.
+- Đăng ký/đăng nhập chỉ sau khi qua gate duyệt.
+- Khách có hồ sơ cá nhân, không có trường đánh giá trên chính hồ sơ Khách.
+- Reader có giới thiệu, mảng chuyên sâu, thông tin nhận phí và QR; API từ chối link trong hồ sơ/thông tin thanh toán.
+- Review công khai 1–5 sao + nội dung; Khách tự gỡ review của mình, Admin gỡ được, Reader không được gỡ.
+- Chat Reader–Khách giữ tối đa 30 ngày, polling khoảng 1,5 giây, có báo phí/báo chuyển khoản/xác nhận/nội dung luận giải.
+- Chat Reader–Khách không sao chép sang Telegram.
+- Chỉ hai người tham gia đọc chat. Quyền Admin đọc chat cần đồng thời `ADMIN_TOKEN` và đúng owner-device ID đã khóa trong KV; Admin khác không đọc được nội dung chat.
+
+Cấu trúc:
+
+- `backend/community.js`
+- `assets/community.js`
+- `assets/community-admin.js`
+- `assets/community.css`
+- `boitoan/community.html`
+- `boitoan/community-admin.html`
+- `tools/apply-role-system.mjs`
+- `docs/handover/ROLE_SYSTEM.md`
+
+Việc vận hành còn cần làm sau khi production được xác nhận:
+
+1. Mở trang quản trị cộng đồng trên đúng thiết bị chủ.
+2. Khóa owner-device lần đầu.
+3. Test E2E: tạo Khách, tạo Reader, review, chat, báo phí, thanh toán và quyền Admin.
+4. Ghi kết quả/dữ liệu thử đã dọn vào nhật ký.
+
+## 4. PWA và cửa hàng ứng dụng
+
+- Root và Bói toán có manifest/service worker.
+- Service worker không được cache navigation, HTML mã hóa hoặc API.
+- Có icon PNG 192×192 và 512×512 thật.
+- ChPlay/App Store/iOS chưa hoàn tất: còn tài khoản developer, đóng gói, listing, privacy disclosure, test và submission.
+
+## 5. CI/CD và Cloudflare
+
+- `.github/workflows/deploy-pages.yml`: deploy từ `main`, preflight secret/binding, chạy test, build site, deploy Pages trước và Worker sau.
+- Workflow có concurrency `cloudflare-production`, không hủy deploy đang chạy.
+- Wrangler pin `4.112.0` để giảm biến động.
+- `.github/workflows/deploy-worker.yml`: chỉ dùng thủ công cho khôi phục; không dùng thay workflow phối hợp khi frontend/API cùng đổi.
+- `backend/wrangler.toml` và workflow trong repository là nguồn chuẩn cấu hình Cloudflare; tránh sửa dashboard mà không cập nhật source.
+- Hậu kiểm mới yêu cầu trang cộng đồng trả HTTP 200 và API Reader không có phiên trả HTTP 401; thành công phải tạo `docs/handover/PRODUCTION_STATUS.md`.
+- Tại thời điểm 04:24 ngày 23/07/2026, file trạng thái mới chưa xuất hiện; production mới nhất được xác nhận vẫn là commit `8790f37`.
+
+## 6. Điều phối nhiều agent
+
+Cơ chế mới:
+
+- `AGENTS.md`: quy tắc bắt buộc cho mọi agent.
+- `docs/handover/ACTIVE_TASKS.json`: khóa phạm vi máy đọc được.
+- `tools/validate-coordination.mjs`: phát hiện task trùng ID/branch/phạm vi.
+- `.github/workflows/coordination-guard.yml`: kiểm tra PR có Task-ID, đúng branch, chỉ sửa trong phạm vi đã khóa và có cập nhật bàn giao.
+- `.github/pull_request_template.md`: checklist bắt buộc.
+- `.github/copilot-instructions.md`: hướng dẫn GitHub Copilot/agent.
+- `docs/handover/PHOI-HOP-DA-AGENT.md`: thỏa thuận vận hành chi tiết.
+
+Nguyên tắc: một PR = một Task-ID; không sửa trực tiếp `main`; không sửa vùng đang bị task khác khóa; mọi task phải cập nhật bàn giao và giải phóng khóa.
+
+## 7. Việc còn lại ưu tiên
+
+1. Xác định kết quả workflow deploy cho source cộng đồng và commit mới nhất; chỉ chốt khi có hậu kiểm.
+2. Test E2E production có ghi KV/Telegram/community rồi dọn dữ liệu thử.
+3. Khóa owner-device trên thiết bị chủ và ghi migration procedure nếu sau này đổi thiết bị.
+4. Cân nhắc bật/chuẩn hóa Workers Logs/Traces trong `wrangler.toml` sau khi xác định chi phí và dữ liệu được phép ghi.
+5. Hoàn thiện đóng gói iOS/Android khi có tài khoản developer và bộ privacy disclosure.
+
+## 8. Bí mật và mật khẩu
+
+- Giá trị mật khẩu cổng được bàn giao riêng, không lưu trong repository.
+- Worker cần các binding/secret phù hợp, gồm: `ADMIN_TOKEN`, `DECRYPT_KEY`, `DECRYPT_KEY_SPARE`, `SESSION_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET` và khóa thanh toán nếu bật.
+- Token, mật khẩu, QR riêng, dữ liệu chat và secret không được chép vào issue/PR/log/bàn giao.
+- Credential từng lộ trong hội thoại hoặc môi trường ngoài repository phải được rotate/revoke theo quyết định của chủ; tài liệu chỉ ghi trạng thái, không ghi giá trị.
 
 ---
-_Xem thiết kế chi tiết & lý do kỹ thuật trong `docs/ARCHITECTURE.md`._
+
+Xem thêm: `docs/ARCHITECTURE.md`, `docs/handover/ROLE_SYSTEM.md`, `docs/handover/PHOI-HOP-DA-AGENT.md`.
