@@ -2,8 +2,8 @@
 
 > File này để các AI/công cụ khác nhau cùng làm trên repository đọc và nắm được ai đã làm gì, phạm vi nào đang giữ, đã kiểm thử ra sao và việc nào còn chờ.
 
-**Chủ sở hữu:** Hiên Nhi Hiên 89.  
-**Quy tắc mới:** mọi agent phải đọc `AGENTS.md` và `docs/handover/ACTIVE_TASKS.json` trước khi sửa. Không ghi giá trị mật khẩu, token hoặc secret vào repository.
+**Chủ sở hữu:** Cái Chợ của Hiên Nhi.  
+**Quy tắc:** mọi agent phải đọc `AGENTS.md` và `docs/handover/ACTIVE_TASKS.json` trước khi sửa. Không ghi giá trị mật khẩu, token hoặc secret vào repository.
 
 ---
 
@@ -30,6 +30,28 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-23 04:45 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-UI-20260723-01 — UI MOBILE + THƯ VIỆN HUYỀN HỌC ⏳
+
+- Branch: `agent/ui-brand-research-20260723`.
+- Yêu cầu từ ảnh production:
+  - nút Cộng đồng đang đè thanh điều hướng;
+  - lựa chọn Khách/Reader vỡ hàng và khó hiểu trên iPhone;
+  - đổi nhận diện `Hiên Nhi 89` thành **Cái Chợ của Hiên Nhi**;
+  - tăng watermark nền, bỏ các cụm `khu vực riêng tư`, đổi font và logo;
+  - dừng kế hoạch OpenAI Developers/API vì không phù hợp quy trình vận hành hiện tại;
+  - tìm nguồn Tarot/Lenormand/Bài Tây/Tử Vi/Kinh Dịch trong Google Drive và Canva.
+- Đã sửa source:
+  - `boitoan/community.html`: topbar mới, logo `◈`, tên thương hiệu mới và hai thẻ lựa chọn vai trò có mô tả rõ.
+  - `assets/community.css`: mobile-first, không vỡ chữ, radio card một cột trên màn hình nhỏ, font hệ thống + serif fallback, watermark lặp nền.
+  - `tools/apply-role-system.mjs`: đưa Cộng đồng vào thanh điều hướng/header thay vì nút nổi; fallback đặt phía trên Chat; chuẩn hóa tên thương hiệu và bỏ các cụm riêng tư; bổ sung patch watermark/logo.
+- Đã nghiên cứu nguồn người dùng có quyền truy cập:
+  - Canva `DAGsWKExmuc` — `Giáo trình tarot hình ảnh`, 63 trang.
+  - Drive có nhiều nguồn Lenormand, Tarot, Bài Tây và Tử Vi; chỉ mục và kế hoạch nằm tại `docs/research/DIVINATION_SOURCE_INDEX.md`.
+  - Tìm kiếm `Kinh Dịch` hiện cho kết quả nhiễu; vòng sau phải tìm theo `Chu Dịch`, `64 quẻ`, `Thoán truyện`, `Mai Hoa Dịch Số`, `Lục Hào`, `Nạp Giáp`.
+- Nguyên tắc: dùng tài liệu để xây schema/logic/nội dung riêng, không sao chép nguyên văn sách có bản quyền vào app.
+- OpenAI Developers/API: **đã loại khỏi kế hoạch của app**; không yêu cầu người dùng tự lấy API key.
+- Chưa làm: chạy CI, review diff, deploy Cloudflare, smoke test iPhone và chỉnh thuật toán trong payload mã hóa.
+
 ### 2026-07-23 04:31 GMT+7 — ChatGPT GPT-5.6 — COORD-20260723-01 — ĐIỀU PHỐI ĐA-AGENT ✅
 
 - Base: `fc5a147596b34d62ed2464fbcaea038530be83cc`; branch `chore/multi-agent-coordination-20260723`; PR #18.
@@ -45,7 +67,7 @@
 - Kiểm thử GitHub Actions:
   - Run `29959470437` — kiểm tra role-system/frontend/Worker: **success**.
   - Run `29959470476` — validator khóa phạm vi + hợp đồng PR: **success**.
-- Task đã chuyển sang `completed`, `active_tasks` đã rỗng và toàn bộ phạm vi được giải phóng. Chờ lượt CI cuối sau commit bàn giao rồi merge PR #18.
+- Task đã chuyển sang `completed`, `active_tasks` đã rỗng và toàn bộ phạm vi được giải phóng.
 
 ### 2026-07-22 — Claude Code — THÊM THAI NGUYÊN · CUNG MỆNH · THÂN CUNG (Tứ trụ) ✅
 
