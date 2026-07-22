@@ -6,6 +6,8 @@ on:
     paths:
       - ".role-system/**"
       - ".github/workflows/materialize-role-system.yml"
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
@@ -17,19 +19,37 @@ concurrency:
 jobs:
   materialize:
     runs-on: ubuntu-latest
+    env:
+      HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
-      - name: Giải nén mã nguồn và tạo commit sạch
+      - name: Giải nén và kiểm tra mã nguồn
         run: |
           set -euo pipefail
           cat .role-system/part-* > "$RUNNER_TEMP/role-system.b64"
           base64 --decode "$RUNNER_TEMP/role-system.b64" > "$RUNNER_TEMP/role-system.tgz"
           tar -xzf "$RUNNER_TEMP/role-system.tgz"
+          node tools/apply-role-system.mjs
+          node --check assets/gate.js
+          node --check assets/community.js
+          node --check assets/community-admin.js
+          node assets/gate.test.mjs
+          node --check boitoan/sw.js
+          node boitoan/sw.test.mjs
+          node --check backend/community.js
+          node backend/community.test.mjs
+          node --check backend/worker.js
+          node backend/worker.test.mjs
+          git checkout -- assets/gate.js assets/gate.css boitoan/sw.js backend/worker.js
+      - name: Tạo commit sạch
+        run: |
+          set -euo pipefail
           rm -rf .role-system .github/workflows/materialize-role-system.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "feat: add Guest Reader Admin community system"
-          git push origin HEAD:feat/roles-reader-community-20260723
+          git push origin HEAD:"$HEAD_BRANCH"
