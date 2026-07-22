@@ -57,7 +57,7 @@ Chạy lại workflow setup sẽ xoay `SESSION_SECRET` và `TELEGRAM_WEBHOOK_SEC
 
 ## Deploy thường xuyên
 
-`.github/workflows/deploy-pages.yml` kiểm tra `CLOUDFLARE_API_TOKEN` và `DECRYPT_KEY_SPARE` trước khi đổi production, chạy test, deploy Pages, đồng bộ khóa SPARE rồi mới deploy Worker trên `main`. `.github/workflows/deploy-worker.yml` chỉ dùng khôi phục thủ công từ `main` và không xoay Worker secrets.
+`.github/workflows/deploy-pages.yml` kiểm tra `CLOUDFLARE_API_TOKEN` và tên binding `DECRYPT_KEY_SPARE` trên Worker trước khi đổi production, chạy test, deploy Pages rồi mới deploy Worker trên `main`. Wrangler giữ nguyên Worker secrets hiện có. `.github/workflows/deploy-worker.yml` chỉ dùng khôi phục thủ công từ `main` và không xoay Worker secrets.
 
 Không deploy Worker mới riêng lẻ khi frontend production còn dùng contract cũ. Rollout frontend và Worker phối hợp.
 

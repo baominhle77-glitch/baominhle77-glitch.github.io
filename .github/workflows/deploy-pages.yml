@@ -26,16 +26,15 @@ jobs:
       - name: Checkout repo chính
         uses: actions/checkout@v4
 
-      - name: Kiểm tra secret deploy
-        env:
-          DECRYPT_KEY_SPARE: ${{ secrets.DECRYPT_KEY_SPARE }}
-        run: |
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Thiếu CLOUDFLARE_API_TOKEN"; exit 1; }
-          test -n "$DECRYPT_KEY_SPARE" || { echo "::error::Thiếu DECRYPT_KEY_SPARE"; exit 1; }
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with: { node-version: "22" }
+
+      - name: Kiểm tra secret deploy
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Thiếu CLOUDFLARE_API_TOKEN"; exit 1; }
+          npx --yes wrangler@4.112.0 secret list --config backend/wrangler.toml --format json > "$RUNNER_TEMP/worker-secrets.json"
+          node -e "const s=require(process.argv[1]); if (!s.some(({name}) => name === 'DECRYPT_KEY_SPARE')) { console.error('::error::Worker thiếu DECRYPT_KEY_SPARE'); process.exit(1); }" "$RUNNER_TEMP/worker-secrets.json"
 
       - name: Kiểm tra source
         run: |
@@ -67,8 +66,4 @@ jobs:
 
       - name: Deploy Worker sau Pages
         working-directory: backend
-        env:
-          DECRYPT_KEY_SPARE: ${{ secrets.DECRYPT_KEY_SPARE }}
-        run: |
-          printf '%s' "$DECRYPT_KEY_SPARE" | npx --yes wrangler@4.112.0 secret put DECRYPT_KEY_SPARE
-          npx --yes wrangler@4.112.0 deploy
+        run: npx --yes wrangler@4.112.0 deploy
