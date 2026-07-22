@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
 import worker, { __test } from "./worker.js";
 
 class MemoryKV {
@@ -25,15 +26,76 @@ class MemoryKV {
 const DID = "11111111-1111-4111-8111-111111111111";
 const EVENT = "22222222-2222-4222-8222-222222222222";
 const CLIENT_MESSAGE = "33333333-3333-4333-8333-333333333333";
+const ADVICE_CLIENT = "88888888-8888-4888-8888-888888888888";
 const SECRET = "test-session-secret-at-least-32-chars";
+const PAYOS_CHECKSUM = "test-payos-checksum-key";
 let telegramId = 100;
 let telegramCalls = [];
 let telegramFails = false;
+let telegramFailMethod = "";
+let payosCalls = [];
+let payosGetCalls = [];
+let payosCreated = null;
+let payosFails = false;
+let payosLostResponse = false;
+let payosVariant = "";
 
 const originalFetch = globalThis.fetch;
-globalThis.fetch = async (url, options) => {
-  telegramCalls.push({ url: String(url), body: JSON.parse(options.body) });
-  if (telegramFails) return new Response(JSON.stringify({ ok: false }), { status: 502 });
+globalThis.fetch = async (url, options = {}) => {
+  const target = String(url);
+  if (target.startsWith("https://api-merchant.payos.vn/v2/payment-requests/") && (!options.method || options.method === "GET")) {
+    payosGetCalls.push({ url: target, headers: options.headers });
+    if (!payosCreated || target.split("/").at(-1) !== String(payosCreated.orderCode)) {
+      return new Response(JSON.stringify({ code: "01", desc: "not found" }), { status: 404 });
+    }
+    const data = {
+      id: payosCreated.paymentLinkId,
+      orderCode: payosCreated.orderCode,
+      amount: payosCreated.amount,
+      amountPaid: 0,
+      amountRemaining: payosCreated.amount,
+      status: "PENDING",
+      createdAt: "2026-07-22T12:00:00.000Z",
+      transactions: [],
+    };
+    const signature = createHmac("sha256", PAYOS_CHECKSUM)
+      .update(Object.keys(data).sort().map((key) => `${key}=${Array.isArray(data[key]) ? JSON.stringify(data[key]) : data[key]}`).join("&"))
+      .digest("hex");
+    return new Response(JSON.stringify({ code: "00", desc: "success", data, signature }), {
+      headers: { "content-type": "application/json" },
+    });
+  }
+  if (target === "https://api-merchant.payos.vn/v2/payment-requests") {
+    const requestBody = JSON.parse(options.body);
+    payosCalls.push({ url: target, headers: options.headers, body: requestBody });
+    if (payosFails) return new Response(JSON.stringify({ code: "500", desc: "failed" }), { status: 502 });
+    const data = {
+      orderCode: requestBody.orderCode,
+      amount: requestBody.amount,
+      currency: "VND",
+      paymentLinkId: "test-payment-link",
+      checkoutUrl: "https://pay.payos.vn/web/test-payment-link",
+      accountName: "MUST NOT LEAK",
+      accountNumber: "0000000000",
+    };
+    payosCreated = { ...data };
+    if (payosLostResponse) throw new Error("connection_lost_after_create");
+    if (payosVariant === "host") data.checkoutUrl = "https://attacker.example/checkout";
+    if (payosVariant === "order") data.orderCode += 1;
+    if (payosVariant === "amount") data.amount += 1;
+    if (payosVariant === "currency") data.currency = "USD";
+    let signature = createHmac("sha256", PAYOS_CHECKSUM)
+      .update(Object.keys(data).sort().map((key) => `${key}=${data[key]}`).join("&"))
+      .digest("hex");
+    if (payosVariant === "signature") signature = "0".repeat(64);
+    return new Response(JSON.stringify({ code: "00", desc: "success", data, signature }), {
+      headers: { "content-type": "application/json" },
+    });
+  }
+  telegramCalls.push({ url: target, body: JSON.parse(options.body) });
+  if (telegramFails || (telegramFailMethod && target.endsWith(`/${telegramFailMethod}`))) {
+    return new Response(JSON.stringify({ ok: false }), { status: 502 });
+  }
   telegramId += 1;
   return new Response(JSON.stringify({ ok: true, result: { message_id: telegramId } }), {
     headers: { "content-type": "application/json" },
@@ -79,6 +141,19 @@ async function call(environment, path, options) {
 }
 
 async function body(response) { return response.json(); }
+
+async function approve(environment, app, did, name) {
+  let response = await call(environment, "/api/request", {
+    method: "POST", body: { app, name, device_id: did },
+  });
+  const approval = await body(response);
+  response = await call(environment, "/api/admin/approve", {
+    method: "POST", token: "admin-secret", body: { id: approval.id },
+  });
+  assert.equal(response.status, 200);
+  response = await call(environment, `/api/status?id=${approval.id}&did=${did}`);
+  return body(response);
+}
 
 try {
   assert.equal(__test.redactIp("203.0.113.42"), "203.0.113.0/24");
@@ -420,6 +495,240 @@ try {
   assert.equal(response.status, 200);
   response = await call(e, "/api/chat/messages", { token: status.token });
   assert.equal(response.status, 401, "denial revokes active session");
+
+  const adviceEnv = env({
+    CHAT_ENABLED: "true",
+    PAYOS_CLIENT_ID: "test-client-id",
+    PAYOS_API_KEY: "test-api-key",
+    PAYOS_CHECKSUM_KEY: PAYOS_CHECKSUM,
+    PAYOS_RETURN_URL: "https://hiennhi89.pages.dev/boitoan/",
+  });
+  const adviceSession = await approve(adviceEnv, "boitoan", DID, "Khách luận giải");
+  const adviceClaims = await __test.verifyJWT(SECRET, adviceSession.token);
+  const spareSession = await approve(adviceEnv, "spare", EVENT, "Khách SPARE");
+  response = await call(adviceEnv, "/api/advice/request", {
+    method: "POST", token: spareSession.token,
+    body: { client_id: ADVICE_CLIENT, section: "Tử vi", question: "Câu hỏi" },
+  });
+  assert.equal(response.status, 403, "advice must only accept an approved boitoan session");
+
+  telegramCalls = [];
+  response = await call(adviceEnv, "/api/advice/request", {
+    method: "POST", token: adviceSession.token,
+    body: {
+      client_id: ADVICE_CLIENT,
+      section: "Tử vi <b>không parse HTML</b>",
+      question: "Xin luận giải <script>alert(1)</script>",
+      cid: "attacker-conversation",
+    },
+  });
+  assert.equal(response.status, 200);
+  const adviceRequest = await body(response);
+  const adviceRecordKey = `advice:${adviceRequest.id}`;
+  let adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+  assert.equal(adviceRecord.cid, adviceClaims.cid);
+  assert.equal(adviceRecord.did, DID);
+  assert(!JSON.stringify(adviceRecord).includes("attacker-conversation"));
+  assert.equal(adviceEnv.KV.options.get(adviceRecordKey).expirationTtl, __test.CHAT_TTL);
+  assert.equal(telegramCalls.length, 1);
+  assert.equal(telegramCalls[0].body.parse_mode, undefined, "advice must use Telegram plain text");
+  assert(telegramCalls[0].body.reply_markup.inline_keyboard.flat()
+    .every((button) => new TextEncoder().encode(button.callback_data).length <= 64));
+
+  response = await call(adviceEnv, "/api/advice/request", {
+    method: "POST", token: adviceSession.token,
+    body: { client_id: ADVICE_CLIENT, section: "retry", question: "retry" },
+  });
+  assert.deepEqual(await body(response), { id: adviceRequest.id, status: "pending", duplicate: true });
+  assert.equal(telegramCalls.length, 1, "idempotent advice retry must not duplicate Telegram message");
+
+  const foreignDid = "99999999-9999-4999-8999-999999999999";
+  const foreignSession = await approve(adviceEnv, "boitoan", foreignDid, "Khách khác");
+  response = await call(adviceEnv, `/api/advice/status?id=${adviceRequest.id}`, { token: foreignSession.token });
+  assert.equal(response.status, 404, "another approved browser must not read advice");
+
+  async function adviceCallback(updateId, command, ownerId = 123456789) {
+    return call(adviceEnv, "/telegram/webhook", {
+      method: "POST",
+      body: {
+        update_id: updateId,
+        callback_query: {
+          id: `advice-callback-${updateId}`,
+          from: { id: ownerId },
+          data: `advice:${adviceRequest.id}:${command}`,
+          message: {
+            message_id: adviceRecord.telegram_message_id,
+            text: "Yêu cầu luận giải",
+            chat: { id: 123456789 },
+          },
+        },
+      },
+      headers: { "X-Telegram-Bot-Api-Secret-Token": "webhook-secret" },
+    });
+  }
+
+  response = await adviceCallback(9100, "9", 999999999);
+  assert.equal(response.status, 200);
+  adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+  assert.equal(adviceRecord.quote_input, "", "foreign Telegram callback must not change quote");
+
+  telegramFailMethod = "editMessageText";
+  await assert.rejects(adviceCallback(9190, "7"), /telegram_unavailable/,
+    "Telegram edit failure must surface for retry");
+  telegramFailMethod = "";
+  response = await adviceCallback(9190, "7");
+  assert.deepEqual(await body(response), { ok: true, duplicate: true });
+  adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+  assert.equal(adviceRecord.quote_input, "7", "retried update must not append a quote digit twice");
+  await adviceCallback(9191, "clear");
+
+  telegramCalls = [];
+  await adviceCallback(9101, "0");
+  await adviceCallback(9102, "confirm");
+  adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+  assert.equal(adviceRecord.status, "pending", "zero quote must be rejected");
+  assert(telegramCalls.some((call) => call.url.endsWith("/answerCallbackQuery")
+    && call.body.text === "Nhập số tiền lớn hơn 0"), "every handled callback must be acknowledged");
+  await adviceCallback(9103, "clear");
+  await adviceCallback(9104, "1");
+  await adviceCallback(9105, "2");
+  await adviceCallback(9106, "3");
+  await adviceCallback(9107, "back");
+  await adviceCallback(9108, "3");
+  await adviceCallback(9109, "confirm");
+  adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+  assert.equal(adviceRecord.status, "quoted");
+  assert.equal(adviceRecord.amount, 123);
+
+  response = await call(adviceEnv, `/api/advice/status?id=${adviceRequest.id}`, { token: adviceSession.token });
+  const quotedStatus = await body(response);
+  assert.deepEqual(quotedStatus, {
+    id: adviceRequest.id,
+    section: "Tử vi <b>không parse HTML</b>",
+    status: "quoted",
+    amount: 123,
+    payment_status: "unpaid",
+    payment_enabled: true,
+  });
+
+  const returnUrl = adviceEnv.PAYOS_RETURN_URL;
+  adviceEnv.PAYOS_RETURN_URL = "";
+  response = await call(adviceEnv, "/api/advice/payment", {
+    method: "POST", token: adviceSession.token, body: { id: adviceRequest.id },
+  });
+  assert.equal(response.status, 503);
+  assert.deepEqual(await body(response), { error: "payment_not_configured" });
+  adviceEnv.PAYOS_RETURN_URL = returnUrl;
+
+  for (const variant of ["signature", "host", "order", "amount", "currency"]) {
+    payosVariant = variant;
+    response = await call(adviceEnv, "/api/advice/payment", {
+      method: "POST", token: adviceSession.token, body: { id: adviceRequest.id },
+    });
+    assert.equal(response.status, 502, `payOS ${variant} mismatch must fail closed`);
+    adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+    assert.equal(adviceRecord.checkout_url, undefined);
+    delete adviceRecord.order_code;
+    delete adviceRecord.payment_link_id;
+    adviceRecord.payment_status = "unpaid";
+    await adviceEnv.KV.put(adviceRecordKey, JSON.stringify(adviceRecord), { expirationTtl: __test.CHAT_TTL });
+    payosCreated = null;
+  }
+  payosVariant = "";
+  payosCalls = [];
+  payosGetCalls = [];
+  payosLostResponse = true;
+  response = await call(adviceEnv, "/api/advice/payment", {
+    method: "POST", token: adviceSession.token, body: { id: adviceRequest.id },
+  });
+  assert.equal(response.status, 502, "lost create response must not be treated as success");
+  payosLostResponse = false;
+  response = await call(adviceEnv, "/api/advice/payment", {
+    method: "POST", token: adviceSession.token, body: { id: adviceRequest.id },
+  });
+  assert.equal(response.status, 200);
+  const payment = await body(response);
+  assert.deepEqual(payment, { checkout_url: "https://pay.payos.vn/web/test-payment-link", duplicate: true },
+    "retry must recover allowlisted hosted checkout from signed payOS detail");
+  assert(!JSON.stringify(payment).includes("MUST NOT LEAK"));
+  assert.equal(payosCalls.length, 1);
+  assert.equal(payosGetCalls.length, 1, "retry after lost response must look up existing order before creating");
+  assert.equal(payosCalls[0].headers["x-client-id"], "test-client-id");
+  assert.equal(payosCalls[0].headers["x-api-key"], "test-api-key");
+  assert.equal(payosCalls[0].body.description.length, 9, "payment description must fit documented 9-character limit");
+  assert(new URL(payosCalls[0].body.returnUrl).searchParams.get("advice") === adviceRequest.id);
+  const expectedRequestSignature = createHmac("sha256", PAYOS_CHECKSUM).update(
+    `amount=${payosCalls[0].body.amount}&cancelUrl=${payosCalls[0].body.cancelUrl}`
+      + `&description=${payosCalls[0].body.description}&orderCode=${payosCalls[0].body.orderCode}`
+      + `&returnUrl=${payosCalls[0].body.returnUrl}`
+  ).digest("hex");
+  assert.equal(payosCalls[0].body.signature, expectedRequestSignature);
+
+  response = await call(adviceEnv, "/api/advice/payment", {
+    method: "POST", token: adviceSession.token, body: { id: adviceRequest.id },
+  });
+  assert.deepEqual(await body(response), {
+    checkout_url: "https://pay.payos.vn/web/test-payment-link", duplicate: true,
+  });
+  assert.equal(payosCalls.length, 1, "payment retry must reuse checkout URL");
+
+  adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+  const webhookData = {
+    orderCode: adviceRecord.order_code,
+    amount: adviceRecord.amount,
+    description: payosCalls[0].body.description,
+    accountNumber: "0000000000",
+    reference: "test-reference",
+    transactionDateTime: "2026-07-22 12:00:00",
+    currency: "VND",
+    paymentLinkId: adviceRecord.payment_link_id,
+    code: "00",
+    desc: "Thành công",
+    counterAccountBankId: "",
+    counterAccountBankName: "",
+    counterAccountName: "",
+    counterAccountNumber: "",
+    virtualAccountName: "",
+    virtualAccountNumber: "",
+  };
+  const signWebhook = (data) => createHmac("sha256", PAYOS_CHECKSUM)
+    .update(Object.keys(data).sort().map((key) => `${key}=${data[key]}`).join("&"))
+    .digest("hex");
+
+  response = await call(adviceEnv, "/payos/webhook", {
+    method: "POST",
+    body: { code: "00", desc: "success", success: true, data: webhookData, signature: "0".repeat(64) },
+  });
+  assert.equal(response.status, 403, "forged webhook must fail closed");
+  adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+  assert.equal(adviceRecord.status, "quoted");
+
+  const wrongAmountData = { ...webhookData, amount: webhookData.amount + 1 };
+  response = await call(adviceEnv, "/payos/webhook", {
+    method: "POST",
+    body: {
+      code: "00", desc: "success", success: true,
+      data: wrongAmountData, signature: signWebhook(wrongAmountData),
+    },
+  });
+  assert.equal(response.status, 200);
+  adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+  assert.equal(adviceRecord.status, "quoted", "signed webhook with wrong amount must not mark payment paid");
+
+  const paidWebhook = {
+    code: "00", desc: "success", success: true,
+    data: webhookData, signature: signWebhook(webhookData),
+  };
+  response = await call(adviceEnv, "/payos/webhook", { method: "POST", body: paidWebhook });
+  assert.equal(response.status, 200);
+  adviceRecord = JSON.parse(await adviceEnv.KV.get(adviceRecordKey));
+  assert.equal(adviceRecord.status, "paid");
+  assert.equal(adviceRecord.payment_status, "paid");
+  response = await call(adviceEnv, "/payos/webhook", { method: "POST", body: paidWebhook });
+  assert.deepEqual(await body(response), { ok: true }, "paid webhook replay must be idempotent");
+
+  assert.equal(await __test.hmacHex("key", "data"), createHmac("sha256", "key").update("data").digest("hex"));
+  assert.equal(__test.payosDataString({ b: null, a: 1 }), "a=1&b=");
 
   telegramFails = true;
   const failureEnv = env({ CHAT_ENABLED: "true" });

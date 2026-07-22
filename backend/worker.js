@@ -1,7 +1,8 @@
 /*!
  * Cloudflare Worker: approval gate, best-effort access telemetry and owner chat.
  * Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, ADMIN_TOKEN,
- * SESSION_SECRET, DECRYPT_KEY and optional DECRYPT_KEY_<APP>. Storage: Workers KV binding "KV".
+ * SESSION_SECRET, DECRYPT_KEY, optional DECRYPT_KEY_<APP>, PAYOS_CLIENT_ID,
+ * PAYOS_API_KEY and PAYOS_CHECKSUM_KEY. Storage: Workers KV binding "KV".
  */
 
 const APPS = new Set(["spare", "boitoan", "medora"]);
@@ -64,6 +65,14 @@ async function hmacSign(secret, data) {
     "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
   );
   return b64url(await crypto.subtle.sign("HMAC", key, enc.encode(data)));
+}
+
+async function hmacHex(secret, data) {
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const signature = new Uint8Array(await crypto.subtle.sign("HMAC", key, enc.encode(data)));
+  return [...signature].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 async function makeJWT(secret, payload, ttlSec = SESSION_TTL) {
@@ -234,6 +243,9 @@ const chatPrefix = (cid) => `chat:${cid}:`;
 const chatKey = (cid, createdAt, id) =>
   `${chatPrefix(cid)}${String(Number.MAX_SAFE_INTEGER - createdAt).padStart(16, "0")}:${id}`;
 const telegramMapKey = (chatId, messageId) => `tgmap:${chatId}:${messageId}`;
+const adviceKey = (id) => `advice:${id}`;
+const adviceClientKey = (sid, clientId) => `advice-client:${sid}:${clientId}`;
+const payosOrderKey = (orderCode) => `payos-order:${orderCode}`;
 
 async function getJson(env, key) {
   const value = await env.KV.get(key);
@@ -512,6 +524,354 @@ async function handleOwnerReply(message, env) {
   await env.KV.put(chatKey(map.cid, createdAt, rec.id), JSON.stringify(rec), { expirationTtl: CHAT_TTL });
 }
 
+/* ----------------------------- advice/payment ----------------------------- */
+function paymentReturnBase(env) {
+  try {
+    const url = new URL(String(env.PAYOS_RETURN_URL || ""));
+    return url.protocol === "https:" && !url.username && !url.password ? url : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function paymentConfigured(env) {
+  return !!(String(env.PAYOS_CLIENT_ID || "") && String(env.PAYOS_API_KEY || "")
+    && String(env.PAYOS_CHECKSUM_KEY || "") && paymentReturnBase(env));
+}
+
+function adviceBoundTo(rec, claims) {
+  return !!rec && rec.app === "boitoan" && secureEqual(rec.cid, claims.cid) && secureEqual(rec.did, claims.did);
+}
+
+async function adviceAuth(request, env) {
+  const claims = await authenticate(request, env, "chat");
+  if (!claims) return { response: json({ error: "unauthorized" }, 401) };
+  if (claims.app !== "boitoan") return { response: json({ error: "forbidden" }, 403) };
+  return { claims };
+}
+
+function adviceKeyboard(rec) {
+  const callback = (command) => `advice:${rec.id}:${command}`;
+  return {
+    inline_keyboard: [
+      [1, 2, 3].map((digit) => ({ text: String(digit), callback_data: callback(digit) })),
+      [4, 5, 6].map((digit) => ({ text: String(digit), callback_data: callback(digit) })),
+      [7, 8, 9].map((digit) => ({ text: String(digit), callback_data: callback(digit) })),
+      [
+        { text: "0", callback_data: callback(0) },
+        { text: "⌫ Xóa", callback_data: callback("back") },
+        { text: "Xóa hết", callback_data: callback("clear") },
+      ],
+      [{ text: "✅ Xác nhận giá", callback_data: callback("confirm") }],
+    ],
+  };
+}
+
+function adviceTelegramText(rec) {
+  const lines = [
+    "Yêu cầu luận giải chuyên sâu",
+    `Phần: ${rec.section}`,
+    `Câu hỏi: ${rec.question}`,
+    `Mã: ${rec.id}`,
+  ];
+  if (rec.status === "paid") lines.push(`ĐÃ THANH TOÁN: ${rec.amount} VND`);
+  else if (rec.status === "quoted") lines.push(`ĐÃ BÁO GIÁ: ${rec.amount} VND`);
+  else lines.push(`Giá đang nhập: ${rec.quote_input || "(chưa nhập)"} VND`);
+  return lines.join("\n\n");
+}
+
+async function putAdvice(env, rec) {
+  await env.KV.put(adviceKey(rec.id), JSON.stringify(rec), { expirationTtl: CHAT_TTL });
+}
+
+async function handleAdviceRequest(request, env) {
+  const auth = await adviceAuth(request, env);
+  if (auth.response) return auth.response;
+  if (!(await rateAllowed(env.CHAT_RATE_LIMITER, `${auth.claims.sid}:advice-send`))) {
+    return json({ error: "rate_limited" }, 429);
+  }
+  const body = await readJson(request);
+  const clientId = body && body.client_id;
+  const section = body && cleanText(body.section, 120);
+  const question = body && cleanText(body.question, 1500);
+  if (!isUuid(clientId) || !section || !question) return json({ error: "invalid_request" }, 400);
+
+  const doneKey = adviceClientKey(auth.claims.sid, clientId);
+  const done = await getJson(env, doneKey);
+  if (done && isUuid(done.id)) return json({ id: done.id, status: "pending", duplicate: true });
+  const pendingKey = `advice-pending:${auth.claims.sid}:${clientId}`;
+  if (await env.KV.get(pendingKey)) return json({ error: "advice_pending" }, 409);
+  await env.KV.put(pendingKey, "1", { expirationTtl: 300 });
+
+  let sent = false;
+  try {
+    const rec = {
+      id: uuid(),
+      client_id: clientId,
+      app: "boitoan",
+      cid: auth.claims.cid,
+      did: auth.claims.did,
+      sid: auth.claims.sid,
+      section,
+      question,
+      quote_input: "",
+      amount: null,
+      status: "pending",
+      payment_status: "unpaid",
+      created_at: Date.now(),
+    };
+    const telegram = await tg(env, "sendMessage", {
+      chat_id: env.TELEGRAM_CHAT_ID,
+      text: adviceTelegramText(rec),
+      reply_markup: adviceKeyboard(rec),
+    });
+    sent = true;
+    const telegramMessageId = telegram.result && telegram.result.message_id;
+    if (!Number.isInteger(telegramMessageId)) throw new Error("telegram_unavailable");
+    rec.telegram_message_id = telegramMessageId;
+    await Promise.all([
+      putAdvice(env, rec),
+      env.KV.put(doneKey, JSON.stringify({ id: rec.id }), { expirationTtl: CHAT_TTL }),
+    ]);
+    await env.KV.delete(pendingKey);
+    return json({ id: rec.id, status: rec.status });
+  } catch (_) {
+    if (!sent) await env.KV.delete(pendingKey).catch(() => {});
+    return json({ error: "advice_unavailable" }, 502);
+  }
+}
+
+async function handleAdviceStatus(request, env, url) {
+  const auth = await adviceAuth(request, env);
+  if (auth.response) return auth.response;
+  if (!(await rateAllowed(env.CHAT_RATE_LIMITER, `${auth.claims.sid}:advice-read`))) {
+    return json({ error: "rate_limited" }, 429);
+  }
+  const id = url.searchParams.get("id");
+  if (!isUuid(id)) return json({ error: "invalid_request" }, 400);
+  const rec = await getJson(env, adviceKey(id));
+  if (!adviceBoundTo(rec, auth.claims)) return json({ error: "not_found" }, 404);
+  return json({
+    id: rec.id,
+    section: rec.section,
+    status: rec.status,
+    amount: Number.isSafeInteger(rec.amount) ? rec.amount : undefined,
+    payment_status: rec.payment_status,
+    payment_enabled: paymentConfigured(env),
+  });
+}
+
+async function handleAdviceCallback(cb, env) {
+  const match = /^advice:([0-9a-f-]{36}):(\d|back|clear|confirm)$/i.exec(String(cb.data || ""));
+  if (!match || !isUuid(match[1])) return { answer: "Lệnh không hợp lệ" };
+  const rec = await getJson(env, adviceKey(match[1]));
+  if (!rec) return { answer: "Yêu cầu đã hết hạn" };
+  if (rec.status !== "pending") return { answer: rec.status === "paid" ? "Đã thanh toán" : "Giá đã được xác nhận" };
+
+  const command = match[2];
+  let answer = "Đã cập nhật";
+  if (/^\d$/.test(command)) {
+    const next = `${rec.quote_input || ""}${command}`;
+    if (!Number.isSafeInteger(Number(next))) return { answer: "Số tiền quá lớn" };
+    rec.quote_input = next;
+  } else if (command === "back") {
+    rec.quote_input = String(rec.quote_input || "").slice(0, -1);
+  } else if (command === "clear") {
+    rec.quote_input = "";
+  } else {
+    const amount = Number(rec.quote_input);
+    if (!/^\d+$/.test(rec.quote_input || "") || !Number.isSafeInteger(amount) || amount <= 0) {
+      return { answer: "Nhập số tiền lớn hơn 0" };
+    }
+    rec.amount = amount;
+    rec.status = "quoted";
+    rec.payment_status = "unpaid";
+    rec.quoted_at = Date.now();
+    answer = "Đã xác nhận giá";
+  }
+  await putAdvice(env, rec);
+  return {
+    answer,
+    edit: {
+      chat_id: cb.message.chat.id,
+      message_id: cb.message.message_id,
+      text: adviceTelegramText(rec),
+      reply_markup: rec.status === "pending" ? adviceKeyboard(rec) : { inline_keyboard: [] },
+    },
+  };
+}
+
+function payosDataString(data) {
+  return Object.keys(data).sort().filter((key) => data[key] !== undefined).map((key) => {
+    let value = data[key];
+    if (Array.isArray(value)) {
+      value = JSON.stringify(value.map((item) => item && typeof item === "object"
+        ? Object.keys(item).sort().reduce((sorted, itemKey) => ({ ...sorted, [itemKey]: item[itemKey] }), {})
+        : item));
+    }
+    if (value === null || value === undefined || value === "null" || value === "undefined") value = "";
+    return `${key}=${value}`;
+  }).join("&");
+}
+
+function orderCodeForAdvice(id) {
+  return Number.parseInt(String(id).replace(/-/g, "").slice(0, 13), 16) || 1;
+}
+
+function paymentUrl(env, id, result) {
+  const url = new URL(paymentReturnBase(env));
+  url.searchParams.set("advice", id);
+  url.searchParams.set("payment", result);
+  return url.href;
+}
+
+function checkoutUrl(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" && url.hostname === "pay.payos.vn" && !url.username && !url.password
+      ? url.href : "";
+  } catch (_) {
+    return "";
+  }
+}
+
+async function recoverPayosCheckout(env, rec) {
+  const response = await fetch(`https://api-merchant.payos.vn/v2/payment-requests/${rec.order_code}`, {
+    headers: {
+      "x-client-id": env.PAYOS_CLIENT_ID,
+      "x-api-key": env.PAYOS_API_KEY,
+    },
+  });
+  if (response.status === 404) return "";
+  const result = await response.json().catch(() => null);
+  const signed = result && result.data && result.signature
+    && await hmacHex(env.PAYOS_CHECKSUM_KEY, payosDataString(result.data));
+  const paymentLinkId = result && result.data && cleanText(result.data.id, 100);
+  // payOS detail omits checkoutUrl; signed id addresses its documented hosted /web/{id} path.
+  const url = paymentLinkId && checkoutUrl(`https://pay.payos.vn/web/${encodeURIComponent(paymentLinkId)}`);
+  if (!response.ok || !result || result.code !== "00" || !signed
+      || !secureEqual(String(signed).toLowerCase(), String(result.signature).toLowerCase()) || !url
+      || result.data.orderCode !== rec.order_code || result.data.amount !== rec.amount
+      || result.data.status !== "PENDING") throw new Error("payment_unavailable");
+  rec.checkout_url = url;
+  rec.payment_link_id = paymentLinkId;
+  rec.payment_status = "pending";
+  await putAdvice(env, rec);
+  return url;
+}
+
+async function handleAdvicePayment(request, env) {
+  const auth = await adviceAuth(request, env);
+  if (auth.response) return auth.response;
+  if (!paymentConfigured(env)) return json({ error: "payment_not_configured" }, 503);
+  if (!(await rateAllowed(env.CHAT_RATE_LIMITER, `${auth.claims.sid}:advice-payment`))) {
+    return json({ error: "rate_limited" }, 429);
+  }
+  const body = await readJson(request);
+  if (!body || !isUuid(body.id)) return json({ error: "invalid_request" }, 400);
+  const rec = await getJson(env, adviceKey(body.id));
+  if (!adviceBoundTo(rec, auth.claims)) return json({ error: "not_found" }, 404);
+  if (rec.status === "paid") return json({ error: "already_paid" }, 409);
+  if (rec.status !== "quoted" || !Number.isSafeInteger(rec.amount) || rec.amount <= 0) {
+    return json({ error: "quote_required" }, 409);
+  }
+  const existing = checkoutUrl(rec.checkout_url);
+  if (existing) return json({ checkout_url: existing, duplicate: true });
+  const pendingKey = `advice-payment-pending:${rec.id}`;
+  if (await env.KV.get(pendingKey)) return json({ error: "payment_pending" }, 409);
+  await env.KV.put(pendingKey, "1", { expirationTtl: 300 });
+
+  try {
+    if (Number.isSafeInteger(rec.order_code)) {
+      const recovered = await recoverPayosCheckout(env, rec);
+      if (recovered) {
+        await env.KV.delete(pendingKey);
+        return json({ checkout_url: recovered, duplicate: true });
+      }
+    } else {
+      rec.order_code = orderCodeForAdvice(rec.id);
+    }
+    const data = {
+      orderCode: rec.order_code,
+      amount: rec.amount,
+      description: `LG${String(rec.order_code).slice(-7)}`,
+      cancelUrl: paymentUrl(env, rec.id, "cancel"),
+      returnUrl: paymentUrl(env, rec.id, "return"),
+    };
+    data.signature = await hmacHex(env.PAYOS_CHECKSUM_KEY,
+      `amount=${data.amount}&cancelUrl=${data.cancelUrl}&description=${data.description}&orderCode=${data.orderCode}&returnUrl=${data.returnUrl}`);
+    await Promise.all([
+      putAdvice(env, rec),
+      env.KV.put(payosOrderKey(rec.order_code), JSON.stringify({ advice_id: rec.id, amount: rec.amount }), { expirationTtl: CHAT_TTL }),
+    ]);
+
+    const response = await fetch("https://api-merchant.payos.vn/v2/payment-requests", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-client-id": env.PAYOS_CLIENT_ID,
+        "x-api-key": env.PAYOS_API_KEY,
+      },
+      body: JSON.stringify(data),
+    });
+    const result = await response.json().catch(() => null);
+    const signed = result && result.data && result.signature
+      && await hmacHex(env.PAYOS_CHECKSUM_KEY, payosDataString(result.data));
+    const url = result && result.data && checkoutUrl(result.data.checkoutUrl);
+    if (!response.ok || !result || result.code !== "00" || !signed
+        || !secureEqual(String(signed).toLowerCase(), String(result.signature).toLowerCase()) || !url
+        || result.data.orderCode !== rec.order_code || result.data.amount !== rec.amount
+        || result.data.currency !== "VND") throw new Error("payment_unavailable");
+    rec.checkout_url = url;
+    rec.payment_link_id = cleanText(result.data.paymentLinkId, 100);
+    rec.payment_status = "pending";
+    await putAdvice(env, rec);
+    await env.KV.delete(pendingKey);
+    return json({ checkout_url: url });
+  } catch (_) {
+    await env.KV.delete(pendingKey).catch(() => {});
+    return json({ error: "payment_unavailable" }, 502);
+  }
+}
+
+async function handlePayosWebhook(request, env) {
+  if (!String(env.PAYOS_CHECKSUM_KEY || "")) return json({ error: "payment_not_configured" }, 503);
+  const body = await readJson(request, 20000);
+  if (!body || !body.data || typeof body.data !== "object" || !/^[0-9a-f]{64}$/i.test(body.signature || "")) {
+    return json({ error: "invalid_request" }, 400);
+  }
+  const expected = await hmacHex(env.PAYOS_CHECKSUM_KEY, payosDataString(body.data));
+  if (!secureEqual(expected.toLowerCase(), String(body.signature).toLowerCase())) {
+    return json({ error: "invalid_signature" }, 403);
+  }
+  const data = body.data;
+  if (body.success !== true || body.code !== "00" || data.code !== "00"
+      || !Number.isSafeInteger(data.orderCode) || !Number.isSafeInteger(data.amount) || data.currency !== "VND") {
+    return json({ ok: true });
+  }
+  const map = await getJson(env, payosOrderKey(data.orderCode));
+  const rec = map && await getJson(env, adviceKey(map.advice_id));
+  if (!map || !rec || rec.order_code !== data.orderCode || rec.amount !== data.amount || map.amount !== data.amount
+      || (rec.payment_link_id && !secureEqual(rec.payment_link_id, cleanText(data.paymentLinkId, 100)))) {
+    return json({ ok: true });
+  }
+  if (rec.status !== "paid") {
+    rec.status = "paid";
+    rec.payment_status = "paid";
+    rec.paid_at = Date.now();
+    await putAdvice(env, rec);
+    if (Number.isInteger(rec.telegram_message_id)) {
+      tg(env, "editMessageText", {
+        chat_id: env.TELEGRAM_CHAT_ID,
+        message_id: rec.telegram_message_id,
+        text: adviceTelegramText(rec),
+        reply_markup: { inline_keyboard: [] },
+      }).catch(() => {});
+    }
+  }
+  return json({ ok: true });
+}
+
 /* ----------------------------- Telegram webhook ----------------------------- */
 async function handleTelegramWebhook(request, env) {
   const webhookSecret = env.TELEGRAM_WEBHOOK_SECRET;
@@ -527,19 +887,27 @@ async function handleTelegramWebhook(request, env) {
   if (cb && cb.message && String(cb.message.chat.id) === String(env.TELEGRAM_CHAT_ID)
       && cb.from && String(cb.from.id) === String(env.TELEGRAM_CHAT_ID)) {
     const [action, id] = String(cb.data || "").split(":");
+    let answer = "Lệnh không hợp lệ";
+    let edit = null;
     if ((action === "approve" || action === "deny") && isUuid(id)) {
       const status = action === "approve" ? "approved" : "denied";
       await decide(env, id, status);
-      await tg(env, "answerCallbackQuery", {
-        callback_query_id: cb.id,
-        text: status === "approved" ? "Đã duyệt" : "Đã từ chối",
-      });
-      await tg(env, "editMessageText", {
+      answer = status === "approved" ? "Đã duyệt" : "Đã từ chối";
+      edit = {
         chat_id: cb.message.chat.id,
         message_id: cb.message.message_id,
         text: `${cb.message.text || "Yêu cầu truy cập"}\n\n${status === "approved" ? "ĐÃ DUYỆT" : "ĐÃ TỪ CHỐI"} lúc ${new Date().toISOString()}`,
-      });
+      };
+    } else if (action === "advice") {
+      const result = await handleAdviceCallback(cb, env);
+      answer = result.answer;
+      edit = result.edit || null;
     }
+    // Persist after local mutation but before Telegram calls: an edit failure must not replay the command.
+    await env.KV.put(updateKey, "1", { expirationTtl: TELEGRAM_UPDATE_TTL });
+    await tg(env, "answerCallbackQuery", { callback_query_id: cb.id, text: answer });
+    if (edit) await tg(env, "editMessageText", edit);
+    return json({ ok: true });
   } else if (update.message) {
     await handleOwnerReply(update.message, env);
   }
@@ -636,8 +1004,12 @@ const worker = {
       if (url.pathname === "/api/log" && request.method === "POST") return withCors(await handleLog(request, env), cors);
       if (url.pathname === "/api/chat/send" && request.method === "POST") return withCors(await handleChatSend(request, env), cors);
       if (url.pathname === "/api/chat/messages" && request.method === "GET") return withCors(await handleChatMessages(request, env), cors);
+      if (url.pathname === "/api/advice/request" && request.method === "POST") return withCors(await handleAdviceRequest(request, env), cors);
+      if (url.pathname === "/api/advice/status" && request.method === "GET") return withCors(await handleAdviceStatus(request, env, url), cors);
+      if (url.pathname === "/api/advice/payment" && request.method === "POST") return withCors(await handleAdvicePayment(request, env), cors);
 
       if (url.pathname === "/telegram/webhook" && request.method === "POST") return handleTelegramWebhook(request, env);
+      if (url.pathname === "/payos/webhook" && request.method === "POST") return handlePayosWebhook(request, env);
 
       if (url.pathname === "/admin" && request.method === "GET") {
         const nonce = b64url(crypto.getRandomValues(new Uint8Array(16)));
@@ -686,5 +1058,7 @@ function withCors(response, cors) {
   return result;
 }
 
-export const __test = { redactIp, browserLabel, makeJWT, verifyJWT, chatKey, ACCESS_TTL, CHAT_TTL };
+export const __test = {
+  redactIp, browserLabel, makeJWT, verifyJWT, chatKey, hmacHex, payosDataString, ACCESS_TTL, CHAT_TTL,
+};
 export default worker;

@@ -51,7 +51,20 @@ Không dùng lại ví dụ hoặc giá trị từng xuất hiện trong Git his
 
 Chạy lại setup sẽ xoay secret ký phiên và webhook, làm mọi phiên đang hoạt động hết hiệu lực. Cập nhật thường ngày dùng workflow deploy Worker, không dùng setup.
 
-## 6. Sau deploy
+## 6. Bật thanh toán luận giải payOS
+
+Chỉ làm sau khi Worker và Pages cùng phiên bản đã chạy test:
+
+1. Đăng nhập hoặc đăng ký payOS trên trang chính thức. Không gửi credentials qua chat.
+2. Mở Cloudflare Worker `hiennhi89-gate`, vào **Settings > Variables and Secrets**.
+3. Nhập `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY` dưới dạng secret.
+4. Trong payOS, đăng ký webhook `https://hiennhi89-gate.hiennhi89.workers.dev/payos/webhook`.
+5. Tạo một yêu cầu luận giải thử, nhập giá trên Telegram, mở hosted checkout và thanh toán số tiền thử phù hợp.
+6. Chỉ chấp nhận thành công khi app hiển thị đã thanh toán từ API status sau webhook. URL quay về không xác nhận thanh toán.
+
+Frontend chỉ nhận URL `https://pay.payos.vn/...`. Tên người nhận có thể vẫn xuất hiện trên trang payOS hoặc ứng dụng ngân hàng theo quy định của bên thanh toán; code không thể bảo đảm ẩn danh tính đó.
+
+## 7. Sau deploy
 
 - `/admin` hiển thị browser-profile ID, trình duyệt, thông tin màn hình/ngôn ngữ và IP đã rút gọn; không phải danh sách thiết bị vật lý tuyệt đối.
 - Người mở bằng mật khẩu cục bộ có thể tạo telemetry nếu online nhưng không có quyền chat.

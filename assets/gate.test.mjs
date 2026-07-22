@@ -22,6 +22,17 @@ assert.doesNotMatch(gate, /catch\(function \(\) \{ reveal\("approved"\); \}\)/, 
 assert.match(gate, /if \(!data\.key\)[\s\S]*Backend chưa có khóa giải mã/, "encrypted approval must fail closed without a key");
 assert.match(gate, /data\.error === "telegram_unavailable"[\s\S]*Bot Telegram chưa sẵn sàng/,
   "Telegram outage must be explained without reporting a pending approval");
+assert.match(gate, /document\.querySelectorAll\("\.screen"\)/, "advice action must be added to every Bói toán screen");
+assert.match(gate, /body: JSON\.stringify\(\{ client_id: randomId\(\), section: section, question: text \}\)/,
+  "advice request must use a retry ID and current section");
+assert.match(gate, /adviceId = data\.id;[\s\S]*sessionStorage\.setItem\(adviceStorageKey, adviceId\)[\s\S]*pollAdvice\(\)/,
+  "advice request must survive reload while waiting for a quote");
+assert.match(gate, /data\.payment_status === "pending"[\s\S]*setTimeout\(pollAdvice, 5000\)/,
+  "pending payment must continue polling verified backend status");
+assert.match(gate, /history\.replaceState\(null, "", cleanUrl\.href\)/,
+  "payment return query must be removed after restoring advice");
+assert.doesNotMatch(gate, /[?&]payment[^\n]*(?:===|==)[^\n]*paid/,
+  "frontend must not trust payment return query as proof of payment");
 
 const deviceSectionEnd = gate.indexOf("/* -------------------------- tiện ích mã hóa");
 const instrumentedDeviceId = gate.slice(0, deviceSectionEnd)
@@ -29,6 +40,7 @@ const instrumentedDeviceId = gate.slice(0, deviceSectionEnd)
 let generated = 0;
 const storageBlocked = {
   window: { GATE: {} },
+  document: { documentElement: { classList: { add() {} } } },
   localStorage: {
     getItem() { throw new Error("blocked"); },
     setItem() { throw new Error("blocked"); },

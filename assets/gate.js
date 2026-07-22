@@ -34,6 +34,9 @@
   var DEVICE_KEY = "gate_device_id";
   var currentDeviceId = "";
   var chatPollTimer = null;
+  var advicePollTimer = null;
+
+  document.documentElement.classList.add("gate-app-" + APP.replace(/[^a-z0-9_-]/gi, ""));
 
   function randomId() {
     if (crypto.randomUUID) return crypto.randomUUID();
@@ -419,12 +422,221 @@
     });
   }
 
+  function injectAdvice() {
+    if (APP !== "boitoan" || !BACKEND || document.getElementById("gate-advice")) return;
+    var shell = document.createElement("div");
+    shell.id = "gate-advice";
+    shell.hidden = true;
+    shell.innerHTML =
+      '<div class="gate-advice-backdrop"></div>' +
+      '<section class="gate-advice-dialog" role="dialog" aria-modal="true" aria-labelledby="gate-advice-title">' +
+        '<button class="gate-advice-close" type="button" aria-label="Đóng">×</button>' +
+        '<h2 id="gate-advice-title">Luận giải chuyên sâu</h2>' +
+        '<p class="gate-advice-section"></p>' +
+        '<form class="gate-advice-form">' +
+          '<label for="gate-advice-question">Câu hỏi của bạn</label>' +
+          '<textarea id="gate-advice-question" class="gate-input" maxlength="1500" rows="5" required placeholder="Nhập câu hỏi cần luận giải…"></textarea>' +
+          '<button class="gate-btn gate-advice-quote" type="submit" disabled>Yêu cầu báo giá</button>' +
+        '</form>' +
+        '<div class="gate-advice-state" role="status"></div>' +
+        '<div class="gate-advice-price" hidden></div>' +
+        '<button class="gate-btn gate-advice-pay" type="button" hidden>Thanh toán</button>' +
+        '<small>Thanh toán qua trang bảo mật của đơn vị trung gian. Ngân hàng hoặc cổng thanh toán có thể hiển thị tên người nhận theo quy định.</small>' +
+      '</section>';
+    document.body.appendChild(shell);
+
+    var dialog = shell.querySelector(".gate-advice-dialog");
+    var form = shell.querySelector(".gate-advice-form");
+    var question = shell.querySelector("#gate-advice-question");
+    var quote = shell.querySelector(".gate-advice-quote");
+    var state = shell.querySelector(".gate-advice-state");
+    var price = shell.querySelector(".gate-advice-price");
+    var pay = shell.querySelector(".gate-advice-pay");
+    var section = "Bói toán";
+    var adviceId = "";
+    var lastTrigger = null;
+    var adviceStorageKey = "gate_advice_" + APP;
+
+    function setState(text, isError) {
+      state.textContent = text || "";
+      state.classList.toggle("err", !!isError);
+    }
+
+    function stopAdvicePolling() {
+      if (advicePollTimer) clearTimeout(advicePollTimer);
+      advicePollTimer = null;
+    }
+
+    function close() {
+      stopAdvicePolling();
+      shell.hidden = true;
+      document.body.classList.remove("gate-advice-opened");
+      if (lastTrigger) lastTrigger.focus();
+    }
+
+    function open(trigger) {
+      lastTrigger = trigger;
+      section = trigger.getAttribute("data-section") || "Bói toán";
+      shell.querySelector(".gate-advice-section").textContent = "Phần: " + section;
+      adviceId = "";
+      try { sessionStorage.removeItem(adviceStorageKey); } catch (e) {}
+      form.hidden = false;
+      question.value = "";
+      quote.disabled = true;
+      price.hidden = true;
+      pay.hidden = true;
+      pay.disabled = false;
+      setState(tokenSupportsChat(accessToken()) ? "Nhập câu hỏi rồi yêu cầu báo giá." : "Cần được chủ duyệt trước khi gửi câu hỏi.", !tokenSupportsChat(accessToken()));
+      shell.hidden = false;
+      document.body.classList.add("gate-advice-opened");
+      question.focus();
+    }
+
+    function showQuote(data) {
+      var paid = data.status === "paid" || data.payment_status === "paid";
+      var pending = !paid && data.payment_status === "pending";
+      price.textContent = "Báo giá: " + new Intl.NumberFormat("vi-VN").format(data.amount) + " ₫";
+      price.hidden = false;
+      pay.hidden = paid;
+      pay.disabled = !data.payment_enabled;
+      pay.textContent = pending ? "Tiếp tục thanh toán" : "Thanh toán";
+      setState(paid
+        ? "Thanh toán đã được xác nhận."
+        : pending ? "Đang chờ xác nhận. Bạn có thể mở lại trang thanh toán."
+          : data.payment_enabled ? "Báo giá đã sẵn sàng. Nhấn Thanh toán để tiếp tục."
+          : "Báo giá đã sẵn sàng. Kênh thanh toán chưa được chủ kích hoạt.",
+        !paid && !pending && !data.payment_enabled);
+    }
+
+    function pollAdvice() {
+      if (!adviceId || shell.hidden) return;
+      chatApi("/api/advice/status?id=" + encodeURIComponent(adviceId)).then(function (data) {
+        if (data.section) {
+          section = data.section;
+          shell.querySelector(".gate-advice-section").textContent = "Phần: " + section;
+        }
+        if (data.status === "quoted" || data.status === "paid") {
+          showQuote(data);
+          if (data.status === "paid" || data.payment_status === "paid") {
+            try { sessionStorage.removeItem(adviceStorageKey); } catch (e) {}
+          } else if (data.payment_status === "pending") {
+            advicePollTimer = setTimeout(pollAdvice, 5000);
+          }
+          return;
+        }
+        setState("Đã gửi. Đang chờ chủ báo giá…");
+        advicePollTimer = setTimeout(pollAdvice, 5000);
+      }).catch(function (error) {
+        setState(error.status === 401 ? "Phiên duyệt đã hết hạn." : "Chưa tải được báo giá.", true);
+        if (error.status !== 401) advicePollTimer = setTimeout(pollAdvice, 8000);
+      });
+    }
+
+    question.addEventListener("input", function () {
+      quote.disabled = !question.value.trim() || !tokenSupportsChat(accessToken());
+    });
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var text = question.value.trim();
+      if (!text || !tokenSupportsChat(accessToken())) return;
+      quote.disabled = true;
+      setState("Đang gửi câu hỏi…");
+      chatApi("/api/advice/request", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ client_id: randomId(), section: section, question: text })
+      }).then(function (data) {
+        adviceId = data.id;
+        try { sessionStorage.setItem(adviceStorageKey, adviceId); } catch (e) {}
+        form.hidden = true;
+        setState("Đã gửi. Đang chờ chủ báo giá…");
+        pollAdvice();
+      }).catch(function (error) {
+        quote.disabled = false;
+        setState(error.status === 401 ? "Phiên duyệt đã hết hạn." : "Không gửi được câu hỏi.", true);
+      });
+    });
+    pay.addEventListener("click", function () {
+      if (!adviceId || pay.disabled) return;
+      pay.disabled = true;
+      setState("Đang mở trang thanh toán…");
+      chatApi("/api/advice/payment", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id: adviceId })
+      }).then(function (data) {
+        try { sessionStorage.setItem(adviceStorageKey, adviceId); } catch (e) {}
+        location.assign(data.checkout_url);
+      }).catch(function (error) {
+        pay.disabled = false;
+        setState(error.message === "payment_not_configured" ? "Kênh thanh toán chưa được chủ kích hoạt." : "Không tạo được phiên thanh toán.", true);
+      });
+    });
+    shell.querySelector(".gate-advice-close").addEventListener("click", close);
+    shell.querySelector(".gate-advice-backdrop").addEventListener("click", close);
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && !shell.hidden) close();
+    });
+
+    function sectionName(screenNode) {
+      var heading = screenNode.querySelector(".shead h2, h2, h1");
+      return (heading && heading.textContent.trim()) || screenNode.id || "Bói toán";
+    }
+
+    function addButtons() {
+      document.querySelectorAll(".screen").forEach(function (screenNode) {
+        if (screenNode.querySelector(":scope > .gate-advice-open")) return;
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "gate-advice-open";
+        button.textContent = "✦ Luận giải chuyên sâu";
+        button.setAttribute("data-section", sectionName(screenNode));
+        button.addEventListener("click", function () { open(button); });
+        screenNode.appendChild(button);
+      });
+    }
+    addButtons();
+    new MutationObserver(addButtons).observe(document.getElementById("gate-content") || document.body, { childList: true, subtree: true });
+
+    var returnAdviceId = new URLSearchParams(location.search).get("advice") || "";
+    if (!returnAdviceId) {
+      try { returnAdviceId = sessionStorage.getItem(adviceStorageKey) || ""; } catch (e) {}
+    }
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(returnAdviceId)
+        && tokenSupportsChat(accessToken())) {
+      adviceId = returnAdviceId;
+      form.hidden = true;
+      quote.disabled = true;
+      price.hidden = true;
+      pay.hidden = true;
+      shell.querySelector(".gate-advice-section").textContent = "Yêu cầu đã gửi";
+      setState("Đang khôi phục yêu cầu…");
+      shell.hidden = false;
+      document.body.classList.add("gate-advice-opened");
+      var cleanUrl = new URL(location.href);
+      cleanUrl.searchParams.delete("advice");
+      cleanUrl.searchParams.delete("payment");
+      history.replaceState(null, "", cleanUrl.href);
+      pollAdvice();
+    }
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key === "Tab") {
+        var focusable = dialog.querySelectorAll('button:not([hidden]):not(:disabled),textarea:not([hidden]):not(:disabled)');
+        if (!focusable.length) return;
+        var first = focusable[0], last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    });
+  }
+
   function reveal(method) {
     document.documentElement.classList.remove("gate-locked");
     var root = document.getElementById("gate-root");
     if (root) root.parentNode.removeChild(root);
     injectLogout(); // nút "khóa lại" nếu máy này đang được ghi nhớ
     injectChat();
+    injectAdvice();
     trackAccess(method || "session");
     // Watermark chủ sở hữu vẫn giữ lại sau khi mở khóa (không xóa).
   }
@@ -433,15 +645,17 @@
   function injectLogout() {
     var has = false;
     try { has = !!localStorage.getItem("gate_key_" + APP); } catch (e) {}
-    if (!has || document.getElementById("gate-logout")) return;
+    if ((!has && APP !== "boitoan") || document.getElementById("gate-logout")) return;
     var b = document.createElement("button");
     b.id = "gate-logout"; b.type = "button";
     b.title = "Quên máy này (bắt nhập lại mật khẩu)";
-    b.textContent = "🔒";
+    b.setAttribute("aria-label", "Khóa ứng dụng");
+    b.textContent = APP === "boitoan" ? "🔒 Khóa" : "🔒";
     b.addEventListener("click", function () {
       try {
         localStorage.removeItem("gate_key_" + APP);
         localStorage.removeItem(REMEMBER_KEY);
+        if (APP === "boitoan") localStorage.removeItem(TOKEN_KEY);
         sessionStorage.removeItem(SESSION_KEY);
       } catch (e) {}
       location.reload();

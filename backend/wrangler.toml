@@ -8,6 +8,8 @@ compatibility_date = "2025-01-01"
 ALLOWED_ORIGINS = "https://baominhle77-glitch.github.io,https://hiennhi89.github.io,https://hiennhi89.pages.dev"
 # Chat app lưu tối đa 30 ngày trong KV và gửi bản sao tới Telegram của chủ app.
 CHAT_ENABLED = "true"
+# Trang Bói toán nhận khách trở lại sau hosted checkout payOS.
+PAYOS_RETURN_URL = "https://hiennhi89.pages.dev/boitoan/"
 
 # Bộ nhớ KV để lưu yêu cầu + nhật ký (workflow tự tạo & điền id).
 [[kv_namespaces]]
@@ -31,4 +33,5 @@ namespace_id = "89002"
 
 # Bí mật (KHÔNG ghi ở đây) — workflow setup hoặc Wrangler đặt:
 #   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_WEBHOOK_SECRET,
-#   ADMIN_TOKEN, SESSION_SECRET, DECRYPT_KEY
+#   ADMIN_TOKEN, SESSION_SECRET, DECRYPT_KEY,
+#   PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY
