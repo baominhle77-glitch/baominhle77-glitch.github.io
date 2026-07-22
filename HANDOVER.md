@@ -56,10 +56,6 @@ Repo cũ không còn là nguồn deploy production.
 - Chưa kiểm thử production trọn luồng khách gửi yêu cầu, Telegram duyệt, nhận phiên/khóa, telemetry và chat.
 - `backend/README.md`: hướng dẫn vận hành; không ghi giá trị bí mật vào repo.
 
-### Reader showcase
-- UI quảng bá reader nằm đầu nội dung app, dùng cấu hình `readers` và allowlist URL Facebook HTTPS.
-- Cả ba danh sách đang rỗng. Cần tên, mô tả và URL Facebook chính xác từ chủ app.
-
 ### PWA và cửa hàng ứng dụng
 - Root và Bói toán có manifest/SW; SW không cache navigation, HTML mã hóa hoặc API.
 - Chỉ có icon 512×512 thật. Còn thiếu icon 192×192 thật, nên chưa tuyên bố đạt điều kiện quảng bá cài đặt Chrome.
@@ -79,7 +75,6 @@ Repo cũ không còn là nguồn deploy production.
 |--------------|-------------|
 | Gate/mã hóa | Đã rollout production; giữ khóa và payload đồng bộ khi đổi mật khẩu. |
 | Telemetry/approval/chat | Đã rollout, chat vẫn tắt; còn test đầu-cuối approval/Telegram/telemetry có ghi dữ liệu. |
-| Reader showcase | UI xong; chờ dữ liệu reader. |
 | PWA | Nền tảng an toàn xong; thiếu icon 192 thật. |
 | ChPlay/App Store | Chưa đóng gói hoặc submit. |
 

@@ -16,7 +16,6 @@ assert.match(gate, /reveal\("saved-key"\)/);
 assert.match(gate, /return "session"/);
 assert.match(gate, /return "remembered"/);
 assert.doesNotMatch(gate, /JSON\.stringify\(\{[^}]*pass(?:word)?\s*:/is, "network JSON must never contain password");
-assert.match(gate, /url\.hostname !== "facebook\.com" && url\.hostname !== "www\.facebook\.com" && url\.hostname !== "m\.facebook\.com"/);
 assert.match(gate, /textContent = String\(message\.text \|\| ""\)/, "chat messages must render as text");
 assert.match(gate, /data\.status === "expired"/, "expired approval must stop polling and stay locked");
 assert.doesNotMatch(gate, /catch\(function \(\) \{ reveal\("approved"\); \}\)/, "decryption failure must not reveal content");
@@ -45,7 +44,6 @@ assert.equal(storageBlocked.__deviceId(), storageBlocked.__deviceId(),
 assert.equal(generated, 1, "stable fallback must only generate one browser ID");
 
 for (const [name, html] of [["root", root], ["boitoan", boitoan], ["medora", medora]]) {
-  assert.match(html, /readers:\s*\[\]/, `${name} must default to no reader promotion`);
   assert.match(html, /(?:src|href)="\/?assets\/gate\.(?:js|css)"/, `${name} must use shared gate assets`);
 }
 

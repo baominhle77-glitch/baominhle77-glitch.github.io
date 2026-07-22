@@ -216,57 +216,6 @@
     }).catch(function () {});
   }
 
-  function facebookUrl(value) {
-    try {
-      var url = new URL(String(value || ""));
-      if (url.protocol !== "https:" || url.username || url.password || url.port
-          || (url.hostname !== "facebook.com" && url.hostname !== "www.facebook.com" && url.hostname !== "m.facebook.com")) return "";
-      return url.href;
-    } catch (e) {
-      return "";
-    }
-  }
-
-  function injectReaderShowcase() {
-    if (document.getElementById("gate-readers")) return;
-    var readers = Array.isArray(CFG.readers) ? CFG.readers : [];
-    var valid = readers.map(function (reader) {
-      return {
-        name: String(reader && reader.name || "").trim().slice(0, 80),
-        description: String(reader && reader.description || "").trim().slice(0, 160),
-        facebook: facebookUrl(reader && reader.facebook)
-      };
-    }).filter(function (reader) { return reader.name && reader.facebook; });
-    if (!valid.length) return;
-
-    var section = document.createElement("section");
-    section.id = "gate-readers";
-    section.setAttribute("aria-label", "Reader được giới thiệu");
-    var heading = document.createElement("strong");
-    heading.textContent = "Reader được giới thiệu";
-    var list = document.createElement("div");
-    list.className = "gate-readers-list";
-    valid.forEach(function (reader) {
-      var link = document.createElement("a");
-      link.className = "gate-reader";
-      link.href = reader.facebook;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      var name = document.createElement("span");
-      name.className = "gate-reader-name";
-      name.textContent = reader.name;
-      link.appendChild(name);
-      if (reader.description) {
-        var description = document.createElement("span");
-        description.textContent = reader.description;
-        link.appendChild(description);
-      }
-      list.appendChild(link);
-    });
-    section.append(heading, list);
-    document.body.insertBefore(section, document.body.firstChild);
-  }
-
   function tokenSupportsChat(token) {
     try {
       var part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
@@ -471,7 +420,6 @@
     var root = document.getElementById("gate-root");
     if (root) root.parentNode.removeChild(root);
     injectLogout(); // nút "khóa lại" nếu máy này đang được ghi nhớ
-    injectReaderShowcase();
     injectChat();
     trackAccess(method || "session");
     // Watermark chủ sở hữu vẫn giữ lại sau khi mở khóa (không xóa).

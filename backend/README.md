@@ -17,7 +17,6 @@ Cloudflare Worker xử lý duyệt người dùng, telemetry truy cập best-eff
 - JWT HS256 v2 có audience, scope và session KV có thể thu hồi.
 - Chat chỉ nhận JWT từ luồng approval. Mở bằng mật khẩu cục bộ không cấp quyền chat.
 - Tin nhắn chat được lưu trong KV và gửi bản sao tới Telegram. `CHAT_ENABLED=false` mặc định.
-- Reader quảng bá do frontend cấu hình; chỉ chấp nhận URL Facebook HTTPS chính xác.
 - Duyệt và chat Telegram giả định `TELEGRAM_CHAT_ID` là cuộc trò chuyện riêng với chủ app; group chat không được hỗ trợ.
 
 ## Cấu hình

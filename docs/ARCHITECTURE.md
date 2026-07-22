@@ -64,10 +64,6 @@ Chat chỉ hoạt động khi:
 
 Tin khách được gửi tới Telegram. Chủ reply đúng tin bot để trả lời. KV giữ tin nhắn và mapping Telegram 30 ngày; frontend tải tối đa 100 tin gần nhất. Telegram giữ bản sao theo chính sách tài khoản/bot, độc lập TTL KV.
 
-## Reader showcase
-
-Mỗi app cấu hình `readers`. Frontend chỉ render mục có tên và URL HTTPS thuộc `facebook.com`, `www.facebook.com` hoặc `m.facebook.com`; nội dung dùng DOM text, không chèn HTML. Danh sách hiện đang rỗng.
-
 ## PWA
 
 Root và Bói toán có manifest cùng Service Worker. Service Worker chỉ cache static allowlist; bỏ qua navigation, HTML mã hóa và API. Vì vậy offline shell có giới hạn nhưng không giữ payload nhạy cảm trong Cache Storage.
