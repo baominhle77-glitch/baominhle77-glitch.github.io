@@ -30,6 +30,21 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-23 05:34 GMT+7 — ChatGPT GPT-5.6 — DEPLOY-20260723-03 — CHẨN ĐOÁN DEPLOYMENT ⏳
+
+- `main` mới nhất khi nhận task: `af260cc5c4c0e0013293cc6ce263e2692822d9ad`.
+- Commit `af260cc…` là bàn giao thủ công ghi đúng rằng production chưa có bằng chứng; không phải kết quả Cloudflare deploy.
+- PR #23 được đóng không merge vì được tạo từ base cũ và sẽ ghi đè các file bàn giao của agent khác.
+- Nhánh thay thế: `agent/DEPLOY-20260723-03-production-diagnostics-v2`, tạo trực tiếp từ `af260cc…`.
+- Phạm vi chỉ gồm workflow deploy và các file trạng thái/bàn giao; không sửa source ứng dụng đã merge.
+- Workflow mới:
+  - gắn ID/outcome cho preflight, tích hợp runtime, test source, test Worker, build, Pages, Worker và smoke test;
+  - hậu kiểm branding `Cái Chợ của Hiên Nhi`, role cards, CSS mobile, gate runtime và API Reader không phiên;
+  - ghi `docs/handover/PRODUCTION_STATUS.md` cho cả `SUCCESS` và `FAILED`;
+  - khi lỗi, ghi đúng outcome từng bước, HTTP codes và link GitHub Actions run;
+  - giữ thứ tự Pages trước Worker, concurrency production và tránh vòng lặp do commit bàn giao.
+- Khóa source `BOITOAN-20260723-02` đã được giải phóng và chuyển sang `recently_completed`; task deploy này giữ riêng vùng hạ tầng cho tới khi có status production.
+
 ### 2026-07-23 05:26 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-02 — SOURCE MERGED / CHỜ PRODUCTION ⛔
 
 - PR #19 đã merge thành commit `ed63ad7dfd8cf85dd58135095175d40a0a913e42`.
@@ -46,7 +61,7 @@
   - không dùng OpenAI Developers/API và không chờ API key.
 - `docs/handover/PRODUCTION_STATUS.md` chưa tồn tại; connector Cloudflare trực tiếp không khả dụng trong workspace hiện tại. Vì vậy chưa xác nhận Pages/Worker đã deploy hoặc giao diện iPhone production đã đúng.
 - PR #20 và #21 được đóng không merge vì trùng phạm vi và kém đầy đủ hơn source trên `main`; hành động này tránh ghi đè công việc của agent khác.
-- Task chuyển `blocked`, chỉ chờ bằng chứng deploy Cloudflare và smoke test iPhone; không sửa thêm source ứng dụng trong lúc chờ.
+- Task source đã hoàn thành tại commit merge; phần xác minh production được tách thành `DEPLOY-20260723-03`.
 
 ### 2026-07-23 05:14 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-02 — MOBILE + BRANDING + KHO LUẬN
 

@@ -19,6 +19,7 @@ jobs:
   deploy:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: "997944c1bfcc2dcaca32718124cd718c"
@@ -31,15 +32,18 @@ jobs:
         with: { node-version: "22" }
 
       - name: Kiểm tra secret deploy
+        id: preflight
         run: |
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Thiếu CLOUDFLARE_API_TOKEN"; exit 1; }
           npx --yes wrangler@4.112.0 secret list --config backend/wrangler.toml --format json > "$RUNNER_TEMP/worker-secrets.json"
           node -e "const s=require(process.argv[1]); if (!s.some(({name}) => name === 'DECRYPT_KEY_SPARE')) { console.error('::error::Worker thiếu DECRYPT_KEY_SPARE'); process.exit(1); }" "$RUNNER_TEMP/worker-secrets.json"
 
       - name: Áp dụng hệ thống tài khoản Khách Reader Admin
+        id: integrate
         run: node tools/apply-role-system.mjs
 
       - name: Kiểm tra source
+        id: test_source
         run: |
           node --check assets/gate.js
           node --check assets/community.js
@@ -51,6 +55,7 @@ jobs:
           node boitoan/sw.test.mjs
 
       - name: Kiểm tra Worker
+        id: test_worker
         run: |
           node --check backend/community.js
           node backend/community.test.mjs
@@ -58,6 +63,7 @@ jobs:
           node backend/worker.test.mjs
 
       - name: Gộp site (SPARE + Bói toán + MEDORA)
+        id: build
         run: |
           set -euo pipefail
           rm -rf _site
@@ -69,31 +75,59 @@ jobs:
           cp medora/index.html _site/medora/index.html
 
       - name: Deploy lên Cloudflare Pages
+        id: deploy_pages
         run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
 
       - name: Deploy Worker sau Pages
+        id: deploy_worker
         working-directory: backend
         run: npx --yes wrangler@4.112.0 deploy
 
       - name: Hậu kiểm production
+        id: smoke
         run: |
           set -euo pipefail
           page_code=""
+          css_code=""
+          gate_code=""
           worker_code=""
-          for attempt in $(seq 1 20); do
-            page_code=$(curl -sS -o "$RUNNER_TEMP/community.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community.html" || true)
+          cache_bust="deploy=${GITHUB_SHA}"
+          for attempt in $(seq 1 30); do
+            page_code=$(curl -sS -o "$RUNNER_TEMP/community.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community.html?${cache_bust}" || true)
+            css_code=$(curl -sS -o "$RUNNER_TEMP/community.css" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/community.css?${cache_bust}" || true)
+            gate_code=$(curl -sS -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
             worker_code=$(curl -sS -o "$RUNNER_TEMP/community-api.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/readers" || true)
-            if [ "$page_code" = "200" ] && grep -q "Cộng đồng luận giải" "$RUNNER_TEMP/community.html" && [ "$worker_code" = "401" ] && grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json"; then
+            if [ "$page_code" = "200" ] \
+              && grep -q "Cái Chợ của Hiên Nhi" "$RUNNER_TEMP/community.html" \
+              && grep -q "community-role-card" "$RUNNER_TEMP/community.html" \
+              && [ "$css_code" = "200" ] \
+              && grep -q "community-role-options" "$RUNNER_TEMP/community.css" \
+              && [ "$gate_code" = "200" ] \
+              && grep -q "applyMarketBranding" "$RUNNER_TEMP/gate.js" \
+              && [ "$worker_code" = "401" ] \
+              && grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json"; then
               break
             fi
-            sleep 3
+            sleep 4
           done
+          {
+            echo "page_code=$page_code"
+            echo "css_code=$css_code"
+            echo "gate_code=$gate_code"
+            echo "worker_code=$worker_code"
+          } >> "$GITHUB_OUTPUT"
           test "$page_code" = "200"
-          grep -q "Cộng đồng luận giải" "$RUNNER_TEMP/community.html"
+          grep -q "Cái Chợ của Hiên Nhi" "$RUNNER_TEMP/community.html"
+          grep -q "community-role-card" "$RUNNER_TEMP/community.html"
+          test "$css_code" = "200"
+          grep -q "community-role-options" "$RUNNER_TEMP/community.css"
+          test "$gate_code" = "200"
+          grep -q "applyMarketBranding" "$RUNNER_TEMP/gate.js"
           test "$worker_code" = "401"
           grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json"
 
-      - name: Ghi trạng thái triển khai
+      - name: Ghi trạng thái triển khai thành công
+        if: success()
         run: |
           set -euo pipefail
           git reset --hard HEAD
@@ -103,15 +137,54 @@ jobs:
           cat > docs/handover/PRODUCTION_STATUS.md <<EOF
           # Trạng thái production
 
+          - Trạng thái: \`SUCCESS\`
           - Source commit: \`$GITHUB_SHA\`
           - Hoàn tất UTC: \`$completed_utc\`
-          - Cloudflare Pages: \`200 OK\` tại \`/boitoan/community.html\`
-          - Cloudflare Worker: \`401 unauthorized\` khi gọi API Reader không có phiên
+          - Workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
+          - Cloudflare Pages: \`${{ steps.smoke.outputs.page_code }}\` tại \`/boitoan/community.html\`
+          - Community CSS: \`${{ steps.smoke.outputs.css_code }}\`
+          - Gate runtime JS: \`${{ steps.smoke.outputs.gate_code }}\`
+          - Cloudflare Worker: \`${{ steps.smoke.outputs.worker_code }} unauthorized\` khi gọi API Reader không có phiên
+          - Branding kiểm tra: \`Cái Chợ của Hiên Nhi\`
+          - Layout kiểm tra: \`community-role-card\`, \`community-role-options\`
           - Thứ tự triển khai: Pages trước, Worker sau
           EOF
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/handover/PRODUCTION_STATUS.md
           git commit -m "docs: record successful production deployment" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Ghi trạng thái triển khai thất bại
+        if: failure()
+        run: |
+          set -euo pipefail
+          git reset --hard HEAD
+          rm -rf _site
+          mkdir -p docs/handover
+          completed_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          cat > docs/handover/PRODUCTION_STATUS.md <<EOF
+          # Trạng thái production
+
+          - Trạng thái: \`FAILED\`
+          - Source commit: \`$GITHUB_SHA\`
+          - Ghi nhận UTC: \`$completed_utc\`
+          - Workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
+          - Preflight: \`${{ steps.preflight.outcome }}\`
+          - Tích hợp runtime: \`${{ steps.integrate.outcome }}\`
+          - Test source: \`${{ steps.test_source.outcome }}\`
+          - Test Worker: \`${{ steps.test_worker.outcome }}\`
+          - Build site: \`${{ steps.build.outcome }}\`
+          - Deploy Pages: \`${{ steps.deploy_pages.outcome }}\`
+          - Deploy Worker: \`${{ steps.deploy_worker.outcome }}\`
+          - Hậu kiểm: \`${{ steps.smoke.outcome }}\`
+          - HTTP Pages/CSS/Gate/Worker: \`${{ steps.smoke.outputs.page_code || 'n/a' }}/${{ steps.smoke.outputs.css_code || 'n/a' }}/${{ steps.smoke.outputs.gate_code || 'n/a' }}/${{ steps.smoke.outputs.worker_code || 'n/a' }}\`
+          - Hành động: mở workflow run ở trên, sửa đúng bước thất bại rồi chạy lại; không coi production đã hoàn tất.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/handover/PRODUCTION_STATUS.md
+          git commit -m "docs: record failed production deployment" || exit 0
           git pull --rebase origin main
           git push origin HEAD:main
