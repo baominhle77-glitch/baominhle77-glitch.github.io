@@ -1,0 +1,35 @@
+name: Vật liệu hóa hệ thống tài khoản
+
+on:
+  push:
+    branches: [feat/roles-reader-community-20260723]
+    paths:
+      - ".role-system/**"
+      - ".github/workflows/materialize-role-system.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-role-system
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Giải nén mã nguồn và tạo commit sạch
+        run: |
+          set -euo pipefail
+          cat .role-system/part-* > "$RUNNER_TEMP/role-system.b64"
+          base64 --decode "$RUNNER_TEMP/role-system.b64" > "$RUNNER_TEMP/role-system.tgz"
+          tar -xzf "$RUNNER_TEMP/role-system.tgz"
+          rm -rf .role-system .github/workflows/materialize-role-system.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: add Guest Reader Admin community system"
+          git push origin HEAD:feat/roles-reader-community-20260723
