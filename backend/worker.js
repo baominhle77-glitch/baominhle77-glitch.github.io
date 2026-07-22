@@ -142,10 +142,14 @@ async function handleStatus(env, url) {
   const rec = await getReq(env, id);
   if (!rec) return json({ status: "unknown" });
   const approved = rec.status === "approved";
+  // Khóa giải mã RIÊNG theo app: secret DECRYPT_KEY_<APP> (vd DECRYPT_KEY_SPARE),
+  // nếu không có thì dùng DECRYPT_KEY chung. Nhờ vậy mỗi app có thể dùng mật khẩu khác nhau.
+  const appKeyName = "DECRYPT_KEY_" + String(rec.app || "").toUpperCase().replace(/[^A-Z0-9_]/g, "");
+  const decKey = env[appKeyName] || env.DECRYPT_KEY || undefined;
   return json({
     status: rec.status,
     token: approved ? rec.token : undefined,
-    key: approved && env.DECRYPT_KEY ? env.DECRYPT_KEY : undefined,
+    key: approved ? decKey : undefined,
   });
 }
 
