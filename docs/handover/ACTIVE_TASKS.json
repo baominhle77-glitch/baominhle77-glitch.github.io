@@ -1,13 +1,32 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T05:26:00+07:00",
+  "updated_at": "2026-07-23T05:34:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
+      "id": "DEPLOY-20260723-03",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/DEPLOY-20260723-03-production-diagnostics-v2",
+      "base_sha": "af260cc5c4c0e0013293cc6ce263e2692822d9ad",
+      "paths": [
+        ".github/workflows/deploy-pages.yml",
+        "docs/handover/PRODUCTION_STATUS.md",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T05:26:00+07:00",
+      "heartbeat_at": "2026-07-23T05:34:00+07:00",
+      "summary": "Triển khai lại source Cái Chợ của Hiên Nhi bằng workflow luôn ghi SUCCESS hoặc FAILED, kèm outcome từng bước và smoke test production."
+    }
+  ],
+  "recently_completed": [
+    {
       "id": "BOITOAN-20260723-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-02-production-handoff",
-      "base_sha": "ed63ad7dfd8cf85dd58135095175d40a0a913e42",
+      "branch": "agent/BOITOAN-20260723-02-mobile-brand-knowledge",
+      "base_sha": "a5d3f7afa78f62e7002e151b48121bb4894d2e1f",
       "paths": [
         "assets/community.css",
         "assets/community.js",
@@ -23,13 +42,11 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
-      "status": "blocked",
+      "status": "completed",
       "started_at": "2026-07-23T04:55:00+07:00",
-      "heartbeat_at": "2026-07-23T05:26:00+07:00",
-      "summary": "Source UI/branding/kho luận đã merge qua PR #19 và CI đạt. Đang chờ bằng chứng deploy Cloudflare cùng smoke test production trên iPhone; không sửa thêm các file ứng dụng cho đến khi xác nhận trạng thái này."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T05:16:00+07:00",
+      "summary": "Source UI mobile, branding Cái Chợ của Hiên Nhi và khung luận chuyên sâu đã qua CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; phần xác minh production được tách sang DEPLOY-20260723-03."
+    },
     {
       "id": "COORD-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
