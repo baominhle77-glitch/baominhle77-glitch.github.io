@@ -61,3 +61,10 @@ Trước khi push: hãy `git fetch` + rebase lên `main` mới nhất để **kh
 - Chủ yêu cầu: cân bằng ngũ hành dùng TRỌNG SỐ tàng can thay vì đếm ngang.
 - boitoan/index.html: bản khí [1] · 2 can [0.7,0.3] · 3 can [0.6,0.3,0.1]; can lộ =1.0;
   địa chi lệnh tháng ×1.5. Hiển thị điểm 1 chữ số thập phân + ghi chú. Đã test Chromium.
+
+### 2026-07-21 — Claude Code — BẢNG ĐIỂM TÀNG CAN THEO PHÂN DÃ (三命通會)  ✅ *(chủ yêu cầu)*
+- Chủ yêu cầu dùng bảng điểm mệnh lý CỔ ĐIỂN, uy tín nhất (nói rõ nguồn).
+- Đã thay trọng số 60/30/10 chung bằng **Nhân nguyên tư lệnh phân dã (人元司令分野)** theo
+  《Tam Mệnh Thông Hội 三命通會》/《Uyên Hải Tử Bình 渊海子平》 — bảng FENYE theo số ngày tiết khí,
+  khớp thứ tự TANG_CAN. Thiên can lộ =1.0; nguyệt lệnh đương quyền ×1.5. Ghi nguồn ngay trong app.
+- Chỉ đụng boitoan/index.html + file này. Đã test Chromium.
