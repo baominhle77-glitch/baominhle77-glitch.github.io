@@ -4,15 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>Cộng đồng luận giải</title>
+  <meta name="theme-color" content="#0d0a16">
+  <title>Cái Chợ của Hiên Nhi · Cộng đồng luận giải</title>
   <link rel="stylesheet" href="/assets/community.css">
 </head>
 <body>
+  <div class="community-watermark" aria-hidden="true">
+    <span>Cái Chợ của Hiên Nhi</span><span>Cái Chợ của Hiên Nhi</span><span>Cái Chợ của Hiên Nhi</span>
+    <span>Cái Chợ của Hiên Nhi</span><span>Cái Chợ của Hiên Nhi</span><span>Cái Chợ của Hiên Nhi</span>
+  </div>
+
   <header class="community-topbar">
-    <a class="community-back" href="./">← Bói toán</a>
-    <div>
-      <strong>Cộng đồng luận giải</strong>
-      <small>Khách · Reader / Người luận giải</small>
+    <a class="community-back" href="./" aria-label="Quay lại Bói toán">← <span>Bói toán</span></a>
+    <div class="community-brand">
+      <span class="community-brand-mark" aria-hidden="true">◈</span>
+      <div>
+        <strong>Cái Chợ của Hiên Nhi</strong>
+        <small>Cộng đồng luận giải</small>
+      </div>
     </div>
     <button id="community-account-button" class="community-icon-button" type="button" hidden>Tài khoản</button>
   </header>
@@ -26,7 +35,7 @@
 
   <template id="community-auth-template">
     <section class="community-auth-layout">
-      <div class="community-card">
+      <div class="community-card community-login-card">
         <h1>Đăng nhập</h1>
         <form id="community-login-form" class="community-form">
           <label>Tên đăng nhập<input name="username" required minlength="3" maxlength="30" autocomplete="username"></label>
@@ -36,13 +45,33 @@
         </form>
       </div>
 
-      <div class="community-card">
-        <h1>Tạo tài khoản</h1>
+      <div class="community-card community-register-card">
+        <div class="community-section-heading">
+          <span class="community-brand-mark small" aria-hidden="true">◈</span>
+          <div>
+            <h1>Tạo tài khoản</h1>
+            <p>Chọn đúng vai trò để hệ thống chỉ hiện các mục cần thiết.</p>
+          </div>
+        </div>
         <form id="community-register-form" class="community-form">
           <fieldset class="community-role-choice">
             <legend>Loại tài khoản</legend>
-            <label><input type="radio" name="role" value="guest" checked> Khách</label>
-            <label><input type="radio" name="role" value="reader"> Reader / Người luận giải</label>
+            <label class="community-role-card">
+              <input type="radio" name="role" value="guest" checked>
+              <span class="community-role-dot" aria-hidden="true"></span>
+              <span class="community-role-copy">
+                <strong>Khách</strong>
+                <small>Tạo hồ sơ cá nhân và trò chuyện với Reader.</small>
+              </span>
+            </label>
+            <label class="community-role-card">
+              <input type="radio" name="role" value="reader">
+              <span class="community-role-dot" aria-hidden="true"></span>
+              <span class="community-role-copy">
+                <strong>Reader / Người luận giải</strong>
+                <small>Thêm chuyên môn, thông tin nhận phí, đánh giá và lịch sử tư vấn.</small>
+              </span>
+            </label>
           </fieldset>
           <label>Tên đăng nhập<input name="username" required pattern="[a-zA-Z0-9_]{3,30}" maxlength="30" autocomplete="username" placeholder="Chữ, số hoặc dấu _"></label>
           <label>Mật khẩu<input name="password" type="password" required minlength="8" maxlength="128" autocomplete="new-password"></label>
