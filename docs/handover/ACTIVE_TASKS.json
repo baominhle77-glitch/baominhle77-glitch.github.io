@@ -1,8 +1,9 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T04:24:00+07:00",
+  "updated_at": "2026-07-23T04:31:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "COORD-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -19,11 +20,10 @@
         "HANDOVER.md",
         "tools/validate-coordination.mjs"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T04:24:00+07:00",
-      "heartbeat_at": "2026-07-23T04:24:00+07:00",
-      "summary": "Thiết lập quy tắc, khóa phạm vi và CI điều phối nhiều agent; không thay đổi logic ứng dụng."
+      "completed_at": "2026-07-23T04:31:00+07:00",
+      "summary": "Thiết lập quy tắc, khóa phạm vi, mẫu PR và CI điều phối nhiều agent; hai workflow PR đạt; không thay đổi logic ứng dụng."
     }
-  ],
-  "recently_completed": []
+  ]
 }
