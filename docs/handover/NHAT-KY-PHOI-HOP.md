@@ -32,6 +32,16 @@ Trước khi push: hãy `git fetch` + rebase lên `main` mới nhất để **kh
 
 ## Nhật ký thay đổi (mới nhất trên cùng)
 
+### 2026-07-21 — Claude Code — SỬA THUẬT TOÁN BÓI TOÁN (Thần số + Tứ trụ)  ✅ *(chủ yêu cầu)*
+- Chủ yêu cầu (khác nhiệm vụ đang giao VSCode): sửa "Tháng cá nhân" tính sai + Tứ trụ chưa dùng tàng can.
+- Đã sửa trong `boitoan/index.html` (giải mã bằng mật khẩu boitoan → sửa JS → mã hóa lại, mật khẩu KHÔNG đổi):
+  1. **Tháng cá nhân**: sửa công thức thành `rút gọn(Năm cá nhân + tháng dương lịch)`
+     (trước đó cộng lặp ngày+tháng sinh vốn đã nằm trong Năm cá nhân → sai).
+  2. **Tứ trụ**: cân bằng ngũ hành nay **đếm cả tàng can** trong địa chi (bản/trung/dư khí);
+     thập thần xét **tất cả** tàng can (không chỉ tàng chính). Bảng `TANG_CAN` giữ nguyên (đã đúng).
+- Đã test Chromium: tháng cá nhân đúng công thức; ngũ hành/thập thần hiện đủ tàng can; không lỗi JS.
+- ⚠️ Chỉ đụng `boitoan/index.html` + file nhật ký này. Không đụng SPARE, MEDORA, sw.js, workflow.
+
 ### 2026-07-21 — Claude Code — ĐỔI MẬT KHẨU RIÊNG CHO SPARE  ✅ *(chủ yêu cầu)*
 - Chủ yêu cầu: "đổi riêng SPARE thành mật khẩu mới, 2 app còn lại giữ nguyên".
 - Đã làm:
