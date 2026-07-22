@@ -1,4 +1,4 @@
-name: Hoàn thiện hệ thống tài khoản
+name: Hoàn thiện mã ứng dụng tài khoản
 
 on:
   pull_request:
@@ -47,13 +47,15 @@ jobs:
           node backend/community.test.mjs
           node --check backend/worker.js
           node backend/worker.test.mjs
-          git checkout -- assets/gate.js assets/gate.css boitoan/sw.js backend/worker.js
-      - name: Tạo commit nguồn sạch
+      - name: Tạo commit mã ứng dụng
         run: |
           set -euo pipefail
-          rm -rf .role-system role-system-diagnostic.txt role-test-diagnostic.txt .github/workflows/materialize-role-system.yml
+          git checkout -- assets/gate.js assets/gate.css boitoan/sw.js backend/worker.js .github/workflows/deploy-pages.yml
+          rm -f .github/workflows/validate-role-system.yml
+          rm -rf .role-system role-system-diagnostic.txt role-test-diagnostic.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "feat: add Guest Reader Admin community system"
+          git pull --rebase origin "$HEAD_BRANCH"
           git push origin HEAD:"$HEAD_BRANCH"
