@@ -1,8 +1,27 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T05:04:00+07:00",
+  "updated_at": "2026-07-23T05:26:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
+    {
+      "id": "DEPLOY-20260723-03",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/DEPLOY-20260723-03-production-diagnostics",
+      "base_sha": "ed63ad7dfd8cf85dd58135095175d40a0a913e42",
+      "paths": [
+        ".github/workflows/deploy-pages.yml",
+        "docs/handover/PRODUCTION_STATUS.md",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T05:26:00+07:00",
+      "heartbeat_at": "2026-07-23T05:26:00+07:00",
+      "summary": "Bổ sung trạng thái success/failure máy đọc được cho deploy Cloudflare, chạy lại deploy commit Cái Chợ của Hiên Nhi và xác minh production."
+    }
+  ],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -23,13 +42,11 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T04:55:00+07:00",
-      "heartbeat_at": "2026-07-23T05:04:00+07:00",
-      "summary": "Sửa lỗi giao diện mobile cộng đồng, đổi nhận diện thành Cái Chợ của Hiên Nhi, bỏ nhắc riêng tư, cải thiện font/logo và tổng hợp tài liệu Drive/Canva để nâng cấp nội dung bói toán bằng lớp tích hợp sau giải mã."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T05:16:00+07:00",
+      "summary": "Source mobile, branding Cái Chợ của Hiên Nhi và khung luận chuyên sâu đã qua hai CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; xác minh production được tách sang DEPLOY-20260723-03."
+    },
     {
       "id": "COORD-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
