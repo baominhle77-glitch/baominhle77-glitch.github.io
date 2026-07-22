@@ -36,9 +36,14 @@ jobs:
           npx --yes wrangler@4.112.0 secret list --config backend/wrangler.toml --format json > "$RUNNER_TEMP/worker-secrets.json"
           node -e "const s=require(process.argv[1]); if (!s.some(({name}) => name === 'DECRYPT_KEY_SPARE')) { console.error('::error::Worker thiếu DECRYPT_KEY_SPARE'); process.exit(1); }" "$RUNNER_TEMP/worker-secrets.json"
 
+      - name: Áp dụng hệ thống tài khoản Khách Reader Admin
+        run: node tools/apply-role-system.mjs
+
       - name: Kiểm tra source
         run: |
           node --check assets/gate.js
+          node --check assets/community.js
+          node --check assets/community-admin.js
           node assets/gate.test.mjs
           node --check sw.js
           node --check boitoan/sw.js
@@ -47,6 +52,8 @@ jobs:
 
       - name: Kiểm tra Worker
         run: |
+          node --check backend/community.js
+          node backend/community.test.mjs
           node --check backend/worker.js
           node backend/worker.test.mjs
 
@@ -56,9 +63,9 @@ jobs:
           rm -rf _site
           mkdir -p _site/boitoan _site/assets _site/medora
           cp index.html manifest.webmanifest sw.js _site/
-          cp assets/gate.js assets/gate.css _site/assets/
+          cp assets/gate.js assets/gate.css assets/community.js assets/community-admin.js assets/community.css _site/assets/
           cp robots.txt _site/robots.txt
-          cp boitoan/index.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
+          cp boitoan/index.html boitoan/community.html boitoan/community-admin.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
           cp medora/index.html _site/medora/index.html
 
       - name: Deploy lên Cloudflare Pages
