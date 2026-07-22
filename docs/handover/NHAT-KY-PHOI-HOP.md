@@ -2,8 +2,8 @@
 
 > File này để các AI/công cụ khác nhau cùng làm trên repository đọc và nắm được ai đã làm gì, phạm vi nào đang giữ, đã kiểm thử ra sao và việc nào còn chờ.
 
-**Chủ sở hữu:** Hiên Nhi Hiên 89.  
-**Quy tắc mới:** mọi agent phải đọc `AGENTS.md` và `docs/handover/ACTIVE_TASKS.json` trước khi sửa. Không ghi giá trị mật khẩu, token hoặc secret vào repository.
+**Thương hiệu hiển thị:** Cái Chợ của Hiên Nhi.  
+**Quy tắc:** mọi agent phải đọc `AGENTS.md` và `docs/handover/ACTIVE_TASKS.json` trước khi sửa. Không ghi giá trị mật khẩu, token hoặc secret vào repository.
 
 ---
 
@@ -30,6 +30,26 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-23 05:14 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-02 — MOBILE + BRANDING + KHO LUẬN ⏳
+
+- Base `a5d3f7afa78f62e7002e151b48121bb4894d2e1f`; branch `agent/BOITOAN-20260723-02-mobile-brand-knowledge`; PR #19.
+- Phản hồi từ ảnh iPhone: nút Cộng đồng nổi che thanh điều hướng; loại tài khoản Reader bị xuống dòng dọc; branding cũ và dòng “khu vực riêng tư” cần bỏ.
+- Đã sửa:
+  - `assets/community.css`: layout mobile, role cards, system-font stack, serif fallback, logo sigil CSS, watermark lặp.
+  - `boitoan/community.html`: hai loại tài khoản thành hai thẻ có mô tả rõ.
+  - `boitoan/community-admin.html`: đồng bộ thương hiệu.
+  - `tools/apply-role-system.mjs`: đưa Cộng đồng vào nav 5 mục; branding sau giải mã; footer/watermark mới; khung luận Tarot/Lenormand/Bài Tây/Kinh Dịch/Tử Vi/Bát Tự; kết nối toàn trải bài.
+  - `docs/research/DIVINATION_SOURCES.md`: bản đồ nguồn và phương pháp tổng hợp, không chép nguyên văn.
+- Không giải mã/ghi đè payload Bói toán; lớp mới được chèn sau giải mã để giữ nguyên các sửa Tử Vi/Bát Tự của agent khác.
+- Nguồn đã rà:
+  - Google Drive: giáo trình của chủ, Tarot, Lenormand, cartomancy/Bài Tây, Tử Vi; chưa tìm thấy giáo trình Kinh Dịch chuyên biệt đủ rõ.
+  - Canva: `Giáo trình tarot hình ảnh`, 63 trang; không có thiết kế Lenormand phù hợp trong lượt tìm.
+- OpenAI Developers: người dùng yêu cầu bỏ; plugin trả `not_installed`, repo không có cấu hình OPENAI; task không phụ thuộc API key.
+- Kiểm thử GitHub Actions:
+  - Run `29962090012` — role system/frontend/SW/Worker: **success**.
+  - Run `29962089978` — coordination guard: **success**.
+- Trạng thái: source đã kiểm thử; PR #19 chưa merge; chưa xác nhận production và chưa test trực tiếp E2E trên iPhone sau deploy.
+
 ### 2026-07-23 04:31 GMT+7 — ChatGPT GPT-5.6 — COORD-20260723-01 — ĐIỀU PHỐI ĐA-AGENT ✅
 
 - Base: `fc5a147596b34d62ed2464fbcaea038530be83cc`; branch `chore/multi-agent-coordination-20260723`; PR #18.
@@ -41,11 +61,7 @@
   - `.github/workflows/coordination-guard.yml` — PR phải có Task-ID, đúng branch, chỉ sửa paths đã khóa và cập nhật bàn giao.
   - `.github/pull_request_template.md`, `.github/copilot-instructions.md`.
   - `docs/handover/PHOI-HOP-DA-AGENT.md` — thỏa thuận vận hành chi tiết.
-- Đã cập nhật `HANDOVER.md`: tách source mới nhất khỏi production đã xác nhận; ghi rõ role system đã merge nhưng hậu kiểm production mới chưa có `PRODUCTION_STATUS.md`.
-- Kiểm thử GitHub Actions:
-  - Run `29959470437` — kiểm tra role-system/frontend/Worker: **success**.
-  - Run `29959470476` — validator khóa phạm vi + hợp đồng PR: **success**.
-- Task đã chuyển sang `completed`, `active_tasks` đã rỗng và toàn bộ phạm vi được giải phóng. Chờ lượt CI cuối sau commit bàn giao rồi merge PR #18.
+- Kiểm thử GitHub Actions đạt; PR #18 merge thành `a5d3f7afa78f62e7002e151b48121bb4894d2e1f`.
 
 ### 2026-07-22 — Claude Code — THÊM THAI NGUYÊN · CUNG MỆNH · THÂN CUNG (Tứ trụ) ✅
 
@@ -54,13 +70,12 @@
 - Test Chromium không lỗi JS; chỉ sửa `boitoan/index.html` và nhật ký; không sửa backend/workflow.
 - Commit merge: `fc5a147596b34d62ed2464fbcaea038530be83cc`.
 
-### 2026-07-23 — ChatGPT GPT-5.6 — COMMUNITY-ROLE-SYSTEM ✅ SOURCE MERGED / PRODUCTION CHƯA CHỐT
+### 2026-07-23 — ChatGPT GPT-5.6 — COMMUNITY-ROLE-SYSTEM ✅ SOURCE MERGED / PRODUCTION CẦN ĐỐI CHIẾU STATUS
 
 - PR #16 merge thành commit `489b751391007976a2a39c4f25bfdcd36db99e25`.
 - Source có tài khoản Khách/Reader/Admin, hồ sơ Reader, review 1–5 sao, chat riêng 30 ngày, báo phí/thanh toán và khóa owner-device cho quyền Admin đọc chat.
 - CI PR đã đạt toàn bộ test frontend/backend/Worker.
-- Workflow deploy được bổ sung hậu kiểm trang cộng đồng HTTP 200 và API không phiên HTTP 401.
-- Tại thời điểm ghi nhật ký, `docs/handover/PRODUCTION_STATUS.md` chưa xuất hiện trên `main`; không coi production đã xác nhận.
+- Trạng thái production phải đối chiếu `docs/handover/PRODUCTION_STATUS.md`, không suy đoán từ source.
 
 ### 2026-07-21 — Claude Code — SỬA THUẬT TOÁN BÓI TOÁN (Thần số + Tứ trụ) ✅
 
