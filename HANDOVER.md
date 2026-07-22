@@ -3,128 +3,140 @@
 > **Mọi agent phải đọc `AGENTS.md` trước file này.** Sau đó đọc
 > `docs/handover/ACTIVE_TASKS.json` và `docs/handover/NHAT-KY-PHOI-HOP.md` trước khi sửa.
 
-**Cập nhật:** 23/07/2026 04:24 (GMT+7)  
-**`main` mới nhất khi lập bàn giao:** `fc5a147596b34d62ed2464fbcaea038530be83cc`  
-**Production đã xác nhận gần nhất:** `8790f37f429987a716d62ab1e3d43ceb1053a3d7`
+**Cập nhật:** 23/07/2026 05:14 (GMT+7)  
+**`main` hiện tại:** `a5d3f7afa78f62e7002e151b48121bb4894d2e1f`  
+**Task đang làm:** `BOITOAN-20260723-02` — PR #19  
+**Production đã xác nhận gần nhất:** xem `docs/handover/PRODUCTION_STATUS.md` nếu file tồn tại; không suy đoán production từ trạng thái source.
 
-Hệ thống Khách/Reader/Admin đã merge vào source tại commit `489b751391007976a2a39c4f25bfdcd36db99e25`. Workflow đã được bổ sung hậu kiểm và cơ chế ghi `docs/handover/PRODUCTION_STATUS.md`, nhưng tại thời điểm cập nhật file này **chưa có file trạng thái production mới trên `main`**; vì vậy không được tuyên bố phần cộng đồng đã xác nhận production cho đến khi hậu kiểm tạo file hoặc có bằng chứng tương đương.
+PR #19 đã đạt hai workflow kiểm thử: hệ thống Khách/Reader/Admin và coordination guard. PR **chưa merge** tại thời điểm ghi file này; branding “Cái Chợ của Hiên Nhi” và sửa mobile **chưa được coi là production** cho đến khi workflow deploy hậu kiểm xong.
 
 ---
 
 ## 1. Ba webapp và vị trí
 
-Repository `baominhle77-glitch.github.io` là **nguồn chuẩn duy nhất** cho cả ba app.
+Repository `baominhle77-glitch.github.io` là nguồn chuẩn duy nhất.
 
-| App | Mô tả | Nguồn trong repo | URL production |
-|---|---|---|---|
-| 🔮 Bói toán | PWA tra cứu, luận giải và cộng đồng Reader | `boitoan/` | `https://hiennhi89.pages.dev/boitoan/` |
-| 🕯️ SPARE | Kho tra cứu tâm linh riêng + chat | root | `https://hiennhi89.pages.dev/` |
-| ⚕️ MEDORA | Học y khoa | `medora/` | `https://hiennhi89.pages.dev/medora/` |
-
-MEDORA được nhập từ commit `84a8632` của repository cũ `baominhle77-glitch.github.io-`. Repository cũ không còn là nguồn deploy production.
+| App | Nguồn | Production |
+|---|---|---|
+| Bói toán / Cái Chợ của Hiên Nhi | `boitoan/`, `assets/`, `backend/` | `https://hiennhi89.pages.dev/boitoan/` |
+| SPARE | root | `https://hiennhi89.pages.dev/` |
+| MEDORA | `medora/` | `https://hiennhi89.pages.dev/medora/` |
 
 ## 2. Gate, mã hóa và quyền truy cập
 
-### Gate
+- Nội dung ba app nằm trong payload AES-256-GCM; không chỉnh ciphertext bằng tay.
+- Công cụ hợp lệ: `tools/decrypt.mjs`, `tools/encrypt.mjs`, `tools/set-password.mjs`.
+- File `*.src.html` không commit.
+- SPARE ưu tiên `DECRYPT_KEY_SPARE`; Bói toán/MEDORA dùng `DECRYPT_KEY` nếu chưa có binding riêng.
+- Worker: `backend/worker.js`; production tại `hiennhi89-gate.hiennhi89.workers.dev`.
+- Approval cấp session; dữ liệu chat cộng đồng giữ tối đa 30 ngày theo backend hiện hành.
 
-- `robots.txt` chặn công cụ tìm kiếm và bot AI đã khai báo.
-- Trang dùng `noindex, nofollow, noarchive, nosnippet` và `referrer: no-referrer`.
-- `assets/gate.js` + `assets/gate.css` là lớp gate dùng chung.
-- Ba app chạy `mode: 'approval'` và nhận khóa giải mã sau khi chủ duyệt.
+## 3. Hệ thống Khách / Reader / Admin
 
-### Payload mã hóa
+Source hiện có:
 
-- Nội dung app được đóng trong payload **AES-256-GCM**; source public không chứa plaintext nội dung chính.
-- Bói toán đã gộp các file dữ liệu/app cũ vào payload; không khôi phục các file plaintext đã xóa.
-- Công cụ: `tools/encrypt.mjs`, `tools/decrypt.mjs`, `tools/set-password.mjs`.
-- File `*.src.html` không được commit.
-- SPARE dùng secret riêng `DECRYPT_KEY_SPARE`; Bói toán và MEDORA dùng `DECRYPT_KEY` chung, trừ khi có binding app-specific mới.
-- Đổi mật khẩu app phải đồng bộ payload mã hóa, gate và Worker secret của đúng app.
+- Khách và Reader đăng ký/đăng nhập sau gate.
+- Reader có hồ sơ, chuyên môn, thông tin nhận phí và QR; backend từ chối link trong hồ sơ/thanh toán.
+- Review 1–5 sao; Khách gỡ review của mình, Admin gỡ được, Reader không gỡ được.
+- Chat Reader–Khách polling khoảng 1,5 giây, giữ tối đa 30 ngày, có báo phí và trạng thái thanh toán.
+- Chat cộng đồng không sao chép sang Telegram.
+- Admin đọc chat chỉ khi có `ADMIN_TOKEN` và đúng owner-device ID đã khóa; Admin khác không đọc được.
 
-### Backend approval
-
-- `backend/worker.js` là Cloudflare Worker cho telemetry, duyệt Telegram/trang Admin, session và API.
-- Worker production: `hiennhi89-gate.hiennhi89.workers.dev`.
-- Phiên approval hiện có thời hạn 12 giờ; chat cũ của hệ thống gốc lưu tối đa 30 ngày trong KV.
-- Telemetry/browser ID là best-effort, không phải định danh thiết bị vật lý tuyệt đối.
-
-## 3. Hệ thống tài khoản Bói toán
-
-Source đã có:
-
-- Vai trò người dùng: **Khách** và **Reader/Người luận giải**; quản trị qua `ADMIN_TOKEN`.
-- Đăng ký/đăng nhập chỉ sau khi qua gate duyệt.
-- Khách có hồ sơ cá nhân, không có trường đánh giá trên chính hồ sơ Khách.
-- Reader có giới thiệu, mảng chuyên sâu, thông tin nhận phí và QR; API từ chối link trong hồ sơ/thông tin thanh toán.
-- Review công khai 1–5 sao + nội dung; Khách tự gỡ review của mình, Admin gỡ được, Reader không được gỡ.
-- Chat Reader–Khách giữ tối đa 30 ngày, polling khoảng 1,5 giây, có báo phí/báo chuyển khoản/xác nhận/nội dung luận giải.
-- Chat Reader–Khách không sao chép sang Telegram.
-- Chỉ hai người tham gia đọc chat. Quyền Admin đọc chat cần đồng thời `ADMIN_TOKEN` và đúng owner-device ID đã khóa trong KV; Admin khác không đọc được nội dung chat.
-
-Cấu trúc:
+Các file chính:
 
 - `backend/community.js`
-- `assets/community.js`
-- `assets/community-admin.js`
-- `assets/community.css`
-- `boitoan/community.html`
-- `boitoan/community-admin.html`
+- `assets/community.js`, `assets/community-admin.js`, `assets/community.css`
+- `boitoan/community.html`, `boitoan/community-admin.html`
 - `tools/apply-role-system.mjs`
 - `docs/handover/ROLE_SYSTEM.md`
 
-Việc vận hành còn cần làm sau khi production được xác nhận:
+## 4. Task `BOITOAN-20260723-02` — trạng thái PR #19
 
-1. Mở trang quản trị cộng đồng trên đúng thiết bị chủ.
-2. Khóa owner-device lần đầu.
-3. Test E2E: tạo Khách, tạo Reader, review, chat, báo phí, thanh toán và quyền Admin.
-4. Ghi kết quả/dữ liệu thử đã dọn vào nhật ký.
+### Đã thay đổi trong source
 
-## 4. PWA và cửa hàng ứng dụng
+- `assets/community.css`: layout mobile mới, system-font stack, serif fallback, watermark lặp và logo sigil CSS.
+- `boitoan/community.html`: lựa chọn loại tài khoản thành hai thẻ rõ ràng; không còn chữ Reader bị xếp dọc.
+- `boitoan/community-admin.html`: đồng bộ branding.
+- `tools/apply-role-system.mjs`:
+  - chèn nút Cộng đồng thành mục thứ năm trong thanh điều hướng, không dùng nút nổi;
+  - đổi phần hiển thị Bói toán sang “Cái Chợ của Hiên Nhi” sau giải mã;
+  - bỏ dòng “khu vực riêng tư” khỏi watermark/footer hiển thị;
+  - tạo logo trăng khuyết + sao bằng CSS;
+  - tăng mật độ watermark;
+  - bổ sung khung luận Tarot, Lenormand, Bài Tây, Kinh Dịch, Tử Vi và Bát Tự;
+  - bổ sung phần kết nối toàn trải bài Tarot/Lenormand/Bài Tây.
+- `docs/research/DIVINATION_SOURCES.md`: ghi nguồn Drive/Canva và phương pháp tổng hợp; không chép nguyên văn tài liệu.
 
-- Root và Bói toán có manifest/service worker.
-- Service worker không được cache navigation, HTML mã hóa hoặc API.
-- Có icon PNG 192×192 và 512×512 thật.
-- ChPlay/App Store/iOS chưa hoàn tất: còn tài khoản developer, đóng gói, listing, privacy disclosure, test và submission.
+### Cách tích hợp
 
-## 5. CI/CD và Cloudflare
+Không giải mã và ghi đè toàn bộ `boitoan/index.html`. Lớp mới được chèn vào `assets/gate.js/gate.css` trong bước build, sau khi payload đã giải mã. Cách này giữ nguyên các sửa thuật toán Tử Vi/Bát Tự gần nhất của agent khác.
 
-- `.github/workflows/deploy-pages.yml`: deploy từ `main`, preflight secret/binding, chạy test, build site, deploy Pages trước và Worker sau.
-- Workflow có concurrency `cloudflare-production`, không hủy deploy đang chạy.
-- Wrangler pin `4.112.0` để giảm biến động.
-- `.github/workflows/deploy-worker.yml`: chỉ dùng thủ công cho khôi phục; không dùng thay workflow phối hợp khi frontend/API cùng đổi.
-- `backend/wrangler.toml` và workflow trong repository là nguồn chuẩn cấu hình Cloudflare; tránh sửa dashboard mà không cập nhật source.
-- Hậu kiểm mới yêu cầu trang cộng đồng trả HTTP 200 và API Reader không có phiên trả HTTP 401; thành công phải tạo `docs/handover/PRODUCTION_STATUS.md`.
-- Tại thời điểm 04:24 ngày 23/07/2026, file trạng thái mới chưa xuất hiện; production mới nhất được xác nhận vẫn là commit `8790f37`.
+### Kiểm thử đã đạt
 
-## 6. Điều phối nhiều agent
+- Run `29962090012`: role system, frontend, service worker, Worker — **success**.
+- Run `29962089978`: Task-ID, branch, phạm vi và bàn giao — **success**.
+- `node --check tools/apply-role-system.mjs` đạt trước khi đẩy.
 
-Cơ chế mới:
+### Chưa hoàn tất
 
-- `AGENTS.md`: quy tắc bắt buộc cho mọi agent.
-- `docs/handover/ACTIVE_TASKS.json`: khóa phạm vi máy đọc được.
-- `tools/validate-coordination.mjs`: phát hiện task trùng ID/branch/phạm vi.
-- `.github/workflows/coordination-guard.yml`: kiểm tra PR có Task-ID, đúng branch, chỉ sửa trong phạm vi đã khóa và có cập nhật bàn giao.
-- `.github/pull_request_template.md`: checklist bắt buộc.
-- `.github/copilot-instructions.md`: hướng dẫn GitHub Copilot/agent.
-- `docs/handover/PHOI-HOP-DA-AGENT.md`: thỏa thuận vận hành chi tiết.
+- PR #19 chưa merge.
+- Chưa có smoke test production cho branding/layout mới.
+- Chưa test E2E production bằng tài khoản Khách + Reader thật trên màn hình nhỏ.
+- Chưa khóa owner-device trên thiết bị chủ nếu production chưa thực hiện bước này.
 
-Nguyên tắc: một PR = một Task-ID; không sửa trực tiếp `main`; không sửa vùng đang bị task khác khóa; mọi task phải cập nhật bàn giao và giải phóng khóa.
+## 5. Nguồn kiến thức Drive/Canva
 
-## 7. Việc còn lại ưu tiên
+Đã rà các nhóm nguồn:
 
-1. Xác định kết quả workflow deploy cho source cộng đồng và commit mới nhất; chỉ chốt khi có hậu kiểm.
-2. Test E2E production có ghi KV/Telegram/community rồi dọn dữ liệu thử.
-3. Khóa owner-device trên thiết bị chủ và ghi migration procedure nếu sau này đổi thiết bị.
-4. Cân nhắc bật/chuẩn hóa Workers Logs/Traces trong `wrangler.toml` sau khi xác định chi phí và dữ liệu được phép ghi.
-5. Hoàn thiện đóng gói iOS/Android khi có tài khoản developer và bộ privacy disclosure.
+- Tarot: giáo trình của chủ, `78 Độ Minh Triết`, lịch sử/trường phái, Mary K. Greer, Liz Dean và Court Cards.
+- Lenormand: Rana George, Caitlín Matthews, Marcus Katz/Tali Goodwin, Andy Boroveshengra và tài liệu dịch/giáo trình trong Drive.
+- Bài Tây/cartomancy: tài liệu đối chiếu Tarot–Lenormand–cartomancy và giáo trình Gypsy.
+- Tử Vi: tài liệu lập và giải Tử Vi trong Drive.
+- Canva: thiết kế `Giáo trình tarot hình ảnh`, 63 trang.
+- Chưa tìm thấy giáo trình Kinh Dịch chuyên biệt đủ rõ trong lượt rà; phần hiện tại chỉ dùng nguyên tắc phổ quát, chưa thay thuật toán quẻ.
 
-## 8. Bí mật và mật khẩu
+Chi tiết tại `docs/research/DIVINATION_SOURCES.md`.
 
-- Giá trị mật khẩu cổng được bàn giao riêng, không lưu trong repository.
-- Worker cần các binding/secret phù hợp, gồm: `ADMIN_TOKEN`, `DECRYPT_KEY`, `DECRYPT_KEY_SPARE`, `SESSION_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET` và khóa thanh toán nếu bật.
-- Token, mật khẩu, QR riêng, dữ liệu chat và secret không được chép vào issue/PR/log/bàn giao.
-- Credential từng lộ trong hội thoại hoặc môi trường ngoài repository phải được rotate/revoke theo quyết định của chủ; tài liệu chỉ ghi trạng thái, không ghi giá trị.
+## 6. OpenAI Developers
+
+- Người dùng yêu cầu bỏ vì không lấy được API key.
+- Plugin Management trả `not_installed`; repository không có cấu hình `OPENAI` được tìm thấy.
+- Không thêm OpenAI API, không tạo dependency mới và không chờ API key cho task này.
+
+## 7. CI/CD và Cloudflare
+
+- `.github/workflows/deploy-pages.yml` deploy từ `main`, chạy `tools/apply-role-system.mjs`, test source/Worker, deploy Pages trước Worker và hậu kiểm.
+- Concurrency: `cloudflare-production`, không hủy deploy đang chạy.
+- `backend/wrangler.toml` và workflow trong repo là source of truth.
+- Sau merge PR #19 phải xác nhận:
+  1. `/boitoan/community.html` HTTP 200;
+  2. API Reader không phiên HTTP 401;
+  3. nút Cộng đồng nằm trong nav 5 mục trên mobile;
+  4. role cards không tràn chữ tại chiều rộng khoảng 375–430 px;
+  5. branding/watermark không còn chuỗi “khu vực riêng tư” ở phần hiển thị Bói toán;
+  6. app mở khóa và các màn Tarot/Lenormand/Bài Tây/Kinh Dịch/Tử Vi/Bát Tự vẫn hoạt động.
+
+## 8. PWA và iOS/Android
+
+- Root và Bói toán có manifest/service worker; không cache navigation, payload HTML hay API.
+- Đóng gói App Store/Google Play chưa hoàn tất; vẫn cần tài khoản developer, privacy disclosure, test thiết bị và submission.
+- Không phụ thuộc OpenAI API để đóng gói app.
+
+## 9. Điều phối nhiều agent
+
+- Một PR = một Task-ID.
+- Không sửa vùng đang bị khóa trong `docs/handover/ACTIVE_TASKS.json`.
+- `tools/apply-role-system.mjs` là điểm build nhạy cảm: agent khác không sửa cho đến khi `BOITOAN-20260723-02` hoàn tất hoặc blocked.
+- Không ghi secret/token/mật khẩu/QR/dữ liệu chat vào repo.
+
+## 10. Việc tiếp theo theo thứ tự
+
+1. Cập nhật nhật ký PR #19 và chạy CI cuối.
+2. Merge PR #19 khi cả hai workflow vẫn đạt.
+3. Theo dõi deploy Cloudflare; chỉ chốt sau hậu kiểm.
+4. Test trực tiếp trên iPhone các kích thước mobile và luồng Khách/Reader.
+5. Chuyển task sang `completed`, giải phóng paths và ghi commit production.
 
 ---
 
-Xem thêm: `docs/ARCHITECTURE.md`, `docs/handover/ROLE_SYSTEM.md`, `docs/handover/PHOI-HOP-DA-AGENT.md`.
+Xem thêm: `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/handover/ROLE_SYSTEM.md`, `docs/handover/PHOI-HOP-DA-AGENT.md`, `docs/research/DIVINATION_SOURCES.md`.
