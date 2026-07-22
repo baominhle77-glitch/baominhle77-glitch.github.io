@@ -1,4 +1,4 @@
-name: Vật liệu hóa hệ thống tài khoản
+name: Chẩn đoán gói hệ thống tài khoản
 
 on:
   pull_request:
@@ -7,12 +7,8 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: materialize-role-system
-  cancel-in-progress: false
-
 jobs:
-  materialize:
+  diagnose:
     runs-on: ubuntu-latest
     env:
       HEAD_BRANCH: ${{ github.head_ref }}
@@ -21,19 +17,27 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
-      - name: Giải nén mã nguồn
+          show-progress: false
+      - name: Ghi chẩn đoán gói
         run: |
-          set -euo pipefail
+          set +e
+          : > role-system-diagnostic.txt
+          wc -c .role-system/part-* >> role-system-diagnostic.txt
+          sha256sum .role-system/part-* >> role-system-diagnostic.txt
           cat .role-system/part-* > "$RUNNER_TEMP/role-system.b64"
+          echo "combined $(wc -c < "$RUNNER_TEMP/role-system.b64")" >> role-system-diagnostic.txt
           base64 --decode "$RUNNER_TEMP/role-system.b64" > "$RUNNER_TEMP/role-system.tgz"
-          tar -tzf "$RUNNER_TEMP/role-system.tgz"
-          tar -xzf "$RUNNER_TEMP/role-system.tgz"
-      - name: Tạo commit sạch
+          echo "base64_status $?" >> role-system-diagnostic.txt
+          echo "tgz_size $(wc -c < "$RUNNER_TEMP/role-system.tgz")" >> role-system-diagnostic.txt
+          gzip -t "$RUNNER_TEMP/role-system.tgz"
+          echo "gzip_status $?" >> role-system-diagnostic.txt
+          tar -tzf "$RUNNER_TEMP/role-system.tgz" >> role-system-diagnostic.txt 2>&1
+          echo "tar_status $?" >> role-system-diagnostic.txt
+          cat role-system-diagnostic.txt
+      - name: Lưu chẩn đoán
         run: |
-          set -euo pipefail
-          rm -rf .role-system .github/workflows/materialize-role-system.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "feat: add Guest Reader Admin community system"
+          git add role-system-diagnostic.txt
+          git commit -m "chore: record role bundle diagnostics" || exit 0
           git push origin HEAD:"$HEAD_BRANCH"
