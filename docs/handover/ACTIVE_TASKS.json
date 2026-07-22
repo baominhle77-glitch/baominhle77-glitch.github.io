@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T05:34:00+07:00",
+  "updated_at": "2026-07-23T05:46:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "DEPLOY-20260723-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/DEPLOY-20260723-03-production-diagnostics-v2",
-      "base_sha": "af260cc5c4c0e0013293cc6ce263e2692822d9ad",
+      "branch": "agent/DEPLOY-20260723-03-follow-redirect",
+      "base_sha": "564b216bc690d79b53d10f2cf407e6d1cf2c2ab8",
       "paths": [
         ".github/workflows/deploy-pages.yml",
         "docs/handover/PRODUCTION_STATUS.md",
@@ -17,8 +17,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T05:26:00+07:00",
-      "heartbeat_at": "2026-07-23T05:34:00+07:00",
-      "summary": "Triển khai lại source Cái Chợ của Hiên Nhi bằng workflow luôn ghi SUCCESS hoặc FAILED, kèm outcome từng bước và smoke test production."
+      "heartbeat_at": "2026-07-23T05:46:00+07:00",
+      "summary": "Pages và Worker đã deploy thành công ở run 29963554073; sửa smoke test theo Cloudflare Clean URLs HTTP 308 bằng curl -L, ghi URL cuối và chạy lại production verification."
     }
   ],
   "recently_completed": [
