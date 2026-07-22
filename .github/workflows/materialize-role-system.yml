@@ -1,4 +1,4 @@
-name: Hoàn thiện hệ thống tài khoản
+name: Chẩn đoán kiểm thử hệ thống tài khoản
 
 on:
   pull_request:
@@ -7,12 +7,8 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: materialize-role-system
-  cancel-in-progress: false
-
 jobs:
-  materialize:
+  diagnose-tests:
     runs-on: ubuntu-latest
     env:
       HEAD_BRANCH: ${{ github.head_ref }}
@@ -27,32 +23,36 @@ jobs:
           node-version: "22"
       - name: Giải nén mã nguồn
         run: |
-          set -euo pipefail
           cat .role-system/part-* > "$RUNNER_TEMP/role-system.b64"
           base64 --decode "$RUNNER_TEMP/role-system.b64" > "$RUNNER_TEMP/role-system.tgz"
-          gzip -t "$RUNNER_TEMP/role-system.tgz"
           tar -xzf "$RUNNER_TEMP/role-system.tgz"
-      - name: Kiểm tra toàn bộ hệ thống
+      - name: Ghi kết quả từng kiểm thử
         run: |
-          set -euo pipefail
-          node tools/apply-role-system.mjs
-          node --check assets/gate.js
-          node --check assets/community.js
-          node --check assets/community-admin.js
-          node assets/gate.test.mjs
-          node --check boitoan/sw.js
-          node boitoan/sw.test.mjs
-          node --check backend/community.js
-          node backend/community.test.mjs
-          node --check backend/worker.js
-          node backend/worker.test.mjs
-          git checkout -- assets/gate.js assets/gate.css boitoan/sw.js backend/worker.js
-      - name: Tạo commit nguồn sạch
+          set +e
+          : > role-test-diagnostic.txt
+          run_test() {
+            echo "### $*" >> role-test-diagnostic.txt
+            "$@" >> role-test-diagnostic.txt 2>&1
+            code=$?
+            echo "status=$code" >> role-test-diagnostic.txt
+            echo >> role-test-diagnostic.txt
+          }
+          run_test node tools/apply-role-system.mjs
+          run_test node --check assets/gate.js
+          run_test node --check assets/community.js
+          run_test node --check assets/community-admin.js
+          run_test node assets/gate.test.mjs
+          run_test node --check boitoan/sw.js
+          run_test node boitoan/sw.test.mjs
+          run_test node --check backend/community.js
+          run_test node backend/community.test.mjs
+          run_test node --check backend/worker.js
+          run_test node backend/worker.test.mjs
+          cat role-test-diagnostic.txt
+      - name: Lưu chẩn đoán
         run: |
-          set -euo pipefail
-          rm -rf .role-system role-system-diagnostic.txt .github/workflows/materialize-role-system.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "feat: add Guest Reader Admin community system"
+          git add role-test-diagnostic.txt
+          git commit -m "chore: record role test diagnostics" || exit 0
           git push origin HEAD:"$HEAD_BRANCH"
