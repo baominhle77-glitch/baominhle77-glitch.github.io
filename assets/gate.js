@@ -31,6 +31,34 @@
   var SESSION_KEY = "gate_ok_" + APP;
   var REMEMBER_KEY = "gate_remember_" + APP;
   var TOKEN_KEY = "gate_token_" + APP;
+  var DEVICE_KEY = "gate_device_id";
+  var currentDeviceId = "";
+  var chatPollTimer = null;
+
+  function randomId() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    var bytes = crypto.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 15) | 64;
+    bytes[8] = (bytes[8] & 63) | 128;
+    var hex = Array.prototype.map.call(bytes, function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+    return hex.slice(0, 8) + "-" + hex.slice(8, 12) + "-" + hex.slice(12, 16) + "-" + hex.slice(16, 20) + "-" + hex.slice(20);
+  }
+
+  function deviceId() {
+    if (currentDeviceId) return currentDeviceId;
+    var id = "";
+    try {
+      id = localStorage.getItem(DEVICE_KEY) || "";
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+        id = randomId();
+        localStorage.setItem(DEVICE_KEY, id);
+      }
+    } catch (e) {
+      id = randomId();
+    }
+    currentDeviceId = id;
+    return currentDeviceId;
+  }
 
   /* -------------------------- tiện ích mã hóa -------------------------- */
   function b64ToBuf(b64) {
@@ -139,7 +167,7 @@
     return fetch(BACKEND + "/api/request", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ app: APP, name: name, note: note, device: fingerprint() })
+      body: JSON.stringify({ app: APP, name: name, note: note, device_id: deviceId(), device: fingerprint() })
     }).then(function (r) {
       if (!r.ok) throw new Error("Không gửi được yêu cầu (" + r.status + ").");
       return r.json();
@@ -150,11 +178,11 @@
     var stopped = false;
     function tick() {
       if (stopped) return;
-      fetch(BACKEND + "/api/status?id=" + encodeURIComponent(id) + "&app=" + encodeURIComponent(APP))
+      fetch(BACKEND + "/api/status?id=" + encodeURIComponent(id) + "&did=" + encodeURIComponent(deviceId()))
         .then(function (r) { return r.json(); })
         .then(function (data) {
           onUpdate(data);
-          if (data.status === "approved" || data.status === "denied") { stopped = true; return; }
+          if (data.status === "approved" || data.status === "denied" || data.status === "expired") { stopped = true; return; }
           setTimeout(tick, 3000);
         })
         .catch(function () { setTimeout(tick, 4000); });
@@ -164,11 +192,286 @@
   }
 
   /* -------------------------- mở khóa / hiện nội dung -------------------------- */
-  function reveal() {
+  function accessToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; }
+  }
+
+  function trackAccess(method) {
+    if (!BACKEND) return;
+    var token = accessToken();
+    fetch(BACKEND + "/api/access", {
+      method: "POST",
+      headers: Object.assign(
+        { "content-type": "application/json" },
+        token ? { "authorization": "Bearer " + token } : {}
+      ),
+      body: JSON.stringify({
+        app: APP,
+        device_id: deviceId(),
+        event_id: randomId(),
+        client_method: method,
+        device: fingerprint()
+      }),
+      keepalive: true
+    }).catch(function () {});
+  }
+
+  function facebookUrl(value) {
+    try {
+      var url = new URL(String(value || ""));
+      if (url.protocol !== "https:" || url.username || url.password || url.port
+          || (url.hostname !== "facebook.com" && url.hostname !== "www.facebook.com" && url.hostname !== "m.facebook.com")) return "";
+      return url.href;
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function injectReaderShowcase() {
+    if (document.getElementById("gate-readers")) return;
+    var readers = Array.isArray(CFG.readers) ? CFG.readers : [];
+    var valid = readers.map(function (reader) {
+      return {
+        name: String(reader && reader.name || "").trim().slice(0, 80),
+        description: String(reader && reader.description || "").trim().slice(0, 160),
+        facebook: facebookUrl(reader && reader.facebook)
+      };
+    }).filter(function (reader) { return reader.name && reader.facebook; });
+    if (!valid.length) return;
+
+    var section = document.createElement("section");
+    section.id = "gate-readers";
+    section.setAttribute("aria-label", "Reader được giới thiệu");
+    var heading = document.createElement("strong");
+    heading.textContent = "Reader được giới thiệu";
+    var list = document.createElement("div");
+    list.className = "gate-readers-list";
+    valid.forEach(function (reader) {
+      var link = document.createElement("a");
+      link.className = "gate-reader";
+      link.href = reader.facebook;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      var name = document.createElement("span");
+      name.className = "gate-reader-name";
+      name.textContent = reader.name;
+      link.appendChild(name);
+      if (reader.description) {
+        var description = document.createElement("span");
+        description.textContent = reader.description;
+        link.appendChild(description);
+      }
+      list.appendChild(link);
+    });
+    section.append(heading, list);
+    document.body.insertBefore(section, document.body.firstChild);
+  }
+
+  function tokenSupportsChat(token) {
+    try {
+      var part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      var claims = JSON.parse(atob(part + "=".repeat((4 - part.length % 4) % 4)));
+      return claims.ver === 2 && claims.aud === "gate-chat" && claims.app === APP
+        && claims.did === deviceId() && Array.isArray(claims.scope) && claims.scope.indexOf("chat") !== -1
+        && Number(claims.exp) * 1000 > Date.now();
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function chatApi(path, options) {
+    options = options || {};
+    options.headers = Object.assign({}, options.headers || {}, { "authorization": "Bearer " + accessToken() });
+    return fetch(BACKEND + path, options).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (!response.ok) {
+          var error = new Error(data.error || ("HTTP " + response.status));
+          error.status = response.status;
+          throw error;
+        }
+        return data;
+      });
+    });
+  }
+
+  function injectChat() {
+    if (!BACKEND || document.getElementById("gate-chat")) return;
+    var shell = document.createElement("aside");
+    shell.id = "gate-chat";
+    shell.setAttribute("aria-label", "Chat với chủ app");
+    var toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "gate-chat-toggle";
+    toggle.textContent = "Chat";
+    toggle.setAttribute("aria-expanded", "false");
+    var panel = document.createElement("div");
+    panel.className = "gate-chat-panel";
+    panel.hidden = true;
+    shell.append(toggle, panel);
+    document.body.appendChild(shell);
+
+    function status(text, isError) {
+      var node = panel.querySelector(".gate-chat-status");
+      if (node) {
+        node.textContent = text || "";
+        node.classList.toggle("err", !!isError);
+      }
+    }
+
+    function stopPolling() {
+      if (chatPollTimer) clearTimeout(chatPollTimer);
+      chatPollTimer = null;
+    }
+
+    function renderMessages(messages) {
+      var list = panel.querySelector(".gate-chat-messages");
+      if (!list) return;
+      list.replaceChildren();
+      (messages || []).forEach(function (message) {
+        var item = document.createElement("div");
+        item.className = "gate-chat-message " + (message.sender === "owner" ? "owner" : "visitor");
+        var sender = document.createElement("strong");
+        sender.textContent = message.sender === "owner" ? "Chủ app" : "Bạn";
+        var text = document.createElement("span");
+        text.textContent = String(message.text || "");
+        item.append(sender, text);
+        list.appendChild(item);
+      });
+      list.scrollTop = list.scrollHeight;
+    }
+
+    function loadMessages() {
+      if (panel.hidden || !tokenSupportsChat(accessToken())) return;
+      chatApi("/api/chat/messages").then(function (data) {
+        renderMessages(data.messages);
+        status("");
+        chatPollTimer = setTimeout(loadMessages, 5000);
+      }).catch(function (error) {
+        if (error.status === 401) {
+          try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+          renderPanel();
+          return;
+        }
+        status(error.message === "chat_disabled" ? "Chat đang tắt." : "Chưa tải được tin nhắn.", true);
+        if (error.status !== 503) chatPollTimer = setTimeout(loadMessages, 8000);
+      });
+    }
+
+    function renderApproved() {
+      panel.replaceChildren();
+      var title = document.createElement("strong");
+      title.textContent = "Chat với chủ app";
+      var messages = document.createElement("div");
+      messages.className = "gate-chat-messages";
+      messages.setAttribute("aria-live", "polite");
+      var form = document.createElement("form");
+      form.className = "gate-chat-form";
+      var input = document.createElement("textarea");
+      input.className = "gate-input";
+      input.maxLength = 1000;
+      input.rows = 2;
+      input.required = true;
+      input.placeholder = "Nhập tin nhắn…";
+      var send = document.createElement("button");
+      send.className = "gate-btn";
+      send.type = "submit";
+      send.textContent = "Gửi";
+      var state = document.createElement("div");
+      state.className = "gate-chat-status";
+      state.setAttribute("role", "status");
+      var notice = document.createElement("small");
+      notice.textContent = "Tin nhắn lưu tối đa 30 ngày trong app và gửi bản sao tới Telegram của chủ app.";
+      form.append(input, send);
+      panel.append(title, messages, form, state, notice);
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var text = input.value.trim();
+        if (!text) return;
+        send.disabled = true;
+        status("Đang gửi…");
+        chatApi("/api/chat/send", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ text: text, client_id: randomId() })
+        }).then(function () {
+          input.value = "";
+          send.disabled = false;
+          stopPolling();
+          return loadMessages();
+        }).catch(function (error) {
+          send.disabled = false;
+          status(error.message === "chat_disabled" ? "Chat đang tắt." : "Không gửi được tin nhắn.", true);
+        });
+      });
+      loadMessages();
+    }
+
+    function renderApproval() {
+      panel.replaceChildren();
+      var title = document.createElement("strong");
+      title.textContent = "Xin quyền chat";
+      var description = document.createElement("p");
+      description.textContent = "Chat chỉ dành cho hồ sơ đã được chủ duyệt.";
+      var form = document.createElement("form");
+      form.className = "gate-chat-form";
+      var name = document.createElement("input");
+      name.className = "gate-input";
+      name.required = true;
+      name.maxLength = 80;
+      name.placeholder = "Tên của bạn";
+      var submit = document.createElement("button");
+      submit.className = "gate-btn";
+      submit.type = "submit";
+      submit.textContent = "Gửi yêu cầu một lần";
+      var state = document.createElement("div");
+      state.className = "gate-chat-status";
+      state.setAttribute("role", "status");
+      form.append(name, submit);
+      panel.append(title, description, form, state);
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        submit.disabled = true;
+        status("Đang gửi yêu cầu…");
+        requestApproval(name.value.trim(), "Xin quyền chat").then(function (result) {
+          status("Đang chờ chủ duyệt…");
+          pollStatus(result.id, function (data) {
+            if (data.status === "approved" && data.token) {
+              try { localStorage.setItem(TOKEN_KEY, data.token); } catch (e) {}
+              renderPanel();
+            } else if (data.status === "denied") {
+              status("Yêu cầu chat bị từ chối.", true);
+            } else if (data.status === "expired") {
+              status("Phiên duyệt đã hết hạn. Gửi yêu cầu mới.", true);
+            }
+          });
+        }).catch(function () {
+          status("Không gửi được yêu cầu.", true);
+        });
+      });
+    }
+
+    function renderPanel() {
+      stopPolling();
+      if (tokenSupportsChat(accessToken())) renderApproved();
+      else renderApproval();
+    }
+
+    toggle.addEventListener("click", function () {
+      panel.hidden = !panel.hidden;
+      toggle.setAttribute("aria-expanded", String(!panel.hidden));
+      if (!panel.hidden) renderPanel();
+      else stopPolling();
+    });
+  }
+
+  function reveal(method) {
     document.documentElement.classList.remove("gate-locked");
     var root = document.getElementById("gate-root");
     if (root) root.parentNode.removeChild(root);
     injectLogout(); // nút "khóa lại" nếu máy này đang được ghi nhớ
+    injectReaderShowcase();
+    injectChat();
+    trackAccess(method || "session");
     // Watermark chủ sở hữu vẫn giữ lại sau khi mở khóa (không xóa).
   }
 
@@ -228,7 +531,7 @@
           if (MODE === "encrypted" || hasPayload) localStorage.setItem("gate_key_" + APP, pass);
         }
       } catch (e) {}
-      reveal();
+      reveal("password");
     });
   }
 
@@ -318,14 +621,24 @@
               } catch (e) {}
               msg.className = "gate-msg ok"; msg.textContent = "Đã được duyệt. Đang mở…";
               // Nếu backend trả khóa giải mã và trang được mã hóa:
-              if (data.key && document.querySelector('script[type="application/gate-payload"]')) {
-                decryptPayload(data.key).then(function (html) { injectHtml(html); reveal(); })
-                  .catch(function () { reveal(); });
+              if (document.querySelector('script[type="application/gate-payload"]')) {
+                if (!data.key) {
+                  msg.className = "gate-msg err";
+                  msg.textContent = "Backend chưa có khóa giải mã. Báo chủ app cập nhật cấu hình.";
+                  return;
+                }
+                decryptPayload(data.key).then(function (html) { injectHtml(html); reveal("approved"); })
+                  .catch(function () {
+                    msg.className = "gate-msg err";
+                    msg.textContent = "Khóa giải mã không khớp. Báo chủ app cập nhật backend.";
+                  });
               } else {
-                setTimeout(reveal, 500);
+                setTimeout(function () { reveal("approved"); }, 500);
               }
             } else if (data.status === "denied") {
               msg.className = "gate-msg err"; msg.textContent = "Yêu cầu bị từ chối.";
+            } else if (data.status === "expired") {
+              msg.className = "gate-msg err"; msg.textContent = "Phiên duyệt đã hết hạn. Hãy tải lại và gửi yêu cầu mới.";
             }
           });
         }).catch(function (err) {
@@ -353,12 +666,12 @@
   }
 
   /* -------------------------- khởi động -------------------------- */
-  function alreadyUnlocked() {
+  function unlockedMethod() {
     try {
-      if (sessionStorage.getItem(SESSION_KEY) === "1") return true;
-      if (localStorage.getItem(REMEMBER_KEY) === "1" && MODE !== "encrypted") return true;
+      if (sessionStorage.getItem(SESSION_KEY) === "1") return "session";
+      if (localStorage.getItem(REMEMBER_KEY) === "1" && MODE !== "encrypted") return "remembered";
     } catch (e) {}
-    return false;
+    return "";
   }
 
   function start() {
@@ -372,7 +685,7 @@
       try { savedKey = localStorage.getItem("gate_key_" + APP); } catch (e) {}
       if (savedKey) {
         decryptPayload(savedKey)
-          .then(function (html) { injectHtml(html); reveal(); })
+          .then(function (html) { injectHtml(html); reveal("saved-key"); })
           .catch(function () {
             // khóa lưu không còn đúng (vd đổi mật khẩu) -> xóa và hiện lại cổng
             try { localStorage.removeItem("gate_key_" + APP); } catch (e) {}
@@ -385,7 +698,8 @@
     }
 
     // Trang local (không mã hóa): dùng cờ đã-mở-khóa như cũ.
-    if (alreadyUnlocked() && MODE !== "encrypted") { reveal(); return; }
+    var method = unlockedMethod();
+    if (method && MODE !== "encrypted") { reveal(method); return; }
     buildUI();
   }
 

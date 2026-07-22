@@ -2,3 +2,5 @@
 *.src.html
 node_modules/
 .wrangler/
+.agent-backups/
+_site/

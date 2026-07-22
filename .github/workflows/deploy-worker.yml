@@ -26,18 +26,21 @@ jobs:
           fi
 
       - name: Checkout
-        if: steps.check.outputs.skip != 'true'
         uses: actions/checkout@v4
 
       - name: Setup Node
-        if: steps.check.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: Kiểm tra Worker
+        run: |
+          node --check backend/worker.js
+          node backend/worker.test.mjs
 
       - name: Deploy với Wrangler
         if: steps.check.outputs.skip != 'true'
         working-directory: backend
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: npx --yes wrangler@latest deploy
+        run: npx --yes wrangler@4.112.0 deploy

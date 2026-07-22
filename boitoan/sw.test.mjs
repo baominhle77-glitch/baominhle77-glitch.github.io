@@ -7,6 +7,7 @@ const entries = new Map();
 let fetchResponse;
 let fetchCalls = 0;
 let cachePutError;
+const deletedCaches = [];
 
 const cache = {
   addAll: async () => {},
@@ -26,8 +27,8 @@ const sandbox = {
   },
   caches: {
     open: async () => cache,
-    keys: async () => ["boitoan-v8", "boitoan-v9"],
-    delete: async () => true,
+    keys: async () => ["hiennhi89-v1", "boitoan-v8", "boitoan-v9", "boitoan-v10"],
+    delete: async (key) => { deletedCaches.push(key); return true; },
     match: async (key) => entries.get(String(key))
   },
   self: {
@@ -41,10 +42,15 @@ const sandbox = {
 
 vm.runInNewContext(await readFile(new URL("./sw.js", import.meta.url), "utf8"), sandbox);
 
-function dispatch(url) {
+let activation;
+handlers.activate({ waitUntil(value) { activation = Promise.resolve(value); } });
+await activation;
+assert.deepEqual(deletedCaches, ["boitoan-v8", "boitoan-v9"], "Bói toán must preserve caches owned by root Service Worker");
+
+function dispatch(url, init) {
   let response;
   handlers.fetch({
-    request: new Request(url),
+    request: init && init.mode === "navigate" ? { method: "GET", mode: "navigate", url } : new Request(url),
     respondWith(value) { response = Promise.resolve(value); }
   });
   return response;
@@ -54,24 +60,24 @@ assert.equal(dispatch("https://gate.example/api/status?id=old"), undefined);
 assert.equal(dispatch("https://example.test/boitoan/api/status?id=old"), undefined);
 assert.equal(fetchCalls, 0, "API requests must bypass the Service Worker");
 
-fetchResponse = new Response("static", { status: 200 });
-let response = await dispatch("https://example.test/boitoan/index.html?v=1");
-assert.equal(await response.text(), "static");
-assert(entries.has("https://example.test/boitoan/index.html"));
+assert.equal(dispatch("https://example.test/boitoan/", { mode: "navigate" }), undefined);
+assert.equal(dispatch("https://example.test/boitoan/index.html"), undefined);
+assert.equal(fetchCalls, 0, "encrypted HTML and navigation must bypass the Service Worker");
 
 fetchResponse = new Response("missing", { status: 404 });
-response = await dispatch("https://example.test/boitoan/gate.css");
+let response = await dispatch("https://example.test/assets/gate.css");
 assert.equal(response.status, 404);
-assert(!entries.has("https://example.test/boitoan/gate.css"));
+assert(!entries.has("https://example.test/assets/gate.css"));
 
+entries.set("https://example.test/boitoan/manifest.webmanifest", new Response("static"));
 fetchResponse = new Error("offline");
-response = await dispatch("https://example.test/boitoan/index.html?v=2");
+response = await dispatch("https://example.test/boitoan/manifest.webmanifest?v=2");
 assert.equal(await response.text(), "static");
 
-entries.set("https://example.test/boitoan/gate.js", new Response("stale"));
+entries.set("https://example.test/assets/gate.js", new Response("stale"));
 fetchResponse = new Response("fresh", { status: 200 });
 cachePutError = new Error("quota exceeded");
-response = await dispatch("https://example.test/boitoan/gate.js");
+response = await dispatch("https://example.test/assets/gate.js");
 assert.equal(await response.text(), "fresh", "cache write failure must not hide network response");
 
 console.log("Service Worker cache security PASS");

@@ -34,21 +34,23 @@ jobs:
 
       - name: Kiểm tra source
         run: |
+          node --check assets/gate.js
+          node assets/gate.test.mjs
+          node --check sw.js
           node --check boitoan/sw.js
-          node --check medora/assets/gate.js
+          node sw.test.mjs
           node boitoan/sw.test.mjs
 
       - name: Gộp site (SPARE + Bói toán + MEDORA)
         run: |
           set -euo pipefail
           rm -rf _site
-          mkdir -p _site/boitoan _site/assets _site/medora/assets
-          cp index.html _site/index.html
+          mkdir -p _site/boitoan _site/assets _site/medora
+          cp index.html manifest.webmanifest sw.js _site/
           cp assets/gate.js assets/gate.css _site/assets/
           cp robots.txt _site/robots.txt
-          cp boitoan/index.html boitoan/gate.js boitoan/gate.css boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon.png _site/boitoan/
+          cp boitoan/index.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon.png _site/boitoan/
           cp medora/index.html _site/medora/index.html
-          cp medora/assets/gate.js medora/assets/gate.css _site/medora/assets/
 
       - name: Deploy lên Cloudflare Pages
         run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true

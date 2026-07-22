@@ -1,56 +1,59 @@
-# 🟢 HƯỚNG DẪN BẤM-TỪNG-BƯỚC (cho người không rành kỹ thuật)
+# Hướng dẫn cài backend từng bước
 
-Mục tiêu: bật **Lớp C** — ai mở web phải xin phép, bạn duyệt bằng **Telegram**, thấy **IP/thiết bị** của họ.
-Bạn KHÔNG cần gõ lệnh. Khoảng 5 phút.
+Mục tiêu: bật luồng xin phép qua Telegram, telemetry truy cập best-effort, trang quản trị và nền tảng chat.
 
-> Claude không vào được tài khoản Cloudflare của bạn, nên có 1 việc **bắt buộc bạn bấm**:
-> tạo 1 "chìa khóa" (API token) bằng **mẫu có sẵn** (chỉ vài cú bấm). Phần còn lại máy tự chạy.
+## 1. Chuẩn bị Telegram
 
----
+1. Tạo bot bằng BotFather hoặc dùng bot hiện có.
+2. Nhắn một tin cho bot.
+3. Lấy chat ID từ Telegram API hoặc công cụ tin cậy.
+4. Không chép bot token hoặc chat ID vào repo, ảnh chụp hay hội thoại hỗ trợ.
 
-## BƯỚC 1 — Nhắn cho bot Telegram ✅ (bạn đã làm xong)
-Claude đã lấy được `chat_id = 8877812376`.
+Bot token đã từng lộ phải được thu hồi bằng BotFather `/revoke` trước khi dùng production.
 
-## BƯỚC 2 — Đăng ký Cloudflare miễn phí ✅ (bạn đã đăng nhập)
-Nếu chưa: https://dash.cloudflare.com/sign-up (email + mật khẩu + xác minh email).
+## 2. Tạo Cloudflare API token
 
-## BƯỚC 3 — Tạo "chìa khóa" API token (chỉ 4 cú bấm)
-1. Bấm thẳng vào link này (đang đăng nhập sẵn): **https://dash.cloudflare.com/profile/api-tokens**
-2. Bấm nút **Create Token** (góc phải).
-3. Tìm dòng đầu tiên **"Edit Cloudflare Workers"** → bấm **Use template** bên phải dòng đó.
-   *(Mẫu này đã có sẵn đủ quyền — bạn KHÔNG cần chọn gì thêm.)*
-4. Kéo xuống cuối → **Continue to summary** → **Create Token**.
-5. **Copy chuỗi token** hiện ra (chỉ hiện 1 lần). Giữ tạm trong ghi chú/Zalo của bạn.
+1. Mở `https://dash.cloudflare.com/profile/api-tokens`.
+2. Tạo token có đúng quyền cần cho Workers Scripts, Workers KV và Pages của tài khoản này.
+3. Giới hạn token vào tài khoản/tài nguyên cần dùng nếu giao diện cho phép.
+4. Copy token vào GitHub secret; không lưu trong file hoặc ứng dụng nhắn tin.
 
-> Nếu màn hình khác hình dung — **chụp màn hình gửi Claude**, Claude chỉ đúng chỗ bấm.
+## 3. Thêm năm GitHub Actions secret
 
-## BƯỚC 4 — Dán 4 "bí mật" vào GitHub
-1. Mở: **https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/settings/secrets/actions**
-2. Bấm **New repository secret**, thêm **lần lượt 4 cái** (Name gõ y hệt, Value dán vào):
+Mở `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/settings/secrets/actions`, chọn **New repository secret**, rồi thêm:
 
-   | Name | Value |
-   |------|-------|
-   | `CLOUDFLARE_API_TOKEN` | chuỗi token ở Bước 3 |
-   | `TELEGRAM_BOT_TOKEN` | token bot của bạn (chuỗi `8938415735:...`) |
-   | `TELEGRAM_CHAT_ID` | `8877812376` |
-   | `DECRYPT_KEY` | `minh-bao-2929-khoa` |
+| Name | Value |
+|------|-------|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token |
+| `TELEGRAM_BOT_TOKEN` | bot token mới, chưa lộ |
+| `TELEGRAM_CHAT_ID` | chat ID của chủ app |
+| `DECRYPT_KEY` | khóa mới dùng để mã hóa nội dung ba app |
+| `ADMIN_TOKEN` | mật khẩu quản trị dài, ngẫu nhiên và riêng biệt |
 
-   Mỗi cái: gõ Name → dán Value → **Add secret**.
+Không dùng lại ví dụ hoặc giá trị từng xuất hiện trong Git history. `DECRYPT_KEY` mới phải khớp payload đã mã hóa và cấu hình PBKDF2 frontend; nếu chưa xoay đồng bộ, dừng trước deploy.
 
-## BƯỚC 5 — Bấm nút chạy
-1. Mở: **https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/workflows/setup-backend.yml**
-2. Bên phải bấm **Run workflow** → **Run workflow** (nút xanh).
-3. Chờ ~1 phút → bấm vào lần chạy → phần **Summary** hiện:
-   - **URL Worker** (dạng `https://hiennhi89-gate....workers.dev`)
-   - **Mật khẩu trang /admin**
-4. **Copy URL Worker gửi cho Claude** → Claude lật công tắc để 3 web bắt đầu "xin phép".
+## 4. Kiểm tra trước khi chạy
 
----
+1. Xác nhận `ALLOWED_ORIGINS` trong `backend/wrangler.toml` chỉ có domain frontend thật.
+2. Xác nhận `namespace_id` `89001` và `89002` không trùng rate-limit binding khác trong tài khoản Cloudflare.
+3. Giữ `CHAT_ENABLED="false"` cho tới khi chấp nhận Telegram giữ bản sao chat 30 ngày.
+4. Chuẩn bị rollout frontend và Worker cùng đợt; không deploy riêng Worker contract mới trước frontend.
 
-## Xong thì thế nào?
-- Ai mở web → thấy ô "xin truy cập" → bạn nhận **tin nhắn Telegram** kèm **IP, thiết bị, tên** → bấm ✅/❌.
-- Hoặc duyệt tại **`<URL>/admin`** (nhập mật khẩu admin ở Bước 5).
+## 5. Chạy setup
 
-## ⚠️ Bảo mật
-Token bot đã lộ trong chat. Sau khi mọi thứ chạy ổn: @BotFather → `/revoke` → lấy token mới →
-sửa lại secret `TELEGRAM_BOT_TOKEN` → chạy lại Bước 5.
+1. Mở `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/workflows/setup-backend.yml`.
+2. Chọn **Run workflow**.
+3. Mở job summary sau khi workflow xanh.
+4. Ghi lại URL Worker. Mật khẩu `/admin` chính là giá trị `ADMIN_TOKEN` đã tự tạo và lưu riêng; workflow không hiển thị nó.
+5. Mở URL Worker, xác nhận phản hồi `gate backend OK`.
+6. Kiểm thử trọn luồng trên môi trường phối hợp: gửi yêu cầu, duyệt, nhận phiên, giải mã, ghi telemetry, thu hồi phiên.
+
+Chạy lại setup sẽ xoay secret ký phiên và webhook, làm mọi phiên đang hoạt động hết hiệu lực. Cập nhật thường ngày dùng workflow deploy Worker, không dùng setup.
+
+## 6. Sau deploy
+
+- `/admin` hiển thị browser-profile ID, trình duyệt, thông tin màn hình/ngôn ngữ và IP đã rút gọn; không phải danh sách thiết bị vật lý tuyệt đối.
+- Người mở bằng mật khẩu cục bộ có thể tạo telemetry nếu online nhưng không có quyền chat.
+- Người được approval nhận phiên 12 giờ và có quyền chat khi `CHAT_ENABLED=true`.
+- Xác nhận bot webhook không có lỗi và không còn update chờ.
+- Thu hồi ngay mọi bot token, Cloudflare token, admin token hoặc khóa giải mã từng lộ.

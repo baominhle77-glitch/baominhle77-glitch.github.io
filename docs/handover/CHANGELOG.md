@@ -1,5 +1,12 @@
 # Nhật ký thay đổi (bàn giao)
 
+## 2026-07-21 (c) — Telemetry, chat, reader và PWA foundation
+- Backend: JWT v2 có session thu hồi, IP `/24`/`/64`, browser-profile telemetry 90 ngày, chat approval 30 ngày, CSP admin và rate limit native.
+- Frontend: một shared gate cho ba app, telemetry mọi reveal path, reader showcase allowlist Facebook và chat chỉ cho phiên approval.
+- PWA: root/Bói toán dùng cache allowlist, không cache navigation, HTML mã hóa hoặc API; manifest chỉ khai icon 512×512 thật.
+- CI: chạy test trước deploy, pin Wrangler `4.112.0`; setup không hiển thị `ADMIN_TOKEN` và kiểm phản hồi webhook.
+- Chưa deploy checkpoint này. Chat vẫn tắt; reader chưa có dữ liệu; PWA còn thiếu icon 192×192 thật.
+
 ## 2026-07-21 — Khởi tạo hệ thống kiểm soát truy cập
 - Thêm Lớp A (chống dò tìm + khóa mật khẩu) cho cả 3 app: Bói toán, SPARE, MEDORA.
 - Thêm `robots.txt`, meta `noindex`, `assets/gate.js` + `gate.css`.

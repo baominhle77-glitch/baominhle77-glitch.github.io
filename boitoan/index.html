@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 <meta name="referrer" content="no-referrer">
 <script>document.documentElement.className += ' gate-locked';</script>
-<link rel="stylesheet" href="gate.css">
+<link rel="stylesheet" href="/assets/gate.css">
 <script>
 window.GATE = {
   app: 'boitoan',
@@ -15,16 +15,18 @@ window.GATE = {
   title: 'Bói Toán · Riêng tư',
   subtitle: 'Nhập mật khẩu để mở kho tra cứu.',
   pbkdf2: { saltB64: 'G3j83jYozrVpn+u5NTax/Q==', hashB64: 'uylBeIGtVdjVL53g/2nvuJn1yLGq0xEArKc3N5AgUWE=', iterations: 200000, keylen: 32 },
+  readers: [],
   backend: 'https://hiennhi89-gate.hiennhi89.workers.dev'
 };
 </script>
-<script src="gate.js" defer></script>
+<script src="/assets/gate.js" defer></script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bói Toán">
 <meta name="theme-color" content="#0d0b14">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon.png">
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <title>Bói Toán — Tra cứu &amp; Thực hành</title>
 <style>
   :root{

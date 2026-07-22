@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 <meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0d0b14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hiên Nhi 89">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="boitoan/icon.png">
+<script>if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
 <title>SPARE — Kho tra cứu riêng của Hiên Nhi Hiên 89</title>
 <!-- ===== Cổng truy cập (gate) — chặn người lạ đọc nội dung ===== -->
 <script>document.documentElement.className += ' gate-locked';</script>
@@ -17,6 +24,7 @@ window.GATE = {
   title: 'SPARE · Kho riêng',
   subtitle: 'Khu vực riêng tư của Hiên Nhi Hiên 89. Nhập mật khẩu để mở.',
   pbkdf2: { saltB64: 'qngtLCNbJ7RaybAa23G/RQ==', hashB64: 'avAhoq47GPNQVPN3EwKlrjQKiXx9FFpwdSTC3I5urug=', iterations: 200000, keylen: 32 },
+  readers: [],
   backend: 'https://hiennhi89-gate.hiennhi89.workers.dev'               // để trống = khóa cục bộ. Điền URL Worker để bật duyệt Telegram.
 };
 </script>

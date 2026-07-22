@@ -1,0 +1,13 @@
+{
+  "name": "Hiên Nhi 89 — Kho riêng",
+  "short_name": "Hiên Nhi 89",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0d0b14",
+  "theme_color": "#0d0b14",
+  "icons": [
+    {"src": "/boitoan/icon.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

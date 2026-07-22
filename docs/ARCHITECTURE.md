@@ -1,115 +1,94 @@
-# 🏗️ Thiết kế hệ thống kiểm soát truy cập
+# Kiến trúc hệ thống
 
-Tài liệu này giải thích **thiết kế, lý do kỹ thuật, và cách bật/tắt từng lớp**.
+## Thành phần
 
-## Sự thật nền tảng (đọc kỹ)
-GitHub Pages là **hosting tĩnh, công khai**. Tự thân nó **không thể**:
-- bắt đăng nhập ở tầng máy chủ,
-- giấu file dữ liệu khỏi người tải mã nguồn,
-- biết IP/thiết bị của khách,
-- chặn ai đó lưu lại trang.
+- Cloudflare Pages phục vụ ba app tại `/`, `/boitoan/`, `/medora/`.
+- `assets/gate.js` và `assets/gate.css` là gate dùng chung.
+- Cloudflare Worker xử lý approval, telemetry, admin và chat.
+- Workers KV lưu yêu cầu, phiên, sự kiện truy cập, log và tin nhắn.
+- Telegram nhận yêu cầu duyệt, nút duyệt/từ chối và bản sao chat.
 
-Vì vậy các yêu cầu "duyệt từng người", "thấy IP/dữ liệu khách nhập" **bắt buộc có backend**.
-Ta giải quyết bằng mô hình **3 lớp**, bật dần theo nhu cầu và công sức bỏ ra.
-
----
-
-## Lớp A — Chống dò tìm + Khóa mật khẩu (ngăn chặn)
-**Mục tiêu:** không lên Google; người có link thấy màn khóa thay vì nội dung.
-
-- `robots.txt`: `Disallow: /` cho mọi bot + chặn riêng bot AI.
-- Meta `noindex,nofollow,noarchive,nosnippet` + `referrer:no-referrer` trên mọi trang.
-- `assets/gate.js`:
-  - Đặt class `gate-locked` lên `<html>` ngay từ `<head>` → CSS che nội dung.
-  - Hiện form mật khẩu. Kiểm tra bằng **PBKDF2-SHA256** (200k vòng) ngay trong trình duyệt,
-    so khớp với hash lưu sẵn trong `window.GATE.pbkdf2`. **Không gửi mật khẩu đi đâu.**
-  - Đúng → lưu cờ mở khóa trong `sessionStorage` (tùy chọn "ghi nhớ máy" → `localStorage`) → hiện nội dung.
-- **Giới hạn trung thực:** nội dung vẫn nằm trong DOM/mã nguồn, chỉ bị che. Người rành kỹ thuật
-  vẫn xem được qua "View source". Đây là **lớp ngăn chặn**, không phải bảo mật tuyệt đối.
-
-### Đổi mật khẩu
-```bash
-node tools/set-password.mjs "mat-khau-moi"
-# Dán khối pbkdf2 in ra vào window.GATE của TỪNG app cần đổi.
+```mermaid
+flowchart LR
+  B[Trình duyệt] -->|approval, access, chat| W[Cloudflare Worker]
+  W --> K[Workers KV]
+  W --> T[Telegram]
+  A[Chủ app] -->|ADMIN_TOKEN| W
+  A -->|duyệt, reply| T
 ```
 
----
+## Gate và mã hóa
 
-## Lớp B — Mã hóa nội dung AES (bảo vệ thật, offline)
-**Mục tiêu:** tải mã nguồn về cũng chỉ thấy chuỗi mã hóa; không mật khẩu = không đọc được.
+Ba trang chứa payload AES-256-GCM. PBKDF2-SHA256 dẫn xuất khóa trong trình duyệt. `*.src.html` plaintext không được commit.
 
-- `tools/encrypt.mjs` mã hóa vùng nội dung bằng **AES-256-GCM**, khóa dẫn xuất PBKDF2 từ mật khẩu.
-- Trang sau mã hóa chỉ còn: khung + `<div id="gate-content"></div>` + `<script type="application/gate-payload">…</script>`.
-- `gate.js` với `mode:'encrypted'` giải mã payload trong trình duyệt rồi chèn nội dung (chạy lại `<script>`).
-- Dùng chung **một mật khẩu** cho những người được phép. Không có backend, vẫn offline.
+`window.GATE.mode`:
 
-### Bật Lớp B cho một app
-```bash
-# 1) Giữ bản gốc để còn chỉnh sau:
-mv index.html index.src.html
-# 2) (Tùy chọn) đánh dấu vùng cần mã hóa bằng <!-- gate:begin --> ... <!-- gate:end -->
-# 3) Mã hóa:
-node tools/encrypt.mjs index.src.html index.html "mat-khau-cua-ban"
-# 4) Trong <head> của index.html, đặt window.GATE.mode = 'encrypted'
-# 5) Chỉ commit index.html (đã mã hóa). Giữ index.src.html ở nhánh/máy riêng.
-```
-> Lưu ý: app Bói toán tải nhiều `data*.js` + có service worker; mã hóa cần cẩn thận từng phần.
-> Nên nhờ trợ lý làm & test bằng trình duyệt trước khi merge.
+- `local`: mở bằng mật khẩu cục bộ.
+- `encrypted`: giải mã cục bộ bằng mật khẩu.
+- `approval`: gửi yêu cầu tới Worker; khi được duyệt, Worker trả JWT và `DECRYPT_KEY`.
 
----
+Mật khẩu cục bộ không được gửi tới Worker. Payload tĩnh cho phép thử mật khẩu ngoại tuyến; khóa yếu hoặc khóa từng lộ làm mất bảo mật nội dung. `robots.txt` và `noindex` chỉ giảm khả năng bị lập chỉ mục, không phải kiểm soát truy cập.
 
-## Lớp C — Backend duyệt + Telegram (kiểm soát đầy đủ)
-**Mục tiêu:** chỉ chủ phê duyệt từng người; thấy IP/thiết bị; ghi dữ liệu khách nhập.
+## Approval và phiên
 
-Kiến trúc:
-```
-Khách mở web ──▶ gate.js (mode:'approval') ──POST /api/request──▶ Cloudflare Worker
-                                                                     │ ghi D1 (IP, UA, thiết bị)
-                                                                     ▼
-                                                        Telegram cho CHỦ  [✅ Duyệt] [❌ Từ chối]
-                                                                     │
-   gate.js poll /api/status ◀── cấp JWT khi duyệt ◀──────────────────┘
-   (được duyệt → hiện nội dung / nhận khóa giải mã)
-Chủ cũng có thể duyệt tại trang /admin (ADMIN_TOKEN, chỉ máy chủ biết).
-```
+1. Frontend tạo browser UUID và gửi `/api/request`.
+2. Worker lưu yêu cầu 7 ngày, rút gọn IP và thông báo Telegram.
+3. Chủ duyệt qua Telegram hoặc `/admin`.
+4. Worker cấp JWT HS256 v2, audience `gate-chat`, scope `access`, `log`, `chat`.
+5. Session tương ứng nằm trong KV 12 giờ. Deny hoặc quyết định lại thu hồi session cũ.
 
-- Endpoint: `/api/request`, `/api/status`, `/api/log` (ghi dữ liệu khách nhập), `/telegram/webhook`,
-  `/admin` + `/api/admin/*`.
-- Phiên: JWT ký HMAC-SHA256 bằng `SESSION_SECRET`, hết hạn 12 giờ.
-- Bảo mật webhook: header `X-Telegram-Bot-Api-Secret-Token`. Bảo mật admin: `ADMIN_TOKEN`.
-- Lưu trữ: Cloudflare D1 (`backend/schema.sql`).
-- Cài đặt: **`backend/README.md`** (một lần ~5 phút).
+JWT đơn lẻ chưa đủ: API luôn kiểm session KV còn active, đúng app, browser ID và chat ID.
 
-### Bật Lớp C trên web
-Trong `window.GATE` của mỗi app:
-```js
-mode: 'approval',
-backend: 'https://baominh-gate.<ban>.workers.dev'
-```
+## Telemetry thiết bị
 
-### Kết hợp B + C (mạnh nhất)
-Mã hóa nội dung (B) + backend chỉ trả **khóa giải mã** cho phiên được duyệt (C).
-Khi đó: người lạ không đọc được mã nguồn (B) **và** phải được bạn duyệt mới có khóa (C).
-`gate.js` đã hỗ trợ: nếu `/api/status` trả `key` và trang có payload mã hóa, nó tự giải mã.
-(Để dùng, cần lưu mật khẩu giải mã ở phía Worker và trả về khi duyệt — mở rộng nhỏ trong `decide()`.)
+`gate_device_id` là UUID dùng chung giữa ba app trong cùng browser profile. Mỗi lần reveal tạo `event_id` riêng và gọi `/api/access`.
 
----
+Dữ liệu gồm app, browser-profile ID, phương thức mở, browser, ngôn ngữ, múi giờ, kích thước màn hình, platform, quốc gia và IP đã rút gọn. IPv4 giữ `/24`; IPv6 giữ `/64`. Không gửi mật khẩu.
 
-## Tự động hóa & bàn giao
-- `.github/workflows/deploy-worker.yml`: push đổi `backend/**` → tự deploy Worker (cần secret `CLOUDFLARE_API_TOKEN`).
-- `.github/workflows/handover.yml`: mỗi push → cập nhật `docs/handover/STATUS.md` (git tự commit).
-- GitHub Pages: merge vào `main` → tự xuất bản. Đảm bảo Settings → Pages → Source = `main` / root.
+Giới hạn:
 
-## Sơ đồ tệp
-```
-├─ index.html                (SPARE, gate wired)
-├─ robots.txt
-├─ assets/gate.js, gate.css
-├─ boitoan/                  (Bói toán PWA, gate + sw cache v6)
-├─ backend/                  (Lớp C: worker.js, wrangler.toml, schema.sql, README.md)
-├─ tools/                    (encrypt.mjs, set-password.mjs)
-├─ .github/workflows/        (deploy-worker.yml, handover.yml)
-├─ docs/ARCHITECTURE.md      (file này)
-├─ docs/handover/            (STATUS.md tự sinh, CHANGELOG.md)
-└─ HANDOVER.md               (đọc trước tiên)
-```
+- Không xác định duy nhất thiết bị vật lý.
+- Xóa storage, private mode hoặc đổi browser tạo ID khác.
+- Offline, tắt JavaScript, chặn request hoặc Worker lỗi làm mất sự kiện.
+- KV list/metadata và rate limiting native có tính nhất quán best-effort.
+
+Mỗi sự kiện truy cập hết hạn sau 90 ngày. Hồ sơ tổng hợp theo browser-profile hết hạn 90 ngày sau lần cập nhật thành công gần nhất. Admin đọc 250 hồ sơ mỗi request và frontend tải tiếp đến hết; số lượt vẫn gần đúng do KV và request có thể mất hoặc ghi đè khi đồng thời. Mốc 250 giữ tổng KV operations mỗi invocation dưới giới hạn 1.000 do Cloudflare công bố; cần đo production trước khi tăng.
+
+## Chat
+
+Chat chỉ hoạt động khi:
+
+- `CHAT_ENABLED="true"`;
+- JWT approval hợp lệ chứa scope `chat`;
+- session KV còn active.
+
+Tin khách được gửi tới Telegram. Chủ reply đúng tin bot để trả lời. KV giữ tin nhắn và mapping Telegram 30 ngày; frontend tải tối đa 100 tin gần nhất. Telegram giữ bản sao theo chính sách tài khoản/bot, độc lập TTL KV.
+
+## Reader showcase
+
+Mỗi app cấu hình `readers`. Frontend chỉ render mục có tên và URL HTTPS thuộc `facebook.com`, `www.facebook.com` hoặc `m.facebook.com`; nội dung dùng DOM text, không chèn HTML. Danh sách hiện đang rỗng.
+
+## PWA
+
+Root và Bói toán có manifest cùng Service Worker. Service Worker chỉ cache static allowlist; bỏ qua navigation, HTML mã hóa và API. Vì vậy offline shell có giới hạn nhưng không giữ payload nhạy cảm trong Cache Storage.
+
+Manifest hiện chỉ khai icon PNG 512×512 đúng kích thước thật. Chưa tuyên bố sẵn sàng quảng bá cài đặt trên Chrome cho tới khi có icon 192×192 thật. ChPlay/App Store cần bước đóng gói, tài khoản developer, listing và quy trình review riêng.
+
+## Retention
+
+| Dữ liệu | TTL |
+|---|---:|
+| Yêu cầu approval, log | 7 ngày |
+| Session | 12 giờ |
+| Telemetry truy cập | 90 ngày |
+| Chat và mapping Telegram | 30 ngày |
+| Telegram update dedupe | 7 ngày |
+
+## Triển khai
+
+- `.github/workflows/deploy-pages.yml` test gate/SW rồi gộp ba app vào `_site` và deploy Pages.
+- `.github/workflows/deploy-worker.yml` test Worker rồi deploy backend.
+- `.github/workflows/setup-backend.yml` tạo KV, xoay secret phiên/webhook, deploy và nối webhook; chỉ dùng khi setup hoặc chủ động xoay secret.
+- Wrangler pin `4.112.0` trong workflow.
+
+Frontend và Worker có contract chung. Deploy phối hợp, kiểm thử đầu-cuối, rồi mới bật chat.

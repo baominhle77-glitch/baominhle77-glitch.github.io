@@ -1,11 +1,11 @@
-# 📋 BÀN GIAO — Hệ thống kiểm soát truy cập cho 3 webapp của Hiên Nhi Hiên 89
+# Bàn giao hệ thống ba webapp
 
 > Đọc file này đầu tiên. Nó cho bất kỳ ai (hoặc AI nick khác) nối vào GitHub nắm ngay
 > toàn bộ tình hình để tiếp tục mà không tốn nhiều limit.
 
-**Cập nhật:** 2026-07-21 · **Nhánh nền:** `main`
+**Cập nhật:** 2026-07-21 · **commit production nền:** `b539612740f56aa00a0c3863706aad005486eaa5`
 
-PR #9 từ `claude/webapp-automation-access-control-3sierx` đã merge vào `main` tại commit `b141644`. Cloudflare Worker và Telegram webhook đã được kiểm tra ngày 2026-07-21; luồng duyệt đầu-cuối chưa được chạy thử trong phiên này.
+Backend, frontend, PWA và tài liệu mới đang ở checkpoint worktree cách ly. Chưa commit, push hoặc deploy. Production cũ tại commit nền vẫn giữ nguyên.
 
 ---
 
@@ -24,17 +24,16 @@ Repo cũ không còn là nguồn deploy production.
 
 ## 2. Đã làm gì (trạng thái hiện tại)
 
-### ✅ Lớp A — Chống dò tìm + Khóa mật khẩu (ĐÃ BẬT)
+### Gate và mã hóa
 - `robots.txt` chặn Google/Bing + bot AI (GPTBot, ClaudeBot, CCBot…).
 - Mọi trang thêm `noindex, nofollow, noarchive, nosnippet` + `referrer: no-referrer`.
 - `assets/gate.js` + `assets/gate.css`: màn hình khóa mật khẩu (PBKDF2-SHA256, chạy offline).
-- Đã wire vào cả 3 app. **Mật khẩu hiện tại xem mục 5.**
-- ⚠️ Bản chất: đây là lớp **ngăn chặn**. Nội dung vẫn nằm trong mã nguồn (chỉ bị che).
-  Muốn "tải về cũng không đọc được" → bật Lớp B. Muốn "duyệt từng người" → bật Lớp C.
+- Đã wire vào cả 3 app bằng shared `assets/gate.js` và `assets/gate.css`.
+- Bốn bản gate trùng trong `boitoan/` và `medora/assets/` đã xóa; không khôi phục nếu không có lý do tương thích rõ ràng.
 
-### ✅ Lớp B — Mã hóa nội dung AES (ĐÃ ÁP DỤNG CẢ 3 APP)
-- Nội dung 3 app đã được **mã hóa AES-256-GCM** (`mode:'encrypted'`). Tải mã nguồn
-  về chỉ thấy chuỗi mã hóa, không chứa nội dung plaintext. Vẫn chạy offline; độ an toàn phụ thuộc độ mạnh mật khẩu vì người có payload có thể thử đoán ngoại tuyến.
+### Mã hóa nội dung
+- Nội dung 3 app là payload **AES-256-GCM**; gate checkpoint hiện chạy `mode:'approval'` và nhận khóa sau khi duyệt. Tải mã nguồn
+  về chỉ thấy chuỗi mã hóa, không chứa nội dung plaintext. Chế độ mật khẩu cục bộ có thể chạy offline; độ an toàn phụ thuộc độ mạnh mật khẩu vì người có payload có thể thử đoán ngoại tuyến.
 - Với **boitoan**: đã GỘP `data*.js` + `app.js` vào trong rồi mã hóa, và **xóa 6 file
   plaintext** (giờ `boitoan/data.js`… trả 404 — không tải về được nữa).
 - Công cụ: `tools/encrypt.mjs` (mã hóa), `tools/decrypt.mjs` (khôi phục để sửa),
@@ -45,17 +44,27 @@ Repo cũ không còn là nguồn deploy production.
 - ✅ Đã test trình duyệt thật (Chromium): mở đúng mật khẩu hiện nội dung, sai mật khẩu
   bị chặn, không lỗi console; boitoan chạy đủ chức năng sau giải mã.
 
-### 🟡 Lớp C — Backend duyệt + Telegram bot (ĐÃ BẬT, CHƯA TEST ĐẦU-CUỐI)
-- `backend/worker.js`: Cloudflare Worker. Ghi IP/quốc gia/thiết bị của khách,
-  gửi Telegram cho chủ với nút ✅ Duyệt / ❌ Từ chối, cấp phiên JWT khi duyệt.
+### Backend, telemetry và chat — chưa deploy
+- `backend/worker.js`: Cloudflare Worker. Ghi telemetry browser-profile best-effort,
+  gửi Telegram cho chủ với nút duyệt/từ chối, cấp phiên JWT v2 khi duyệt.
 - Duyệt được bằng **bot Telegram** HOẶC **trang `/admin`** (mật khẩu ADMIN_TOKEN).
 - `/`, `/boitoan/` và `/medora/` dùng `mode: 'approval'`, trỏ tới `https://hiennhi89-gate.hiennhi89.workers.dev`.
-- Worker trả HTTP 200 với `gate backend OK`; repo cấu hình binding `KV`, Workers API xác nhận 5 secret binding bắt buộc đã tồn tại.
-- Bot `@Appwebcuatoi_bot` hoạt động; webhook trỏ đúng Worker, không có lỗi hoặc bản cập nhật chờ tại lúc kiểm tra.
-- ⚠️ Chưa kiểm thử trọn luồng khách gửi yêu cầu → Telegram duyệt → nhận phiên/khóa giải mã trong phiên này.
+- Worker lưu IP đã rút gọn `/24` hoặc `/64`, không nhận mật khẩu. Browser ID không phải định danh thiết bị vật lý tuyệt đối.
+- Chat chỉ dành cho phiên approval; mặc định `CHAT_ENABLED=false`. Tin chat giữ 30 ngày trong KV và có bản sao Telegram.
+- Telemetry giữ 90 ngày; yêu cầu/log 7 ngày; phiên 12 giờ.
+- Chưa kiểm thử production trọn luồng khách gửi yêu cầu, Telegram duyệt, nhận phiên/khóa, telemetry và chat.
 - `backend/README.md`: hướng dẫn vận hành; không ghi giá trị bí mật vào repo.
 
-### ✅ Tự động hóa
+### Reader showcase
+- UI quảng bá reader nằm đầu nội dung app, dùng cấu hình `readers` và allowlist URL Facebook HTTPS.
+- Cả ba danh sách đang rỗng. Cần tên, mô tả và URL Facebook chính xác từ chủ app.
+
+### PWA và cửa hàng ứng dụng
+- Root và Bói toán có manifest/SW; SW không cache navigation, HTML mã hóa hoặc API.
+- Chỉ có icon 512×512 thật. Còn thiếu icon 192×192 thật, nên chưa tuyên bố đạt điều kiện quảng bá cài đặt Chrome.
+- ChPlay/App Store chưa hoàn tất. Cần tài khoản developer, đóng gói, listing, privacy disclosure, test và submission riêng.
+
+### Tự động hóa — chưa chạy deploy cho checkpoint này
 - `.github/workflows/deploy-worker.yml`: tự deploy Worker khi push (cần secret `CLOUDFLARE_API_TOKEN`).
 - `.github/workflows/deploy-pages.yml`: khi source đổi trên `main`, gộp ba app từ chính repo này và Direct Upload lên Cloudflare Pages project `hiennhi89`; thiếu token làm workflow thất bại rõ ràng.
 - `.github/workflows/handover.yml`: được thiết kế để cập nhật `docs/handover/STATUS.md`; hiện chưa tạo được file này trên `main`.
@@ -65,22 +74,25 @@ Repo cũ không còn là nguồn deploy production.
 
 | Muốn mức nào | Bạn cần làm |
 |--------------|-------------|
-| Chỉ chống dò tìm + khóa (Lớp A) | Đã có trong `main`; kiểm tra web thật trước khi kết luận. |
-| Thêm mã hóa thật (Lớp B) | Đã có trong `main`; dùng `tools/encrypt.mjs` khi cần sửa nội dung. |
-| Duyệt từng người + Telegram (Lớp C) | Đã bật cho cả ba URL; cần test đầu-cuối. |
-| Deploy Worker tự động | Worker đang hoạt động; workflow deploy gần nhất trên `main` kết thúc thành công. |
-| Deploy ba app tự động | Giữ secret `CLOUDFLARE_API_TOKEN`; push source lên `main` rồi kiểm tra workflow và ba URL production. |
+| Gate/mã hóa | Code checkpoint đã cập nhật; chưa rollout. |
+| Telemetry/approval/chat | Worker và frontend đã code; cần review, test đầu-cuối và rollout phối hợp. |
+| Reader showcase | UI xong; chờ dữ liệu reader. |
+| PWA | Nền tảng an toàn xong; thiếu icon 192 thật. |
+| ChPlay/App Store | Chưa đóng gói hoặc submit. |
 
 ## 4. Cách tiếp tục công việc (cho nick/AI khác)
-1. Đọc file này trước. `docs/ARCHITECTURE.md` và `docs/handover/DOI-TEN-VA-TIEP-TUC.md` còn hướng dẫn cũ về GitHub Pages/D1/repo phụ; production hiện dùng một repo, Cloudflare Pages và Workers KV như code/cấu hình hiện tại.
-2. Xem `git log`, GitHub Actions và deployment Cloudflare Pages. `docs/handover/STATUS.md` hiện chưa tồn tại trên `main` dù workflow bàn giao gần nhất báo thành công.
-3. Tạo nhánh mới từ `main`, mở PR nháp; không tiếp tục trên nhánh đã merge.
-4. Đổi mật khẩu: `node tools/set-password.mjs "mk-moi"` rồi dán khối in ra vào `window.GATE`.
+1. Làm trong checkpoint worktree hiện tại; không sửa nhầm working tree production.
+2. Chạy full suite trong `backend/`, `assets/`, root và `boitoan/`.
+3. Validate manifest/icon dimensions và Wrangler config nhưng không deploy.
+4. Independent review diff và bằng chứng test; sửa finding trước rollout.
+5. Trước deploy, xác nhận rate-limit namespace `89001`/`89002` không trùng trong tài khoản Cloudflare.
+6. Rotate/revoke mọi credential từng lộ. `TELEGRAM_CHAT_ID` hiện là Worker secret, không còn trong `wrangler.toml`.
+7. Chỉ commit, push hoặc deploy khi chủ app cho phép rõ ràng. Deploy frontend và Worker phối hợp.
 
 ## 5. Bí mật / mật khẩu
 - **Mật khẩu cổng hiện tại** được bàn giao RIÊNG trong hội thoại, **không lưu trong repo**.
   Repo chỉ chứa hash PBKDF2; vẫn có rủi ro bị thử đoán ngoại tuyến nếu mật khẩu yếu. Đổi bất cứ lúc nào bằng `tools/set-password.mjs`.
-- Cloudflare API xác thực thành công. Worker có các secret binding: `ADMIN_TOKEN`, `DECRYPT_KEY`, `SESSION_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`.
+- Worker cần secret binding: `ADMIN_TOKEN`, `DECRYPT_KEY`, `SESSION_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET`.
 - Giá trị token, mật khẩu và secret chỉ giữ ngoài repo; **không chép vào tài liệu hoặc commit**.
 
 ---
