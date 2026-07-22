@@ -8,7 +8,7 @@ Cloudflare Worker xử lý duyệt người dùng, telemetry truy cập best-eff
 - Telemetry chỉ gửi khi trình duyệt online và request tới Worker thành công. Không thể thống kê tuyệt đối mọi lượt truy cập.
 - Worker không nhận mật khẩu cổng. IP được rút gọn thành IPv4 `/24` hoặc IPv6 `/64` trước khi lưu và hiển thị.
 - Yêu cầu và log giữ 7 ngày; phiên duyệt 12 giờ; sự kiện truy cập 90 ngày; tin nhắn chat 30 ngày.
-- `/admin` phân trang toàn bộ hồ sơ trình duyệt; danh sách yêu cầu duyệt chỉ quét tối đa 500 khóa KV mỗi lần tải.
+- `/admin` phân trang độc lập và tải toàn bộ hồ sơ trình duyệt cùng yêu cầu duyệt còn trong KV.
 - Workers KV và rate limit native đều best-effort; không dùng chúng làm ranh giới bảo mật duy nhất.
 
 ## Tính năng
@@ -16,7 +16,7 @@ Cloudflare Worker xử lý duyệt người dùng, telemetry truy cập best-eff
 - Duyệt hoặc từ chối qua Telegram và `/admin`.
 - JWT HS256 v2 có audience, scope và session KV có thể thu hồi.
 - Chat chỉ nhận JWT từ luồng approval. Mở bằng mật khẩu cục bộ không cấp quyền chat.
-- Tin nhắn chat được lưu trong KV và gửi bản sao tới Telegram. `CHAT_ENABLED=false` mặc định.
+- Tin nhắn chat được lưu trong KV và gửi bản sao tới Telegram. Production đặt `CHAT_ENABLED=true`.
 - Duyệt và chat Telegram giả định `TELEGRAM_CHAT_ID` là cuộc trò chuyện riêng với chủ app; group chat không được hỗ trợ.
 
 ## Cấu hình
@@ -62,12 +62,7 @@ Không deploy Worker mới riêng lẻ khi frontend production còn dùng contra
 
 ## Chat
 
-Trước khi bật:
-
-1. Xác nhận bot và webhook hoạt động.
-2. Chấp nhận Telegram giữ bản sao nội dung chat.
-3. Xác nhận chính sách giữ tin nhắn 30 ngày.
-4. Đổi `CHAT_ENABLED` thành `"true"`, chạy test, rồi deploy phối hợp.
+Chat đã bật trong cấu hình production sau khi bot, webhook và luồng Telegram approval được xác minh. Tin nhắn thử production phải dùng nội dung không nhạy cảm; sau mỗi rollout, kiểm tra cả gửi từ app và reply từ Telegram.
 
 Chủ app trả lời khách bằng cách reply đúng tin nhắn bot trên Telegram.
 

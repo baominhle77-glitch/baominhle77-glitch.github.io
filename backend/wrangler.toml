@@ -6,8 +6,8 @@ compatibility_date = "2025-01-01"
 [vars]
 # Domain web của bạn (CORS). Sửa nếu đổi tên tài khoản.
 ALLOWED_ORIGINS = "https://baominhle77-glitch.github.io,https://hiennhi89.github.io,https://hiennhi89.pages.dev"
-# Bật sau khi đã đặt webhook/bot secret và chấp nhận Telegram giữ bản sao tin nhắn.
-CHAT_ENABLED = "false"
+# Chat app lưu tối đa 30 ngày trong KV và gửi bản sao tới Telegram của chủ app.
+CHAT_ENABLED = "true"
 
 # Bộ nhớ KV để lưu yêu cầu + nhật ký (workflow tự tạo & điền id).
 [[kv_namespaces]]

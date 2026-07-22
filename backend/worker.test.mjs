@@ -156,14 +156,48 @@ try {
   assert.match(response.headers.get("content-security-policy"), /default-src 'none'/);
   assert(adminPage.includes("textContent"));
   assert(!adminPage.includes("innerHTML"));
+  assert(adminPage.includes("https://hiennhi89.pages.dev/boitoan/"));
+  assert(adminPage.includes("Thu hồi phiên"));
+  assert(adminPage.includes("loadAll('requests')"));
   assert(!adminPage.includes("<img src=x onerror=alert(1)>"), "stored payload must not enter admin HTML");
 
-  response = await call(e, "/api/admin/list", { token: "admin-secret" });
+  response = await call(e, "/api/admin/list?kind=requests", { token: "admin-secret" });
   assert.equal(response.status, 200);
-  const adminData = await body(response);
-  assert.equal(adminData.requests[0].ip, "203.0.113.0/24");
-  assert.equal(adminData.devices[0].visits, 1);
-  assert.equal(adminData.cursor, "");
+  const requestData = await body(response);
+  assert.equal(requestData.requests[0].ip, "203.0.113.0/24");
+  assert.equal(requestData.cursor, "");
+
+  response = await call(e, "/api/admin/list?kind=devices", { token: "admin-secret" });
+  const deviceData = await body(response);
+  assert.equal(deviceData.devices[0].visits, 1);
+  assert.equal(deviceData.cursor, "");
+
+  const paginationEnv = env();
+  for (let i = 0; i < 501; i += 1) {
+    const id = `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`;
+    await paginationEnv.KV.put(`req:${id}`, JSON.stringify({
+      id, app: "spare", name: `Yêu cầu ${i}`, status: "denied", created_at: i,
+    }));
+  }
+  const revocableId = "ffffffff-ffff-4fff-bfff-ffffffffffff";
+  await paginationEnv.KV.put(`req:${revocableId}`, JSON.stringify({
+    id: revocableId, app: "spare", name: "Phiên ngoài 500 khóa", device_id: DID,
+    status: "pending", created_at: 999,
+  }));
+  response = await call(paginationEnv, "/api/admin/approve", {
+    method: "POST", token: "admin-secret", body: { id: revocableId },
+  });
+  assert.equal(response.status, 200);
+  let requestCursor = "";
+  const allRequests = [];
+  do {
+    response = await call(paginationEnv, `/api/admin/list?kind=requests${requestCursor ? `&cursor=${encodeURIComponent(requestCursor)}` : ""}`, { token: "admin-secret" });
+    const page = await body(response);
+    allRequests.push(...page.requests);
+    requestCursor = page.cursor;
+  } while (requestCursor);
+  assert.equal(allRequests.length, 502);
+  assert.equal(allRequests.find(({ id }) => id === revocableId)?.status, "approved", "active approval beyond 500 keys must remain visible and revocable");
 
   for (let i = 0; i < 251; i += 1) {
     const id = `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`;
@@ -172,15 +206,14 @@ try {
       methods: ["password"], countries: ["VN"], browser: "Chrome", device: {},
     }));
   }
-  response = await call(e, "/api/admin/list", { token: "admin-secret" });
+  response = await call(e, "/api/admin/list?kind=devices", { token: "admin-secret" });
   const firstDevicePage = await body(response);
   assert.equal(firstDevicePage.devices.length, 250);
   assert(firstDevicePage.cursor);
-  response = await call(e, `/api/admin/list?cursor=${encodeURIComponent(firstDevicePage.cursor)}`, { token: "admin-secret" });
+  response = await call(e, `/api/admin/list?kind=devices&cursor=${encodeURIComponent(firstDevicePage.cursor)}`, { token: "admin-secret" });
   const secondDevicePage = await body(response);
   assert.equal(secondDevicePage.devices.length, 2);
   assert.equal(secondDevicePage.cursor, "");
-  assert.deepEqual(secondDevicePage.requests, [], "approval records are only loaded with the first device page");
 
   response = await call(e, "/api/admin/approve", {
     method: "POST",

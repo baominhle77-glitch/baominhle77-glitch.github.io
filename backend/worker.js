@@ -13,9 +13,7 @@ const CHAT_TTL = 30 * 24 * 60 * 60;
 const TELEGRAM_UPDATE_TTL = 7 * 24 * 60 * 60;
 const CHAT_MESSAGE_LIMIT = 100;
 // ponytail: Bound KV reads per admin request; tune after production profiling.
-const ADMIN_DEVICE_PAGE_LIMIT = 250;
-// ponytail: Keep combined legacy request + device reads below Cloudflare's 1,000-operation invocation limit.
-const ADMIN_REQUEST_SCAN_LIMIT = 500;
+const ADMIN_PAGE_LIMIT = 250;
 const enc = new TextEncoder();
 
 const json = (obj, status = 200, extra = {}) =>
@@ -564,17 +562,20 @@ function publicRequest(rec) {
   };
 }
 
-async function listRequests(env) {
+async function listRequests(env, cursor) {
   const out = [];
-  const page = await env.KV.list({ prefix: "req:", limit: ADMIN_REQUEST_SCAN_LIMIT });
+  const page = await env.KV.list({ prefix: "req:", cursor: cursor || undefined, limit: ADMIN_PAGE_LIMIT });
   const records = await Promise.all(page.keys.map((key) => getJson(env, key.name)));
   for (const rec of records) if (rec) out.push(publicRequest(rec));
   out.sort((a, b) => b.created_at - a.created_at);
-  return out.slice(0, 100);
+  return {
+    requests: out,
+    cursor: page.list_complete ? "" : cleanText(page.cursor, 4096),
+  };
 }
 
 async function listDevices(env, cursor) {
-  const page = await env.KV.list({ prefix: "device:", cursor: cursor || undefined, limit: ADMIN_DEVICE_PAGE_LIMIT });
+  const page = await env.KV.list({ prefix: "device:", cursor: cursor || undefined, limit: ADMIN_PAGE_LIMIT });
   const records = await Promise.all(page.keys.map((key) => getJson(env, key.name)));
   const devices = records.filter((rec) => rec && validApp(rec.app) && isUuid(rec.device_id)).map((rec) => ({
     app: rec.app,
@@ -597,8 +598,8 @@ async function listDevices(env, cursor) {
 function adminHtml(nonce) {
   return `<!doctype html><html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Kiểm soát truy cập</title>
-<style nonce="${nonce}">body{font-family:system-ui,sans-serif;background:#0d0b14;color:#e8e2f4;margin:0;padding:16px}h1,h2{color:#d4a94e;font-size:1.1rem}input,button{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid #332a52;background:#161226;color:#e8e2f4}button{cursor:pointer}table{width:100%;border-collapse:collapse;margin:12px 0 28px;font-size:.82rem}td,th{border-bottom:1px solid #332a52;padding:8px;text-align:left;vertical-align:top}.ok{background:#1e5f3f}.no{background:#5f2b1e}.pending{color:#d4a94e}.approved{color:#5fbf8a}.denied{color:#e0785a}.muted,small{color:#a89fc4}.scroll{overflow:auto}</style>
-</head><body><h1>Kiểm soát truy cập</h1><p class="muted">Số liệu là gần đúng cho từng hồ sơ trình duyệt online trong 90 ngày gần nhất; có thể bỏ sót.</p>
+<style nonce="${nonce}">body{font-family:system-ui,sans-serif;background:#0d0b14;color:#e8e2f4;margin:0;padding:16px}h1,h2{color:#d4a94e;font-size:1.1rem}a{color:#b9a6ea}input,button{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid #332a52;background:#161226;color:#e8e2f4}button{cursor:pointer}table{width:100%;border-collapse:collapse;margin:12px 0 28px;font-size:.82rem}td,th{border-bottom:1px solid #332a52;padding:8px;text-align:left;vertical-align:top}.ok{background:#1e5f3f}.no{background:#5f2b1e}.pending{color:#d4a94e}.approved{color:#5fbf8a}.denied{color:#e0785a}.muted,small{color:#a89fc4}.scroll{overflow:auto}.links{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}</style>
+</head><body><h1>Kiểm soát truy cập</h1><nav class="links" aria-label="Link hệ thống"><a href="https://hiennhi89.pages.dev/">SPARE</a><a href="https://hiennhi89.pages.dev/boitoan/">Bói toán</a><a href="https://hiennhi89.pages.dev/medora/">MEDORA</a></nav><p class="muted">Mỗi mã là một hồ sơ trình duyệt, không phải thiết bị vật lý. Danh sách gồm cả cách mở bằng mật khẩu, ghi nhớ và phê duyệt trong 90 ngày gần nhất; telemetry online có thể bỏ sót. “Lần cuối” là lần truy cập gần nhất, không khẳng định thiết bị đang online.</p>
 <label>ADMIN_TOKEN <input id="tok" type="password" autocomplete="current-password"></label> <button id="load" type="button">Tải dữ liệu</button>
 <p id="msg" role="status"></p><h2>Thiết bị</h2><div id="devices" class="scroll"></div><h2>Yêu cầu duyệt</h2><div id="requests" class="scroll"></div>
 <script nonce="${nonce}">'use strict';
@@ -609,8 +610,9 @@ function table(headers){const t=node('table'),head=node('tr');headers.forEach(fu
 async function api(path,opt){opt=opt||{};opt.headers=Object.assign({'authorization':'Bearer '+$('tok').value},opt.headers||{});const r=await fetch(path,opt);const d=await r.json();if(!r.ok)throw new Error(d.error||('HTTP '+r.status));return d}
 async function decide(id,action){await api('/api/admin/'+action,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:id})});await load()}
 function renderDevices(items){const t=table(['App','Mã trình duyệt','Cách mở','Lượt gần đúng','Quốc gia/IP rút gọn','Trình duyệt/thiết bị','Lần đầu','Lần cuối']);items.forEach(function(d){const r=node('tr');cell(r,d.app);cell(r,d.device_id);cell(r,(d.methods||[]).join(', '));cell(r,d.visits);cell(r,(d.countries||[]).join(', ')+' '+(d.ip||''));cell(r,[d.browser,d.device&&d.device.platform,d.device&&d.device.screen].filter(Boolean).join(' · '));cell(r,new Date(d.first_seen).toLocaleString());cell(r,new Date(d.last_seen).toLocaleString());t.appendChild(r)});$('devices').replaceChildren(t)}
-function renderRequests(items){const t=table(['TT','App','Tên/Lý do','IP rút gọn','Trình duyệt','Lúc','']);items.forEach(function(q){const r=node('tr');cell(r,q.status,q.status);cell(r,q.app);const who=cell(r,q.name);who.appendChild(node('br'));who.appendChild(node('small',q.note||''));cell(r,(q.country||'')+' '+(q.ip||''));cell(r,q.browser);cell(r,new Date(q.created_at).toLocaleString());const actions=cell(r,'');if(q.status==='pending'){const yes=node('button','Duyệt','ok');yes.addEventListener('click',function(){decide(q.id,'approve')});const no=node('button','Từ chối','no');no.addEventListener('click',function(){decide(q.id,'deny')});actions.append(yes,' ',no)}t.appendChild(r)});$('requests').replaceChildren(t)}
-async function load(){try{$('msg').textContent='Đang tải…';let cursor='',devices=[],first=true;do{const d=await api('/api/admin/list'+(cursor?'?cursor='+encodeURIComponent(cursor):''));devices=devices.concat(d.devices||[]);if(first){renderRequests(d.requests||[]);first=false}cursor=d.cursor||'';$('msg').textContent='Đang tải '+devices.length+' hồ sơ…'}while(cursor);devices.sort(function(a,b){return b.last_seen-a.last_seen});renderDevices(devices);$('msg').textContent='Đã tải '+devices.length+' hồ sơ trình duyệt.'}catch(e){$('msg').textContent='Lỗi: '+e.message}}
+function renderRequests(items){const t=table(['TT','App','Tên/Lý do','IP rút gọn','Trình duyệt','Lúc','']);items.forEach(function(q){const r=node('tr');cell(r,q.status,q.status);cell(r,q.app);const who=cell(r,q.name);who.appendChild(node('br'));who.appendChild(node('small',q.note||''));cell(r,(q.country||'')+' '+(q.ip||''));cell(r,q.browser);cell(r,new Date(q.created_at).toLocaleString());const actions=cell(r,'');if(q.status==='pending'){const yes=node('button','Duyệt','ok');yes.addEventListener('click',function(){decide(q.id,'approve')});const no=node('button','Từ chối','no');no.addEventListener('click',function(){decide(q.id,'deny')});actions.append(yes,' ',no)}else if(q.status==='approved'){const revoke=node('button','Thu hồi phiên','no');revoke.addEventListener('click',function(){decide(q.id,'deny')});actions.appendChild(revoke)}t.appendChild(r)});$('requests').replaceChildren(t)}
+async function loadAll(kind){let cursor='',items=[];do{const d=await api('/api/admin/list?kind='+kind+(cursor?'&cursor='+encodeURIComponent(cursor):''));items=items.concat(d[kind]||[]);cursor=d.cursor||'';$('msg').textContent='Đang tải '+kind+': '+items.length}while(cursor);return items}
+async function load(){try{$('msg').textContent='Đang tải…';const requests=await loadAll('requests');const devices=await loadAll('devices');requests.sort(function(a,b){return b.created_at-a.created_at});devices.sort(function(a,b){return b.last_seen-a.last_seen});renderRequests(requests);renderDevices(devices);$('msg').textContent='Đã tải '+requests.length+' yêu cầu và '+devices.length+' hồ sơ trình duyệt.'}catch(e){$('msg').textContent='Lỗi: '+e.message}}
 $('load').addEventListener('click',load);
 </script></body></html>`;
 }
@@ -653,10 +655,10 @@ const worker = {
         if (!requireAdmin(request, env)) return json({ error: "unauthorized" }, 401);
         if (url.pathname === "/api/admin/list" && request.method === "GET") {
           const cursor = cleanText(url.searchParams.get("cursor"), 4096);
-          const [requests, result] = cursor
-            ? [[], await listDevices(env, cursor)]
-            : await Promise.all([listRequests(env), listDevices(env)]);
-          return json({ requests, devices: result.devices, cursor: result.cursor });
+          const kind = url.searchParams.get("kind");
+          if (kind === "requests") return json(await listRequests(env, cursor));
+          if (kind === "devices") return json(await listDevices(env, cursor));
+          return json({ error: "invalid_request" }, 400);
         }
         const body = await readJson(request);
         if (!body || !isUuid(body.id)) return json({ error: "invalid_request" }, 400);

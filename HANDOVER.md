@@ -50,7 +50,7 @@ Repo cũ không còn là nguồn deploy production.
 - Duyệt được bằng **bot Telegram** HOẶC **trang `/admin`** (mật khẩu ADMIN_TOKEN).
 - `/`, `/boitoan/` và `/medora/` dùng `mode: 'approval'`, trỏ tới `https://hiennhi89-gate.hiennhi89.workers.dev`.
 - Worker lưu IP đã rút gọn `/24` hoặc `/64`, không nhận mật khẩu. Browser ID không phải định danh thiết bị vật lý tuyệt đối.
-- Chat chỉ dành cho phiên approval; mặc định `CHAT_ENABLED=false`. Tin chat giữ 30 ngày trong KV và có bản sao Telegram.
+- Chat chỉ dành cho phiên approval; cấu hình production đặt `CHAT_ENABLED=true`. Tin chat giữ 30 ngày trong KV và có bản sao Telegram.
 - Telemetry giữ 90 ngày; yêu cầu/log 7 ngày; phiên 12 giờ.
 - SPARE ưu tiên Worker secret `DECRYPT_KEY_SPARE`; Bói toán và MEDORA dùng fallback `DECRYPT_KEY`.
 - Chưa kiểm thử production trọn luồng khách gửi yêu cầu, Telegram duyệt, nhận phiên/khóa, telemetry và chat.
@@ -74,7 +74,7 @@ Repo cũ không còn là nguồn deploy production.
 | Muốn mức nào | Bạn cần làm |
 |--------------|-------------|
 | Gate/mã hóa | Đã rollout production; giữ khóa và payload đồng bộ khi đổi mật khẩu. |
-| Telemetry/approval/chat | Đã rollout, chat vẫn tắt; còn test đầu-cuối approval/Telegram/telemetry có ghi dữ liệu. |
+| Telemetry/approval/chat | Approval/Telegram đã xác minh; cấu hình tiếp theo bật chat. Còn test chat gửi/reply đầu-cuối sau rollout. |
 | PWA | Nền tảng an toàn và icon 192/512 đã xong. |
 | ChPlay/App Store | Chưa đóng gói hoặc submit. |
 
