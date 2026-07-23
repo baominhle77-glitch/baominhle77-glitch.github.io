@@ -129,8 +129,13 @@ await edit("assets/community-admin.js", (source) => {
   return source;
 });
 
+const gateValue = await readFile("assets/gate.js", "utf8");
+const gateMarkers = gateValue.includes("Account V10 authoritative Admin return")
+  ? ["Account V9 Admin return-to-app", "Account V10 authoritative Admin return", "startWithoutAdminReturn", "adminReturnCandidate", "restoreAdminApp", 'reveal("admin-return")', "/api/community/admin/session"]
+  : ["Account V9 Admin return-to-app", "startWithoutAdminReturn", "storedAdminReturnCandidate", "restoreAdminApp", 'reveal("admin-return")', "/api/community/admin/session"];
+for (const marker of gateMarkers) if (!gateValue.includes(marker)) throw new Error(`Thiếu marker ${marker} trong assets/gate.js`);
+
 for (const [path, markers] of [
-  ["assets/gate.js", ["Account V9 Admin return-to-app", "startWithoutAdminReturn", "storedAdminReturnCandidate", "restoreAdminApp", 'reveal("admin-return")', "/api/community/admin/session"]],
   ["boitoan/community-admin.html", ["community-back-to-app", "admin_return=1"]],
   ["assets/community-admin.js", ["Account V9 Admin return navigation", "gate_ok_boitoan", "gate_remember_boitoan"]],
 ]) {
