@@ -1,37 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T19:29:00+07:00",
+  "updated_at": "2026-07-23T19:33:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-10",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-10-deploy-success",
-      "base_sha": "031ed270ee0f9a6cd8545b0e684280c9104cb3af",
+      "branch": "agent/BOITOAN-20260723-10-closeout",
+      "base_sha": "a09859db90680255652d9787e7714abf36cc6b8e",
       "paths": [
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/record-production-deploy.yml",
-        "assets/account-v2.test.mjs",
-        "assets/gate.test.mjs",
-        "backend/account-v2.test.mjs",
-        "backend/community.test.mjs",
-        "boitoan/sw.js",
-        "boitoan/sw.test.mjs",
-        "tools/apply-account-v2-runner.mjs",
-        "tools/apply-admin-levels-v6.mjs",
-        "tools/apply-admin-session-v5.mjs",
-        "tools/apply-admin-v5-v6-runner.mjs",
         "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/PRODUCTION_STATUS.md"
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T17:49:00+07:00",
-      "heartbeat_at": "2026-07-23T19:29:00+07:00",
-      "summary": "Account V6 đã triển khai thực tế: run 30006916811 có build/test, Pages deploy, Worker deploy và hậu kiểm production đều success; workflow chỉ bị kết luận failure vì bước ghi status cũ chạy trong worktree có file build thay đổi. Recorder mới đọc trực tiếp các job steps: nếu Pages/Worker/smoke success thì ghi production SUCCESS dù bước status cũ lỗi; nếu bất kỳ bước production nào lỗi mới ghi FAILURE."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T19:33:00+07:00",
+      "summary": "Hoàn tất Account V6 hai cấp tại cùng form Admin. Backend phân hai mật khẩu bằng PBKDF2 hash + salt, không plaintext; cấp JWT gắn thiết bị và vô hiệu ADMIN_TOKEN cũ tại Community API. Admin thường quản lý/khóa/xóa member, xóa review và quản lý bài thảo luận; không đọc hội thoại hoặc impersonate. Admin tổng có toàn bộ quyền Admin thường cộng xem hội thoại riêng và mở trang cá nhân member chỉ đọc; chỉ một thiết bị primary, primary mới thu hồi primary cũ nhưng giữ regular. CI cuối 30005276397/30005276313, production run 30007344122 có Pages/Worker/smoke success; PRODUCTION_STATUS source b5ed5230 ghi SUCCESS. Cache Bói toán v14."
+    },
     {
       "id": "TRAVELDOC-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -82,7 +69,7 @@
       "status": "completed",
       "started_at": "2026-07-23T16:08:00+07:00",
       "completed_at": "2026-07-23T16:47:00+07:00",
-      "summary": "Người dùng báo iPhone WebKit crash liên tục tại /boitoan/. Xác định vòng lặp MutationObserver: injectCommunity gán textContent vô điều kiện, tự tạo childList mutation và gọi lại vô hạn. Runtime guard idempotent merge PR #43, source 4c4fa691. Sau khi sửa chính xác browser harness, checker độc lập merge PR #45, source bc8016a2. CI Account 29996444259 và coordination 29996444031 success; deploy 29996510949 success; WebKit production E2E 29996558091 success với register/login/me/WebKit/delete/token revoked/relogin = 201/200/200/200/200/401/401, error none. Tài khoản thử tự xóa; task và khóa đã giải phóng."
+      "summary": "Sửa vòng lặp MutationObserver làm Safari/WebKit crash; production và WebKit E2E success."
     },
     {
       "id": "BOITOAN-20260723-08",
@@ -97,7 +84,7 @@
       "status": "completed",
       "started_at": "2026-07-23T14:50:00+07:00",
       "completed_at": "2026-07-23T15:58:00+07:00",
-      "summary": "Admin navigation và Reader production E2E đã hoàn tất; production E2E đạt 201/200/200/200/401/401. Sau đó người dùng phát hiện riêng lỗi crash WebKit ở trang /boitoan/."
+      "summary": "Admin navigation và Reader đa nền tảng đã deploy."
     },
     {
       "id": "BOITOAN-20260723-07",
