@@ -1,0 +1,18 @@
+-- Dữ liệu khởi tạo. Thông tin vận hành cần được kiểm tra lại trước khi dùng.
+BEGIN TRANSACTION;
+
+INSERT OR IGNORE INTO places (slug,name,province,district,region,category,summary,tags,featured,status,created_at,updated_at,updated_by) VALUES
+('pho-co-hoi-an','Phố cổ Hội An','Quảng Nam','Hội An','Duyên hải Nam Trung Bộ','Di sản – đô thị cổ','Không gian đô thị cổ ven sông với nhà gỗ, hội quán, chùa Cầu và đèn lồng.','phố cổ,đèn lồng,ẩm thực,di sản',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('vinh-ha-long','Vịnh Hạ Long','Quảng Ninh','Hạ Long','Đông Bắc Bộ','Biển đảo – địa chất','Quần thể đảo đá vôi, hang động và mặt nước rộng lớn với nhiều tuyến du thuyền.','du thuyền,hang động,biển,địa chất',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('quan-the-danh-thang-trang-an','Quần thể danh thắng Tràng An','Ninh Bình','Hoa Lư','Đồng bằng sông Hồng','Danh thắng – văn hóa','Cảnh quan núi đá vôi, thung nước, hang xuyên thủy và di tích lịch sử.','thuyền,núi đá vôi,hang động,cố đô',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('co-do-hue','Quần thể di tích Cố đô Huế','Thừa Thiên Huế','Huế','Bắc Trung Bộ','Di tích lịch sử','Hệ thống kinh thành, cung điện, đền miếu và lăng tẩm gắn với triều Nguyễn.','cố đô,triều Nguyễn,lăng tẩm,ẩm thực',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('phong-nha-ke-bang','Vườn quốc gia Phong Nha – Kẻ Bàng','Quảng Bình','Bố Trạch','Bắc Trung Bộ','Hang động – vườn quốc gia','Vùng karst với hệ thống hang động, sông ngầm và rừng tự nhiên.','hang động,trekking,rừng,sông ngầm',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('sa-pa','Sa Pa','Lào Cai','Sa Pa','Tây Bắc Bộ','Núi – văn hóa bản địa','Thị xã vùng cao với ruộng bậc thang, Hoàng Liên Sơn và văn hóa bản địa.','ruộng bậc thang,săn mây,trekking,bản làng',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('cao-nguyen-da-dong-van','Cao nguyên đá Đồng Văn','Hà Giang','Đồng Văn','Đông Bắc Bộ','Địa chất – cung đường','Không gian núi đá, cung đèo cao, thung lũng và làng bản ở cực Bắc Việt Nam.','đèo,địa chất,cực Bắc,chợ phiên',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('ho-hoan-kiem-pho-co-ha-noi','Hồ Hoàn Kiếm và Phố cổ Hà Nội','Hà Nội','Hoàn Kiếm','Đồng bằng sông Hồng','Đô thị – lịch sử','Trung tâm lịch sử kết nối hồ, đền Ngọc Sơn, phố nghề và ẩm thực đường phố.','phố cổ,ẩm thực,hồ,phố đi bộ',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('da-lat','Đà Lạt','Lâm Đồng','Đà Lạt','Tây Nguyên','Cao nguyên – đô thị','Đô thị cao nguyên với khí hậu mát, rừng thông, hồ, thác và vườn hoa.','cao nguyên,rừng thông,cà phê,săn mây',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('con-dao','Côn Đảo','Bà Rịa – Vũng Tàu','Côn Đảo','Đông Nam Bộ','Biển đảo – lịch sử','Quần đảo kết hợp bãi biển, rừng, hệ sinh thái biển và di tích lịch sử.','biển,lịch sử,lặn,vườn quốc gia',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('phu-quoc','Phú Quốc','Kiên Giang','Phú Quốc','Tây Nam Bộ','Biển đảo – nghỉ dưỡng','Đảo lớn với bãi biển, rừng, làng nghề và nhiều dịch vụ nghỉ dưỡng.','đảo,hoàng hôn,hải sản,nghỉ dưỡng',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed'),
+('cho-noi-cai-rang','Chợ nổi Cái Răng','Cần Thơ','Cái Răng','Tây Nam Bộ','Sông nước – văn hóa chợ','Không gian giao thương trên sông phản ánh văn hóa thương hồ miền Tây.','chợ nổi,sông nước,ăn sáng,thương hồ',1,'published','2026-07-23T17:46:00+07:00','2026-07-23T17:46:00+07:00','seed');
+
+COMMIT;
