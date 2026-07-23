@@ -1,22 +1,41 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T00:00:00+07:00",
+  "updated_at": "2026-07-24T01:05:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260724-14",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260724-14-admin-return-v10",
+      "base_sha": "8862919d4b477c360df3fe6cf3541165629aae3f",
+      "paths": [
+        "tools/apply-admin-v9-return-to-app.mjs",
+        "tools/apply-admin-v10-authoritative-return.mjs",
+        "tools/apply-admin-v5-v6-runner.mjs",
+        "tools/admin-v9-return-webkit-check.mjs",
+        "assets/account-v2.test.mjs",
+        "boitoan/index.html",
+        "boitoan/sw.js",
+        "boitoan/sw.test.mjs",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/verify-admin-v9-return.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/ADMIN_V10_RETURN_STATUS.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-24T00:46:00+07:00",
+      "heartbeat_at": "2026-07-24T01:05:00+07:00",
+      "summary": "Nghiệm thu iPhone xác nhận Admin V9 vẫn rơi về màn chọn tài khoản. V10 dùng JWT + device và phản hồi backend làm nguồn sự thật, thử xác minh khi URL có admin_return hoặc còn token, tự phục hồi mọi cờ còn thiếu. WebKit chỉ gieo token + device; cache v18. Bổ sung V9 vào phạm vi vì cần sửa kiểm tra chạy lặp để chấp nhận trạng thái V10."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-13",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-13-closeout",
-      "base_sha": "2751597b8869fdb2152431546391383cf82f3b22",
-      "paths": [
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/ADMIN_V9_RETURN_STATUS.md"
-      ],
       "status": "completed",
-      "started_at": "2026-07-23T23:22:00+07:00",
       "completed_at": "2026-07-24T00:00:00+07:00",
-      "summary": "Clip iPhone xác nhận nút ← Bói toán từ Khu vực quản trị rơi về màn chọn tài khoản. Lỗi gốc: link cũ chỉ trỏ ./ và gate chỉ xét gate_ok/gate_remember trước khi dựng cổng, không dùng JWT Admin còn hợp lệ. Admin V9 đổi link sang ?admin_return=1, xác minh market_admin_token qua /api/community/admin/session trước khi dựng cổng, mở thẳng app bằng reveal(admin-return) khi token hợp lệ; chỉ xóa phiên và hiện cổng khi token không hợp lệ. Cache v17. CI 30026525523/30026525436 success; runtime merge 27e6a4de; deploy 30026591180 success; production proof source a6d73bae, verifier 30027374756 success với Gate/Admin/SW 200/200/200 và WebKit success."
+      "summary": "Admin V9 đã deploy nhưng bài test gieo sẵn quá nhiều cờ nên không bắt được lỗi nghiệm thu thật."
     },
     {
       "id": "BOITOAN-20260723-12",
@@ -25,38 +44,6 @@
       "status": "completed",
       "completed_at": "2026-07-23T21:11:00+07:00",
       "summary": "Admin V8 edge-safe đã xác minh production."
-    },
-    {
-      "id": "BOITOAN-20260723-11",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-11-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T20:23:00+07:00",
-      "summary": "Hotfix V7 tách namespace, logout sạch và xác nhận phiên; nghiệm thu mật khẩu thật sau đó vẫn thất bại."
-    },
-    {
-      "id": "BOITOAN-20260723-10",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-10-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T19:33:00+07:00",
-      "summary": "Account V6 hai cấp Admin, JWT gắn thiết bị và quyền regular/primary."
-    },
-    {
-      "id": "TRAVEL-20260723-01",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/TRAVEL-20260723-01-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T18:54:00+07:00",
-      "summary": "Hoàn tất PWA Vietnam Travel và API/Telegram quản trị."
-    },
-    {
-      "id": "BOITOAN-20260723-09",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-09-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T16:47:00+07:00",
-      "summary": "Sửa vòng lặp MutationObserver làm Safari/WebKit crash."
     }
   ]
 }

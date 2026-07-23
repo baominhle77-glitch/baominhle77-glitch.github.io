@@ -26,6 +26,7 @@ if (!backend.includes("/* Account V8 edge-safe admin authentication */")) {
 }
 await importRuntime("apply-admin-v9-return-to-app.mjs");
 await importRuntime("apply-admin-v8-tests.mjs");
+await importRuntime("apply-admin-v10-authoritative-return.mjs");
 
 const gatePath = new URL("../assets/gate.js", import.meta.url);
 let gate = await readFile(gatePath, "utf8");
@@ -39,10 +40,10 @@ backend = await readFile(backendPath, "utf8");
 for (const marker of ["Account V8 edge-safe admin authentication", "ADMIN_V8_PASSWORD_SALT_B64", 'ADMIN_AUTH_VERSION = "2026-07-23-v8"', "adminAuthHealth", "admin_auth_unavailable"]) {
   if (!backend.includes(marker)) throw new Error(`Thiếu marker Admin backend: ${marker}`);
 }
-for (const marker of ["Account V5 single admin login", "Account V6 dual admin UI", "Account V7 admin login hotfix", "Account V8 frontend auth contract", "Account V9 Admin return-to-app", "storedAdminReturnCandidate", "restoreAdminApp", "market_admin_level", "market_admin_auth_version", dualLevel]) {
+for (const marker of ["Account V5 single admin login", "Account V6 dual admin UI", "Account V7 admin login hotfix", "Account V8 frontend auth contract", "Account V9 Admin return-to-app", "Account V10 authoritative Admin return", "adminReturnCandidate", "restoreAdminApp", "market_admin_level", "market_admin_auth_version", dualLevel]) {
   if (!gate.includes(marker)) throw new Error(`Thiếu marker Admin frontend: ${marker}`);
 }
 const adminHtml = await readFile(new URL("../boitoan/community-admin.html", import.meta.url), "utf8");
-if (!adminHtml.includes("community-back-to-app") || !adminHtml.includes("admin_return=1")) throw new Error("Thiếu liên kết quay lại Bói toán V9");
+if (!adminHtml.includes("community-back-to-app") || !adminHtml.includes("admin_return=1&v=18")) throw new Error("Thiếu liên kết quay lại Bói toán V10");
 
-console.log("Account Admin V5-V9: hai cấp quyền, xác thực edge-safe và quay lại app bằng JWT Admin đã xác minh.");
+console.log("Account Admin V5-V10: hai cấp quyền, xác thực edge-safe và phục hồi app theo JWT backend.");
