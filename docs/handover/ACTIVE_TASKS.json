@@ -1,23 +1,41 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T14:39:00+07:00",
+  "updated_at": "2026-07-23T14:50:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-08",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-08-production-e2e-hotfix",
+      "base_sha": "e86e7e6fed193f9b326d1d00a5793fbd799cb2f3",
+      "paths": [
+        "tools/apply-account-v3-hotfix.mjs",
+        "tools/apply-account-v2-runner.mjs",
+        "assets/account-v2.test.mjs",
+        "backend/account-v2.test.mjs",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/deploy-pages.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T14:50:00+07:00",
+      "heartbeat_at": "2026-07-23T14:50:00+07:00",
+      "summary": "Người dùng nghiệm thu production trên iPhone và nền tảng khác: Admin chỉ có badge, không có lối vào khu quản trị ngay trên app; đăng ký Reader công khai báo lỗi. Sửa điều hướng Admin rõ ràng, bỏ phụ thuộc khóa giải mã đối với trang plaintext, đồng nhất contract gate/community token, thêm test backend không có DECRYPT_KEY và E2E production tạo Reader thật → đăng nhập → đọc hồ sơ → xóa sạch dữ liệu thử."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-07",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-07-closeout",
       "base_sha": "67878700192da449d2df2613a7402f3e68a829c8",
-      "paths": [
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
+      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
       "started_at": "2026-07-23T14:17:00+07:00",
       "completed_at": "2026-07-23T14:34:00+07:00",
-      "summary": "PR #33 merge thành 9a6b53cc7e99d78ab53410df4d3d531aeef31caa. CI coordination run 29988447066 và Account V2/frontend/Worker run 29988447104 đều success. Production run 29988531212 ghi SUCCESS cho đúng source: Pages/Admin/CSS/Gate 200, Worker và API thảo luận không phiên 401, onboarding invalid payload 400. Đã sửa nút Admin thành Xem trang cá nhân, dùng admin_view=profile để mở thẳng renderProfile trong phiên impersonation, hiển thị hồ sơ Khách/Reader và dữ liệu Reader ở chế độ chỉ đọc, có nút quay lại Admin. Không lưu mật khẩu, IP hoặc mã thiết bị trong source."
+      "summary": "PR #33 và production thành công; Admin tổng mở thẳng Trang cá nhân member ở chế độ chỉ đọc. Nghiệm thu sau đó cho thấy lối vào khu quản trị chưa xuất hiện rõ trên giao diện app chính."
     },
     {
       "id": "BOITOAN-20260723-06",
@@ -28,7 +46,7 @@
       "status": "completed",
       "started_at": "2026-07-23T13:12:00+07:00",
       "completed_at": "2026-07-23T13:56:00+07:00",
-      "summary": "PR #31 và production Account V2 thành công: onboarding hai màn hình, sửa đăng ký plaintext và input iPhone, badge vai trò, giao diện theo role, quyền Admin và impersonation chỉ đọc."
+      "summary": "PR #31 và production Account V2 thành công: onboarding hai màn hình, sửa đăng ký plaintext và input iPhone, badge vai trò, giao diện theo role, quyền Admin và impersonation chỉ đọc. Nghiệm thu đa nền tảng sau đó phát hiện public entry vẫn phụ thuộc DECRYPT_KEY ở backend."
     },
     {
       "id": "BOITOAN-20260723-05",
