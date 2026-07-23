@@ -20,6 +20,20 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-23 18:54 GMT+7 — ChatGPT GPT-5.6 — TRAVEL-20260723-01 — HOÀN TẤT ✅
+
+- Tạo PWA công khai `/vietnam-travel/`, tối ưu mobile/iPhone, có tìm kiếm không dấu, lọc vùng/loại, sắp xếp, yêu thích, chi tiết, bản đồ, chia sẻ và offline shell.
+- Bộ seed gồm 20 địa điểm nổi tiếng/đặc thù của Việt Nam.
+- Dữ liệu động lưu tại Cloudflare KV, khóa `travel:places:v1`; API công khai chỉ đọc ở `/api/travel/*`.
+- Điều khiển Telegram owner-only: `/travel`, `/ds`, `/xem`, `/them`, `/sua`, `/an`, `/hien`, `/xoa` có xác nhận và `/thongke`.
+- Bảo mật: webhook giữ secret header; module kiểm tra cả `chat.id` và `from.id` khớp `TELEGRAM_CHAT_ID`; source không chứa token, webhook secret hay Telegram ID dạng giá trị.
+- Source thật materialize tại `b3a29cbd5416424a6df16bb4a7bd392a75287f5c`; bundle trung gian đã xóa.
+- Travel unit test `5/5`, syntax và idempotent integration đạt.
+- Validation run `30004367095`: success.
+- Production deploy + smoke run `30004367100`, job `89196797196`: success; Pages, Worker, Travel health/API, dữ liệu seed và các app cũ đều đạt.
+- Workflow kích hoạt tạm đã xóa; workflow production chuẩn `.github/workflows/deploy-pages.yml` đã bao gồm Vietnam Travel.
+- Task chuyển `completed`; khóa điều phối đã giải phóng.
+
 ### 2026-07-23 16:47 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-09 — HOÀN TẤT ✅
 
 - Người dùng mở `/boitoan/` trên iPhone lúc 16:07 và WebKit báo trang gặp sự cố liên tục.
