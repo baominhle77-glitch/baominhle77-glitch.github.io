@@ -7,6 +7,9 @@ on:
     paths:
       - ".travel-bundle/**"
       - ".github/workflows/materialize-vietnam-travel.yml"
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
@@ -14,11 +17,14 @@ permissions:
 
 jobs:
   materialize:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Checkout branch
+      - name: Checkout nhánh nguồn
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
 
       - name: Ghép và kiểm tra gói nguồn
         run: |
@@ -48,6 +54,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "feat: thêm app Vietnam Travel và Telegram control"
-          git push
-
-# Trigger sau khi đủ 10 khối nguồn.
+          git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}
