@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T14:50:00+07:00",
+  "updated_at": "2026-07-23T15:06:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -21,8 +21,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T14:50:00+07:00",
-      "heartbeat_at": "2026-07-23T14:50:00+07:00",
-      "summary": "Người dùng nghiệm thu production trên iPhone và nền tảng khác: Admin chỉ có badge, không có lối vào khu quản trị ngay trên app; đăng ký Reader công khai báo lỗi. Sửa điều hướng Admin rõ ràng, bỏ phụ thuộc khóa giải mã đối với trang plaintext, đồng nhất contract gate/community token, thêm test backend không có DECRYPT_KEY và E2E production tạo Reader thật → đăng nhập → đọc hồ sơ → xóa sạch dữ liệu thử."
+      "heartbeat_at": "2026-07-23T15:06:00+07:00",
+      "summary": "Người dùng nghiệm thu production trên iPhone và nền tảng khác: Admin chỉ có badge, không có lối vào khu quản trị ngay trên app; đăng ký Reader công khai báo lỗi. Đã xác định public entry vẫn phụ thuộc DECRYPT_KEY và contract existing-gate thiếu gate_token. Hotfix đang sửa điều hướng Admin, đồng nhất hai token, test không có DECRYPT_KEY và E2E production tạo Reader thật → đăng nhập thiết bị thứ hai → đọc hồ sơ → xóa sạch dữ liệu thử. CI đầu phát hiện marker đặt sai điểm khởi động gate; đã sửa và kích hoạt lại kiểm thử."
     }
   ],
   "recently_completed": [
