@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T19:19:00+07:00",
+  "updated_at": "2026-07-23T19:29:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-10",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-10-deploy-result",
-      "base_sha": "dc5adef5881ddc4d723a5fff68eb1210bcacbef4",
+      "branch": "agent/BOITOAN-20260723-10-deploy-success",
+      "base_sha": "031ed270ee0f9a6cd8545b0e684280c9104cb3af",
       "paths": [
         ".github/workflows/validate-role-system.yml",
         ".github/workflows/deploy-pages.yml",
@@ -27,8 +27,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:49:00+07:00",
-      "heartbeat_at": "2026-07-23T19:19:00+07:00",
-      "summary": "Account V6 đã merge tại f5ac80b7: cùng form Admin, backend phân regular/primary bằng PBKDF2 hash, JWT gắn thiết bị; regular quản lý member/review/post; primary thêm hội thoại và hồ sơ member, chỉ một thiết bị primary. Deploy workflow đã được bổ sung smoke test marker Account V6. Workflow record-production-deploy mới sẽ ghi SUCCESS/FAILURE, source SHA và run ID sau mọi lần deploy để có bằng chứng và log chẩn đoán kể cả khi deploy thất bại."
+      "heartbeat_at": "2026-07-23T19:29:00+07:00",
+      "summary": "Account V6 đã triển khai thực tế: run 30006916811 có build/test, Pages deploy, Worker deploy và hậu kiểm production đều success; workflow chỉ bị kết luận failure vì bước ghi status cũ chạy trong worktree có file build thay đổi. Recorder mới đọc trực tiếp các job steps: nếu Pages/Worker/smoke success thì ghi production SUCCESS dù bước status cũ lỗi; nếu bất kỳ bước production nào lỗi mới ghi FAILURE."
     }
   ],
   "recently_completed": [
