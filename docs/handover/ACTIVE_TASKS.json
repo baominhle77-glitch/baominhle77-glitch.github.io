@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T12:49:00+07:00",
+  "updated_at": "2026-07-23T13:05:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -10,14 +10,18 @@
       "base_sha": "320323bced769902e503a808b0b31f8c7f44c7b5",
       "paths": [
         "tools/apply-role-system.mjs",
+        "tools/apply-onboarding-admin-v2.mjs",
         ".github/workflows/deploy-pages.yml",
+        ".github/workflows/onboarding-admin-v2-check.yml",
         "assets/gate.js",
         "assets/gate.css",
         "assets/community.js",
         "assets/community-admin.js",
         "assets/community.css",
+        "assets/onboarding-admin-v2.test.mjs",
         "backend/community.js",
         "backend/community.test.mjs",
+        "backend/onboarding-admin-v2.test.mjs",
         "backend/worker.js",
         "backend/worker.test.mjs",
         "boitoan/index.html",
@@ -30,8 +34,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T12:49:00+07:00",
-      "heartbeat_at": "2026-07-23T12:49:00+07:00",
-      "summary": "Sửa khẩn cấp onboarding Spirituality Market theo phản hồi trực tiếp trên iPhone: tách màn hình chọn Đăng nhập/Đăng ký/Admin khỏi biểu mẫu bước hai; chẩn đoán và sửa lỗi tạo tài khoản production; bổ sung phân cấp Admin và Tổng Admin theo owner-device, gồm xóa review, xóa member, mở chủ đề thảo luận, xem chat và phiên đại diện có kiểm soát/audit. Không ghi mật khẩu hoặc mã thiết bị cá nhân vào source công khai."
+      "heartbeat_at": "2026-07-23T13:05:00+07:00",
+      "summary": "Sửa khẩn cấp onboarding Spirituality Market theo phản hồi trực tiếp trên iPhone: tách màn hình chọn Đăng nhập/Đăng ký/Admin khỏi biểu mẫu bước hai; sửa lỗi tạo tài khoản do frontend bắt buộc giải mã trong khi app hiện là HTML thường; cho phép khôi phục account tạo dở bằng đúng mật khẩu; bổ sung Admin/Tổng Admin theo owner-device, gồm xóa review, xóa member, mở chủ đề thảo luận, xem chat và phiên đại diện có audit. Không ghi mật khẩu hoặc mã thiết bị cá nhân vào source công khai."
     }
   ],
   "recently_completed": [
