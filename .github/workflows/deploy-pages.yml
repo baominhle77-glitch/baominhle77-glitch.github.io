@@ -19,10 +19,11 @@ jobs:
   deploy:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: "997944c1bfcc2dcaca32718124cd718c"
+      KV_NAMESPACE_ID: "1030b053db194312be8adbfc24e73a85"
     steps:
       - name: Checkout repo chính
         uses: actions/checkout@v4
@@ -36,13 +37,23 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Thiếu CLOUDFLARE_API_TOKEN"; exit 1; }
           npx --yes wrangler@4.112.0 secret list --config backend/wrangler.toml --format json > "$RUNNER_TEMP/worker-secrets.json"
-          node -e "const s=require(process.argv[1]); if (!s.some(({name}) => name === 'DECRYPT_KEY_SPARE')) { console.error('::error::Worker thiếu DECRYPT_KEY_SPARE'); process.exit(1); }" "$RUNNER_TEMP/worker-secrets.json"
+          node - <<'NODE' "$RUNNER_TEMP/worker-secrets.json"
+          const secrets = require(process.argv[2]);
+          for (const name of ["DECRYPT_KEY_SPARE", "SESSION_SECRET", "ADMIN_TOKEN"]) {
+            if (!secrets.some((item) => item.name === name)) {
+              console.error(`::error::Worker thiếu ${name}`);
+              process.exit(1);
+            }
+          }
+          NODE
 
       - name: Áp dụng hệ thống tài khoản Khách Reader Admin
         id: integrate
         run: |
+          node --check tools/apply-account-v3-hotfix.mjs
           node tools/apply-role-system.mjs
           node tools/apply-account-v2-runner.mjs
+          node tools/apply-account-v3-hotfix.mjs
 
       - name: Kiểm tra source
         id: test_source
@@ -124,6 +135,9 @@ jobs:
               && grep -q "gate-entry-choice" "$RUNNER_TEMP/gate.js" \
               && grep -q "claimPrimaryAdminDevice" "$RUNNER_TEMP/gate.js" \
               && grep -q "if (!payload)" "$RUNNER_TEMP/gate.js" \
+              && grep -q "community-admin.html" "$RUNNER_TEMP/gate.js" \
+              && grep -q "Mở quản trị" "$RUNNER_TEMP/gate.js" \
+              && grep -q "Account V3 admin navigation" "$RUNNER_TEMP/gate.js" \
               && [ "$worker_code" = "401" ] \
               && grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json" \
               && [ "$posts_code" = "401" ] \
@@ -155,12 +169,115 @@ jobs:
           grep -q "gate-entry-choice" "$RUNNER_TEMP/gate.js"
           grep -q "claimPrimaryAdminDevice" "$RUNNER_TEMP/gate.js"
           grep -q "if (!payload)" "$RUNNER_TEMP/gate.js"
+          grep -q "community-admin.html" "$RUNNER_TEMP/gate.js"
+          grep -q "Mở quản trị" "$RUNNER_TEMP/gate.js"
+          grep -q "Account V3 admin navigation" "$RUNNER_TEMP/gate.js"
           test "$worker_code" = "401"
           grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json"
           test "$posts_code" = "401"
           grep -q '"unauthorized"' "$RUNNER_TEMP/community-posts.json"
           test "$entry_code" = "400"
           grep -q '"invalid_account"' "$RUNNER_TEMP/community-entry.json"
+
+      - name: E2E production Reader trên hai thiết bị và tự xóa
+        id: e2e_reader
+        if: contains(github.event.head_commit.message, 'Reader E2E hotfix')
+        run: |
+          set -euo pipefail
+          api="https://hiennhi89-gate.hiennhi89.workers.dev"
+          username="e2e_reader_${GITHUB_RUN_ID}"
+          password="E2EReader-${GITHUB_RUN_ID}!"
+          did1=$(node -e 'console.log(require("node:crypto").randomUUID())')
+          did2=$(node -e 'console.log(require("node:crypto").randomUUID())')
+          uid=""; community_sid1=""; community_sid2=""; gate_sid1=""; gate_sid2=""
+
+          encode_key() { node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$1"; }
+          delete_key() {
+            local key="$1" encoded
+            encoded=$(encode_key "$key")
+            curl --fail-with-body -sS -X DELETE \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces/$KV_NAMESPACE_ID/values/$encoded" >/dev/null
+          }
+          cleanup_best_effort() {
+            set +e
+            [ -n "$username" ] && delete_key "community-login:$username"
+            [ -n "$uid" ] && delete_key "community-profile:$uid"
+            [ -n "$uid" ] && delete_key "community-reader:$uid"
+            delete_key "community-device:boitoan:$did1"
+            delete_key "community-device:boitoan:$did2"
+            [ -n "$community_sid1" ] && delete_key "community-session:$community_sid1"
+            [ -n "$community_sid2" ] && delete_key "community-session:$community_sid2"
+            [ -n "$gate_sid1" ] && delete_key "session:$gate_sid1"
+            [ -n "$gate_sid2" ] && delete_key "session:$gate_sid2"
+          }
+          trap cleanup_best_effort EXIT
+
+          node - <<'NODE' "$RUNNER_TEMP/register-body.json" "$username" "$password" "$did1"
+          const fs=require('node:fs');
+          fs.writeFileSync(process.argv[2], JSON.stringify({
+            entry:true, device_id:process.argv[5],
+            device:{ua:'GitHub Actions E2E Android Chrome',lang:'vi-VN',tz:'Asia/Ho_Chi_Minh',screen:'412x915',platform:'Android'},
+            role:'reader', username:process.argv[3], password:process.argv[4],
+            display_name:'KIỂM THỬ READER TỰ XÓA', bio:'', specialties:'Tarot, Lenormand'
+          }));
+          NODE
+          register_code=$(curl -sS -o "$RUNNER_TEMP/register-response.json" -w "%{http_code}" --max-time 30 \
+            -H 'content-type: application/json' -H 'user-agent: GitHub-Actions-E2E-Android-Chrome' \
+            --data-binary @"$RUNNER_TEMP/register-body.json" "$api/api/community/register")
+          test "$register_code" = "201"
+          node - <<'NODE' "$RUNNER_TEMP/register-response.json"
+          const d=require(process.argv[2]);
+          if (!d.token || !d.gate_token || !d.profile || d.profile.role !== 'reader') throw new Error('register contract incomplete');
+          NODE
+          uid=$(node -e 'console.log(require(process.argv[1]).profile.id)' "$RUNNER_TEMP/register-response.json")
+          register_token=$(node -e 'console.log(require(process.argv[1]).token)' "$RUNNER_TEMP/register-response.json")
+          register_gate=$(node -e 'console.log(require(process.argv[1]).gate_token)' "$RUNNER_TEMP/register-response.json")
+          community_sid1=$(node -e 'console.log(JSON.parse(Buffer.from(process.argv[1].split(".")[1],"base64url")).sid)' "$register_token")
+          gate_sid1=$(node -e 'console.log(JSON.parse(Buffer.from(process.argv[1].split(".")[1],"base64url")).sid)' "$register_gate")
+
+          node - <<'NODE' "$RUNNER_TEMP/login-body.json" "$username" "$password" "$did2"
+          const fs=require('node:fs');
+          fs.writeFileSync(process.argv[2], JSON.stringify({
+            entry:true, device_id:process.argv[5],
+            device:{ua:'GitHub Actions E2E iPad Safari',lang:'vi-VN',tz:'Asia/Ho_Chi_Minh',screen:'1024x1366',platform:'iPad'},
+            username:process.argv[3], password:process.argv[4]
+          }));
+          NODE
+          login_code=$(curl -sS -o "$RUNNER_TEMP/login-response.json" -w "%{http_code}" --max-time 30 \
+            -H 'content-type: application/json' -H 'user-agent: GitHub-Actions-E2E-iPad-Safari' \
+            --data-binary @"$RUNNER_TEMP/login-body.json" "$api/api/community/login")
+          test "$login_code" = "200"
+          node - <<'NODE' "$RUNNER_TEMP/login-response.json" "$uid"
+          const d=require(process.argv[2]);
+          if (!d.token || !d.gate_token || !d.profile || d.profile.id !== process.argv[3] || d.profile.role !== 'reader') throw new Error('cross-device login failed');
+          NODE
+          login_token=$(node -e 'console.log(require(process.argv[1]).token)' "$RUNNER_TEMP/login-response.json")
+          login_gate=$(node -e 'console.log(require(process.argv[1]).gate_token)' "$RUNNER_TEMP/login-response.json")
+          community_sid2=$(node -e 'console.log(JSON.parse(Buffer.from(process.argv[1].split(".")[1],"base64url")).sid)' "$login_token")
+          gate_sid2=$(node -e 'console.log(JSON.parse(Buffer.from(process.argv[1].split(".")[1],"base64url")).sid)' "$login_gate")
+
+          me_code=$(curl -sS -o "$RUNNER_TEMP/me-response.json" -w "%{http_code}" --max-time 30 \
+            -H "authorization: Bearer $login_token" "$api/api/community/me")
+          test "$me_code" = "200"
+          node - <<'NODE' "$RUNNER_TEMP/me-response.json" "$uid"
+          const d=require(process.argv[2]);
+          if (!d.profile || d.profile.id !== process.argv[3] || d.profile.role !== 'reader') throw new Error('profile read failed');
+          NODE
+
+          # Xóa sạch tài khoản và mọi phiên E2E ngay trong cùng job.
+          cleanup_best_effort
+          trap - EXIT
+          login_key=$(encode_key "community-login:$username")
+          deleted_code=$(curl -sS -o "$RUNNER_TEMP/deleted-check.json" -w "%{http_code}" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces/$KV_NAMESPACE_ID/values/$login_key")
+          test "$deleted_code" = "404"
+          echo "register_code=$register_code" >> "$GITHUB_OUTPUT"
+          echo "login_code=$login_code" >> "$GITHUB_OUTPUT"
+          echo "me_code=$me_code" >> "$GITHUB_OUTPUT"
+          echo "cleanup_code=$deleted_code" >> "$GITHUB_OUTPUT"
+          echo "E2E Reader production PASS: tạo thật, đăng nhập thiết bị thứ hai, đọc hồ sơ và xóa sạch."
 
       - name: Ghi trạng thái triển khai thành công
         if: success()
@@ -185,7 +302,8 @@ jobs:
           - Cloudflare Worker: \`${{ steps.smoke.outputs.worker_code }} unauthorized\` khi gọi API Reader không có phiên
           - API thảo luận: \`${{ steps.smoke.outputs.posts_code }} unauthorized\` khi không có phiên
           - Onboarding công khai: \`${{ steps.smoke.outputs.entry_code }} invalid_account\` với dữ liệu kiểm thử không hợp lệ
-          - Account V2: onboarding hai màn hình, nhánh plaintext không ép giải mã, badge vai trò và Admin tổng
+          - Reader E2E production: \`${{ steps.e2e_reader.outcome }}\`; register/login/me/cleanup \`${{ steps.e2e_reader.outputs.register_code || 'n/a' }}/${{ steps.e2e_reader.outputs.login_code || 'n/a' }}/${{ steps.e2e_reader.outputs.me_code || 'n/a' }}/${{ steps.e2e_reader.outputs.cleanup_code || 'n/a' }}\`
+          - Account V3: plaintext public entry không cần DECRYPT_KEY; badge và bottom navigation Admin mở khu quản trị
           - Thứ tự triển khai: Pages trước, Worker sau
           EOF
           git config user.name "github-actions[bot]"
@@ -217,6 +335,7 @@ jobs:
           - Deploy Pages: \`${{ steps.deploy_pages.outcome }}\`
           - Deploy Worker: \`${{ steps.deploy_worker.outcome }}\`
           - Hậu kiểm: \`${{ steps.smoke.outcome }}\`
+          - Reader E2E production: \`${{ steps.e2e_reader.outcome }}\`
           - HTTP Pages/Admin/CSS/Gate/Worker/Posts/Onboarding: \`${{ steps.smoke.outputs.page_code || 'n/a' }}/${{ steps.smoke.outputs.admin_page_code || 'n/a' }}/${{ steps.smoke.outputs.css_code || 'n/a' }}/${{ steps.smoke.outputs.gate_code || 'n/a' }}/${{ steps.smoke.outputs.worker_code || 'n/a' }}/${{ steps.smoke.outputs.posts_code || 'n/a' }}/${{ steps.smoke.outputs.entry_code || 'n/a' }}\`
           - URL cuối sau chuyển hướng: \`${{ steps.smoke.outputs.page_url || 'n/a' }}\`
           - Hành động: mở workflow run ở trên, sửa đúng bước thất bại rồi chạy lại; không coi production đã hoàn tất.

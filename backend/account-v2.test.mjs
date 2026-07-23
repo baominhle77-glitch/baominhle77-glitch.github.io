@@ -14,7 +14,8 @@ class MemoryKV {
 }
 
 const secret = "s".repeat(64);
-const env = { KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass", DECRYPT_KEY: "test-key" };
+// Cố ý KHÔNG cấu hình DECRYPT_KEY: production Bói toán hiện là plaintext sau gate.
+const env = { KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass" };
 function b64url(input) { return Buffer.from(input).toString("base64url"); }
 function jwt(payload, ttl = 3600) {
   const now = Math.floor(Date.now() / 1000);
@@ -37,21 +38,39 @@ async function call(path, { method = "GET", token = "", body, admin = false, dev
 const ownerDid = randomUUID();
 const guestDid = randomUUID();
 const readerDid = randomUUID();
+const readerSecondDevice = randomUUID();
 
 let result = await call("/api/community/register", {
   method: "POST",
   body: { entry: true, device_id: guestDid, device: { platform: "iPhone" }, role: "guest", username: "v2_guest", password: "password-guest", display_name: "Khách V2", bio: "" }
 });
 assert.equal(result.status, 201);
+assert.ok(result.data.token, "đăng ký Khách phải có community token");
+assert.ok(result.data.gate_token, "đăng ký Khách phải có gate token");
+assert.equal(result.data.key, undefined, "plaintext không cần trả khóa giải mã");
 const guestToken = result.data.token;
 const guestId = result.data.profile.id;
 
 result = await call("/api/community/register", {
   method: "POST",
-  body: { entry: true, device_id: readerDid, device: { platform: "iPhone" }, role: "reader", username: "v2_reader", password: "password-reader", display_name: "Reader V2", bio: "", specialties: "Tarot" }
+  body: { entry: true, device_id: readerDid, device: { platform: "Android", screen: "412x915" }, role: "reader", username: "v2_reader", password: "password-reader", display_name: "Reader V2", bio: "", specialties: "Tarot" }
 });
-assert.equal(result.status, 201);
+assert.equal(result.status, 201, "Reader phải đăng ký được trên public entry không có DECRYPT_KEY");
+assert.ok(result.data.token);
+assert.ok(result.data.gate_token);
+assert.equal(result.data.profile.role, "reader");
+assert.equal(result.data.key, undefined);
 const readerId = result.data.profile.id;
+
+result = await call("/api/community/login", {
+  method: "POST",
+  body: { entry: true, device_id: readerSecondDevice, device: { platform: "iPad", screen: "1024x1366" }, username: "v2_reader", password: "password-reader" }
+});
+assert.equal(result.status, 200, "Reader phải đăng nhập được từ một thiết bị/nền tảng khác");
+assert.ok(result.data.token);
+assert.ok(result.data.gate_token);
+assert.equal(result.data.profile.id, readerId);
+assert.equal(result.data.profile.role, "reader");
 
 result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: ownerDid, replace: true } });
 assert.equal(result.status, 200);
@@ -90,4 +109,4 @@ assert.equal(result.data.error, "invalid_login");
 
 const audits = await env.KV.list({ prefix: "community-audit:" });
 assert.ok(audits.keys.length >= 5, "các thao tác Admin nhạy cảm phải có audit");
-console.log("Account V2 backend tests PASS");
+console.log("Account V3 backend tests PASS");
