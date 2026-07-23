@@ -1,29 +1,22 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T23:31:00+07:00",
+  "updated_at": "2026-07-23T23:50:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-13",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-13-admin-return",
-      "base_sha": "7736f08368327f6d28954150a79a0a00b5b70ead",
+      "branch": "agent/BOITOAN-20260723-13-production-proof",
+      "base_sha": "6e9b024cac0c575818851767cd34983e1e150895",
       "paths": [
-        "tools/apply-admin-v5-v6-runner.mjs",
-        "tools/apply-admin-v9-return-to-app.mjs",
-        "tools/admin-v9-return-webkit-check.mjs",
-        "assets/account-v2.test.mjs",
-        "boitoan/sw.js",
-        "boitoan/sw.test.mjs",
-        ".github/workflows/validate-role-system.yml",
         ".github/workflows/verify-admin-v9-return.yml",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/ADMIN_V9_RETURN_STATUS.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T23:22:00+07:00",
-      "heartbeat_at": "2026-07-23T23:31:00+07:00",
-      "summary": "Clip iPhone xác nhận từ Khu vực quản trị bấm ← Bói toán lại rơi về màn chọn Đăng nhập/Đăng ký/Admin. Nguyên nhân thiết kế: link chỉ trỏ ./ và gate khởi động chỉ dựa gate_ok/gate_remember, chưa dùng JWT Admin đã được backend xác nhận để mở lại nội dung. V9 xác minh market_admin_token với /api/community/admin/session trước khi hiện app, giữ đúng cấp regular/primary, dùng link admin_return rõ ràng, không đăng xuất khi quay lại, chỉ dựng cổng nếu token thực sự không hợp lệ; có WebKit production verifier cho cả phiên hợp lệ và không hợp lệ."
+      "heartbeat_at": "2026-07-23T23:50:00+07:00",
+      "summary": "Runtime Admin V9 đã merge tại 27e6a4de và deploy run 30026591180 có Pages/Worker/smoke success. Verifier hậu kiểm chưa ghi status, nên chuyển sang workflow luôn ghi SUCCESS/FAILURE cho từng pha static production và WebKit, đồng thời tự chạy trên push để có bằng chứng chẩn đoán bền vững trước khi yêu cầu người dùng nghiệm thu lại."
     }
   ],
   "recently_completed": [
@@ -31,10 +24,7 @@
       "id": "BOITOAN-20260723-12",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-12-closeout",
-      "base_sha": "66328b7e529c314213d6724358344f4df02ba0fc",
-      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/BOITOAN_ADMIN_V8.md", "docs/handover/ADMIN_V8_PRODUCTION_STATUS.md"],
       "status": "completed",
-      "started_at": "2026-07-23T20:38:00+07:00",
       "completed_at": "2026-07-23T21:11:00+07:00",
       "summary": "Admin V8 edge-safe đã xác minh production."
     },
@@ -55,14 +45,6 @@
       "summary": "Account V6 hai cấp Admin, JWT gắn thiết bị và quyền regular/primary."
     },
     {
-      "id": "TRAVELDOC-20260723-01",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/TRAVELDOC-20260723-01-handover-v2",
-      "status": "completed",
-      "completed_at": "2026-07-23T19:03:00+07:00",
-      "summary": "Bổ sung Vietnam Travel vào HANDOVER chung."
-    },
-    {
       "id": "TRAVEL-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/TRAVEL-20260723-01-closeout",
@@ -77,30 +59,6 @@
       "status": "completed",
       "completed_at": "2026-07-23T16:47:00+07:00",
       "summary": "Sửa vòng lặp MutationObserver làm Safari/WebKit crash."
-    },
-    {
-      "id": "BOITOAN-20260723-08",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-08-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T15:58:00+07:00",
-      "summary": "Admin navigation và Reader đa nền tảng đã deploy."
-    },
-    {
-      "id": "BOITOAN-20260723-07",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-07-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T14:34:00+07:00",
-      "summary": "Admin tổng mở trang cá nhân member chỉ đọc."
-    },
-    {
-      "id": "BOITOAN-20260723-06",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-06-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T13:56:00+07:00",
-      "summary": "Account V2, onboarding hai màn hình và quyền theo vai trò."
     }
   ]
 }
