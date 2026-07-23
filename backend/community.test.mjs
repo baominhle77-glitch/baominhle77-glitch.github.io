@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createHmac, randomUUID } from "node:crypto";
+import { createHmac, pbkdf2Sync, randomBytes, randomUUID } from "node:crypto";
 import { handleCommunity, __test } from "./community.js";
 
 class MemoryKV {
@@ -14,7 +14,20 @@ class MemoryKV {
 }
 
 const secret = "s".repeat(64);
-const env = { KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass", DECRYPT_KEY: "test-decrypt-key" };
+const primaryAdminPassword = "test-community-primary-admin";
+const adminSalt = randomBytes(16);
+const adminIterations = 1200;
+const adminHash = (password) => pbkdf2Sync(password, adminSalt, adminIterations, 32, "sha256").toString("base64");
+const env = {
+  KV: new MemoryKV(),
+  SESSION_SECRET: secret,
+  ADMIN_TOKEN: "legacy-admin-token-must-not-work",
+  ADMIN_PASSWORD_SALT_B64: adminSalt.toString("base64"),
+  ADMIN_REGULAR_PASSWORD_HASH_B64: adminHash("test-community-regular-admin"),
+  ADMIN_PRIMARY_PASSWORD_HASH_B64: adminHash(primaryAdminPassword),
+  ADMIN_PASSWORD_ITERATIONS: String(adminIterations),
+  DECRYPT_KEY: "test-decrypt-key",
+};
 function b64url(input) { return Buffer.from(input).toString("base64url"); }
 function jwt(payload, ttl = 3600) {
   const now = Math.floor(Date.now() / 1000);
@@ -28,11 +41,10 @@ async function gateToken(did) {
   await env.KV.put(`session:${sid}`, JSON.stringify({ active: true, app: "boitoan", did, cid: "x".repeat(32), expires_at: Date.now() + 3600000 }));
   return jwt({ ver: 2, aud: "gate-chat", app: "boitoan", sid, did, cid: "x".repeat(32), scope: ["access", "chat"] });
 }
-async function call(path, { method = "GET", token = "", body, admin = false, ownerDevice = "" } = {}) {
+async function call(path, { method = "GET", token = "", body, ownerDevice = "" } = {}) {
   const headers = {};
   if (body !== undefined) headers["content-type"] = "application/json";
   if (token) headers.authorization = `Bearer ${token}`;
-  if (admin) headers.authorization = `Bearer ${env.ADMIN_TOKEN}`;
   if (ownerDevice) headers["x-owner-device-id"] = ownerDevice;
   const request = new Request(`https://worker.test${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
   const response = await handleCommunity(request, env);
@@ -155,24 +167,29 @@ result = await call(`/api/community/conversations/${conversation.id}/messages`, 
 });
 assert.equal(result.status, 201);
 
-result = await call("/api/community/admin/users", { admin: true });
+const adminDid = randomUUID();
+result = await call("/api/community/admin/login", {
+  method: "POST", ownerDevice: adminDid,
+  body: { password: primaryAdminPassword, device_id: adminDid, remember: true }
+});
+assert.equal(result.status, 200);
+assert.equal(result.data.level, "primary");
+assert.equal(result.data.primary, true);
+const primaryAdminToken = result.data.token;
+
+result = await call("/api/community/admin/users", { token: primaryAdminToken, ownerDevice: adminDid });
 assert.equal(result.status, 200);
 assert.equal(result.data.users.length, 3);
-result = await call("/api/community/admin/conversations", { admin: true, ownerDevice: guestDid });
-assert.equal(result.status, 403);
-assert.equal(result.data.error, "owner_device_required");
-result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, body: { device_id: guestDid } });
-assert.equal(result.status, 200);
-result = await call("/api/community/admin/conversations", { admin: true, ownerDevice: readerDid });
-assert.equal(result.status, 403, "Admin khác không được đọc chat");
-result = await call("/api/community/admin/conversations", { admin: true, ownerDevice: guestDid });
+result = await call("/api/community/admin/conversations", { token: primaryAdminToken, ownerDevice: readerDid });
+assert.equal(result.status, 401, "JWT Admin tổng không dùng được trên thiết bị khác");
+result = await call("/api/community/admin/conversations", { token: primaryAdminToken, ownerDevice: adminDid });
 assert.equal(result.status, 200);
 assert.equal(result.data.conversations.length, 1);
-result = await call(`/api/community/admin/conversations/${conversation.id}/messages`, { admin: true, ownerDevice: guestDid });
+result = await call(`/api/community/admin/conversations/${conversation.id}/messages`, { token: primaryAdminToken, ownerDevice: adminDid });
 assert.equal(result.status, 200);
 assert.equal(result.data.messages.length, 2);
 
-result = await call(`/api/community/admin/reviews/${reader.id}/${guest.id}`, { method: "DELETE", admin: true });
+result = await call(`/api/community/admin/reviews/${reader.id}/${guest.id}`, { method: "DELETE", token: primaryAdminToken, ownerDevice: adminDid });
 assert.equal(result.status, 200);
 result = await call(`/api/community/readers/${reader.id}`, { token: guestToken });
 assert.equal(result.data.reviews.length, 0);
