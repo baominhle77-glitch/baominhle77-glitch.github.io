@@ -91,12 +91,28 @@ await edit("boitoan/sw.test.mjs", (source) => {
   return source;
 });
 
+await edit("assets/account-v2.test.mjs", (source) => {
+  const declaration = 'const plaintextPasswordAssignment = /(?:regular|primary|admin)?_?password\\s*[:=]\\s*["\\\'][^"\\\']{6,}["\\\']/i;';
+  if (!source.includes("const plaintextPasswordAssignment")) {
+    source = source.replace(
+      'const webkitCheck = fs.readFileSync(new URL("../tools/webkit-production-check.mjs", import.meta.url), "utf8");',
+      'const webkitCheck = fs.readFileSync(new URL("../tools/webkit-production-check.mjs", import.meta.url), "utf8");\n' + declaration
+    );
+  }
+  source = source.replace(
+    /assert\.doesNotMatch\((adminV(?:6|7|9|10)), \/[^\n]+\/, "([^"]+)"\);/g,
+    'assert.doesNotMatch($1, plaintextPasswordAssignment, "$2");'
+  );
+  return source;
+});
+
 for (const [path, markers] of [
   ["assets/gate.js", ["Account V10 authoritative Admin return", "adminReturnCandidate", "requested || !!token", "restoreAdminApp(startWithoutAdminReturn)"]],
   ["boitoan/community-admin.html", ["community-back-to-app", "admin_return=1&v=18"]],
   ["boitoan/index.html", ["/assets/gate.js?v=18"]],
   ["boitoan/sw.js", ["boitoan-v18"]],
   ["boitoan/sw.test.mjs", ["boitoan-v18", "current v18"]],
+  ["assets/account-v2.test.mjs", ["plaintextPasswordAssignment"]],
 ]) {
   const value = await readFile(path, "utf8");
   for (const marker of markers) if (!value.includes(marker)) throw new Error(`Thiếu marker ${marker} trong ${path}`);
