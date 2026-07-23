@@ -1,0 +1,172 @@
+name: E2E Reader production sau deploy
+
+on:
+  workflow_run:
+    workflows: ["Deploy lên Cloudflare Pages (hiennhi89.pages.dev)"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reader-production-e2e
+  cancel-in-progress: false
+
+jobs:
+  verify-reader:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout source đã deploy
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 1
+
+      - name: Xác định có chạy E2E không
+        id: marker
+        run: |
+          subject=$(git log -1 --format=%s)
+          if [[ "$subject" == *"Reader production verification"* ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Bỏ qua: commit không phải lần nghiệm thu Reader production."
+          fi
+
+      - name: Tạo Reader thật, đăng nhập nền tảng thứ hai, đọc hồ sơ và tự xóa
+        id: e2e
+        if: steps.marker.outputs.run == 'true'
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          api="https://hiennhi89-gate.hiennhi89.workers.dev"
+          username="e2e_reader_${GITHUB_RUN_ID}"
+          password="E2EReader-${GITHUB_RUN_ID}!"
+          did1=$(node -e 'console.log(require("node:crypto").randomUUID())')
+          did2=$(node -e 'console.log(require("node:crypto").randomUUID())')
+          reader_token=""
+          register_code="n/a"; login_code="n/a"; me_code="n/a"; delete_code="n/a"; revoked_code="n/a"; relogin_code="n/a"; error_code=""
+
+          write_outputs() {
+            {
+              echo "register_code=$register_code"
+              echo "login_code=$login_code"
+              echo "me_code=$me_code"
+              echo "delete_code=$delete_code"
+              echo "revoked_code=$revoked_code"
+              echo "relogin_code=$relogin_code"
+              echo "error_code=$error_code"
+            } >> "$GITHUB_OUTPUT"
+          }
+          cleanup() {
+            if [ -n "$reader_token" ]; then
+              curl -sS -X DELETE -H "authorization: Bearer $reader_token" "$api/api/community/me" >/dev/null || true
+            fi
+          }
+          trap 'cleanup; write_outputs' EXIT
+
+          node - <<'NODE' "$RUNNER_TEMP/register.json" "$username" "$password" "$did1"
+          const fs=require('node:fs');
+          fs.writeFileSync(process.argv[2], JSON.stringify({
+            entry:true,
+            device_id:process.argv[5],
+            device:{ua:'E2E Android Chrome',lang:'vi-VN',tz:'Asia/Ho_Chi_Minh',screen:'412x915',platform:'Android'},
+            role:'reader', username:process.argv[3], password:process.argv[4],
+            display_name:'KIỂM THỬ READER TỰ XÓA', bio:'', specialties:'Tarot, Lenormand'
+          }));
+          NODE
+          register_code=$(curl -sS -o "$RUNNER_TEMP/register-response.json" -w "%{http_code}" --max-time 30 \
+            -H 'content-type: application/json' -H 'user-agent: E2E-Android-Chrome' \
+            --data-binary @"$RUNNER_TEMP/register.json" "$api/api/community/register" || echo 000)
+          if [ "$register_code" != "201" ]; then
+            error_code=$(node -e 'try{console.log(require(process.argv[1]).error||"register_failed")}catch{console.log("register_invalid_response")}' "$RUNNER_TEMP/register-response.json")
+            exit 1
+          fi
+          reader_token=$(node -e 'const d=require(process.argv[1]); if(!d.token||!d.gate_token||d.profile?.role!=="reader") process.exit(2); console.log(d.token)' "$RUNNER_TEMP/register-response.json") || { error_code="register_contract"; exit 1; }
+          reader_id=$(node -e 'console.log(require(process.argv[1]).profile.id)' "$RUNNER_TEMP/register-response.json")
+
+          node - <<'NODE' "$RUNNER_TEMP/login.json" "$username" "$password" "$did2"
+          const fs=require('node:fs');
+          fs.writeFileSync(process.argv[2], JSON.stringify({
+            entry:true,
+            device_id:process.argv[5],
+            device:{ua:'E2E iPad Safari',lang:'vi-VN',tz:'Asia/Ho_Chi_Minh',screen:'1024x1366',platform:'iPad'},
+            username:process.argv[3], password:process.argv[4]
+          }));
+          NODE
+          login_code=$(curl -sS -o "$RUNNER_TEMP/login-response.json" -w "%{http_code}" --max-time 30 \
+            -H 'content-type: application/json' -H 'user-agent: E2E-iPad-Safari' \
+            --data-binary @"$RUNNER_TEMP/login.json" "$api/api/community/login" || echo 000)
+          if [ "$login_code" != "200" ]; then
+            error_code=$(node -e 'try{console.log(require(process.argv[1]).error||"login_failed")}catch{console.log("login_invalid_response")}' "$RUNNER_TEMP/login-response.json")
+            exit 1
+          fi
+          reader_token=$(node -e 'const d=require(process.argv[1]); if(!d.token||!d.gate_token||d.profile?.id!==process.argv[2]||d.profile?.role!=="reader") process.exit(2); console.log(d.token)' "$RUNNER_TEMP/login-response.json" "$reader_id") || { error_code="login_contract"; exit 1; }
+
+          me_code=$(curl -sS -o "$RUNNER_TEMP/me-response.json" -w "%{http_code}" --max-time 30 \
+            -H "authorization: Bearer $reader_token" "$api/api/community/me" || echo 000)
+          if [ "$me_code" != "200" ]; then error_code="me_failed"; exit 1; fi
+          node -e 'const d=require(process.argv[1]); if(d.profile?.id!==process.argv[2]||d.profile?.role!=="reader") process.exit(1)' "$RUNNER_TEMP/me-response.json" "$reader_id" || { error_code="me_contract"; exit 1; }
+
+          delete_code=$(curl -sS -o "$RUNNER_TEMP/delete-response.json" -w "%{http_code}" --max-time 30 -X DELETE \
+            -H "authorization: Bearer $reader_token" "$api/api/community/me" || echo 000)
+          if [ "$delete_code" != "200" ]; then
+            error_code=$(node -e 'try{console.log(require(process.argv[1]).error||"delete_failed")}catch{console.log("delete_invalid_response")}' "$RUNNER_TEMP/delete-response.json")
+            exit 1
+          fi
+
+          revoked_code=$(curl -sS -o "$RUNNER_TEMP/revoked-response.json" -w "%{http_code}" --max-time 30 \
+            -H "authorization: Bearer $reader_token" "$api/api/community/me" || echo 000)
+          if [ "$revoked_code" != "401" ]; then error_code="token_not_revoked"; exit 1; fi
+
+          relogin_code=$(curl -sS -o "$RUNNER_TEMP/relogin-response.json" -w "%{http_code}" --max-time 30 \
+            -H 'content-type: application/json' --data-binary @"$RUNNER_TEMP/login.json" "$api/api/community/login" || echo 000)
+          if [ "$relogin_code" != "401" ]; then error_code="account_still_loginable"; exit 1; fi
+          node -e 'const d=require(process.argv[1]); if(d.error!=="invalid_login") process.exit(1)' "$RUNNER_TEMP/relogin-response.json" || { error_code="wrong_relogin_error"; exit 1; }
+
+          reader_token=""
+          error_code=""
+          write_outputs
+          trap - EXIT
+          echo "Reader production E2E PASS"
+
+      - name: Ghi kết quả E2E
+        if: always() && steps.marker.outputs.run == 'true'
+        env:
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          REGISTER_CODE: ${{ steps.e2e.outputs.register_code }}
+          LOGIN_CODE: ${{ steps.e2e.outputs.login_code }}
+          ME_CODE: ${{ steps.e2e.outputs.me_code }}
+          DELETE_CODE: ${{ steps.e2e.outputs.delete_code }}
+          REVOKED_CODE: ${{ steps.e2e.outputs.revoked_code }}
+          RELOGIN_CODE: ${{ steps.e2e.outputs.relogin_code }}
+          ERROR_CODE: ${{ steps.e2e.outputs.error_code }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          DEPLOY_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          mkdir -p docs/handover
+          completed_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          cat > docs/handover/READER_E2E_STATUS.md <<EOF
+          # Trạng thái E2E Reader production
+
+          - Trạng thái: \`${E2E_OUTCOME^^}\`
+          - Source commit: \`$SOURCE_SHA\`
+          - Hoàn tất UTC: \`$completed_utc\`
+          - Deploy workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/$DEPLOY_RUN_ID\`
+          - E2E workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
+          - Register / login thiết bị 2 / me / delete / token revoked / login sau xóa: \`${REGISTER_CODE:-n/a}/${LOGIN_CODE:-n/a}/${ME_CODE:-n/a}/${DELETE_CODE:-n/a}/${REVOKED_CODE:-n/a}/${RELOGIN_CODE:-n/a}\`
+          - Mã lỗi an toàn: \`${ERROR_CODE:-none}\`
+          - Dữ liệu thử: tài khoản có tiền tố \`e2e_reader_\`; workflow gọi API tự xóa và xác nhận token cùng đăng nhập đều bị thu hồi.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/handover/READER_E2E_STATUS.md
+          git commit -m "docs: record Reader production E2E ${E2E_OUTCOME}" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Kết luận E2E
+        if: always() && steps.marker.outputs.run == 'true'
+        run: test "${{ steps.e2e.outcome }}" = "success"
