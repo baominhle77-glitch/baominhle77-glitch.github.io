@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T18:12:00+07:00",
+  "updated_at": "2026-07-23T18:17:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -16,7 +16,6 @@
         ".github/workflows/validate-vietnam-travel.yml",
         ".github/workflows/deploy-vietnam-travel.yml",
         ".github/workflows/materialize-vietnam-travel.yml",
-        ".github/workflows/materialize-vietnam-travel-rescue.yml",
         ".travel-bundle/**",
         "docs/handover/VIETNAM_TRAVEL.md",
         "docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log",
@@ -25,8 +24,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:19:00+07:00",
-      "heartbeat_at": "2026-07-23T18:12:00+07:00",
-      "summary": "Tiếp tục app PWA /vietnam-travel/, API Cloudflare KV và Telegram bot. PR #47 đã merge nhưng source thật chưa được materialize; chuyển sang nhánh cứu hộ có log chẩn đoán, không ghi token vào source và không sửa trực tiếp main."
+      "heartbeat_at": "2026-07-23T18:17:00+07:00",
+      "summary": "Tiếp tục app PWA /vietnam-travel/, API Cloudflare KV và Telegram bot. PR #47 đã merge nhưng source thật chưa được materialize; PR #49 sửa workflow theo staging, checksum, test và log chẩn đoán, không ghi token vào source và không sửa trực tiếp main."
     }
   ],
   "recently_completed": [
