@@ -1,13 +1,14 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T01:05:00+07:00",
+  "updated_at": "2026-07-24T01:14:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260724-14",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260724-14-admin-return-v10",
-      "base_sha": "8862919d4b477c360df3fe6cf3541165629aae3f",
+      "branch": "agent/BOITOAN-20260724-14-closeout",
+      "base_sha": "808f8c4df5b328f208c98ba0b639b316ab3b2e60",
       "paths": [
         "tools/apply-admin-v9-return-to-app.mjs",
         "tools/apply-admin-v10-authoritative-return.mjs",
@@ -22,13 +23,11 @@
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/ADMIN_V10_RETURN_STATUS.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-24T00:46:00+07:00",
-      "heartbeat_at": "2026-07-24T01:05:00+07:00",
-      "summary": "Nghiệm thu iPhone xác nhận Admin V9 vẫn rơi về màn chọn tài khoản. V10 dùng JWT + device và phản hồi backend làm nguồn sự thật, thử xác minh khi URL có admin_return hoặc còn token, tự phục hồi mọi cờ còn thiếu. WebKit chỉ gieo token + device; cache v18. Bổ sung V9 vào phạm vi vì cần sửa kiểm tra chạy lặp để chấp nhận trạng thái V10."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-24T01:14:00+07:00",
+      "summary": "Sửa dứt điểm lỗi từ Khu vực quản trị bấm ← Bói toán rơi về màn chọn tài khoản. V9 sai vì chỉ thử khôi phục khi đủ cờ frontend và bài WebKit gieo sẵn chính các cờ đó. V10 dùng JWT + device và phản hồi /api/community/admin/session làm nguồn sự thật; URL admin_return hoặc còn JWT là đủ để xác minh, sau đó tự phục hồi session/level/primary/auth_version và mở app. Backend từ chối mới xóa phiên. Link ?admin_return=1&v=18, index gate.js?v=18, cache boitoan-v18. CI 30032461183/30032460855 success; merge 808f8c4d; production Gate/Admin/Index/SW 200/200/200/200; verifier rerun 30032516574 success với WebKit chỉ gieo token + device."
+    },
     {
       "id": "BOITOAN-20260723-13",
       "owner": "ChatGPT GPT-5.6 Thinking",
