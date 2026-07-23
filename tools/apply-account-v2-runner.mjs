@@ -6,7 +6,7 @@ const runtimePath = new URL(`./.apply-account-v2-runtime-${process.pid}.mjs`, im
 
 let source = await readFile(templatePath, "utf8");
 const unsafe = 'await adminAudit(env, request, "review_deleted", `${readerId}:${authorId}`);';
-const safe = 'await adminAudit(env, request, "review_deleted", `\\${readerId}:\\${authorId}`);';
+const safe = 'await adminAudit(env, request, "review_deleted", \\`\\${readerId}:\\${authorId}\\`);';
 if (!source.includes(unsafe)) throw new Error("Không tìm thấy điểm sửa template review audit");
 source = source.replace(unsafe, safe);
 
