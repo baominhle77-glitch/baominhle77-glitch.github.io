@@ -1,35 +1,35 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T18:23:00+07:00",
+  "updated_at": "2026-07-23T18:54:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "TRAVEL-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/TRAVEL-20260723-01-trigger-v2",
-      "base_sha": "f30a2dc0db744655cf3961ee586f2cc4d296f7c5",
+      "branch": "agent/TRAVEL-20260723-01-handover",
+      "base_sha": "04024845740fadce03d435a6f81db8f22f17b25c",
       "paths": [
         "vietnam-travel/**",
         "backend/travel.js",
         "backend/travel.test.mjs",
         "tools/apply-travel-system.mjs",
-        ".github/workflows/validate-vietnam-travel.yml",
-        ".github/workflows/deploy-vietnam-travel.yml",
-        ".github/workflows/materialize-vietnam-travel.yml",
+        ".github/workflows/deploy-vietnam-travel-pr.yml",
         ".github/workflows/materialize-vietnam-travel-v2.yml",
         ".travel-bundle/**",
+        ".deploy-vietnam-travel/**",
         "docs/handover/VIETNAM_TRAVEL.md",
         "docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log",
         "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md"
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/PRODUCTION_STATUS.md",
+        "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T17:19:00+07:00",
-      "heartbeat_at": "2026-07-23T18:23:00+07:00",
-      "summary": "App PWA /vietnam-travel/, API Cloudflare KV và Telegram bot đang materialize. Workflow V2 đã có trên main tại f30a2dc0; branch này tạo push riêng để kích hoạt V2, sau đó kiểm source thật, test và production trước khi đóng task."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T18:54:00+07:00",
+      "summary": "Đã hoàn tất PWA Vietnam Travel tại /vietnam-travel/, 20 địa điểm seed, API Cloudflare Workers KV và quản trị qua Telegram bot hiện có. Source materialize main b3a29cb; checksum đạt, unit test 5/5; deploy kiểm soát run 30004472078 success gồm secret, tích hợp Worker, Pages, Worker và smoke Travel/API/root/Bói toán/MEDORA. Không lưu token, Chat ID hoặc secret trong source; khóa file đã giải phóng."
+    },
     {
       "id": "BOITOAN-20260723-09",
       "owner": "ChatGPT GPT-5.6 Thinking",
