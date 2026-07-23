@@ -1,9 +1,23 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T18:54:00+07:00",
+  "updated_at": "2026-07-23T18:58:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
+    {
+      "id": "TRAVELDOC-20260723-01",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/TRAVELDOC-20260723-01-handover",
+      "base_sha": "3a37e1672e1c48a36c576d2c126b69587d7e1f8a",
+      "paths": [
+        "HANDOVER.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-23T18:57:00+07:00",
+      "completed_at": "2026-07-23T18:58:00+07:00",
+      "summary": "Cập nhật HANDOVER chung từ ba thành bốn webapp, bổ sung Vietnam Travel, URL production, lệnh Telegram, nguồn chuẩn, validation/deploy run và trạng thái smoke; chỉ thay đổi tài liệu/ledger, không thay đổi source ứng dụng hoặc secret."
+    },
     {
       "id": "TRAVEL-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
