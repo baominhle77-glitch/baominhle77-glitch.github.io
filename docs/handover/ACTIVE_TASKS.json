@@ -1,16 +1,19 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T16:27:00+07:00",
+  "updated_at": "2026-07-23T16:42:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-09",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-09-webkit-fixture",
-      "base_sha": "b505c342670b638aca939b149f224eec57f983ff",
+      "branch": "agent/BOITOAN-20260723-09-webkit-script",
+      "base_sha": "adab6be8eb7e9a72e7c5bcfd45d88007e06f2033",
       "paths": [
         "tools/apply-account-v3-hotfix.mjs",
+        "tools/webkit-production-check.mjs",
         "assets/account-v2.test.mjs",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/deploy-pages.yml",
         ".github/workflows/e2e-reader-production.yml",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
@@ -18,8 +21,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T16:08:00+07:00",
-      "heartbeat_at": "2026-07-23T16:27:00+07:00",
-      "summary": "Runtime guard đã deploy thành công tại 4c4fa691, nhưng E2E WebKit đầu thất bại ở cách dựng phiên mở khóa vì phụ thuộc login.key bí mật; API register/login/me vẫn 201/200/200. Chuyển bài test sang hai pha: mở trang production thật ở trạng thái khóa để bắt crash tải trang, rồi route-fulfill một tài liệu plaintext tối thiểu cùng origin nhưng nạp đúng /assets/gate.js production, kích hoạt session Reader, MutationObserver và nav gây lỗi; kiểm tra tab không crash, đúng một link và mutation hữu hạn."
+      "heartbeat_at": "2026-07-23T16:42:00+07:00",
+      "summary": "Runtime guard đã deploy tại 4c4fa691. E2E WebKit fixture lần hai vẫn dừng ngoài catch và không tạo file lỗi, nên tách browser test thành tools/webkit-production-check.mjs độc lập, bắt buộc node --check trong PR/deploy CI, bọc toàn bộ khởi động trong main().catch và ghi mã lỗi cụ thể. Fixture cùng origin nạp đúng gate.js production, không phụ thuộc secret, đo mutation delta và page crash."
     }
   ],
   "recently_completed": [
