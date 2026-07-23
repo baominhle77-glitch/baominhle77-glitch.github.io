@@ -1,37 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T21:08:00+07:00",
+  "updated_at": "2026-07-23T21:11:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-12",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-12-production-proof",
-      "base_sha": "d52e1ae2c606a67e32bd628bf72f8abca4d99795",
+      "branch": "agent/BOITOAN-20260723-12-closeout",
+      "base_sha": "66328b7e529c314213d6724358344f4df02ba0fc",
       "paths": [
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/verify-admin-v8-production.yml",
-        "assets/account-v2.test.mjs",
-        "backend/account-v2.test.mjs",
-        "backend/admin-v8-health.test.mjs",
-        "backend/community.test.mjs",
-        "backend/wrangler.toml",
-        "boitoan/sw.js",
-        "boitoan/sw.test.mjs",
-        "tools/apply-admin-v5-v6-runner.mjs",
-        "tools/apply-admin-v8-edge-login.mjs",
-        "tools/apply-admin-v8-tests.mjs",
         "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/BOITOAN_ADMIN_V8.md",
         "docs/handover/ADMIN_V8_PRODUCTION_STATUS.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T20:38:00+07:00",
-      "heartbeat_at": "2026-07-23T21:08:00+07:00",
-      "summary": "V8 runtime đã merge và deploy. Nhánh hiện tại bổ sung bằng chứng production bền vững: verifier kiểm tra frontend V8, config_ok, crypto_ok, PBKDF2 10000 vòng và đường login thật bằng mật khẩu sai có chủ đích phải trả 401; kết quả được commit vào ADMIN_V8_PRODUCTION_STATUS.md trước khi nghiệm thu lại."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T21:11:00+07:00",
+      "summary": "Hoàn tất Admin V8 sau nghiệm thu thất bại của V7. Chuyển PBKDF2 Admin từ 200000 xuống 10000 vòng phù hợp Cloudflare edge; ghim salt/hash V8 trong wrangler; trim khoảng trắng; tách lỗi crypto 503 khỏi sai mật khẩu 401; auth version V8; cache v16. CI 30013651155/30013651230 success. Production source b6b9e742, deploy 30014457630 và verifier 30014502155 success; ADMIN_V8_PRODUCTION_STATUS xác nhận frontend 200, config_ok=true, crypto_ok=true và login path thực thi crypto bình thường. Không lưu mật khẩu thật trong source/workflow."
+    },
     {
       "id": "BOITOAN-20260723-11",
       "owner": "ChatGPT GPT-5.6 Thinking",
