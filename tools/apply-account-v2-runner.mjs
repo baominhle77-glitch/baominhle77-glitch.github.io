@@ -19,3 +19,5 @@ try {
 } finally {
   await unlink(runtimePath).catch(() => {});
 }
+
+await import(new URL("./apply-account-v2-profile-view.mjs", import.meta.url).href + `?v=${Date.now()}`);
