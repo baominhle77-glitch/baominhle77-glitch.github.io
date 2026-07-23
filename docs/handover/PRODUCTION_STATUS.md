@@ -1,18 +1,17 @@
 # Trạng thái production
 
-- Trạng thái: `FAILED`
-- Source commit: `d5260f02121c723c983f7afe65ab01d3007e93ff`
-- Ghi nhận UTC: `2026-07-23T08:13:44Z`
-- Workflow run: `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/runs/29990544477`
-- Preflight: `success`
-- Tích hợp runtime: `success`
-- Test source: `success`
-- Test Worker: `success`
-- Build site: `success`
-- Deploy Pages: `success`
-- Deploy Worker: `success`
-- Hậu kiểm: `success`
-- Reader E2E production: `failure`
-- HTTP Pages/Admin/CSS/Gate/Worker/Posts/Onboarding: `200/200/200/200/401/401/400`
-- URL cuối sau chuyển hướng: `https://hiennhi89.pages.dev/boitoan/community?deploy=d5260f02121c723c983f7afe65ab01d3007e93ff`
-- Hành động: mở workflow run ở trên, sửa đúng bước thất bại rồi chạy lại; không coi production đã hoàn tất.
+- Trạng thái: `SUCCESS`
+- Source commit: `d7c55914c820534b894a6f3edbb6845219a3e39c`
+- Hoàn tất UTC: `2026-07-23T08:34:58Z`
+- Workflow run: `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/runs/29991588297`
+- Cloudflare Pages: `200`
+- URL cuối sau chuyển hướng: `https://hiennhi89.pages.dev/boitoan/community?deploy=d7c55914c820534b894a6f3edbb6845219a3e39c`
+- Trang Admin: `200`
+- Community CSS: `200`
+- Gate runtime JS: `200`
+- Cloudflare Worker: `401 unauthorized` khi gọi API Reader không có phiên
+- API thảo luận: `401 unauthorized` khi không có phiên
+- Onboarding công khai: `400 invalid_account` với dữ liệu kiểm thử không hợp lệ
+- Reader E2E production: `skipped`; register/login/me/cleanup `n/a/n/a/n/a/n/a`
+- Account V3: plaintext public entry không cần DECRYPT_KEY; badge và bottom navigation Admin mở khu quản trị
+- Thứ tự triển khai: Pages trước, Worker sau
