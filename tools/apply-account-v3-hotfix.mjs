@@ -48,14 +48,14 @@ await edit("backend/community.js", (source) => {
   const existingRegister = `  if (entry.existingGate) {
     return json({ token: await issueCommunitySession(env, created.profile, entry.did), profile: publicProfile(created.profile, true) }, 201);
   }
- `;
+`;
   if (!source.includes(existingRegister)) throw new Error("Không tìm thấy nhánh register existingGate cũ");
   source = source.replace(existingRegister, "");
 
   const existingLogin = `  if (entry.existingGate) {
     return json({ token: await issueCommunitySession(env, authenticated.profile, entry.did), profile: publicProfile(authenticated.profile, true) });
   }
- `;
+`;
   if (!source.includes(existingLogin)) throw new Error("Không tìm thấy nhánh login existingGate cũ");
   source = source.replace(existingLogin, "");
 
