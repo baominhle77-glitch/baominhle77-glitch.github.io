@@ -90,13 +90,16 @@ jobs:
             app=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/?$bust" || true)
             gate=$(curl -fsSL "https://hiennhi89.pages.dev/assets/gate.js?$bust" || true)
             admin=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/community-admin.html?$bust" || true)
-            health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/health" || true)
+            health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/admin/health" || true)
             if grep -q 'application/gate-payload' <<<"$app" \
               && grep -q '/assets/gate.js?v=19' <<<"$app" \
               && grep -q 'Bói toán V11' <<<"$gate" \
               && grep -q 'openAppContent(data.key, "admin-session")' <<<"$gate" \
               && grep -q 'admin_return=1&v=19' <<<"$admin" \
-              && grep -q '"ok":true' <<<"$health"; then
+              && grep -q '"auth_version":"2026-07-24-v11"' <<<"$health" \
+              && grep -q '"config_ok":true' <<<"$health" \
+              && grep -q '"crypto_ok":true' <<<"$health" \
+              && grep -q '"decrypt_key_configured":true' <<<"$health"; then
               echo "Production V11 đạt ở lần $attempt"
               exit 0
             fi

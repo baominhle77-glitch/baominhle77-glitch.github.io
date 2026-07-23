@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T02:22:00+07:00",
+  "updated_at": "2026-07-24T02:26:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260724-15",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260724-15-rebuild",
-      "base_sha": "2efdefe1c4ca007bf7d630e8f9d778ad03762df1",
+      "branch": "agent/BOITOAN-20260724-15-prod-audit",
+      "base_sha": "b298d8b226a3634f6259ce6d2885da0ca2a4535c",
       "paths": [
         "boitoan/**",
         "assets/**",
@@ -18,8 +18,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-24T01:29:00+07:00",
-      "heartbeat_at": "2026-07-24T02:22:00+07:00",
-      "summary": "Bói toán V11 đã chuyển thành source trực tiếp. Luồng duy nhất: xác thực backend → nhận key → decryptPayload → injectHtml → kiểm DOM → reveal. Các patch V2–V10 là no-op; Worker deploy trước Pages; CI đã qua frontend/Worker và WebKit payload AES thật. Phạm vi được rút gọn theo thư mục hệ thống, bỏ danh sách file vụn gây cản trở thay đổi đồng bộ."
+      "heartbeat_at": "2026-07-24T02:26:00+07:00",
+      "summary": "V11 đã merge main và đang hậu kiểm Cloudflare production. Tiêu chí: Worker/API sẵn sàng, Pages phục vụ gate v19, payload AES được giải mã rồi bơm DOM trước reveal, WebKit mở đủ giao diện chứ không chỉ khung ngoài."
     }
   ],
   "recently_completed": [
