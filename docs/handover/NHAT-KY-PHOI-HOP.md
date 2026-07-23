@@ -21,48 +21,34 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-23 10:16 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-04 — GỠ KHUNG LUẬN AI ⏳
+### 2026-07-23 10:30 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-04 — HOÀN TẤT ✅
 
-- BaoMinh kiểm tra trực tiếp trên điện thoại và xác nhận **giao diện mobile đạt yêu cầu**.
-- Phản hồi cần xử lý: các hộp `Khung luận Tarot`, `Khung luận Lenormand`, `Khung luận Bài Tây`, `Khung luận Kinh Dịch`, `Khung luận Tử Vi`, `Khung luận Bát Tự` và `Kết nối toàn trải bài` quá máy móc, phiến diện, không có giá trị thực tế.
-- Nhánh chính thức: `agent/BOITOAN-20260723-04-remove-ai-guides-v2`, tạo từ production source `e71bf5539c8ef796baf5f36d1f6c328ad5d547f5`.
-- Thay đổi source hiện tại: chỉ sửa `tools/apply-role-system.mjs`, **xóa 149 dòng, không thêm nội dung thay thế**.
-- Đã gỡ các hàm/call/CSS tạo guide và tổng hợp trải bài; giữ nguyên:
-  - branding và logo;
-  - bottom nav 5 mục và nút Cộng đồng;
-  - role cards mobile;
-  - nút/luồng `Luận giải chuyên sâu` có sẵn;
-  - thuật toán và payload Bói toán;
-  - tài khoản, chat, review, thanh toán và Worker.
-- Kiểm tra thủ công đã phát hiện một tham chiếu `addMarketGuides()` còn sót ở nhánh thử nghiệm; đã sửa trước khi tạo nhánh v2. Không coi bản thử nghiệm là đạt.
-- Nguyên tắc bắt buộc từ người dùng được ghi vào hồ sơ chung: **không bịa; bằng chứng trước, kết luận sau**.
+- BaoMinh đã kiểm tra trực tiếp trên điện thoại và xác nhận giao diện mobile đạt yêu cầu.
+- PR #26 merge thành `3322b7c899aeeee3d2e98e26e4cbc97931390a77`.
+- Hai CI trước merge đều success:
+  - run `29976927421` — coordination guard;
+  - run `29976927419` — role system/frontend/Worker.
+- Production run `29976968849` ghi `SUCCESS` cho đúng source commit `3322b7c…`:
+  - Pages `200`;
+  - CSS `200`;
+  - gate runtime JS `200`;
+  - Worker không phiên `401 unauthorized`, đúng kỳ vọng.
+- Source `main` đã đối chiếu lại: không còn `marketGuide`, `addMarketGuides`, `renderMarketSynthesis`, `watchMarketResult`, `.market-guide`, `.market-dynamic-analysis`, các chuỗi `Khung luận…` hoặc `Kết nối toàn trải bài`.
+- Vẫn giữ nguyên `injectCommunity`, `applyMarketBranding`, logo, nav 5 mục, role cards, nút/luồng `Luận giải chuyên sâu`, thuật toán gốc, tài khoản, chat, review và thanh toán.
+- Task đã chuyển `completed`; không còn vùng file nào bị khóa.
+- Nguyên tắc của người dùng được lưu cố định trong bàn giao: **không bịa; bằng chứng trước, kết luận sau**.
 
 ### 2026-07-23 10:14 GMT+7 — ChatGPT GPT-5.6 — DEPLOY-20260723-03 — PRODUCTION SUCCESS ✅
 
 - PR #25 merge thành `5e4e139b2bc09d14dd73fc6990adb428a8d2b40f`.
-- Workflow run `29976466953` ghi `SUCCESS` vào `docs/handover/PRODUCTION_STATUS.md`.
-- Bằng chứng hậu kiểm:
-  - Cloudflare Pages: `200`;
-  - URL cuối sau Clean URL redirect: `/boitoan/community?...`;
-  - Community CSS: `200`;
-  - Gate runtime JS: `200`;
-  - Worker API không phiên: `401 unauthorized`, đúng kỳ vọng.
-- Task deploy hoàn tất và khóa hạ tầng/bàn giao được giải phóng.
-
-### 2026-07-23 05:34 GMT+7 — ChatGPT GPT-5.6 — DEPLOY-20260723-03 — CHẨN ĐOÁN DEPLOYMENT
-
-- Run đầu tiên deploy Pages và Worker thành công nhưng smoke test báo lỗi do `/boitoan/community.html` trả HTTP `308` sang Clean URL.
-- Workflow được sửa dùng `curl -L`, ghi `url_effective`, đồng thời vẫn kiểm tra branding, role cards, CSS, gate runtime và API Reader không phiên.
-- Không sửa source ứng dụng trong task hạ tầng này.
+- Workflow run `29976466953` sửa false-negative do Cloudflare Clean URLs HTTP 308.
+- Pages/CSS/Gate `200`, Worker `401 unauthorized` đúng kỳ vọng.
 
 ### 2026-07-23 05:26 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-02 — SOURCE MERGED
 
 - PR #19 merge thành `ed63ad7dfd8cf85dd58135095175d40a0a913e42`.
-- CI trước merge đạt:
-  - Run `29962090012` — role system/frontend/SW/Worker: success.
-  - Run `29962089978` — coordination guard: success.
-- Source bổ sung branding `Cái Chợ của Hiên Nhi`, role cards responsive, nav 5 mục, font hệ thống, logo/watermark và lớp khung luận.
-- Phần khung luận bị người dùng yêu cầu gỡ trong task `BOITOAN-20260723-04`; không được coi đây là tính năng đã được chấp thuận.
+- Source bổ sung branding, role cards responsive, nav 5 mục, font hệ thống, logo/watermark và lớp khung luận.
+- Phần khung luận sau đó bị người dùng đánh giá không hữu ích và đã được gỡ hoàn toàn trong `BOITOAN-20260723-04`.
 - OpenAI Developers/API đã bị loại khỏi kế hoạch; app không chờ API key.
 
 ### 2026-07-23 04:31 GMT+7 — ChatGPT GPT-5.6 — COORD-20260723-01 — ĐIỀU PHỐI ĐA-AGENT ✅
