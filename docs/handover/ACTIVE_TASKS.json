@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T17:59:00+07:00",
+  "updated_at": "2026-07-23T18:10:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -17,6 +17,8 @@
         "assets/community-admin.js",
         "assets/account-v2.test.mjs",
         "boitoan/community-admin.html",
+        "boitoan/sw.js",
+        "boitoan/sw.test.mjs",
         ".github/workflows/validate-role-system.yml",
         ".github/workflows/deploy-pages.yml",
         "docs/handover/ACTIVE_TASKS.json",
@@ -25,8 +27,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:49:00+07:00",
-      "heartbeat_at": "2026-07-23T17:59:00+07:00",
-      "summary": "Sửa xác thực Admin hai lớp bị lệch: cửa đầu kiểm PBKDF2 nhưng trang Quản trị lại gửi mật khẩu như ADMIN_TOKEN. Thiết kế mới: POST /api/community/admin/login xác minh cùng PBKDF2 hash hiện hành, cấp JWT Admin gắn thiết bị, tự đặt thiết bị đăng nhập làm Admin tổng, frontend lưu token và chuyển thẳng sang Quản trị; trang Quản trị tự tải dữ liệu, không hỏi mật khẩu lần hai và không có nút bind thủ công. Không lưu mật khẩu plaintext trong source."
+      "heartbeat_at": "2026-07-23T18:10:00+07:00",
+      "summary": "PR #48 đã mở. Account V5 dùng POST /api/community/admin/login xác minh PBKDF2 hash hiện hành, cấp JWT Admin gắn device, tự đặt thiết bị đăng nhập làm Admin tổng; frontend chuyển thẳng vào Quản trị, trang Quản trị không hỏi mật khẩu lần hai; logout thu hồi JWT. Đã thêm test sai/đúng password qua hash override, device binding, quyền Admin và token revocation; cache tăng v13. Đang chờ hai CI PR chạy."
     }
   ],
   "recently_completed": [
