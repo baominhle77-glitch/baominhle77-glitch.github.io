@@ -9,9 +9,10 @@ const unsafeReviewAudit = 'await adminAudit(env, request, "review_deleted", `${r
 const safeReviewAudit = 'await adminAudit(env, request, "review_deleted", \`\${readerId}:\${authorId}\`);';
 const unsafeAdminName = 'cell(r,user.username+"\n"+user.display_name);';
 const safeAdminName = 'cell(r,user.username+"\\n"+user.display_name);';
-if (!source.includes(unsafeReviewAudit)) throw new Error("Không tìm thấy điểm sửa template review audit");
-if (!source.includes(unsafeAdminName)) throw new Error("Không tìm thấy điểm sửa xuống dòng tên Admin");
-source = source.replace(unsafeReviewAudit, safeReviewAudit).replace(unsafeAdminName, safeAdminName);
+if (source.includes(unsafeReviewAudit)) source = source.replace(unsafeReviewAudit, safeReviewAudit);
+else if (!source.includes(safeReviewAudit)) throw new Error("Không tìm thấy điểm sửa template review audit");
+if (source.includes(unsafeAdminName)) source = source.replace(unsafeAdminName, safeAdminName);
+else if (!source.includes(safeAdminName)) throw new Error("Không tìm thấy điểm sửa xuống dòng tên Admin");
 
 await writeFile(runtimePath, source, "utf8");
 try {
