@@ -1,35 +1,32 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T18:23:00+07:00",
+  "updated_at": "2026-07-23T18:54:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "TRAVEL-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/TRAVEL-20260723-01-trigger-v2",
-      "base_sha": "f30a2dc0db744655cf3961ee586f2cc4d296f7c5",
+      "branch": "agent/TRAVEL-20260723-01-closeout",
+      "base_sha": "b3a29cbd5416424a6df16bb4a7bd392a75287f5c",
       "paths": [
         "vietnam-travel/**",
         "backend/travel.js",
         "backend/travel.test.mjs",
         "tools/apply-travel-system.mjs",
         ".github/workflows/validate-vietnam-travel.yml",
-        ".github/workflows/deploy-vietnam-travel.yml",
-        ".github/workflows/materialize-vietnam-travel.yml",
-        ".github/workflows/materialize-vietnam-travel-v2.yml",
-        ".travel-bundle/**",
+        ".github/workflows/deploy-pages.yml",
         "docs/handover/VIETNAM_TRAVEL.md",
         "docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log",
         "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md"
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T17:19:00+07:00",
-      "heartbeat_at": "2026-07-23T18:23:00+07:00",
-      "summary": "App PWA /vietnam-travel/, API Cloudflare KV và Telegram bot đang materialize. Workflow V2 đã có trên main tại f30a2dc0; branch này tạo push riêng để kích hoạt V2, sau đó kiểm source thật, test và production trước khi đóng task."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T18:54:00+07:00",
+      "summary": "Hoàn tất PWA /vietnam-travel/ với 20 địa điểm seed, tìm kiếm/lọc/yêu thích/bản đồ/offline; dữ liệu Cloudflare KV travel:places:v1; Telegram owner-only thêm/sửa/ẩn/hiện/xóa/thống kê. Source materialized tại b3a29cbd. Travel test 5/5; validation run 30004367095 success; deploy và production smoke run 30004367100, job 89196797196 success cho Pages, Worker, Travel API và các app cũ. Bundle và workflow kích hoạt tạm đã xóa; source không chứa token/secret."
+    },
     {
       "id": "BOITOAN-20260723-09",
       "owner": "ChatGPT GPT-5.6 Thinking",
