@@ -1,0 +1,53 @@
+name: Xuất snapshot Bói toán sau build
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/export-boitoan-snapshot.yml
+      - docs/handover/ACTIVE_TASKS.json
+      - boitoan/**
+      - assets/**
+      - backend/**
+      - tools/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Sinh đúng bản đang được deploy
+        run: |
+          set -euo pipefail
+          node tools/apply-role-system.mjs
+          node tools/apply-account-v2-runner.mjs
+          node tools/apply-account-v3-hotfix.mjs
+      - name: Đóng gói toàn bộ phần liên quan Bói toán
+        run: |
+          set -euo pipefail
+          tar -czf "$RUNNER_TEMP/boitoan-built-snapshot.tar.gz" \
+            boitoan assets backend tools docs/handover \
+            .github/workflows/deploy-pages.yml \
+            .github/workflows/validate-role-system.yml \
+            .github/workflows/verify-admin-v9-return.yml \
+            .github/workflows/e2e-reader-production.yml \
+            HANDOVER.md docs/ARCHITECTURE.md 2>/dev/null || \
+          tar -czf "$RUNNER_TEMP/boitoan-built-snapshot.tar.gz" \
+            boitoan assets backend tools docs/handover \
+            .github/workflows/deploy-pages.yml \
+            .github/workflows/validate-role-system.yml \
+            .github/workflows/verify-admin-v9-return.yml \
+            .github/workflows/e2e-reader-production.yml
+          sha256sum "$RUNNER_TEMP/boitoan-built-snapshot.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boitoan-built-snapshot
+          path: ${{ runner.temp }}/boitoan-built-snapshot.tar.gz
+          retention-days: 2
