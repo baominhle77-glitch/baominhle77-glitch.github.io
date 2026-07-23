@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T18:23:00+07:00",
+  "updated_at": "2026-07-23T18:27:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -27,6 +27,29 @@
       "started_at": "2026-07-23T17:19:00+07:00",
       "heartbeat_at": "2026-07-23T18:23:00+07:00",
       "summary": "App PWA /vietnam-travel/, API Cloudflare KV và Telegram bot đang materialize. Workflow V2 đã có trên main tại f30a2dc0; branch này tạo push riêng để kích hoạt V2, sau đó kiểm source thật, test và production trước khi đóng task."
+    },
+    {
+      "id": "BOITOAN-20260723-10",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-10-admin-dual-v7",
+      "base_sha": "9b200cf6791d2824aa8eec1e50433c69dedb4d67",
+      "paths": [
+        "tools/apply-admin-session-v5.mjs",
+        "tools/apply-admin-levels-v6.mjs",
+        "tools/apply-account-v2-runner.mjs",
+        "backend/account-v2.test.mjs",
+        "assets/account-v2.test.mjs",
+        "boitoan/sw.js",
+        "boitoan/sw.test.mjs",
+        ".github/workflows/validate-role-system.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T17:49:00+07:00",
+      "heartbeat_at": "2026-07-23T18:27:00+07:00",
+      "summary": "Account V6 phân hai cấp tại cùng form Admin. Admin thường quản lý tài khoản, khóa/xóa member, xóa review và quản lý bài thảo luận. Admin tổng có toàn bộ quyền trên cộng quyền xem hội thoại riêng và mở trang cá nhân member chỉ đọc. Chỉ một thiết bị có phiên Admin tổng; đăng nhập primary mới thu hồi primary cũ nhưng giữ các phiên regular. ADMIN_TOKEN cũ bị vô hiệu với API community. Hai mật khẩu chỉ lưu dạng PBKDF2 hash + salt, không plaintext. Nhánh đã dựng lại từ main mới nhất để không xung đột task Travel; đang chờ CI."
     }
   ],
   "recently_completed": [
