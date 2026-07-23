@@ -38,7 +38,7 @@ assert.match(community, /Chế độ chỉ đọc/);
 assert.match(community, /Quay lại khu vực Admin/);
 
 assert.match(admin, /market_admin_token/, "trang Quản trị phải dùng JWT Admin");
-assert.match(admin, /community-admin\/session/, "trang Quản trị phải xác nhận cấp quyền từ server");
+assert.match(admin, /\/api\/community\/admin\/session/, "trang Quản trị phải xác nhận cấp quyền từ server");
 assert.match(admin, /if \(primary\) action\.append/, "chỉ Admin tổng thấy nút mở trang cá nhân member");
 assert.match(admin, /conversationTab\.hidden=!primary/, "Admin thường không được thấy tab hội thoại");
 assert.match(admin, /Admin tổng/, "giao diện phải hiện đúng cấp Admin tổng");
