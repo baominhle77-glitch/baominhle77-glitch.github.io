@@ -56,3 +56,5 @@ jobs:
           git add -A
           git commit -m "feat: thêm app Vietnam Travel và Telegram control"
           git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}
+
+# Kích hoạt materialize sau PR #47.
