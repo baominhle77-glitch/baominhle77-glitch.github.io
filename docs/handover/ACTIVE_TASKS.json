@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T02:39:00+07:00",
+  "updated_at": "2026-07-24T02:41:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
@@ -8,6 +8,7 @@
       "id": "BOITOAN-20260724-15",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260724-15-closeout",
+      "paths": ["docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T02:39:00+07:00",
       "summary": "Bói toán V11 đã thay chuỗi patch V2–V10 bằng source trực tiếp. Admin/Member nhận khóa từ backend, bắt buộc decryptPayload → injectHtml → kiểm DOM → reveal; không còn mở khung rỗng. Worker deploy trước Pages. CI source/frontend/Worker/WebKit AES thật đạt; production audit static/API/WebKit đạt; deploy cuối run 30038693404 SUCCESS."
