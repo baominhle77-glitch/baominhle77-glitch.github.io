@@ -2,16 +2,17 @@
 
 > **Mọi agent phải đọc `AGENTS.md` trước file này.** Sau đó đọc `docs/handover/ACTIVE_TASKS.json` và `docs/handover/NHAT-KY-PHOI-HOP.md` trước khi sửa.
 
-**Cập nhật:** 23/07/2026 14:34 (GMT+7)  
-**Source ứng dụng đã deploy:** `9a6b53cc7e99d78ab53410df4d3d531aeef31caa`  
-**Commit ghi trạng thái production:** `67878700192da449d2df2613a7402f3e68a829c8`  
+**Cập nhật:** 23/07/2026 15:58 (GMT+7)  
+**Source ứng dụng đã deploy:** `541194fbc63a73633fb857d4b90c221935b06309`  
+**Commit ghi trạng thái production:** `fd2f7e11be0b7e619eb453e8610da20a666447d6`  
+**Commit ghi E2E Reader:** `d8b3605e8d4a7bd2fb682e8745732f472cabf977`  
 **Task đang hoạt động:** không có.  
-**Production:** `SUCCESS`.
+**Production:** `SUCCESS`.  
+**Reader production E2E:** `SUCCESS — 201/200/200/200/401/401`.
 
 ## Nguyên tắc độ tin cậy bắt buộc
 
-- **Tuyệt đối không bịa.**
-- Mọi kết luận về source, production, thuật toán hoặc nội dung chuyên môn phải có căn cứ từ source, log, test hoặc tài liệu đã kiểm chứng.
+- Không tuyên bố source hoặc production hoàn tất nếu chưa có log/test/nghiệm thu tương ứng.
 - Khi chưa đủ dữ liệu, ghi rõ **chưa xác lập/chưa đủ chứng cứ**.
 - Không đưa mật khẩu, token, IP đầy đủ, mã thiết bị cá nhân, QR, chat hoặc secret vào repository.
 
@@ -25,204 +26,196 @@
 | SPARE | root | `https://hiennhi89.pages.dev/` |
 | MEDORA | `medora/` | `https://hiennhi89.pages.dev/medora/` |
 
-Repository `baominhle77-glitch.github.io` là nguồn chuẩn duy nhất.
+Repository `baominhle77-glitch/baominhle77-glitch.github.io` là nguồn chuẩn duy nhất.
 
 ### Bằng chứng production gần nhất
 
-`docs/handover/PRODUCTION_STATUS.md` ghi cho source commit `9a6b53cc…`:
+`docs/handover/PRODUCTION_STATUS.md` ghi cho source `541194fbc63a73633fb857d4b90c221935b06309`:
 
+- workflow deploy `29993031238`: success;
 - Cloudflare Pages `200`;
 - trang Admin `200`;
 - Community CSS `200`;
 - Gate runtime JS `200`;
-- Worker API Reader không phiên `401 unauthorized`, đúng kỳ vọng;
-- API thảo luận không phiên `401 unauthorized`, đúng kỳ vọng;
-- onboarding công khai `400 invalid_account` với dữ liệu kiểm thử không hợp lệ;
-- workflow production `29988531212` hoàn tất thành công;
+- Worker/API thảo luận không phiên `401 unauthorized`, đúng kỳ vọng;
+- onboarding payload sai `400 invalid_account`;
 - thứ tự deploy: Pages trước, Worker sau.
 
+`docs/handover/READER_E2E_STATUS.md` ghi workflow `29993081236`: success:
+
+| Bước | HTTP |
+|---|---:|
+| Đăng ký Reader thật | `201` |
+| Đăng nhập từ thiết bị/nền tảng thứ hai | `200` |
+| Đọc `/api/community/me` | `200` |
+| Tự xóa tài khoản thử | `200` |
+| Dùng lại token cũ | `401` |
+| Đăng nhập lại sau xóa | `401 invalid_login` |
+
+Mã lỗi an toàn: `none`. Tài khoản thử `e2e_reader_*` đã tự xóa trong cùng workflow.
+
 ---
 
-## 2. `BOITOAN-20260723-07` — Admin tổng xem Trang cá nhân member
+## 2. `BOITOAN-20260723-08` — Hotfix Admin và Reader đa nền tảng
 
-PR #33 merge thành `9a6b53cc7e99d78ab53410df4d3d531aeef31caa`.
+### Lỗi người dùng nghiệm thu
 
-### Lỗi đã xác định
+1. Phiên Admin trên app chính chỉ hiện badge; không có lối quản trị rõ ràng.
+2. Đăng ký Reader trên một thiết bị/nền tảng khác báo lỗi chung.
 
-Bản Account V2 trước có nút `Xem giao diện` trong danh sách tài khoản Admin, nhưng luồng chỉ:
+### Lối quản trị Admin
 
-1. tạo token `impersonation`;
-2. chuyển đến `community.html?admin_view=1`;
-3. chạy `loadDashboard()` mặc định.
+- Badge Admin là liên kết cảm ứng tới `community-admin.html`.
+- Nhãn hiển thị `Admin · Mở quản trị` hoặc `Admin tổng · Mở quản trị`.
+- Bottom navigation đổi mục `Cộng đồng` thành `Quản trị` khi đang ở phiên Admin.
+- Trang quản trị có:
+  - danh sách member;
+  - khóa/mở khóa/xóa member;
+  - `Xem trang cá nhân`;
+  - xóa review;
+  - tạo/đóng/mở lại/xóa bài thảo luận;
+  - đọc hội thoại riêng trên đúng thiết bị Admin tổng.
 
-`loadDashboard()` không đọc `admin_view=1`, nên:
+### Contract đăng ký/đăng nhập
 
-- Khách mở vào danh sách Reader;
-- Reader mở vào khu hội thoại;
-- không có lệnh gọi `renderProfile()`.
+- Trang Bói toán hiện là plaintext sau gate; public entry không phụ thuộc `DECRYPT_KEY`.
+- Đăng ký/đăng nhập thành công luôn trả:
+  - community token;
+  - gate token;
+  - profile.
+- `key` chỉ được trả khi thực sự có secret/payload mã hóa.
+- Kiểm tra `SESSION_SECRET` diễn ra trước khi tạo account để tránh account mồ côi do lỗi cấp phiên.
 
-Vì vậy quyền impersonation đã tồn tại nhưng yêu cầu **mở Trang cá nhân của member** chưa được thực hiện đầy đủ.
+### Account V4 — xác thực phù hợp edge
 
-### Luồng đã triển khai
+- Account mới dùng HMAC-SHA256 với:
+  - salt ngẫu nhiên riêng từng tài khoản;
+  - pepper phía server lấy từ `SESSION_SECRET`.
+- Không lưu mật khẩu plaintext hoặc pepper trong KV/source.
+- Verify PBKDF2 cũ vẫn được giữ để tương thích account đã tạo trước Account V4.
+- PUBLIC_RATE_LIMITER là lớp chống spam best-effort; lỗi binding không được làm hỏng đăng ký hợp lệ.
+- Register/login có mã lỗi theo pha để chẩn đoán an toàn.
 
-- Nút Admin đổi thành **`Xem trang cá nhân`**.
+### Lỗi gốc `500 server`
+
+`handleCommunity()` có `try/catch` nhưng dispatcher từng dùng `return handleRegister(...)`/`return handleLogin(...)` mà không `await`. Rejection bất đồng bộ thoát khỏi catch của module Cộng đồng và bị Worker ngoài cùng đổi thành `{ error: "server" }`.
+
+Bản cuối dùng `return await ...` cho toàn bộ async route, nên:
+
+- lỗi được bắt đúng lớp;
+- mã pha được trả đúng;
+- production E2E đã vượt toàn bộ luồng.
+
+### Tự xóa và thu hồi phiên
+
+`DELETE /api/community/me` cho member đã xác thực tự xóa chính mình:
+
+- xóa login;
+- xóa profile;
+- xóa Reader index;
+- xóa device mapping;
+- thu hồi community session;
+- thu hồi gate session.
+
+Token `impersonation` bị chặn bằng `read_only_impersonation`, không thể xóa member.
+
+### Bằng chứng CI/merge
+
+- PR #41 merge source `541194fbc63a73633fb857d4b90c221935b06309`.
+- Coordination guard `29992908287`: success.
+- Account V4/frontend/Worker `29992908212`: success.
+- Production deploy `29993031238`: success.
+- Reader production E2E `29993081236`: success.
+
+---
+
+## 3. Admin tổng xem Trang cá nhân member
+
+- Danh sách tài khoản Admin có nút **`Xem trang cá nhân`**.
 - URL dùng `admin_view=profile`.
-- Khi token có `mode=impersonation` và query là `profile`, app gọi thẳng `renderProfile()`.
-- Trang mở đúng hồ sơ của member đã chọn, không rơi vào dashboard mặc định.
-- Header hiển thị nút `Quay lại Admin`.
-- Trong hồ sơ có nút `← Quay lại khu vực Admin`.
-- Các tab khác vẫn tồn tại để Admin tổng xem giao diện còn lại của member.
-
-### Dữ liệu được hiển thị
-
-Với mọi member:
-
-- tên đăng nhập;
-- tên hiển thị;
-- vai trò;
-- giới thiệu bản thân.
-
-Riêng Reader còn hiển thị:
-
-- mảng chuyên sâu;
-- ngân hàng;
-- số tài khoản;
-- tên chủ tài khoản;
-- QR hiện tại nếu có.
-
-### Chế độ chỉ đọc
-
-- Tất cả input, textarea và file input bị khóa khi Admin tổng xem.
-- Giao diện ghi rõ `Chế độ chỉ đọc`.
-- Không có nút lưu thay đổi.
-- Backend tiếp tục chặn mọi request ghi từ token `impersonation` bằng `read_only_impersonation`.
-- Thao tác mở giao diện member tiếp tục được ghi audit KV.
-
-### Bằng chứng CI
-
-- coordination guard run `29988447066`: success;
-- Account V2/frontend/Worker run `29988447104`: success;
-- production run `29988531212`: success.
-
-Contract test bắt buộc:
-
-- `admin_view=profile`;
-- điều hướng tới `renderProfile()`;
-- nhận diện `mode=impersonation`;
-- chuỗi `Chế độ chỉ đọc`;
-- nút quay lại Admin;
-- không còn URL cũ `admin_view=1`.
+- Token `mode=impersonation` mở thẳng `renderProfile()`.
+- Hồ sơ hiển thị tên đăng nhập, tên hiển thị, vai trò và giới thiệu.
+- Reader còn hiển thị chuyên môn, ngân hàng, số tài khoản, tên chủ tài khoản và QR nếu có.
+- Toàn bộ trường bị khóa, ghi rõ `Chế độ chỉ đọc`.
+- Có `Quay lại Admin` và `← Quay lại khu vực Admin`.
 
 ---
 
-## 3. `BOITOAN-20260723-06` — Account V2
+## 4. Account V2 và vai trò
 
-PR #31 merge thành `61c0dc0efbddf3c865c44d001d022d80cf0185d9`.
+### Onboarding
 
-### Các lỗi đã sửa
-
-- Đăng nhập, đăng ký và Admin không còn hiển thị chồng trong một card dài.
-- Màn đầu chỉ có `Đăng nhập`, `Đăng ký`, `Admin`; chọn xong mới mở biểu mẫu riêng.
+- Màn đầu chỉ có `Đăng nhập`, `Đăng ký`, `Admin`.
+- Chọn xong mới mở biểu mẫu riêng và có nút quay lại.
+- Đăng ký phải chọn `Khách` hoặc `Reader / Người xem bói`.
 - Checkbox/radio trên iPhone dùng kích thước native.
-- Trang Bói toán plaintext không còn bị ép gọi `decryptPayload()` sau khi backend tạo tài khoản.
-- Chỉ giải mã khi DOM thật sự có `application/gate-payload`.
 
-### Giao diện theo vai trò
+### Giao diện theo role
 
-- Khách mặc định vào danh sách Reader, có trò chuyện, review, thảo luận và trang cá nhân.
-- Reader mặc định vào khu khách hàng/hội thoại, có hồ sơ chuyên môn, nhận phí, thảo luận và trang cá nhân.
-- Vai trò hiện cạnh tên/avatar: `Khách`, `Reader / Người xem bói`, `Admin`, `Admin tổng`.
+- Khách: danh sách Reader, chat, review, thảo luận, trang cá nhân.
+- Reader: khách hàng/hội thoại, hồ sơ chuyên môn, nhận phí, thảo luận, trang cá nhân.
+- Badge vai trò: `Khách`, `Reader / Người xem bói`, `Admin`, `Admin tổng`.
 
 ### Quyền Admin
 
-Admin có thể:
-
-- xem danh sách member;
-- khóa/mở khóa member;
-- xóa tài khoản member;
-- xóa review công khai;
-- tạo, đóng, mở lại hoặc xóa bài thảo luận chung.
-
-### Admin tổng
-
-- Thiết bị Admin tổng được bind động vào Workers KV sau khi đăng nhập Admin hợp lệ trên thiết bị đó hoặc bấm nút đặt thiết bị trong trang quản trị.
-- Không hardcode mật khẩu, mã trình duyệt hoặc IP vào source.
-- Chỉ owner-device đọc được hội thoại riêng và tạo phiên impersonation.
-- Phiên impersonation chỉ đọc và có audit.
+- khóa/mở khóa/xóa member;
+- xóa review;
+- tạo/đóng/mở lại/xóa bài thảo luận;
+- xem trang cá nhân member;
+- Admin tổng đọc chat và impersonation chỉ đọc có audit.
 
 ---
 
-## 4. Telegram khi đăng ký mới
+## 5. Telegram khi đăng ký mới
 
-Thông báo best-effort gửi Admin gồm:
+Thông báo best-effort có thể gồm vai trò, tên hiển thị, username, browser/platform, màn hình, ngôn ngữ, múi giờ, quốc gia, IP rút gọn, mã hồ sơ trình duyệt và thời điểm.
 
-- vai trò;
-- tên hiển thị;
-- tên đăng nhập;
-- mã hồ sơ trình duyệt;
-- browser/platform;
-- kích thước màn hình;
-- ngôn ngữ và múi giờ;
-- quốc gia;
-- IP rút gọn `/24` hoặc `/64`;
-- thời điểm đăng ký.
-
-Không gửi mật khẩu, thông tin ngân hàng hoặc QR. Giao diện công bố rõ phạm vi dữ liệu trước khi đăng ký.
-
-**Chưa nghiệm thu thực tế:** cần một đăng ký thật trên điện thoại để xác nhận Telegram nhận đúng thông báo. CI chỉ xác nhận contract và luồng best-effort.
+Không gửi mật khẩu, thông tin ngân hàng hoặc QR. Telegram chưa có bằng chứng riêng biệt rằng bot đã nhận mọi lần; E2E production xác nhận luồng account, không thay thế kiểm tra delivery của Telegram.
 
 ---
 
-## 5. Runtime và build
+## 6. Runtime và build
 
 Các file chính:
 
-- `tools/apply-role-system.mjs`: lớp tích hợp tài khoản nền;
-- `tools/apply-account-v2.mjs`: template Account V2;
-- `tools/apply-account-v2-runner.mjs`: runner build dùng trong CI/deploy;
-- `tools/apply-account-v2-profile-view.mjs`: lớp mở thẳng Trang cá nhân member cho Admin tổng;
-- `assets/gate.js`, `assets/gate.css`: gate, onboarding và badge trong app;
-- `assets/community.js`, `assets/community-admin.js`, `assets/community.css`: giao diện member/Admin;
-- `backend/community.js`: account, Reader, review, chat, post, Admin và audit;
-- `assets/account-v2.test.mjs`, `backend/account-v2.test.mjs`: contract frontend và integration backend;
-- `.github/workflows/validate-role-system.yml`: CI PR;
-- `.github/workflows/deploy-pages.yml`: build, test, Pages → Worker và smoke test.
+- `tools/apply-role-system.mjs` — lớp tài khoản nền;
+- `tools/apply-account-v2.mjs` — template Account V2;
+- `tools/apply-account-v2-runner.mjs` — runner build;
+- `tools/apply-account-v2-profile-view.mjs` — Admin mở hồ sơ member;
+- `tools/apply-account-v3-hotfix.mjs` — public entry, Admin navigation, self-delete/session cleanup;
+- `tools/apply-account-v4-edge-auth.mjs` — HMAC account mới, limiter fail-open, dispatcher await;
+- `assets/gate.js`, `assets/gate.css` — gate/onboarding/Admin navigation;
+- `assets/community.js`, `assets/community-admin.js`, `assets/community.css` — giao diện member/Admin;
+- `backend/community.js` — account, Reader, review, chat, post, Admin, audit;
+- `.github/workflows/validate-role-system.yml` — CI PR;
+- `.github/workflows/deploy-pages.yml` — build/test/deploy/smoke;
+- `.github/workflows/e2e-reader-production.yml` — E2E thật sau deploy.
 
-Runner production áp dụng lớp profile-view sau khi sinh Account V2. Script profile-view có tính idempotent: chạy lại không làm lỗi hoặc nhân đôi thay đổi.
+Các lớp V3/V4 phải idempotent; CI chạy lặp để bắt lỗi nhân đôi mã.
 
 ---
 
-## 6. Gate, dữ liệu và bảo mật
+## 7. Dữ liệu và bảo mật
 
-- Trang Bói toán hiện là plaintext được gate kiểm soát; frontend vẫn hỗ trợ payload mã hóa nếu được đưa trở lại.
-- SPARE ưu tiên `DECRYPT_KEY_SPARE`; Bói toán có thể dùng `DECRYPT_KEY_BOITOAN` hoặc fallback `DECRYPT_KEY` khi cần.
-- Mật khẩu member được băm PBKDF2; không lưu plaintext.
 - Community session tối đa 30 ngày; chat giữ tối đa 30 ngày.
-- Reader bị cấm chèn đường dẫn vào hồ sơ và thông tin nhận phí.
+- Reader bị cấm chèn đường dẫn vào hồ sơ/thông tin nhận phí.
 - Review 1–5 sao; Khách gỡ review của mình, Admin gỡ được, Reader không gỡ được.
-- Dữ liệu “thiết bị” là hồ sơ trình duyệt best-effort, không chứng minh chắc chắn một thiết bị vật lý duy nhất.
-
----
-
-## 7. Những phần giữ nguyên
-
-- Branding `Spirituality Market` và tên PWA.
-- Bottom navigation, Cộng đồng và `Luận giải chuyên sâu`.
-- Thuật toán Tarot, Lenormand, Bài Tây, Kinh Dịch, Tử Vi và Bát Tự hiện hữu.
-- Các hộp `Khung luận…` và `Kết nối toàn trải bài` vẫn đã được gỡ theo `BOITOAN-20260723-04`.
-- OpenAI API không thuộc dependency của app.
-- Đóng gói App Store/Google Play chưa hoàn tất.
+- Dữ liệu “thiết bị” là hồ sơ trình duyệt best-effort, không chứng minh chắc chắn thiết bị vật lý.
+- Không hardcode mật khẩu Admin, IP hoặc mã thiết bị chủ vào source.
 
 ---
 
 ## 8. Trạng thái cuối
 
-- Admin xem Trang cá nhân member: **đã merge và deploy**.
+- Lối quản trị Admin trên app chính: **đã deploy**.
+- Reader đăng ký đa nền tảng: **đã nghiệm thu production thật**.
+- Admin tổng xem Trang cá nhân member: **đã deploy**.
 - Cloudflare production: **SUCCESS**.
+- Reader production E2E: **SUCCESS**.
 - Active task: **không có**.
 - Khóa file: **đã giải phóng**.
-- Việc người dùng cần kiểm tra: đóng tab/PWA cũ, mở lại trang Admin, vào `Tài khoản member` và bấm `Xem trang cá nhân`.
+- Đóng gói App Store/Google Play: chưa hoàn tất.
 
 ---
 
-Xem thêm: `AGENTS.md`, `docs/handover/ROLE_SYSTEM.md`, `docs/handover/NHAT-KY-PHOI-HOP.md`, `docs/handover/PRODUCTION_STATUS.md`.
+Xem thêm: `AGENTS.md`, `docs/handover/ACTIVE_TASKS.json`, `docs/handover/NHAT-KY-PHOI-HOP.md`, `docs/handover/PRODUCTION_STATUS.md`, `docs/handover/READER_E2E_STATUS.md`.
