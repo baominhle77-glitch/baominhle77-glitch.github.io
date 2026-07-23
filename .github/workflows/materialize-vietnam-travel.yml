@@ -49,3 +49,5 @@ jobs:
           git add -A
           git commit -m "feat: thêm app Vietnam Travel và Telegram control"
           git push
+
+# Trigger sau khi đủ 10 khối nguồn.
