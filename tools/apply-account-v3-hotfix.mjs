@@ -35,7 +35,6 @@ await edit("backend/community.js", (source) => {
   return json(payload, status);
 }`;
   source = replaceRequired(source, oldEntryResponse, newEntryResponse, "entryResponse không bắt buộc khóa giải mã");
-
   source = source.replaceAll('  if (!entry.existingGate && !entryDecryptKey(env)) return json({ error: "decrypt_key_unavailable" }, 503);\n', "");
 
   const registerRate = '  if (entry.rateLimited) return json({ error: "rate_limited" }, 429);\n  const created = await createAccount(env, body || {}, entry.did);';
@@ -60,13 +59,29 @@ await edit("backend/community.js", (source) => {
   if (!source.includes(existingLogin)) throw new Error("Không tìm thấy nhánh login existingGate cũ");
   source = source.replace(existingLogin, "");
 
-  source = source.replace("\nexport async function handleCommunity", "\n/* Account V3 plaintext public entry */\nexport async function handleCommunity");
+  const meReadOnly = '  if (request.method === "GET") return json({ profile: publicProfile(auth.profile, true), session_mode: auth.claims.mode || "member" });\n  if (auth.claims.mode === "impersonation") return json({ error: "read_only_impersonation" }, 403);';
+  const meDelete = '  if (request.method === "GET") return json({ profile: publicProfile(auth.profile, true), session_mode: auth.claims.mode || "member" });\n  if (request.method === "DELETE") {\n    if (auth.claims.mode === "impersonation") return json({ error: "read_only_impersonation" }, 403);\n    await deleteMemberAccount(env, auth.profile.id);\n    return json({ ok: true, deleted: auth.profile.id });\n  }\n  if (auth.claims.mode === "impersonation") return json({ error: "read_only_impersonation" }, 403);';
+  source = replaceRequired(source, meReadOnly, meDelete, "member tự xóa tài khoản đã xác thực");
+
+  source = replaceRequired(
+    source,
+    '  for (const prefix of ["community-session:", "community-device:", "community-review:", "community-user-conversation:"]) {',
+    '  for (const prefix of ["community-session:", "session:", "community-device:", "community-review:", "community-user-conversation:"]) {',
+    "thu hồi cả gate session khi xóa member"
+  );
+  source = replaceRequired(
+    source,
+    '    if (path === "/api/community/me" && (request.method === "GET" || request.method === "PUT")) return handleMe(request, env);',
+    '    if (path === "/api/community/me" && (request.method === "GET" || request.method === "PUT" || request.method === "DELETE")) return handleMe(request, env);',
+    "route DELETE /api/community/me"
+  );
+
+  source = source.replace("\nexport async function handleCommunity", "\n/* Account V3 plaintext public entry */\n/* Account V3 self delete cleanup */\nexport async function handleCommunity");
   return source;
 });
 
 await edit("assets/gate.js", (source) => {
   if (source.includes("/* Account V3 admin navigation */")) return source;
-
   const start = source.indexOf("  function injectCommunity() {");
   const end = source.indexOf("  function applyMarketBranding() {", start);
   if (start < 0 || end < 0) throw new Error("Không tìm thấy injectCommunity");
@@ -95,32 +110,10 @@ await edit("assets/gate.js", (source) => {
 
 `;
   source = source.slice(0, start) + navigationBlock + source.slice(end);
-
-  source = replaceRequired(
-    source,
-    '    var chip = document.createElement("div");\n    chip.id = "market-account-identity";',
-    '    var chip = document.createElement(admin ? "a" : "div");\n    if (admin) { chip.href = new URL("community-admin.html", location.href).href; chip.setAttribute("aria-label", "Mở khu vực quản trị"); }\n    chip.id = "market-account-identity";',
-    "badge Admin thành liên kết quản trị"
-  );
-  source = replaceRequired(
-    source,
-    '    chip.querySelector("small").textContent = primary ? "Admin tổng" : accountRoleLabel(role);',
-    '    chip.querySelector("small").textContent = admin ? ((primary ? "Admin tổng" : "Admin") + " · Mở quản trị") : accountRoleLabel(role);',
-    "nhãn mở quản trị"
-  );
-  source = replaceRequired(
-    source,
-    '    if (header) header.appendChild(chip); else document.body.appendChild(chip);',
-    '    if (header) header.appendChild(chip); else document.body.appendChild(chip);\n    injectCommunity();',
-    "đồng bộ bottom navigation"
-  );
-  source = replaceRequired(
-    source,
-    '          localStorage.removeItem("community_token_boitoan");\n        } catch (e) {}\n        return claimPrimaryAdminDevice(pass);',
-    '          localStorage.removeItem("community_token_boitoan");\n        } catch (e) {}\n        injectAccountIdentity("password");\n        injectCommunity();\n        return claimPrimaryAdminDevice(pass);',
-    "hiện lối quản trị ngay sau đăng nhập Admin"
-  );
-
+  source = replaceRequired(source, '    var chip = document.createElement("div");\n    chip.id = "market-account-identity";', '    var chip = document.createElement(admin ? "a" : "div");\n    if (admin) { chip.href = new URL("community-admin.html", location.href).href; chip.setAttribute("aria-label", "Mở khu vực quản trị"); }\n    chip.id = "market-account-identity";', "badge Admin thành liên kết quản trị");
+  source = replaceRequired(source, '    chip.querySelector("small").textContent = primary ? "Admin tổng" : accountRoleLabel(role);', '    chip.querySelector("small").textContent = admin ? ((primary ? "Admin tổng" : "Admin") + " · Mở quản trị") : accountRoleLabel(role);', "nhãn mở quản trị");
+  source = replaceRequired(source, '    if (header) header.appendChild(chip); else document.body.appendChild(chip);', '    if (header) header.appendChild(chip); else document.body.appendChild(chip);\n    injectCommunity();', "đồng bộ bottom navigation");
+  source = replaceRequired(source, '          localStorage.removeItem("community_token_boitoan");\n        } catch (e) {}\n        return claimPrimaryAdminDevice(pass);', '          localStorage.removeItem("community_token_boitoan");\n        } catch (e) {}\n        injectAccountIdentity("password");\n        injectCommunity();\n        return claimPrimaryAdminDevice(pass);', "hiện lối quản trị ngay sau đăng nhập Admin");
   const startup = "  if (document.readyState === \"loading\") {";
   if (!source.includes(startup)) throw new Error("Không tìm thấy điểm khởi động gate");
   source = source.replace(startup, "  /* Account V3 admin navigation */\n" + startup);
@@ -139,11 +132,11 @@ a.market-account-identity:active { transform:scale(.98); }
 
 const backend = await readFile("backend/community.js", "utf8");
 const gate = await readFile("assets/gate.js", "utf8");
-for (const marker of ["Account V3 plaintext public entry", "if (key) payload.key = key", "gate_token: gateToken"]) {
+for (const marker of ["Account V3 plaintext public entry", "Account V3 self delete cleanup", "if (key) payload.key = key", "gate_token: gateToken", 'request.method === "DELETE"', '"session:"']) {
   if (!backend.includes(marker)) throw new Error(`Thiếu marker backend: ${marker}`);
 }
 for (const marker of ["Account V3 admin navigation", "community-admin.html", "Mở quản trị", "marketAdminSession"]) {
   if (!gate.includes(marker)) throw new Error(`Thiếu marker frontend: ${marker}`);
 }
 if (backend.includes('if (!entry.existingGate && !entryDecryptKey(env))')) throw new Error("Backend vẫn bắt buộc DECRYPT_KEY cho public entry");
-console.log("Account V3 hotfix: Admin có lối quản trị rõ ràng; public Reader không phụ thuộc DECRYPT_KEY.");
+console.log("Account V3 hotfix: Admin có lối quản trị; Reader đa nền tảng; tài khoản E2E tự xóa và thu hồi phiên.");

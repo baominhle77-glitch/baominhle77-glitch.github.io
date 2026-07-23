@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T15:09:00+07:00",
+  "updated_at": "2026-07-23T15:18:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-08",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-08-production-e2e-hotfix",
-      "base_sha": "e86e7e6fed193f9b326d1d00a5793fbd799cb2f3",
+      "branch": "agent/BOITOAN-20260723-08-e2e-cleanup-fix",
+      "base_sha": "03eecbee75c7af47124b71e45ef1c6f3b2c94f06",
       "paths": [
         "tools/apply-account-v3-hotfix.mjs",
         "tools/apply-account-v2-runner.mjs",
@@ -15,14 +15,16 @@
         "backend/account-v2.test.mjs",
         ".github/workflows/validate-role-system.yml",
         ".github/workflows/deploy-pages.yml",
+        ".github/workflows/e2e-reader-production.yml",
+        "docs/handover/READER_E2E_STATUS.md",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T14:50:00+07:00",
-      "heartbeat_at": "2026-07-23T15:09:00+07:00",
-      "summary": "Người dùng nghiệm thu production trên iPhone và nền tảng khác: Admin chỉ có badge, không có lối vào khu quản trị ngay trên app; đăng ký Reader công khai báo lỗi. Đã xác định public entry vẫn phụ thuộc DECRYPT_KEY và contract existing-gate thiếu gate_token. Hotfix sửa điều hướng Admin, đồng nhất hai token, test không có DECRYPT_KEY và E2E production tạo Reader thật → đăng nhập thiết bị thứ hai → đọc hồ sơ → xóa sạch dữ liệu thử. CI đầu phát hiện marker đặt sai điểm khởi động gate; marker đã chuyển tới điểm khởi động thật và commit này kích hoạt lại toàn bộ CI."
+      "heartbeat_at": "2026-07-23T15:18:00+07:00",
+      "summary": "Runtime hotfix PR #36 đã qua CI và deploy Pages/Worker/smoke thành công tại d5260f0, nhưng production E2E cleanup dùng Cloudflare KV API thất bại. Đang chuyển E2E sang workflow chạy sau deploy: tạo Reader thật, đăng nhập thiết bị thứ hai, đọc hồ sơ, DELETE /api/community/me, xác nhận token bị thu hồi và đăng nhập lại trả invalid_login; ghi trạng thái riêng, không phụ thuộc quyền KV của token deploy."
     }
   ],
   "recently_completed": [
@@ -46,7 +48,7 @@
       "status": "completed",
       "started_at": "2026-07-23T13:12:00+07:00",
       "completed_at": "2026-07-23T13:56:00+07:00",
-      "summary": "PR #31 và production Account V2 thành công: onboarding hai màn hình, sửa đăng ký plaintext và input iPhone, badge vai trò, giao diện theo role, quyền Admin và impersonation chỉ đọc. Nghiệm thu đa nền tảng sau đó phát hiện public entry vẫn phụ thuộc DECRYPT_KEY ở backend."
+      "summary": "PR #31 và production Account V2 thành công; nghiệm thu đa nền tảng sau đó phát hiện public entry vẫn phụ thuộc DECRYPT_KEY ở backend."
     },
     {
       "id": "BOITOAN-20260723-05",

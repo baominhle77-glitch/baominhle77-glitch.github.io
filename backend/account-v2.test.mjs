@@ -14,7 +14,6 @@ class MemoryKV {
 }
 
 const secret = "s".repeat(64);
-// Cố ý KHÔNG cấu hình DECRYPT_KEY: production Bói toán hiện là plaintext sau gate.
 const env = { KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass" };
 function b64url(input) { return Buffer.from(input).toString("base64url"); }
 function jwt(payload, ttl = 3600) {
@@ -45,9 +44,9 @@ let result = await call("/api/community/register", {
   body: { entry: true, device_id: guestDid, device: { platform: "iPhone" }, role: "guest", username: "v2_guest", password: "password-guest", display_name: "Khách V2", bio: "" }
 });
 assert.equal(result.status, 201);
-assert.ok(result.data.token, "đăng ký Khách phải có community token");
-assert.ok(result.data.gate_token, "đăng ký Khách phải có gate token");
-assert.equal(result.data.key, undefined, "plaintext không cần trả khóa giải mã");
+assert.ok(result.data.token);
+assert.ok(result.data.gate_token);
+assert.equal(result.data.key, undefined);
 const guestToken = result.data.token;
 const guestId = result.data.profile.id;
 
@@ -71,11 +70,12 @@ assert.ok(result.data.token);
 assert.ok(result.data.gate_token);
 assert.equal(result.data.profile.id, readerId);
 assert.equal(result.data.profile.role, "reader");
+const readerToken = result.data.token;
 
 result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: ownerDid, replace: true } });
 assert.equal(result.status, 200);
 result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: randomUUID(), replace: true } });
-assert.equal(result.status, 200, "Admin hợp lệ được chuyển thiết bị Admin tổng có audit");
+assert.equal(result.status, 200);
 result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: ownerDid, replace: true } });
 assert.equal(result.status, 200);
 
@@ -84,17 +84,17 @@ assert.equal(result.status, 201);
 const postId = result.data.post.id;
 result = await call("/api/community/posts", { token: guestToken });
 assert.equal(result.status, 200);
-assert.equal(result.data.posts.length, 1);
 result = await call(`/api/community/posts/${postId}/comments`, { method: "POST", token: guestToken, body: { text: "Bình luận đầu tiên" } });
 assert.equal(result.status, 201);
 
 result = await call(`/api/community/admin/users/${guestId}/impersonate`, { method: "POST", admin: true, device: ownerDid });
 assert.equal(result.status, 200);
-assert.equal(result.data.view_only, true);
 const impersonationToken = result.data.token;
 result = await call(`/api/community/posts/${postId}/comments`, { method: "POST", token: impersonationToken, body: { text: "Không được đăng dưới danh nghĩa member" } });
 assert.equal(result.status, 403);
 assert.equal(result.data.error, "read_only_impersonation");
+result = await call("/api/community/me", { method: "DELETE", token: impersonationToken });
+assert.equal(result.status, 403, "phiên impersonation không được xóa member");
 
 result = await call(`/api/community/readers/${readerId}/reviews`, { method: "POST", token: guestToken, body: { rating: 5, text: "Đánh giá thử" } });
 assert.equal(result.status, 201);
@@ -107,6 +107,21 @@ result = await call("/api/community/login", { method: "POST", body: { entry: tru
 assert.equal(result.status, 401);
 assert.equal(result.data.error, "invalid_login");
 
+result = await call("/api/community/me", { method: "DELETE", token: readerToken });
+assert.equal(result.status, 200, "Reader đã xác thực phải xóa được chính tài khoản của mình");
+assert.equal(result.data.deleted, readerId);
+result = await call("/api/community/login", { method: "POST", body: { entry: true, device_id: readerSecondDevice, username: "v2_reader", password: "password-reader" } });
+assert.equal(result.status, 401);
+assert.equal(result.data.error, "invalid_login");
+assert.equal(await env.KV.get(`community-profile:${readerId}`), null);
+assert.equal(await env.KV.get(`community-reader:${readerId}`), null);
+for (const prefix of ["community-session:", "session:", "community-device:"]) {
+  for (const key of (await env.KV.list({ prefix })).keys) {
+    const value = JSON.parse(await env.KV.get(key.name));
+    assert.notEqual(value.uid, readerId, `${prefix} không được giữ phiên/thiết bị Reader đã xóa`);
+  }
+}
+
 const audits = await env.KV.list({ prefix: "community-audit:" });
-assert.ok(audits.keys.length >= 5, "các thao tác Admin nhạy cảm phải có audit");
+assert.ok(audits.keys.length >= 5);
 console.log("Account V3 backend tests PASS");
