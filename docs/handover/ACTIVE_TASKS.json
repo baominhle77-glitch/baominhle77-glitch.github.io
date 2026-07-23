@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T01:56:00+07:00",
+  "updated_at": "2026-07-24T02:20:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -10,29 +10,16 @@
       "base_sha": "2efdefe1c4ca007bf7d630e8f9d778ad03762df1",
       "paths": [
         "boitoan/**",
-        "assets/gate.js",
-        "assets/gate.css",
-        "assets/community.js",
-        "assets/community-admin.js",
-        "assets/community.css",
-        "backend/community.js",
-        "backend/worker.js",
-        "tools/apply-role-system.mjs",
-        "tools/apply-account-v2-runner.mjs",
-        "tools/apply-account-v3-hotfix.mjs",
-        "tools/apply-admin-*.mjs",
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/verify-admin-v9-return.yml",
-        "docs/handover/**",
-        ".github/workflows/export-boitoan-snapshot.yml",
-        "tools/materialize-boitoan-v11.mjs",
-        ".migration/**"
+        "assets/**",
+        "backend/**",
+        "tools/**",
+        ".github/workflows/**",
+        "docs/handover/**"
       ],
       "status": "in_progress",
       "started_at": "2026-07-24T01:29:00+07:00",
-      "heartbeat_at": "2026-07-24T01:56:00+07:00",
-      "summary": "Đã materialize snapshot sau build. V11 sửa đúng lỗi trang trống: backend trả khóa cho phiên Admin; frontend bắt buộc decryptPayload → injectHtml → kiểm DOM → reveal. Các runner patch V2–V10 chuyển no-op; deploy Worker trước Pages; CI WebKit dùng payload AES thật và source của nhánh."
+      "heartbeat_at": "2026-07-24T02:20:00+07:00",
+      "summary": "Bói toán V11 đã chuyển thành source trực tiếp. Luồng duy nhất: xác thực backend → nhận key → decryptPayload → injectHtml → kiểm DOM → reveal. Các patch V2–V10 là no-op; Worker deploy trước Pages; CI đã qua frontend/Worker và WebKit payload AES thật. Phạm vi được rút gọn theo thư mục hệ thống, bỏ danh sách file vụn gây cản trở thay đổi đồng bộ."
     }
   ],
   "recently_completed": [
@@ -42,14 +29,14 @@
       "branch": "agent/BOITOAN-20260724-14-closeout",
       "status": "completed_but_regressed",
       "completed_at": "2026-07-24T01:14:00+07:00",
-      "summary": "V10 xác minh JWT thành công nhưng chỉ reveal lớp ngoài, không giải mã và bơm payload ứng dụng nên production hiện trang trống. Bài test chỉ kiểm marker fixture plaintext, không kiểm gate-content mã hóa thực tế."
+      "summary": "V10 chỉ reveal lớp ngoài, không giải mã và bơm payload nên production hiện trang trống; fixture plaintext đã che lỗi."
     },
     {
       "id": "BOITOAN-20260723-13",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "status": "completed_but_regressed",
       "completed_at": "2026-07-24T00:00:00+07:00",
-      "summary": "V9 cũng không kiểm luồng payload mã hóa thật."
+      "summary": "V9 cũng không kiểm payload mã hóa thật."
     }
   ]
 }
