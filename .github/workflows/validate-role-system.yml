@@ -18,7 +18,7 @@ jobs:
       - name: Áp dụng lớp tích hợp
         run: |
           node tools/apply-role-system.mjs
-          node tools/apply-account-v2.mjs
+          node --input-type=module -e 'globalThis.readerId="${readerId}"; globalThis.authorId="${authorId}"; await import("./tools/apply-account-v2.mjs");'
       - name: Kiểm tra frontend
         run: |
           node --check assets/gate.js
