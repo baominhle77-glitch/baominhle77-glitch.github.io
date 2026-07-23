@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T20:41:00+07:00",
+  "updated_at": "2026-07-23T20:50:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -11,20 +11,23 @@
       "paths": [
         ".github/workflows/deploy-pages.yml",
         ".github/workflows/validate-role-system.yml",
+        ".github/workflows/verify-admin-v8-production.yml",
         "assets/account-v2.test.mjs",
         "backend/account-v2.test.mjs",
+        "backend/admin-v8-health.test.mjs",
         "backend/community.test.mjs",
         "backend/wrangler.toml",
         "boitoan/sw.js",
         "boitoan/sw.test.mjs",
         "tools/apply-admin-v5-v6-runner.mjs",
         "tools/apply-admin-v8-edge-login.mjs",
+        "tools/apply-admin-v8-tests.mjs",
         "docs/handover/ACTIVE_TASKS.json"
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T20:38:00+07:00",
-      "heartbeat_at": "2026-07-23T20:41:00+07:00",
-      "summary": "Nghiệm thu production xác nhận mật khẩu Admin tổng đúng vẫn bị invalid_admin_login. Chẩn đoán mới: Admin V5-V7 còn dùng PBKDF2 200000 vòng ngay trong Cloudflare Worker; lỗi/giới hạn CPU bị catch và biến thành báo sai mật khẩu. V8 sẽ dùng cấu hình PBKDF2 edge-safe 10000 vòng được ghim rõ trong wrangler, tách auth version, trim khoảng trắng, trả lỗi crypto riêng, thêm health self-test production và smoke bắt buộc trước khi kết luận."
+      "heartbeat_at": "2026-07-23T20:50:00+07:00",
+      "summary": "Nghiệm thu production xác nhận mật khẩu Admin tổng đúng vẫn bị invalid_admin_login. Chẩn đoán: Admin V5-V7 dùng PBKDF2 200000 vòng ngay trong Cloudflare Worker; lỗi/giới hạn CPU bị catch và biến thành báo sai mật khẩu. V8 dùng PBKDF2 edge-safe 10000 vòng được ghim trong wrangler, trim khoảng trắng, trả lỗi crypto riêng, health self-test và workflow production bắt buộc kiểm tra config_ok, crypto_ok cùng một lần đăng nhập sai có chủ đích phải trả 401 thay vì 503."
     }
   ],
   "recently_completed": [
@@ -37,7 +40,7 @@
       "status": "completed",
       "started_at": "2026-07-23T19:53:00+07:00",
       "completed_at": "2026-07-23T20:23:00+07:00",
-      "summary": "Hoàn tất hotfix Admin V7 theo nghiệm thu iPhone. Tách namespace ADMIN_V7_*; auth version V7; logout sạch; xác nhận phiên backend; cache v15. CI và deploy kỹ thuật đạt nhưng nghiệm thu người dùng sau đó xác nhận đăng nhập mật khẩu thật vẫn thất bại."
+      "summary": "Hotfix V7 tách namespace, logout sạch và xác nhận phiên; CI/deploy kỹ thuật đạt nhưng nghiệm thu mật khẩu thật vẫn thất bại."
     },
     {
       "id": "BOITOAN-20260723-10",
