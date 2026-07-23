@@ -17,14 +17,21 @@ const secret = "s".repeat(64);
 const regularAdminPassword = "test-regular-admin";
 const primaryAdminPassword = "test-primary-admin";
 const adminSalt = randomBytes(16);
+const legacyAdminSalt = randomBytes(16);
 const adminIterations = 1500;
 const adminHash = (password) => pbkdf2Sync(password, adminSalt, adminIterations, 32, "sha256").toString("base64");
+const legacyHash = (password) => pbkdf2Sync(password, legacyAdminSalt, 900, 32, "sha256").toString("base64");
 const env = {
   KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "legacy-admin-token-must-not-work",
-  ADMIN_PASSWORD_SALT_B64: adminSalt.toString("base64"),
-  ADMIN_REGULAR_PASSWORD_HASH_B64: adminHash(regularAdminPassword),
-  ADMIN_PRIMARY_PASSWORD_HASH_B64: adminHash(primaryAdminPassword),
-  ADMIN_PASSWORD_ITERATIONS: String(adminIterations),
+  // Cố ý để lại cấu hình V5/V6 sai. Account V7 phải bỏ qua hoàn toàn các biến này.
+  ADMIN_PASSWORD_SALT_B64: legacyAdminSalt.toString("base64"),
+  ADMIN_REGULAR_PASSWORD_HASH_B64: legacyHash("legacy-regular-admin"),
+  ADMIN_PRIMARY_PASSWORD_HASH_B64: legacyHash("legacy-primary-admin"),
+  ADMIN_PASSWORD_ITERATIONS: "900",
+  ADMIN_V7_PASSWORD_SALT_B64: adminSalt.toString("base64"),
+  ADMIN_V7_REGULAR_PASSWORD_HASH_B64: adminHash(regularAdminPassword),
+  ADMIN_V7_PRIMARY_PASSWORD_HASH_B64: adminHash(primaryAdminPassword),
+  ADMIN_V7_PASSWORD_ITERATIONS: String(adminIterations),
   PUBLIC_RATE_LIMITER: { async limit() { throw new Error("simulated_binding_failure"); } },
 };
 async function call(path, { method = "GET", token = "", body, device = "" } = {}) {
@@ -91,7 +98,7 @@ result = await call("/api/community/admin/users", { token: env.ADMIN_TOKEN, devi
 assert.equal(result.status, 401, "ADMIN_TOKEN cũ không được cấp quyền công khai nữa");
 
 result = await call("/api/community/admin/login", { method: "POST", device: regularDid, body: { password: regularAdminPassword, device_id: regularDid, remember: true } });
-assert.equal(result.status, 200, "mật khẩu Admin thường phải cấp phiên Admin thường");
+assert.equal(result.status, 200, "mật khẩu Admin thường phải hoạt động dù Cloudflare còn cấu hình salt/hash V5-V6 cũ");
 assert.ok(result.data.token);
 assert.equal(result.data.level, "regular");
 assert.equal(result.data.primary, false);
@@ -114,7 +121,7 @@ assert.equal(result.status, 403, "Admin thường không được đọc hội t
 assert.equal(result.data.error, "owner_device_required");
 
 result = await call("/api/community/admin/login", { method: "POST", device: primaryDid1, body: { password: primaryAdminPassword, device_id: primaryDid1, remember: true } });
-assert.equal(result.status, 200, "mật khẩu Admin tổng phải cấp phiên Admin tổng");
+assert.equal(result.status, 200, "mật khẩu Admin tổng phải hoạt động dù Cloudflare còn cấu hình salt/hash V5-V6 cũ");
 assert.equal(result.data.level, "primary");
 assert.equal(result.data.primary, true);
 assert.equal(await env.KV.get("community-owner-device"), primaryDid1);
@@ -194,4 +201,4 @@ assert.equal(result.status, 401, "đăng xuất phải thu hồi JWT Admin tổn
 
 const audits = await env.KV.list({ prefix: "community-audit:" });
 assert.ok(audits.keys.length >= 7);
-console.log("Account V6 dual Admin levels, unique primary device and Account V4 edge authentication tests PASS");
+console.log("Account V7 dual Admin, legacy config isolation, unique primary device and edge authentication tests PASS");

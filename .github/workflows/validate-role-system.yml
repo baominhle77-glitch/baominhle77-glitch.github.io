@@ -16,8 +16,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
       - name: Áp dụng lớp tích hợp
-        id: integrate
-        continue-on-error: true
         run: |
           set -o pipefail
           {
@@ -27,15 +25,13 @@ jobs:
             node --check tools/apply-account-v4-edge-auth.mjs
             node --check tools/apply-admin-session-v5.mjs
             node --check tools/apply-admin-levels-v6.mjs
+            node --check tools/apply-admin-v7-login-hotfix.mjs
             node tools/apply-role-system.mjs
             node tools/apply-account-v2-runner.mjs
-            # Chỉ lớp Admin V5-V6 chạy lại; không tái sinh Account V2.
+            # Chạy lại riêng chuỗi Admin V5-V7 để xác nhận idempotent.
             node tools/apply-admin-v5-v6-runner.mjs
-          } > account-v6-apply.log 2>&1
+          } 2>&1 | tee account-v7-apply.log
       - name: Kiểm tra frontend
-        id: frontend
-        if: steps.integrate.outcome == 'success'
-        continue-on-error: true
         run: |
           set -o pipefail
           {
@@ -47,11 +43,8 @@ jobs:
             node assets/account-v2.test.mjs
             node --check boitoan/sw.js
             node boitoan/sw.test.mjs
-          } > account-v6-frontend.log 2>&1
+          } 2>&1 | tee account-v7-frontend.log
       - name: Kiểm tra Worker
-        id: worker
-        if: steps.integrate.outcome == 'success' && steps.frontend.outcome == 'success'
-        continue-on-error: true
         run: |
           set -o pipefail
           {
@@ -60,22 +53,17 @@ jobs:
             node backend/account-v2.test.mjs
             node --check backend/worker.js
             node backend/worker.test.mjs
-          } > account-v6-worker.log 2>&1
+          } 2>&1 | tee account-v7-worker.log
       - name: Lưu log chẩn đoán
-        if: always() && (steps.integrate.outcome == 'failure' || steps.frontend.outcome == 'failure' || steps.worker.outcome == 'failure')
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: account-v6-diagnostic-log
+          name: account-v7-diagnostic-log
           path: |
-            account-v6-apply.log
-            account-v6-frontend.log
-            account-v6-worker.log
+            account-v7-apply.log
+            account-v7-frontend.log
+            account-v7-worker.log
           if-no-files-found: warn
           retention-days: 3
       - name: Kết luận
-        if: always()
-        run: |
-          test "${{ steps.integrate.outcome }}" = "success"
-          test "${{ steps.frontend.outcome }}" = "success"
-          test "${{ steps.worker.outcome }}" = "success"
-          echo "Account V6 CI PASS"
+        run: echo "Account V7 CI PASS"

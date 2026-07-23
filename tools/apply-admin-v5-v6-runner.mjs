@@ -13,8 +13,13 @@ async function importRuntime(templateName) {
   }
 }
 
-await importRuntime("apply-admin-session-v5.mjs");
-await importRuntime("apply-admin-levels-v6.mjs");
+const backendPath = new URL("../backend/community.js", import.meta.url);
+const backendBefore = await readFile(backendPath, "utf8");
+if (!backendBefore.includes("/* Account V7 admin login hotfix */")) {
+  await importRuntime("apply-admin-session-v5.mjs");
+  await importRuntime("apply-admin-levels-v6.mjs");
+  await importRuntime("apply-admin-v7-login-hotfix.mjs");
+}
 
 const gatePath = new URL("../assets/gate.js", import.meta.url);
 let gate = await readFile(gatePath, "utf8");
@@ -24,7 +29,11 @@ if (gate.includes(primaryOnly)) gate = gate.replace(primaryOnly, dualLevel);
 else if (!gate.includes(dualLevel)) throw new Error("Không tìm thấy hợp đồng phiên Admin frontend");
 await writeFile(gatePath, gate, "utf8");
 
-for (const marker of ["Account V5 single admin login", "Account V6 dual admin UI", "market_admin_level", dualLevel]) {
+const backend = await readFile(backendPath, "utf8");
+for (const marker of ["Account V7 admin login hotfix", "ADMIN_V7_PASSWORD_SALT_B64", 'ADMIN_AUTH_VERSION = "2026-07-23-v7"']) {
+  if (!backend.includes(marker)) throw new Error(`Thiếu marker Admin backend: ${marker}`);
+}
+for (const marker of ["Account V5 single admin login", "Account V6 dual admin UI", "Account V7 admin login hotfix", "market_admin_level", "market_admin_auth_version", dualLevel]) {
   if (!gate.includes(marker)) throw new Error(`Thiếu marker Admin frontend: ${marker}`);
 }
-console.log("Account Admin V5-V6: đăng nhập một lần, hai cấp quyền và frontend nhận regular/primary.");
+console.log("Account Admin V5-V7: hai cấp quyền, đăng nhập sạch, xác thực phiên và idempotent trên trạng thái V7.");
