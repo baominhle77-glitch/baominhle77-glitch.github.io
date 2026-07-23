@@ -1,8 +1,9 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T10:16:00+07:00",
+  "updated_at": "2026-07-23T10:30:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -14,13 +15,11 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T09:59:00+07:00",
-      "heartbeat_at": "2026-07-23T10:16:00+07:00",
-      "summary": "Gỡ toàn bộ các hộp Khung luận Tarot/Lenormand/Bài Tây/Kinh Dịch/Tử Vi/Bát Tự và phần Kết nối toàn trải bài do lớp bổ sung tạo ra; giữ nguyên giao diện mobile đã được người dùng xác nhận đạt, branding, Cộng đồng, nút Luận giải chuyên sâu và thuật toán gốc."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T10:26:15+07:00",
+      "summary": "PR #26 merge tại 3322b7c899aeeee3d2e98e26e4cbc97931390a77 và production run 29976968849 ghi SUCCESS. Đã gỡ toàn bộ các hộp Khung luận và Kết nối toàn trải bài do lớp bổ sung tạo ra; giữ nguyên giao diện mobile được người dùng xác nhận đạt, branding, Cộng đồng, Luận giải chuyên sâu và thuật toán gốc."
+    },
     {
       "id": "DEPLOY-20260723-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -61,7 +60,7 @@
       "status": "completed",
       "started_at": "2026-07-23T04:55:00+07:00",
       "completed_at": "2026-07-23T05:16:00+07:00",
-      "summary": "Source UI mobile và branding Cái Chợ của Hiên Nhi đã qua CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; các khung luận bổ sung sau đó bị người dùng đánh giá không hữu ích và được xử lý trong BOITOAN-20260723-04."
+      "summary": "Source UI mobile và branding Cái Chợ của Hiên Nhi đã qua CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; các khung luận bổ sung sau đó bị người dùng đánh giá không hữu ích và đã được gỡ trong BOITOAN-20260723-04."
     },
     {
       "id": "COORD-20260723-01",
