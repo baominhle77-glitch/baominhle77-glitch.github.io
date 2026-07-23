@@ -11,14 +11,43 @@
 ## Trạng thái mật khẩu và hạ tầng
 
 - **SPARE** (`/`) dùng mật khẩu riêng.
-- **Bói toán** (`/boitoan/`) và **MEDORA** (`/medora/`) dùng chung mật khẩu Admin hiện hành.
-- Giá trị mật khẩu không lưu trong repository; không commit `*.src.html`.
+- **Bói toán** (`/boitoan/`) có hai cấp Admin được backend phân loại bằng hai mật khẩu khác nhau; chỉ lưu PBKDF2 hash + salt, không lưu plaintext.
+- **MEDORA** (`/medora/`) giữ cơ chế truy cập riêng hiện hành.
+- Không commit `*.src.html`, mật khẩu, token hoặc secret.
 - Production frontend: `hiennhi89.pages.dev`.
 - Backend: `hiennhi89-gate.hiennhi89.workers.dev`.
 
 ---
 
 ## Nhật ký thay đổi — mới nhất trên cùng
+
+### 2026-07-23 19:33 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-10 — HOÀN TẤT ✅
+
+- Sửa dứt điểm lỗi xác thực hai lớp: người dùng chỉ đăng nhập **một lần** tại cùng mục `Admin`, backend nhận diện mật khẩu và cấp JWT gắn đúng `device_id`; trang Quản trị không hỏi mật khẩu lần hai.
+- Phân cấp:
+  - `regular` — Admin thường: quản lý, khóa/mở khóa và xóa member; xóa review; tạo, đóng, mở lại và xóa bài thảo luận chung.
+  - `primary` — Admin tổng: toàn bộ quyền Admin thường, cộng quyền xem danh sách/nội dung hội thoại riêng và mở trang cá nhân member ở chế độ impersonation chỉ đọc.
+- Backend cưỡng chế quyền độc lập với UI:
+  - Admin thường gọi API hội thoại hoặc impersonation nhận `403 owner_device_required`;
+  - JWT Admin chỉ dùng được trên đúng thiết bị đã đăng nhập;
+  - chỉ một phiên/thiết bị Admin tổng hoạt động; đăng nhập primary trên thiết bị mới thu hồi primary cũ nhưng không thu hồi các phiên regular.
+- `ADMIN_TOKEN` cũ không còn được chấp nhận tại Community API.
+- Hai mật khẩu chỉ tồn tại dưới dạng PBKDF2-SHA256 hash + salt; không có plaintext trong source, test, log hoặc handover.
+- Frontend lưu `market_admin_token` và cấp quyền do server trả về; Admin thường không thấy tab Hội thoại/nút `Xem trang cá nhân`, Admin tổng thấy đầy đủ.
+- Cache Bói toán tăng `boitoan-v14` để Safari/iPhone nhận asset mới.
+- PR #64 merge Account V6 thành `f5ac80b72005e1bc9f2d934ca4ffbdb57ec427a8`.
+- CI cuối trước merge:
+  - coordination `30005276397`: success;
+  - Account V6/frontend/Worker `30005276313`: success.
+- Production run `30007344122`:
+  - Cloudflare Pages: success;
+  - Worker: success;
+  - hậu kiểm production Account V6/Travel/MEDORA: success;
+  - trang Quản trị có badge cấp quyền, không còn form mật khẩu lần hai;
+  - gate production có endpoint Admin login V6;
+  - API phiên Admin không token trả `401 unauthorized`.
+- Recorder ghi production `SUCCESS` tại source `b5ed52305192455d161c3e22934e3aeaada61eb3`; workflow gốc chỉ từng báo failure do bước ghi file trạng thái cũ sau khi deployment và smoke test đã đạt.
+- Task chuyển `completed`; toàn bộ khóa điều phối đã giải phóng.
 
 ### 2026-07-23 18:54 GMT+7 — ChatGPT GPT-5.6 — TRAVEL-20260723-01 — HOÀN TẤT ✅
 
