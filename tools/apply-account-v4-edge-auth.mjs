@@ -90,13 +90,29 @@ async function verifyPassword(env, password, record) {
   catch (_) { return json({ error: "login_session_stage" }, 500); }`;
   source = replaceRequired(source, oldLoginStage, newLoginStage, "mã lỗi pha đăng nhập an toàn");
 
-  source = source.replace("\nexport async function handleCommunity", "\n/* Account V4 edge authentication */\nexport async function handleCommunity");
+  const dispatchPairs = [
+    ['return handleRegister(request, env);', 'return await handleRegister(request, env);'],
+    ['return handleLogin(request, env);', 'return await handleLogin(request, env);'],
+    ['return handleMe(request, env);', 'return await handleMe(request, env);'],
+    ['return handleReaders(request, env, path);', 'return await handleReaders(request, env, path);'],
+    ['return handleConversations(request, env, path);', 'return await handleConversations(request, env, path);'],
+    ['return handlePosts(request, env, path);', 'return await handlePosts(request, env, path);'],
+    ['return handleAdmin(request, env, path);', 'return await handleAdmin(request, env, path);'],
+  ];
+  for (const [before, after] of dispatchPairs) {
+    if (source.includes(before)) source = source.replaceAll(before, after);
+  }
+  if (!source.includes('return await handleRegister(request, env);') || !source.includes('return await handleLogin(request, env);')) {
+    throw new Error("Dispatcher chưa await register/login");
+  }
+
+  source = source.replace("\nexport async function handleCommunity", "\n/* Account V4 edge authentication */\n/* Account V4 awaited dispatcher */\nexport async function handleCommunity");
   return source;
 });
 
 const backend = await readFile("backend/community.js", "utf8");
-for (const marker of ["Account V4 edge authentication", "hmac-sha256-v1", "edgePasswordHash", "register_account_stage", "register_session_stage", "login_account_stage", "login_session_stage"]) {
+for (const marker of ["Account V4 edge authentication", "Account V4 awaited dispatcher", "hmac-sha256-v1", "edgePasswordHash", "register_account_stage", "register_session_stage", "login_account_stage", "login_session_stage", "return await handleRegister", "return await handleLogin"]) {
   if (!backend.includes(marker)) throw new Error(`Thiếu marker Account V4: ${marker}`);
 }
 if (backend.includes("const iterations = 210000;\n  return { salt: b64url(salt), iterations")) throw new Error("Tài khoản mới vẫn đang dùng PBKDF2 210000 vòng");
-console.log("Account V4: HMAC-SHA256 salt + pepper cho tài khoản mới, legacy PBKDF2 read-only, limiter fail-open.");
+console.log("Account V4: xác thực edge, limiter fail-open và dispatcher await để bắt rejection đúng lớp.");
