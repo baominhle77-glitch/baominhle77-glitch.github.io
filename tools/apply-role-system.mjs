@@ -75,7 +75,6 @@ await edit("assets/gate.js", (source) => {
     if (!window.__marketBrandObserver) {
       window.__marketBrandObserver = new MutationObserver(function () {
         injectCommunity();
-        addMarketGuides();
       });
       window.__marketBrandObserver.observe(document.getElementById("gate-content") || document.body, { childList: true, subtree: true });
     }
