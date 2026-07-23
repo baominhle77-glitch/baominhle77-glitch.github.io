@@ -18,16 +18,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout source đã deploy
+      - name: Checkout main để ghi trạng thái
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-          fetch-depth: 1
+          ref: main
+          fetch-depth: 0
 
       - name: Xác định có chạy E2E không
         id: marker
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          subject=$(git log -1 --format=%s)
+          subject=$(git show -s --format=%s "$SOURCE_SHA")
           if [[ "$subject" == *"Reader production verification"* ]]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
