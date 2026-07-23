@@ -1,25 +1,23 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T23:50:00+07:00",
+  "updated_at": "2026-07-24T00:00:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-13",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-13-production-proof",
-      "base_sha": "6e9b024cac0c575818851767cd34983e1e150895",
+      "branch": "agent/BOITOAN-20260723-13-closeout",
+      "base_sha": "2751597b8869fdb2152431546391383cf82f3b22",
       "paths": [
-        ".github/workflows/verify-admin-v9-return.yml",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/ADMIN_V9_RETURN_STATUS.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T23:22:00+07:00",
-      "heartbeat_at": "2026-07-23T23:50:00+07:00",
-      "summary": "Runtime Admin V9 đã merge tại 27e6a4de và deploy run 30026591180 có Pages/Worker/smoke success. Verifier hậu kiểm chưa ghi status, nên chuyển sang workflow luôn ghi SUCCESS/FAILURE cho từng pha static production và WebKit, đồng thời tự chạy trên push để có bằng chứng chẩn đoán bền vững trước khi yêu cầu người dùng nghiệm thu lại."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-24T00:00:00+07:00",
+      "summary": "Clip iPhone xác nhận nút ← Bói toán từ Khu vực quản trị rơi về màn chọn tài khoản. Lỗi gốc: link cũ chỉ trỏ ./ và gate chỉ xét gate_ok/gate_remember trước khi dựng cổng, không dùng JWT Admin còn hợp lệ. Admin V9 đổi link sang ?admin_return=1, xác minh market_admin_token qua /api/community/admin/session trước khi dựng cổng, mở thẳng app bằng reveal(admin-return) khi token hợp lệ; chỉ xóa phiên và hiện cổng khi token không hợp lệ. Cache v17. CI 30026525523/30026525436 success; runtime merge 27e6a4de; deploy 30026591180 success; production proof source a6d73bae, verifier 30027374756 success với Gate/Admin/SW 200/200/200 và WebKit success."
+    },
     {
       "id": "BOITOAN-20260723-12",
       "owner": "ChatGPT GPT-5.6 Thinking",
