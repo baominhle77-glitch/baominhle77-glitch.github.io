@@ -1,33 +1,23 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T20:18:00+07:00",
+  "updated_at": "2026-07-23T20:23:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-11",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-11-admin-login-hotfix",
-      "base_sha": "6e0a9d85b4b0e8af93fb2452da5103415fd2cb41",
+      "branch": "agent/BOITOAN-20260723-11-closeout",
+      "base_sha": "c25ac673396d6d52b5724abe8394f99747fceb4e",
       "paths": [
-        ".github/workflows/validate-role-system.yml",
-        "assets/account-v2.test.mjs",
-        "backend/account-v2.test.mjs",
-        "backend/community.test.mjs",
-        "boitoan/sw.js",
-        "boitoan/sw.test.mjs",
-        "tools/apply-admin-v5-v6-runner.mjs",
-        "tools/apply-admin-v7-login-hotfix.mjs",
         "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
+        "docs/handover/BOITOAN_ADMIN_V7.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T19:53:00+07:00",
-      "heartbeat_at": "2026-07-23T20:18:00+07:00",
-      "summary": "Người dùng nghiệm thu iPhone: link tự khôi phục phiên Admin cũ, bấm Khóa không xóa hết market_admin_*, mật khẩu Admin tổng bị backend báo sai và trang Quản trị mở rồi bị trả về app do token/cấp quyền không đồng nhất. Hotfix V7 tách namespace salt/hash khỏi cấu hình V5-V6 cũ trên Cloudflare, xóa và thu hồi phiên cũ trước đăng nhập, kiểm tra auth version/server trước khi hiện Admin, ẩn UI quản trị trước xác thực và tăng cache Bói toán v15. Build/frontend đã đạt; đang cập nhật fixture Community sang namespace V7 để chạy toàn bộ Worker test."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T20:23:00+07:00",
+      "summary": "Hoàn tất hotfix Admin V7 theo nghiệm thu iPhone. Tách namespace ADMIN_V7_* để salt/hash cũ trên Cloudflare không thể làm mật khẩu đúng bị từ chối; auth version V7 vô hiệu phiên cũ; đăng nhập mới và nút Khóa đều xóa/thu hồi JWT cũ; app chính xác nhận phiên với backend trước khi hiện Admin; trang Quản trị ẩn UI đến khi server xác nhận; cache Bói toán v15. CI coordination 30010743764 và Account build/frontend/Worker 30010743857 success. Merge abe06500; deploy 30010842776 có Pages/Worker/smoke success; recorder c25ac673."
+    },
     {
       "id": "BOITOAN-20260723-10",
       "owner": "ChatGPT GPT-5.6 Thinking",
