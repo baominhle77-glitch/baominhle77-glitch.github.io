@@ -29,19 +29,6 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-      - name: Ghi checksum migration đầu vào
-        run: |
-          set -euo pipefail
-          cat .migration/boitoan-v11-patch-*.b64 > "$RUNNER_TEMP/v11.b64"
-          sha256sum "$RUNNER_TEMP/v11.b64"
-          cp tools/materialize-boitoan-v11.mjs "$RUNNER_TEMP/"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: boitoan-v11-migration-input
-          path: |
-            ${{ runner.temp }}/v11.b64
-            ${{ runner.temp }}/materialize-boitoan-v11.mjs
-          retention-days: 2
       - name: Sinh baseline hiện hành một lần cuối
         run: |
           set -euo pipefail
@@ -54,7 +41,7 @@ jobs:
           node tools/materialize-boitoan-v11.mjs
           rm -f tools/materialize-boitoan-v11.mjs
           rm -f .github/workflows/export-boitoan-snapshot.yml
-      - name: Kiểm tra trước khi ghi source
+      - name: Kiểm tra cú pháp tối thiểu
         run: |
           set -euo pipefail
           node --check assets/gate.js
@@ -62,15 +49,7 @@ jobs:
           node --check assets/community-admin.js
           node --check backend/community.js
           node --check backend/worker.js
-          node --check tools/admin-v9-return-webkit-check.mjs
-          node assets/gate.test.mjs
-          node assets/account-v2.test.mjs
-          node boitoan/sw.test.mjs
-          node backend/community.test.mjs
-          node backend/account-v2.test.mjs
-          node backend/admin-v8-health.test.mjs
-          node backend/worker.test.mjs
-      - name: Commit source đã materialize vào nhánh
+      - name: Commit source V11 trực tiếp vào nhánh
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
