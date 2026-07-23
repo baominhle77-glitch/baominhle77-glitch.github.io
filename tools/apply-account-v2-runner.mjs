@@ -5,10 +5,13 @@ const templatePath = new URL("./apply-account-v2.mjs", import.meta.url);
 const runtimePath = new URL(`./.apply-account-v2-runtime-${process.pid}.mjs`, import.meta.url);
 
 let source = await readFile(templatePath, "utf8");
-const unsafe = 'await adminAudit(env, request, "review_deleted", `${readerId}:${authorId}`);';
-const safe = 'await adminAudit(env, request, "review_deleted", \\`\\${readerId}:\\${authorId}\\`);';
-if (!source.includes(unsafe)) throw new Error("Không tìm thấy điểm sửa template review audit");
-source = source.replace(unsafe, safe);
+const unsafeReviewAudit = 'await adminAudit(env, request, "review_deleted", `${readerId}:${authorId}`);';
+const safeReviewAudit = 'await adminAudit(env, request, "review_deleted", \\`\\${readerId}:\\${authorId}\\`);';
+const unsafeAdminName = 'cell(r,user.username+"\\n"+user.display_name);';
+const safeAdminName = 'cell(r,user.username+"\\\\n"+user.display_name);';
+if (!source.includes(unsafeReviewAudit)) throw new Error("Không tìm thấy điểm sửa template review audit");
+if (!source.includes(unsafeAdminName)) throw new Error("Không tìm thấy điểm sửa xuống dòng tên Admin");
+source = source.replace(unsafeReviewAudit, safeReviewAudit).replace(unsafeAdminName, safeAdminName);
 
 await writeFile(runtimePath, source, "utf8");
 try {
