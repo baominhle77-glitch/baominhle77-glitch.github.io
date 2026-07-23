@@ -1,207 +1,168 @@
-# Bàn giao hệ thống ba webapp
+# Bàn giao hệ thống bốn webapp
 
 > **Mọi agent phải đọc `AGENTS.md` trước file này.** Sau đó đọc `docs/handover/ACTIVE_TASKS.json` và `docs/handover/NHAT-KY-PHOI-HOP.md` trước khi sửa.
 
-**Cập nhật:** 23/07/2026 16:47 (GMT+7)  
-**Source ứng dụng đã deploy:** `bc8016a23c342ff93416003293148c06263242f8`  
-**Commit ghi trạng thái production:** `b29e3ca66ee1da27631d881be34086ad4e3ac2d5`  
-**Commit ghi E2E Reader + WebKit:** `1768f2c073571f51de9ba550a84786ba7b75573c`  
-**Task đang hoạt động:** không có.  
-**Production:** `SUCCESS`.  
-**Reader + WebKit production E2E:** `SUCCESS — 201/200/200/200/200/401/401`.
+**Cập nhật:** 23/07/2026 18:54 (GMT+7)  
+**Repository chuẩn:** `baominhle77-glitch/baominhle77-glitch.github.io`  
+**Source Vietnam Travel:** `b3a29cbda57621e1c946fbdd128678bbf3949737`  
+**Deploy Vietnam Travel:** workflow run `30004472078`  
+**Task đang hoạt động:** không có  
+**Production:** `SUCCESS`
 
 ## Nguyên tắc độ tin cậy bắt buộc
 
 - Không tuyên bố source hoặc production hoàn tất nếu chưa có log/test/nghiệm thu tương ứng.
 - Khi chưa đủ dữ liệu, ghi rõ **chưa xác lập/chưa đủ chứng cứ**.
-- Không đưa mật khẩu, token, IP đầy đủ, mã thiết bị cá nhân, QR, chat hoặc secret vào repository.
+- Không đưa mật khẩu, token, Telegram Chat ID, IP đầy đủ, mã thiết bị cá nhân, QR, chat hoặc secret vào repository.
+- Không sửa trực tiếp `main`; dùng Task-ID, branch, PR, CI và file bàn giao.
 
 ---
 
 ## 1. Webapp và production
 
-| App | Nguồn | Production |
+| App | Source | Production |
 |---|---|---|
-| Bói toán / Spirituality Market | `boitoan/`, `assets/`, `backend/` | `https://hiennhi89.pages.dev/boitoan/` |
 | SPARE | root | `https://hiennhi89.pages.dev/` |
+| Bói toán / Spirituality Market | `boitoan/`, `assets/`, `backend/` | `https://hiennhi89.pages.dev/boitoan/` |
 | MEDORA | `medora/` | `https://hiennhi89.pages.dev/medora/` |
+| Việt Nam Đi Đâu? | `vietnam-travel/`, `backend/travel.js` | `https://hiennhi89.pages.dev/vietnam-travel/` |
 
-Repository `baominhle77-glitch/baominhle77-glitch.github.io` là nguồn chuẩn duy nhất.
-
-### Bằng chứng production gần nhất
-
-`docs/handover/PRODUCTION_STATUS.md` cho source `bc8016a23c342ff93416003293148c06263242f8`:
-
-- workflow deploy `29996510949`: success;
-- Cloudflare Pages `200`;
-- trang Admin `200`;
-- Community CSS `200`;
-- Gate runtime JS `200`;
-- Worker/API thảo luận không phiên `401 unauthorized`, đúng kỳ vọng;
-- onboarding payload sai `400 invalid_account`;
-- thứ tự deploy: Pages trước, Worker sau.
-
-`docs/handover/READER_E2E_STATUS.md` ghi workflow `29996558091`: success:
-
-| Bước | HTTP/kết quả |
-|---|---:|
-| Đăng ký Reader thật | `201` |
-| Đăng nhập từ thiết bị/nền tảng thứ hai | `200` |
-| Đọc `/api/community/me` | `200` |
-| WebKit gate production | `200` |
-| Tự xóa tài khoản thử | `200` |
-| Dùng lại token cũ | `401` |
-| Đăng nhập lại sau xóa | `401 invalid_login` |
-
-Mã lỗi: `none`. Tài khoản thử `e2e_reader_*` đã tự xóa trong cùng workflow.
+Backend dùng chung: `https://hiennhi89-gate.hiennhi89.workers.dev`.
 
 ---
 
-## 2. `BOITOAN-20260723-09` — WebKit/iPhone crash loop
+## 2. Vietnam Travel — `TRAVEL-20260723-01`
 
-### Triệu chứng người dùng xác nhận
+### Chức năng đã triển khai
 
-Safari/WebKit trên iPhone hiển thị: trang `/boitoan/` gặp sự cố liên tục và không thể mở.
+- PWA công khai, responsive, tối ưu điện thoại/iPhone.
+- Tìm kiếm không dấu, lọc theo vùng và loại hình, sắp xếp.
+- Lưu yêu thích bằng `localStorage`.
+- Trang chi tiết, bản đồ, nguồn tham khảo và chia sẻ.
+- Seed 20 địa điểm nổi tiếng/đặc thù của Việt Nam.
+- API công khai chỉ đọc tại `/api/travel/*`.
+- Dữ liệu lưu trong Cloudflare Workers KV, khóa `travel:places:v1`.
 
-### Lỗi gốc
+### Điều khiển bằng Telegram Bot hiện có
 
-- `applyMarketBranding()` tạo `MutationObserver` theo dõi `childList`.
-- Observer gọi `injectCommunity()` sau mỗi mutation.
-- Bản Account V3 từng gán `textContent` nhãn `Cộng đồng/Quản trị` vô điều kiện.
-- Gán `textContent` tự tạo child-list mutation mới, observer lại gọi hàm, tạo vòng lặp vô hạn và làm tab WebKit sập.
+- `/travel`, `/dulich`, `/diadiem`: hướng dẫn.
+- `/ds`: danh sách.
+- `/xem <id>`: xem chi tiết.
+- `/them`: thêm địa điểm bằng các dòng trường.
+- `/sua <id>`: sửa.
+- `/an <id>`, `/hien <id>`: ẩn/hiện trên web.
+- `/xoa <id>`: xóa sau nút xác nhận.
+- `/thongke`: thống kê.
 
-### Runtime đã sửa
+Bot chỉ xử lý mutation khi cả `chat.id` và `from.id` khớp `TELEGRAM_CHAT_ID`. Webhook chung vẫn xác thực `X-Telegram-Bot-Api-Secret-Token`.
 
-`injectCommunity()` hiện idempotent:
+### Bảo mật và dữ liệu
 
-- chỉ đổi `href` nếu khác;
-- chỉ đổi `textContent` nếu nhãn khác;
-- chỉ đổi `aria-label` nếu khác;
-- chỉ thêm body class nếu chưa có;
-- vẫn giữ đúng một link Cộng đồng/Quản trị.
+- Không lưu bot token, webhook secret hoặc Telegram ID dạng giá trị trong source.
+- URL nhập qua bot chỉ nhận `https://` và không nhận credential trong URL.
+- API chỉ trả bản ghi `published=true`.
+- Dữ liệu hỏng được sao lưu tạm 7 ngày dưới khóa `travel:places:v1:corrupt:*`, sau đó khôi phục seed.
+- Giới hạn phiên bản KV hiện tại: 1.000 địa điểm.
 
-Marker production: `Account V3 iOS mutation guard`.
+### Bằng chứng source và test
 
-PR #43 merge runtime guard thành `4c4fa6911637ff6da5e2cf4da986f496d06ca8e3`.
+- Source materialize trên `main`: `b3a29cbda57621e1c946fbdd128678bbf3949737`.
+- SHA-256 archive: `1511d9f80024a4a495e955e88680b4400a3d20973afd530edcb509457dbcad30` — đạt.
+- Log: `docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log`.
+- Unit test: `5/5` đạt.
+- Đã test parser tiếng Việt, seed/public filter, quyền chủ bot, thêm/sửa/ẩn/hiện/xóa, lọc vùng/danh mục.
+- Syntax check backend, frontend, service worker, seed và tool tích hợp: đạt.
 
-### WebKit checker
+### Bằng chứng Cloudflare production
 
-`tools/webkit-production-check.mjs`:
+Workflow `Deploy Vietnam Travel qua PR kiểm soát`, run `30004472078`: `SUCCESS`.
 
-1. mở HTML/CSS/JS production thật trong context WebKit iPhone sạch và theo dõi page crash;
-2. tạo document plaintext tối thiểu cùng origin bằng route fulfill;
-3. nạp đúng `/assets/gate.js` và `/assets/gate.css` production;
-4. kích hoạt phiên Reader, `applyMarketBranding`, `MutationObserver` và `injectCommunity`;
-5. yêu cầu đúng một `#gate-community-link`, nhãn đúng, tổng mutation hữu hạn và mutation delta ổn định;
-6. xác nhận asset production có marker iOS guard;
-7. ghi lỗi cụ thể qua `WEBKIT_E2E_ERROR` nếu thất bại.
+Các bước đều success:
 
-Script không phụ thuộc `DECRYPT_KEY` hoặc login key, được `node --check` ở PR CI và ngay trước production run.
+1. Kiểm tra Cloudflare deploy token và Worker secrets, gồm Telegram.
+2. Tích hợp Travel vào Worker và chạy test source/Worker.
+3. Build SPARE + Bói toán + MEDORA + Vietnam Travel.
+4. Deploy Cloudflare Pages.
+5. Deploy Cloudflare Worker.
+6. Hậu kiểm production.
 
-PR #45 merge checker cuối thành source `bc8016a23c342ff93416003293148c06263242f8`.
+Smoke test đạt:
 
-### Bằng chứng
+- Vietnam Travel `200`, đúng tiêu đề `Việt Nam Đi Đâu?`.
+- `/api/travel/health` `200`, service `vietnam-travel`.
+- `/api/travel/places` `200`, có seed `vinh-ha-long`.
+- SPARE `200`.
+- Bói toán `200`, đúng marker `Spirituality Market`.
+- MEDORA `200`.
 
-- Account/frontend/Worker CI `29996444259`: success;
-- coordination guard `29996444031`: success;
-- production deploy `29996510949`: success;
-- WebKit production E2E `29996558091`: success;
-- WebKit không crash, DOM contract đạt, mutation ổn định.
+### Nghiệm thu Telegram còn lại
 
----
+Chủ bot gửi `/travel` trong Telegram và kiểm bot trả hướng dẫn. Đây là thao tác hội thoại thực tế không tự động gửi thay người dùng trong CI.
 
-## 3. `BOITOAN-20260723-08` — Hotfix Admin và Reader đa nền tảng
-
-### Lối quản trị Admin
-
-- Badge Admin là liên kết cảm ứng tới `community-admin.html`.
-- Nhãn hiển thị `Admin · Mở quản trị` hoặc `Admin tổng · Mở quản trị`.
-- Bottom navigation đổi mục `Cộng đồng` thành `Quản trị` khi đang ở phiên Admin.
-- Trang quản trị có danh sách member, khóa/mở khóa/xóa member, `Xem trang cá nhân`, xóa review, quản lý bài thảo luận và đọc hội thoại riêng trên đúng thiết bị Admin tổng.
-
-### Contract đăng ký/đăng nhập
-
-- Public entry không phụ thuộc `DECRYPT_KEY` khi trang plaintext.
-- Đăng ký/đăng nhập thành công trả community token, gate token và profile.
-- `key` chỉ được trả khi thực sự có secret/payload mã hóa.
-- Kiểm tra `SESSION_SECRET` diễn ra trước khi tạo account.
-
-### Account V4
-
-- Account mới dùng HMAC-SHA256 với salt riêng và pepper phía server từ `SESSION_SECRET`.
-- Không lưu mật khẩu plaintext hoặc pepper trong KV/source.
-- Verify PBKDF2 cũ vẫn được giữ để tương thích dữ liệu cũ.
-- PUBLIC_RATE_LIMITER là best-effort; lỗi binding không làm hỏng đăng ký hợp lệ.
-- Dispatcher dùng `return await ...` để bắt rejection bất đồng bộ đúng lớp.
-
-### Tự xóa và thu hồi phiên
-
-`DELETE /api/community/me` xóa login, profile, Reader index, device mapping, community session và gate session. Token impersonation bị chặn bằng `read_only_impersonation`.
+Tài liệu chi tiết: `docs/handover/VIETNAM_TRAVEL.md`.
 
 ---
 
-## 4. Admin tổng xem Trang cá nhân member
+## 3. Bói toán / Spirituality Market — trạng thái chính
 
-- Danh sách tài khoản Admin có nút **`Xem trang cá nhân`**.
-- URL dùng `admin_view=profile`.
-- Token `mode=impersonation` mở thẳng `renderProfile()`.
-- Hồ sơ hiển thị tên đăng nhập, tên hiển thị, vai trò, giới thiệu; Reader còn có chuyên môn và dữ liệu nhận phí/QR nếu có.
-- Toàn bộ trường bị khóa, ghi rõ `Chế độ chỉ đọc`.
-- Có `Quay lại Admin` và `← Quay lại khu vực Admin`.
+### WebKit/iPhone crash loop
 
----
+- Lỗi gốc: `MutationObserver` gọi `injectCommunity()`; bản cũ gán `textContent` vô điều kiện, tự tạo mutation mới và lặp vô hạn.
+- Runtime hiện idempotent; marker production `Account V3 iOS mutation guard`.
+- Source checker: `bc8016a23c342ff93416003293148c06263242f8`.
+- Production deploy `29996510949`: success.
+- WebKit production E2E `29996558091`: success; register/login/me/WebKit/delete/token revoked/relogin = `201/200/200/200/200/401/401`.
 
-## 5. Account V2 và vai trò
+### Admin và Reader
 
-- Màn đầu chỉ có `Đăng nhập`, `Đăng ký`, `Admin`; chọn xong mới mở form riêng.
-- Đăng ký chọn `Khách` hoặc `Reader / Người xem bói`.
-- Checkbox/radio trên iPhone dùng kích thước native.
-- Khách: danh sách Reader, chat, review, thảo luận, trang cá nhân.
-- Reader: khách hàng/hội thoại, hồ sơ chuyên môn, nhận phí, thảo luận, trang cá nhân.
-- Badge vai trò: `Khách`, `Reader / Người xem bói`, `Admin`, `Admin tổng`.
-
----
-
-## 6. Runtime và build
-
-Các file chính:
-
-- `tools/apply-role-system.mjs` — lớp tài khoản nền;
-- `tools/apply-account-v2.mjs` — template Account V2;
-- `tools/apply-account-v2-runner.mjs` — runner build;
-- `tools/apply-account-v2-profile-view.mjs` — Admin mở hồ sơ member;
-- `tools/apply-account-v3-hotfix.mjs` — public entry, Admin navigation, self-delete/session cleanup, iOS mutation guard;
-- `tools/apply-account-v4-edge-auth.mjs` — HMAC account mới, limiter fail-open, dispatcher await;
-- `tools/webkit-production-check.mjs` — nghiệm thu WebKit production;
-- `assets/gate.js`, `assets/gate.css` — gate/onboarding/Admin navigation;
-- `assets/community.js`, `assets/community-admin.js`, `assets/community.css` — giao diện member/Admin;
-- `backend/community.js` — account, Reader, review, chat, post, Admin, audit;
-- `.github/workflows/validate-role-system.yml` — CI PR;
-- `.github/workflows/deploy-pages.yml` — build/test/deploy/smoke;
-- `.github/workflows/e2e-reader-production.yml` — Reader + WebKit E2E thật sau deploy.
-
-Các lớp V3/V4 phải idempotent; CI chạy lặp để bắt lỗi nhân đôi mã.
+- Badge Admin/Admin tổng mở trực tiếp trang quản trị.
+- Bottom navigation đổi `Cộng đồng` thành `Quản trị` khi có quyền.
+- Admin tổng xem hồ sơ member ở chế độ chỉ đọc.
+- Public entry không phụ thuộc khóa giải mã khi trang plaintext.
+- Account mới dùng HMAC-SHA256 với salt riêng và pepper phía server.
+- Reader có thể tự xóa tài khoản; token cũ bị thu hồi.
 
 ---
 
-## 7. Dữ liệu và bảo mật
+## 4. Runtime và build
 
-- Community session tối đa 30 ngày; chat giữ tối đa 30 ngày.
-- Reader bị cấm chèn đường dẫn vào hồ sơ/thông tin nhận phí.
-- Review 1–5 sao; Khách gỡ review của mình, Admin gỡ được, Reader không gỡ được.
-- Dữ liệu “thiết bị” là hồ sơ trình duyệt best-effort, không chứng minh chắc chắn thiết bị vật lý.
-- Không hardcode mật khẩu Admin, IP hoặc mã thiết bị chủ vào source.
+### Travel
+
+- `vietnam-travel/index.html`
+- `vietnam-travel/app.css`
+- `vietnam-travel/app.js`
+- `vietnam-travel/data/seed-places.js`
+- `vietnam-travel/manifest.webmanifest`
+- `vietnam-travel/sw.js`
+- `backend/travel.js`
+- `backend/travel.test.mjs`
+- `tools/apply-travel-system.mjs`
+- `.github/workflows/materialize-vietnam-travel-v2.yml`
+- `.github/workflows/deploy-vietnam-travel-pr.yml`
+
+### Account/Bói toán
+
+- `tools/apply-role-system.mjs`
+- `tools/apply-account-v2-runner.mjs`
+- `tools/apply-account-v3-hotfix.mjs`
+- `tools/apply-account-v4-edge-auth.mjs`
+- `tools/webkit-production-check.mjs`
+- `assets/gate.js`, `assets/gate.css`
+- `assets/community.js`, `assets/community-admin.js`, `assets/community.css`
+- `backend/community.js`
+
+Các lớp tích hợp phải idempotent; CI phải bắt lỗi nhân đôi mã.
 
 ---
 
-## 8. Trạng thái cuối
+## 5. Trạng thái cuối
 
-- Lỗi WebKit/iPhone crash loop: **đã sửa và nghiệm thu bằng WebKit production**.
-- Lối quản trị Admin trên app chính: **đã deploy**.
-- Reader đăng ký đa nền tảng: **đã nghiệm thu production thật**.
-- Admin tổng xem Trang cá nhân member: **đã deploy**.
-- Cloudflare production: **SUCCESS**.
-- Reader + WebKit production E2E: **SUCCESS**.
+- Vietnam Travel source: **đã có trên `main`**.
+- Vietnam Travel Cloudflare Pages + Worker: **đã deploy và smoke test thành công**.
+- Điều khiển Travel qua Telegram: **đã tích hợp, test quyền/lệnh; chờ chủ bot gửi `/travel` để nghiệm thu hội thoại trực tiếp**.
+- Bói toán WebKit/iPhone crash loop: **đã sửa và nghiệm thu**.
+- Reader/Admin đa nền tảng: **đã nghiệm thu production**.
+- SPARE, Bói toán, MEDORA: **không bị regression trong smoke Travel**.
 - Active task: **không có**.
 - Khóa file: **đã giải phóng**.
 - Đóng gói App Store/Google Play: chưa hoàn tất.
