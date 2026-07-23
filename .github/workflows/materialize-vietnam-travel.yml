@@ -3,6 +3,7 @@ name: Materialize Vietnam Travel source
 on:
   push:
     branches:
+      - main
       - agent/TRAVEL-20260723-01-telegram-webapp
     paths:
       - ".travel-bundle/**"
@@ -47,7 +48,7 @@ jobs:
           node --check vietnam-travel/data/seed-places.js
           node -e "JSON.parse(require('node:fs').readFileSync('vietnam-travel/manifest.webmanifest','utf8'))"
 
-      - name: Commit source thật vào branch
+      - name: Commit source thật vào nhánh hiện tại
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
