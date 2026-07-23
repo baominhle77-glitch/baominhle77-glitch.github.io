@@ -20,6 +20,23 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-23 18:54 GMT+7 — ChatGPT GPT-5.6 — TRAVEL-20260723-01 — HOÀN TẤT ✅
+
+- Hoàn tất PWA **Việt Nam Đi Đâu?** tại `/vietnam-travel/`, tối ưu điện thoại/iPhone.
+- Tính năng công khai: tìm kiếm không dấu, lọc vùng/loại hình, sắp xếp, lưu yêu thích, chi tiết, bản đồ, nguồn và chia sẻ.
+- Seed gồm 20 địa điểm nổi tiếng/đặc thù của Việt Nam.
+- Backend dùng Worker hiện có, route `/api/travel/*`; dữ liệu trong Cloudflare Workers KV khóa `travel:places:v1`.
+- Telegram Bot hiện có điều khiển thêm, sửa, ẩn, hiện, xóa có xác nhận, xem danh sách/chi tiết và thống kê.
+- Quyền Telegram kiểm tra đồng thời `chat.id` và `from.id` phải khớp `TELEGRAM_CHAT_ID`; source không chứa token, Chat ID hoặc secret.
+- Source được materialize trên `main` tại `b3a29cbda57621e1c946fbdd128678bbf3949737`.
+- SHA-256 archive đạt; log `docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log`.
+- Unit test Travel `5/5` đạt: parser tiếng Việt; seed/public filter; quyền chủ bot; thêm/sửa/ẩn/hiện/xóa; lọc vùng/danh mục.
+- Deploy kiểm soát Cloudflare run `30004472078`: success toàn bộ secret check, tích hợp Worker, test, build, Pages, Worker và hậu kiểm production.
+- Smoke production đạt: Travel `200`, health API `200`, places API `200` có `vinh-ha-long`, SPARE `200`, Bói toán `200` đúng `Spirituality Market`, MEDORA `200`.
+- PR kích hoạt deploy #58 đã đóng không merge để không đưa marker tạm vào `main`.
+- Task chuyển `completed`; khóa file đã giải phóng.
+- Nghiệm thu hội thoại trực tiếp còn một thao tác thủ công của chủ bot: gửi `/travel` trong Telegram và kiểm bot trả hướng dẫn.
+
 ### 2026-07-23 16:47 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-09 — HOÀN TẤT ✅
 
 - Người dùng mở `/boitoan/` trên iPhone lúc 16:07 và WebKit báo trang gặp sự cố liên tục.
