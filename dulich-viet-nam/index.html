@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b5d48">
+  <meta name="description" content="Kho dữ liệu địa điểm du lịch nổi tiếng và đặc trưng của Việt Nam, có tìm kiếm theo tỉnh thành, vùng miền và loại hình.">
+  <meta name="robots" content="index,follow">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <title>Việt Nam Đi Đâu? — Kho địa điểm du lịch Việt Nam</title>
+</head>
+<body>
+  <a class="skip-link" href="#main">Bỏ qua tới nội dung</a>
+
+  <header class="hero">
+    <div class="hero__inner">
+      <p class="eyebrow">Kho dữ liệu du lịch Việt Nam</p>
+      <h1>Việt Nam Đi Đâu?</h1>
+      <p class="hero__lead">Tìm địa điểm nổi tiếng, bản sắc địa phương, di sản, thiên nhiên, ẩm thực và trải nghiệm đặc trưng trên khắp Việt Nam.</p>
+      <div class="hero__stats" aria-live="polite">
+        <span><strong id="statPlaces">0</strong> địa điểm</span>
+        <span><strong id="statProvinces">0</strong> tỉnh/thành</span>
+        <span><strong id="statCategories">0</strong> nhóm trải nghiệm</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="shell">
+    <section class="toolbar" aria-label="Bộ lọc địa điểm">
+      <label class="search-field">
+        <span>Tìm kiếm</span>
+        <input id="searchInput" type="search" autocomplete="off" placeholder="Ví dụ: Hội An, biển, chùa, Tây Bắc…">
+      </label>
+
+      <label>
+        <span>Vùng</span>
+        <select id="regionFilter">
+          <option value="">Tất cả vùng</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Tỉnh/thành</span>
+        <select id="provinceFilter">
+          <option value="">Tất cả tỉnh/thành</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Loại hình</span>
+        <select id="categoryFilter">
+          <option value="">Tất cả loại hình</option>
+        </select>
+      </label>
+
+      <label class="check-field">
+        <input id="featuredFilter" type="checkbox">
+        <span>Chỉ xem nổi bật</span>
+      </label>
+
+      <button id="resetFilters" class="button button--ghost" type="button">Xóa bộ lọc</button>
+    </section>
+
+    <section class="status-row">
+      <p id="resultStatus" aria-live="polite">Đang tải dữ liệu…</p>
+      <p id="dataSource" class="muted"></p>
+    </section>
+
+    <section id="placeGrid" class="place-grid" aria-label="Danh sách địa điểm"></section>
+
+    <section id="emptyState" class="empty-state" hidden>
+      <h2>Không tìm thấy địa điểm phù hợp</h2>
+      <p>Thử rút gọn từ khóa hoặc xóa bớt bộ lọc.</p>
+    </section>
+  </main>
+
+  <dialog id="placeDialog" class="place-dialog">
+    <article>
+      <button id="closeDialog" class="dialog-close" type="button" aria-label="Đóng">×</button>
+      <div id="dialogContent"></div>
+    </article>
+  </dialog>
+
+  <footer>
+    <p>Dữ liệu được quản trị qua Telegram Bot. Giá vé, giờ mở cửa và điều kiện tham quan có thể thay đổi; cần kiểm tra nguồn chính thức trước chuyến đi.</p>
+  </footer>
+
+  <template id="placeCardTemplate">
+    <article class="place-card">
+      <button class="place-card__button" type="button">
+        <div class="place-card__media" aria-hidden="true">
+          <span class="place-card__region"></span>
+        </div>
+        <div class="place-card__body">
+          <div class="place-card__meta">
+            <span class="pill place-card__category"></span>
+            <span class="pill pill--featured place-card__featured" hidden>Nổi bật</span>
+          </div>
+          <h2 class="place-card__name"></h2>
+          <p class="place-card__location"></p>
+          <p class="place-card__summary"></p>
+          <div class="place-card__tags"></div>
+        </div>
+      </button>
+    </article>
+  </template>
+
+  <script src="config.js"></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
