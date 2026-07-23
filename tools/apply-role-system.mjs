@@ -62,129 +62,6 @@ await edit("assets/gate.js", (source) => {
     document.body.classList.add("market-has-community-nav");
   }
 
-  function marketGuide(screenId, title, intro, points) {
-    var screen = document.getElementById(screenId);
-    if (!screen || screen.querySelector(":scope > .market-guide")) return;
-    var panel = document.createElement("details");
-    panel.className = "market-guide";
-    var summary = document.createElement("summary");
-    summary.textContent = title;
-    var lead = document.createElement("p");
-    lead.className = "market-guide-lead";
-    lead.textContent = intro;
-    var list = document.createElement("ol");
-    points.forEach(function (text) {
-      var item = document.createElement("li");
-      item.textContent = text;
-      list.appendChild(item);
-    });
-    panel.append(summary, lead, list);
-    var firstPanel = screen.querySelector(":scope > .panel");
-    if (firstPanel) firstPanel.insertAdjacentElement("afterend", panel);
-    else screen.appendChild(panel);
-  }
-
-  function addMarketGuides() {
-    marketGuide("scr-tarot", "Khung luận Tarot 7 tầng",
-      "Không đọc từng lá rời. Hãy đi từ câu hỏi, vị trí và hình ảnh đến mạch chung của toàn trải bài.", [
-        "Xác định đúng câu hỏi, phạm vi thời gian và vai trò của từng vị trí trong trải bài.",
-        "Đọc hình ảnh trước từ khóa: hướng nhìn, chuyển động, màu sắc, vật thể nổi bật và cảm giác đầu tiên.",
-        "Ghép số học, nguyên tố, Ẩn chính–Ẩn phụ và phẩm chất của bộ Hoàng gia.",
-        "Phân biệt thuận/nghịch như hai cách biểu hiện của cùng một năng lượng, không mặc định nghịch là xấu.",
-        "Tìm lá trội, nguyên tố thiếu, cặp tương hỗ hoặc xung đột và các biểu tượng lặp.",
-        "Đọc quan hệ giữa các lá theo câu chuyện: nguyên nhân → trạng thái → hướng phát triển.",
-        "Kết luận thành thông điệp có điều kiện, rủi ro, cơ hội và hành động thực tế."
-      ]);
-    marketGuide("scr-lenormand", "Khung luận Lenormand theo cú pháp",
-      "Lenormand mạnh ở sự cụ thể. Ý nghĩa chính hình thành từ lá đứng cạnh nhau, hướng và vị trí trong cụm.", [
-        "Giữ câu hỏi ngắn, rõ chủ thể và khung thời gian; tránh hỏi nhiều việc trong một lần.",
-        "Xác định lá chủ đề rồi đọc lá kế bên như từ bổ nghĩa, động từ hoặc hoàn cảnh.",
-        "Với 3 lá, đọc theo cụm 1+2, 2+3 và câu hoàn chỉnh 1→2→3.",
-        "Với 9 lá, ưu tiên lá trung tâm, hàng–cột–chéo và các cụm chạm trực tiếp trung tâm.",
-        "Theo dõi hướng nhìn/chuyển động, khoảng cách và nhóm chủ đề: người, tin tức, công việc, tiền, trở ngại.",
-        "Không tách từng lá thành bài diễn văn; chốt bằng một câu cụ thể rồi mới mở rộng điều kiện."
-      ]);
-    marketGuide("scr-baitay", "Khung luận Bài Tây truyền thống",
-      "Luận theo chất bài, màu, cấp số và nhịp tiến triển giữa các lá thay vì chỉ tra một nghĩa cố định.", [
-        "Chất Cơ thiên về cảm xúc–quan hệ; Rô về vật chất–tin tức; Chuồn về công việc–hành động; Bích về thử thách–kết thúc.",
-        "Đọc số như giai đoạn phát triển; lá hình là người, vai trò hoặc cách hành xử.",
-        "Đối chiếu đỏ/đen, chất trội/chất vắng và cặp cùng số để nhận ra thuận lợi hay ma sát.",
-        "Trải 3–5 lá phải có mạch thời gian hoặc mạch nguyên nhân, không cộng nghĩa cơ học.",
-        "Chốt điều kiện có thể thay đổi kết quả và hành động kiểm chứng được."
-      ]);
-    marketGuide("scr-kinhdich", "Khung luận Kinh Dịch",
-      "Một quẻ không chỉ là tốt/xấu; trọng tâm là thời, thế, vị và cách chuyển đúng với hoàn cảnh.", [
-        "Đọc quẻ chủ để nhận diện tình thế hiện tại và nguyên tắc vận hành.",
-        "Xem tượng quẻ, Thoán và cấu trúc nội–ngoại quái trước khi đi vào chi tiết.",
-        "Hào động cho biết điểm biến đổi; xét vị trí hào, đắc trung/đắc chính và quan hệ ứng–thừa–tỷ.",
-        "Quẻ biến mô tả hướng chuyển khi tác động của hào động được thực hiện.",
-        "Kết luận theo ba phần: nên giữ gì, nên đổi gì và dấu hiệu nào cho thấy thời đã chuyển."
-      ]);
-    marketGuide("scr-tuvi", "Khung luận Tử Vi nhiều lớp",
-      "Không kết luận từ một sao đơn lẻ. Cần đọc cung, chính tinh, phụ tinh và hệ liên kết toàn lá số.", [
-        "Bắt đầu từ Mệnh–Thân, cục và quan hệ sinh khắc tổng thể.",
-        "Đọc chính tinh theo trạng thái và bối cảnh cung; phụ tinh làm rõ cách biểu hiện.",
-        "Xét tam phương tứ chính, giáp cung, xung chiếu và các bộ sao trước khi chốt.",
-        "Phân biệt bản chất lâu dài với vận hạn theo đại vận, tiểu vận và lưu niên.",
-        "Nêu cả năng lực, điểm dễ lệch và điều kiện kích hoạt; tránh định mệnh hóa."
-      ]);
-    marketGuide("scr-battu", "Khung luận Bát Tự cân bằng khí",
-      "Trọng tâm là Nhật chủ trong mùa sinh và dòng khí toàn cục, không phải đếm ngũ hành đơn giản.", [
-        "Xác định vượng suy theo tiết khí, nguyệt lệnh, thông căn, thấu can và tàng can.",
-        "Đọc Thập thần theo vai trò và quan hệ với Nhật chủ, không gắn nhãn tốt/xấu cố định.",
-        "Xem tổ hợp hợp–xung–hình–hại và khả năng hóa khí trong đúng điều kiện.",
-        "Chọn hỷ/kỵ theo nhu cầu cân bằng thực tế của mệnh cục; tránh dùng một công thức cho mọi lá số.",
-        "Đối chiếu đại vận–lưu niên để nhận thời điểm kích hoạt và mức độ biến động."
-      ]);
-  }
-
-  function cardNames(result) {
-    return Array.prototype.map.call(result.querySelectorAll(".tcard .nm"), function (node) {
-      return node.textContent.trim();
-    }).filter(Boolean);
-  }
-
-  function renderMarketSynthesis(result, kind) {
-    var old = result.querySelector(":scope > .market-dynamic-analysis");
-    if (old) old.remove();
-    var names = cardNames(result);
-    if (!names.length) return;
-    var box = document.createElement("section");
-    box.className = "market-dynamic-analysis";
-    var heading = document.createElement("h3");
-    heading.textContent = "✦ Kết nối toàn trải bài";
-    var flow = document.createElement("p");
-    flow.innerHTML = "<strong>Mạch lá:</strong> " + names.join(" → ");
-    var note = document.createElement("p");
-    if (kind === "lenormand" && names.length > 1) {
-      var pairs = [];
-      for (var i = 0; i < names.length - 1; i++) pairs.push(names[i] + " + " + names[i + 1]);
-      note.innerHTML = "<strong>Cặp cần đọc:</strong> " + pairs.join(" · ");
-    } else if (kind === "tarot") {
-      note.textContent = names.length === 1
-        ? "Đọc lá này theo câu hỏi và lĩnh vực đã chọn; tách cơ hội, bóng tối và hành động."
-        : "Đọc sự chuyển dịch giữa các vị trí, sau đó kiểm tra lá/biểu tượng/nguyên tố lặp trước khi kết luận.";
-    } else {
-      note.textContent = "Đọc chiều chuyển của chuỗi, chất bài trội và điểm đổi nhịp; không cộng nghĩa từng lá một cách máy móc.";
-    }
-    box.append(heading, flow, note);
-    result.appendChild(box);
-  }
-
-  function watchMarketResult(id, kind) {
-    var result = document.getElementById(id);
-    if (!result || result.getAttribute("data-market-watch") === "1") return;
-    result.setAttribute("data-market-watch", "1");
-    var options = { childList: true, subtree: true };
-    var observer = new MutationObserver(function () {
-      observer.disconnect();
-      renderMarketSynthesis(result, kind);
-      observer.observe(result, options);
-    });
-    observer.observe(result, options);
-    renderMarketSynthesis(result, kind);
-  }
-
   function applyMarketBranding() {
     if (APP !== "boitoan") return;
     document.body.classList.add("market-brand");
@@ -195,10 +72,6 @@ await edit("assets/gate.js", (source) => {
       headerTitle.innerHTML = marketSigil() + '<span>Cái Chợ của Hiên Nhi</span>';
     }
     injectCommunity();
-    addMarketGuides();
-    watchMarketResult("tarotResult", "tarot");
-    watchMarketResult("lenResult", "lenormand");
-    watchMarketResult("btResult", "baitay");
     if (!window.__marketBrandObserver) {
       window.__marketBrandObserver = new MutationObserver(function () {
         injectCommunity();
@@ -302,27 +175,6 @@ await edit("assets/gate.css", (source) => {
 }
 .gate-owner-top, .gate-owner-bottom { font-family: ui-serif, "New York", Georgia, serif; }
 
-.market-guide {
-  margin: 12px 0; border: 1px solid #8b6fd066; border-radius: 14px;
-  background: linear-gradient(155deg, #211831dd, #151020dd); overflow: hidden;
-}
-.market-guide summary {
-  cursor: pointer; list-style: none; padding: 13px 15px; color: #f5dfa1;
-  font: 700 .93rem/1.3 ui-serif, "New York", Georgia, serif;
-}
-.market-guide summary::-webkit-details-marker { display: none; }
-.market-guide summary::after { content: "＋"; float: right; color: #8b6fd0; }
-.market-guide[open] summary::after { content: "−"; }
-.market-guide-lead { margin: 0; padding: 0 15px 9px; color: #c1b7d2; font-size: .82rem; }
-.market-guide ol { margin: 0; padding: 0 18px 15px 34px; color: #d9d1e6; font-size: .81rem; }
-.market-guide li + li { margin-top: 6px; }
-
-.market-dynamic-analysis {
-  margin: 12px 0; padding: 14px; border: 1px solid #d4a94e88; border-radius: 14px;
-  background: linear-gradient(145deg, #3a2f1a99, #1d1728dd);
-}
-.market-dynamic-analysis h3 { margin: 0 0 8px; color: #f5dfa1; font-size: .96rem; }
-.market-dynamic-analysis p { margin: 5px 0; color: #ddd5e9; font-size: .83rem; overflow-wrap: anywhere; }
 
 @media (max-width: 380px) {
   .gate-app-boitoan nav button, .gate-community-link { font-size: .56rem; }
