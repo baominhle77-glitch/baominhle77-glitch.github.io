@@ -91,6 +91,7 @@ await edit("assets/community.js", (source) => {
 });
 
 await edit("assets/community-admin.js", (source) => {
+  if (source.includes('button("Xem trang cá nhân","community-secondary"') && source.includes('admin_view=profile')) return source;
   if (!source.includes('button("Xem giao diện","community-secondary"')) throw new Error("Không tìm thấy nút Xem giao diện Admin");
   source = source.replace('button("Xem giao diện","community-secondary"', 'button("Xem trang cá nhân","community-secondary"');
   if (!source.includes('location.assign("./community.html?admin_view=1")')) throw new Error("Không tìm thấy URL impersonation cũ");
