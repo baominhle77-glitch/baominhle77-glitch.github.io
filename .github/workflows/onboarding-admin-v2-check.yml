@@ -34,17 +34,23 @@ jobs:
         run: |
           node tools/apply-role-system.mjs
           node tools/apply-onboarding-admin-v2.mjs
-      - name: Kiểm tra frontend
+      - name: Kiểm tra cú pháp gate
+        run: node --check assets/gate.js
+      - name: Kiểm tra cú pháp community
+        run: node --check assets/community.js
+      - name: Kiểm tra cú pháp Admin
+        run: node --check assets/community-admin.js
+      - name: Gate regression test
+        run: node assets/gate.test.mjs
+      - name: Onboarding v2 frontend contract
+        run: node assets/onboarding-admin-v2.test.mjs
+      - name: Kiểm tra cú pháp Community Worker
+        run: node --check backend/community.js
+      - name: Community regression test
+        run: node backend/community.test.mjs
+      - name: Onboarding/Admin v2 backend test
+        run: node backend/onboarding-admin-v2.test.mjs
+      - name: Kiểm tra Worker chung
         run: |
-          node --check assets/gate.js
-          node --check assets/community.js
-          node --check assets/community-admin.js
-          node assets/gate.test.mjs
-          node assets/onboarding-admin-v2.test.mjs
-      - name: Kiểm tra Worker và quyền
-        run: |
-          node --check backend/community.js
-          node backend/community.test.mjs
-          node backend/onboarding-admin-v2.test.mjs
           node --check backend/worker.js
           node backend/worker.test.mjs
