@@ -16,8 +16,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
       - name: Áp dụng lớp tích hợp
-        id: integrate
-        continue-on-error: true
         run: |
           set -o pipefail
           {
@@ -32,11 +30,8 @@ jobs:
             node tools/apply-account-v2-runner.mjs
             # Chạy lại riêng chuỗi Admin V5-V7 để xác nhận idempotent.
             node tools/apply-admin-v5-v6-runner.mjs
-          } > account-v7-apply.log 2>&1
+          } 2>&1 | tee account-v7-apply.log
       - name: Kiểm tra frontend
-        id: frontend
-        if: steps.integrate.outcome == 'success'
-        continue-on-error: true
         run: |
           set -o pipefail
           {
@@ -48,11 +43,8 @@ jobs:
             node assets/account-v2.test.mjs
             node --check boitoan/sw.js
             node boitoan/sw.test.mjs
-          } > account-v7-frontend.log 2>&1
+          } 2>&1 | tee account-v7-frontend.log
       - name: Kiểm tra Worker
-        id: worker
-        if: steps.integrate.outcome == 'success' && steps.frontend.outcome == 'success'
-        continue-on-error: true
         run: |
           set -o pipefail
           {
@@ -61,9 +53,9 @@ jobs:
             node backend/account-v2.test.mjs
             node --check backend/worker.js
             node backend/worker.test.mjs
-          } > account-v7-worker.log 2>&1
+          } 2>&1 | tee account-v7-worker.log
       - name: Lưu log chẩn đoán
-        if: always() && (steps.integrate.outcome == 'failure' || steps.frontend.outcome == 'failure' || steps.worker.outcome == 'failure')
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: account-v7-diagnostic-log
@@ -74,9 +66,4 @@ jobs:
           if-no-files-found: warn
           retention-days: 3
       - name: Kết luận
-        if: always()
-        run: |
-          test "${{ steps.integrate.outcome }}" = "success"
-          test "${{ steps.frontend.outcome }}" = "success"
-          test "${{ steps.worker.outcome }}" = "success"
-          echo "Account V7 CI PASS"
+        run: echo "Account V7 CI PASS"
