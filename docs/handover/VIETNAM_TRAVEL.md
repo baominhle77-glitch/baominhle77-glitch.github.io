@@ -1,19 +1,22 @@
 # Vietnam Travel — bàn giao kỹ thuật
 
 **Task-ID:** `TRAVEL-20260723-01`  
+**Trạng thái:** `COMPLETED / PRODUCTION SUCCESS`  
+**Hoàn tất:** 23/07/2026 18:54 (GMT+7)  
 **Ứng dụng:** `/vietnam-travel/`  
 **Backend:** Worker hiện có, route `/api/travel/*`  
 **Kho dữ liệu:** Cloudflare Workers KV, khóa `travel:places:v1`  
 **Quản trị:** Telegram Bot hiện có; chỉ chấp nhận update khi cả `chat.id` và `from.id` khớp `TELEGRAM_CHAT_ID`.
 
-## 1. Phạm vi bản đầu
+## 1. Phạm vi đã triển khai
 
-- PWA công khai, tối ưu điện thoại và iPhone.
+- PWA công khai, tối ưu điện thoại và iPhone, có service worker/offline shell.
 - Tìm kiếm không dấu; lọc theo vùng và loại hình; sắp xếp.
 - Lưu yêu thích trên trình duyệt bằng `localStorage`.
-- Chi tiết địa điểm, bản đồ, nguồn tham khảo và chia sẻ.
+- Trang chi tiết địa điểm, bản đồ, nguồn tham khảo và chia sẻ.
 - Bộ dữ liệu khởi tạo gồm 20 địa điểm nổi tiếng/đặc thù của Việt Nam.
 - API công khai chỉ đọc; mọi mutation chỉ đi qua Telegram webhook đã xác thực secret.
+- Giới hạn tối đa 1.000 địa điểm trong kho KV.
 
 ## 2. Lệnh Telegram
 
@@ -31,18 +34,18 @@ Các trường hỗ trợ: Tên, Tỉnh/Thành phố, Vùng, Loại, Mô tả, N
 ## 3. Bảo mật và dữ liệu
 
 - Không có bot token, webhook secret hoặc Telegram ID dạng giá trị trong source.
-- Worker tiếp tục xác thực header `X-Telegram-Bot-Api-Secret-Token` ở webhook chung.
+- Worker xác thực header `X-Telegram-Bot-Api-Secret-Token` ở webhook chung.
 - Module Travel kiểm tra chủ bot lần hai bằng `TELEGRAM_CHAT_ID` cho cả chat và người gửi.
 - URL nhập qua bot chỉ nhận `https://`, không nhận credential trong URL.
 - Dữ liệu hỏng được sao lưu tạm 7 ngày dưới khóa `travel:places:v1:corrupt:*` rồi khôi phục seed.
-- Giới hạn tối đa 1.000 địa điểm để giữ payload KV có kiểm soát.
-- KV có tính nhất quán cuối cùng; cập nhật vừa thực hiện có thể cần tải lại sau một khoảng ngắn tại một số điểm mạng.
+- Cloudflare KV có tính nhất quán cuối cùng; cập nhật vừa thực hiện có thể cần tải lại sau một khoảng ngắn tại một số điểm mạng.
 
 ## 4. Build và deploy
 
-- `tools/apply-travel-system.mjs` ghép module vào Worker theo cách idempotent.
-- `validate-vietnam-travel.yml` chạy test module và kiểm tra việc ghép Worker hai lần không làm thay đổi source.
-- `deploy-vietnam-travel.yml` chỉ chạy sau workflow production chính thành công; nó dựng lại toàn bộ site hiện có cùng `/vietnam-travel/`, deploy Pages trước rồi Worker sau, sau đó smoke test cả app mới và app cũ.
+- `tools/apply-travel-system.mjs` ghép module Travel vào Worker theo cách idempotent.
+- `.github/workflows/validate-vietnam-travel.yml` kiểm tra source, 5 unit test và việc ghép Worker hai lần không làm thay đổi kết quả.
+- `.github/workflows/deploy-pages.yml` là workflow production chuẩn: dựng toàn bộ SPARE, Bói toán, MEDORA và Vietnam Travel; deploy Pages trước, Worker sau; smoke test app mới cùng app cũ.
+- Các workflow và bundle chỉ dùng để materialize/kích hoạt thử nghiệm đã được xóa sau khi hoàn tất.
 
 ## 5. File chính
 
@@ -52,15 +55,17 @@ Các trường hỗ trợ: Tên, Tỉnh/Thành phố, Vùng, Loại, Mô tả, N
 - `vietnam-travel/data/seed-places.js`
 - `vietnam-travel/manifest.webmanifest`
 - `vietnam-travel/sw.js`
+- `vietnam-travel/icon.svg`
 - `backend/travel.js`
 - `backend/travel.test.mjs`
 - `tools/apply-travel-system.mjs`
 
-## 6. Trạng thái xác minh
+## 6. Bằng chứng xác minh cuối
 
-Tại thời điểm tạo tài liệu này:
-
-- Unit test Travel: `5/5` đạt ở môi trường cục bộ.
-- Syntax check frontend/backend/tool: đạt.
-- Fixture kiểm tra tool tích hợp chạy hai lần: đạt, output không đổi.
-- CI GitHub, merge, deploy và production E2E: phải lấy trạng thái từ PR/workflow tương ứng; không được suy đoán là đã đạt khi chưa có log.
+- Source thật được materialize tại commit `b3a29cbd5416424a6df16bb4a7bd392a75287f5c`.
+- Unit test Travel: `5/5` đạt.
+- Syntax check frontend/backend/tool và kiểm tra idempotent: đạt.
+- Validation workflow run `30004367095`: `success`.
+- Production deploy + smoke workflow run `30004367100`, job `89196797196`: `success`.
+- Trong production run: kiểm tra secrets đạt; Pages deploy đạt; Worker deploy đạt; `/vietnam-travel/`, Travel health/API và dữ liệu seed đạt; root, Bói toán và MEDORA vẫn đạt.
+- Bundle `.travel-bundle` đã xóa; source không chứa token/secret.
