@@ -1,37 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T12:18:00+07:00",
+  "updated_at": "2026-07-23T12:22:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-05",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-05-spirituality-onboarding",
-      "base_sha": "17ad69761011c9e1aaf586a8f07130aa8c2e9209",
+      "branch": "agent/BOITOAN-20260723-05-closeout",
+      "base_sha": "dd008ff5edaeac0f33144b88fb0a07f24d8064c4",
       "paths": [
-        "tools/apply-role-system.mjs",
-        ".github/workflows/deploy-pages.yml",
-        "assets/gate.js",
-        "assets/gate.css",
-        "assets/community.js",
-        "backend/community.js",
-        "backend/worker.js",
-        "backend/community.test.mjs",
-        "boitoan/index.html",
-        "boitoan/community.html",
-        "boitoan/community-admin.html",
-        "boitoan/manifest.webmanifest",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T12:01:00+07:00",
-      "heartbeat_at": "2026-07-23T12:18:00+07:00",
-      "summary": "Đổi toàn bộ branding hiển thị Cái Chợ của Hiên Nhi thành Spirituality Market; chuẩn hóa cách gọi Admin; đưa đăng nhập/đăng ký và phân loại Khách hoặc Reader/Người xem bói lên cửa sổ đầu tiên; thành viên mới được cấp phiên vào app ngay và gửi thông báo Telegram gồm thông tin tài khoản cùng dữ liệu thiết bị tối thiểu có công bố rõ. PR #28: test chức năng đã đạt; đang chạy lại coordination guard với metadata PR đã chuẩn hóa."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T12:20:00+07:00",
+      "summary": "PR #28 merge thành d48ef93137c35e38ee64004dfb0cdaee9c04fd83. CI coordination run 29981811502 và role-system run 29981811526 đều success. Production run 29981841325 ghi SUCCESS: Pages/CSS/Gate 200, Worker không phiên 401, onboarding công khai trả 400 invalid_account với dữ liệu kiểm thử không hợp lệ, branding Spirituality Market và marker buildBoitoanEntryUI tồn tại. Đã đổi branding/watermark, chuẩn hóa Admin, đưa đăng nhập/đăng ký Khách hoặc Reader/Người xem bói lên cửa đầu, cấp phiên vào app ngay và gửi Telegram thông tin tài khoản cùng dữ liệu thiết bị tối thiểu có công bố rõ."
+    },
     {
       "id": "BOITOAN-20260723-04",
       "owner": "ChatGPT GPT-5.6 Thinking",

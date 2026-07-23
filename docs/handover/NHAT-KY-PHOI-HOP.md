@@ -2,7 +2,7 @@
 
 > File này để các AI/công cụ cùng làm trên repository nắm được phạm vi, bằng chứng kiểm thử và việc còn chờ.
 
-**Thương hiệu hiển thị:** Cái Chợ của Hiên Nhi.  
+**Thương hiệu hiển thị:** Spirituality Market.  
 **Quy tắc điều phối:** đọc `AGENTS.md` và `docs/handover/ACTIVE_TASKS.json` trước khi sửa; không ghi mật khẩu, token hoặc secret vào repository.  
 **Quy tắc độ tin cậy:** tuyệt đối không bịa. Mọi kết luận về source, production hoặc chuyên môn phải dựa trên source, log, test hoặc tài liệu đã kiểm chứng. Nếu chưa đủ bằng chứng, phải ghi rõ **chưa xác lập/chưa đủ chứng cứ**; không tự điền nội dung chung chung cho đủ giao diện.
 
@@ -11,7 +11,7 @@
 ## Trạng thái mật khẩu và hạ tầng
 
 - **SPARE** (`/`) dùng mật khẩu riêng.
-- **Bói toán** (`/boitoan/`) và **MEDORA** (`/medora/`) dùng chung mật khẩu hiện hành.
+- **Bói toán** (`/boitoan/`) và **MEDORA** (`/medora/`) dùng chung mật khẩu Admin hiện hành.
 - Giá trị mật khẩu không lưu trong repository; không commit `*.src.html`.
 - Worker cấp khóa theo `app`: ưu tiên `DECRYPT_KEY_<APP>`, nếu thiếu dùng `DECRYPT_KEY` chung.
 - Production frontend: `hiennhi89.pages.dev`.
@@ -20,6 +20,26 @@
 ---
 
 ## Nhật ký thay đổi — mới nhất trên cùng
+
+### 2026-07-23 12:20 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-05 — HOÀN TẤT ✅
+
+- PR #28 merge thành `d48ef93137c35e38ee64004dfb0cdaee9c04fd83`.
+- CI trước merge đều success:
+  - run `29981811502` — coordination guard;
+  - run `29981811526` — role system, frontend và Worker.
+- Production run `29981841325` ghi `SUCCESS` cho đúng source commit `d48ef931…`:
+  - Cloudflare Pages `200`;
+  - Community CSS `200`;
+  - gate runtime JS `200`;
+  - Worker không phiên `401 unauthorized`, đúng kỳ vọng;
+  - onboarding công khai trả `400 invalid_account` với payload kiểm thử không hợp lệ;
+  - branding `Spirituality Market` và marker `buildBoitoanEntryUI` tồn tại.
+- Đã đổi branding và watermark từ `Cái Chợ của Hiên Nhi` thành `Spirituality Market` trên cổng, app, trang Cộng đồng, trang Admin và PWA manifest.
+- Chuẩn hóa cách gọi quyền quản trị là `Admin`; giữ nguyên thuật ngữ nghiệp vụ `Tên chủ tài khoản` của ngân hàng.
+- Cửa sổ đầu Bói toán có ba luồng: đăng nhập thành viên, tạo tài khoản và Admin.
+- Khi đăng ký phải chọn `Khách` hoặc `Reader / Người xem bói`; tạo xong được cấp cả phiên app và phiên cộng đồng để vào app ngay, không chờ Admin duyệt.
+- Đăng ký mới gửi Telegram best-effort cho Admin: vai trò, tên hiển thị, tên đăng nhập, mã trình duyệt, browser/platform, màn hình, ngôn ngữ, múi giờ, quốc gia, IP rút gọn và thời gian. Không gửi mật khẩu, thông tin ngân hàng hoặc QR; giao diện có thông báo rõ trước đăng ký.
+- Task đã chuyển `completed`; không còn vùng file nào bị khóa.
 
 ### 2026-07-23 10:30 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-04 — HOÀN TẤT ✅
 
