@@ -88,14 +88,17 @@ jobs:
         run: |
           set -euo pipefail
           page_code=""
+          page_url=""
           css_code=""
           gate_code=""
           worker_code=""
           cache_bust="deploy=${GITHUB_SHA}"
           for attempt in $(seq 1 30); do
-            page_code=$(curl -sS -o "$RUNNER_TEMP/community.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community.html?${cache_bust}" || true)
-            css_code=$(curl -sS -o "$RUNNER_TEMP/community.css" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/community.css?${cache_bust}" || true)
-            gate_code=$(curl -sS -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
+            page_meta=$(curl -sSL -o "$RUNNER_TEMP/community.html" -w "%{http_code}|%{url_effective}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community.html?${cache_bust}" || true)
+            page_code=${page_meta%%|*}
+            page_url=${page_meta#*|}
+            css_code=$(curl -sSL -o "$RUNNER_TEMP/community.css" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/community.css?${cache_bust}" || true)
+            gate_code=$(curl -sSL -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
             worker_code=$(curl -sS -o "$RUNNER_TEMP/community-api.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/readers" || true)
             if [ "$page_code" = "200" ] \
               && grep -q "Cái Chợ của Hiên Nhi" "$RUNNER_TEMP/community.html" \
@@ -112,6 +115,7 @@ jobs:
           done
           {
             echo "page_code=$page_code"
+            echo "page_url=$page_url"
             echo "css_code=$css_code"
             echo "gate_code=$gate_code"
             echo "worker_code=$worker_code"
@@ -141,7 +145,8 @@ jobs:
           - Source commit: \`$GITHUB_SHA\`
           - Hoàn tất UTC: \`$completed_utc\`
           - Workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
-          - Cloudflare Pages: \`${{ steps.smoke.outputs.page_code }}\` tại \`/boitoan/community.html\`
+          - Cloudflare Pages: \`${{ steps.smoke.outputs.page_code }}\`
+          - URL cuối sau chuyển hướng: \`${{ steps.smoke.outputs.page_url }}\`
           - Community CSS: \`${{ steps.smoke.outputs.css_code }}\`
           - Gate runtime JS: \`${{ steps.smoke.outputs.gate_code }}\`
           - Cloudflare Worker: \`${{ steps.smoke.outputs.worker_code }} unauthorized\` khi gọi API Reader không có phiên
@@ -180,6 +185,7 @@ jobs:
           - Deploy Worker: \`${{ steps.deploy_worker.outcome }}\`
           - Hậu kiểm: \`${{ steps.smoke.outcome }}\`
           - HTTP Pages/CSS/Gate/Worker: \`${{ steps.smoke.outputs.page_code || 'n/a' }}/${{ steps.smoke.outputs.css_code || 'n/a' }}/${{ steps.smoke.outputs.gate_code || 'n/a' }}/${{ steps.smoke.outputs.worker_code || 'n/a' }}\`
+          - URL cuối sau chuyển hướng: \`${{ steps.smoke.outputs.page_url || 'n/a' }}\`
           - Hành động: mở workflow run ở trên, sửa đúng bước thất bại rồi chạy lại; không coi production đã hoàn tất.
           EOF
           git config user.name "github-actions[bot]"
