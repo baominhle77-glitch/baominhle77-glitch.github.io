@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T19:56:00+07:00",
+  "updated_at": "2026-07-23T20:18:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -12,6 +12,7 @@
         ".github/workflows/validate-role-system.yml",
         "assets/account-v2.test.mjs",
         "backend/account-v2.test.mjs",
+        "backend/community.test.mjs",
         "boitoan/sw.js",
         "boitoan/sw.test.mjs",
         "tools/apply-admin-v5-v6-runner.mjs",
@@ -22,8 +23,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T19:53:00+07:00",
-      "heartbeat_at": "2026-07-23T19:56:00+07:00",
-      "summary": "Người dùng nghiệm thu iPhone: link tự khôi phục phiên Admin cũ, bấm Khóa không xóa hết market_admin_*, mật khẩu Admin tổng bị backend báo sai và trang Quản trị mở rồi bị trả về app do token/cấp quyền không đồng nhất. Hotfix V7 tách namespace salt/hash khỏi cấu hình V5-V6 cũ trên Cloudflare, xóa và thu hồi phiên cũ trước đăng nhập, kiểm tra auth version/server trước khi hiện Admin, ẩn UI quản trị trước xác thực và tăng cache Bói toán v15."
+      "heartbeat_at": "2026-07-23T20:18:00+07:00",
+      "summary": "Người dùng nghiệm thu iPhone: link tự khôi phục phiên Admin cũ, bấm Khóa không xóa hết market_admin_*, mật khẩu Admin tổng bị backend báo sai và trang Quản trị mở rồi bị trả về app do token/cấp quyền không đồng nhất. Hotfix V7 tách namespace salt/hash khỏi cấu hình V5-V6 cũ trên Cloudflare, xóa và thu hồi phiên cũ trước đăng nhập, kiểm tra auth version/server trước khi hiện Admin, ẩn UI quản trị trước xác thực và tăng cache Bói toán v15. Build/frontend đã đạt; đang cập nhật fixture Community sang namespace V7 để chạy toàn bộ Worker test."
     }
   ],
   "recently_completed": [
