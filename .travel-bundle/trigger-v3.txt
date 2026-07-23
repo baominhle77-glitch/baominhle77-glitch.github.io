@@ -1,3 +1,3 @@
 TRAVEL-20260723-01
-Kích hoạt materialize qua production workflow và V2 trên main.
-Created: 2026-07-23T18:31:00+07:00
+Kích hoạt materialize qua pull request để GitHub Actions kiểm checksum, bung source và chạy test.
+Created: 2026-07-23T18:39:00+07:00
