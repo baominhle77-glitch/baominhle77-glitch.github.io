@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T18:23:00+07:00",
+  "updated_at": "2026-07-23T18:48:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "TRAVEL-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/TRAVEL-20260723-01-trigger-v2",
-      "base_sha": "f30a2dc0db744655cf3961ee586f2cc4d296f7c5",
+      "branch": "agent/TRAVEL-20260723-01-deploy-verify",
+      "base_sha": "b3a29cbda57621e1c946fbdd128678bbf3949737",
       "paths": [
         "vietnam-travel/**",
         "backend/travel.js",
@@ -21,12 +21,13 @@
         "docs/handover/VIETNAM_TRAVEL.md",
         "docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log",
         "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md"
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/PRODUCTION_STATUS.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:19:00+07:00",
-      "heartbeat_at": "2026-07-23T18:23:00+07:00",
-      "summary": "App PWA /vietnam-travel/, API Cloudflare KV và Telegram bot đang materialize. Workflow V2 đã có trên main tại f30a2dc0; branch này tạo push riêng để kích hoạt V2, sau đó kiểm source thật, test và production trước khi đóng task."
+      "heartbeat_at": "2026-07-23T18:48:00+07:00",
+      "summary": "Source PWA Vietnam Travel, API KV và Telegram bot đã materialize trên main tại b3a29cb; checksum đúng và 5/5 test đạt. Branch này tạo commit người dùng qua PR để kích hoạt CI/deploy Cloudflare và hậu kiểm Travel cùng các app production hiện hữu trước khi đóng task."
     }
   ],
   "recently_completed": [
