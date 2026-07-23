@@ -1,0 +1,63 @@
+name: Xác minh Admin V8 production
+
+on:
+  workflow_run:
+    workflows: ["Deploy lên Cloudflare Pages (hiennhi89.pages.dev)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-admin-v8-production
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Kiểm tra frontend và crypto Worker thực tế
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          cache_bust="admin-v8=${SOURCE_SHA}-${GITHUB_RUN_ID}"
+          device_id=$(node -e 'console.log(require("node:crypto").randomUUID())')
+          gate_code=""
+          health_code=""
+          invalid_code=""
+
+          for attempt in $(seq 1 30); do
+            gate_code=$(curl -sSL -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
+            health_code=$(curl -sS -o "$RUNNER_TEMP/admin-health.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/admin/health?${cache_bust}" || true)
+            invalid_code=$(curl -sS -o "$RUNNER_TEMP/admin-invalid.json" -w "%{http_code}" --max-time 20 \
+              -X POST "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/admin/login" \
+              -H 'content-type: application/json' \
+              -H "x-owner-device-id: ${device_id}" \
+              --data "{\"password\":\"definitely-not-an-admin-password-v8\",\"device_id\":\"${device_id}\",\"remember\":false}" || true)
+
+            if [ "$gate_code" = "200" ] \
+              && grep -q 'Account V8 frontend auth contract' "$RUNNER_TEMP/gate.js" \
+              && grep -q '2026-07-23-v8' "$RUNNER_TEMP/gate.js" \
+              && [ "$health_code" = "200" ] \
+              && grep -q '"auth_version":"2026-07-23-v8"' "$RUNNER_TEMP/admin-health.json" \
+              && grep -q '"iterations":10000' "$RUNNER_TEMP/admin-health.json" \
+              && grep -q '"config_ok":true' "$RUNNER_TEMP/admin-health.json" \
+              && grep -q '"crypto_ok":true' "$RUNNER_TEMP/admin-health.json" \
+              && [ "$invalid_code" = "401" ] \
+              && grep -q '"invalid_admin_login"' "$RUNNER_TEMP/admin-invalid.json"; then
+              echo "Admin V8 production PASS ở lần ${attempt}."
+              cat "$RUNNER_TEMP/admin-health.json"
+              exit 0
+            fi
+            sleep 4
+          done
+
+          echo "::error::Admin V8 production chưa đạt. gate=${gate_code} health=${health_code} invalid=${invalid_code}"
+          echo "--- health ---"
+          cat "$RUNNER_TEMP/admin-health.json" 2>/dev/null || true
+          echo "--- invalid login ---"
+          cat "$RUNNER_TEMP/admin-invalid.json" 2>/dev/null || true
+          exit 1
