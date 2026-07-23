@@ -21,6 +21,23 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-23 13:12 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-06 — ĐANG THỰC HIỆN
+
+- Người dùng kiểm tra production bằng iPhone và xác nhận onboarding hiện tại lủng củng: các form Đăng nhập/Đăng ký/Admin nằm trong cùng một card dài; checkbox/radio bị CSS kéo thành ô dài.
+- Đăng ký tài khoản hiển thị lỗi chung sau khi gửi form.
+- Đã xác định nguyên nhân từ source: `boitoan/index.html` hiện là plaintext sau gate, nhưng `finishMemberEntry` vẫn luôn gọi `decryptPayload`; tài khoản có thể đã tạo xong rồi frontend mới lỗi khi không tìm thấy payload mã hóa.
+- Phương án Account V2:
+  - màn 1 chỉ có ba lựa chọn `Đăng nhập`, `Đăng ký`, `Admin`;
+  - màn 2 chỉ hiển thị đúng form đã chọn và có nút quay lại;
+  - frontend chỉ giải mã khi thực sự tồn tại `application/gate-payload`, nếu không sẽ mở app trực tiếp;
+  - sửa checkbox/radio trên iPhone;
+  - lưu profile để hiện badge vai trò cạnh tên/avatar và trong app;
+  - giao diện Khách/Reader có tab và màn mặc định khác nhau;
+  - Admin xóa review, khóa/xóa member, tạo/đóng/xóa bài thảo luận;
+  - thiết bị đăng nhập Admin hợp lệ tự nhận quyền Admin tổng bằng owner-device KV, không hardcode mã thiết bị vào source;
+  - Admin tổng đọc chat và mở giao diện member bằng phiên impersonation chỉ đọc có audit.
+- Đã tạo `tools/apply-account-v2.mjs`, test frontend/backend và cập nhật workflow; đang chờ CI PR xác nhận trước merge/deploy.
+
 ### 2026-07-23 12:20 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-05 — HOÀN TẤT ✅
 
 - PR #28 merge thành `d48ef93137c35e38ee64004dfb0cdaee9c04fd83`.

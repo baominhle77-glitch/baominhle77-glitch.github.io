@@ -1,8 +1,40 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T12:22:00+07:00",
+  "updated_at": "2026-07-23T13:40:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-06",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-06-onboarding-admin-roles",
+      "base_sha": "daf65806bda430d991043b9e289746bfb5365632",
+      "paths": [
+        "tools/apply-account-v2.mjs",
+        "tools/apply-account-v2-runner.mjs",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/deploy-pages.yml",
+        "assets/gate.js",
+        "assets/gate.css",
+        "assets/community.js",
+        "assets/community-admin.js",
+        "assets/community.css",
+        "backend/community.js",
+        "backend/account-v2.test.mjs",
+        "assets/account-v2.test.mjs",
+        "boitoan/community.html",
+        "boitoan/community-admin.html",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ROLE_SYSTEM.md",
+        "docs/handover/PRODUCTION_STATUS.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T13:12:00+07:00",
+      "heartbeat_at": "2026-07-23T13:40:00+07:00",
+      "summary": "Sửa lỗi đăng ký thành viên do frontend luôn cố giải mã trang Bói toán dù source hiện là plaintext; thiết kế onboarding hai màn hình tách biệt; phân giao diện theo vai trò; bổ sung badge tài khoản; mở rộng Admin xóa review, xóa member, tạo bài thảo luận; thiết bị Admin tổng tự khóa owner-device sau đăng nhập và được xem chat, xem giao diện member bằng phiên impersonation chỉ đọc có audit. Không ghi mật khẩu hoặc mã thiết bị cụ thể vào source. Runner xử lý template sinh mã Account V2; PRODUCTION_STATUS được thêm vào phạm vi vì main có commit bot mới hơn base của task và coordination guard dùng diff hai đầu."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-05",

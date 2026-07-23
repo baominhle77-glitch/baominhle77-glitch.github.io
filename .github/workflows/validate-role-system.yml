@@ -16,18 +16,57 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
       - name: Áp dụng lớp tích hợp
-        run: node tools/apply-role-system.mjs
+        id: integrate
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          {
+            node tools/apply-role-system.mjs
+            node tools/apply-account-v2-runner.mjs
+          } > account-v2-apply.log 2>&1
       - name: Kiểm tra frontend
+        id: frontend
+        if: steps.integrate.outcome == 'success'
+        continue-on-error: true
         run: |
-          node --check assets/gate.js
-          node --check assets/community.js
-          node --check assets/community-admin.js
-          node assets/gate.test.mjs
-          node --check boitoan/sw.js
-          node boitoan/sw.test.mjs
+          set -o pipefail
+          {
+            node --check assets/gate.js
+            node --check assets/community.js
+            node --check assets/community-admin.js
+            node assets/gate.test.mjs
+            node assets/account-v2.test.mjs
+            node --check boitoan/sw.js
+            node boitoan/sw.test.mjs
+          } > account-v2-frontend.log 2>&1
       - name: Kiểm tra Worker
+        id: worker
+        if: steps.integrate.outcome == 'success' && steps.frontend.outcome == 'success'
+        continue-on-error: true
         run: |
-          node --check backend/community.js
-          node backend/community.test.mjs
-          node --check backend/worker.js
-          node backend/worker.test.mjs
+          set -o pipefail
+          {
+            node --check backend/community.js
+            node backend/community.test.mjs
+            node backend/account-v2.test.mjs
+            node --check backend/worker.js
+            node backend/worker.test.mjs
+          } > account-v2-worker.log 2>&1
+      - name: Lưu log chẩn đoán
+        if: always() && (steps.integrate.outcome == 'failure' || steps.frontend.outcome == 'failure' || steps.worker.outcome == 'failure')
+        uses: actions/upload-artifact@v4
+        with:
+          name: account-v2-diagnostic-log
+          path: |
+            account-v2-apply.log
+            account-v2-frontend.log
+            account-v2-worker.log
+          if-no-files-found: warn
+          retention-days: 3
+      - name: Kết luận
+        if: always()
+        run: |
+          test "${{ steps.integrate.outcome }}" = "success"
+          test "${{ steps.frontend.outcome }}" = "success"
+          test "${{ steps.worker.outcome }}" = "success"
+          echo "Account V2 CI PASS"
