@@ -1,46 +1,34 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T14:20:00+07:00",
+  "updated_at": "2026-07-23T14:34:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-07",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-07-admin-member-profile",
-      "base_sha": "463e5944d1abcd56e80e1b19f491220896ba98d4",
-      "paths": [
-        "tools/apply-account-v2-profile-view.mjs",
-        "tools/apply-account-v2-runner.mjs",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/deploy-pages.yml",
-        "assets/account-v2.test.mjs",
-        "assets/community.js",
-        "assets/community-admin.js",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
-      "status": "in_progress",
-      "started_at": "2026-07-23T14:17:00+07:00",
-      "heartbeat_at": "2026-07-23T14:20:00+07:00",
-      "summary": "Sửa thiếu sót Account V2: nút Xem giao diện hiện chỉ mở dashboard mặc định của member nên Admin tổng không vào thẳng Trang cá nhân. Bổ sung điều hướng admin_view=profile, hiển thị đúng trang cá nhân Khách/Reader ở chế độ chỉ đọc, nút quay lại Admin và test production marker."
-    }
-  ],
-  "recently_completed": [
-    {
-      "id": "BOITOAN-20260723-06",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-06-closeout",
-      "base_sha": "52083fda3aa54ea03c727d5a11aba8871c54b9ab",
+      "branch": "agent/BOITOAN-20260723-07-closeout",
+      "base_sha": "67878700192da449d2df2613a7402f3e68a829c8",
       "paths": [
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
       "status": "completed",
+      "started_at": "2026-07-23T14:17:00+07:00",
+      "completed_at": "2026-07-23T14:34:00+07:00",
+      "summary": "PR #33 merge thành 9a6b53cc7e99d78ab53410df4d3d531aeef31caa. CI coordination run 29988447066 và Account V2/frontend/Worker run 29988447104 đều success. Production run 29988531212 ghi SUCCESS cho đúng source: Pages/Admin/CSS/Gate 200, Worker và API thảo luận không phiên 401, onboarding invalid payload 400. Đã sửa nút Admin thành Xem trang cá nhân, dùng admin_view=profile để mở thẳng renderProfile trong phiên impersonation, hiển thị hồ sơ Khách/Reader và dữ liệu Reader ở chế độ chỉ đọc, có nút quay lại Admin. Không lưu mật khẩu, IP hoặc mã thiết bị trong source."
+    },
+    {
+      "id": "BOITOAN-20260723-06",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-06-closeout",
+      "base_sha": "52083fda3aa54ea03c727d5a11aba8871c54b9ab",
+      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
+      "status": "completed",
       "started_at": "2026-07-23T13:12:00+07:00",
       "completed_at": "2026-07-23T13:56:00+07:00",
-      "summary": "PR #31 merge thành 61c0dc0efbddf3c865c44d001d022d80cf0185d9. CI coordination run 29986274969 và Account/Frontend/Worker run 29986275030 đều success. Production run 29986415052 ghi SUCCESS: Pages/Admin/CSS/Gate 200; Worker và API thảo luận không phiên 401; onboarding invalid payload 400; marker Account V2 tồn tại. Đã tách onboarding thành màn chọn và màn thao tác riêng, sửa đăng ký plaintext và input iPhone, hiển thị badge vai trò, phân giao diện Khách/Reader, mở rộng Admin xóa review/member và bài thảo luận, Admin tổng xem chat và giao diện member bằng phiên chỉ đọc có audit. PR #30 trùng phạm vi, không mergeable và có workflow failure đã được đóng không merge. Không lưu mật khẩu, IP hoặc mã thiết bị cụ thể trong source."
+      "summary": "PR #31 và production Account V2 thành công: onboarding hai màn hình, sửa đăng ký plaintext và input iPhone, badge vai trò, giao diện theo role, quyền Admin và impersonation chỉ đọc."
     },
     {
       "id": "BOITOAN-20260723-05",
@@ -51,7 +39,7 @@
       "status": "completed",
       "started_at": "2026-07-23T12:01:00+07:00",
       "completed_at": "2026-07-23T12:20:00+07:00",
-      "summary": "PR #28 merge thành d48ef93137c35e38ee64004dfb0cdaee9c04fd83. CI và production thành công; onboarding này sau đó được chỉnh lại trong BOITOAN-20260723-06."
+      "summary": "PR #28 và production thành công; onboarding này sau đó được thay thế bởi Account V2."
     },
     {
       "id": "BOITOAN-20260723-04",
@@ -63,28 +51,6 @@
       "started_at": "2026-07-23T09:59:00+07:00",
       "completed_at": "2026-07-23T10:26:15+07:00",
       "summary": "PR #26 và production thành công; đã gỡ các hộp Khung luận và Kết nối toàn trải bài."
-    },
-    {
-      "id": "DEPLOY-20260723-03",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/DEPLOY-20260723-03-follow-redirect",
-      "base_sha": "564b216bc690d79b53d10f2cf407e6d1cf2c2ab8",
-      "paths": [".github/workflows/deploy-pages.yml", "docs/handover/PRODUCTION_STATUS.md", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
-      "status": "completed",
-      "started_at": "2026-07-23T05:26:00+07:00",
-      "completed_at": "2026-07-23T10:14:25+07:00",
-      "summary": "PR #25 sửa hậu kiểm Cloudflare Clean URLs; production thành công."
-    },
-    {
-      "id": "BOITOAN-20260723-02",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-02-mobile-brand-knowledge",
-      "base_sha": "a5d3f7afa78f62e7002e151b48121bb4894d2e1f",
-      "paths": ["assets/community.css", "assets/community.js", "assets/gate.css", "assets/gate.js", "assets/cho-hien-nhi-sigil.svg", "boitoan/community.html", "boitoan/community-admin.html", "boitoan/index.html", "tools/apply-role-system.mjs", "docs/research/DIVINATION_SOURCES.md", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
-      "status": "completed",
-      "started_at": "2026-07-23T04:55:00+07:00",
-      "completed_at": "2026-07-23T05:16:00+07:00",
-      "summary": "Source UI mobile và branding cũ đã qua CI; branding và onboarding sau đó được thay thế."
     }
   ]
 }
