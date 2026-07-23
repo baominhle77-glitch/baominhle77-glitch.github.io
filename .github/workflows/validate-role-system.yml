@@ -39,6 +39,7 @@ jobs:
             node --check assets/gate.js
             node --check assets/community.js
             node --check assets/community-admin.js
+            node --check tools/webkit-production-check.mjs
             node assets/gate.test.mjs
             node assets/account-v2.test.mjs
             node --check boitoan/sw.js
