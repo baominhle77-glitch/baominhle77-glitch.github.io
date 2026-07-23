@@ -92,6 +92,7 @@ jobs:
           css_code=""
           gate_code=""
           worker_code=""
+          entry_code=""
           cache_bust="deploy=${GITHUB_SHA}"
           for attempt in $(seq 1 30); do
             page_meta=$(curl -sSL -o "$RUNNER_TEMP/community.html" -w "%{http_code}|%{url_effective}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community.html?${cache_bust}" || true)
@@ -100,15 +101,24 @@ jobs:
             css_code=$(curl -sSL -o "$RUNNER_TEMP/community.css" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/community.css?${cache_bust}" || true)
             gate_code=$(curl -sSL -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
             worker_code=$(curl -sS -o "$RUNNER_TEMP/community-api.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/readers" || true)
+            entry_code=$(curl -sS -o "$RUNNER_TEMP/community-entry.json" -w "%{http_code}" --max-time 20 \
+              -H 'content-type: application/json' \
+              --data '{"entry":true,"device_id":"00000000-0000-4000-8000-000000000001","role":"guest","username":"x","password":"short","display_name":""}' \
+              "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/register" || true)
             if [ "$page_code" = "200" ] \
-              && grep -q "Cái Chợ của Hiên Nhi" "$RUNNER_TEMP/community.html" \
+              && grep -q "Spirituality Market" "$RUNNER_TEMP/community.html" \
               && grep -q "community-role-card" "$RUNNER_TEMP/community.html" \
+              && grep -q "Reader / Người xem bói" "$RUNNER_TEMP/community.html" \
               && [ "$css_code" = "200" ] \
               && grep -q "community-role-options" "$RUNNER_TEMP/community.css" \
               && [ "$gate_code" = "200" ] \
               && grep -q "applyMarketBranding" "$RUNNER_TEMP/gate.js" \
+              && grep -q "buildBoitoanEntryUI" "$RUNNER_TEMP/gate.js" \
+              && grep -q "Đăng nhập Admin" "$RUNNER_TEMP/gate.js" \
               && [ "$worker_code" = "401" ] \
-              && grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json"; then
+              && grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json" \
+              && [ "$entry_code" = "400" ] \
+              && grep -q '"invalid_account"' "$RUNNER_TEMP/community-entry.json"; then
               break
             fi
             sleep 4
@@ -119,16 +129,22 @@ jobs:
             echo "css_code=$css_code"
             echo "gate_code=$gate_code"
             echo "worker_code=$worker_code"
+            echo "entry_code=$entry_code"
           } >> "$GITHUB_OUTPUT"
           test "$page_code" = "200"
-          grep -q "Cái Chợ của Hiên Nhi" "$RUNNER_TEMP/community.html"
+          grep -q "Spirituality Market" "$RUNNER_TEMP/community.html"
           grep -q "community-role-card" "$RUNNER_TEMP/community.html"
+          grep -q "Reader / Người xem bói" "$RUNNER_TEMP/community.html"
           test "$css_code" = "200"
           grep -q "community-role-options" "$RUNNER_TEMP/community.css"
           test "$gate_code" = "200"
           grep -q "applyMarketBranding" "$RUNNER_TEMP/gate.js"
+          grep -q "buildBoitoanEntryUI" "$RUNNER_TEMP/gate.js"
+          grep -q "Đăng nhập Admin" "$RUNNER_TEMP/gate.js"
           test "$worker_code" = "401"
           grep -q '"unauthorized"' "$RUNNER_TEMP/community-api.json"
+          test "$entry_code" = "400"
+          grep -q '"invalid_account"' "$RUNNER_TEMP/community-entry.json"
 
       - name: Ghi trạng thái triển khai thành công
         if: success()
@@ -150,8 +166,9 @@ jobs:
           - Community CSS: \`${{ steps.smoke.outputs.css_code }}\`
           - Gate runtime JS: \`${{ steps.smoke.outputs.gate_code }}\`
           - Cloudflare Worker: \`${{ steps.smoke.outputs.worker_code }} unauthorized\` khi gọi API Reader không có phiên
-          - Branding kiểm tra: \`Cái Chợ của Hiên Nhi\`
-          - Layout kiểm tra: \`community-role-card\`, \`community-role-options\`
+          - Onboarding công khai: \`${{ steps.smoke.outputs.entry_code }} invalid_account\` với dữ liệu kiểm thử không hợp lệ
+          - Branding kiểm tra: \`Spirituality Market\`
+          - Layout kiểm tra: \`community-role-card\`, \`community-role-options\`, \`buildBoitoanEntryUI\`
           - Thứ tự triển khai: Pages trước, Worker sau
           EOF
           git config user.name "github-actions[bot]"
@@ -164,7 +181,6 @@ jobs:
       - name: Ghi trạng thái triển khai thất bại
         if: failure()
         run: |
-          set -euo pipefail
           git reset --hard HEAD
           rm -rf _site
           mkdir -p docs/handover
@@ -184,7 +200,7 @@ jobs:
           - Deploy Pages: \`${{ steps.deploy_pages.outcome }}\`
           - Deploy Worker: \`${{ steps.deploy_worker.outcome }}\`
           - Hậu kiểm: \`${{ steps.smoke.outcome }}\`
-          - HTTP Pages/CSS/Gate/Worker: \`${{ steps.smoke.outputs.page_code || 'n/a' }}/${{ steps.smoke.outputs.css_code || 'n/a' }}/${{ steps.smoke.outputs.gate_code || 'n/a' }}/${{ steps.smoke.outputs.worker_code || 'n/a' }}\`
+          - HTTP Pages/CSS/Gate/Worker/Onboarding: \`${{ steps.smoke.outputs.page_code || 'n/a' }}/${{ steps.smoke.outputs.css_code || 'n/a' }}/${{ steps.smoke.outputs.gate_code || 'n/a' }}/${{ steps.smoke.outputs.worker_code || 'n/a' }}/${{ steps.smoke.outputs.entry_code || 'n/a' }}\`
           - URL cuối sau chuyển hướng: \`${{ steps.smoke.outputs.page_url || 'n/a' }}\`
           - Hành động: mở workflow run ở trên, sửa đúng bước thất bại rồi chạy lại; không coi production đã hoàn tất.
           EOF
