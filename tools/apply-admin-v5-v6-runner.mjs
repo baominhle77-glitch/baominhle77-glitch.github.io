@@ -24,6 +24,7 @@ backend = await readFile(backendPath, "utf8");
 if (!backend.includes("/* Account V8 edge-safe admin authentication */")) {
   await importRuntime("apply-admin-v8-edge-login.mjs");
 }
+await importRuntime("apply-admin-v8-tests.mjs");
 
 const gatePath = new URL("../assets/gate.js", import.meta.url);
 let gate = await readFile(gatePath, "utf8");
