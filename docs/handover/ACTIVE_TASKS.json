@@ -1,8 +1,25 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T16:47:00+07:00",
+  "updated_at": "2026-07-23T17:46:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "TRAVEL-20260723-01",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/TRAVEL-20260723-01-vietnam-travel",
+      "base_sha": "e3d6aa846e24be6685ba58220afb79e6af22812c",
+      "paths": [
+        "dulich-viet-nam/**",
+        "travel-worker/**",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T17:46:00+07:00",
+      "heartbeat_at": "2026-07-23T17:46:00+07:00",
+      "summary": "Xây web app kho địa điểm du lịch Việt Nam trong thư mục độc lập, kèm Cloudflare Worker + D1 và Telegram Bot quản trị; không đụng frontend/backend production hiện hữu."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-09",
