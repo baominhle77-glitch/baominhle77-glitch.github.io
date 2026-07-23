@@ -7,7 +7,7 @@
     {
       "id": "BOITOAN-20260723-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-04-remove-ai-guides-v2",
+      "branch": "agent/BOITOAN-20260723-04-closeout",
       "base_sha": "e71bf5539c8ef796baf5f36d1f6c328ad5d547f5",
       "paths": [
         "tools/apply-role-system.mjs",
@@ -18,7 +18,7 @@
       "status": "completed",
       "started_at": "2026-07-23T09:59:00+07:00",
       "completed_at": "2026-07-23T10:26:15+07:00",
-      "summary": "PR #26 merge tại 3322b7c899aeeee3d2e98e26e4cbc97931390a77 và production run 29976968849 ghi SUCCESS. Đã gỡ toàn bộ các hộp Khung luận và Kết nối toàn trải bài do lớp bổ sung tạo ra; giữ nguyên giao diện mobile được người dùng xác nhận đạt, branding, Cộng đồng, Luận giải chuyên sâu và thuật toán gốc."
+      "summary": "PR #26 merge tại 3322b7c899aeeee3d2e98e26e4cbc97931390a77 và production run 29976968849 ghi SUCCESS. Đã gỡ toàn bộ các hộp Khung luận và Kết nối toàn trải bài do lớp bổ sung tạo ra; giữ nguyên giao diện mobile được người dùng xác nhận đạt, branding, Cộng đồng, Luận giải chuyên sâu và thuật toán gốc. Nhánh closeout chỉ chốt ba file bàn giao."
     },
     {
       "id": "DEPLOY-20260723-03",
