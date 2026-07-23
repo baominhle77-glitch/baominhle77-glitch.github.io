@@ -1,15 +1,16 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T19:03:00+07:00",
+  "updated_at": "2026-07-23T19:11:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-10",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-10-admin-dual-v10",
-      "base_sha": "9d0572ebfd8b9737e9771fed79fbfd05391712f6",
+      "branch": "agent/BOITOAN-20260723-10-production-proof",
+      "base_sha": "971a353318d49af17dba7ed4526dfb9b3d0322ab",
       "paths": [
         ".github/workflows/validate-role-system.yml",
+        ".github/workflows/deploy-pages.yml",
         "assets/account-v2.test.mjs",
         "assets/gate.test.mjs",
         "backend/account-v2.test.mjs",
@@ -20,12 +21,13 @@
         "tools/apply-admin-levels-v6.mjs",
         "tools/apply-admin-session-v5.mjs",
         "tools/apply-admin-v5-v6-runner.mjs",
-        "docs/handover/ACTIVE_TASKS.json"
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/PRODUCTION_STATUS.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:49:00+07:00",
-      "heartbeat_at": "2026-07-23T18:58:00+07:00",
-      "summary": "Account V6 phân hai cấp tại cùng form Admin. Admin thường quản lý tài khoản, khóa/xóa member, xóa review và quản lý bài thảo luận. Admin tổng có toàn bộ quyền trên cộng quyền xem hội thoại riêng và mở trang cá nhân member chỉ đọc. Chỉ một thiết bị có phiên Admin tổng; đăng nhập primary mới thu hồi primary cũ nhưng giữ các phiên regular. ADMIN_TOKEN cũ bị vô hiệu với API community. Hai mật khẩu chỉ lưu dạng PBKDF2 hash + salt, không plaintext. Account/frontend/Worker và coordination đã success trên nhánh trước; nhánh v10 dựng trực tiếp từ main sau toàn bộ closeout Travel để merge không xung đột."
+      "heartbeat_at": "2026-07-23T19:11:00+07:00",
+      "summary": "Account V6 đã merge tại f5ac80b7: cùng form Admin, backend phân regular/primary bằng PBKDF2 hash, JWT gắn thiết bị; regular quản lý member/review/post; primary thêm hội thoại và hồ sơ member, chỉ một thiết bị primary. PR hiện tại bổ sung hậu kiểm Cloudflare bắt buộc: production phải phục vụ marker Account V6, trang Quản trị không còn form mật khẩu lần hai, API phiên Admin không token trả 401; workflow ghi PRODUCTION_STATUS theo đúng source/run sau khi Pages và Worker đều đạt."
     }
   ],
   "recently_completed": [
