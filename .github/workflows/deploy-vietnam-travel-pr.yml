@@ -1,0 +1,120 @@
+name: Deploy Vietnam Travel qua PR kiểm soát
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".deploy-vietnam-travel/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: "997944c1bfcc2dcaca32718124cd718c"
+    steps:
+      - name: Checkout nhánh PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Kiểm tra secret deploy và Telegram
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Thiếu CLOUDFLARE_API_TOKEN"; exit 1; }
+          npx --yes wrangler@4.112.0 secret list --config backend/wrangler.toml --format json > "$RUNNER_TEMP/worker-secrets.json"
+          node - <<'NODE' "$RUNNER_TEMP/worker-secrets.json"
+          const secrets = require(process.argv[2]);
+          for (const name of [
+            "DECRYPT_KEY_SPARE", "SESSION_SECRET", "ADMIN_TOKEN",
+            "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_WEBHOOK_SECRET"
+          ]) {
+            if (!secrets.some((item) => item.name === name)) {
+              console.error(`::error::Worker thiếu ${name}`);
+              process.exit(1);
+            }
+          }
+          NODE
+
+      - name: Áp dụng lớp build và kiểm thử
+        run: |
+          set -euo pipefail
+          node tools/apply-role-system.mjs
+          node tools/apply-account-v2-runner.mjs
+          node tools/apply-account-v3-hotfix.mjs
+          node tools/apply-travel-system.mjs
+          node tools/validate-coordination.mjs
+          node --check backend/travel.js
+          node --test backend/travel.test.mjs
+          node --check backend/worker.js
+          node backend/worker.test.mjs
+          node --check vietnam-travel/app.js
+          node --check vietnam-travel/sw.js
+          node --check vietnam-travel/data/seed-places.js
+          grep -q 'Travel API integration v1' backend/worker.js
+          grep -q 'Travel Telegram integration v1' backend/worker.js
+
+      - name: Gộp toàn bộ site
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data
+          cp index.html manifest.webmanifest sw.js _site/
+          cp assets/gate.js assets/gate.css assets/community.js assets/community-admin.js assets/community.css _site/assets/
+          cp robots.txt _site/robots.txt
+          cp boitoan/index.html boitoan/community.html boitoan/community-admin.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
+          cp medora/index.html _site/medora/index.html
+          cp vietnam-travel/index.html vietnam-travel/app.css vietnam-travel/app.js vietnam-travel/manifest.webmanifest vietnam-travel/sw.js vietnam-travel/icon.svg _site/vietnam-travel/
+          cp vietnam-travel/data/seed-places.js _site/vietnam-travel/data/
+
+      - name: Deploy Pages
+        run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
+
+      - name: Deploy Worker
+        working-directory: backend
+        run: npx --yes wrangler@4.112.0 deploy
+
+      - name: Hậu kiểm production
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            travel_code=$(curl -sSL -o "$RUNNER_TEMP/travel.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/vietnam-travel/?deploy=${GITHUB_SHA}" || true)
+            health_code=$(curl -sS -o "$RUNNER_TEMP/health.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/travel/health" || true)
+            places_code=$(curl -sS -o "$RUNNER_TEMP/places.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/travel/places" || true)
+            root_code=$(curl -sSL -o /dev/null -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/?deploy=${GITHUB_SHA}" || true)
+            boitoan_code=$(curl -sSL -o "$RUNNER_TEMP/community.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community.html?deploy=${GITHUB_SHA}" || true)
+            medora_code=$(curl -sSL -o /dev/null -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/medora/?deploy=${GITHUB_SHA}" || true)
+            if [ "$travel_code" = "200" ] \
+              && grep -q "Việt Nam Đi Đâu?" "$RUNNER_TEMP/travel.html" \
+              && [ "$health_code" = "200" ] \
+              && grep -q '"service":"vietnam-travel"' "$RUNNER_TEMP/health.json" \
+              && [ "$places_code" = "200" ] \
+              && grep -q '"vinh-ha-long"' "$RUNNER_TEMP/places.json" \
+              && [ "$root_code" = "200" ] \
+              && [ "$boitoan_code" = "200" ] \
+              && grep -q "Spirituality Market" "$RUNNER_TEMP/community.html" \
+              && [ "$medora_code" = "200" ]; then
+              echo "Production đạt: Travel=$travel_code API=$places_code Root=$root_code BoiToan=$boitoan_code Medora=$medora_code"
+              exit 0
+            fi
+            sleep 4
+          done
+          echo "::error::Hậu kiểm production không đạt"
+          cat "$RUNNER_TEMP/health.json" 2>/dev/null || true
+          cat "$RUNNER_TEMP/places.json" 2>/dev/null || true
+          exit 1
