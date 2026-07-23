@@ -77,12 +77,26 @@ await edit("boitoan/community-admin.html", (source) => {
   return source;
 });
 
+await edit("boitoan/index.html", (source) => {
+  if (source.includes('/assets/gate.js?v=18')) return source;
+  return replaceRequired(source, '<script src="/assets/gate.js" defer></script>', '<script src="/assets/gate.js?v=18" defer></script>', "cache bust gate.js V18");
+});
+
+await edit("boitoan/sw.js", (source) => source.replace('var CACHE="boitoan-v17";', 'var CACHE="boitoan-v18";'));
+await edit("boitoan/sw.test.mjs", (source) => source
+  .replaceAll('"boitoan-v17"', '"boitoan-v17", "boitoan-v18"')
+  .replace('current v17', 'current v18')
+  .replace('"boitoan-v10", "boitoan-v11", "boitoan-v12", "boitoan-v13", "boitoan-v14", "boitoan-v15", "boitoan-v16"', '"boitoan-v10", "boitoan-v11", "boitoan-v12", "boitoan-v13", "boitoan-v14", "boitoan-v15", "boitoan-v16", "boitoan-v17"')
+);
+
 for (const [path, markers] of [
   ["assets/gate.js", ["Account V10 authoritative Admin return", "adminReturnCandidate", "requested || !!token", "restoreAdminApp(startWithoutAdminReturn)"]],
   ["boitoan/community-admin.html", ["community-back-to-app", "admin_return=1&v=18"]],
+  ["boitoan/index.html", ["/assets/gate.js?v=18"]],
+  ["boitoan/sw.js", ["boitoan-v18"]],
 ]) {
   const value = await readFile(path, "utf8");
   for (const marker of markers) if (!value.includes(marker)) throw new Error(`Thiếu marker ${marker} trong ${path}`);
 }
 
-console.log("Account V10: JWT và phản hồi backend là nguồn sự thật; tự phục hồi phiên Admin dù thiếu cờ frontend.");
+console.log("Account V10: JWT và phản hồi backend là nguồn sự thật; tự phục hồi phiên Admin dù thiếu cờ frontend, cache v18.");
