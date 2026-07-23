@@ -14,7 +14,7 @@ class MemoryKV {
 }
 
 const secret = "s".repeat(64);
-const env = { KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass" };
+const env = { KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass", DECRYPT_KEY: "test-decrypt-key" };
 function b64url(input) { return Buffer.from(input).toString("base64url"); }
 function jwt(payload, ttl = 3600) {
   const now = Math.floor(Date.now() / 1000);
@@ -53,12 +53,42 @@ assert.equal(__test.validateProfileBody({ display_name: "A", bank_name: "VCB" },
 assert.equal(__test.secureEqual("abc", "abc"), true);
 assert.equal(__test.secureEqual("abc", "abd"), false);
 
+const entryDid = randomUUID();
+let result = await call("/api/community/register", {
+  method: "POST",
+  body: {
+    entry: true,
+    device_id: entryDid,
+    device: { ua: "Mozilla/5.0 Version/18.0 Mobile Safari/605.1", lang: "vi-VN", tz: "Asia/Bangkok", screen: "1179x2556", platform: "iPhone" },
+    role: "guest",
+    username: "entry_01",
+    password: "password-entry",
+    display_name: "Thành viên Cổng",
+    bio: ""
+  }
+});
+assert.equal(result.status, 201);
+assert.equal(result.data.profile.role, "guest");
+assert.equal(result.data.key, env.DECRYPT_KEY);
+assert.equal(typeof result.data.gate_token, "string");
+assert.equal(typeof result.data.token, "string");
+assert.equal(result.data.telegram_notified, false);
+
+result = await call("/api/community/login", {
+  method: "POST",
+  body: { entry: true, device_id: entryDid, device: { platform: "iPhone" }, username: "entry_01", password: "password-entry" }
+});
+assert.equal(result.status, 200);
+assert.equal(result.data.profile.username, "entry_01");
+assert.equal(result.data.key, env.DECRYPT_KEY);
+assert.equal(typeof result.data.gate_token, "string");
+
 const guestDid = randomUUID();
 const readerDid = randomUUID();
 const guestGate = await gateToken(guestDid);
 const readerGate = await gateToken(readerDid);
 
-let result = await call("/api/community/register", {
+result = await call("/api/community/register", {
   method: "POST", token: guestGate,
   body: { role: "guest", username: "guest_01", password: "password-guest", display_name: "Khách Một", bio: "Tôi là khách" }
 });
@@ -127,7 +157,7 @@ assert.equal(result.status, 201);
 
 result = await call("/api/community/admin/users", { admin: true });
 assert.equal(result.status, 200);
-assert.equal(result.data.users.length, 2);
+assert.equal(result.data.users.length, 3);
 result = await call("/api/community/admin/conversations", { admin: true, ownerDevice: guestDid });
 assert.equal(result.status, 403);
 assert.equal(result.data.error, "owner_device_required");
