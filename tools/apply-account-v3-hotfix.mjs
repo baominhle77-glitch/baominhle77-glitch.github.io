@@ -121,7 +121,9 @@ await edit("assets/gate.js", (source) => {
     "hiện lối quản trị ngay sau đăng nhập Admin"
   );
 
-  source = source.replace("\n  boot();", "\n  /* Account V3 admin navigation */\n  boot();");
+  const startup = "  if (document.readyState === \"loading\") {";
+  if (!source.includes(startup)) throw new Error("Không tìm thấy điểm khởi động gate");
+  source = source.replace(startup, "  /* Account V3 admin navigation */\n" + startup);
   return source;
 });
 
