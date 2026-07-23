@@ -1,8 +1,30 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T13:56:00+07:00",
+  "updated_at": "2026-07-23T14:17:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-07",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-07-admin-member-profile",
+      "base_sha": "463e5944d1abcd56e80e1b19f491220896ba98d4",
+      "paths": [
+        "tools/apply-account-v2-profile-view.mjs",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/deploy-pages.yml",
+        "assets/account-v2.test.mjs",
+        "assets/community.js",
+        "assets/community-admin.js",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T14:17:00+07:00",
+      "heartbeat_at": "2026-07-23T14:17:00+07:00",
+      "summary": "Sửa thiếu sót Account V2: nút Xem giao diện hiện chỉ mở dashboard mặc định của member nên Admin tổng không vào thẳng Trang cá nhân. Bổ sung điều hướng admin_view=profile, hiển thị đúng trang cá nhân Khách/Reader ở chế độ chỉ đọc, nút quay lại Admin và test production marker."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-06",
