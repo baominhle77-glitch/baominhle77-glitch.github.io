@@ -1,4 +1,4 @@
-var CACHE="boitoan-v12";
+var CACHE="boitoan-v13";
 // Không cache HTML/navigation: index chứa payload mã hóa và phải luôn lấy từ mạng.
 var ASSETS=["manifest.webmanifest","icon-192.png","icon.png","/assets/gate.css","/assets/gate.js"];
 var ASSET_URLS=ASSETS.map(function(path){return new URL(path,self.registration.scope).href;});
