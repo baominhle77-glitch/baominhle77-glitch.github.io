@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T20:50:00+07:00",
+  "updated_at": "2026-07-23T21:08:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-12",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-12-admin-edge-auth",
-      "base_sha": "e3c94ba4b5cb126f9c57ff18083451788504929e",
+      "branch": "agent/BOITOAN-20260723-12-production-proof",
+      "base_sha": "d52e1ae2c606a67e32bd628bf72f8abca4d99795",
       "paths": [
         ".github/workflows/deploy-pages.yml",
         ".github/workflows/validate-role-system.yml",
@@ -22,12 +22,13 @@
         "tools/apply-admin-v5-v6-runner.mjs",
         "tools/apply-admin-v8-edge-login.mjs",
         "tools/apply-admin-v8-tests.mjs",
-        "docs/handover/ACTIVE_TASKS.json"
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/ADMIN_V8_PRODUCTION_STATUS.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T20:38:00+07:00",
-      "heartbeat_at": "2026-07-23T20:50:00+07:00",
-      "summary": "Nghiệm thu production xác nhận mật khẩu Admin tổng đúng vẫn bị invalid_admin_login. Chẩn đoán: Admin V5-V7 dùng PBKDF2 200000 vòng ngay trong Cloudflare Worker; lỗi/giới hạn CPU bị catch và biến thành báo sai mật khẩu. V8 dùng PBKDF2 edge-safe 10000 vòng được ghim trong wrangler, trim khoảng trắng, trả lỗi crypto riêng, health self-test và workflow production bắt buộc kiểm tra config_ok, crypto_ok cùng một lần đăng nhập sai có chủ đích phải trả 401 thay vì 503."
+      "heartbeat_at": "2026-07-23T21:08:00+07:00",
+      "summary": "V8 runtime đã merge và deploy. Nhánh hiện tại bổ sung bằng chứng production bền vững: verifier kiểm tra frontend V8, config_ok, crypto_ok, PBKDF2 10000 vòng và đường login thật bằng mật khẩu sai có chủ đích phải trả 401; kết quả được commit vào ADMIN_V8_PRODUCTION_STATUS.md trước khi nghiệm thu lại."
     }
   ],
   "recently_completed": [

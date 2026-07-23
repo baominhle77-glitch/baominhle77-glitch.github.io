@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: verify-admin-v8-production
@@ -19,8 +19,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Kiểm tra frontend và crypto Worker thực tế
+        id: smoke
         env:
           SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          DEPLOY_RUN_ID: ${{ github.event.workflow_run.id || 'manual' }}
         run: |
           set -euo pipefail
           cache_bust="admin-v8=${SOURCE_SHA}-${GITHUB_RUN_ID}"
@@ -28,6 +30,7 @@ jobs:
           gate_code=""
           health_code=""
           invalid_code=""
+          passed_attempt=""
 
           for attempt in $(seq 1 30); do
             gate_code=$(curl -sSL -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
@@ -48,16 +51,70 @@ jobs:
               && grep -q '"crypto_ok":true' "$RUNNER_TEMP/admin-health.json" \
               && [ "$invalid_code" = "401" ] \
               && grep -q '"invalid_admin_login"' "$RUNNER_TEMP/admin-invalid.json"; then
-              echo "Admin V8 production PASS ở lần ${attempt}."
-              cat "$RUNNER_TEMP/admin-health.json"
-              exit 0
+              passed_attempt="$attempt"
+              break
             fi
             sleep 4
           done
 
-          echo "::error::Admin V8 production chưa đạt. gate=${gate_code} health=${health_code} invalid=${invalid_code}"
-          echo "--- health ---"
-          cat "$RUNNER_TEMP/admin-health.json" 2>/dev/null || true
-          echo "--- invalid login ---"
-          cat "$RUNNER_TEMP/admin-invalid.json" 2>/dev/null || true
+          if [ -z "$passed_attempt" ]; then
+            echo "::error::Admin V8 production chưa đạt. gate=${gate_code} health=${health_code} invalid=${invalid_code}"
+            echo "--- health ---"
+            cat "$RUNNER_TEMP/admin-health.json" 2>/dev/null || true
+            echo "--- invalid login ---"
+            cat "$RUNNER_TEMP/admin-invalid.json" 2>/dev/null || true
+            exit 1
+          fi
+
+          cp "$RUNNER_TEMP/admin-health.json" "$RUNNER_TEMP/admin-health-final.json"
+          echo "source_sha=${SOURCE_SHA}" >> "$GITHUB_OUTPUT"
+          echo "deploy_run_id=${DEPLOY_RUN_ID}" >> "$GITHUB_OUTPUT"
+          echo "gate_code=${gate_code}" >> "$GITHUB_OUTPUT"
+          echo "health_code=${health_code}" >> "$GITHUB_OUTPUT"
+          echo "invalid_code=${invalid_code}" >> "$GITHUB_OUTPUT"
+          echo "passed_attempt=${passed_attempt}" >> "$GITHUB_OUTPUT"
+          echo "Admin V8 production PASS ở lần ${passed_attempt}."
+          cat "$RUNNER_TEMP/admin-health-final.json"
+
+      - name: Checkout main để ghi bằng chứng
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Ghi trạng thái Admin V8 production
+        env:
+          SOURCE_SHA: ${{ steps.smoke.outputs.source_sha }}
+          DEPLOY_RUN_ID: ${{ steps.smoke.outputs.deploy_run_id }}
+          GATE_CODE: ${{ steps.smoke.outputs.gate_code }}
+          HEALTH_CODE: ${{ steps.smoke.outputs.health_code }}
+          INVALID_CODE: ${{ steps.smoke.outputs.invalid_code }}
+          PASSED_ATTEMPT: ${{ steps.smoke.outputs.passed_attempt }}
+        run: |
+          set -euo pipefail
+          completed_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          mkdir -p docs/handover
+          cat > docs/handover/ADMIN_V8_PRODUCTION_STATUS.md <<EOF
+          # Admin V8 — trạng thái production
+
+          - Trạng thái: \`SUCCESS\`
+          - Source commit được kiểm tra: \`${SOURCE_SHA}\`
+          - Hoàn tất UTC: \`${completed_utc}\`
+          - Deploy workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${DEPLOY_RUN_ID}\`
+          - Verification workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
+          - Gate frontend: HTTP \`${GATE_CODE}\`, có marker \`Account V8 frontend auth contract\` và auth version \`2026-07-23-v8\`.
+          - Admin health: HTTP \`${HEALTH_CODE}\`, \`config_ok=true\`, \`crypto_ok=true\`, PBKDF2-SHA256 \`10000\` vòng.
+          - Đường đăng nhập Worker thật: mật khẩu sai có chủ đích trả HTTP \`${INVALID_CODE}\` + \`invalid_admin_login\`; điều này xác nhận phép tính crypto đã chạy, không rơi vào \`admin_auth_unavailable\`.
+          - Lần kiểm tra thành công: \`${PASSED_ATTEMPT}\`.
+          - Không sử dụng hoặc ghi mật khẩu Admin thật trong workflow xác minh.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/handover/ADMIN_V8_PRODUCTION_STATUS.md
+          git commit -m "docs: record Admin V8 production verification" || exit 0
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep $((attempt * 2))
+          done
           exit 1
