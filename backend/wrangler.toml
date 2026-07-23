@@ -10,6 +10,11 @@ ALLOWED_ORIGINS = "https://baominhle77-glitch.github.io,https://hiennhi89.github
 CHAT_ENABLED = "true"
 # Trang Bói toán nhận khách trở lại sau hosted checkout payOS.
 PAYOS_RETURN_URL = "https://hiennhi89.pages.dev/boitoan/"
+# Admin V8: chỉ lưu salt/hash PBKDF2, không lưu mật khẩu rõ. 10.000 vòng để chạy ổn định trên Cloudflare edge.
+ADMIN_V8_PASSWORD_SALT_B64 = "Wg1fGuw3MNtQz8jVKobFUA=="
+ADMIN_V8_REGULAR_PASSWORD_HASH_B64 = "WP5H0yPnvX7DJ1Gg2ODMiz9m+tAlFhYzf+S4JTXJur0="
+ADMIN_V8_PRIMARY_PASSWORD_HASH_B64 = "nyCS+HxOceWo77FTxDQySuSTZOhKt+HuRHPBM/7uHZM="
+ADMIN_V8_PASSWORD_ITERATIONS = "10000"
 
 # Bộ nhớ KV để lưu yêu cầu + nhật ký (workflow tự tạo & điền id).
 [[kv_namespaces]]
