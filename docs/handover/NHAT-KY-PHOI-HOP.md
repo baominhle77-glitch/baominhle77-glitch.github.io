@@ -21,44 +21,43 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-23 14:34 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-07 — HOÀN TẤT ✅
+
+- Người dùng xác nhận Admin tổng không thấy được `Trang cá nhân` của member như đã yêu cầu.
+- Đối chiếu source xác định nút cũ `Xem giao diện` chỉ tạo phiên impersonation rồi chuyển tới `community.html?admin_view=1`; `loadDashboard()` không xử lý tham số này nên vẫn mở màn mặc định theo vai trò, không gọi `renderProfile()`.
+- PR #33 merge thành `9a6b53cc7e99d78ab53410df4d3d531aeef31caa`.
+- CI mới nhất đều success:
+  - run `29988447066` — coordination guard;
+  - run `29988447104` — Account V2, frontend và Worker.
+- Production run `29988531212` ghi `SUCCESS` cho đúng source commit:
+  - Cloudflare Pages, trang Admin, Community CSS và Gate runtime JS đều `200`;
+  - Worker Reader và API thảo luận không phiên trả `401 unauthorized`, đúng kỳ vọng;
+  - onboarding dữ liệu không hợp lệ trả `400 invalid_account`.
+- Bản mới:
+  - đổi nút thành `Xem trang cá nhân`;
+  - dùng `admin_view=profile` và mở thẳng `renderProfile()` trong phiên impersonation;
+  - hiện tên đăng nhập, tên hiển thị, giới thiệu của Khách;
+  - với Reader còn hiện chuyên môn, ngân hàng, số tài khoản, tên chủ tài khoản và QR hiện tại nếu có;
+  - toàn bộ trường bị khóa, ghi rõ `Chế độ chỉ đọc`;
+  - có nút `Quay lại khu vực Admin` và `Quay lại Admin` trên header;
+  - các tab khác của member vẫn có thể xem, nhưng màn đầu luôn là Trang cá nhân.
+- Script profile-view đã được làm idempotent và được runner production áp dụng sau Account V2.
+- Task chuyển `completed`; không còn file bị khóa.
+
 ### 2026-07-23 13:56 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-06 — HOÀN TẤT ✅
 
 - Người dùng kiểm tra production trên iPhone và chỉ ra ba lỗi thực tế: onboarding hiển thị chồng nhiều nhánh, checkbox/radio thành thanh dài, đăng ký báo lỗi chung.
 - Nguyên nhân đăng ký đã được xác lập từ source: app Bói toán hiện là plaintext sau gate nhưng frontend cũ vẫn bắt buộc gọi `decryptPayload()` sau khi backend tạo tài khoản. Nếu account đã được tạo, lỗi xảy ra ở bước frontend sau đó.
 - PR #31 merge thành `61c0dc0efbddf3c865c44d001d022d80cf0185d9`.
-- CI trước merge đều success:
-  - run `29986274969` — coordination guard;
-  - run `29986275030` — Account V2, frontend, Worker và test tích hợp.
-- Production run `29986415052` ghi `SUCCESS`:
-  - Cloudflare Pages `200`;
-  - trang Admin `200`;
-  - Community CSS `200`;
-  - gate runtime JS `200`;
-  - Worker API Reader và API thảo luận không phiên `401 unauthorized`, đúng kỳ vọng;
-  - onboarding công khai trả `400 invalid_account` với dữ liệu kiểm thử không hợp lệ;
-  - marker onboarding hai màn hình, nhánh plaintext không ép giải mã, badge vai trò và Admin tổng tồn tại.
-- Account V2 đã triển khai:
-  - màn đầu chỉ có `Đăng nhập`, `Đăng ký`, `Admin`;
-  - chọn xong mới mở màn thao tác riêng, có nút quay lại;
-  - checkbox/radio dùng kích thước native trên iPhone;
-  - nếu trang không có payload AES thì mở trực tiếp bằng token hợp lệ, chỉ giải mã khi payload thực sự tồn tại;
-  - vai trò hiện cạnh tên/avatar và trong giao diện;
-  - Khách và Reader có màn mặc định/tab phù hợp chức năng;
-  - Admin khóa/mở khóa hoặc xóa member, xóa review, tạo/đóng/mở lại/xóa bài thảo luận;
-  - Admin tổng đọc chat riêng và mở giao diện member bằng phiên impersonation chỉ đọc, backend chặn thao tác ghi và ghi audit KV.
-- Thiết bị Admin tổng được bind động trong Workers KV sau khi đăng nhập Admin hợp lệ trên thiết bị đó; không hardcode mật khẩu, IP hoặc mã thiết bị vào source.
-- PR #30 trùng Task-ID/phạm vi, không mergeable và có workflow chuyên biệt failure đã được ghi chú rồi đóng không merge để tránh ghi đè production.
-- Telegram đăng ký mới vẫn là best-effort; cần một đăng ký thật sau khi tải bản mới để nghiệm thu thông báo thực tế.
-- Task chuyển `completed`; không còn file bị khóa hoặc PR mở.
+- CI trước merge đều success: run `29986274969` và `29986275030`.
+- Production run `29986415052` ghi `SUCCESS`.
+- Account V2 đã triển khai onboarding hai màn hình, input iPhone, nhánh plaintext, badge vai trò, giao diện theo role, quyền Admin và phiên impersonation chỉ đọc.
 
 ### 2026-07-23 12:20 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-05 — HOÀN TẤT ✅
 
 - PR #28 merge thành `d48ef93137c35e38ee64004dfb0cdaee9c04fd83`.
-- CI trước merge đều success:
-  - run `29981811502` — coordination guard;
-  - run `29981811526` — role system, frontend và Worker.
-- Production run `29981841325` ghi `SUCCESS` cho đúng source commit `d48ef931…`.
-- Đã đổi branding và watermark thành `Spirituality Market`, chuẩn hóa cách gọi `Admin`, đưa đăng nhập/đăng ký thành viên lên cửa đầu và giữ Telegram best-effort. Bố cục onboarding này sau đó được thay thế bởi Account V2 theo nghiệm thu iPhone.
+- CI và production thành công.
+- Đã đổi branding và watermark thành `Spirituality Market`, chuẩn hóa cách gọi `Admin`, đưa đăng nhập/đăng ký thành viên lên cửa đầu và giữ Telegram best-effort. Bố cục này sau đó được thay thế bởi Account V2.
 
 ### 2026-07-23 10:30 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-04 — HOÀN TẤT ✅
 
