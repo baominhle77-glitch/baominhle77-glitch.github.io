@@ -1,102 +1,94 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T12:22:00+07:00",
+  "updated_at": "2026-07-23T12:49:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-06",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-06-onboarding-admin-fix",
+      "base_sha": "320323bced769902e503a808b0b31f8c7f44c7b5",
+      "paths": [
+        "tools/apply-role-system.mjs",
+        ".github/workflows/deploy-pages.yml",
+        "assets/gate.js",
+        "assets/gate.css",
+        "assets/community.js",
+        "assets/community-admin.js",
+        "assets/community.css",
+        "backend/community.js",
+        "backend/community.test.mjs",
+        "backend/worker.js",
+        "backend/worker.test.mjs",
+        "boitoan/index.html",
+        "boitoan/community.html",
+        "boitoan/community-admin.html",
+        "boitoan/manifest.webmanifest",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T12:49:00+07:00",
+      "heartbeat_at": "2026-07-23T12:49:00+07:00",
+      "summary": "Sửa khẩn cấp onboarding Spirituality Market theo phản hồi trực tiếp trên iPhone: tách màn hình chọn Đăng nhập/Đăng ký/Admin khỏi biểu mẫu bước hai; chẩn đoán và sửa lỗi tạo tài khoản production; bổ sung phân cấp Admin và Tổng Admin theo owner-device, gồm xóa review, xóa member, mở chủ đề thảo luận, xem chat và phiên đại diện có kiểm soát/audit. Không ghi mật khẩu hoặc mã thiết bị cá nhân vào source công khai."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-05",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-05-closeout",
       "base_sha": "dd008ff5edaeac0f33144b88fb0a07f24d8064c4",
-      "paths": [
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
+      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
       "started_at": "2026-07-23T12:01:00+07:00",
       "completed_at": "2026-07-23T12:20:00+07:00",
-      "summary": "PR #28 merge thành d48ef93137c35e38ee64004dfb0cdaee9c04fd83. CI coordination run 29981811502 và role-system run 29981811526 đều success. Production run 29981841325 ghi SUCCESS: Pages/CSS/Gate 200, Worker không phiên 401, onboarding công khai trả 400 invalid_account với dữ liệu kiểm thử không hợp lệ, branding Spirituality Market và marker buildBoitoanEntryUI tồn tại. Đã đổi branding/watermark, chuẩn hóa Admin, đưa đăng nhập/đăng ký Khách hoặc Reader/Người xem bói lên cửa đầu, cấp phiên vào app ngay và gửi Telegram thông tin tài khoản cùng dữ liệu thiết bị tối thiểu có công bố rõ."
+      "summary": "PR #28 merge thành d48ef93137c35e38ee64004dfb0cdaee9c04fd83. CI và production đã ghi SUCCESS cho branding/onboarding bản đầu; phản hồi thực tế sau đó phát hiện UI lủng củng và đăng ký lỗi, đang được sửa trong BOITOAN-20260723-06."
     },
     {
       "id": "BOITOAN-20260723-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-04-closeout",
       "base_sha": "e71bf5539c8ef796baf5f36d1f6c328ad5d547f5",
-      "paths": [
-        "tools/apply-role-system.mjs",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
+      "paths": ["tools/apply-role-system.mjs", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
       "started_at": "2026-07-23T09:59:00+07:00",
       "completed_at": "2026-07-23T10:26:15+07:00",
-      "summary": "PR #26 merge tại 3322b7c899aeeee3d2e98e26e4cbc97931390a77 và production run 29976968849 ghi SUCCESS. Đã gỡ toàn bộ các hộp Khung luận và Kết nối toàn trải bài do lớp bổ sung tạo ra; giữ nguyên giao diện mobile được người dùng xác nhận đạt, branding, Cộng đồng, Luận giải chuyên sâu và thuật toán gốc. Nhánh closeout chỉ chốt ba file bàn giao."
+      "summary": "Đã gỡ toàn bộ các hộp Khung luận và Kết nối toàn trải bài; giữ nguyên giao diện mobile, Cộng đồng, Luận giải chuyên sâu và thuật toán gốc."
     },
     {
       "id": "DEPLOY-20260723-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/DEPLOY-20260723-03-follow-redirect",
       "base_sha": "564b216bc690d79b53d10f2cf407e6d1cf2c2ab8",
-      "paths": [
-        ".github/workflows/deploy-pages.yml",
-        "docs/handover/PRODUCTION_STATUS.md",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
+      "paths": [".github/workflows/deploy-pages.yml", "docs/handover/PRODUCTION_STATUS.md", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
       "started_at": "2026-07-23T05:26:00+07:00",
       "completed_at": "2026-07-23T10:14:25+07:00",
-      "summary": "PR #25 sửa hậu kiểm Cloudflare Clean URLs; production run 29976466953 ghi SUCCESS: Pages/CSS/Gate 200, Worker 401 unauthorized đúng kỳ vọng, URL cuối sau redirect được xác nhận."
+      "summary": "Sửa hậu kiểm Cloudflare Clean URLs; Pages/CSS/Gate 200, Worker 401 unauthorized đúng kỳ vọng."
     },
     {
       "id": "BOITOAN-20260723-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-02-mobile-brand-knowledge",
       "base_sha": "a5d3f7afa78f62e7002e151b48121bb4894d2e1f",
-      "paths": [
-        "assets/community.css",
-        "assets/community.js",
-        "assets/gate.css",
-        "assets/gate.js",
-        "assets/cho-hien-nhi-sigil.svg",
-        "boitoan/community.html",
-        "boitoan/community-admin.html",
-        "boitoan/index.html",
-        "tools/apply-role-system.mjs",
-        "docs/research/DIVINATION_SOURCES.md",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
+      "paths": ["assets/community.css", "assets/community.js", "assets/gate.css", "assets/gate.js", "assets/cho-hien-nhi-sigil.svg", "boitoan/community.html", "boitoan/community-admin.html", "boitoan/index.html", "tools/apply-role-system.mjs", "docs/research/DIVINATION_SOURCES.md", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
       "started_at": "2026-07-23T04:55:00+07:00",
       "completed_at": "2026-07-23T05:16:00+07:00",
-      "summary": "Source UI mobile và branding Cái Chợ của Hiên Nhi đã qua CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; các khung luận bổ sung sau đó bị người dùng đánh giá không hữu ích và đã được gỡ trong BOITOAN-20260723-04."
+      "summary": "Source UI mobile và branding phiên trước đã qua CI; các khung luận sau đó đã được gỡ."
     },
     {
       "id": "COORD-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "chore/multi-agent-coordination-20260723",
       "base_sha": "fc5a147596b34d62ed2464fbcaea038530be83cc",
-      "paths": [
-        "AGENTS.md",
-        ".github/copilot-instructions.md",
-        ".github/pull_request_template.md",
-        ".github/workflows/coordination-guard.yml",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/PHOI-HOP-DA-AGENT.md",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md",
-        "tools/validate-coordination.mjs"
-      ],
+      "paths": ["AGENTS.md", ".github/copilot-instructions.md", ".github/pull_request_template.md", ".github/workflows/coordination-guard.yml", "docs/handover/ACTIVE_TASKS.json", "docs/handover/PHOI-HOP-DA-AGENT.md", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md", "tools/validate-coordination.mjs"],
       "status": "completed",
       "started_at": "2026-07-23T04:24:00+07:00",
       "completed_at": "2026-07-23T04:31:00+07:00",
-      "summary": "Thiết lập quy tắc, khóa phạm vi, mẫu PR và CI điều phối nhiều agent; hai workflow PR đạt; không thay đổi logic ứng dụng."
+      "summary": "Thiết lập quy tắc, khóa phạm vi, mẫu PR và CI điều phối nhiều agent."
     }
   ]
 }
