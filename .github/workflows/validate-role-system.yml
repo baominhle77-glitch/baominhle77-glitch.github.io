@@ -16,18 +16,22 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
       - name: Áp dụng lớp tích hợp
-        run: node tools/apply-role-system.mjs
+        run: |
+          node tools/apply-role-system.mjs
+          node tools/apply-account-v2.mjs
       - name: Kiểm tra frontend
         run: |
           node --check assets/gate.js
           node --check assets/community.js
           node --check assets/community-admin.js
           node assets/gate.test.mjs
+          node assets/account-v2.test.mjs
           node --check boitoan/sw.js
           node boitoan/sw.test.mjs
       - name: Kiểm tra Worker
         run: |
           node --check backend/community.js
           node backend/community.test.mjs
+          node backend/account-v2.test.mjs
           node --check backend/worker.js
           node backend/worker.test.mjs
