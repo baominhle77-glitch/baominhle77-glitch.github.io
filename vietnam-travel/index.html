@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f4c3a">
+  <meta name="description" content="Kho thông tin các địa điểm du lịch nổi tiếng và đặc thù của Việt Nam: tìm kiếm, lọc theo vùng, lưu yêu thích và mở bản đồ.">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:title" content="Việt Nam Đi Đâu? — Kho địa điểm du lịch">
+  <meta property="og:description" content="Khám phá địa điểm nổi tiếng và đặc thù trên khắp Việt Nam.">
+  <title>Việt Nam Đi Đâu? — Kho địa điểm du lịch</title>
+  <link rel="canonical" href="https://hiennhi89.pages.dev/vietnam-travel/">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+  <a class="skip-link" href="#places">Bỏ qua tới danh sách địa điểm</a>
+
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Việt Nam Đi Đâu — Trang chủ">
+      <span class="brand-mark" aria-hidden="true">V</span>
+      <span>
+        <strong>Việt Nam Đi Đâu?</strong>
+        <small>Kho địa điểm du lịch</small>
+      </span>
+    </a>
+    <button id="favoritesOnly" class="ghost-button" type="button" aria-pressed="false">
+      <span aria-hidden="true">♡</span> Yêu thích
+    </button>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Từ địa đầu Hà Giang đến Đất Mũi Cà Mau</p>
+        <h1 id="hero-title">Tìm một nơi đáng đi ở Việt Nam</h1>
+        <p>Tra cứu nhanh điểm nổi bật, thời điểm phù hợp, thời lượng gợi ý, lưu ý thực tế và đường đi trên bản đồ.</p>
+        <div class="hero-stats" aria-live="polite">
+          <div><strong id="totalCount">—</strong><span>địa điểm</span></div>
+          <div><strong id="regionCount">—</strong><span>vùng</span></div>
+          <div><strong id="favoriteCount">0</strong><span>đã lưu</span></div>
+        </div>
+      </div>
+      <div class="hero-map" aria-hidden="true">
+        <span class="map-dot dot-north"></span>
+        <span class="map-dot dot-central"></span>
+        <span class="map-dot dot-highlands"></span>
+        <span class="map-dot dot-south"></span>
+        <span class="map-label label-north">Bắc</span>
+        <span class="map-label label-central">Trung</span>
+        <span class="map-label label-highlands">Tây Nguyên</span>
+        <span class="map-label label-south">Nam</span>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="Bộ lọc địa điểm">
+      <label class="search-box" for="searchInput">
+        <span aria-hidden="true">⌕</span>
+        <input id="searchInput" type="search" inputmode="search" autocomplete="off" placeholder="Tìm tên, tỉnh, trải nghiệm...">
+      </label>
+      <label>
+        <span class="sr-only">Lọc theo vùng</span>
+        <select id="regionFilter">
+          <option value="">Tất cả vùng</option>
+        </select>
+      </label>
+      <label>
+        <span class="sr-only">Lọc theo loại hình</span>
+        <select id="categoryFilter">
+          <option value="">Tất cả loại hình</option>
+        </select>
+      </label>
+      <label>
+        <span class="sr-only">Sắp xếp</span>
+        <select id="sortSelect">
+          <option value="featured">Nổi bật trước</option>
+          <option value="name">Tên A–Z</option>
+          <option value="province">Tỉnh/TP A–Z</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="result-bar" aria-live="polite">
+      <p id="resultText">Đang tải dữ liệu…</p>
+      <button id="resetFilters" class="text-button" type="button" hidden>Xóa bộ lọc</button>
+    </section>
+
+    <section id="places" class="place-grid" aria-label="Danh sách địa điểm"></section>
+
+    <section id="emptyState" class="empty-state" hidden>
+      <span aria-hidden="true">⌁</span>
+      <h2>Không tìm thấy địa điểm phù hợp</h2>
+      <p>Thử đổi từ khóa hoặc bỏ bớt bộ lọc.</p>
+      <button id="emptyReset" class="primary-button" type="button">Xóa bộ lọc</button>
+    </section>
+
+    <section class="telegram-guide" aria-labelledby="telegram-title">
+      <div>
+        <p class="eyebrow">Dành cho chủ dữ liệu</p>
+        <h2 id="telegram-title">Cập nhật kho bằng Telegram Bot</h2>
+        <p>Thêm, sửa, ẩn, hiện hoặc xóa địa điểm ngay trong cuộc trò chuyện với bot. Hệ thống chỉ nhận lệnh từ Telegram ID của chủ bot.</p>
+      </div>
+      <details>
+        <summary>Xem lệnh quản trị</summary>
+        <pre><code>/travel
+/ds
+/xem &lt;id&gt;
+/an &lt;id&gt;
+/hien &lt;id&gt;
+/xoa &lt;id&gt;
+
+/them
+Tên: ...
+Tỉnh: ...
+Vùng: ...
+Loại: ...
+Mô tả: ...
+
+/sua &lt;id&gt;
+Mô tả: nội dung mới</code></pre>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>Việt Nam Đi Đâu?</strong> — dữ liệu tham khảo cho việc lập kế hoạch.</p>
+    <p>Giá vé, giờ mở cửa, thời tiết và điều kiện tiếp cận có thể thay đổi; hãy kiểm tra nguồn chính thức trước chuyến đi.</p>
+    <p id="dataStatus">Dữ liệu đang tải.</p>
+  </footer>
+
+  <dialog id="placeDialog" aria-labelledby="dialogTitle">
+    <button id="dialogClose" class="dialog-close" type="button" aria-label="Đóng">×</button>
+    <div id="dialogVisual" class="dialog-visual" aria-hidden="true"></div>
+    <div class="dialog-body">
+      <div class="dialog-heading">
+        <div>
+          <p id="dialogLocation" class="eyebrow"></p>
+          <h2 id="dialogTitle"></h2>
+        </div>
+        <button id="dialogFavorite" class="favorite-button" type="button" aria-label="Lưu yêu thích">♡</button>
+      </div>
+      <div id="dialogCategories" class="tag-row"></div>
+      <p id="dialogSummary" class="dialog-summary"></p>
+      <div id="dialogHighlights" class="detail-section"></div>
+      <dl class="detail-list">
+        <div><dt>Thời điểm phù hợp</dt><dd id="dialogBestTime"></dd></div>
+        <div><dt>Thời lượng gợi ý</dt><dd id="dialogDuration"></dd></div>
+        <div><dt>Địa chỉ/khu vực</dt><dd id="dialogAddress"></dd></div>
+        <div><dt>Lưu ý thực tế</dt><dd id="dialogTips"></dd></div>
+      </dl>
+      <div class="dialog-actions">
+        <a id="dialogMap" class="primary-button" href="#" target="_blank" rel="noopener noreferrer">Mở bản đồ</a>
+        <button id="dialogShare" class="secondary-button" type="button">Chia sẻ</button>
+        <a id="dialogSource" class="text-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Nguồn tham khảo</a>
+      </div>
+    </div>
+  </dialog>
+
+  <template id="placeCardTemplate">
+    <article class="place-card">
+      <div class="card-visual">
+        <span class="card-region"></span>
+        <button class="favorite-button card-favorite" type="button" aria-label="Lưu yêu thích">♡</button>
+      </div>
+      <div class="card-body">
+        <div class="card-location"></div>
+        <h2 class="card-title"></h2>
+        <p class="card-summary"></p>
+        <div class="tag-row card-tags"></div>
+        <div class="card-footer">
+          <span class="card-duration"></span>
+          <button class="detail-button" type="button">Xem chi tiết <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

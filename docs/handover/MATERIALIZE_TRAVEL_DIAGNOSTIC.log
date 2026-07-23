@@ -1,0 +1,47 @@
+MATERIALIZE_TRAVEL_DIAGNOSTIC_V2
+started_at=2026-07-23T11:41:35Z
+source_commit=282fec79f2a50ce56bf0771b44b6bd293041a2aa
+archive_bytes=28426
+/home/runner/work/_temp/vietnam-travel-source.tar.gz: OK
+TAP version 13
+# Subtest: slug và parser trường tiếng Việt ổn định
+ok 1 - slug và parser trường tiếng Việt ổn định
+  ---
+  duration_ms: 8.017206
+  type: 'test'
+  ...
+# Subtest: API tự seed và chỉ trả địa điểm công khai
+ok 2 - API tự seed và chỉ trả địa điểm công khai
+  ---
+  duration_ms: 393.321061
+  type: 'test'
+  ...
+# Subtest: Telegram chỉ nhận lệnh của chủ bot
+ok 3 - Telegram chỉ nhận lệnh của chủ bot
+  ---
+  duration_ms: 1.62138
+  type: 'test'
+  ...
+# Subtest: thêm, sửa, ẩn, hiện và xóa địa điểm qua Telegram
+ok 4 - thêm, sửa, ẩn, hiện và xóa địa điểm qua Telegram
+  ---
+  duration_ms: 181.915957
+  type: 'test'
+  ...
+# Subtest: lọc vùng và danh mục ở API
+ok 5 - lọc vùng và danh mục ở API
+  ---
+  duration_ms: 3.099154
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 995.388516
+completed_at=2026-07-23T11:41:39Z
+status=0

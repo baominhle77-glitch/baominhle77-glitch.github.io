@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Biểu tượng Việt Nam Đi Đâu">
+  <rect width="512" height="512" rx="118" fill="#0f4c3a"/>
+  <path d="M148 114h75l35 139 35-139h74L296 398h-77L148 114Z" fill="#f4d06f"/>
+  <circle cx="385" cy="118" r="35" fill="#fff" opacity=".9"/>
+</svg>
