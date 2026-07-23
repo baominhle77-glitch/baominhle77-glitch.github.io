@@ -1,20 +1,22 @@
-# Bàn giao hệ thống ba webapp
+# Bàn giao hệ thống bốn webapp
 
 > **Mọi agent phải đọc `AGENTS.md` trước file này.** Sau đó đọc `docs/handover/ACTIVE_TASKS.json` và `docs/handover/NHAT-KY-PHOI-HOP.md` trước khi sửa.
 
-**Cập nhật:** 23/07/2026 16:47 (GMT+7)  
-**Source ứng dụng đã deploy:** `bc8016a23c342ff93416003293148c06263242f8`  
-**Commit ghi trạng thái production:** `b29e3ca66ee1da27631d881be34086ad4e3ac2d5`  
-**Commit ghi E2E Reader + WebKit:** `1768f2c073571f51de9ba550a84786ba7b75573c`  
-**Task đang hoạt động:** không có.  
-**Production:** `SUCCESS`.  
-**Reader + WebKit production E2E:** `SUCCESS — 201/200/200/200/200/401/401`.
+**Cập nhật:** 23/07/2026 18:58 (GMT+7)  
+**Source Bói toán đã deploy:** `bc8016a23c342ff93416003293148c06263242f8`  
+**Source Vietnam Travel:** `b3a29cbd5416424a6df16bb4a7bd392a75287f5c`  
+**Validation Vietnam Travel:** run `30004367095`  
+**Deploy + production smoke Vietnam Travel:** run `30004367100`, job `89196797196`  
+**Task đang hoạt động:** `BOITOAN-20260723-10` — Account V6; xem `docs/handover/ACTIVE_TASKS.json`  
+**Production hiện tại:** `SUCCESS`  
+**Reader + WebKit production E2E:** `SUCCESS — 201/200/200/200/200/401/401`
 
 ## Nguyên tắc độ tin cậy bắt buộc
 
 - Không tuyên bố source hoặc production hoàn tất nếu chưa có log/test/nghiệm thu tương ứng.
 - Khi chưa đủ dữ liệu, ghi rõ **chưa xác lập/chưa đủ chứng cứ**.
-- Không đưa mật khẩu, token, IP đầy đủ, mã thiết bị cá nhân, QR, chat hoặc secret vào repository.
+- Không đưa mật khẩu, token, Telegram Chat ID, IP đầy đủ, mã thiết bị cá nhân, QR, chat hoặc secret vào repository.
+- Không sửa trực tiếp `main`; dùng Task-ID, branch, PR, CI và file bàn giao.
 
 ---
 
@@ -25,10 +27,11 @@
 | Bói toán / Spirituality Market | `boitoan/`, `assets/`, `backend/` | `https://hiennhi89.pages.dev/boitoan/` |
 | SPARE | root | `https://hiennhi89.pages.dev/` |
 | MEDORA | `medora/` | `https://hiennhi89.pages.dev/medora/` |
+| Việt Nam Đi Đâu? | `vietnam-travel/`, `backend/travel.js` | `https://hiennhi89.pages.dev/vietnam-travel/` |
 
-Repository `baominhle77-glitch/baominhle77-glitch.github.io` là nguồn chuẩn duy nhất.
+Repository `baominhle77-glitch/baominhle77-glitch.github.io` là nguồn chuẩn duy nhất. Backend dùng chung: `https://hiennhi89-gate.hiennhi89.workers.dev`.
 
-### Bằng chứng production gần nhất
+### Bằng chứng production Bói toán/Reader gần nhất
 
 `docs/handover/PRODUCTION_STATUS.md` cho source `bc8016a23c342ff93416003293148c06263242f8`:
 
@@ -55,9 +58,69 @@ Repository `baominhle77-glitch/baominhle77-glitch.github.io` là nguồn chuẩn
 
 Mã lỗi: `none`. Tài khoản thử `e2e_reader_*` đã tự xóa trong cùng workflow.
 
+### Bằng chứng production Vietnam Travel
+
+- Source thật trên `main`: `b3a29cbd5416424a6df16bb4a7bd392a75287f5c`.
+- Unit test Travel: `5/5` đạt.
+- Validation workflow run `30004367095`: success.
+- Production deploy + smoke run `30004367100`, job `89196797196`: success.
+- Cloudflare Pages, Worker, Travel page, Travel health/API và seed đều đạt.
+- Smoke regression cho SPARE, Bói toán và MEDORA đều đạt.
+
 ---
 
-## 2. `BOITOAN-20260723-09` — WebKit/iPhone crash loop
+## 2. `TRAVEL-20260723-01` — Việt Nam Đi Đâu?
+
+### Chức năng đã triển khai
+
+- PWA công khai, responsive, tối ưu điện thoại/iPhone và có offline shell.
+- Tìm kiếm không dấu, lọc theo vùng/loại hình và sắp xếp.
+- Lưu yêu thích bằng `localStorage`.
+- Trang chi tiết địa điểm, bản đồ, nguồn tham khảo và chia sẻ.
+- Seed 20 địa điểm nổi tiếng/đặc thù của Việt Nam.
+- API công khai chỉ đọc tại `/api/travel/*`.
+- Dữ liệu lưu trong Cloudflare Workers KV, khóa `travel:places:v1`.
+- Giới hạn phiên bản KV hiện tại: 1.000 địa điểm.
+
+### Điều khiển bằng Telegram Bot hiện có
+
+- `/travel`, `/dulich`, `/diadiem`: hướng dẫn.
+- `/ds [từ khóa]`: danh sách.
+- `/xem <id>`: xem chi tiết.
+- `/them`: thêm địa điểm bằng các dòng trường.
+- `/sua <id>`: sửa.
+- `/an <id>`, `/hien <id>`: ẩn/hiện trên web.
+- `/xoa <id>`: xóa sau nút xác nhận.
+- `/thongke`: thống kê.
+
+Bot chỉ xử lý mutation khi cả `chat.id` và `from.id` khớp `TELEGRAM_CHAT_ID`. Webhook chung vẫn xác thực `X-Telegram-Bot-Api-Secret-Token`.
+
+### Bảo mật và dữ liệu
+
+- Không lưu bot token, webhook secret hoặc Telegram ID dạng giá trị trong source.
+- URL nhập qua bot chỉ nhận `https://` và không nhận credential trong URL.
+- API chỉ trả bản ghi `published=true`.
+- Dữ liệu hỏng được sao lưu tạm 7 ngày dưới khóa `travel:places:v1:corrupt:*`, sau đó khôi phục seed.
+- Cloudflare KV có tính nhất quán cuối cùng; cập nhật mới có thể cần tải lại sau một khoảng ngắn tại một số điểm mạng.
+
+### Kiểm thử và production
+
+- SHA-256 archive: `1511d9f80024a4a495e955e88680b4400a3d20973afd530edcb509457dbcad30` — đạt.
+- Log: `docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log`.
+- Đã test parser tiếng Việt, seed/public filter, quyền chủ bot, thêm/sửa/ẩn/hiện/xóa, lọc vùng/danh mục và tích hợp idempotent vào Worker.
+- `/vietnam-travel/` trả `200`, đúng tiêu đề `Việt Nam Đi Đâu?`.
+- `/api/travel/health` trả `200`, service `vietnam-travel`.
+- `/api/travel/places` trả `200`, có seed `vinh-ha-long`.
+
+### Nghiệm thu Telegram trực tiếp
+
+Chủ bot gửi `/travel` trong Telegram và kiểm bot trả hướng dẫn. Đây là thao tác hội thoại thực tế không tự động gửi thay người dùng trong CI.
+
+Tài liệu chi tiết: `docs/handover/VIETNAM_TRAVEL.md`.
+
+---
+
+## 3. `BOITOAN-20260723-09` — WebKit/iPhone crash loop
 
 ### Triệu chứng người dùng xác nhận
 
@@ -110,7 +173,7 @@ PR #45 merge checker cuối thành source `bc8016a23c342ff93416003293148c0626324
 
 ---
 
-## 3. `BOITOAN-20260723-08` — Hotfix Admin và Reader đa nền tảng
+## 4. `BOITOAN-20260723-08` — Hotfix Admin và Reader đa nền tảng
 
 ### Lối quản trị Admin
 
@@ -140,7 +203,7 @@ PR #45 merge checker cuối thành source `bc8016a23c342ff93416003293148c0626324
 
 ---
 
-## 4. Admin tổng xem Trang cá nhân member
+## 5. Admin tổng xem Trang cá nhân member
 
 - Danh sách tài khoản Admin có nút **`Xem trang cá nhân`**.
 - URL dùng `admin_view=profile`.
@@ -151,7 +214,7 @@ PR #45 merge checker cuối thành source `bc8016a23c342ff93416003293148c0626324
 
 ---
 
-## 5. Account V2 và vai trò
+## 6. Account V2 và vai trò
 
 - Màn đầu chỉ có `Đăng nhập`, `Đăng ký`, `Admin`; chọn xong mới mở form riêng.
 - Đăng ký chọn `Khách` hoặc `Reader / Người xem bói`.
@@ -162,9 +225,24 @@ PR #45 merge checker cuối thành source `bc8016a23c342ff93416003293148c0626324
 
 ---
 
-## 6. Runtime và build
+## 7. Runtime và build
 
-Các file chính:
+### Travel
+
+- `vietnam-travel/index.html`
+- `vietnam-travel/app.css`
+- `vietnam-travel/app.js`
+- `vietnam-travel/data/seed-places.js`
+- `vietnam-travel/manifest.webmanifest`
+- `vietnam-travel/sw.js`
+- `vietnam-travel/icon.svg`
+- `backend/travel.js`
+- `backend/travel.test.mjs`
+- `tools/apply-travel-system.mjs`
+- `.github/workflows/validate-vietnam-travel.yml`
+- `.github/workflows/deploy-pages.yml`
+
+### Bói toán/Account
 
 - `tools/apply-role-system.mjs` — lớp tài khoản nền;
 - `tools/apply-account-v2.mjs` — template Account V2;
@@ -180,28 +258,31 @@ Các file chính:
 - `.github/workflows/deploy-pages.yml` — build/test/deploy/smoke;
 - `.github/workflows/e2e-reader-production.yml` — Reader + WebKit E2E thật sau deploy.
 
-Các lớp V3/V4 phải idempotent; CI chạy lặp để bắt lỗi nhân đôi mã.
+Các lớp tích hợp phải idempotent; CI chạy lặp để bắt lỗi nhân đôi mã.
 
 ---
 
-## 7. Dữ liệu và bảo mật
+## 8. Dữ liệu và bảo mật
 
 - Community session tối đa 30 ngày; chat giữ tối đa 30 ngày.
 - Reader bị cấm chèn đường dẫn vào hồ sơ/thông tin nhận phí.
 - Review 1–5 sao; Khách gỡ review của mình, Admin gỡ được, Reader không gỡ được.
 - Dữ liệu “thiết bị” là hồ sơ trình duyệt best-effort, không chứng minh chắc chắn thiết bị vật lý.
-- Không hardcode mật khẩu Admin, IP hoặc mã thiết bị chủ vào source.
+- Không hardcode mật khẩu Admin, IP, Telegram ID hoặc mã thiết bị chủ vào source.
 
 ---
 
-## 8. Trạng thái cuối
+## 9. Trạng thái cuối
 
+- Vietnam Travel source: **đã có trên `main`**.
+- Vietnam Travel Cloudflare Pages + Worker: **đã deploy và smoke test thành công**.
+- Điều khiển Travel qua Telegram: **đã tích hợp và test quyền/lệnh; chờ chủ bot gửi `/travel` để nghiệm thu hội thoại trực tiếp**.
 - Lỗi WebKit/iPhone crash loop: **đã sửa và nghiệm thu bằng WebKit production**.
 - Lối quản trị Admin trên app chính: **đã deploy**.
 - Reader đăng ký đa nền tảng: **đã nghiệm thu production thật**.
 - Admin tổng xem Trang cá nhân member: **đã deploy**.
 - Cloudflare production: **SUCCESS**.
 - Reader + WebKit production E2E: **SUCCESS**.
-- Active task: **không có**.
-- Khóa file: **đã giải phóng**.
+- Active task: `BOITOAN-20260723-10` đang thực hiện Account V6; không thuộc phạm vi Travel.
+- Khóa Travel: **đã giải phóng**.
 - Đóng gói App Store/Google Play: chưa hoàn tất.
