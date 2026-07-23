@@ -22,14 +22,15 @@ jobs:
           set -o pipefail
           {
             node --check tools/apply-account-v2-runner.mjs
+            node --check tools/apply-admin-v5-v6-runner.mjs
             node --check tools/apply-account-v3-hotfix.mjs
             node --check tools/apply-account-v4-edge-auth.mjs
             node --check tools/apply-admin-session-v5.mjs
             node --check tools/apply-admin-levels-v6.mjs
             node tools/apply-role-system.mjs
             node tools/apply-account-v2-runner.mjs
-            # Runner chứa toàn bộ V2-V6 và phải chạy lặp an toàn.
-            node tools/apply-account-v2-runner.mjs
+            # Chỉ lớp Admin V5-V6 chạy lại; không tái sinh Account V2.
+            node tools/apply-admin-v5-v6-runner.mjs
           } > account-v6-apply.log 2>&1
       - name: Kiểm tra frontend
         id: frontend
