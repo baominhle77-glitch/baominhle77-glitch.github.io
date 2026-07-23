@@ -1,4 +1,4 @@
-name: Xác minh Admin V9 quay lại Bói toán
+name: Xác minh Admin V10 quay lại Bói toán
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: verify-admin-v9-return-production
+  group: verify-admin-v10-return-production
   cancel-in-progress: true
 
 jobs:
@@ -34,29 +34,33 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Kiểm tra asset production V9
+      - name: Kiểm tra asset production V10
         id: static
         continue-on-error: true
         env:
           SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           set -euo pipefail
-          cache_bust="admin-v9=${SOURCE_SHA}-${GITHUB_RUN_ID}"
-          gate_code="n/a"; admin_code="n/a"; sw_code="n/a"; success_attempt=""
+          cache_bust="admin-v10=${SOURCE_SHA}-${GITHUB_RUN_ID}"
+          gate_code="n/a"; admin_code="n/a"; index_code="n/a"; sw_code="n/a"; success_attempt=""
           for attempt in $(seq 1 30); do
             gate_code=$(curl -sSL -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
             admin_code=$(curl -sSL -o "$RUNNER_TEMP/admin.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community-admin.html?${cache_bust}" || true)
+            index_code=$(curl -sSL -o "$RUNNER_TEMP/index.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/?${cache_bust}" || true)
             sw_code=$(curl -sSL -o "$RUNNER_TEMP/sw.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/sw.js?${cache_bust}" || true)
             if [ "$gate_code" = "200" ] \
-              && grep -q 'Account V9 Admin return-to-app' "$RUNNER_TEMP/gate.js" \
-              && grep -q 'storedAdminReturnCandidate' "$RUNNER_TEMP/gate.js" \
+              && grep -q 'Account V10 authoritative Admin return' "$RUNNER_TEMP/gate.js" \
+              && grep -q 'adminReturnCandidate' "$RUNNER_TEMP/gate.js" \
+              && grep -q 'requested || !!token' "$RUNNER_TEMP/gate.js" \
               && grep -q 'restoreAdminApp' "$RUNNER_TEMP/gate.js" \
               && grep -q 'reveal("admin-return")' "$RUNNER_TEMP/gate.js" \
               && [ "$admin_code" = "200" ] \
               && grep -q 'id="community-back-to-app"' "$RUNNER_TEMP/admin.html" \
-              && grep -q 'admin_return=1' "$RUNNER_TEMP/admin.html" \
+              && grep -q 'admin_return=1&v=18' "$RUNNER_TEMP/admin.html" \
+              && [ "$index_code" = "200" ] \
+              && grep -q '/assets/gate.js?v=18' "$RUNNER_TEMP/index.html" \
               && [ "$sw_code" = "200" ] \
-              && grep -q 'boitoan-v17' "$RUNNER_TEMP/sw.js"; then
+              && grep -q 'boitoan-v18' "$RUNNER_TEMP/sw.js"; then
               success_attempt="$attempt"
               break
             fi
@@ -65,11 +69,12 @@ jobs:
           {
             echo "gate_code=$gate_code"
             echo "admin_code=$admin_code"
+            echo "index_code=$index_code"
             echo "sw_code=$sw_code"
             echo "attempt=${success_attempt:-none}"
           } >> "$GITHUB_OUTPUT"
           test -n "$success_attempt"
-          echo "Static V9 production PASS ở lần ${success_attempt}."
+          echo "Static V10 production PASS ở lần ${success_attempt}."
 
       - name: Cài Playwright WebKit
         id: install
@@ -98,6 +103,7 @@ jobs:
           WEBKIT_OUTCOME: ${{ steps.webkit.outcome }}
           GATE_CODE: ${{ steps.static.outputs.gate_code }}
           ADMIN_CODE: ${{ steps.static.outputs.admin_code }}
+          INDEX_CODE: ${{ steps.static.outputs.index_code }}
           SW_CODE: ${{ steps.static.outputs.sw_code }}
           SUCCESS_ATTEMPT: ${{ steps.static.outputs.attempt }}
         run: |
@@ -106,27 +112,27 @@ jobs:
           status="FAILURE"
           if [ "$STATIC_OUTCOME" = "success" ] && [ "$INSTALL_OUTCOME" = "success" ] && [ "$WEBKIT_OUTCOME" = "success" ]; then status="SUCCESS"; fi
           mkdir -p docs/handover
-          cat > docs/handover/ADMIN_V9_RETURN_STATUS.md <<EOF
-          # Admin V9 — quay lại Bói toán
+          cat > docs/handover/ADMIN_V10_RETURN_STATUS.md <<EOF
+          # Admin V10 — quay lại Bói toán
 
           - Trạng thái: \`$status\`
           - Source commit: \`$SOURCE_SHA\`
           - Hoàn tất UTC: \`$completed_utc\`
           - Deploy workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/$DEPLOY_RUN_ID\`
           - Verification workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
-          - Static production: \`$STATIC_OUTCOME\`; Gate/Admin/SW HTTP \`${GATE_CODE:-n/a}/${ADMIN_CODE:-n/a}/${SW_CODE:-n/a}\`; lần đạt \`${SUCCESS_ATTEMPT:-none}\`.
+          - Static production: \`$STATIC_OUTCOME\`; Gate/Admin/Index/SW HTTP \`${GATE_CODE:-n/a}/${ADMIN_CODE:-n/a}/${INDEX_CODE:-n/a}/${SW_CODE:-n/a}\`; lần đạt \`${SUCCESS_ATTEMPT:-none}\`.
           - Cài WebKit: \`$INSTALL_OUTCOME\`.
           - Luồng WebKit: \`${WEBKIT_OUTCOME:-skipped}\`.
-          - Production gate yêu cầu marker \`Account V9 Admin return-to-app\`, \`storedAdminReturnCandidate\`, \`restoreAdminApp\` và \`reveal("admin-return")\`.
-          - Trang Quản trị yêu cầu liên kết \`← Bói toán\` dùng \`?admin_return=1\`; cache \`boitoan-v17\`.
-          - WebKit hợp lệ: JWT Admin được mock server xác nhận thì app mở thẳng, không dựng cổng đăng nhập.
-          - WebKit không hợp lệ: JWT bị xóa và cổng đăng nhập mới xuất hiện.
+          - Production gate yêu cầu marker \`Account V10 authoritative Admin return\`, \`adminReturnCandidate\`, \`requested || !!token\`, \`restoreAdminApp\` và \`reveal("admin-return")\`.
+          - Trang Quản trị dùng \`?admin_return=1&v=18\`; index tải \`gate.js?v=18\`; cache \`boitoan-v18\`.
+          - WebKit chỉ gieo \`market_admin_token\` và \`gate_device_id\`, cố ý xóa session/level/primary/auth_version để mô phỏng đúng lỗi iPhone.
+          - Backend hợp lệ phải tự phục hồi toàn bộ cờ và mở app; backend từ chối mới xóa token và hiện cổng.
           - Không sử dụng mật khẩu Admin thật trong bài kiểm tra.
           EOF
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/handover/ADMIN_V9_RETURN_STATUS.md
-          git commit -m "docs: record Admin V9 return verification $status" || exit 0
+          git add docs/handover/ADMIN_V10_RETURN_STATUS.md
+          git commit -m "docs: record Admin V10 return verification $status" || exit 0
           git pull --rebase origin main
           git push origin HEAD:main
 
