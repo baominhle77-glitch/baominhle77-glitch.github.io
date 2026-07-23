@@ -1,48 +1,42 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T01:14:00+07:00",
+  "updated_at": "2026-07-24T02:22:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260724-15",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260724-15-rebuild",
+      "base_sha": "2efdefe1c4ca007bf7d630e8f9d778ad03762df1",
+      "paths": [
+        "boitoan/**",
+        "assets/**",
+        "backend/**",
+        "tools/**",
+        ".github/workflows/**",
+        "docs/handover/**"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-24T01:29:00+07:00",
+      "heartbeat_at": "2026-07-24T02:22:00+07:00",
+      "summary": "Bói toán V11 đã chuyển thành source trực tiếp. Luồng duy nhất: xác thực backend → nhận key → decryptPayload → injectHtml → kiểm DOM → reveal. Các patch V2–V10 là no-op; Worker deploy trước Pages; CI đã qua frontend/Worker và WebKit payload AES thật. Phạm vi được rút gọn theo thư mục hệ thống, bỏ danh sách file vụn gây cản trở thay đổi đồng bộ."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260724-14",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260724-14-closeout",
-      "base_sha": "808f8c4df5b328f208c98ba0b639b316ab3b2e60",
-      "paths": [
-        "tools/apply-admin-v9-return-to-app.mjs",
-        "tools/apply-admin-v10-authoritative-return.mjs",
-        "tools/apply-admin-v5-v6-runner.mjs",
-        "tools/admin-v9-return-webkit-check.mjs",
-        "assets/account-v2.test.mjs",
-        "boitoan/index.html",
-        "boitoan/sw.js",
-        "boitoan/sw.test.mjs",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/verify-admin-v9-return.yml",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/ADMIN_V10_RETURN_STATUS.md"
-      ],
-      "status": "completed",
-      "started_at": "2026-07-24T00:46:00+07:00",
+      "status": "cancelled",
       "completed_at": "2026-07-24T01:14:00+07:00",
-      "summary": "Sửa dứt điểm lỗi từ Khu vực quản trị bấm ← Bói toán rơi về màn chọn tài khoản. V9 sai vì chỉ thử khôi phục khi đủ cờ frontend và bài WebKit gieo sẵn chính các cờ đó. V10 dùng JWT + device và phản hồi /api/community/admin/session làm nguồn sự thật; URL admin_return hoặc còn JWT là đủ để xác minh, sau đó tự phục hồi session/level/primary/auth_version và mở app. Backend từ chối mới xóa phiên. Link ?admin_return=1&v=18, index gate.js?v=18, cache boitoan-v18. CI 30032461183/30032460855 success; merge 808f8c4d; production Gate/Admin/Index/SW 200/200/200/200; verifier rerun 30032516574 success với WebKit chỉ gieo token + device."
+      "summary": "V10 bị V11 thay thế vì chỉ reveal lớp ngoài, không giải mã và bơm payload; fixture plaintext đã che lỗi."
     },
     {
       "id": "BOITOAN-20260723-13",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-13-closeout",
-      "status": "completed",
+      "status": "cancelled",
       "completed_at": "2026-07-24T00:00:00+07:00",
-      "summary": "Admin V9 đã deploy nhưng bài test gieo sẵn quá nhiều cờ nên không bắt được lỗi nghiệm thu thật."
-    },
-    {
-      "id": "BOITOAN-20260723-12",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-12-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T21:11:00+07:00",
-      "summary": "Admin V8 edge-safe đã xác minh production."
+      "summary": "V9 bị V11 thay thế vì không kiểm payload mã hóa thật."
     }
   ]
 }

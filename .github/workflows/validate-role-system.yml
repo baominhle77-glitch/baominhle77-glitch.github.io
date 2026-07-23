@@ -11,70 +11,45 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-      - name: Áp dụng lớp tích hợp
+
+      - name: Xác nhận source trực tiếp
         run: |
-          set -o pipefail
-          {
-            node --check tools/apply-account-v2-runner.mjs
-            node --check tools/apply-admin-v5-v6-runner.mjs
-            node --check tools/apply-account-v3-hotfix.mjs
-            node --check tools/apply-account-v4-edge-auth.mjs
-            node --check tools/apply-admin-session-v5.mjs
-            node --check tools/apply-admin-levels-v6.mjs
-            node --check tools/apply-admin-v7-login-hotfix.mjs
-            node --check tools/apply-admin-v8-edge-login.mjs
-            node --check tools/apply-admin-v8-tests.mjs
-            node --check tools/apply-admin-v9-return-to-app.mjs
-            node --check tools/apply-admin-v10-authoritative-return.mjs
-            node tools/apply-role-system.mjs
-            node tools/apply-account-v2-runner.mjs
-            # Chạy lại riêng chuỗi Admin V5-V10 để xác nhận idempotent.
-            node tools/apply-admin-v5-v6-runner.mjs
-          } 2>&1 | tee account-v10-apply.log
-      - name: Kiểm tra frontend
+          set -euo pipefail
+          before=$(git status --porcelain)
+          node tools/apply-role-system.mjs
+          node tools/apply-account-v2-runner.mjs
+          node tools/apply-account-v3-hotfix.mjs
+          after=$(git status --porcelain)
+          test "$before" = "$after"
+          grep -q 'Bói toán V11' assets/gate.js
+          grep -q 'openAppContent(data.key, "admin-session")' assets/gate.js
+
+      - name: Kiểm tra frontend và Worker
         run: |
-          set -o pipefail
-          {
-            node --check assets/gate.js
-            node --check assets/community.js
-            node --check assets/community-admin.js
-            node --check tools/webkit-production-check.mjs
-            node --check tools/admin-v9-return-webkit-check.mjs
-            node assets/gate.test.mjs
-            node assets/account-v2.test.mjs
-            node --check boitoan/sw.js
-            node boitoan/sw.test.mjs
-          } 2>&1 | tee account-v10-frontend.log
-      - name: Kiểm tra Worker
+          set -euo pipefail
+          node --check assets/gate.js
+          node --check assets/community.js
+          node --check assets/community-admin.js
+          node --check tools/admin-v9-return-webkit-check.mjs
+          node assets/gate.test.mjs
+          node assets/account-v2.test.mjs
+          node --check boitoan/sw.js
+          node boitoan/sw.test.mjs
+          node --check backend/community.js
+          node backend/community.test.mjs
+          node backend/account-v2.test.mjs
+          node backend/admin-v8-health.test.mjs
+          node --check backend/worker.js
+          node backend/worker.test.mjs
+
+      - name: Kiểm tra WebKit với payload AES thật
         run: |
-          set -o pipefail
-          {
-            node --check backend/community.js
-            node backend/community.test.mjs
-            node backend/account-v2.test.mjs
-            node backend/admin-v8-health.test.mjs
-            node --check backend/worker.js
-            node backend/worker.test.mjs
-          } 2>&1 | tee account-v10-worker.log
-      - name: Lưu log chẩn đoán
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: account-v10-diagnostic-log
-          path: |
-            account-v10-apply.log
-            account-v10-frontend.log
-            account-v10-worker.log
-            assets/gate.js
-            assets/community-admin.js
-            boitoan/community-admin.html
-            boitoan/index.html
-            boitoan/sw.js
-          if-no-files-found: warn
-          retention-days: 3
-      - name: Kết luận
-        run: echo "Account V10 CI PASS"
+          set -euo pipefail
+          npm install --no-save playwright@1.52.0
+          npx playwright install --with-deps webkit
+          LOCAL_GATE_JS=1 node tools/admin-v9-return-webkit-check.mjs "$GITHUB_SHA"

@@ -37,7 +37,7 @@ body::before {
   pointer-events: none;
   opacity: .045;
   transform: rotate(-17deg) scale(1.08);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='310' height='120'%3E%3Ctext x='10' y='58' fill='%23d8b45c' font-size='18' font-family='serif' letter-spacing='2'%3EC%C3%A1i%20Ch%E1%BB%A3%20c%E1%BB%A7a%20Hi%C3%AAn%20Nhi%3C/text%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='310' height='120'%3E%3Ctext x='10' y='58' fill='%23d8b45c' font-size='18' font-family='serif' letter-spacing='2'%3ESpirituality%20Market%3C/text%3E%3C/svg%3E");
   background-repeat: repeat;
 }
 body > * { position: relative; z-index: 1; }
@@ -243,3 +243,28 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
+
+
+/* Account V2 role UI */
+.community-account-identity { display:flex; align-items:center; gap:11px; min-width:0; }
+.community-avatar { display:grid; place-items:center; width:44px; height:44px; flex:0 0 44px; border-radius:50%; background:linear-gradient(145deg,#8b6fd0,#4d357f); color:white; font-weight:850; font-size:1rem; }
+.community-name-line { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.community-name-line h1,.community-name-line h3 { margin:0; }
+.community-role-badge { display:inline-flex; align-items:center; min-height:24px; padding:3px 9px; border:1px solid #725a94; border-radius:999px; background:#2a203d; color:#dbcdf0; font-size:.7rem; font-weight:800; white-space:nowrap; }
+.community-role-badge.role-reader { border-color:#d8b45c88; color:#f0cf72; }
+.community-role-badge.role-guest { border-color:#8669c788; color:#cbb8f0; }
+.community-post-list,.community-comment-list,.community-admin-posts { display:grid; gap:12px; }
+.community-post-card { width:100%; display:grid; gap:6px; text-align:left; padding:16px; border:1px solid var(--line); border-radius:15px; background:#171124; color:var(--text); }
+.community-post-card p,.community-admin-post p,.community-comment p { margin:0; color:var(--muted); white-space:pre-wrap; }
+.community-post-card small,.community-admin-post small,.community-comment small { color:var(--muted); }
+.community-post-body { white-space:pre-wrap; padding:15px; border:1px solid #ffffff14; border-radius:14px; background:#120e1c; }
+.community-comment { display:grid; gap:6px; padding:13px; border:1px solid #ffffff16; border-radius:14px; background:#120e1c; }
+.community-comment-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.community-admin-post { display:grid; gap:8px; padding:15px; border:1px solid var(--line); border-radius:15px; background:#171124; }
+.community-admin-actions { display:flex; flex-wrap:wrap; gap:7px; }
+.community-table td { white-space:pre-line; }
+@media (max-width:640px) { .community-dashboard-head{align-items:flex-start}.community-account-identity{align-items:flex-start}.community-name-line{display:grid;gap:4px}.community-admin-actions{min-width:150px} }
+
+
+/* Account V5 admin session UI */
+.community-admin-session-card{display:grid;gap:14px}.community-admin-session-copy{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.community-admin-session-copy>div{display:grid;gap:3px}.community-admin-session-copy h1,.community-admin-session-copy p{margin:0}.community-role-badge.role-admin{border-color:#f0cf72;color:#f0cf72}.community-admin-session-card>.community-secondary{justify-self:start}

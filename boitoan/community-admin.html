@@ -5,47 +5,29 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="theme-color" content="#0b0813">
-  <title>Spirituality Market · Quản trị cộng đồng</title>
+  <title>Spirituality Market · Quản trị</title>
   <link rel="stylesheet" href="/assets/community.css">
 </head>
 <body>
   <header class="community-topbar">
-    <a class="community-back" href="./">← Bói toán</a>
-    <div class="community-brand">
-      <span class="community-sigil" aria-hidden="true"></span>
-      <div class="community-brand-copy">
-        <strong>Spirituality Market</strong>
-        <small>Quản trị tài khoản, đánh giá và hội thoại</small>
-      </div>
-    </div>
+    <a id="community-back-to-app" class="community-back" href="./?admin_return=1&v=19">← Bói toán</a>
+    <div class="community-brand"><span class="community-sigil" aria-hidden="true"></span><div class="community-brand-copy"><strong>Spirituality Market</strong><small>Quản trị tài khoản, đánh giá và hội thoại</small></div></div>
   </header>
   <main class="community-shell">
-    <section class="community-card">
-      <h1>Đăng nhập quản trị</h1>
-      <form id="community-admin-login" class="community-form community-admin-login">
-        <label>Mật khẩu Admin<input id="community-admin-token" type="password" autocomplete="current-password" required></label>
-        <button class="community-primary" type="submit">Tải dữ liệu</button>
-      </form>
-      <p id="community-admin-state" class="community-state" role="status"></p>
-      <div class="community-owner-device">
-        <div><strong>Thiết bị Admin</strong><small id="community-owner-device-id"></small></div>
-        <button id="community-bind-owner" type="button" class="community-secondary">Khóa thiết bị Admin này</button>
-      </div>
+    <section class="community-card community-admin-session-card">
+      <div class="community-admin-session-copy"><span id="community-admin-level-badge" class="community-role-badge role-admin">Admin</span><div><h1>Khu vực quản trị</h1><p id="community-admin-level-description">Đang xác nhận cấp quyền quản trị…</p></div></div>
+      <button id="community-admin-logout" type="button" class="community-secondary">Đăng xuất Admin</button>
+      <p id="community-admin-state" class="community-state" role="status">Đang tải dữ liệu…</p>
     </section>
-
     <nav class="community-tabs" aria-label="Quản trị">
       <button type="button" data-admin-tab="users" class="active">Tài khoản</button>
       <button type="button" data-admin-tab="reviews">Đánh giá</button>
+      <button type="button" data-admin-tab="posts">Thảo luận</button>
       <button type="button" data-admin-tab="conversations">Hội thoại</button>
     </nav>
-
-    <section id="community-admin-content" class="community-card">
-      <p>Nhập mật khẩu Admin để tải dữ liệu.</p>
-    </section>
+    <section id="community-admin-content" class="community-card"><p>Đang tải dữ liệu quản trị…</p></section>
   </main>
-  <script>
-    window.COMMUNITY_BACKEND = "https://hiennhi89-gate.hiennhi89.workers.dev";
-  </script>
+  <script>window.COMMUNITY_BACKEND="https://hiennhi89-gate.hiennhi89.workers.dev";</script>
   <script src="/assets/community-admin.js" defer></script>
 </body>
 </html>

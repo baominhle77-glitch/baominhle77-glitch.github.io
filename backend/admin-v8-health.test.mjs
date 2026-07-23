@@ -27,16 +27,18 @@ const env = {
   ADMIN_V8_REGULAR_PASSWORD_HASH_B64: readVar("ADMIN_V8_REGULAR_PASSWORD_HASH_B64"),
   ADMIN_V8_PRIMARY_PASSWORD_HASH_B64: readVar("ADMIN_V8_PRIMARY_PASSWORD_HASH_B64"),
   ADMIN_V8_PASSWORD_ITERATIONS: readVar("ADMIN_V8_PASSWORD_ITERATIONS"),
+  DECRYPT_KEY_BOITOAN: "test-health-decrypt-key",
 };
 
 const response = await handleCommunity(new Request("https://worker.test/api/community/admin/health"), env);
-assert.equal(response.status, 200, "Admin V8 crypto health phải chạy được với cấu hình deploy thật");
+assert.equal(response.status, 200, "Admin V11 crypto health phải chạy được với cấu hình deploy thật");
 const data = await response.json();
 assert.equal(data.service, "community-admin");
-assert.equal(data.auth_version, "2026-07-23-v8");
+assert.equal(data.auth_version, "2026-07-24-v11");
 assert.equal(data.algorithm, "PBKDF2-SHA256");
 assert.equal(data.iterations, 10000);
 assert.equal(data.config_ok, true);
 assert.equal(data.crypto_ok, true);
+assert.equal(data.decrypt_key_configured, true);
 
-console.log("Admin V8 production config and edge crypto health PASS");
+console.log("Admin V11 production config, decrypt key and edge crypto health PASS");

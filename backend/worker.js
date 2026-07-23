@@ -1,3 +1,4 @@
+import { handleCommunity } from "./community.js";
 /*!
  * Cloudflare Worker: approval gate, best-effort access telemetry and owner chat.
  * Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, ADMIN_TOKEN,
@@ -35,7 +36,7 @@ function corsHeaders(request, env) {
   return {
     "Access-Control-Allow-Origin": ok ? origin || "*" : "null",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "content-type, authorization",
+    "Access-Control-Allow-Headers": "content-type, authorization, x-owner-device-id",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin",
   };
@@ -998,6 +999,9 @@ const worker = {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
     try {
+      const communityResponse = await handleCommunity(request, env);
+      if (communityResponse) return withCors(communityResponse, cors);
+
       if (url.pathname === "/api/request" && request.method === "POST") return withCors(await handleRequest(request, env), cors);
       if (url.pathname === "/api/status" && request.method === "GET") return withCors(await handleStatus(env, url), cors);
       if (url.pathname === "/api/access" && request.method === "POST") return withCors(await handleAccess(request, env), cors);

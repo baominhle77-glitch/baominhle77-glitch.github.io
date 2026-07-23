@@ -27,7 +27,7 @@ const sandbox = {
   },
   caches: {
     open: async () => cache,
-    keys: async () => ["hiennhi89-v2", "boitoan-v10", "boitoan-v11", "boitoan-v12", "boitoan-v13", "boitoan-v14", "boitoan-v15", "boitoan-v16", "boitoan-v17"],
+    keys: async () => ["hiennhi89-v2", "boitoan-v10", "boitoan-v11", "boitoan-v12", "boitoan-v13", "boitoan-v14", "boitoan-v15", "boitoan-v16", "boitoan-v17", "boitoan-v19"],
     delete: async (key) => { deletedCaches.push(key); return true; },
     match: async (key) => entries.get(String(key))
   },
@@ -45,7 +45,7 @@ vm.runInNewContext(await readFile(new URL("./sw.js", import.meta.url), "utf8"), 
 let activation;
 handlers.activate({ waitUntil(value) { activation = Promise.resolve(value); } });
 await activation;
-assert.deepEqual(deletedCaches, ["boitoan-v10", "boitoan-v11", "boitoan-v12", "boitoan-v13", "boitoan-v14", "boitoan-v15", "boitoan-v16"], "Bói toán must preserve caches owned by root Service Worker and current v17");
+assert.deepEqual(deletedCaches, ["boitoan-v10", "boitoan-v11", "boitoan-v12", "boitoan-v13", "boitoan-v14", "boitoan-v15", "boitoan-v16", "boitoan-v17"], "Bói toán must preserve caches owned by root Service Worker and current v19");
 
 function dispatch(url, init) {
   let response;

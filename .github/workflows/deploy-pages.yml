@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: cloudflare-production
@@ -17,256 +17,90 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: "997944c1bfcc2dcaca32718124cd718c"
-      KV_NAMESPACE_ID: "1030b053db194312be8adbfc24e73a85"
     steps:
-      - name: Checkout repo chính
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Bung gói nguồn Vietnam Travel nếu còn gói tạm
+      - name: Kiểm tra cấu hình Cloudflare
         run: |
           set -euo pipefail
-          if ! compgen -G '.travel-bundle/chunk-*' > /dev/null; then
-            echo 'Source Vietnam Travel đã được materialize.'
-            exit 0
-          fi
-
-          cat .travel-bundle/chunk-* > "$RUNNER_TEMP/vietnam-travel-source.tar.gz.b64"
-          base64 --decode "$RUNNER_TEMP/vietnam-travel-source.tar.gz.b64" > "$RUNNER_TEMP/vietnam-travel-source.tar.gz"
-          echo "1511d9f80024a4a495e955e88680b4400a3d20973afd530edcb509457dbcad30  $RUNNER_TEMP/vietnam-travel-source.tar.gz" | sha256sum -c -
-          tar -xzf "$RUNNER_TEMP/vietnam-travel-source.tar.gz" -C .
-
-          rm -rf .travel-bundle
-          rm -f .github/workflows/materialize-vietnam-travel.yml
-          rm -f .github/workflows/deploy-vietnam-travel.yml
-
-          node --check backend/travel.js
-          node --test backend/travel.test.mjs
-          node --check tools/apply-travel-system.mjs
-          node --check vietnam-travel/app.js
-          node --check vietnam-travel/sw.js
-          node --check vietnam-travel/data/seed-places.js
-          node -e 'JSON.parse(require("node:fs").readFileSync("vietnam-travel/manifest.webmanifest", "utf8"))'
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "feat: materialize source Vietnam Travel"
-          git fetch origin main
-          if [ "$(git rev-parse origin/main)" != "$(git rev-parse HEAD^)" ]; then
-            git rebase origin/main
-          fi
-          git push origin HEAD:main
-
-      - name: Kiểm tra secret deploy
-        run: |
-          set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Thiếu CLOUDFLARE_API_TOKEN"; exit 1; }
-          npx --yes wrangler@4.112.0 secret list --config backend/wrangler.toml --format json > "$RUNNER_TEMP/worker-secrets.json"
-          node - <<'NODE' "$RUNNER_TEMP/worker-secrets.json"
-          const secrets = require(process.argv[2]);
-          for (const name of [
-            "DECRYPT_KEY_SPARE", "SESSION_SECRET", "ADMIN_TOKEN",
-            "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_WEBHOOK_SECRET"
-          ]) {
-            if (!secrets.some((item) => item.name === name)) {
-              console.error(`::error::Worker thiếu ${name}`);
-              process.exit(1);
-            }
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx --yes wrangler@4.112.0 secret list --config backend/wrangler.toml --format json > "$RUNNER_TEMP/secrets.json"
+          node - <<'NODE' "$RUNNER_TEMP/secrets.json"
+          const values = require(process.argv[2]).map(({name}) => name);
+          for (const name of ["SESSION_SECRET", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_WEBHOOK_SECRET"]) {
+            if (!values.includes(name)) throw new Error(`Worker thiếu ${name}`);
+          }
+          if (!values.includes("DECRYPT_KEY_BOITOAN") && !values.includes("DECRYPT_KEY")) {
+            throw new Error("Worker thiếu khóa giải mã Bói toán");
           }
           NODE
 
-      - name: Áp dụng các lớp build hiện hành và Travel
+      - name: Kiểm tra source trực tiếp
         run: |
           set -euo pipefail
-          node --check tools/apply-account-v3-hotfix.mjs
-          node tools/apply-role-system.mjs
-          node tools/apply-account-v2-runner.mjs
-          node tools/apply-account-v3-hotfix.mjs
           node tools/apply-travel-system.mjs
-
-      - name: Kiểm tra source và Worker
-        run: |
-          set -euo pipefail
-          node tools/validate-coordination.mjs
           node --check assets/gate.js
           node --check assets/community.js
           node --check assets/community-admin.js
           node assets/gate.test.mjs
           node assets/account-v2.test.mjs
-          node --check sw.js
-          node --check boitoan/sw.js
-          node sw.test.mjs
           node boitoan/sw.test.mjs
           node --check backend/community.js
           node backend/community.test.mjs
           node backend/account-v2.test.mjs
-          node --check backend/travel.js
-          node --test backend/travel.test.mjs
+          node backend/admin-v8-health.test.mjs
           node --check backend/worker.js
           node backend/worker.test.mjs
-          node --check vietnam-travel/app.js
-          node --check vietnam-travel/sw.js
-          node --check vietnam-travel/data/seed-places.js
-          grep -q 'Travel API integration v1' backend/worker.js
-          grep -q 'Travel Telegram integration v1' backend/worker.js
+          node --test backend/travel.test.mjs
+          grep -q 'Bói toán V11' assets/gate.js
+          grep -q '/assets/gate.js?v=19' boitoan/index.html
+          grep -q 'boitoan-v19' boitoan/sw.js
 
-      - name: Gộp site (SPARE + Bói toán + MEDORA + Vietnam Travel)
+      - name: Gộp site
         run: |
           set -euo pipefail
           rm -rf _site
           mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data
-          cp index.html manifest.webmanifest sw.js _site/
+          cp index.html manifest.webmanifest sw.js robots.txt _site/
           cp assets/gate.js assets/gate.css assets/community.js assets/community-admin.js assets/community.css _site/assets/
-          cp robots.txt _site/robots.txt
           cp boitoan/index.html boitoan/community.html boitoan/community-admin.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
           cp medora/index.html _site/medora/index.html
           cp vietnam-travel/index.html vietnam-travel/app.css vietnam-travel/app.js vietnam-travel/manifest.webmanifest vietnam-travel/sw.js vietnam-travel/icon.svg _site/vietnam-travel/
           cp vietnam-travel/data/seed-places.js _site/vietnam-travel/data/
 
-      - name: Deploy lên Cloudflare Pages
-        run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
-
-      - name: Deploy Worker sau Pages
+      - name: Deploy Worker trước Pages
         working-directory: backend
         run: npx --yes wrangler@4.112.0 deploy
 
-      - name: Hậu kiểm production Travel và Account V6
-        id: smoke
+      - name: Deploy Pages
+        run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
+
+      - name: Hậu kiểm production
         run: |
           set -euo pipefail
-          cache_bust="deploy=${GITHUB_SHA}"
-          travel_code=""
-          seed_code=""
-          health_code=""
-          places_code=""
-          root_code=""
-          boitoan_code=""
-          medora_code=""
-          admin_page_code=""
-          gate_code=""
-          admin_session_code=""
-
+          bust="v11=${GITHUB_SHA}-${GITHUB_RUN_ID}"
           for attempt in $(seq 1 30); do
-            travel_code=$(curl -sSL -o "$RUNNER_TEMP/travel.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/vietnam-travel/?${cache_bust}" || true)
-            seed_code=$(curl -sSL -o "$RUNNER_TEMP/seed.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/vietnam-travel/data/seed-places.js?${cache_bust}" || true)
-            health_code=$(curl -sS -o "$RUNNER_TEMP/travel-health.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/travel/health" || true)
-            places_code=$(curl -sS -o "$RUNNER_TEMP/travel-places.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/travel/places" || true)
-            root_code=$(curl -sSL -o /dev/null -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/?${cache_bust}" || true)
-            boitoan_code=$(curl -sSL -o "$RUNNER_TEMP/community.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community.html?${cache_bust}" || true)
-            admin_page_code=$(curl -sSL -o "$RUNNER_TEMP/community-admin.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community-admin.html?${cache_bust}" || true)
-            gate_code=$(curl -sSL -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
-            admin_session_code=$(curl -sS -o "$RUNNER_TEMP/admin-session.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/admin/session" || true)
-            medora_code=$(curl -sSL -o /dev/null -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/medora/?${cache_bust}" || true)
-
-            if [ "$travel_code" = "200" ] \
-              && grep -q "Việt Nam Đi Đâu?" "$RUNNER_TEMP/travel.html" \
-              && [ "$seed_code" = "200" ] \
-              && grep -q "vinh-ha-long" "$RUNNER_TEMP/seed.js" \
-              && [ "$health_code" = "200" ] \
-              && grep -q '"service":"vietnam-travel"' "$RUNNER_TEMP/travel-health.json" \
-              && [ "$places_code" = "200" ] \
-              && grep -q '"vinh-ha-long"' "$RUNNER_TEMP/travel-places.json" \
-              && [ "$root_code" = "200" ] \
-              && [ "$boitoan_code" = "200" ] \
-              && grep -q "Spirituality Market" "$RUNNER_TEMP/community.html" \
-              && [ "$admin_page_code" = "200" ] \
-              && grep -q 'community-admin-level-badge' "$RUNNER_TEMP/community-admin.html" \
-              && ! grep -q 'Mật khẩu Admin' "$RUNNER_TEMP/community-admin.html" \
-              && [ "$gate_code" = "200" ] \
-              && grep -q 'Account V6 dual admin UI' "$RUNNER_TEMP/gate.js" \
-              && grep -q '/api/community/admin/login' "$RUNNER_TEMP/gate.js" \
-              && [ "$admin_session_code" = "401" ] \
-              && grep -q '"unauthorized"' "$RUNNER_TEMP/admin-session.json" \
-              && [ "$medora_code" = "200" ]; then
-              echo "Production đạt: Travel=$travel_code API=$places_code Root=$root_code BoiToan=$boitoan_code Admin=$admin_page_code Gate=$gate_code AdminSession=$admin_session_code Medora=$medora_code"
-              break
+            app=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/?$bust" || true)
+            gate=$(curl -fsSL "https://hiennhi89.pages.dev/assets/gate.js?$bust" || true)
+            admin=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/community-admin.html?$bust" || true)
+            health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/health" || true)
+            if grep -q 'application/gate-payload' <<<"$app" \
+              && grep -q '/assets/gate.js?v=19' <<<"$app" \
+              && grep -q 'Bói toán V11' <<<"$gate" \
+              && grep -q 'openAppContent(data.key, "admin-session")' <<<"$gate" \
+              && grep -q 'admin_return=1&v=19' <<<"$admin" \
+              && grep -q '"ok":true' <<<"$health"; then
+              echo "Production V11 đạt ở lần $attempt"
+              exit 0
             fi
             sleep 4
           done
-
-          {
-            echo "travel_code=$travel_code"
-            echo "seed_code=$seed_code"
-            echo "health_code=$health_code"
-            echo "places_code=$places_code"
-            echo "root_code=$root_code"
-            echo "boitoan_code=$boitoan_code"
-            echo "admin_page_code=$admin_page_code"
-            echo "gate_code=$gate_code"
-            echo "admin_session_code=$admin_session_code"
-            echo "medora_code=$medora_code"
-          } >> "$GITHUB_OUTPUT"
-
-          test "$travel_code" = "200"
-          grep -q "Việt Nam Đi Đâu?" "$RUNNER_TEMP/travel.html"
-          test "$seed_code" = "200"
-          grep -q "vinh-ha-long" "$RUNNER_TEMP/seed.js"
-          test "$health_code" = "200"
-          grep -q '"service":"vietnam-travel"' "$RUNNER_TEMP/travel-health.json"
-          test "$places_code" = "200"
-          grep -q '"vinh-ha-long"' "$RUNNER_TEMP/travel-places.json"
-          test "$root_code" = "200"
-          test "$boitoan_code" = "200"
-          grep -q "Spirituality Market" "$RUNNER_TEMP/community.html"
-          test "$admin_page_code" = "200"
-          grep -q 'community-admin-level-badge' "$RUNNER_TEMP/community-admin.html"
-          ! grep -q 'Mật khẩu Admin' "$RUNNER_TEMP/community-admin.html"
-          test "$gate_code" = "200"
-          grep -q 'Account V6 dual admin UI' "$RUNNER_TEMP/gate.js"
-          grep -q '/api/community/admin/login' "$RUNNER_TEMP/gate.js"
-          test "$admin_session_code" = "401"
-          grep -q '"unauthorized"' "$RUNNER_TEMP/admin-session.json"
-          test "$medora_code" = "200"
-
-      - name: Ghi trạng thái production
-        if: success()
-        env:
-          TRAVEL_CODE: ${{ steps.smoke.outputs.travel_code }}
-          PLACES_CODE: ${{ steps.smoke.outputs.places_code }}
-          ROOT_CODE: ${{ steps.smoke.outputs.root_code }}
-          BOITOAN_CODE: ${{ steps.smoke.outputs.boitoan_code }}
-          ADMIN_PAGE_CODE: ${{ steps.smoke.outputs.admin_page_code }}
-          GATE_CODE: ${{ steps.smoke.outputs.gate_code }}
-          ADMIN_SESSION_CODE: ${{ steps.smoke.outputs.admin_session_code }}
-          MEDORA_CODE: ${{ steps.smoke.outputs.medora_code }}
-        run: |
-          set -euo pipefail
-          mkdir -p docs/handover
-          completed_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          cat > docs/handover/PRODUCTION_STATUS.md <<EOF
-          # Trạng thái production
-
-          - Trạng thái: \`SUCCESS\`
-          - Source commit: \`$GITHUB_SHA\`
-          - Hoàn tất UTC: \`$completed_utc\`
-          - Workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
-          - Cloudflare Pages root: \`${ROOT_CODE}\`
-          - Bói toán / Spirituality Market: \`${BOITOAN_CODE}\`
-          - Trang Quản trị: \`${ADMIN_PAGE_CODE}\`
-          - Gate runtime JS: \`${GATE_CODE}\`
-          - API phiên Admin không token: \`${ADMIN_SESSION_CODE} unauthorized\`
-          - Vietnam Travel / API địa điểm: \`${TRAVEL_CODE}/${PLACES_CODE}\`
-          - MEDORA: \`${MEDORA_CODE}\`
-          - Account V6: cùng một mục Admin; backend phân cấp \`regular\` và \`primary\`; trang Quản trị không hỏi mật khẩu lần hai.
-          - Admin thường: quản lý member, review và bài thảo luận.
-          - Admin tổng: toàn bộ quyền Admin thường, thêm hội thoại riêng và trang cá nhân member; chỉ một thiết bị primary hoạt động.
-          - Bảo mật: mật khẩu không lưu plaintext trong source; phiên JWT gắn thiết bị và \`ADMIN_TOKEN\` cũ không được chấp nhận tại Community API.
-          - Thứ tự triển khai: Pages trước, Worker sau.
-          EOF
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/handover/PRODUCTION_STATUS.md
-          git commit -m "docs: record Account V6 production status" || exit 0
-          git pull --rebase origin main
-          git push origin HEAD:main
+          echo "Production chưa đồng bộ V11" >&2
+          exit 1
