@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T15:39:00+07:00",
+  "updated_at": "2026-07-23T15:47:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -24,8 +24,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T14:50:00+07:00",
-      "heartbeat_at": "2026-07-23T15:39:00+07:00",
-      "summary": "PR #38 deploy/smoke thành công nhưng E2E Reader thật trả 500 server ngay bước register. Khác biệt giữa Node CI và Workers production tập trung ở xác thực PBKDF2 210.000 vòng trên edge và rate limiter best-effort. Đang thay bản ghi mật khẩu mới bằng HMAC-SHA256 có salt + pepper SESSION_SECRET, giữ nhánh legacy PBKDF2 để đọc dữ liệu cũ, làm rate limiter fail-open có ghi mã pha an toàn, rồi chạy lại E2E thật 201/200/200/200/401/401."
+      "heartbeat_at": "2026-07-23T15:47:00+07:00",
+      "summary": "PR #38 deploy/smoke thành công nhưng E2E Reader thật trả 500 server ngay register. Account V4 đã chuyển tài khoản mới sang HMAC-SHA256 salt + pepper SESSION_SECRET, legacy PBKDF2 chỉ để đọc tương thích, rate limiter fail-open và mã lỗi theo pha. Commit này kích hoạt lại CI; chỉ merge khi V4 frontend/Worker và coordination đều success, sau đó E2E thật phải đạt 201/200/200/200/401/401."
     }
   ],
   "recently_completed": [
