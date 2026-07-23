@@ -1,0 +1,119 @@
+name: Materialize Vietnam Travel V2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-vietnam-travel-v2
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Kiểm tra gói nguồn
+        id: chunks
+        shell: bash
+        run: |
+          if compgen -G '.travel-bundle/chunk-*' > /dev/null; then
+            echo 'exists=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'exists=false' >> "$GITHUB_OUTPUT"
+            echo 'Không còn bundle cần materialize.'
+          fi
+
+      - name: Bung và kiểm tra an toàn trong staging
+        if: steps.chunks.outputs.exists == 'true'
+        id: materialize
+        shell: bash
+        run: |
+          set +e
+          LOG="$RUNNER_TEMP/materialize-travel.log"
+          STAGE="$RUNNER_TEMP/materialize-stage"
+          ARCHIVE="$RUNNER_TEMP/vietnam-travel-source.tar.gz"
+          mkdir -p "$STAGE/repo" docs/handover
+
+          {
+            echo "MATERIALIZE_TRAVEL_DIAGNOSTIC_V2"
+            echo "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "source_commit=$GITHUB_SHA"
+            echo
+            echo "== Ghép Base64 =="
+            cat .travel-bundle/chunk-* > "$RUNNER_TEMP/vietnam-travel-source.tar.gz.b64"
+            base64 --decode "$RUNNER_TEMP/vietnam-travel-source.tar.gz.b64" > "$ARCHIVE"
+            echo "archive_bytes=$(wc -c < "$ARCHIVE")"
+
+            echo
+            echo "== Kiểm SHA-256 =="
+            echo "1511d9f80024a4a495e955e88680b4400a3d20973afd530edcb509457dbcad30  $ARCHIVE" | sha256sum -c -
+
+            echo
+            echo "== Danh sách gói =="
+            tar -tzf "$ARCHIVE"
+
+            echo
+            echo "== Tạo bản staging =="
+            tar --exclude='.git' -cf - . | tar -xf - -C "$STAGE/repo"
+            tar -xzf "$ARCHIVE" -C "$STAGE/repo"
+
+            echo
+            echo "== Kiểm tra source =="
+            cd "$STAGE/repo"
+            node --check backend/travel.js
+            node --test backend/travel.test.mjs
+            node --check tools/apply-travel-system.mjs
+            node --check vietnam-travel/app.js
+            node --check vietnam-travel/sw.js
+            node --check vietnam-travel/data/seed-places.js
+            node -e "JSON.parse(require('node:fs').readFileSync('vietnam-travel/manifest.webmanifest','utf8'))"
+          } > "$LOG" 2>&1
+          STATUS=$?
+
+          cd "$GITHUB_WORKSPACE"
+          {
+            echo
+            echo "completed_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "status=$STATUS"
+          } >> "$LOG"
+          cp "$LOG" docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log
+
+          if [ "$STATUS" -eq 0 ]; then
+            tar -xzf "$ARCHIVE" -C "$GITHUB_WORKSPACE"
+            rm -rf .travel-bundle
+            echo 'success=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'success=false' >> "$GITHUB_OUTPUT"
+          fi
+
+          exit 0
+
+      - name: Commit source hoặc log chẩn đoán
+        if: steps.chunks.outputs.exists == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Không có thay đổi để commit"
+            exit 0
+          fi
+          if [ "${{ steps.materialize.outputs.success }}" = "true" ]; then
+            git commit -m "feat: materialize source Vietnam Travel V2"
+          else
+            git commit -m "docs: ghi lỗi materialize Vietnam Travel V2"
+          fi
+          git push origin HEAD:main
