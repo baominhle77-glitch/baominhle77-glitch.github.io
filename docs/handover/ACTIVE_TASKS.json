@@ -1,43 +1,56 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T21:11:00+07:00",
+  "updated_at": "2026-07-23T23:31:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-13",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-13-admin-return",
+      "base_sha": "7736f08368327f6d28954150a79a0a00b5b70ead",
+      "paths": [
+        "tools/apply-admin-v5-v6-runner.mjs",
+        "tools/apply-admin-v9-return-to-app.mjs",
+        "tools/admin-v9-return-webkit-check.mjs",
+        "assets/account-v2.test.mjs",
+        "boitoan/sw.js",
+        "boitoan/sw.test.mjs",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/verify-admin-v9-return.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/ADMIN_V9_RETURN_STATUS.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T23:22:00+07:00",
+      "heartbeat_at": "2026-07-23T23:31:00+07:00",
+      "summary": "Clip iPhone xác nhận từ Khu vực quản trị bấm ← Bói toán lại rơi về màn chọn Đăng nhập/Đăng ký/Admin. Nguyên nhân thiết kế: link chỉ trỏ ./ và gate khởi động chỉ dựa gate_ok/gate_remember, chưa dùng JWT Admin đã được backend xác nhận để mở lại nội dung. V9 xác minh market_admin_token với /api/community/admin/session trước khi hiện app, giữ đúng cấp regular/primary, dùng link admin_return rõ ràng, không đăng xuất khi quay lại, chỉ dựng cổng nếu token thực sự không hợp lệ; có WebKit production verifier cho cả phiên hợp lệ và không hợp lệ."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-12",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-12-closeout",
       "base_sha": "66328b7e529c314213d6724358344f4df02ba0fc",
-      "paths": [
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/BOITOAN_ADMIN_V8.md",
-        "docs/handover/ADMIN_V8_PRODUCTION_STATUS.md"
-      ],
+      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/BOITOAN_ADMIN_V8.md", "docs/handover/ADMIN_V8_PRODUCTION_STATUS.md"],
       "status": "completed",
       "started_at": "2026-07-23T20:38:00+07:00",
       "completed_at": "2026-07-23T21:11:00+07:00",
-      "summary": "Hoàn tất Admin V8 sau nghiệm thu thất bại của V7. Chuyển PBKDF2 Admin từ 200000 xuống 10000 vòng phù hợp Cloudflare edge; ghim salt/hash V8 trong wrangler; trim khoảng trắng; tách lỗi crypto 503 khỏi sai mật khẩu 401; auth version V8; cache v16. CI 30013651155/30013651230 success. Production source b6b9e742, deploy 30014457630 và verifier 30014502155 success; ADMIN_V8_PRODUCTION_STATUS xác nhận frontend 200, config_ok=true, crypto_ok=true và login path thực thi crypto bình thường. Không lưu mật khẩu thật trong source/workflow."
+      "summary": "Admin V8 edge-safe đã xác minh production."
     },
     {
       "id": "BOITOAN-20260723-11",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-11-closeout",
-      "base_sha": "c25ac673396d6d52b5724abe8394f99747fceb4e",
-      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/BOITOAN_ADMIN_V7.md"],
       "status": "completed",
-      "started_at": "2026-07-23T19:53:00+07:00",
       "completed_at": "2026-07-23T20:23:00+07:00",
-      "summary": "Hotfix V7 tách namespace, logout sạch và xác nhận phiên; CI/deploy kỹ thuật đạt nhưng nghiệm thu mật khẩu thật vẫn thất bại."
+      "summary": "Hotfix V7 tách namespace, logout sạch và xác nhận phiên; nghiệm thu mật khẩu thật sau đó vẫn thất bại."
     },
     {
       "id": "BOITOAN-20260723-10",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-10-closeout",
-      "base_sha": "a09859db90680255652d9787e7714abf36cc6b8e",
-      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
-      "started_at": "2026-07-23T17:49:00+07:00",
       "completed_at": "2026-07-23T19:33:00+07:00",
       "summary": "Account V6 hai cấp Admin, JWT gắn thiết bị và quyền regular/primary."
     },
@@ -45,10 +58,7 @@
       "id": "TRAVELDOC-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/TRAVELDOC-20260723-01-handover-v2",
-      "base_sha": "f5ac80b72005e1bc9f2d934ca4ffbdb57ec427a8",
-      "paths": ["HANDOVER.md", "docs/handover/ACTIVE_TASKS.json"],
       "status": "completed",
-      "started_at": "2026-07-23T19:02:00+07:00",
       "completed_at": "2026-07-23T19:03:00+07:00",
       "summary": "Bổ sung Vietnam Travel vào HANDOVER chung."
     },
@@ -56,10 +66,7 @@
       "id": "TRAVEL-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/TRAVEL-20260723-01-closeout",
-      "base_sha": "b3a29cbd5416424a6df16bb4a7bd392a75287f5c",
-      "paths": ["vietnam-travel/**", "backend/travel.js", "backend/travel.test.mjs", "tools/apply-travel-system.mjs", ".github/workflows/validate-vietnam-travel.yml", ".github/workflows/deploy-pages.yml", "docs/handover/VIETNAM_TRAVEL.md", "docs/handover/ACTIVE_TASKS.json", "HANDOVER.md"],
       "status": "completed",
-      "started_at": "2026-07-23T17:19:00+07:00",
       "completed_at": "2026-07-23T18:54:00+07:00",
       "summary": "Hoàn tất PWA Vietnam Travel và API/Telegram quản trị."
     },

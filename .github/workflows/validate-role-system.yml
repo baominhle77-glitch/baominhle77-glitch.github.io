@@ -28,11 +28,12 @@ jobs:
             node --check tools/apply-admin-v7-login-hotfix.mjs
             node --check tools/apply-admin-v8-edge-login.mjs
             node --check tools/apply-admin-v8-tests.mjs
+            node --check tools/apply-admin-v9-return-to-app.mjs
             node tools/apply-role-system.mjs
             node tools/apply-account-v2-runner.mjs
-            # Chạy lại riêng chuỗi Admin V5-V8 để xác nhận idempotent.
+            # Chạy lại riêng chuỗi Admin V5-V9 để xác nhận idempotent.
             node tools/apply-admin-v5-v6-runner.mjs
-          } 2>&1 | tee account-v8-apply.log
+          } 2>&1 | tee account-v9-apply.log
       - name: Kiểm tra frontend
         run: |
           set -o pipefail
@@ -45,7 +46,7 @@ jobs:
             node assets/account-v2.test.mjs
             node --check boitoan/sw.js
             node boitoan/sw.test.mjs
-          } 2>&1 | tee account-v8-frontend.log
+          } 2>&1 | tee account-v9-frontend.log
       - name: Kiểm tra Worker
         run: |
           set -o pipefail
@@ -56,17 +57,20 @@ jobs:
             node backend/admin-v8-health.test.mjs
             node --check backend/worker.js
             node backend/worker.test.mjs
-          } 2>&1 | tee account-v8-worker.log
+          } 2>&1 | tee account-v9-worker.log
       - name: Lưu log chẩn đoán
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: account-v8-diagnostic-log
+          name: account-v9-diagnostic-log
           path: |
-            account-v8-apply.log
-            account-v8-frontend.log
-            account-v8-worker.log
+            account-v9-apply.log
+            account-v9-frontend.log
+            account-v9-worker.log
+            assets/gate.js
+            assets/community-admin.js
+            boitoan/community-admin.html
           if-no-files-found: warn
           retention-days: 3
       - name: Kết luận
-        run: echo "Account V8 CI PASS"
+        run: echo "Account V9 CI PASS"

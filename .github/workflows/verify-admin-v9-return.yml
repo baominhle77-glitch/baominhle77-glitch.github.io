@@ -1,0 +1,101 @@
+name: Xác minh Admin V9 quay lại Bói toán
+
+on:
+  workflow_run:
+    workflows: ["Deploy lên Cloudflare Pages (hiennhi89.pages.dev)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: verify-admin-v9-return-production
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Kiểm tra asset production V9
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          cache_bust="admin-v9=${SOURCE_SHA}-${GITHUB_RUN_ID}"
+          for attempt in $(seq 1 30); do
+            gate_code=$(curl -sSL -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
+            admin_code=$(curl -sSL -o "$RUNNER_TEMP/admin.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community-admin.html?${cache_bust}" || true)
+            sw_code=$(curl -sSL -o "$RUNNER_TEMP/sw.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/sw.js?${cache_bust}" || true)
+            if [ "$gate_code" = "200" ] \
+              && grep -q 'Account V9 Admin return-to-app' "$RUNNER_TEMP/gate.js" \
+              && grep -q 'storedAdminReturnCandidate' "$RUNNER_TEMP/gate.js" \
+              && grep -q 'restoreAdminApp' "$RUNNER_TEMP/gate.js" \
+              && grep -q 'reveal("admin-return")' "$RUNNER_TEMP/gate.js" \
+              && [ "$admin_code" = "200" ] \
+              && grep -q 'id="community-back-to-app"' "$RUNNER_TEMP/admin.html" \
+              && grep -q 'admin_return=1' "$RUNNER_TEMP/admin.html" \
+              && [ "$sw_code" = "200" ] \
+              && grep -q 'boitoan-v17' "$RUNNER_TEMP/sw.js"; then
+              echo "Static V9 production PASS ở lần ${attempt}."
+              exit 0
+            fi
+            sleep 4
+          done
+          echo "::error::Production chưa phục vụ đủ asset Admin V9. gate=${gate_code:-n/a} admin=${admin_code:-n/a} sw=${sw_code:-n/a}"
+          exit 1
+
+      - name: Cài Playwright WebKit
+        run: |
+          npm install --no-save playwright@1.52.0
+          npx playwright install --with-deps webkit
+
+      - name: Kiểm tra luồng quay lại bằng WebKit
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          node --check tools/admin-v9-return-webkit-check.mjs
+          node tools/admin-v9-return-webkit-check.mjs "$SOURCE_SHA"
+
+      - name: Ghi bằng chứng production
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          DEPLOY_RUN_ID: ${{ github.event.workflow_run.id || 'manual' }}
+        run: |
+          set -euo pipefail
+          completed_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          mkdir -p docs/handover
+          cat > docs/handover/ADMIN_V9_RETURN_STATUS.md <<EOF
+          # Admin V9 — quay lại Bói toán
+
+          - Trạng thái: \`SUCCESS\`
+          - Source commit: \`$SOURCE_SHA\`
+          - Hoàn tất UTC: \`$completed_utc\`
+          - Deploy workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/$DEPLOY_RUN_ID\`
+          - Verification workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
+          - Production gate: có marker \`Account V9 Admin return-to-app\`, \`storedAdminReturnCandidate\`, \`restoreAdminApp\` và \`reveal("admin-return")\`.
+          - Trang Quản trị: liên kết \`← Bói toán\` dùng \`?admin_return=1\`.
+          - Cache Bói toán: \`boitoan-v17\`.
+          - WebKit hợp lệ: JWT Admin được mock server xác nhận thì app mở thẳng, không dựng cổng đăng nhập.
+          - WebKit không hợp lệ: JWT bị xóa và cổng đăng nhập mới xuất hiện.
+          - Không sử dụng mật khẩu Admin thật trong bài kiểm tra.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/handover/ADMIN_V9_RETURN_STATUS.md
+          git commit -m "docs: record Admin V9 return verification" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
