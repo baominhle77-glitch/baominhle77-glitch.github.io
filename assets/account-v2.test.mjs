@@ -73,7 +73,7 @@ assert.match(deploy, /- name: Deploy Pages/);
 assert.ok(deploy.indexOf("- name: Deploy Worker trước Pages") < deploy.indexOf("- name: Deploy Pages"));
 assert.match(deploy, /application\/gate-payload/);
 assert.match(deploy, /\/assets\/gate\.js\?v=19/);
-assert.match(deploy, /openAppContent\(data\.key, \\"admin-session\\"\)/);
+assert.match(deploy, /openAppContent\(data\.key, "admin-session"\)/);
 
 assert.match(e2eWorkflow, /workflow_run:/);
 assert.match(e2eWorkflow, /role:'reader'/);
