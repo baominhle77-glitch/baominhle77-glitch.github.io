@@ -1,6 +1,10 @@
 name: Xác minh Admin V9 quay lại Bói toán
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/verify-admin-v9-return.yml
   workflow_run:
     workflows: ["Deploy lên Cloudflare Pages (hiennhi89.pages.dev)"]
     types: [completed]
@@ -15,7 +19,7 @@ concurrency:
 
 jobs:
   verify:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -31,11 +35,14 @@ jobs:
           node-version: "22"
 
       - name: Kiểm tra asset production V9
+        id: static
+        continue-on-error: true
         env:
           SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           set -euo pipefail
           cache_bust="admin-v9=${SOURCE_SHA}-${GITHUB_RUN_ID}"
+          gate_code="n/a"; admin_code="n/a"; sw_code="n/a"; success_attempt=""
           for attempt in $(seq 1 30); do
             gate_code=$(curl -sSL -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?${cache_bust}" || true)
             admin_code=$(curl -sSL -o "$RUNNER_TEMP/admin.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community-admin.html?${cache_bust}" || true)
@@ -50,20 +57,31 @@ jobs:
               && grep -q 'admin_return=1' "$RUNNER_TEMP/admin.html" \
               && [ "$sw_code" = "200" ] \
               && grep -q 'boitoan-v17' "$RUNNER_TEMP/sw.js"; then
-              echo "Static V9 production PASS ở lần ${attempt}."
-              exit 0
+              success_attempt="$attempt"
+              break
             fi
             sleep 4
           done
-          echo "::error::Production chưa phục vụ đủ asset Admin V9. gate=${gate_code:-n/a} admin=${admin_code:-n/a} sw=${sw_code:-n/a}"
-          exit 1
+          {
+            echo "gate_code=$gate_code"
+            echo "admin_code=$admin_code"
+            echo "sw_code=$sw_code"
+            echo "attempt=${success_attempt:-none}"
+          } >> "$GITHUB_OUTPUT"
+          test -n "$success_attempt"
+          echo "Static V9 production PASS ở lần ${success_attempt}."
 
       - name: Cài Playwright WebKit
+        id: install
+        continue-on-error: true
         run: |
           npm install --no-save playwright@1.52.0
           npx playwright install --with-deps webkit
 
       - name: Kiểm tra luồng quay lại bằng WebKit
+        id: webkit
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
         env:
           SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
@@ -71,24 +89,36 @@ jobs:
           node tools/admin-v9-return-webkit-check.mjs "$SOURCE_SHA"
 
       - name: Ghi bằng chứng production
+        if: always()
         env:
           SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-          DEPLOY_RUN_ID: ${{ github.event.workflow_run.id || 'manual' }}
+          DEPLOY_RUN_ID: ${{ github.event.workflow_run.id || 'push-or-manual' }}
+          STATIC_OUTCOME: ${{ steps.static.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          WEBKIT_OUTCOME: ${{ steps.webkit.outcome }}
+          GATE_CODE: ${{ steps.static.outputs.gate_code }}
+          ADMIN_CODE: ${{ steps.static.outputs.admin_code }}
+          SW_CODE: ${{ steps.static.outputs.sw_code }}
+          SUCCESS_ATTEMPT: ${{ steps.static.outputs.attempt }}
         run: |
           set -euo pipefail
           completed_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          status="FAILURE"
+          if [ "$STATIC_OUTCOME" = "success" ] && [ "$INSTALL_OUTCOME" = "success" ] && [ "$WEBKIT_OUTCOME" = "success" ]; then status="SUCCESS"; fi
           mkdir -p docs/handover
           cat > docs/handover/ADMIN_V9_RETURN_STATUS.md <<EOF
           # Admin V9 — quay lại Bói toán
 
-          - Trạng thái: \`SUCCESS\`
+          - Trạng thái: \`$status\`
           - Source commit: \`$SOURCE_SHA\`
           - Hoàn tất UTC: \`$completed_utc\`
           - Deploy workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/$DEPLOY_RUN_ID\`
           - Verification workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
-          - Production gate: có marker \`Account V9 Admin return-to-app\`, \`storedAdminReturnCandidate\`, \`restoreAdminApp\` và \`reveal("admin-return")\`.
-          - Trang Quản trị: liên kết \`← Bói toán\` dùng \`?admin_return=1\`.
-          - Cache Bói toán: \`boitoan-v17\`.
+          - Static production: \`$STATIC_OUTCOME\`; Gate/Admin/SW HTTP \`${GATE_CODE:-n/a}/${ADMIN_CODE:-n/a}/${SW_CODE:-n/a}\`; lần đạt \`${SUCCESS_ATTEMPT:-none}\`.
+          - Cài WebKit: \`$INSTALL_OUTCOME\`.
+          - Luồng WebKit: \`${WEBKIT_OUTCOME:-skipped}\`.
+          - Production gate yêu cầu marker \`Account V9 Admin return-to-app\`, \`storedAdminReturnCandidate\`, \`restoreAdminApp\` và \`reveal("admin-return")\`.
+          - Trang Quản trị yêu cầu liên kết \`← Bói toán\` dùng \`?admin_return=1\`; cache \`boitoan-v17\`.
           - WebKit hợp lệ: JWT Admin được mock server xác nhận thì app mở thẳng, không dựng cổng đăng nhập.
           - WebKit không hợp lệ: JWT bị xóa và cổng đăng nhập mới xuất hiện.
           - Không sử dụng mật khẩu Admin thật trong bài kiểm tra.
@@ -96,6 +126,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/handover/ADMIN_V9_RETURN_STATUS.md
-          git commit -m "docs: record Admin V9 return verification" || exit 0
+          git commit -m "docs: record Admin V9 return verification $status" || exit 0
           git pull --rebase origin main
           git push origin HEAD:main
+
+      - name: Kết luận
+        if: always()
+        run: |
+          test "${{ steps.static.outcome }}" = "success"
+          test "${{ steps.install.outcome }}" = "success"
+          test "${{ steps.webkit.outcome }}" = "success"
