@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T02:20:00+07:00",
+  "updated_at": "2026-07-24T02:22:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -18,7 +18,7 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-24T01:29:00+07:00",
-      "heartbeat_at": "2026-07-24T02:20:00+07:00",
+      "heartbeat_at": "2026-07-24T02:22:00+07:00",
       "summary": "Bói toán V11 đã chuyển thành source trực tiếp. Luồng duy nhất: xác thực backend → nhận key → decryptPayload → injectHtml → kiểm DOM → reveal. Các patch V2–V10 là no-op; Worker deploy trước Pages; CI đã qua frontend/Worker và WebKit payload AES thật. Phạm vi được rút gọn theo thư mục hệ thống, bỏ danh sách file vụn gây cản trở thay đổi đồng bộ."
     }
   ],
@@ -27,16 +27,16 @@
       "id": "BOITOAN-20260724-14",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260724-14-closeout",
-      "status": "completed_but_regressed",
+      "status": "cancelled",
       "completed_at": "2026-07-24T01:14:00+07:00",
-      "summary": "V10 chỉ reveal lớp ngoài, không giải mã và bơm payload nên production hiện trang trống; fixture plaintext đã che lỗi."
+      "summary": "V10 bị V11 thay thế vì chỉ reveal lớp ngoài, không giải mã và bơm payload; fixture plaintext đã che lỗi."
     },
     {
       "id": "BOITOAN-20260723-13",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "status": "completed_but_regressed",
+      "status": "cancelled",
       "completed_at": "2026-07-24T00:00:00+07:00",
-      "summary": "V9 cũng không kiểm payload mã hóa thật."
+      "summary": "V9 bị V11 thay thế vì không kiểm payload mã hóa thật."
     }
   ]
 }
