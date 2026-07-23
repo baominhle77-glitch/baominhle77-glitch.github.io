@@ -15,7 +15,15 @@ assert.match(gate, /reveal\("approved"\)/);
 assert.match(gate, /reveal\("saved-key"\)/);
 assert.match(gate, /return "session"/);
 assert.match(gate, /return "remembered"/);
-assert.doesNotMatch(gate, /JSON\.stringify\(\{[^}]*pass(?:word)?\s*:/is, "network JSON must never contain password");
+
+const passwordPayloadPattern = /JSON\.stringify\(\{[^}]*pass(?:word)?\s*:/gis;
+const passwordPayloads = [...gate.matchAll(passwordPayloadPattern)];
+assert.equal(passwordPayloads.length, 1, "chỉ request đăng nhập Admin được phép chứa mật khẩu");
+const passwordPayloadIndex = passwordPayloads[0].index;
+const passwordPayloadContext = gate.slice(Math.max(0, passwordPayloadIndex - 700), passwordPayloadIndex + 500);
+assert.match(passwordPayloadContext, /fetch\(BACKEND \+ "\/api\/community\/admin\/login"[\s\S]*method: "POST"/, "mật khẩu chỉ được gửi bằng POST tới endpoint Admin login");
+assert.match(passwordPayloadContext, /body: JSON\.stringify\(\{ password: pass, device_id: deviceId\(\), remember:/, "payload Admin login chỉ gồm thông tin xác thực cần thiết");
+
 assert.match(gate, /textContent = String\(message\.text \|\| ""\)/, "chat messages must render as text");
 assert.match(gate, /data\.status === "expired"/, "expired approval must stop polling and stay locked");
 assert.doesNotMatch(gate, /catch\(function \(\) \{ reveal\("approved"\); \}\)/, "decryption failure must not reveal content");
