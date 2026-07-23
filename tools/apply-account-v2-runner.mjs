@@ -6,9 +6,9 @@ const runtimePath = new URL(`./.apply-account-v2-runtime-${process.pid}.mjs`, im
 
 let source = await readFile(templatePath, "utf8");
 const unsafeReviewAudit = 'await adminAudit(env, request, "review_deleted", `${readerId}:${authorId}`);';
-const safeReviewAudit = 'await adminAudit(env, request, "review_deleted", \\`\\${readerId}:\\${authorId}\\`);';
-const unsafeAdminName = 'cell(r,user.username+"\\n"+user.display_name);';
-const safeAdminName = 'cell(r,user.username+"\\\\n"+user.display_name);';
+const safeReviewAudit = 'await adminAudit(env, request, "review_deleted", \`\${readerId}:\${authorId}\`);';
+const unsafeAdminName = 'cell(r,user.username+"\n"+user.display_name);';
+const safeAdminName = 'cell(r,user.username+"\\n"+user.display_name);';
 if (!source.includes(unsafeReviewAudit)) throw new Error("Không tìm thấy điểm sửa template review audit");
 if (!source.includes(unsafeAdminName)) throw new Error("Không tìm thấy điểm sửa xuống dòng tên Admin");
 source = source.replace(unsafeReviewAudit, safeReviewAudit).replace(unsafeAdminName, safeAdminName);
@@ -23,3 +23,5 @@ try {
 await import(new URL("./apply-account-v2-profile-view.mjs", import.meta.url).href + `?v=${Date.now()}`);
 await import(new URL("./apply-account-v3-hotfix.mjs", import.meta.url).href + `?v=${Date.now()}`);
 await import(new URL("./apply-account-v4-edge-auth.mjs", import.meta.url).href + `?v=${Date.now()}`);
+await import(new URL("./apply-admin-session-v5.mjs", import.meta.url).href + `?v=${Date.now()}`);
+await import(new URL("./apply-admin-levels-v6.mjs", import.meta.url).href + `?v=${Date.now()}`);

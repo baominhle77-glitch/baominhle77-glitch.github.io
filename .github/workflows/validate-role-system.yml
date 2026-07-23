@@ -23,12 +23,16 @@ jobs:
           {
             node --check tools/apply-account-v3-hotfix.mjs
             node --check tools/apply-account-v4-edge-auth.mjs
+            node --check tools/apply-admin-session-v5.mjs
+            node --check tools/apply-admin-levels-v6.mjs
             node tools/apply-role-system.mjs
             node tools/apply-account-v2-runner.mjs
             # Tất cả lớp phải chạy lặp an toàn.
             node tools/apply-account-v3-hotfix.mjs
             node tools/apply-account-v4-edge-auth.mjs
-          } > account-v4-apply.log 2>&1
+            node tools/apply-admin-session-v5.mjs
+            node tools/apply-admin-levels-v6.mjs
+          } > account-v6-apply.log 2>&1
       - name: Kiểm tra frontend
         id: frontend
         if: steps.integrate.outcome == 'success'
@@ -44,7 +48,7 @@ jobs:
             node assets/account-v2.test.mjs
             node --check boitoan/sw.js
             node boitoan/sw.test.mjs
-          } > account-v4-frontend.log 2>&1
+          } > account-v6-frontend.log 2>&1
       - name: Kiểm tra Worker
         id: worker
         if: steps.integrate.outcome == 'success' && steps.frontend.outcome == 'success'
@@ -57,16 +61,16 @@ jobs:
             node backend/account-v2.test.mjs
             node --check backend/worker.js
             node backend/worker.test.mjs
-          } > account-v4-worker.log 2>&1
+          } > account-v6-worker.log 2>&1
       - name: Lưu log chẩn đoán
         if: always() && (steps.integrate.outcome == 'failure' || steps.frontend.outcome == 'failure' || steps.worker.outcome == 'failure')
         uses: actions/upload-artifact@v4
         with:
-          name: account-v4-diagnostic-log
+          name: account-v6-diagnostic-log
           path: |
-            account-v4-apply.log
-            account-v4-frontend.log
-            account-v4-worker.log
+            account-v6-apply.log
+            account-v6-frontend.log
+            account-v6-worker.log
           if-no-files-found: warn
           retention-days: 3
       - name: Kết luận
@@ -75,4 +79,4 @@ jobs:
           test "${{ steps.integrate.outcome }}" = "success"
           test "${{ steps.frontend.outcome }}" = "success"
           test "${{ steps.worker.outcome }}" = "success"
-          echo "Account V4 CI PASS"
+          echo "Account V6 CI PASS"
