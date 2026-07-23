@@ -10,16 +10,18 @@ source = source.replace(
 );
 
 source = source
-  .replace(/\n    addMarketGuides\(\);/g, "")
-  .replace(/\n    watchMarketResult\([^\n]+\);/g, "")
+  .replace(/\n[ \t]*addMarketGuides\(\);/g, "")
+  .replace(/\n[ \t]*watchMarketResult\([^\n]+\);/g, "")
   .replace(/\n\.market-guide \{[\s\S]*?\n\.market-dynamic-analysis p \{[^\n]*\}\n/g, "\n");
 
 const forbidden = [
   "function marketGuide",
   "function addMarketGuides",
+  "addMarketGuides(",
   "function cardNames",
   "function renderMarketSynthesis",
   "function watchMarketResult",
+  "watchMarketResult(",
   "Khung luận Tarot",
   "Khung luận Lenormand",
   "Khung luận Bài Tây",
