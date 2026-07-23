@@ -9,7 +9,7 @@ on:
       - ".github/workflows/materialize-vietnam-travel.yml"
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 permissions:
