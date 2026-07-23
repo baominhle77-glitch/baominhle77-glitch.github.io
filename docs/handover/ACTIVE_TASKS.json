@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T15:47:00+07:00",
+  "updated_at": "2026-07-23T15:54:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-08",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-08-edge-password-fix",
+      "branch": "agent/BOITOAN-20260723-08-dispatch-await-fix",
       "base_sha": "f442bb449ee47ac7b687bca784b9415bf92f0a14",
       "paths": [
         "tools/apply-account-v3-hotfix.mjs",
@@ -24,8 +24,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T14:50:00+07:00",
-      "heartbeat_at": "2026-07-23T15:47:00+07:00",
-      "summary": "PR #38 deploy/smoke thành công nhưng E2E Reader thật trả 500 server ngay register. Account V4 đã chuyển tài khoản mới sang HMAC-SHA256 salt + pepper SESSION_SECRET, legacy PBKDF2 chỉ để đọc tương thích, rate limiter fail-open và mã lỗi theo pha. Commit này kích hoạt lại CI; chỉ merge khi V4 frontend/Worker và coordination đều success, sau đó E2E thật phải đạt 201/200/200/200/401/401."
+      "heartbeat_at": "2026-07-23T15:54:00+07:00",
+      "summary": "PR #40 deploy/smoke thành công nhưng E2E vẫn trả 500 server. Đã xác định lỗi gốc dispatcher: handleCommunity đặt try/catch nhưng return Promise của các async handler không await, nên rejection thoát ra Worker ngoài và bị đổi thành server. Đang buộc await cho mọi route, thêm contract test; giữ Account V4 HMAC/limiter fail-open. E2E thật vẫn phải đạt 201/200/200/200/401/401."
     }
   ],
   "recently_completed": [
