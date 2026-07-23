@@ -112,6 +112,13 @@ await edit("assets/gate.js", (source) => {
 
   source = replaceRequired(
     source,
+    '  function injectCommunity() {',
+    '  document.addEventListener("click", function(event){\n    if (APP !== "boitoan") return;\n    var target = event.target && event.target.closest ? event.target.closest("#gate-logout") : null;\n    if (!target) return;\n    var previousAdminToken = clearMarketAdminSession();\n    if (previousAdminToken) revokeMarketAdminSession(previousAdminToken);\n  }, true);\n\n  function injectCommunity() {',
+    "bắt nút Khóa ở tầng ngoài"
+  );
+
+  source = replaceRequired(
+    source,
     '          localStorage.setItem("market_admin_session", "1");',
     '          localStorage.setItem("market_admin_session", "1");\n          localStorage.setItem("market_admin_auth_version", MARKET_ADMIN_AUTH_VERSION);',
     "ghi phiên bản phiên Admin frontend"
@@ -130,28 +137,6 @@ await edit("assets/gate.js", (source) => {
     '    trackAccess(method || "session");\n    validateMarketAdminSession();',
     "tự dọn phiên Admin cũ khi mở app"
   );
-
-  const oldLock = `    b.addEventListener("click", function () {
-      try {
-        localStorage.removeItem("gate_key_" + APP);
-        localStorage.removeItem(REMEMBER_KEY);
-        if (APP === "boitoan") localStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(SESSION_KEY);
-      } catch (e) {}
-      location.reload();
-    });`;
-  const newLock = `    b.addEventListener("click", function () {
-      var previousAdminToken = APP === "boitoan" ? clearMarketAdminSession() : "";
-      if (previousAdminToken) revokeMarketAdminSession(previousAdminToken);
-      try {
-        localStorage.removeItem("gate_key_" + APP);
-        localStorage.removeItem(REMEMBER_KEY);
-        if (APP === "boitoan") localStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(SESSION_KEY);
-      } catch (e) {}
-      location.reload();
-    });`;
-  source = replaceRequired(source, oldLock, newLock, "nút Khóa phải đăng xuất Admin hoàn toàn");
   return source;
 });
 
@@ -190,7 +175,7 @@ await edit("assets/community-admin.js", (source) => {
 
 for (const [path, markers] of [
   ["backend/community.js", ["Account V7 admin login hotfix", "ADMIN_V7_PASSWORD_SALT_B64", 'ADMIN_AUTH_VERSION = "2026-07-23-v7"']],
-  ["assets/gate.js", ["Account V7 admin login hotfix", "clearMarketAdminSession", "validateMarketAdminSession", "market_admin_auth_version"]],
+  ["assets/gate.js", ["Account V7 admin login hotfix", "clearMarketAdminSession", "validateMarketAdminSession", "market_admin_auth_version", 'closest("#gate-logout")']],
   ["assets/community-admin.js", ["Account V7 admin page session guard", "adminAuthVersion !== ADMIN_AUTH_VERSION", "content.hidden = true"]],
 ]) {
   const value = await readFile(path, "utf8");
