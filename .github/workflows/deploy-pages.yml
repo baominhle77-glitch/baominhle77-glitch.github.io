@@ -42,7 +42,7 @@ jobs:
         id: integrate
         run: |
           node tools/apply-role-system.mjs
-          node --input-type=module -e 'globalThis.readerId="${readerId}"; globalThis.authorId="${authorId}"; await import("./tools/apply-account-v2.mjs");'
+          node tools/apply-account-v2-runner.mjs
 
       - name: Kiểm tra source
         id: test_source
