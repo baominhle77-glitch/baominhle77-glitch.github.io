@@ -3,24 +3,30 @@ name: Materialize Vietnam Travel V2
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - ".travel-bundle/**"
+      - ".github/workflows/materialize-vietnam-travel-v2.yml"
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: materialize-vietnam-travel-v2
+  group: materialize-vietnam-travel-v2-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   materialize:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout main
+      - name: Checkout nhánh cần materialize
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
       - name: Kiểm tra gói nguồn
@@ -116,4 +122,5 @@ jobs:
           else
             git commit -m "docs: ghi lỗi materialize Vietnam Travel V2"
           fi
-          git push origin HEAD:main
+          target_branch="${GITHUB_HEAD_REF:-main}"
+          git push origin "HEAD:${target_branch}"
