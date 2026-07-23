@@ -15,36 +15,19 @@ function replaceRequired(source, before, after, label) {
 await edit("assets/gate.js", (source) => {
   if (source.includes("/* Account V9 Admin return-to-app */")) return source;
 
-  const oldStart = `  function start() {
-    injectOwner(); // watermark chủ sở hữu (hiện cả khi khóa lẫn sau mở khóa)
-    var hasPayload = !!document.querySelector('script[type="application/gate-payload"]');
+  const startMarker = "\n  function start() {";
+  const startIndex = source.lastIndexOf(startMarker);
+  const bootMarker = '\n\n  if (document.readyState === "loading") {';
+  const bootIndex = source.indexOf(bootMarker, startIndex + startMarker.length);
+  if (startIndex < 0 || bootIndex < 0) throw new Error("Không tìm thấy startup gate hiện hành");
 
-    if (hasPayload) {
-      // GHI NHỚ MÁY NÀY: nếu máy này đã lưu khóa -> tự giải mã, khỏi nhập lại
-      // (bền vững kể cả sau khi tắt máy vì dùng localStorage).
-      var savedKey = null;
-      try { savedKey = localStorage.getItem("gate_key_" + APP); } catch (e) {}
-      if (savedKey) {
-        decryptPayload(savedKey)
-          .then(function (html) { injectHtml(html); reveal("saved-key"); })
-          .catch(function () {
-            // khóa lưu không còn đúng (vd đổi mật khẩu) -> xóa và hiện lại cổng
-            try { localStorage.removeItem("gate_key_" + APP); } catch (e) {}
-            buildUI();
-          });
-        return;
-      }
-      buildUI();
-      return;
-    }
+  source = source.slice(0, startIndex)
+    + source.slice(startIndex, bootIndex).replace(startMarker, "\n  function startWithoutAdminReturn() {")
+    + source.slice(bootIndex);
 
-    // Trang local (không mã hóa): dùng cờ đã-mở-khóa như cũ.
-    var method = unlockedMethod();
-    if (method && MODE !== "encrypted") { reveal(method); return; }
-    buildUI();
-  }`;
+  const wrapper = `
 
-  const newStart = `  /* Account V9 Admin return-to-app */
+  /* Account V9 Admin return-to-app */
   function storedAdminReturnCandidate() {
     if (APP !== "boitoan" || !BACKEND) return false;
     try {
@@ -61,28 +44,6 @@ await edit("assets/gate.js", (source) => {
       sessionStorage.removeItem(SESSION_KEY);
       localStorage.removeItem(REMEMBER_KEY);
     } catch (e) {}
-  }
-
-  function continueGateStart(hasPayload) {
-    if (hasPayload) {
-      var savedKey = null;
-      try { savedKey = localStorage.getItem("gate_key_" + APP); } catch (e) {}
-      if (savedKey) {
-        decryptPayload(savedKey)
-          .then(function (html) { injectHtml(html); reveal("saved-key"); })
-          .catch(function () {
-            try { localStorage.removeItem("gate_key_" + APP); } catch (e) {}
-            buildUI();
-          });
-        return;
-      }
-      buildUI();
-      return;
-    }
-
-    var method = unlockedMethod();
-    if (method && MODE !== "encrypted") { reveal(method); return; }
-    buildUI();
   }
 
   function restoreAdminApp(onInvalid) {
@@ -107,7 +68,7 @@ await edit("assets/gate.js", (source) => {
         else localStorage.removeItem("market_admin_primary");
         sessionStorage.setItem(SESSION_KEY, "1");
       } catch (e) {}
-      if (history && history.replaceState && /[?&]admin_return=1(?:&|$)/.test(location.search)) {
+      if (window.history && history.replaceState && /[?&]admin_return=1(?:&|$)/.test(location.search)) {
         history.replaceState(null, "", location.pathname + location.hash);
       }
       reveal("admin-return");
@@ -119,16 +80,16 @@ await edit("assets/gate.js", (source) => {
   }
 
   function start() {
-    injectOwner();
     var hasPayload = !!document.querySelector('script[type="application/gate-payload"]');
     if (!hasPayload && storedAdminReturnCandidate()) {
-      restoreAdminApp(function () { continueGateStart(false); });
+      injectOwner();
+      restoreAdminApp(startWithoutAdminReturn);
       return;
     }
-    continueGateStart(hasPayload);
+    startWithoutAdminReturn();
   }`;
 
-  return replaceRequired(source, oldStart, newStart, "khôi phục JWT Admin trước khi dựng cổng đăng nhập");
+  return source.slice(0, source.indexOf(bootMarker)) + wrapper + source.slice(source.indexOf(bootMarker));
 });
 
 await edit("boitoan/community-admin.html", (source) => {
@@ -168,7 +129,7 @@ await edit("assets/community-admin.js", (source) => {
 });
 
 for (const [path, markers] of [
-  ["assets/gate.js", ["Account V9 Admin return-to-app", "storedAdminReturnCandidate", "restoreAdminApp", 'reveal("admin-return")', "/api/community/admin/session"]],
+  ["assets/gate.js", ["Account V9 Admin return-to-app", "startWithoutAdminReturn", "storedAdminReturnCandidate", "restoreAdminApp", 'reveal("admin-return")', "/api/community/admin/session"]],
   ["boitoan/community-admin.html", ["community-back-to-app", "admin_return=1"]],
   ["assets/community-admin.js", ["Account V9 Admin return navigation", "gate_ok_boitoan", "gate_remember_boitoan"]],
 ]) {
