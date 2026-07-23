@@ -1,8 +1,30 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T16:47:00+07:00",
+  "updated_at": "2026-07-23T17:19:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "TRAVEL-20260723-01",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/TRAVEL-20260723-01-telegram-webapp",
+      "base_sha": "e3d6aa846e24be6685ba58220afb79e6af22812c",
+      "paths": [
+        "vietnam-travel/**",
+        "backend/travel.js",
+        "backend/travel.test.mjs",
+        "tools/apply-travel-system.mjs",
+        ".github/workflows/validate-vietnam-travel.yml",
+        ".github/workflows/deploy-vietnam-travel.yml",
+        "docs/handover/VIETNAM_TRAVEL.md",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T17:19:00+07:00",
+      "heartbeat_at": "2026-07-23T17:19:00+07:00",
+      "summary": "Xây app PWA lưu địa điểm du lịch Việt Nam tại /vietnam-travel/, API Cloudflare KV và điều khiển thêm/sửa/ẩn/hiện/xóa qua Telegram bot hiện có; không ghi token vào source."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-09",
