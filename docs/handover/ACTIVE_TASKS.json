@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T15:16:00+07:00",
+  "updated_at": "2026-07-23T15:18:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -15,14 +15,16 @@
         "backend/account-v2.test.mjs",
         ".github/workflows/validate-role-system.yml",
         ".github/workflows/deploy-pages.yml",
+        ".github/workflows/e2e-reader-production.yml",
+        "docs/handover/READER_E2E_STATUS.md",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T14:50:00+07:00",
-      "heartbeat_at": "2026-07-23T15:16:00+07:00",
-      "summary": "Runtime hotfix PR #36 đã qua CI và deploy Pages/Worker/smoke thành công tại d5260f0, nhưng production E2E cleanup thất bại. Tiếp tục cùng task trên nhánh mới: dùng DELETE /api/community/me được xác thực để tài khoản E2E tự xóa, thu hồi cả community/gate session, sau đó xác nhận đăng nhập lại trả invalid_login; không phụ thuộc quyền ghi KV của Cloudflare API token."
+      "heartbeat_at": "2026-07-23T15:18:00+07:00",
+      "summary": "Runtime hotfix PR #36 đã qua CI và deploy Pages/Worker/smoke thành công tại d5260f0, nhưng production E2E cleanup dùng Cloudflare KV API thất bại. Đang chuyển E2E sang workflow chạy sau deploy: tạo Reader thật, đăng nhập thiết bị thứ hai, đọc hồ sơ, DELETE /api/community/me, xác nhận token bị thu hồi và đăng nhập lại trả invalid_login; ghi trạng thái riêng, không phụ thuộc quyền KV của token deploy."
     }
   ],
   "recently_completed": [
