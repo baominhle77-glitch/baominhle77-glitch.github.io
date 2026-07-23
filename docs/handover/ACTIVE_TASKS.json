@@ -1,8 +1,27 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T15:58:00+07:00",
+  "updated_at": "2026-07-23T16:10:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-09",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-09-ios-mutation-loop",
+      "base_sha": "433f430c21d4fe544fdf9cddcd71ee31e65ceb9e",
+      "paths": [
+        "tools/apply-account-v3-hotfix.mjs",
+        "assets/account-v2.test.mjs",
+        ".github/workflows/e2e-reader-production.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T16:08:00+07:00",
+      "heartbeat_at": "2026-07-23T16:10:00+07:00",
+      "summary": "Người dùng mở /boitoan/ trên iPhone lúc 16:07 và WebKit báo trang gặp sự cố liên tục. Đã xác định vòng lặp DOM: applyMarketBranding có MutationObserver gọi injectCommunity; Account V3 injectCommunity luôn gán textContent cho nhãn, chính thao tác này tạo childList mutation mới và gọi lại observer vô hạn. Sửa hàm thành idempotent, chỉ thay DOM khi giá trị thực sự đổi; thêm contract test và E2E WebKit production sau deploy."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-08",
@@ -17,7 +36,7 @@
       "status": "completed",
       "started_at": "2026-07-23T14:50:00+07:00",
       "completed_at": "2026-07-23T15:58:00+07:00",
-      "summary": "Người dùng nghiệm thu trên iPhone và nền tảng khác: Admin không có lối quản trị rõ, Reader register lỗi. Đã triển khai badge Admin bấm được và bottom nav Quản trị; public entry không phụ thuộc DECRYPT_KEY; luôn cấp community+gate token; DELETE /me tự xóa và thu hồi cả hai phiên; Account V4 HMAC-SHA256 salt+pepper, limiter fail-open; sửa dispatcher await để bắt rejection đúng lớp. PR #41 merge source 541194fbc63a73633fb857d4b90c221935b06309. CI coordination 29992908287 và Account V4 29992908212 success. Deploy 29993031238 SUCCESS. E2E production 29993081236 SUCCESS với register/login thiết bị 2/me/delete/token revoked/relogin = 201/200/200/200/401/401, error none; tài khoản thử tự xóa."
+      "summary": "Admin navigation và Reader production E2E đã hoàn tất; production E2E đạt 201/200/200/200/401/401. Sau đó người dùng phát hiện riêng lỗi crash WebKit ở trang /boitoan/."
     },
     {
       "id": "BOITOAN-20260723-07",
