@@ -26,11 +26,13 @@ jobs:
             node --check tools/apply-admin-session-v5.mjs
             node --check tools/apply-admin-levels-v6.mjs
             node --check tools/apply-admin-v7-login-hotfix.mjs
+            node --check tools/apply-admin-v8-edge-login.mjs
+            node --check tools/apply-admin-v8-tests.mjs
             node tools/apply-role-system.mjs
             node tools/apply-account-v2-runner.mjs
-            # Chạy lại riêng chuỗi Admin V5-V7 để xác nhận idempotent.
+            # Chạy lại riêng chuỗi Admin V5-V8 để xác nhận idempotent.
             node tools/apply-admin-v5-v6-runner.mjs
-          } 2>&1 | tee account-v7-apply.log
+          } 2>&1 | tee account-v8-apply.log
       - name: Kiểm tra frontend
         run: |
           set -o pipefail
@@ -43,7 +45,7 @@ jobs:
             node assets/account-v2.test.mjs
             node --check boitoan/sw.js
             node boitoan/sw.test.mjs
-          } 2>&1 | tee account-v7-frontend.log
+          } 2>&1 | tee account-v8-frontend.log
       - name: Kiểm tra Worker
         run: |
           set -o pipefail
@@ -51,19 +53,20 @@ jobs:
             node --check backend/community.js
             node backend/community.test.mjs
             node backend/account-v2.test.mjs
+            node backend/admin-v8-health.test.mjs
             node --check backend/worker.js
             node backend/worker.test.mjs
-          } 2>&1 | tee account-v7-worker.log
+          } 2>&1 | tee account-v8-worker.log
       - name: Lưu log chẩn đoán
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: account-v7-diagnostic-log
+          name: account-v8-diagnostic-log
           path: |
-            account-v7-apply.log
-            account-v7-frontend.log
-            account-v7-worker.log
+            account-v8-apply.log
+            account-v8-frontend.log
+            account-v8-worker.log
           if-no-files-found: warn
           retention-days: 3
       - name: Kết luận
-        run: echo "Account V7 CI PASS"
+        run: echo "Account V8 CI PASS"
