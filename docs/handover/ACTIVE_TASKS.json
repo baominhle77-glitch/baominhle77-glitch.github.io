@@ -1,8 +1,26 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T05:46:00+07:00",
+  "updated_at": "2026-07-23T10:16:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-04",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-04-remove-ai-guides-v2",
+      "base_sha": "e71bf5539c8ef796baf5f36d1f6c328ad5d547f5",
+      "paths": [
+        "tools/apply-role-system.mjs",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T09:59:00+07:00",
+      "heartbeat_at": "2026-07-23T10:16:00+07:00",
+      "summary": "Gỡ toàn bộ các hộp Khung luận Tarot/Lenormand/Bài Tây/Kinh Dịch/Tử Vi/Bát Tự và phần Kết nối toàn trải bài do lớp bổ sung tạo ra; giữ nguyên giao diện mobile đã được người dùng xác nhận đạt, branding, Cộng đồng, nút Luận giải chuyên sâu và thuật toán gốc."
+    }
+  ],
+  "recently_completed": [
     {
       "id": "DEPLOY-20260723-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -15,13 +33,11 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T05:26:00+07:00",
-      "heartbeat_at": "2026-07-23T05:46:00+07:00",
-      "summary": "Pages và Worker đã deploy thành công ở run 29963554073; sửa smoke test theo Cloudflare Clean URLs HTTP 308 bằng curl -L, ghi URL cuối và chạy lại production verification."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T10:14:25+07:00",
+      "summary": "PR #25 sửa hậu kiểm Cloudflare Clean URLs; production run 29976466953 ghi SUCCESS: Pages/CSS/Gate 200, Worker 401 unauthorized đúng kỳ vọng, URL cuối sau redirect được xác nhận."
+    },
     {
       "id": "BOITOAN-20260723-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -45,7 +61,7 @@
       "status": "completed",
       "started_at": "2026-07-23T04:55:00+07:00",
       "completed_at": "2026-07-23T05:16:00+07:00",
-      "summary": "Source UI mobile, branding Cái Chợ của Hiên Nhi và khung luận chuyên sâu đã qua CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; phần xác minh production được tách sang DEPLOY-20260723-03."
+      "summary": "Source UI mobile và branding Cái Chợ của Hiên Nhi đã qua CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; các khung luận bổ sung sau đó bị người dùng đánh giá không hữu ích và được xử lý trong BOITOAN-20260723-04."
     },
     {
       "id": "COORD-20260723-01",
