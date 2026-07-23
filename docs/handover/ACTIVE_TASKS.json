@@ -1,9 +1,21 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T02:41:00+07:00",
+  "updated_at": "2026-07-24T03:03:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
+    {
+      "id": "HANDOVER-20260724-01",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/HANDOVER-20260724-01",
+      "paths": [
+        "HANDOVER.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "completed_at": "2026-07-24T03:03:00+07:00",
+      "summary": "Thay HANDOVER.md dài và lẫn lịch sử bằng bản chuẩn ngắn: sơ đồ hệ thống, trạng thái V11, bất biến kỹ thuật, source map, quy trình tiếp tục, test tối thiểu và liên kết tới tài liệu chi tiết."
+    },
     {
       "id": "BOITOAN-20260724-15",
       "owner": "ChatGPT GPT-5.6 Thinking",
