@@ -1,0 +1,12 @@
+{
+  "name": "Việt Nam Đi Đâu?",
+  "short_name": "Đi Đâu VN",
+  "description": "Kho dữ liệu địa điểm du lịch nổi tiếng và đặc trưng của Việt Nam.",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef5f1",
+  "theme_color": "#0b5d48",
+  "icons": []
+}
