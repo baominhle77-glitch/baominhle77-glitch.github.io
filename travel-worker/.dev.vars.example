@@ -1,0 +1,5 @@
+# Chỉ dùng làm mẫu. Không commit file .dev.vars thật.
+TELEGRAM_BOT_TOKEN=replace_me
+TELEGRAM_WEBHOOK_SECRET=replace_me
+TELEGRAM_ADMIN_CHAT_ID=replace_me
+ADMIN_API_TOKEN=replace_me
