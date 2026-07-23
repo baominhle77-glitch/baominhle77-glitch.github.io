@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T17:53:00+07:00",
+  "updated_at": "2026-07-23T18:17:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "TRAVEL-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/TRAVEL-20260723-01-telegram-webapp",
-      "base_sha": "e3d6aa846e24be6685ba58220afb79e6af22812c",
+      "branch": "agent/TRAVEL-20260723-01-materialize-fix",
+      "base_sha": "49a78bdb1c51c558e611e3d6b0e58b6c0f9cbb5b",
       "paths": [
         "vietnam-travel/**",
         "backend/travel.js",
@@ -18,13 +18,14 @@
         ".github/workflows/materialize-vietnam-travel.yml",
         ".travel-bundle/**",
         "docs/handover/VIETNAM_TRAVEL.md",
+        "docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:19:00+07:00",
-      "heartbeat_at": "2026-07-23T17:53:00+07:00",
-      "summary": "Xây app PWA lưu địa điểm du lịch Việt Nam tại /vietnam-travel/, API Cloudflare KV và điều khiển thêm/sửa/ẩn/hiện/xóa qua Telegram bot hiện có; không ghi token vào source."
+      "heartbeat_at": "2026-07-23T18:17:00+07:00",
+      "summary": "Tiếp tục app PWA /vietnam-travel/, API Cloudflare KV và Telegram bot. PR #47 đã merge nhưng source thật chưa được materialize; PR #49 sửa workflow theo staging, checksum, test và log chẩn đoán, không ghi token vào source và không sửa trực tiếp main."
     }
   ],
   "recently_completed": [
