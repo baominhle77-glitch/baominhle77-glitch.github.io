@@ -1,53 +1,67 @@
-name: Xuất snapshot Bói toán sau build
+name: Materialize Bói toán V11
 
 on:
   pull_request:
     branches: [main]
     paths:
       - .github/workflows/export-boitoan-snapshot.yml
+      - .migration/**
+      - tools/materialize-boitoan-v11.mjs
       - docs/handover/ACTIVE_TASKS.json
-      - boitoan/**
-      - assets/**
-      - backend/**
-      - tools/**
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: materialize-boitoan-v11
+  cancel-in-progress: false
 
 jobs:
-  export:
+  materialize:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/BOITOAN-20260724-15-rebuild'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: agent/BOITOAN-20260724-15-rebuild
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-      - name: Sinh đúng bản đang được deploy
+      - name: Sinh baseline hiện hành một lần cuối
         run: |
           set -euo pipefail
           node tools/apply-role-system.mjs
           node tools/apply-account-v2-runner.mjs
           node tools/apply-account-v3-hotfix.mjs
-      - name: Đóng gói toàn bộ phần liên quan Bói toán
+      - name: Chuyển sang source trực tiếp V11
         run: |
           set -euo pipefail
-          tar -czf "$RUNNER_TEMP/boitoan-built-snapshot.tar.gz" \
-            boitoan assets backend tools docs/handover \
-            .github/workflows/deploy-pages.yml \
-            .github/workflows/validate-role-system.yml \
-            .github/workflows/verify-admin-v9-return.yml \
-            .github/workflows/e2e-reader-production.yml \
-            HANDOVER.md docs/ARCHITECTURE.md 2>/dev/null || \
-          tar -czf "$RUNNER_TEMP/boitoan-built-snapshot.tar.gz" \
-            boitoan assets backend tools docs/handover \
-            .github/workflows/deploy-pages.yml \
-            .github/workflows/validate-role-system.yml \
-            .github/workflows/verify-admin-v9-return.yml \
-            .github/workflows/e2e-reader-production.yml
-          sha256sum "$RUNNER_TEMP/boitoan-built-snapshot.tar.gz"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: boitoan-built-snapshot
-          path: ${{ runner.temp }}/boitoan-built-snapshot.tar.gz
-          retention-days: 2
+          node tools/materialize-boitoan-v11.mjs
+          rm -f tools/materialize-boitoan-v11.mjs
+          rm -f .github/workflows/export-boitoan-snapshot.yml
+      - name: Kiểm tra trước khi ghi source
+        run: |
+          set -euo pipefail
+          node --check assets/gate.js
+          node --check assets/community.js
+          node --check assets/community-admin.js
+          node --check backend/community.js
+          node --check backend/worker.js
+          node --check tools/admin-v9-return-webkit-check.mjs
+          node assets/gate.test.mjs
+          node assets/account-v2.test.mjs
+          node boitoan/sw.test.mjs
+          node backend/community.test.mjs
+          node backend/account-v2.test.mjs
+          node backend/admin-v8-health.test.mjs
+          node backend/worker.test.mjs
+      - name: Commit source đã materialize vào nhánh
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor: materialize Bói toán V11 direct source"
+          git push origin HEAD:agent/BOITOAN-20260724-15-rebuild
