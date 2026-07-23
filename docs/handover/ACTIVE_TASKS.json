@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T18:18:00+07:00",
+  "updated_at": "2026-07-23T18:21:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -28,8 +28,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:49:00+07:00",
-      "heartbeat_at": "2026-07-23T18:18:00+07:00",
-      "summary": "PR #48 đang sửa xác thực Admin thành một lần qua backend và phân hai cấp tại cùng form Admin. Admin thường có quyền quản lý tài khoản, khóa/xóa member, xóa review, quản lý bài thảo luận và các quyền Admin thông thường. Admin tổng có toàn bộ quyền Admin thường cộng quyền xem hội thoại riêng và mở trang cá nhân member chỉ đọc. Chỉ một thiết bị có phiên Admin tổng hoạt động; đăng nhập primary mới thu hồi phiên primary cũ nhưng không thu hồi Admin thường. ADMIN_TOKEN cũ bị vô hiệu với API community. Hai mật khẩu chỉ lưu dưới dạng PBKDF2 hash + salt, không ghi plaintext vào source. Đã bổ sung test phân quyền server và UI; đang chờ CI PR."
+      "heartbeat_at": "2026-07-23T18:21:00+07:00",
+      "summary": "PR #48 đã được cập nhật sang Account V6 hai cấp Admin tại cùng một form. Admin thường có quyền quản lý tài khoản, khóa/xóa member, xóa review, quản lý bài thảo luận và các quyền Admin thông thường. Admin tổng có toàn bộ quyền Admin thường cộng quyền xem hội thoại riêng và mở trang cá nhân member chỉ đọc. Chỉ một thiết bị có phiên Admin tổng hoạt động; đăng nhập primary mới thu hồi phiên primary cũ nhưng không thu hồi Admin thường. ADMIN_TOKEN cũ bị vô hiệu với API community. Hai mật khẩu chỉ lưu dưới dạng PBKDF2 hash + salt, không ghi plaintext vào source. Đã thêm test server/UI/cache; đang chờ CI PR."
     }
   ],
   "recently_completed": [
