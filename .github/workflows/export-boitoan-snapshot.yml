@@ -29,6 +29,19 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
+      - name: Ghi checksum migration đầu vào
+        run: |
+          set -euo pipefail
+          cat .migration/boitoan-v11-patch-*.b64 > "$RUNNER_TEMP/v11.b64"
+          sha256sum "$RUNNER_TEMP/v11.b64"
+          cp tools/materialize-boitoan-v11.mjs "$RUNNER_TEMP/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boitoan-v11-migration-input
+          path: |
+            ${{ runner.temp }}/v11.b64
+            ${{ runner.temp }}/materialize-boitoan-v11.mjs
+          retention-days: 2
       - name: Sinh baseline hiện hành một lần cuối
         run: |
           set -euo pipefail
