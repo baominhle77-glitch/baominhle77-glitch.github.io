@@ -22,3 +22,4 @@ try {
 
 await import(new URL("./apply-account-v2-profile-view.mjs", import.meta.url).href + `?v=${Date.now()}`);
 await import(new URL("./apply-account-v3-hotfix.mjs", import.meta.url).href + `?v=${Date.now()}`);
+await import(new URL("./apply-account-v4-edge-auth.mjs", import.meta.url).href + `?v=${Date.now()}`);

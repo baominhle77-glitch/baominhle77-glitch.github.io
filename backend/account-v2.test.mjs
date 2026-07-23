@@ -14,15 +14,10 @@ class MemoryKV {
 }
 
 const secret = "s".repeat(64);
-const env = { KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass" };
-function b64url(input) { return Buffer.from(input).toString("base64url"); }
-function jwt(payload, ttl = 3600) {
-  const now = Math.floor(Date.now() / 1000);
-  const header = b64url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-  const body = b64url(JSON.stringify({ ...payload, iat: now, exp: now + ttl }));
-  const sig = createHmac("sha256", secret).update(`${header}.${body}`).digest("base64url");
-  return `${header}.${body}.${sig}`;
-}
+const env = {
+  KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass",
+  PUBLIC_RATE_LIMITER: { async limit() { throw new Error("simulated_binding_failure"); } },
+};
 async function call(path, { method = "GET", token = "", body, admin = false, device = "" } = {}) {
   const headers = {};
   if (body !== undefined) headers["content-type"] = "application/json";
@@ -43,12 +38,16 @@ let result = await call("/api/community/register", {
   method: "POST",
   body: { entry: true, device_id: guestDid, device: { platform: "iPhone" }, role: "guest", username: "v2_guest", password: "password-guest", display_name: "Khách V2", bio: "" }
 });
-assert.equal(result.status, 201);
+assert.equal(result.status, 201, "lỗi binding limiter best-effort không được chặn đăng ký");
 assert.ok(result.data.token);
 assert.ok(result.data.gate_token);
 assert.equal(result.data.key, undefined);
 const guestToken = result.data.token;
 const guestId = result.data.profile.id;
+const guestLogin = JSON.parse(await env.KV.get("community-login:v2_guest"));
+assert.equal(guestLogin.password.scheme, "hmac-sha256-v1", "tài khoản mới phải dùng HMAC salt + pepper phù hợp edge");
+assert.ok(guestLogin.password.salt && guestLogin.password.hash);
+assert.equal(guestLogin.password.iterations, undefined);
 
 result = await call("/api/community/register", {
   method: "POST",
@@ -60,6 +59,8 @@ assert.ok(result.data.gate_token);
 assert.equal(result.data.profile.role, "reader");
 assert.equal(result.data.key, undefined);
 const readerId = result.data.profile.id;
+const readerLoginRecord = JSON.parse(await env.KV.get("community-login:v2_reader"));
+assert.equal(readerLoginRecord.password.scheme, "hmac-sha256-v1");
 
 result = await call("/api/community/login", {
   method: "POST",
@@ -124,4 +125,4 @@ for (const prefix of ["community-session:", "session:", "community-device:"]) {
 
 const audits = await env.KV.list({ prefix: "community-audit:" });
 assert.ok(audits.keys.length >= 5);
-console.log("Account V3 backend tests PASS");
+console.log("Account V4 edge authentication tests PASS");
