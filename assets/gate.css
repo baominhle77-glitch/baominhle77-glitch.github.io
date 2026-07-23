@@ -208,3 +208,70 @@ body.gate-advice-opened { overflow: hidden !important; }
   .gate-app-boitoan #gate-logout { right: 8px; min-width: 86px; height: 46px; }
   .gate-advice-dialog { padding: 18px; }
 }
+
+
+/* Spirituality Market: runtime integration */
+.gate-app-boitoan body { font-family: ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important; text-rendering:optimizeLegibility; }
+.gate-app-boitoan h1,.gate-app-boitoan h2,.gate-app-boitoan h3,.gate-app-boitoan .btn,.gate-app-boitoan .back { font-family:ui-serif,"New York","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif !important; }
+.market-gate-sigil,.market-sigil { position:relative;display:inline-block;width:42px;height:42px;border:1px solid #d4a94eaa;border-radius:50%;background:radial-gradient(circle at 38% 34%,#8b6fd066,#171124 64%);box-shadow:0 0 0 5px #d4a94e12,inset 0 0 20px #8b6fd055; }
+.market-gate-sigil { margin:0 auto 13px; }
+.market-gate-sigil::before,.market-sigil::before { content:"";position:absolute;left:10px;top:9px;width:17px;height:17px;border:2px solid #f5dfa1;border-radius:50%;box-shadow:6px 1px 0 -1px #171124;transform:rotate(-17deg); }
+.market-gate-sigil::after,.market-sigil::after { content:"✦";position:absolute;right:6px;top:4px;color:#f5dfa1;font-size:12px;text-shadow:0 0 10px #f5dfa1bb; }
+.market-gate-sigil span { display:none; }
+.market-brand-title { display:flex !important;align-items:center;justify-content:center;gap:11px;text-transform:none !important;letter-spacing:.055em !important;font-size:clamp(1.18rem,5vw,1.48rem) !important; }
+.market-brand-title .market-sigil { width:34px;height:34px;flex:0 0 34px; }
+.market-brand-title .market-sigil::before { left:7px;top:6px;width:14px;height:14px; }
+.market-brand-title .market-sigil::after { right:5px;top:3px;font-size:10px; }
+.gate-app-boitoan nav { display:grid !important;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;justify-content:initial !important;gap:0; }
+.gate-app-boitoan nav button,.gate-community-link { min-width:0;width:100%;min-height:52px;padding:2px 2px !important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink-faint,#6f668f);background:none;border:0;font:400 .62rem/1.15 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-decoration:none;text-align:center; }
+.gate-community-link .i { color:#d4a94e;font-size:1.25rem;line-height:1; }
+.gate-community-link .market-nav-label { color:#d4a94e;overflow-wrap:anywhere; }
+.gate-community-link:focus-visible { outline:2px solid #a98fe0;outline-offset:-2px;border-radius:8px; }
+.gate-owner-pattern { position:absolute;inset:-22vh -25vw;display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));grid-auto-rows:18vh;align-items:center;justify-items:center;transform:rotate(-22deg) scale(1.08);opacity:.075; }
+.gate-owner-pattern span { color:#8b6fd0;font:700 clamp(17px,3.4vw,38px)/1.1 ui-serif,Georgia,serif;letter-spacing:.055em;white-space:nowrap;user-select:none; }
+.gate-owner-top,.gate-owner-bottom { font-family:ui-serif,"New York",Georgia,serif; }
+.gate-member-card { width:min(94vw,520px);max-height:calc(100dvh - 24px);overflow:auto; }
+.gate-entry-tabs { display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:14px 0; }
+.gate-entry-tabs button { border:1px solid #332a52;border-radius:10px;background:#161226;color:#a89fc4;padding:10px 6px;font:600 .78rem/1.2 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+.gate-entry-tabs button.active { color:#f5dfa1;border-color:#d4a94e;background:#2a2213; }
+.gate-role-choice { border:0;padding:0;margin:0 0 10px;display:grid;gap:8px; }
+.gate-role-choice legend { color:#d4a94e;font-size:.84rem;margin-bottom:6px; }
+.gate-role-card { position:relative;display:flex;align-items:flex-start;gap:9px;padding:11px;border:1px solid #332a52;border-radius:12px;background:#161226;text-align:left; }
+.gate-role-card:has(input:checked) { border-color:#d4a94e;background:#241d3d;box-shadow:0 0 0 2px #d4a94e18; }
+.gate-role-card input { margin-top:3px;accent-color:#d4a94e; }
+.gate-role-card span { display:grid;gap:2px; }
+.gate-role-card strong { color:#e8e2f4;font-size:.9rem; }
+.gate-role-card small { color:#a89fc4;font-size:.72rem;line-height:1.35; }
+.gate-privacy { color:#8f86a8;font-size:.68rem;line-height:1.45;text-align:left;margin:8px 0 2px; }
+@media (max-width:380px) { .gate-app-boitoan nav button,.gate-community-link{font-size:.56rem}.market-brand-title{font-size:1.08rem !important;gap:7px}.market-brand-title .market-sigil{width:30px;height:30px;flex-basis:30px}.gate-entry-tabs button{font-size:.7rem;padding:9px 3px} }
+
+
+/* Account V2: staged onboarding */
+.gate-member-card { width:min(92vw,430px); max-height:calc(100dvh - 28px); overflow:auto; padding:24px 20px 20px; }
+.gate-entry-brand { display:grid; justify-items:center; gap:3px; margin-bottom:14px; }
+.gate-entry-choice { display:grid; gap:11px; }
+.gate-entry-choice[hidden], .gate-entry-stage[hidden], .gate-member-card form[hidden] { display:none !important; }
+.gate-entry-option { position:relative; display:grid; gap:4px; width:100%; min-height:76px; padding:14px 42px 14px 15px; border:1px solid #493865; border-radius:14px; background:linear-gradient(150deg,#211831,#151020); color:#f3eef8; text-align:left; cursor:pointer; }
+.gate-entry-option strong { color:#f5dfa1; font-size:1rem; }
+.gate-entry-option small { color:#b9adc9; font-size:.78rem; line-height:1.4; }
+.gate-entry-option > span { position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#d8b45c; font-size:1.8rem; }
+.gate-entry-stage { display:grid; gap:8px; text-align:left; }
+.gate-entry-back { justify-self:start; border:0; background:none; color:#d8b45c; padding:4px 0 8px; font-weight:750; cursor:pointer; }
+.gate-entry-heading { margin:0; color:#f5dfa1; font:600 1.25rem/1.2 ui-serif,Georgia,serif; text-align:center; }
+.gate-entry-description { margin:0 0 10px; color:#b9adc9; font-size:.82rem; text-align:center; }
+.gate-member-card .gate-form > label:not(.gate-remember) { display:grid; gap:6px; margin:0; color:#d8cde6; font-size:.78rem; font-weight:700; text-align:left; }
+.gate-member-card input[type="checkbox"], .gate-member-card input[type="radio"] { width:auto !important; min-width:18px; height:18px; padding:0 !important; margin:0; -webkit-appearance:auto !important; appearance:auto !important; accent-color:#d8b45c; }
+.gate-member-card .gate-remember { display:flex; align-items:center; justify-content:flex-start; gap:9px; margin:2px 0; }
+.gate-member-card .gate-role-card { display:grid; grid-template-columns:22px minmax(0,1fr); align-items:start; }
+.market-account-identity { display:inline-grid; grid-template-columns:34px minmax(0,auto); align-items:center; gap:9px; margin:11px auto 0; padding:7px 11px 7px 7px; border:1px solid #d8b45c66; border-radius:999px; background:#171124dd; text-align:left; }
+.market-account-avatar { display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:linear-gradient(145deg,#8b6fd0,#4d357f); color:#fff; font-weight:850; }
+.market-account-copy { display:grid; line-height:1.15; }
+.market-account-copy strong { color:#f3eef8; font:750 .82rem/1.2 ui-sans-serif,-apple-system,sans-serif; }
+.market-account-copy small { color:#f0cf72; font:700 .67rem/1.2 ui-sans-serif,-apple-system,sans-serif; }
+.market-account-identity.role-admin { border-color:#f0cf72; box-shadow:0 0 0 3px #d8b45c18; }
+@media (max-width:380px) { .gate-member-card{padding:20px 15px 16px}.gate-entry-option{min-height:70px}.gate-entry-option strong{font-size:.94rem} }
+
+
+/* Account V3 admin navigation */
+a.market-account-identity { text-decoration:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+a.market-account-identity:active { transform:scale(.98); }

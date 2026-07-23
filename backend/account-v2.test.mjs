@@ -23,15 +23,16 @@ const adminHash = (password) => pbkdf2Sync(password, adminSalt, adminIterations,
 const legacyHash = (password) => pbkdf2Sync(password, legacyAdminSalt, 900, 32, "sha256").toString("base64");
 const env = {
   KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "legacy-admin-token-must-not-work",
-  // Cố ý để lại cấu hình V5/V6 sai. Account V7 phải bỏ qua hoàn toàn các biến này.
+  // Cố ý để lại cấu hình V5/V6 sai. Account V8 phải bỏ qua hoàn toàn các biến này.
   ADMIN_PASSWORD_SALT_B64: legacyAdminSalt.toString("base64"),
   ADMIN_REGULAR_PASSWORD_HASH_B64: legacyHash("legacy-regular-admin"),
   ADMIN_PRIMARY_PASSWORD_HASH_B64: legacyHash("legacy-primary-admin"),
   ADMIN_PASSWORD_ITERATIONS: "900",
-  ADMIN_V7_PASSWORD_SALT_B64: adminSalt.toString("base64"),
-  ADMIN_V7_REGULAR_PASSWORD_HASH_B64: adminHash(regularAdminPassword),
-  ADMIN_V7_PRIMARY_PASSWORD_HASH_B64: adminHash(primaryAdminPassword),
-  ADMIN_V7_PASSWORD_ITERATIONS: String(adminIterations),
+  ADMIN_V8_PASSWORD_SALT_B64: adminSalt.toString("base64"),
+  ADMIN_V8_REGULAR_PASSWORD_HASH_B64: adminHash(regularAdminPassword),
+  ADMIN_V8_PRIMARY_PASSWORD_HASH_B64: adminHash(primaryAdminPassword),
+  ADMIN_V8_PASSWORD_ITERATIONS: String(adminIterations),
+  DECRYPT_KEY_BOITOAN: "test-boitoan-decrypt-key",
   PUBLIC_RATE_LIMITER: { async limit() { throw new Error("simulated_binding_failure"); } },
 };
 async function call(path, { method = "GET", token = "", body, device = "" } = {}) {
@@ -58,7 +59,7 @@ let result = await call("/api/community/register", {
 assert.equal(result.status, 201, "lỗi binding limiter best-effort không được chặn đăng ký");
 assert.ok(result.data.token);
 assert.ok(result.data.gate_token);
-assert.equal(result.data.key, undefined);
+assert.equal(result.data.key, env.DECRYPT_KEY_BOITOAN);
 const guestToken = result.data.token;
 const guestId = result.data.profile.id;
 const guestLogin = JSON.parse(await env.KV.get("community-login:v2_guest"));
@@ -74,7 +75,7 @@ assert.equal(result.status, 201, "Reader phải đăng ký được trên public
 assert.ok(result.data.token);
 assert.ok(result.data.gate_token);
 assert.equal(result.data.profile.role, "reader");
-assert.equal(result.data.key, undefined);
+assert.equal(result.data.key, env.DECRYPT_KEY_BOITOAN);
 const readerId = result.data.profile.id;
 const readerLoginRecord = JSON.parse(await env.KV.get("community-login:v2_reader"));
 assert.equal(readerLoginRecord.password.scheme, "hmac-sha256-v1");
@@ -102,6 +103,7 @@ assert.equal(result.status, 200, "mật khẩu Admin thường phải hoạt đ�
 assert.ok(result.data.token);
 assert.equal(result.data.level, "regular");
 assert.equal(result.data.primary, false);
+assert.equal(result.data.key, env.DECRYPT_KEY_BOITOAN);
 assert.equal(await env.KV.get("community-owner-device"), null, "Admin thường không được chiếm thiết bị Admin tổng");
 const regularAdminToken = result.data.token;
 
@@ -109,6 +111,7 @@ result = await call("/api/community/admin/session", { token: regularAdminToken, 
 assert.equal(result.status, 200);
 assert.equal(result.data.level, "regular");
 assert.equal(result.data.primary, false);
+assert.equal(result.data.key, env.DECRYPT_KEY_BOITOAN);
 result = await call("/api/community/admin/users", { token: regularAdminToken, device: regularDid });
 assert.equal(result.status, 200, "Admin thường được quản lý tài khoản");
 result = await call("/api/community/admin/users", { token: regularAdminToken, device: randomUUID() });
@@ -124,6 +127,7 @@ result = await call("/api/community/admin/login", { method: "POST", device: prim
 assert.equal(result.status, 200, "mật khẩu Admin tổng phải hoạt động dù Cloudflare còn cấu hình salt/hash V5-V6 cũ");
 assert.equal(result.data.level, "primary");
 assert.equal(result.data.primary, true);
+assert.equal(result.data.key, env.DECRYPT_KEY_BOITOAN);
 assert.equal(await env.KV.get("community-owner-device"), primaryDid1);
 const firstPrimaryToken = result.data.token;
 
@@ -131,10 +135,12 @@ result = await call("/api/community/admin/session", { token: firstPrimaryToken, 
 assert.equal(result.status, 200);
 assert.equal(result.data.level, "primary");
 assert.equal(result.data.primary, true);
+assert.equal(result.data.key, env.DECRYPT_KEY_BOITOAN);
 
 result = await call("/api/community/admin/login", { method: "POST", device: primaryDid2, body: { password: primaryAdminPassword, device_id: primaryDid2, remember: true } });
 assert.equal(result.status, 200, "đăng nhập Admin tổng trên thiết bị mới phải chuyển quyền duy nhất");
 assert.equal(result.data.primary, true);
+assert.equal(result.data.key, env.DECRYPT_KEY_BOITOAN);
 assert.equal(await env.KV.get("community-owner-device"), primaryDid2);
 const primaryAdminToken = result.data.token;
 result = await call("/api/community/admin/users", { token: firstPrimaryToken, device: primaryDid1 });
@@ -201,4 +207,4 @@ assert.equal(result.status, 401, "đăng xuất phải thu hồi JWT Admin tổn
 
 const audits = await env.KV.list({ prefix: "community-audit:" });
 assert.ok(audits.keys.length >= 7);
-console.log("Account V7 dual Admin, legacy config isolation, unique primary device and edge authentication tests PASS");
+console.log("Account V11 dual Admin, encrypted app key contract and edge authentication tests PASS");

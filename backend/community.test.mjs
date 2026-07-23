@@ -22,10 +22,10 @@ const env = {
   KV: new MemoryKV(),
   SESSION_SECRET: secret,
   ADMIN_TOKEN: "legacy-admin-token-must-not-work",
-  ADMIN_V7_PASSWORD_SALT_B64: adminSalt.toString("base64"),
-  ADMIN_V7_REGULAR_PASSWORD_HASH_B64: adminHash("test-community-regular-admin"),
-  ADMIN_V7_PRIMARY_PASSWORD_HASH_B64: adminHash(primaryAdminPassword),
-  ADMIN_V7_PASSWORD_ITERATIONS: String(adminIterations),
+  ADMIN_V8_PASSWORD_SALT_B64: adminSalt.toString("base64"),
+  ADMIN_V8_REGULAR_PASSWORD_HASH_B64: adminHash("test-community-regular-admin"),
+  ADMIN_V8_PRIMARY_PASSWORD_HASH_B64: adminHash(primaryAdminPassword),
+  ADMIN_V8_PASSWORD_ITERATIONS: String(adminIterations),
   DECRYPT_KEY: "test-decrypt-key",
 };
 function b64url(input) { return Buffer.from(input).toString("base64url"); }
@@ -175,6 +175,7 @@ result = await call("/api/community/admin/login", {
 assert.equal(result.status, 200);
 assert.equal(result.data.level, "primary");
 assert.equal(result.data.primary, true);
+assert.equal(result.data.key, env.DECRYPT_KEY);
 const primaryAdminToken = result.data.token;
 
 result = await call("/api/community/admin/users", { token: primaryAdminToken, ownerDevice: adminDid });

@@ -26,7 +26,7 @@
   var APP = CFG.app || "app";
   var MODE = CFG.mode || "local";
   var BACKEND = (CFG.backend || "").replace(/\/+$/, "");
-  var TITLE = CFG.title || "Khu vực riêng tư";
+  var TITLE = CFG.title || "Spirituality Market";
   var SUBTITLE = CFG.subtitle || "Nhập mật khẩu để tiếp tục.";
   var SESSION_KEY = "gate_ok_" + APP;
   var REMEMBER_KEY = "gate_remember_" + APP;
@@ -154,6 +154,26 @@
     });
   }
 
+  /* Bói toán V11: mọi loại phiên đều đi qua đúng một đường mở nội dung. */
+  function openAppContent(key, method) {
+    var payload = document.querySelector('script[type="application/gate-payload"]');
+    if (!payload) {
+      reveal(method || "session");
+      return Promise.resolve();
+    }
+    if (!key) {
+      var missing = new Error("decrypt_key_unavailable");
+      missing.code = "decrypt_key_unavailable";
+      return Promise.reject(missing);
+    }
+    return decryptPayload(key).then(function (html) {
+      injectHtml(html);
+      var host = document.getElementById("gate-content");
+      if (!host || !host.children.length) throw new Error("empty_decrypted_app");
+      reveal(method || "session");
+    });
+  }
+
   /* -------------------------- backend duyệt (approval) -------------------------- */
   function fingerprint() {
     // Dấu vết thiết bị nhẹ (không xâm phạm) để chủ nhận diện phiên yêu cầu.
@@ -174,7 +194,7 @@
     }).then(function (r) {
       return r.json().then(function (data) {
         if (!r.ok) throw new Error(data.error === "telegram_unavailable"
-          ? "Bot Telegram chưa sẵn sàng. Báo chủ app kiểm tra bot."
+          ? "Bot Telegram chưa sẵn sàng. Báo Admin kiểm tra bot."
           : "Không gửi được yêu cầu (" + r.status + ").");
         return data;
       });
@@ -254,7 +274,7 @@
     if (!BACKEND || document.getElementById("gate-chat")) return;
     var shell = document.createElement("aside");
     shell.id = "gate-chat";
-    shell.setAttribute("aria-label", "Chat với chủ app");
+    shell.setAttribute("aria-label", "Chat với Admin");
     var toggle = document.createElement("button");
     toggle.type = "button";
     toggle.className = "gate-chat-toggle";
@@ -287,7 +307,7 @@
         var item = document.createElement("div");
         item.className = "gate-chat-message " + (message.sender === "owner" ? "owner" : "visitor");
         var sender = document.createElement("strong");
-        sender.textContent = message.sender === "owner" ? "Chủ app" : "Bạn";
+        sender.textContent = message.sender === "owner" ? "Admin" : "Bạn";
         var text = document.createElement("span");
         text.textContent = String(message.text || "");
         item.append(sender, text);
@@ -316,7 +336,7 @@
     function renderApproved() {
       panel.replaceChildren();
       var title = document.createElement("strong");
-      title.textContent = "Chat với chủ app";
+      title.textContent = "Chat với Admin";
       var messages = document.createElement("div");
       messages.className = "gate-chat-messages";
       messages.setAttribute("aria-live", "polite");
@@ -337,7 +357,7 @@
       state.className = "gate-chat-status";
       state.setAttribute("role", "status");
       var notice = document.createElement("small");
-      notice.textContent = "Tin nhắn lưu tối đa 30 ngày trong app và gửi bản sao tới Telegram của chủ app.";
+      notice.textContent = "Tin nhắn lưu tối đa 30 ngày trong app và gửi bản sao tới Telegram của Admin.";
       form.append(input, send);
       panel.append(title, messages, form, state, notice);
       form.addEventListener("submit", function (event) {
@@ -504,7 +524,7 @@
         ? "Thanh toán đã được xác nhận."
         : pending ? "Đang chờ xác nhận. Bạn có thể mở lại trang thanh toán."
           : data.payment_enabled ? "Báo giá đã sẵn sàng. Nhấn Thanh toán để tiếp tục."
-          : "Báo giá đã sẵn sàng. Kênh thanh toán chưa được chủ kích hoạt.",
+          : "Báo giá đã sẵn sàng. Kênh thanh toán chưa được Admin kích hoạt.",
         !paid && !pending && !data.payment_enabled);
     }
 
@@ -524,7 +544,7 @@
           }
           return;
         }
-        setState("Đã gửi. Đang chờ chủ báo giá…");
+        setState("Đã gửi. Đang chờ Admin báo giá…");
         advicePollTimer = setTimeout(pollAdvice, 5000);
       }).catch(function (error) {
         setState(error.status === 401 ? "Phiên duyệt đã hết hạn." : "Chưa tải được báo giá.", true);
@@ -549,7 +569,7 @@
         adviceId = data.id;
         try { sessionStorage.setItem(adviceStorageKey, adviceId); } catch (e) {}
         form.hidden = true;
-        setState("Đã gửi. Đang chờ chủ báo giá…");
+        setState("Đã gửi. Đang chờ Admin báo giá…");
         pollAdvice();
       }).catch(function (error) {
         quote.disabled = false;
@@ -569,7 +589,7 @@
         location.assign(data.checkout_url);
       }).catch(function (error) {
         pay.disabled = false;
-        setState(error.message === "payment_not_configured" ? "Kênh thanh toán chưa được chủ kích hoạt." : "Không tạo được phiên thanh toán.", true);
+        setState(error.message === "payment_not_configured" ? "Kênh thanh toán chưa được Admin kích hoạt." : "Không tạo được phiên thanh toán.", true);
       });
     });
     shell.querySelector(".gate-advice-close").addEventListener("click", close);
@@ -630,6 +650,136 @@
     });
   }
 
+  function marketSigil() {
+    return '<span class="market-sigil" aria-hidden="true"></span>';
+  }
+
+  /* Account V7 admin login hotfix */
+  /* Account V8 frontend auth contract */
+  var MARKET_ADMIN_AUTH_VERSION = "2026-07-24-v11";
+  function marketAdminSession() {
+    try {
+      var level = localStorage.getItem("market_admin_level") || "";
+      return localStorage.getItem("market_admin_session") === "1"
+        && !!localStorage.getItem("market_admin_token")
+        && localStorage.getItem("market_admin_auth_version") === MARKET_ADMIN_AUTH_VERSION
+        && (level === "regular" || level === "primary")
+        && !storedAccountProfile();
+    } catch (e) { return false; }
+  }
+
+  function clearMarketAdminSession() {
+    var token = "", hadAdmin = false;
+    try {
+      token = localStorage.getItem("market_admin_token") || "";
+      hadAdmin = !!token || localStorage.getItem("market_admin_session") === "1";
+      localStorage.removeItem("market_admin_token");
+      localStorage.removeItem("market_admin_session");
+      localStorage.removeItem("market_admin_primary");
+      localStorage.removeItem("market_admin_level");
+      localStorage.removeItem("market_admin_auth_version");
+      if (hadAdmin) {
+        localStorage.removeItem("community_profile_boitoan");
+        localStorage.removeItem("community_token_boitoan");
+      }
+    } catch (e) {}
+    return token;
+  }
+
+  function revokeMarketAdminSession(token) {
+    if (!token || !BACKEND) return;
+    fetch(BACKEND + "/api/community/admin/session", {
+      method: "DELETE",
+      headers: { authorization: "Bearer " + token, "x-owner-device-id": deviceId() },
+      keepalive: true
+    }).catch(function () {});
+  }
+
+  document.addEventListener("click", function(event){
+    if (APP !== "boitoan") return;
+    var target = event.target && event.target.closest ? event.target.closest("#gate-logout") : null;
+    if (!target) return;
+    var previousAdminToken = clearMarketAdminSession();
+    if (previousAdminToken) revokeMarketAdminSession(previousAdminToken);
+  }, true);
+
+  function injectCommunity() {
+    if (APP !== "boitoan") return;
+    var nav = document.querySelector("body nav");
+    if (!nav) { setTimeout(injectCommunity, 80); return; }
+    var link = document.getElementById("gate-community-link");
+    if (!link) {
+      link = document.createElement("a");
+      link.id = "gate-community-link";
+      link.className = "gate-community-link";
+      link.innerHTML = '<span class="i">✦</span><span class="market-nav-label"></span>';
+      nav.appendChild(link);
+    }
+    var admin = marketAdminSession();
+    var targetHref = new URL(admin ? "community-admin.html" : "community.html", location.href).href;
+    var targetLabel = admin ? "Quản trị" : "Cộng đồng";
+    var targetAria = admin ? "Mở khu vực quản trị Spirituality Market" : "Mở Spirituality Market";
+    if (link.href !== targetHref) link.href = targetHref;
+    var labelNode = link.querySelector(".market-nav-label");
+    if (!labelNode) {
+      labelNode = document.createElement("span");
+      labelNode.className = "market-nav-label";
+      link.appendChild(labelNode);
+    }
+    // MutationObserver của applyMarketBranding theo dõi childList. Không được gán
+    // textContent vô điều kiện vì chính thao tác đó tạo mutation mới và lặp vô hạn trên WebKit.
+    if (labelNode.textContent !== targetLabel) labelNode.textContent = targetLabel;
+    if (link.getAttribute("aria-label") !== targetAria) link.setAttribute("aria-label", targetAria);
+    if (!document.body.classList.contains("market-has-community-nav")) document.body.classList.add("market-has-community-nav");
+  }
+
+  function applyMarketBranding() {
+    if (APP !== "boitoan") return;
+    document.body.classList.add("market-brand");
+    document.title = "Spirituality Market · Bói toán";
+    var headerTitle = document.querySelector("#gate-content .wrap > header h1, body > .wrap > header h1");
+    if (headerTitle && !headerTitle.classList.contains("market-brand-title")) {
+      headerTitle.classList.add("market-brand-title");
+      headerTitle.innerHTML = marketSigil() + '<span>Spirituality Market</span>';
+    }
+    injectCommunity();
+    if (!window.__marketBrandObserver) {
+      window.__marketBrandObserver = new MutationObserver(function () { injectCommunity(); });
+      window.__marketBrandObserver.observe(document.getElementById("gate-content") || document.body, { childList: true, subtree: true });
+    }
+  }
+
+  function storedAccountProfile() {
+    try { return JSON.parse(localStorage.getItem("community_profile_boitoan") || "null"); } catch (e) { return null; }
+  }
+  function accountRoleLabel(role) {
+    if (role === "reader") return "Reader / Người xem bói";
+    if (role === "guest") return "Khách";
+    return "Admin";
+  }
+  function injectAccountIdentity(method) {
+    if (APP !== "boitoan") return;
+    var old = document.getElementById("market-account-identity");
+    if (old) old.remove();
+    var profile = storedAccountProfile();
+    var admin = !profile && (method === "password" || method === "saved-key" || method === "remembered" || localStorage.getItem("market_admin_session") === "1");
+    var role = admin ? "admin" : profile && profile.role;
+    if (!role) return;
+    var display = admin ? "Admin" : (profile.display_name || profile.username || "Thành viên");
+    var primary = false;
+    try { primary = admin && localStorage.getItem("market_admin_primary") === "1"; } catch (e) {}
+    var chip = document.createElement(admin ? "a" : "div");
+    if (admin) { chip.href = new URL("community-admin.html", location.href).href; chip.setAttribute("aria-label", "Mở khu vực quản trị"); }
+    chip.id = "market-account-identity";
+    chip.className = "market-account-identity role-" + role;
+    chip.innerHTML = '<span class="market-account-avatar"></span><span class="market-account-copy"><strong></strong><small></small></span>';
+    chip.querySelector(".market-account-avatar").textContent = display.trim().slice(0, 1).toUpperCase() || "✦";
+    chip.querySelector("strong").textContent = display;
+    chip.querySelector("small").textContent = admin ? ((primary ? "Admin tổng" : "Admin") + " · Mở quản trị") : accountRoleLabel(role);
+    var header = document.querySelector("#gate-content .wrap > header, body > .wrap > header");
+    if (header) header.appendChild(chip); else document.body.appendChild(chip);
+    injectCommunity();
+  }
   function reveal(method) {
     document.documentElement.classList.remove("gate-locked");
     var root = document.getElementById("gate-root");
@@ -637,8 +787,10 @@
     injectLogout(); // nút "khóa lại" nếu máy này đang được ghi nhớ
     injectChat();
     injectAdvice();
+    applyMarketBranding();
+    injectAccountIdentity(method || "session");
     trackAccess(method || "session");
-    // Watermark chủ sở hữu vẫn giữ lại sau khi mở khóa (không xóa).
+    // Watermark Admin vẫn giữ lại sau khi mở khóa (không xóa).
   }
 
   // Nút nhỏ để "quên máy này" (xóa khóa đã lưu) — chỉ hiện khi máy đang được ghi nhớ.
@@ -655,7 +807,15 @@
       try {
         localStorage.removeItem("gate_key_" + APP);
         localStorage.removeItem(REMEMBER_KEY);
-        if (APP === "boitoan") localStorage.removeItem(TOKEN_KEY);
+        if (APP === "boitoan") {
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem("community_token_boitoan");
+          localStorage.removeItem("community_profile_boitoan");
+          localStorage.removeItem("market_admin_session");
+          localStorage.removeItem("market_admin_primary");
+          localStorage.removeItem("market_admin_level");
+          localStorage.removeItem("market_admin_token");
+        }
         sessionStorage.removeItem(SESSION_KEY);
       } catch (e) {}
       location.reload();
@@ -663,7 +823,7 @@
     document.body.appendChild(b);
   }
 
-  // Watermark chủ sở hữu: hiện ở ĐẦU trang, CUỐI trang và CHỮ MỜ nền.
+  // Watermark Admin: hiện ở ĐẦU trang, CUỐI trang và CHỮ MỜ nền.
   // Bền vững qua cả lúc khóa lẫn sau khi mở khóa. Không chặn thao tác (pointer-events:none).
   function injectOwner() {
     if (!CFG.owner || document.getElementById("gate-owner-wrap")) return;
@@ -672,8 +832,9 @@
     w.id = "gate-owner-wrap";
     w.setAttribute("aria-hidden", "true");
     var top = document.createElement("div"); top.className = "gate-owner-top"; top.textContent = "✦ " + name + " ✦";
-    var bg = document.createElement("div"); bg.className = "gate-owner-bg"; bg.textContent = name;
-    var bot = document.createElement("div"); bot.className = "gate-owner-bottom"; bot.textContent = "✦ " + name + " · khu vực riêng tư ✦";
+    var bg = document.createElement("div"); bg.className = "gate-owner-pattern";
+    for (var i = 0; i < 18; i++) { var mark = document.createElement("span"); mark.textContent = name; bg.appendChild(mark); }
+    var bot = document.createElement("div"); bot.className = "gate-owner-bottom"; bot.textContent = "✦ " + name + " ✦";
     w.appendChild(top); w.appendChild(bg); w.appendChild(bot);
     document.body.appendChild(w);
   }
@@ -703,13 +864,212 @@
     });
   }
 
+  function memberEntryError(code) {
+    var messages = {
+      invalid_login: "Tên đăng nhập hoặc mật khẩu không đúng.",
+      username_exists: "Tên đăng nhập đã được sử dụng.",
+      invalid_account: "Thông tin chưa hợp lệ. Tên đăng nhập cần 3–30 ký tự; mật khẩu ít nhất 8 ký tự.",
+      display_name_required: "Vui lòng nhập tên hiển thị.",
+      account_unavailable: "Tài khoản hiện không khả dụng.",
+      decrypt_key_unavailable: "Hệ thống chưa sẵn sàng cấp quyền vào app. Vui lòng báo Admin.",
+      rate_limited: "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",
+      community_server: "Hệ thống tài khoản đang gặp lỗi. Vui lòng thử lại.",
+    };
+    return messages[code] || "Không thực hiện được. Vui lòng thử lại.";
+  }
+
+  function finishMemberEntry(data, remember, method) {
+    if (!data || !data.gate_token || !data.token) {
+      return Promise.reject(Object.assign(new Error("entry_incomplete"), { code: "entry_incomplete" }));
+    }
+    try {
+      localStorage.setItem(TOKEN_KEY, data.gate_token);
+      localStorage.setItem("community_token_boitoan", data.token);
+      localStorage.setItem("community_profile_boitoan", JSON.stringify(data.profile || {}));
+      clearMarketAdminSession();
+      sessionStorage.setItem(SESSION_KEY, "1");
+      if (remember) {
+        localStorage.setItem(REMEMBER_KEY, "1");
+        if (data.key) localStorage.setItem("gate_key_" + APP, data.key);
+      } else {
+        localStorage.removeItem(REMEMBER_KEY);
+        localStorage.removeItem("gate_key_" + APP);
+      }
+    } catch (e) {}
+    return openAppContent(data.key, method || "member");
+  }
+
+  function buildBoitoanEntryUI() {
+    var root = document.createElement("div");
+    root.id = "gate-root";
+    root.innerHTML =
+      '<div class="gate-card gate-member-card" role="dialog" aria-modal="true" aria-label="Cổng Spirituality Market">' +
+        '<div class="gate-entry-brand"><div class="gate-sigil market-gate-sigil" aria-hidden="true"><span></span></div><h1 class="gate-title">Spirituality Market</h1></div>' +
+        '<section class="gate-entry-choice" aria-label="Chọn cách truy cập">' +
+          '<p class="gate-sub">Chọn một mục để tiếp tục.</p>' +
+          '<button type="button" class="gate-entry-option" data-entry-open="login"><strong>Đăng nhập</strong><small>Dành cho Khách hoặc Reader đã có tài khoản.</small><span>›</span></button>' +
+          '<button type="button" class="gate-entry-option" data-entry-open="register"><strong>Đăng ký</strong><small>Tạo tài khoản Khách hoặc Reader / Người xem bói.</small><span>›</span></button>' +
+          '<button type="button" class="gate-entry-option" data-entry-open="admin"><strong>Admin</strong><small>Mở khu vực quản trị bằng mật khẩu Admin.</small><span>›</span></button>' +
+        '</section>' +
+        '<section class="gate-entry-stage" data-entry-stage hidden>' +
+          '<button type="button" class="gate-entry-back">← Quay lại</button>' +
+          '<h2 class="gate-entry-heading"></h2><p class="gate-entry-description"></p>' +
+          '<form class="gate-form gate-member-login" autocomplete="on" hidden>' +
+            '<label>Tên đăng nhập<input class="gate-input" name="username" required minlength="3" maxlength="30" autocomplete="username"></label>' +
+            '<label>Mật khẩu<input class="gate-input" name="password" type="password" required minlength="8" maxlength="128" autocomplete="current-password"></label>' +
+            '<label class="gate-remember"><input type="checkbox" name="remember" checked> Ghi nhớ trên thiết bị này</label>' +
+            '<button class="gate-btn" type="submit">Vào ứng dụng</button><div class="gate-msg" aria-live="polite"></div>' +
+          '</form>' +
+          '<form class="gate-form gate-member-register" autocomplete="on" hidden>' +
+            '<fieldset class="gate-role-choice"><legend>Chọn loại tài khoản</legend>' +
+              '<label class="gate-role-card"><input type="radio" name="role" value="guest" checked><span><strong>Khách</strong><small>Xem bài, tìm Reader, trò chuyện và đánh giá.</small></span></label>' +
+              '<label class="gate-role-card"><input type="radio" name="role" value="reader"><span><strong>Reader / Người xem bói</strong><small>Tạo hồ sơ chuyên môn, nhận khách và luận giải.</small></span></label>' +
+            '</fieldset>' +
+            '<label>Tên hiển thị<input class="gate-input" name="display_name" required maxlength="80" autocomplete="name"></label>' +
+            '<label>Tên đăng nhập<input class="gate-input" name="username" required pattern="[a-zA-Z0-9_]{3,30}" maxlength="30" placeholder="Chữ, số hoặc dấu _" autocomplete="username"></label>' +
+            '<label>Mật khẩu<input class="gate-input" name="password" type="password" required minlength="8" maxlength="128" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password"></label>' +
+            '<label class="gate-remember"><input type="checkbox" name="remember" checked> Ghi nhớ trên thiết bị này</label>' +
+            '<p class="gate-privacy">Khi đăng ký, hệ thống gửi Admin tên hiển thị, tên đăng nhập, vai trò và dữ liệu kỹ thuật thiết bị đã nêu. Không gửi mật khẩu.</p>' +
+            '<button class="gate-btn" type="submit">Tạo tài khoản và vào app</button><div class="gate-msg" aria-live="polite"></div>' +
+          '</form>' +
+          '<form class="gate-form gate-admin-login" autocomplete="off" hidden>' +
+            '<label>Mật khẩu Admin<input class="gate-input" name="password" type="password" required autocomplete="current-password"></label>' +
+            '<label class="gate-remember"><input type="checkbox" name="remember" checked> Ghi nhớ thiết bị Admin</label>' +
+            '<button class="gate-btn" type="submit">Đăng nhập Admin</button><div class="gate-msg" aria-live="polite"></div>' +
+          '</form>' +
+        '</section>' +
+        '<div class="gate-foot">Spirituality Market · Truy cập được ghi nhận</div>' +
+      '</div>';
+    document.body.appendChild(root);
+
+    var choice = root.querySelector(".gate-entry-choice");
+    var stage = root.querySelector("[data-entry-stage]");
+    var heading = root.querySelector(".gate-entry-heading");
+    var description = root.querySelector(".gate-entry-description");
+    var forms = {
+      login: root.querySelector(".gate-member-login"),
+      register: root.querySelector(".gate-member-register"),
+      admin: root.querySelector(".gate-admin-login"),
+    };
+    var copy = {
+      login: ["Đăng nhập", "Sử dụng tài khoản Khách hoặc Reader / Người xem bói."],
+      register: ["Tạo tài khoản", "Chọn đúng vai trò trước khi hoàn tất đăng ký."],
+      admin: ["Admin", "Đăng nhập khu vực quản trị."],
+    };
+    function openStage(name) {
+      choice.hidden = true;
+      stage.hidden = false;
+      heading.textContent = copy[name][0];
+      description.textContent = copy[name][1];
+      Object.keys(forms).forEach(function (key) { forms[key].hidden = key !== name; });
+      var first = forms[name].querySelector('input:not([type="checkbox"]):not([type="radio"])');
+      if (first) setTimeout(function () { first.focus(); }, 20);
+    }
+    function backToChoice() {
+      stage.hidden = true;
+      choice.hidden = false;
+      Object.keys(forms).forEach(function (key) {
+        forms[key].hidden = true;
+        var msg = forms[key].querySelector(".gate-msg");
+        if (msg) { msg.className = "gate-msg"; msg.textContent = ""; }
+      });
+    }
+    root.querySelectorAll("[data-entry-open]").forEach(function (button) {
+      button.addEventListener("click", function () { openStage(button.getAttribute("data-entry-open")); });
+    });
+    root.querySelector(".gate-entry-back").addEventListener("click", backToChoice);
+
+    function entryRequest(path, payload) {
+      return fetch(BACKEND + path, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(Object.assign({ entry: true, device_id: deviceId(), device: fingerprint() }, payload)),
+      }).then(function (response) {
+        return response.json().catch(function () { return {}; }).then(function (data) {
+          if (!response.ok) { var error = new Error(data.error || "entry_failed"); error.code = data.error || "entry_failed"; error.detail = data.detail || ""; throw error; }
+          return data;
+        });
+      });
+    }
+
+    forms.login.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var form = forms.login, button = form.querySelector("button[type=submit]"), msg = form.querySelector(".gate-msg");
+      button.disabled = true; msg.className = "gate-msg wait"; msg.textContent = "Đang đăng nhập…";
+      entryRequest("/api/community/login", { username: form.username.value.trim().toLowerCase(), password: form.password.value })
+        .then(function (data) { return finishMemberEntry(data, form.remember.checked, "member-login"); })
+        .catch(function (error) { button.disabled = false; msg.className = "gate-msg err"; msg.textContent = memberEntryError(error.code || error.message); });
+    });
+
+    forms.register.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var form = forms.register, button = form.querySelector("button[type=submit]"), msg = form.querySelector(".gate-msg");
+      button.disabled = true; msg.className = "gate-msg wait"; msg.textContent = "Đang tạo tài khoản…";
+      entryRequest("/api/community/register", {
+        role: form.role.value,
+        display_name: form.display_name.value.trim(),
+        username: form.username.value.trim().toLowerCase(),
+        password: form.password.value,
+        bio: "",
+      }).then(function (data) {
+        msg.className = "gate-msg ok";
+        msg.textContent = "Đã tạo tài khoản. Đang mở ứng dụng…";
+        return finishMemberEntry(data, form.remember.checked, "member-register");
+      }).catch(function (error) {
+        button.disabled = false; msg.className = "gate-msg err";
+        msg.textContent = memberEntryError(error.code || error.message);
+        if ((error.code || error.message) === "username_exists") msg.textContent += " Hãy quay lại và chọn Đăng nhập nếu đây là tài khoản vừa tạo trước đó.";
+      });
+    });
+
+    /* Account V5 single admin login */
+    /* Account V6 dual admin UI */
+    forms.admin.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var form = forms.admin, button = form.querySelector("button[type=submit]"), msg = form.querySelector(".gate-msg"), pass = form.password.value;
+      var previousAdminToken = clearMarketAdminSession();
+      if (previousAdminToken) revokeMarketAdminSession(previousAdminToken);
+      button.disabled = true; msg.className = "gate-msg wait"; msg.textContent = "Đang đăng nhập Admin…";
+      fetch(BACKEND + "/api/community/admin/login", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-owner-device-id": deviceId() },
+        body: JSON.stringify({ password: pass, device_id: deviceId(), remember: !!form.remember.checked, device: fingerprint() }),
+      }).then(function (response) {
+        return response.json().catch(function () { return {}; }).then(function (data) {
+          if (!response.ok) { var error = new Error(data.error || "admin_login_failed"); error.code = data.error || "admin_login_failed"; throw error; }
+          return data;
+        });
+      }).then(function (data) {
+        if (!data.token || (data.level !== "regular" && data.level !== "primary")) throw new Error("admin_session_incomplete");
+        try {
+          localStorage.setItem("market_admin_token", data.token);
+          localStorage.setItem("market_admin_session", "1");
+          localStorage.setItem("market_admin_auth_version", MARKET_ADMIN_AUTH_VERSION);
+          localStorage.setItem("market_admin_level", data.level);
+          if (data.primary) localStorage.setItem("market_admin_primary", "1");
+          else localStorage.removeItem("market_admin_primary");
+          localStorage.removeItem("community_profile_boitoan");
+          localStorage.removeItem("community_token_boitoan");
+          sessionStorage.setItem(SESSION_KEY, "1");
+          if (form.remember.checked) localStorage.setItem(REMEMBER_KEY, "1");
+        } catch (e) {}
+        msg.className = "gate-msg ok"; msg.textContent = "Đăng nhập thành công. Đang mở Quản trị…";
+        location.replace("./community-admin.html");
+      }).catch(function (error) {
+        button.disabled = false; msg.className = "gate-msg err";
+        msg.textContent = error.code === "invalid_admin_login" ? "Mật khẩu Admin không đúng." : error.code === "admin_auth_unavailable" ? "Hệ thống xác thực Admin đang lỗi. Vui lòng tải lại sau ít phút." : "Không đăng nhập được Admin. Vui lòng thử lại.";
+      });
+    });
+  }
+
   /* -------------------------- giao diện khóa -------------------------- */
   function buildUI() {
+    if (APP === "boitoan" && MODE === "approval") { buildBoitoanEntryUI(); return; }
     var root = document.createElement("div");
     root.id = "gate-root";
     root.innerHTML =
       '<div class="gate-card" role="dialog" aria-modal="true" aria-label="Cổng truy cập">' +
-        '<div class="gate-sigil">🔒</div>' +
+        '<div class="gate-sigil market-gate-sigil" aria-hidden="true"><span></span></div>' +
         '<h1 class="gate-title"></h1>' +
         '<p class="gate-sub"></p>' +
         '<form class="gate-form" autocomplete="off">' +
@@ -725,7 +1085,7 @@
           '<a href="#" class="gate-guest" style="display:none">Bạn là khách? Xin quyền truy cập →</a>' +
           '<div class="gate-msg" aria-live="polite"></div>' +
         '</form>' +
-        '<div class="gate-foot">Khu vực riêng tư · Không lập chỉ mục · Truy cập được ghi nhận</div>' +
+        '<div class="gate-foot">Spirituality Market · Truy cập được ghi nhận</div>' +
       '</div>';
     document.body.appendChild(root);
 
@@ -733,7 +1093,7 @@
     root.querySelector(".gate-sub").textContent = SUBTITLE;
     if (CFG.owner) {
       root.querySelector(".gate-foot").textContent =
-        "Chủ sở hữu: " + CFG.owner + " · Khu vực riêng tư · Không lập chỉ mục";
+        "Spirituality Market · Truy cập được ghi nhận";
     }
 
     var form = root.querySelector(".gate-form");
@@ -761,7 +1121,7 @@
         guestLink.style.display = "none";
         btn.textContent = "Gửi yêu cầu duyệt";
         msg.className = "gate-msg"; msg.textContent = "";
-        root.querySelector(".gate-sub").textContent = "Nhập tên rồi gửi — chủ sẽ duyệt qua Telegram.";
+        root.querySelector(".gate-sub").textContent = "Nhập tên rồi gửi — Admin sẽ duyệt qua Telegram.";
         var gn = form.gname; if (gn) gn.focus();
       });
     }
@@ -792,13 +1152,13 @@
               if (document.querySelector('script[type="application/gate-payload"]')) {
                 if (!data.key) {
                   msg.className = "gate-msg err";
-                  msg.textContent = "Backend chưa có khóa giải mã. Báo chủ app cập nhật cấu hình.";
+                  msg.textContent = "Backend chưa có khóa giải mã. Báo Admin cập nhật cấu hình.";
                   return;
                 }
-                decryptPayload(data.key).then(function (html) { injectHtml(html); reveal("approved"); })
+                openAppContent(data.key, "approved")
                   .catch(function () {
                     msg.className = "gate-msg err";
-                    msg.textContent = "Khóa giải mã không khớp. Báo chủ app cập nhật backend.";
+                    msg.textContent = "Khóa giải mã không khớp. Báo Admin cập nhật backend.";
                   });
               } else {
                 setTimeout(function () { reveal("approved"); }, 500);
@@ -842,8 +1202,8 @@
     return "";
   }
 
-  function start() {
-    injectOwner(); // watermark chủ sở hữu (hiện cả khi khóa lẫn sau mở khóa)
+  function startWithoutAdminReturn() {
+    injectOwner(); // watermark Admin (hiện cả khi khóa lẫn sau mở khóa)
     var hasPayload = !!document.querySelector('script[type="application/gate-payload"]');
 
     if (hasPayload) {
@@ -852,8 +1212,7 @@
       var savedKey = null;
       try { savedKey = localStorage.getItem("gate_key_" + APP); } catch (e) {}
       if (savedKey) {
-        decryptPayload(savedKey)
-          .then(function (html) { injectHtml(html); reveal("saved-key"); })
+        openAppContent(savedKey, "saved-key")
           .catch(function () {
             // khóa lưu không còn đúng (vd đổi mật khẩu) -> xóa và hiện lại cổng
             try { localStorage.removeItem("gate_key_" + APP); } catch (e) {}
@@ -871,6 +1230,80 @@
     buildUI();
   }
 
+  /* Bói toán V11: một state machine duy nhất cho Admin quay lại app. */
+  function adminReturnRequested() {
+    if (APP !== "boitoan" || !BACKEND) return false;
+    try {
+      return new URLSearchParams(location.search).get("admin_return") === "1"
+        || !!localStorage.getItem("market_admin_token");
+    } catch (e) { return false; }
+  }
+
+  function clearGateUnlockFlags() {
+    try {
+      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(REMEMBER_KEY);
+      localStorage.removeItem("gate_key_" + APP);
+    } catch (e) {}
+  }
+
+  function storeAdminSession(data) {
+    localStorage.setItem("market_admin_session", "1");
+    localStorage.setItem("market_admin_level", data.level);
+    localStorage.setItem("market_admin_auth_version", MARKET_ADMIN_AUTH_VERSION);
+    if (data.primary) localStorage.setItem("market_admin_primary", "1");
+    else localStorage.removeItem("market_admin_primary");
+    sessionStorage.setItem(SESSION_KEY, "1");
+  }
+
+  function cleanAdminReturnUrl() {
+    try {
+      var url = new URL(location.href);
+      url.searchParams.delete("admin_return");
+      url.searchParams.delete("v");
+      history.replaceState(null, "", url.pathname + (url.search ? url.search : "") + url.hash);
+    } catch (e) {}
+  }
+
+  function restoreAdminApp() {
+    var token = "";
+    try { token = localStorage.getItem("market_admin_token") || ""; } catch (e) {}
+    if (!token) {
+      clearMarketAdminSession();
+      clearGateUnlockFlags();
+      startWithoutAdminReturn();
+      return;
+    }
+    fetch(BACKEND + "/api/community/admin/session", {
+      headers: { authorization: "Bearer " + token, "x-owner-device-id": deviceId() },
+      cache: "no-store"
+    }).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (!response.ok || (data.level !== "regular" && data.level !== "primary")) {
+          var error = new Error(data.error || "invalid_admin_session");
+          error.status = response.status;
+          throw error;
+        }
+        return data;
+      });
+    }).then(function (data) {
+      storeAdminSession(data);
+      return openAppContent(data.key, "admin-session");
+    }).then(cleanAdminReturnUrl).catch(function () {
+      clearMarketAdminSession();
+      clearGateUnlockFlags();
+      startWithoutAdminReturn();
+    });
+  }
+
+  function start() {
+    if (adminReturnRequested()) {
+      injectOwner();
+      restoreAdminApp();
+      return;
+    }
+    startWithoutAdminReturn();
+  }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start);
   } else {

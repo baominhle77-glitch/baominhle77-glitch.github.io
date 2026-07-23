@@ -10,6 +10,9 @@
 
   function getStorage(key) { try { return localStorage.getItem(key) || ""; } catch (_) { return ""; } }
   function setStorage(key, value) { try { if (value) localStorage.setItem(key, value); else localStorage.removeItem(key); } catch (_) {} }
+  function saveProfile(profile) { state.profile = profile || null; setStorage("community_profile_boitoan", profile ? JSON.stringify(profile) : ""); return state.profile; }
+  function roleLabel(role) { return role === "reader" ? "Reader / Người xem bói" : role === "guest" ? "Khách" : "Admin"; }
+  function tokenClaims() { try { var token=getStorage(COMMUNITY_TOKEN_KEY), part=token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); return JSON.parse(atob(part+"=".repeat((4-part.length%4)%4))); } catch (_) { return {}; } }
   function uuid() {
     if (crypto.randomUUID) return crypto.randomUUID();
     var bytes = crypto.getRandomValues(new Uint8Array(16));
@@ -101,7 +104,7 @@
       api("/api/community/login", jsonOptions("POST", {
         username: login.username.value.trim(), password: login.password.value
       }), "gate").then(function (data) {
-        setStorage(COMMUNITY_TOKEN_KEY, data.token); state.profile = data.profile; return loadDashboard();
+        setStorage(COMMUNITY_TOKEN_KEY, data.token); saveProfile(data.profile); return loadDashboard();
       }).catch(function (error) {
         submit.disabled = false; setMessage(status, humanError(error), true);
       });
@@ -126,7 +129,7 @@
           qr_data: qr
         }), "gate");
       }).then(function (data) {
-        setStorage(COMMUNITY_TOKEN_KEY, data.token); state.profile = data.profile; return loadDashboard();
+        setStorage(COMMUNITY_TOKEN_KEY, data.token); saveProfile(data.profile); return loadDashboard();
       }).catch(function (error) {
         submit.disabled = false; setMessage(status, humanError(error), true);
       });
@@ -135,11 +138,10 @@
 
   function topTabs(active) {
     var nav = el("nav", null, "community-tabs");
-    var entries = [
-      ["readers", "Reader", renderReaders],
-      ["conversations", "Trò chuyện", renderConversations],
-      ["profile", "Trang cá nhân", renderProfile]
-    ];
+    var entries = [["posts", "Thảo luận", renderPosts]];
+    if (state.profile.role === "guest") entries.push(["readers", "Reader", renderReaders]);
+    entries.push(["conversations", state.profile.role === "reader" ? "Khách hàng" : "Trò chuyện", renderConversations]);
+    entries.push(["profile", "Trang cá nhân", renderProfile]);
     entries.forEach(function (item) {
       var tab = button(item[1], item[0] === active ? "active" : "", item[2]);
       tab.className = item[0] === active ? "active" : "";
@@ -150,35 +152,84 @@
 
   function dashboardHeader() {
     var wrap = el("div", null, "community-dashboard-head");
+    var identity = el("div", null, "community-account-identity");
+    var avatar = el("span", (state.profile.display_name || state.profile.username || "?").trim().slice(0, 1).toUpperCase(), "community-avatar");
     var text = el("div");
-    text.append(el("h1", "Xin chào, " + state.profile.display_name));
-    text.append(el("p", state.profile.role === "reader" ? "Tài khoản Reader / Người luận giải" : "Tài khoản Khách"));
-    var logout = button("Đăng xuất", "community-secondary", function () {
-      setStorage(COMMUNITY_TOKEN_KEY, ""); state.profile = null; renderAuth();
+    var titleLine = el("div", null, "community-name-line");
+    titleLine.append(el("h1", "Xin chào, " + state.profile.display_name), el("span", roleLabel(state.profile.role), "community-role-badge role-" + state.profile.role));
+    text.append(titleLine, el("p", state.profile.role === "reader" ? "Quản lý hồ sơ, khách hàng và nội dung luận giải." : "Tìm Reader, trò chuyện, đánh giá và tham gia thảo luận."));
+    identity.append(avatar, text);
+    var impersonating = tokenClaims().mode === "impersonation";
+    var logout = button(impersonating ? "Quay lại Admin" : "Đăng xuất", "community-secondary", function () {
+      setStorage(COMMUNITY_TOKEN_KEY, ""); saveProfile(null);
+      if (impersonating) { if (history.length > 1) history.back(); else location.assign("./community-admin.html"); return; }
+      renderAuth();
     });
-    wrap.append(text, logout);
+    wrap.append(identity, logout);
     return wrap;
   }
 
   function loadDashboard() {
     ACCOUNT_BUTTON.hidden = false;
     ACCOUNT_BUTTON.onclick = renderProfile;
-    return Promise.all([
-      api("/api/community/readers"),
-      api("/api/community/conversations")
-    ]).then(function (results) {
-      state.readers = results[0].readers || [];
+    return Promise.all([api("/api/community/posts"), api("/api/community/conversations"), state.profile.role === "guest" ? api("/api/community/readers") : Promise.resolve({ readers: [] })]).then(function (results) {
+      state.posts = results[0].posts || [];
       state.conversations = results[1].conversations || [];
-      renderReaders();
+      state.readers = results[2].readers || [];
+      var requestedView = new URLSearchParams(location.search).get("admin_view");
+      if (tokenClaims().mode === "impersonation" && requestedView === "profile") renderProfile();
+      else if (state.profile.role === "reader") renderConversations(); else renderReaders();
     }).catch(function (error) {
-      if (error.status === 401) { setStorage(COMMUNITY_TOKEN_KEY, ""); renderAuth(); return; }
+      if (error.status === 401) { setStorage(COMMUNITY_TOKEN_KEY, ""); saveProfile(null); renderAuth(); return; }
       APP.replaceChildren(el("section", humanError(error), "community-card community-state error"));
     });
   }
 
+  function renderPosts() {
+    clearPoll();
+    var card = el("section", null, "community-card");
+    card.append(dashboardHeader(), topTabs("posts"), el("h2", "Thảo luận chung"));
+    var list = el("div", null, "community-post-list");
+    if (!state.posts || !state.posts.length) list.append(el("p", "Admin chưa mở bài thảo luận nào.", "community-empty"));
+    (state.posts || []).forEach(function (post) {
+      var item = button(post.title, "community-post-card", function () { openPost(post.id); });
+      item.append(el("p", post.text.length > 220 ? post.text.slice(0, 217) + "…" : post.text), el("small", (post.closed ? "Đã đóng · " : "") + Number(post.comment_count || 0) + " bình luận · " + formatDate(post.updated_at || post.created_at)));
+      list.append(item);
+    });
+    card.append(list); APP.replaceChildren(card);
+  }
+
+  function openPost(id) {
+    clearPoll(); APP.replaceChildren(el("section", "Đang tải bài thảo luận…", "community-card"));
+    api("/api/community/posts/" + encodeURIComponent(id)).then(function (data) {
+      var card = el("section", null, "community-card");
+      card.append(button("← Thảo luận", "community-secondary", renderPosts), dashboardHeader(), topTabs("posts"));
+      card.append(el("h2", data.post.title), el("p", data.post.text, "community-post-body"));
+      var comments = el("div", null, "community-comment-list");
+      (data.comments || []).forEach(function (comment) {
+        var row = el("article", null, "community-comment");
+        var head = el("div", null, "community-comment-head");
+        head.append(el("strong", comment.author_name), el("span", roleLabel(comment.author_role), "community-role-badge role-" + comment.author_role));
+        row.append(head, el("p", comment.text), el("small", formatDate(comment.created_at))); comments.append(row);
+      });
+      if (!(data.comments || []).length) comments.append(el("p", "Chưa có bình luận.", "community-empty"));
+      card.append(comments);
+      if (!data.post.closed && tokenClaims().mode !== "impersonation") {
+        var form = el("form", null, "community-form community-comment-form");
+        form.innerHTML = '<label>Tham gia thảo luận<textarea name="text" rows="4" maxlength="2000" required></textarea></label><button class="community-primary" type="submit">Đăng bình luận</button><p class="community-state" role="status"></p>';
+        form.addEventListener("submit", function (event) {
+          event.preventDefault(); var submit=form.querySelector("button"), status=form.querySelector(".community-state"); submit.disabled=true; setMessage(status,"Đang đăng…");
+          api("/api/community/posts/" + encodeURIComponent(id) + "/comments", jsonOptions("POST", { text: form.text.value.trim() })).then(function () { return api("/api/community/posts"); }).then(function (posts) { state.posts=posts.posts||[]; openPost(id); }).catch(function (error) { submit.disabled=false; setMessage(status,humanError(error),true); });
+        });
+        card.append(form);
+      } else if (data.post.closed) card.append(el("p", "Bài thảo luận đã được Admin đóng.", "community-state"));
+      APP.replaceChildren(card);
+    }).catch(function (error) { APP.replaceChildren(el("section", humanError(error), "community-card community-state error")); });
+  }
+
   function readerCard(reader) {
     var card = el("article", null, "community-reader-card");
-    card.append(el("h3", reader.display_name));
+    var readerTitle = el("div", null, "community-name-line"); readerTitle.append(el("h3", reader.display_name), el("span", "Reader", "community-role-badge role-reader")); card.append(readerTitle);
     card.append(el("div", "★ " + Number(reader.rating || 0).toFixed(1) + " · " + Number(reader.review_count || 0) + " đánh giá", "community-rating"));
     var bio = reader.bio || "Reader chưa thêm phần giới thiệu.";
     card.append(el("p", bio.length > 170 ? bio.slice(0, 167) + "…" : bio));
@@ -374,8 +425,23 @@
 
   function renderProfile() {
     clearPoll();
-    var card = el("section", null, "community-card"); card.append(dashboardHeader(), topTabs("profile"), el("h2", "Trang cá nhân"));
+    var adminView = tokenClaims().mode === "impersonation";
+    function leaveAdminView() {
+      setStorage(COMMUNITY_TOKEN_KEY, ""); saveProfile(null);
+      if (history.length > 1) history.back(); else location.assign("./community-admin.html");
+    }
+    var card = el("section", null, "community-card");
+    card.append(dashboardHeader(), topTabs("profile"), el("h2", "Trang cá nhân"));
+    if (adminView) {
+      var notice = el("div", null, "community-state");
+      notice.append(el("strong", "Admin tổng đang xem trang cá nhân của " + (state.profile.display_name || state.profile.username)), el("span", " · Chế độ chỉ đọc"));
+      card.append(notice, button("← Quay lại khu vực Admin", "community-secondary", leaveAdminView));
+    }
     var form = el("form", null, "community-form");
+    if (adminView) {
+      var username = el("input"); username.value = state.profile.username || ""; username.disabled = true;
+      var usernameLabel = el("label", "Tên đăng nhập"); usernameLabel.append(username); form.append(usernameLabel);
+    }
     var display = el("input"); display.name = "display_name"; display.maxLength = 80; display.required = true; display.value = state.profile.display_name || "";
     var bio = el("textarea"); bio.name = "bio"; bio.maxLength = 1000; bio.rows = 5; bio.value = state.profile.bio || "";
     var displayLabel = el("label", "Tên hiển thị"); displayLabel.append(display);
@@ -389,6 +455,15 @@
       accountName = el("input"); accountName.value = state.profile.bank && state.profile.bank.account_name || "";
       qrFile = el("input"); qrFile.type = "file"; qrFile.accept = "image/png,image/jpeg,image/webp";
       [["Mảng chuyên sâu", specialties], ["Ngân hàng", bankName], ["Số tài khoản", accountNumber], ["Tên chủ tài khoản", accountName], ["Thay ảnh QR", qrFile]].forEach(function (pair) { var label = el("label", pair[0]); label.append(pair[1]); form.append(label); });
+      if (adminView && state.profile.bank && state.profile.bank.qr_data) {
+        var qr = el("img"); qr.src = state.profile.bank.qr_data; qr.alt = "QR của " + state.profile.display_name; qr.className = "community-qr";
+        var qrLabel = el("div", null, "community-payment-box"); qrLabel.append(el("strong", "QR hiện tại"), qr); form.append(qrLabel);
+      }
+    }
+    if (adminView) {
+      [display, bio, specialties, bankName, accountNumber, accountName, qrFile].filter(Boolean).forEach(function (control) { control.disabled = true; });
+      form.append(el("p", "Đây là toàn bộ trang cá nhân của member theo dữ liệu hiện có. Admin tổng không thể sửa dưới danh nghĩa member.", "community-state"));
+      card.append(form); APP.replaceChildren(card); return;
     }
     var submit = el("button", "Lưu thay đổi", "community-primary"); submit.type = "submit";
     var status = el("p", "", "community-state"); form.append(submit, status); card.append(form); APP.replaceChildren(card);
@@ -402,15 +477,16 @@
           account_number: accountNumber ? accountNumber.value.trim() : "", account_name: accountName ? accountName.value.trim() : "",
           qr_data: newQr || oldQr
         }));
-      }).then(function (data) { state.profile = data.profile; setMessage(status, "Đã lưu."); submit.disabled = false; }).catch(function (error) { submit.disabled = false; setMessage(status, humanError(error), true); });
+      }).then(function (data) { saveProfile(data.profile); setMessage(status, "Đã lưu."); submit.disabled = false; }).catch(function (error) { submit.disabled = false; setMessage(status, humanError(error), true); });
     });
   }
 
   function boot() {
     if (!BACKEND) { APP.replaceChildren(el("section", "Thiếu cấu hình backend.", "community-card community-state error")); return; }
     var communityToken = getStorage(COMMUNITY_TOKEN_KEY);
+    if (!state.posts) state.posts = [];
     if (communityToken) {
-      api("/api/community/me").then(function (data) { state.profile = data.profile; return loadDashboard(); }).catch(function () { setStorage(COMMUNITY_TOKEN_KEY, ""); renderAuth(); });
+      api("/api/community/me").then(function (data) { saveProfile(data.profile); return loadDashboard(); }).catch(function () { setStorage(COMMUNITY_TOKEN_KEY, ""); renderAuth(); });
       return;
     }
     if (!getStorage(GATE_TOKEN_KEY)) {
@@ -421,5 +497,6 @@
     renderAuth();
   }
 
+  /* Admin total member profile view */
   boot();
 }());
