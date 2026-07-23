@@ -8,6 +8,7 @@ const admin = fs.readFileSync(new URL("./community-admin.js", import.meta.url), 
 const adminHtml = fs.readFileSync(new URL("../boitoan/community-admin.html", import.meta.url), "utf8");
 const adminV6 = fs.readFileSync(new URL("../tools/apply-admin-levels-v6.mjs", import.meta.url), "utf8");
 const adminV7 = fs.readFileSync(new URL("../tools/apply-admin-v7-login-hotfix.mjs", import.meta.url), "utf8");
+const adminV9 = fs.readFileSync(new URL("../tools/apply-admin-v9-return-to-app.mjs", import.meta.url), "utf8");
 const e2eWorkflow = fs.readFileSync(new URL("../.github/workflows/e2e-reader-production.yml", import.meta.url), "utf8");
 const webkitCheck = fs.readFileSync(new URL("../tools/webkit-production-check.mjs", import.meta.url), "utf8");
 
@@ -27,6 +28,12 @@ assert.match(gate, /function clearMarketAdminSession\(/, "phải có một hàm 
 assert.match(gate, /function validateMarketAdminSession\(/, "app chính phải xác nhận phiên Admin với backend");
 assert.match(gate, /previousAdminToken = clearMarketAdminSession\(\)/, "đăng nhập mới phải xóa phiên Admin cũ trước");
 assert.match(gate, /validateMarketAdminSession\(\);/, "mở app phải tự loại bỏ phiên Admin đã hết hạn");
+assert.match(gate, /Account V9 Admin return-to-app/, "phải có lớp quay lại app từ trang Quản trị");
+assert.match(gate, /function storedAdminReturnCandidate\(/, "phải phát hiện JWT Admin còn lưu trước khi dựng cổng");
+assert.match(gate, /function restoreAdminApp\(/, "phải xác minh JWT Admin với backend khi quay lại");
+assert.match(gate, /restoreAdminApp[\s\S]*\/api\/community\/admin\/session/, "khôi phục app phải gọi endpoint phiên Admin");
+assert.match(gate, /reveal\("admin-return"\)/, "JWT Admin hợp lệ phải mở thẳng giao diện Bói toán");
+assert.match(gate, /clearMarketAdminSession\(\);[\s\S]*clearGateUnlockFlags\(\);[\s\S]*onInvalid\(\)/, "JWT Admin sai mới được dọn và trả về cổng");
 assert.match(gate, /community-admin\.html/, "badge và bottom navigation Admin phải mở trang quản trị");
 assert.match(gate, /Mở quản trị/, "giao diện Admin phải có chỉ dẫn quản trị rõ ràng");
 assert.match(gate, /targetLabel = admin \? "Quản trị" : "Cộng đồng"/, "bottom navigation phải đổi đúng nhãn theo phiên");
@@ -51,6 +58,9 @@ assert.match(admin, /if \(primary\) action\.append/, "chỉ Admin tổng thấy 
 assert.match(admin, /conversationTab\.hidden=!primary/, "Admin thường không được thấy tab hội thoại");
 assert.match(admin, /Admin tổng/, "giao diện phải hiện đúng cấp Admin tổng");
 assert.match(admin, /Quản trị tài khoản, đánh giá và bài thảo luận/, "Admin thường phải có mô tả quyền riêng");
+assert.match(admin, /community-back-to-app/, "trang Quản trị phải gắn handler quay lại app");
+assert.match(admin, /sessionStorage\.setItem\("gate_ok_boitoan", "1"\)/, "bấm Bói toán phải giữ phiên trong cùng tab");
+assert.match(admin, /localStorage\.removeItem\("gate_remember_boitoan"\)/, "đăng xuất Admin mới được xóa cờ nhớ app");
 assert.doesNotMatch(admin, /community-admin-token|Mật khẩu Admin/, "trang Quản trị không được hỏi mật khẩu lần hai");
 assert.match(admin, /Xóa tài khoản/);
 assert.match(admin, /Xem trang cá nhân/);
@@ -59,6 +69,8 @@ assert.doesNotMatch(admin, /admin_view=1/);
 assert.match(admin, /Mở bài thảo luận/);
 assert.match(adminHtml, /data-admin-tab="posts"/);
 assert.match(adminHtml, /community-admin-level-badge/);
+assert.match(adminHtml, /id="community-back-to-app"/);
+assert.match(adminHtml, /href="\.\/\?admin_return=1"/, "liên kết Bói toán phải yêu cầu khôi phục phiên Admin rõ ràng");
 assert.doesNotMatch(adminHtml, /Mật khẩu Admin|community-admin-login|community-admin-token/, "HTML quản trị không được còn form mật khẩu");
 
 assert.match(adminV6, /ADMIN_REGULAR_PASSWORD_HASH_B64/, "phải có hash riêng cho Admin thường");
@@ -71,6 +83,10 @@ assert.match(adminV7, /ADMIN_V7_PASSWORD_SALT_B64/, "V7 phải dùng namespace c
 assert.match(adminV7, /clearMarketAdminSession/, "V7 phải dọn sạch phiên cũ");
 assert.match(adminV7, /validateMarketAdminSession/, "V7 phải xác thực phiên với backend");
 assert.doesNotMatch(adminV7, /hiennhi89|hiennhihien8991/, "hotfix không được chứa mật khẩu Admin dạng rõ");
+assert.match(adminV9, /storedAdminReturnCandidate/);
+assert.match(adminV9, /restoreAdminApp/);
+assert.match(adminV9, /admin_return=1/);
+assert.doesNotMatch(adminV9, /hiennhi89|hiennhihien8991/, "V9 không được chứa mật khẩu Admin dạng rõ");
 
 assert.match(e2eWorkflow, /workflow_run:/, "E2E phải chạy sau deploy production");
 assert.match(e2eWorkflow, /Reader production verification/, "E2E chỉ chạy cho commit nghiệm thu được đánh dấu");
@@ -96,4 +112,4 @@ assert.doesNotMatch(webkitCheck, /!state\.key|!login\.key/, "checker không đư
 assert.match(webkitCheck, /WEBKIT_E2E_ERROR/, "checker phải ghi lỗi WebKit cụ thể để chẩn đoán");
 assert.match(webkitCheck, /production_gate_missing_ios_guard/, "checker phải xác nhận production đang phục vụ đúng asset có guard");
 
-console.log("Account V7 dual Admin, clean re-login, frontend session guard and WebKit contracts PASS");
+console.log("Account V9 Admin return-to-app, dual roles, frontend session guard and WebKit contracts PASS");
