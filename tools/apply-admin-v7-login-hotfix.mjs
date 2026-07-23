@@ -126,8 +126,8 @@ await edit("assets/gate.js", (source) => {
 
   source = replaceRequired(
     source,
-    '    trackAccess(method || "session");\n    // Watermark chủ sở hữu vẫn giữ lại sau khi mở khóa (không xóa).',
-    '    trackAccess(method || "session");\n    validateMarketAdminSession();\n    // Watermark chủ sở hữu vẫn giữ lại sau khi mở khóa (không xóa).',
+    '    trackAccess(method || "session");',
+    '    trackAccess(method || "session");\n    validateMarketAdminSession();',
     "tự dọn phiên Admin cũ khi mở app"
   );
 
