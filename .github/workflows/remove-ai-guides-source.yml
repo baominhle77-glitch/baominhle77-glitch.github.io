@@ -1,0 +1,46 @@
+name: One-off gỡ khung luận AI
+
+on:
+  push:
+    branches:
+      - agent/BOITOAN-20260723-04-remove-ai-guides
+    paths:
+      - tools/remove-ai-guides-source.mjs
+      - .github/workflows/remove-ai-guides-source.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout nhánh
+        uses: actions/checkout@v4
+        with:
+          ref: agent/BOITOAN-20260723-04-remove-ai-guides
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Gỡ khung luận và phần kết nối trải bài
+        run: node tools/remove-ai-guides-source.mjs
+
+      - name: Kiểm tra cú pháp và marker
+        run: |
+          node --check tools/apply-role-system.mjs
+          ! grep -q "Khung luận Tarot" tools/apply-role-system.mjs
+          ! grep -q "Kết nối toàn trải bài" tools/apply-role-system.mjs
+          grep -q "function injectCommunity" tools/apply-role-system.mjs
+          grep -q "function applyMarketBranding" tools/apply-role-system.mjs
+
+      - name: Commit bản đã làm sạch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/apply-role-system.mjs
+          git commit -m "fix: remove AI guide panels and synthetic spread summary"
+          git push origin HEAD:agent/BOITOAN-20260723-04-remove-ai-guides
