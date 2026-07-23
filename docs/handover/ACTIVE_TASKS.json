@@ -1,54 +1,50 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T16:47:00+07:00",
+  "updated_at": "2026-07-23T17:59:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260723-10",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/BOITOAN-20260723-10-admin-session-v6",
+      "base_sha": "e3d6aa846e24be6685ba58220afb79e6af22812c",
+      "paths": [
+        "tools/apply-admin-session-v5.mjs",
+        "tools/apply-account-v2-runner.mjs",
+        "backend/community.js",
+        "backend/account-v2.test.mjs",
+        "assets/gate.js",
+        "assets/community-admin.js",
+        "assets/account-v2.test.mjs",
+        "boitoan/community-admin.html",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/deploy-pages.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "HANDOVER.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-23T17:49:00+07:00",
+      "heartbeat_at": "2026-07-23T17:59:00+07:00",
+      "summary": "Sửa xác thực Admin hai lớp bị lệch: cửa đầu kiểm PBKDF2 nhưng trang Quản trị lại gửi mật khẩu như ADMIN_TOKEN. Thiết kế mới: POST /api/community/admin/login xác minh cùng PBKDF2 hash hiện hành, cấp JWT Admin gắn thiết bị, tự đặt thiết bị đăng nhập làm Admin tổng, frontend lưu token và chuyển thẳng sang Quản trị; trang Quản trị tự tải dữ liệu, không hỏi mật khẩu lần hai và không có nút bind thủ công. Không lưu mật khẩu plaintext trong source."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260723-09",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-09-closeout",
-      "base_sha": "1768f2c073571f51de9ba550a84786ba7b75573c",
-      "paths": [
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
       "status": "completed",
-      "started_at": "2026-07-23T16:08:00+07:00",
       "completed_at": "2026-07-23T16:47:00+07:00",
-      "summary": "Người dùng báo iPhone WebKit crash liên tục tại /boitoan/. Xác định vòng lặp MutationObserver: injectCommunity gán textContent vô điều kiện, tự tạo childList mutation và gọi lại vô hạn. Runtime guard idempotent merge PR #43, source 4c4fa691. Sau khi sửa chính xác browser harness, checker độc lập merge PR #45, source bc8016a2. CI Account 29996444259 và coordination 29996444031 success; deploy 29996510949 success; WebKit production E2E 29996558091 success với register/login/me/WebKit/delete/token revoked/relogin = 201/200/200/200/200/401/401, error none. Tài khoản thử tự xóa; task và khóa đã giải phóng."
+      "summary": "Sửa vòng lặp MutationObserver làm Safari/WebKit crash; production và WebKit E2E success."
     },
     {
       "id": "BOITOAN-20260723-08",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-08-closeout",
-      "base_sha": "d8b3605e8d4a7bd2fb682e8745732f472cabf977",
-      "paths": [
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
       "status": "completed",
-      "started_at": "2026-07-23T14:50:00+07:00",
       "completed_at": "2026-07-23T15:58:00+07:00",
-      "summary": "Admin navigation và Reader production E2E đã hoàn tất; production E2E đạt 201/200/200/200/401/401. Sau đó người dùng phát hiện riêng lỗi crash WebKit ở trang /boitoan/."
-    },
-    {
-      "id": "BOITOAN-20260723-07",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-07-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T14:34:00+07:00",
-      "summary": "PR #33: Admin tổng mở thẳng Trang cá nhân member ở chế độ chỉ đọc."
-    },
-    {
-      "id": "BOITOAN-20260723-06",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-06-closeout",
-      "status": "completed",
-      "completed_at": "2026-07-23T13:56:00+07:00",
-      "summary": "PR #31: Account V2, onboarding hai màn hình và quyền theo vai trò."
+      "summary": "Admin navigation và Reader đa nền tảng đã deploy."
     }
   ]
 }
