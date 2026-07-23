@@ -22,7 +22,7 @@ jobs:
           set -o pipefail
           {
             node tools/apply-role-system.mjs
-            node --input-type=module -e 'globalThis.readerId="${readerId}"; globalThis.authorId="${authorId}"; await import("./tools/apply-account-v2.mjs");'
+            node tools/apply-account-v2-runner.mjs
           } > account-v2-apply.log 2>&1
       - name: Lưu log chẩn đoán nếu tích hợp lỗi
         if: steps.integrate.outcome == 'failure'
