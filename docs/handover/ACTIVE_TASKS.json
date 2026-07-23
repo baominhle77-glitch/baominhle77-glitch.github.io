@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T01:31:00+07:00",
+  "updated_at": "2026-07-24T01:56:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -24,12 +24,15 @@
         ".github/workflows/deploy-pages.yml",
         ".github/workflows/validate-role-system.yml",
         ".github/workflows/verify-admin-v9-return.yml",
-        "docs/handover/**"
+        "docs/handover/**",
+        ".github/workflows/export-boitoan-snapshot.yml",
+        "tools/materialize-boitoan-v11.mjs",
+        ".migration/**"
       ],
       "status": "in_progress",
       "started_at": "2026-07-24T01:29:00+07:00",
-      "heartbeat_at": "2026-07-24T01:31:00+07:00",
-      "summary": "Ảnh iPhone xác nhận V10 mở lớp ngoài nhưng gate-content vẫn rỗng. Nguyên nhân kỹ thuật: payload Bói toán vẫn mã hóa; V10 xác minh JWT rồi gọi reveal() mà không decryptPayload()+injectHtml(), lặp lại đúng lỗi đã từng được ghi nhận ở commit 49190b1. Tái cấu trúc lại luồng khởi động thành một nguồn sự thật, kiểm tra giao diện thật và loại bỏ chuỗi patch chồng chéo gây drift."
+      "heartbeat_at": "2026-07-24T01:56:00+07:00",
+      "summary": "Đã materialize snapshot sau build. V11 sửa đúng lỗi trang trống: backend trả khóa cho phiên Admin; frontend bắt buộc decryptPayload → injectHtml → kiểm DOM → reveal. Các runner patch V2–V10 chuyển no-op; deploy Worker trước Pages; CI WebKit dùng payload AES thật và source của nhánh."
     }
   ],
   "recently_completed": [
