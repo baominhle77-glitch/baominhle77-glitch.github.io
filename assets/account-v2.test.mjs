@@ -13,8 +13,13 @@ assert.match(gate, /data-entry-open="login"[\s\S]*data-entry-open="register"[\s\
 assert.match(gate, /if \(!payload\) \{[\s\S]*reveal\(method \|\| "member"\)/, "trang plaintext không được ép giải mã sau đăng ký");
 assert.match(gate, /community_profile_boitoan/, "phải lưu hồ sơ để hiện badge vai trò trong app");
 assert.match(gate, /claimPrimaryAdminDevice/, "Admin đăng nhập phải khóa thiết bị Admin tổng");
+assert.match(gate, /function marketAdminSession\(/, "phải nhận diện phiên Admin trên app chính");
+assert.match(gate, /community-admin\.html/, "badge và bottom navigation Admin phải mở trang quản trị");
+assert.match(gate, /Mở quản trị/, "giao diện Admin phải có chỉ dẫn quản trị rõ ràng");
+assert.match(gate, /admin \? "Quản trị" : "Cộng đồng"/, "bottom navigation phải đổi thành Quản trị cho Admin");
 assert.match(gateCss, /input\[type="checkbox"\][\s\S]*width:auto !important/, "checkbox không được kéo thành ô dài trên iPhone");
 assert.match(gateCss, /market-account-identity/);
+assert.match(gateCss, /a\.market-account-identity/, "badge Admin có thể bấm trên thiết bị cảm ứng");
 assert.match(community, /function renderPosts\(/, "member phải có khu thảo luận chung");
 assert.match(community, /community-role-badge role-/, "vai trò phải hiện cạnh tên");
 assert.match(community, /state\.profile\.role === "reader" \? "Khách hàng" : "Trò chuyện"/, "tab phải khác theo vai trò");
@@ -29,4 +34,4 @@ assert.doesNotMatch(admin, /admin_view=1/, "Không được mở dashboard mặc
 assert.match(admin, /Mở bài thảo luận/);
 assert.match(adminHtml, /data-admin-tab="posts"/);
 
-console.log("Account V2 frontend contracts PASS");
+console.log("Account V3 frontend contracts PASS");
