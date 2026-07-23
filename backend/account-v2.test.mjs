@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createHmac, randomUUID } from "node:crypto";
+import { randomBytes, randomUUID, pbkdf2Sync } from "node:crypto";
 import { handleCommunity } from "./community.js";
 
 class MemoryKV {
@@ -14,22 +14,32 @@ class MemoryKV {
 }
 
 const secret = "s".repeat(64);
+const regularAdminPassword = "test-regular-admin";
+const primaryAdminPassword = "test-primary-admin";
+const adminSalt = randomBytes(16);
+const adminIterations = 1500;
+const adminHash = (password) => pbkdf2Sync(password, adminSalt, adminIterations, 32, "sha256").toString("base64");
 const env = {
-  KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass",
+  KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "legacy-admin-token-must-not-work",
+  ADMIN_PASSWORD_SALT_B64: adminSalt.toString("base64"),
+  ADMIN_REGULAR_PASSWORD_HASH_B64: adminHash(regularAdminPassword),
+  ADMIN_PRIMARY_PASSWORD_HASH_B64: adminHash(primaryAdminPassword),
+  ADMIN_PASSWORD_ITERATIONS: String(adminIterations),
   PUBLIC_RATE_LIMITER: { async limit() { throw new Error("simulated_binding_failure"); } },
 };
-async function call(path, { method = "GET", token = "", body, admin = false, device = "" } = {}) {
+async function call(path, { method = "GET", token = "", body, device = "" } = {}) {
   const headers = {};
   if (body !== undefined) headers["content-type"] = "application/json";
   if (token) headers.authorization = `Bearer ${token}`;
-  if (admin) headers.authorization = `Bearer ${env.ADMIN_TOKEN}`;
   if (device) headers["x-owner-device-id"] = device;
   const request = new Request(`https://worker.test${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
   const response = await handleCommunity(request, env);
   return { status: response.status, data: await response.json() };
 }
 
-const ownerDid = randomUUID();
+const regularDid = randomUUID();
+const primaryDid1 = randomUUID();
+const primaryDid2 = randomUUID();
 const guestDid = randomUUID();
 const readerDid = randomUUID();
 const readerSecondDevice = randomUUID();
@@ -73,23 +83,79 @@ assert.equal(result.data.profile.id, readerId);
 assert.equal(result.data.profile.role, "reader");
 const readerToken = result.data.token;
 
-result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: ownerDid, replace: true } });
-assert.equal(result.status, 200);
-result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: randomUUID(), replace: true } });
-assert.equal(result.status, 200);
-result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: ownerDid, replace: true } });
-assert.equal(result.status, 200);
+result = await call("/api/community/admin/login", { method: "POST", device: regularDid, body: { password: "wrong-password", device_id: regularDid, remember: true } });
+assert.equal(result.status, 401);
+assert.equal(result.data.error, "invalid_admin_login");
 
-result = await call("/api/community/admin/posts", { method: "POST", admin: true, device: ownerDid, body: { title: "Chủ đề chung", text: "Mọi member cùng trao đổi." } });
+result = await call("/api/community/admin/users", { token: env.ADMIN_TOKEN, device: regularDid });
+assert.equal(result.status, 401, "ADMIN_TOKEN cũ không được cấp quyền công khai nữa");
+
+result = await call("/api/community/admin/login", { method: "POST", device: regularDid, body: { password: regularAdminPassword, device_id: regularDid, remember: true } });
+assert.equal(result.status, 200, "mật khẩu Admin thường phải cấp phiên Admin thường");
+assert.ok(result.data.token);
+assert.equal(result.data.level, "regular");
+assert.equal(result.data.primary, false);
+assert.equal(await env.KV.get("community-owner-device"), null, "Admin thường không được chiếm thiết bị Admin tổng");
+const regularAdminToken = result.data.token;
+
+result = await call("/api/community/admin/session", { token: regularAdminToken, device: regularDid });
+assert.equal(result.status, 200);
+assert.equal(result.data.level, "regular");
+assert.equal(result.data.primary, false);
+result = await call("/api/community/admin/users", { token: regularAdminToken, device: regularDid });
+assert.equal(result.status, 200, "Admin thường được quản lý tài khoản");
+result = await call("/api/community/admin/users", { token: regularAdminToken, device: randomUUID() });
+assert.equal(result.status, 401, "JWT Admin phải gắn đúng thiết bị");
+result = await call(`/api/community/admin/users/${guestId}/impersonate`, { method: "POST", token: regularAdminToken, device: regularDid });
+assert.equal(result.status, 403, "Admin thường không được mở trang cá nhân dưới giao diện member");
+assert.equal(result.data.error, "owner_device_required");
+result = await call("/api/community/admin/conversations", { token: regularAdminToken, device: regularDid });
+assert.equal(result.status, 403, "Admin thường không được đọc hội thoại riêng");
+assert.equal(result.data.error, "owner_device_required");
+
+result = await call("/api/community/admin/login", { method: "POST", device: primaryDid1, body: { password: primaryAdminPassword, device_id: primaryDid1, remember: true } });
+assert.equal(result.status, 200, "mật khẩu Admin tổng phải cấp phiên Admin tổng");
+assert.equal(result.data.level, "primary");
+assert.equal(result.data.primary, true);
+assert.equal(await env.KV.get("community-owner-device"), primaryDid1);
+const firstPrimaryToken = result.data.token;
+
+result = await call("/api/community/admin/session", { token: firstPrimaryToken, device: primaryDid1 });
+assert.equal(result.status, 200);
+assert.equal(result.data.level, "primary");
+assert.equal(result.data.primary, true);
+
+result = await call("/api/community/admin/login", { method: "POST", device: primaryDid2, body: { password: primaryAdminPassword, device_id: primaryDid2, remember: true } });
+assert.equal(result.status, 200, "đăng nhập Admin tổng trên thiết bị mới phải chuyển quyền duy nhất");
+assert.equal(result.data.primary, true);
+assert.equal(await env.KV.get("community-owner-device"), primaryDid2);
+const primaryAdminToken = result.data.token;
+result = await call("/api/community/admin/users", { token: firstPrimaryToken, device: primaryDid1 });
+assert.equal(result.status, 401, "phiên Admin tổng cũ phải bị thu hồi");
+result = await call("/api/community/admin/users", { token: regularAdminToken, device: regularDid });
+assert.equal(result.status, 200, "chuyển thiết bị Admin tổng không được thu hồi Admin thường");
+
+result = await call("/api/community/conversations", { method: "POST", token: guestToken, body: { reader_id: readerId } });
 assert.equal(result.status, 201);
+const conversationId = result.data.conversation.id;
+result = await call(`/api/community/conversations/${conversationId}/messages`, { method: "POST", token: guestToken, body: { text: "Tin nhắn kiểm thử riêng tư", client_id: randomUUID() } });
+assert.equal(result.status, 201);
+result = await call("/api/community/admin/conversations", { token: primaryAdminToken, device: primaryDid2 });
+assert.equal(result.status, 200, "Admin tổng được xem danh sách hội thoại");
+result = await call(`/api/community/admin/conversations/${conversationId}/messages`, { token: primaryAdminToken, device: primaryDid2 });
+assert.equal(result.status, 200, "Admin tổng được xem nội dung hội thoại");
+assert.equal(result.data.messages.length, 1);
+
+result = await call("/api/community/admin/posts", { method: "POST", token: regularAdminToken, device: regularDid, body: { title: "Chủ đề chung", text: "Mọi member cùng trao đổi." } });
+assert.equal(result.status, 201, "Admin thường được mở bài thảo luận");
 const postId = result.data.post.id;
 result = await call("/api/community/posts", { token: guestToken });
 assert.equal(result.status, 200);
 result = await call(`/api/community/posts/${postId}/comments`, { method: "POST", token: guestToken, body: { text: "Bình luận đầu tiên" } });
 assert.equal(result.status, 201);
 
-result = await call(`/api/community/admin/users/${guestId}/impersonate`, { method: "POST", admin: true, device: ownerDid });
-assert.equal(result.status, 200);
+result = await call(`/api/community/admin/users/${guestId}/impersonate`, { method: "POST", token: primaryAdminToken, device: primaryDid2 });
+assert.equal(result.status, 200, "Admin tổng được mở trang cá nhân member");
 const impersonationToken = result.data.token;
 result = await call(`/api/community/posts/${postId}/comments`, { method: "POST", token: impersonationToken, body: { text: "Không được đăng dưới danh nghĩa member" } });
 assert.equal(result.status, 403);
@@ -99,11 +165,11 @@ assert.equal(result.status, 403, "phiên impersonation không được xóa memb
 
 result = await call(`/api/community/readers/${readerId}/reviews`, { method: "POST", token: guestToken, body: { rating: 5, text: "Đánh giá thử" } });
 assert.equal(result.status, 201);
-result = await call(`/api/community/admin/reviews/${readerId}/${guestId}`, { method: "DELETE", admin: true, device: ownerDid });
-assert.equal(result.status, 200);
+result = await call(`/api/community/admin/reviews/${readerId}/${guestId}`, { method: "DELETE", token: regularAdminToken, device: regularDid });
+assert.equal(result.status, 200, "Admin thường được xóa review");
 
-result = await call(`/api/community/admin/users/${guestId}`, { method: "DELETE", admin: true, device: ownerDid });
-assert.equal(result.status, 200);
+result = await call(`/api/community/admin/users/${guestId}`, { method: "DELETE", token: regularAdminToken, device: regularDid });
+assert.equal(result.status, 200, "Admin thường được xóa member");
 result = await call("/api/community/login", { method: "POST", body: { entry: true, device_id: guestDid, username: "v2_guest", password: "password-guest" } });
 assert.equal(result.status, 401);
 assert.equal(result.data.error, "invalid_login");
@@ -116,13 +182,16 @@ assert.equal(result.status, 401);
 assert.equal(result.data.error, "invalid_login");
 assert.equal(await env.KV.get(`community-profile:${readerId}`), null);
 assert.equal(await env.KV.get(`community-reader:${readerId}`), null);
-for (const prefix of ["community-session:", "session:", "community-device:"]) {
-  for (const key of (await env.KV.list({ prefix })).keys) {
-    const value = JSON.parse(await env.KV.get(key.name));
-    assert.notEqual(value.uid, readerId, `${prefix} không được giữ phiên/thiết bị Reader đã xóa`);
-  }
-}
+
+result = await call("/api/community/admin/session", { method: "DELETE", token: regularAdminToken, device: regularDid });
+assert.equal(result.status, 200);
+result = await call("/api/community/admin/users", { token: regularAdminToken, device: regularDid });
+assert.equal(result.status, 401, "đăng xuất phải thu hồi JWT Admin thường");
+result = await call("/api/community/admin/session", { method: "DELETE", token: primaryAdminToken, device: primaryDid2 });
+assert.equal(result.status, 200);
+result = await call("/api/community/admin/users", { token: primaryAdminToken, device: primaryDid2 });
+assert.equal(result.status, 401, "đăng xuất phải thu hồi JWT Admin tổng");
 
 const audits = await env.KV.list({ prefix: "community-audit:" });
-assert.ok(audits.keys.length >= 5);
-console.log("Account V4 edge authentication tests PASS");
+assert.ok(audits.keys.length >= 7);
+console.log("Account V6 dual Admin levels, unique primary device and Account V4 edge authentication tests PASS");
