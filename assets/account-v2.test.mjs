@@ -18,8 +18,14 @@ assert.match(gateCss, /market-account-identity/);
 assert.match(community, /function renderPosts\(/, "member phải có khu thảo luận chung");
 assert.match(community, /community-role-badge role-/, "vai trò phải hiện cạnh tên");
 assert.match(community, /state\.profile\.role === "reader" \? "Khách hàng" : "Trò chuyện"/, "tab phải khác theo vai trò");
+assert.match(community, /requestedView === "profile"\) renderProfile\(\)/, "Admin tổng phải vào thẳng Trang cá nhân");
+assert.match(community, /tokenClaims\(\)\.mode === "impersonation"/, "Trang cá nhân Admin phải nhận diện phiên impersonation");
+assert.match(community, /Chế độ chỉ đọc/, "Trang cá nhân member phải chỉ đọc khi Admin tổng xem");
+assert.match(community, /Quay lại khu vực Admin/, "Phải có đường quay lại khu vực Admin");
 assert.match(admin, /Xóa tài khoản/);
-assert.match(admin, /Xem giao diện/);
+assert.match(admin, /Xem trang cá nhân/);
+assert.match(admin, /admin_view=profile/);
+assert.doesNotMatch(admin, /admin_view=1/, "Không được mở dashboard mặc định cũ");
 assert.match(admin, /Mở bài thảo luận/);
 assert.match(adminHtml, /data-admin-tab="posts"/);
 
