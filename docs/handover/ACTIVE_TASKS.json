@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T18:48:00+07:00",
+  "updated_at": "2026-07-23T18:52:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -15,9 +15,11 @@
         "tools/apply-travel-system.mjs",
         ".github/workflows/validate-vietnam-travel.yml",
         ".github/workflows/deploy-vietnam-travel.yml",
+        ".github/workflows/deploy-vietnam-travel-pr.yml",
         ".github/workflows/materialize-vietnam-travel.yml",
         ".github/workflows/materialize-vietnam-travel-v2.yml",
         ".travel-bundle/**",
+        ".deploy-vietnam-travel/**",
         "docs/handover/VIETNAM_TRAVEL.md",
         "docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log",
         "docs/handover/ACTIVE_TASKS.json",
@@ -26,8 +28,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:19:00+07:00",
-      "heartbeat_at": "2026-07-23T18:48:00+07:00",
-      "summary": "Source PWA Vietnam Travel, API KV và Telegram bot đã materialize trên main tại b3a29cb; checksum đúng và 5/5 test đạt. Branch này tạo commit người dùng qua PR để kích hoạt CI/deploy Cloudflare và hậu kiểm Travel cùng các app production hiện hữu trước khi đóng task."
+      "heartbeat_at": "2026-07-23T18:52:00+07:00",
+      "summary": "Source PWA Vietnam Travel, API KV và Telegram bot đã materialize trên main tại b3a29cb; checksum đúng và 5/5 test đạt. Branch này kích hoạt workflow deploy PR kiểm soát cho Cloudflare Pages + Worker; đã bổ sung marker deploy vào đúng phạm vi khóa và đang chờ hậu kiểm production trước khi đóng task."
     }
   ],
   "recently_completed": [
