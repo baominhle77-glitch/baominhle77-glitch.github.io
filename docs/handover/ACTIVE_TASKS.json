@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T14:17:00+07:00",
+  "updated_at": "2026-07-23T14:20:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -10,6 +10,7 @@
       "base_sha": "463e5944d1abcd56e80e1b19f491220896ba98d4",
       "paths": [
         "tools/apply-account-v2-profile-view.mjs",
+        "tools/apply-account-v2-runner.mjs",
         ".github/workflows/validate-role-system.yml",
         ".github/workflows/deploy-pages.yml",
         "assets/account-v2.test.mjs",
@@ -21,7 +22,7 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T14:17:00+07:00",
-      "heartbeat_at": "2026-07-23T14:17:00+07:00",
+      "heartbeat_at": "2026-07-23T14:20:00+07:00",
       "summary": "Sửa thiếu sót Account V2: nút Xem giao diện hiện chỉ mở dashboard mặc định của member nên Admin tổng không vào thẳng Trang cá nhân. Bổ sung điều hướng admin_view=profile, hiển thị đúng trang cá nhân Khách/Reader ở chế độ chỉ đọc, nút quay lại Admin và test production marker."
     }
   ],
@@ -46,73 +47,44 @@
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-05-closeout",
       "base_sha": "dd008ff5edaeac0f33144b88fb0a07f24d8064c4",
-      "paths": [
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
+      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
       "started_at": "2026-07-23T12:01:00+07:00",
       "completed_at": "2026-07-23T12:20:00+07:00",
-      "summary": "PR #28 merge thành d48ef93137c35e38ee64004dfb0cdaee9c04fd83. CI coordination run 29981811502 và role-system run 29981811526 đều success. Production run 29981841325 ghi SUCCESS. Đã đổi branding thành Spirituality Market, chuẩn hóa Admin và đưa đăng nhập/đăng ký thành viên lên cửa đầu; lớp này sau đó được chỉnh lại trong BOITOAN-20260723-06 theo nghiệm thu trực tiếp trên iPhone."
+      "summary": "PR #28 merge thành d48ef93137c35e38ee64004dfb0cdaee9c04fd83. CI và production thành công; onboarding này sau đó được chỉnh lại trong BOITOAN-20260723-06."
     },
     {
       "id": "BOITOAN-20260723-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-04-closeout",
       "base_sha": "e71bf5539c8ef796baf5f36d1f6c328ad5d547f5",
-      "paths": [
-        "tools/apply-role-system.mjs",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
+      "paths": ["tools/apply-role-system.mjs", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
       "started_at": "2026-07-23T09:59:00+07:00",
       "completed_at": "2026-07-23T10:26:15+07:00",
-      "summary": "PR #26 merge tại 3322b7c899aeeee3d2e98e26e4cbc97931390a77 và production run 29976968849 ghi SUCCESS. Đã gỡ toàn bộ các hộp Khung luận và Kết nối toàn trải bài do lớp bổ sung tạo ra; giữ nguyên giao diện, Cộng đồng, Luận giải chuyên sâu và thuật toán gốc."
+      "summary": "PR #26 và production thành công; đã gỡ các hộp Khung luận và Kết nối toàn trải bài."
     },
     {
       "id": "DEPLOY-20260723-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/DEPLOY-20260723-03-follow-redirect",
       "base_sha": "564b216bc690d79b53d10f2cf407e6d1cf2c2ab8",
-      "paths": [
-        ".github/workflows/deploy-pages.yml",
-        "docs/handover/PRODUCTION_STATUS.md",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
+      "paths": [".github/workflows/deploy-pages.yml", "docs/handover/PRODUCTION_STATUS.md", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
       "started_at": "2026-07-23T05:26:00+07:00",
       "completed_at": "2026-07-23T10:14:25+07:00",
-      "summary": "PR #25 sửa hậu kiểm Cloudflare Clean URLs; production run 29976466953 ghi SUCCESS: Pages/CSS/Gate 200, Worker 401 unauthorized đúng kỳ vọng, URL cuối sau redirect được xác nhận."
+      "summary": "PR #25 sửa hậu kiểm Cloudflare Clean URLs; production thành công."
     },
     {
       "id": "BOITOAN-20260723-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-02-mobile-brand-knowledge",
       "base_sha": "a5d3f7afa78f62e7002e151b48121bb4894d2e1f",
-      "paths": [
-        "assets/community.css",
-        "assets/community.js",
-        "assets/gate.css",
-        "assets/gate.js",
-        "assets/cho-hien-nhi-sigil.svg",
-        "boitoan/community.html",
-        "boitoan/community-admin.html",
-        "boitoan/index.html",
-        "tools/apply-role-system.mjs",
-        "docs/research/DIVINATION_SOURCES.md",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md"
-      ],
+      "paths": ["assets/community.css", "assets/community.js", "assets/gate.css", "assets/gate.js", "assets/cho-hien-nhi-sigil.svg", "boitoan/community.html", "boitoan/community-admin.html", "boitoan/index.html", "tools/apply-role-system.mjs", "docs/research/DIVINATION_SOURCES.md", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
       "started_at": "2026-07-23T04:55:00+07:00",
       "completed_at": "2026-07-23T05:16:00+07:00",
-      "summary": "Source UI mobile và branding cũ đã qua CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; branding và onboarding sau đó đã được thay thế bởi các task mới hơn."
+      "summary": "Source UI mobile và branding cũ đã qua CI; branding và onboarding sau đó được thay thế."
     }
   ]
 }
