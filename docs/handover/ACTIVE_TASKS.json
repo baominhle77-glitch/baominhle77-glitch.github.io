@@ -1,15 +1,16 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T15:18:00+07:00",
+  "updated_at": "2026-07-23T15:39:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-08",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-08-e2e-cleanup-fix",
-      "base_sha": "03eecbee75c7af47124b71e45ef1c6f3b2c94f06",
+      "branch": "agent/BOITOAN-20260723-08-edge-password-fix",
+      "base_sha": "f442bb449ee47ac7b687bca784b9415bf92f0a14",
       "paths": [
         "tools/apply-account-v3-hotfix.mjs",
+        "tools/apply-account-v4-edge-auth.mjs",
         "tools/apply-account-v2-runner.mjs",
         "assets/account-v2.test.mjs",
         "backend/account-v2.test.mjs",
@@ -23,8 +24,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T14:50:00+07:00",
-      "heartbeat_at": "2026-07-23T15:18:00+07:00",
-      "summary": "Runtime hotfix PR #36 đã qua CI và deploy Pages/Worker/smoke thành công tại d5260f0, nhưng production E2E cleanup dùng Cloudflare KV API thất bại. Đang chuyển E2E sang workflow chạy sau deploy: tạo Reader thật, đăng nhập thiết bị thứ hai, đọc hồ sơ, DELETE /api/community/me, xác nhận token bị thu hồi và đăng nhập lại trả invalid_login; ghi trạng thái riêng, không phụ thuộc quyền KV của token deploy."
+      "heartbeat_at": "2026-07-23T15:39:00+07:00",
+      "summary": "PR #38 deploy/smoke thành công nhưng E2E Reader thật trả 500 server ngay bước register. Khác biệt giữa Node CI và Workers production tập trung ở xác thực PBKDF2 210.000 vòng trên edge và rate limiter best-effort. Đang thay bản ghi mật khẩu mới bằng HMAC-SHA256 có salt + pepper SESSION_SECRET, giữ nhánh legacy PBKDF2 để đọc dữ liệu cũ, làm rate limiter fail-open có ghi mã pha an toàn, rồi chạy lại E2E thật 201/200/200/200/401/401."
     }
   ],
   "recently_completed": [
@@ -32,45 +33,17 @@
       "id": "BOITOAN-20260723-07",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-07-closeout",
-      "base_sha": "67878700192da449d2df2613a7402f3e68a829c8",
-      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
-      "started_at": "2026-07-23T14:17:00+07:00",
       "completed_at": "2026-07-23T14:34:00+07:00",
-      "summary": "PR #33 và production thành công; Admin tổng mở thẳng Trang cá nhân member ở chế độ chỉ đọc. Nghiệm thu sau đó cho thấy lối vào khu quản trị chưa xuất hiện rõ trên giao diện app chính."
+      "summary": "PR #33: Admin tổng mở thẳng Trang cá nhân member ở chế độ chỉ đọc."
     },
     {
       "id": "BOITOAN-20260723-06",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260723-06-closeout",
-      "base_sha": "52083fda3aa54ea03c727d5a11aba8871c54b9ab",
-      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
       "status": "completed",
-      "started_at": "2026-07-23T13:12:00+07:00",
       "completed_at": "2026-07-23T13:56:00+07:00",
-      "summary": "PR #31 và production Account V2 thành công; nghiệm thu đa nền tảng sau đó phát hiện public entry vẫn phụ thuộc DECRYPT_KEY ở backend."
-    },
-    {
-      "id": "BOITOAN-20260723-05",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-05-closeout",
-      "base_sha": "dd008ff5edaeac0f33144b88fb0a07f24d8064c4",
-      "paths": ["docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
-      "status": "completed",
-      "started_at": "2026-07-23T12:01:00+07:00",
-      "completed_at": "2026-07-23T12:20:00+07:00",
-      "summary": "PR #28 và production thành công; onboarding này sau đó được thay thế bởi Account V2."
-    },
-    {
-      "id": "BOITOAN-20260723-04",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-04-closeout",
-      "base_sha": "e71bf5539c8ef796baf5f36d1f6c328ad5d547f5",
-      "paths": ["tools/apply-role-system.mjs", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "HANDOVER.md"],
-      "status": "completed",
-      "started_at": "2026-07-23T09:59:00+07:00",
-      "completed_at": "2026-07-23T10:26:15+07:00",
-      "summary": "PR #26 và production thành công; đã gỡ các hộp Khung luận và Kết nối toàn trải bài."
+      "summary": "PR #31: Account V2, onboarding hai màn hình và quyền theo vai trò."
     }
   ]
 }
