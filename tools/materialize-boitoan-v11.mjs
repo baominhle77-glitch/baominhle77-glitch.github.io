@@ -8,6 +8,7 @@ import { spawnSync } from "node:child_process";
 const root = new URL("../", import.meta.url);
 const chunkNames = [0, 1, 2, 3, 4].map((n) => `.migration/boitoan-v11-patch-${String(n).padStart(2, "0")}.b64`);
 const expectedB64 = "1c63deaf7cef5d1731884f67466cf03806b89766b6c33c52fd391a9f9dae47f5";
+const uploadedB64 = "99f6ad8c076fe74b7cb6738fa4be0875cb2834ac93ac0e6d6ee1f0736fc92314";
 const expectedPatch = "df68060cc86109255a6bff0518632de0196baa8794bdee793db8a35903282de0";
 const legacy = [
   "apply-role-system.mjs", "apply-account-v2.mjs", "apply-account-v2-profile-view.mjs",
@@ -18,10 +19,14 @@ const legacy = [
 ];
 
 function sha(value) { return createHash("sha256").update(value).digest("hex"); }
-const b64 = (await Promise.all(chunkNames.map((name) => readFile(new URL(name, root), "utf8")))).join("");
-if (sha(b64) !== expectedB64) throw new Error("Các mảnh migration V11 không khớp checksum");
+let b64 = (await Promise.all(chunkNames.map((name) => readFile(new URL(name, root), "utf8")))).join("");
+if (sha(b64) === uploadedB64) {
+  b64 = b64.slice(0, 135) + "/" + b64.slice(135);
+  b64 = b64.slice(0, 2253) + "j" + b64.slice(2253);
+}
+if (sha(b64) !== expectedB64) throw new Error(`Các mảnh migration V11 không khớp checksum: ${sha(b64)}`);
 const patch = gunzipSync(Buffer.from(b64, "base64"));
-if (sha(patch) !== expectedPatch) throw new Error("Patch V11 không khớp checksum");
+if (sha(patch) !== expectedPatch) throw new Error(`Patch V11 không khớp checksum: ${sha(patch)}`);
 
 const temp = await mkdtemp(join(tmpdir(), "boitoan-v11-"));
 const patchPath = join(temp, "v11.patch");
