@@ -1,16 +1,17 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T19:11:00+07:00",
+  "updated_at": "2026-07-23T19:19:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-10",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-10-production-proof",
-      "base_sha": "971a353318d49af17dba7ed4526dfb9b3d0322ab",
+      "branch": "agent/BOITOAN-20260723-10-deploy-result",
+      "base_sha": "dc5adef5881ddc4d723a5fff68eb1210bcacbef4",
       "paths": [
         ".github/workflows/validate-role-system.yml",
         ".github/workflows/deploy-pages.yml",
+        ".github/workflows/record-production-deploy.yml",
         "assets/account-v2.test.mjs",
         "assets/gate.test.mjs",
         "backend/account-v2.test.mjs",
@@ -26,8 +27,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:49:00+07:00",
-      "heartbeat_at": "2026-07-23T19:11:00+07:00",
-      "summary": "Account V6 đã merge tại f5ac80b7: cùng form Admin, backend phân regular/primary bằng PBKDF2 hash, JWT gắn thiết bị; regular quản lý member/review/post; primary thêm hội thoại và hồ sơ member, chỉ một thiết bị primary. PR hiện tại bổ sung hậu kiểm Cloudflare bắt buộc: production phải phục vụ marker Account V6, trang Quản trị không còn form mật khẩu lần hai, API phiên Admin không token trả 401; workflow ghi PRODUCTION_STATUS theo đúng source/run sau khi Pages và Worker đều đạt."
+      "heartbeat_at": "2026-07-23T19:19:00+07:00",
+      "summary": "Account V6 đã merge tại f5ac80b7: cùng form Admin, backend phân regular/primary bằng PBKDF2 hash, JWT gắn thiết bị; regular quản lý member/review/post; primary thêm hội thoại và hồ sơ member, chỉ một thiết bị primary. Deploy workflow đã được bổ sung smoke test marker Account V6. Workflow record-production-deploy mới sẽ ghi SUCCESS/FAILURE, source SHA và run ID sau mọi lần deploy để có bằng chứng và log chẩn đoán kể cả khi deploy thất bại."
     }
   ],
   "recently_completed": [

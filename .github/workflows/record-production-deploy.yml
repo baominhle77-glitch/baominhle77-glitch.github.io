@@ -1,0 +1,57 @@
+name: Ghi kết quả deploy production
+
+on:
+  workflow_run:
+    workflows: ["Deploy lên Cloudflare Pages (hiennhi89.pages.dev)"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-status-recorder
+  cancel-in-progress: false
+
+jobs:
+  record:
+    if: github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main hiện tại
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Ghi trạng thái workflow deploy
+        env:
+          DEPLOY_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          DEPLOY_RUN_ID: ${{ github.event.workflow_run.id }}
+          DEPLOY_EVENT: ${{ github.event.workflow_run.event }}
+        run: |
+          set -euo pipefail
+          mkdir -p docs/handover
+          completed_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          status=$(printf '%s' "$DEPLOY_CONCLUSION" | tr '[:lower:]' '[:upper:]')
+          cat > docs/handover/PRODUCTION_STATUS.md <<EOF
+          # Trạng thái production
+
+          - Trạng thái: \`$status\`
+          - Source commit: \`$SOURCE_SHA\`
+          - Hoàn tất UTC: \`$completed_utc\`
+          - Workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/$DEPLOY_RUN_ID\`
+          - Sự kiện: \`$DEPLOY_EVENT\`
+          - Workflow deploy đã tự chạy build, toàn bộ test Account/Travel/Worker, triển khai Pages trước Worker và hậu kiểm production.
+          - Account V6: cùng một mục Admin; backend phân cấp \`regular\` và \`primary\`; trang Quản trị không hỏi mật khẩu lần hai.
+          - Admin thường: quản lý member, review và bài thảo luận.
+          - Admin tổng: toàn bộ quyền Admin thường, thêm hội thoại riêng và trang cá nhân member; chỉ một thiết bị primary hoạt động.
+          - Bảo mật: không lưu mật khẩu plaintext trong source; JWT gắn thiết bị; \`ADMIN_TOKEN\` cũ không được chấp nhận tại Community API.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/handover/PRODUCTION_STATUS.md
+          git commit -m "docs: record production deploy $status" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
