@@ -23,6 +23,7 @@ jobs:
           {
             node tools/apply-role-system.mjs
             node tools/apply-account-v2-runner.mjs
+            node tools/apply-account-v2-profile-view.mjs
           } > account-v2-apply.log 2>&1
       - name: Kiểm tra frontend
         id: frontend
