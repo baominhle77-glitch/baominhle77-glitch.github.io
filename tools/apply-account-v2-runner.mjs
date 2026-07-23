@@ -30,5 +30,6 @@ await importRuntime("apply-account-v2.mjs", (value) => {
 await import(new URL("./apply-account-v2-profile-view.mjs", import.meta.url).href + `?v=${Date.now()}`);
 await import(new URL("./apply-account-v3-hotfix.mjs", import.meta.url).href + `?v=${Date.now()}`);
 await import(new URL("./apply-account-v4-edge-auth.mjs", import.meta.url).href + `?v=${Date.now()}`);
-await importRuntime("apply-admin-session-v5.mjs", (source) => source.replaceAll('"community-admin/session"', '"/api/community/admin/session"'));
-await importRuntime("apply-admin-levels-v6.mjs", (source) => source.replaceAll('"community-admin/session"', '"/api/community/admin/session"'));
+const patchAdminSessionMarker = (source) => source.replaceAll("community-admin/session", "/api/community/admin/session");
+await importRuntime("apply-admin-session-v5.mjs", patchAdminSessionMarker);
+await importRuntime("apply-admin-levels-v6.mjs", patchAdminSessionMarker);
