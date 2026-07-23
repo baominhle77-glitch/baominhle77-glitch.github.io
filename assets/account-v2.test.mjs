@@ -17,7 +17,10 @@ assert.match(gate, /claimPrimaryAdminDevice/, "Admin đăng nhập phải khóa 
 assert.match(gate, /function marketAdminSession\(/, "phải nhận diện phiên Admin trên app chính");
 assert.match(gate, /community-admin\.html/, "badge và bottom navigation Admin phải mở trang quản trị");
 assert.match(gate, /Mở quản trị/, "giao diện Admin phải có chỉ dẫn quản trị rõ ràng");
-assert.match(gate, /admin \? "Quản trị" : "Cộng đồng"/, "bottom navigation phải đổi thành Quản trị cho Admin");
+assert.match(gate, /targetLabel = admin \? "Quản trị" : "Cộng đồng"/, "bottom navigation phải đổi đúng nhãn theo phiên");
+assert.match(gate, /Account V3 iOS mutation guard/, "phải có chốt chống vòng lặp MutationObserver trên WebKit");
+assert.match(gate, /if \(labelNode\.textContent !== targetLabel\) labelNode\.textContent = targetLabel/, "chỉ được thay text khi nội dung thực sự đổi");
+assert.doesNotMatch(gate, /link\.querySelector\("\.market-nav-label"\)\.textContent\s*=/, "không được gán textContent vô điều kiện trong injectCommunity");
 assert.match(gateCss, /input\[type="checkbox"\][\s\S]*width:auto !important/, "checkbox không được kéo thành ô dài trên iPhone");
 assert.match(gateCss, /a\.market-account-identity/, "badge Admin có thể bấm trên thiết bị cảm ứng");
 assert.match(community, /function renderPosts\(/, "member phải có khu thảo luận chung");
@@ -37,9 +40,14 @@ assert.match(e2eWorkflow, /workflow_run:/, "E2E phải chạy sau deploy product
 assert.match(e2eWorkflow, /Reader production verification/, "E2E chỉ chạy cho commit nghiệm thu được đánh dấu");
 assert.match(e2eWorkflow, /role:'reader'/, "E2E phải tạo tài khoản Reader thật");
 assert.match(e2eWorkflow, /E2E iPad Safari/, "E2E phải đăng nhập trên nền tảng thứ hai");
+assert.match(e2eWorkflow, /playwright@1\.52\.0/, "E2E phải cài Playwright cố định phiên bản");
+assert.match(e2eWorkflow, /webkit\.launch/, "E2E phải mở app bằng engine WebKit thực tế");
+assert.match(e2eWorkflow, /webkit_page_crashed/, "E2E phải phát hiện tab WebKit bị crash");
+assert.match(e2eWorkflow, /webkit_mutation_loop/, "E2E phải phát hiện vòng lặp DOM mutation");
+assert.match(e2eWorkflow, /#gate-community-link/, "E2E phải xác nhận chỉ có một lối Cộng đồng\/Quản trị");
 assert.match(e2eWorkflow, /-X DELETE[\s\S]*\/api\/community\/me/, "E2E phải xóa tài khoản qua API đã xác thực");
 assert.match(e2eWorkflow, /token_not_revoked/);
 assert.match(e2eWorkflow, /account_still_loginable/);
 assert.match(e2eWorkflow, /READER_E2E_STATUS\.md/);
 
-console.log("Account V3 frontend and production E2E contracts PASS");
+console.log("Account V3 iOS mutation guard, frontend and WebKit production E2E contracts PASS");
