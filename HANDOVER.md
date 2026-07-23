@@ -1,14 +1,18 @@
 # Bàn giao hệ thống ba webapp
 
-> **Mọi agent phải đọc `AGENTS.md` trước file này.** Sau đó đọc
-> `docs/handover/ACTIVE_TASKS.json` và `docs/handover/NHAT-KY-PHOI-HOP.md` trước khi sửa.
+> **Mọi agent phải đọc `AGENTS.md` trước file này.** Sau đó đọc `docs/handover/ACTIVE_TASKS.json` và `docs/handover/NHAT-KY-PHOI-HOP.md` trước khi sửa.
 
-**Cập nhật:** 23/07/2026 05:34 (GMT+7)  
-**`main` tại lúc mở task deploy:** `af260cc5c4c0e0013293cc6ce263e2692822d9ad`  
-**Task đang làm:** `DEPLOY-20260723-03`  
-**Production:** chưa xác nhận; nguồn chuẩn duy nhất là `docs/handover/PRODUCTION_STATUS.md` sau workflow mới.
+**Cập nhật:** 23/07/2026 10:16 (GMT+7)  
+**`main` hiện tại:** `e71bf5539c8ef796baf5f36d1f6c328ad5d547f5`  
+**Task đang làm:** `BOITOAN-20260723-04` — gỡ các khung luận AI bổ sung.  
+**Production đã xác nhận:** `SUCCESS` cho commit `5e4e139b2bc09d14dd73fc6990adb428a8d2b40f`.
 
-Source UI/branding/kho luận đã merge qua PR #19 tại `ed63ad7dfd8cf85dd58135095175d40a0a913e42`. Commit `af260cc…` chỉ cập nhật bàn giao rằng production còn chờ, không phải bằng chứng Cloudflare đã deploy.
+## Nguyên tắc độ tin cậy bắt buộc
+
+- **Tuyệt đối không bịa.**
+- Mọi khẳng định về source, production, thuật toán hoặc nội dung chuyên môn phải có căn cứ từ source, log, test hoặc tài liệu đã kiểm chứng.
+- Khi chưa đủ dữ liệu, ghi rõ **chưa xác lập/chưa đủ chứng cứ**; không tự tạo nội dung chung chung để làm giao diện có vẻ “đầy đủ”.
+- Phải phân biệt rõ: dữ kiện đã kiểm tra, suy luận kỹ thuật và phần chưa xác minh.
 
 ---
 
@@ -22,7 +26,75 @@ Source UI/branding/kho luận đã merge qua PR #19 tại `ed63ad7dfd8cf85dd5813
 
 Repository `baominhle77-glitch.github.io` là nguồn chuẩn duy nhất.
 
-## 2. Gate, mã hóa và quyền truy cập
+### Bằng chứng production gần nhất
+
+`docs/handover/PRODUCTION_STATUS.md` ghi:
+
+- Pages `200`;
+- URL cuối sau Clean URL redirect: `https://hiennhi89.pages.dev/boitoan/community?...`;
+- Community CSS `200`;
+- Gate runtime JS `200`;
+- Worker API không phiên `401 unauthorized`, đúng kỳ vọng;
+- branding và role-card markers đều tồn tại.
+
+Workflow run: `29976466953`.
+
+---
+
+## 2. Xác nhận giao diện từ người dùng
+
+Ngày 23/07/2026, BaoMinh kiểm tra trực tiếp trên điện thoại và xác nhận:
+
+- giao diện mobile hiện tại **đạt yêu cầu**;
+- vị trí nút Cộng đồng, role cards, branding và bố cục không cần thiết kế lại;
+- cần gỡ các phần “Khung luận…” vì quá máy móc, phiến diện và không tạo giá trị thực tế.
+
+Đây là bằng chứng nghiệm thu trực tiếp của người dùng đối với giao diện, không phải suy đoán từ screenshot hay CI.
+
+---
+
+## 3. Task `BOITOAN-20260723-04` — đang làm
+
+Nhánh: `agent/BOITOAN-20260723-04-remove-ai-guides-v2`  
+Base: `e71bf5539c8ef796baf5f36d1f6c328ad5d547f5`
+
+### Phạm vi gỡ
+
+Xóa khỏi lớp tích hợp runtime:
+
+- `Khung luận Tarot`;
+- `Khung luận Lenormand`;
+- `Khung luận Bài Tây`;
+- `Khung luận Kinh Dịch`;
+- `Khung luận Tử Vi`;
+- `Khung luận Bát Tự`;
+- `Kết nối toàn trải bài`;
+- các hàm/call/CSS chỉ phục vụ các hộp trên.
+
+### Phạm vi giữ nguyên
+
+- giao diện mobile đã được người dùng xác nhận đạt;
+- branding, logo, watermark;
+- bottom nav 5 mục và nút Cộng đồng;
+- role cards Khách/Reader;
+- nút và luồng `Luận giải chuyên sâu` có sẵn trong app;
+- thuật toán Tarot/Lenormand/Bài Tây/Kinh Dịch/Tử Vi/Bát Tự hiện hữu;
+- payload mã hóa;
+- tài khoản, chat, review, báo phí/thanh toán;
+- Worker và cơ chế bảo vệ Admin.
+
+### Diff đã kiểm tra
+
+- `tools/apply-role-system.mjs`: xóa 149 dòng, không thêm nội dung thay thế.
+- Không còn marker/hàm: `marketGuide`, `addMarketGuides`, `renderMarketSynthesis`, `watchMarketResult`, `.market-guide`, `.market-dynamic-analysis`.
+- Vẫn còn marker bắt buộc: `injectCommunity`, `applyMarketBranding`, `market-brand-title`.
+- Một tham chiếu hàm còn sót đã được phát hiện ở nhánh thử nghiệm và sửa trước khi tạo nhánh v2; nhánh thử nghiệm không được coi là bản đạt.
+
+**Lưu ý trạng thái:** production tại commit `e71bf55…` vẫn còn các khung luận cho đến khi PR của task này merge và workflow deploy tiếp theo ghi `SUCCESS`.
+
+---
+
+## 4. Gate, mã hóa và quyền truy cập
 
 - Nội dung app nằm trong payload AES-256-GCM; không chỉnh ciphertext bằng tay.
 - Dùng `tools/decrypt.mjs`, `tools/encrypt.mjs`, `tools/set-password.mjs`; không commit `*.src.html`.
@@ -30,7 +102,9 @@ Repository `baominhle77-glitch.github.io` là nguồn chuẩn duy nhất.
 - Worker production: `hiennhi89-gate.hiennhi89.workers.dev`.
 - Không ghi mật khẩu, token, QR, chat hoặc secret vào repository.
 
-## 3. Khách / Reader / Admin
+---
+
+## 5. Khách / Reader / Admin
 
 - Khách và Reader đăng ký/đăng nhập sau gate.
 - Reader có hồ sơ, chuyên môn, thông tin nhận phí và QR; backend từ chối link trong hồ sơ/thanh toán.
@@ -41,94 +115,54 @@ Repository `baominhle77-glitch.github.io` là nguồn chuẩn duy nhất.
 
 Các file chính: `backend/community.js`, `assets/community*.js/css`, `boitoan/community*.html`, `tools/apply-role-system.mjs`.
 
-## 4. `BOITOAN-20260723-02` — source hoàn tất
+---
 
-PR #19 merge thành `ed63ad7dfd8cf85dd58135095175d40a0a913e42`.
+## 6. Nguồn Drive/Canva
 
-Source đã có:
+Bản đồ nguồn nằm tại `docs/research/DIVINATION_SOURCES.md`.
 
-- Nút **Cộng đồng** là mục thứ năm trong bottom nav, không còn nút nổi che giao diện.
-- Chọn tài khoản bằng hai role card Khách/Reader; responsive ở chiều rộng iPhone, không còn chữ xếp dọc.
-- Branding hiển thị đổi thành **Cái Chợ của Hiên Nhi**; bỏ cụm “khu vực riêng tư” khỏi phần hiển thị Bói toán.
-- Font dùng system stack đa thiết bị; tiêu đề dùng serif fallback.
-- Logo sigil trăng khuyết + sao dựng bằng CSS; watermark lặp dày hơn.
-- Thêm khung luận Tarot, Lenormand, Bài Tây, Kinh Dịch, Tử Vi, Bát Tự và phần kết nối toàn trải bài.
-- Không giải mã/ghi đè payload; lớp mới được chèn sau giải mã để giữ nguyên các sửa thuật toán khác.
-- OpenAI Developers/API key không còn là phụ thuộc của app hoặc kế hoạch deploy.
+- Tarot, Lenormand, cartomancy/Bài Tây và Tử Vi đã có tài liệu tham khảo được liệt kê.
+- Canva có `Giáo trình tarot hình ảnh`, 63 trang.
+- Kinh Dịch: chưa xác định được giáo trình chuyên biệt đủ rõ.
+- Danh sách nguồn **không tự động chứng minh** mọi câu luận là đúng; muốn đưa nội dung vào app phải có quy tắc cụ thể, nguồn đối chiếu và test riêng.
+- Không sao chép nguyên văn tài liệu có bản quyền vào source.
 
-Kiểm thử trước merge:
+---
 
-- Run `29962090012`: role system, frontend, service worker, Worker — success.
-- Run `29962089978`: Task-ID, branch, phạm vi và bàn giao — success.
-- `node --check tools/apply-role-system.mjs` đạt.
-
-Task source đã chuyển sang `recently_completed`; xác minh production được tách thành task deploy riêng để không tiếp tục khóa các file ứng dụng.
-
-## 5. Nguồn Drive/Canva và nâng cấp chuyên môn
-
-Bản đồ nguồn nằm tại `docs/research/DIVINATION_SOURCES.md`:
-
-- Tarot: giáo trình của chủ, `78 Độ Minh Triết`, lịch sử/trường phái, Mary K. Greer, Liz Dean, Court Cards.
-- Lenormand: Rana George, Caitlín Matthews, Marcus Katz/Tali Goodwin, Andy Boroveshengra và các bản dịch/giáo trình trong Drive.
-- Bài Tây/cartomancy: tài liệu đối chiếu Tarot–Lenormand–cartomancy và giáo trình Gypsy.
-- Tử Vi: tài liệu lập và giải Tử Vi trong Drive.
-- Canva: `Giáo trình tarot hình ảnh`, 63 trang.
-- Kinh Dịch: chưa xác định được giáo trình chuyên biệt đủ rõ; lớp hiện tại chỉ thêm khung luận phổ quát, chưa thay thuật toán quẻ.
-
-Không sao chép nguyên văn tài liệu có bản quyền vào source; chỉ tổng hợp schema, quy tắc và diễn giải mới.
-
-## 6. OpenAI Developers
+## 7. OpenAI Developers
 
 - Đã loại khỏi kế hoạch theo yêu cầu người dùng.
-- Repository không có cấu hình OpenAI API cần thiết cho task này.
-- Không yêu cầu API key và không thêm dependency OpenAI.
+- Repository không cần OpenAI API key cho app hoặc quy trình deploy hiện tại.
+- Không thêm dependency OpenAI cho task này.
 
-## 7. `DEPLOY-20260723-03` — đang làm
+---
 
-Nhánh: `agent/DEPLOY-20260723-03-production-diagnostics-v2`, tạo từ `af260cc…` để giữ nguyên bàn giao của agent khác.
-
-PR #23 cũ đã đóng không merge vì dùng base cũ và xung đột các file bàn giao. Nhánh v2 chỉ sửa workflow deploy và trạng thái/bàn giao.
-
-Workflow mới trong `.github/workflows/deploy-pages.yml`:
-
-1. gắn ID/outcome cho preflight, tích hợp runtime, test source, test Worker, build, Pages, Worker và smoke test;
-2. deploy Pages trước, Worker sau;
-3. hậu kiểm:
-   - `/boitoan/community.html` HTTP 200;
-   - branding `Cái Chợ của Hiên Nhi`;
-   - marker `community-role-card`;
-   - CSS HTTP 200 và marker `community-role-options`;
-   - gate runtime JS HTTP 200 và marker `applyMarketBranding`;
-   - API Reader không phiên HTTP 401 với `unauthorized`;
-4. ghi `docs/handover/PRODUCTION_STATUS.md` khi **SUCCESS** hoặc **FAILED**;
-5. khi FAILED, ghi outcome từng bước, HTTP codes và link GitHub Actions run;
-6. giữ concurrency `cloudflare-production` và tránh vòng lặp do commit handover.
-
-Task deploy chỉ hoàn tất khi status file ghi `SUCCESS`. Nếu `FAILED`, status file là nguồn để sửa đúng bước lỗi; không suy đoán.
-
-## 8. PWA và iOS/Android
+## 8. PWA và thiết bị
 
 - Root và Bói toán có manifest/service worker; không cache navigation, payload HTML hoặc API.
-- Đóng gói App Store/Google Play chưa hoàn tất; vẫn cần tài khoản developer, privacy disclosure, test thiết bị và submission.
-- Sau production cần test trực tiếp trên iPhone: nav 5 mục, role cards ở 375–430 px, mở khóa app, các mục luận và luồng Khách/Reader.
-- Không phụ thuộc OpenAI API để đóng gói app.
+- Đóng gói App Store/Google Play chưa hoàn tất.
+- Sau khi gỡ khung luận và deploy, cần tải lại trên iPhone để xác nhận các hộp đã biến mất nhưng bố cục đạt vẫn giữ nguyên.
+
+---
 
 ## 9. Điều phối đa-agent
 
 - Một PR = một Task-ID.
 - Không sửa vùng đang bị khóa trong `docs/handover/ACTIVE_TASKS.json`.
-- Hiện chỉ vùng workflow deploy và handover/status bị `DEPLOY-20260723-03` khóa; source ứng dụng đã được giải phóng.
-- PR #20, #21 và #23 đã đóng không merge để tránh ghi đè hoặc trùng phạm vi.
-
-## 10. Bước tiếp theo
-
-1. Mở PR từ nhánh diagnostics v2.
-2. Chạy role-system CI và coordination guard.
-3. Merge khi cả hai đạt.
-4. Chờ workflow production tạo `PRODUCTION_STATUS.md`.
-5. Nếu SUCCESS, đóng task và giải phóng khóa; nếu FAILED, sửa đúng bước được ghi trong file.
-6. Queen Linh tải lại app trên iPhone và gửi ảnh mới để xác nhận trực quan.
+- Task `BOITOAN-20260723-04` đang khóa `tools/apply-role-system.mjs` và ba file bàn giao chung.
+- `PRODUCTION_STATUS.md` là nguồn chuẩn về deploy; không suy đoán từ trạng thái merge.
 
 ---
 
-Xem thêm: `AGENTS.md`, `docs/handover/ROLE_SYSTEM.md`, `docs/handover/PHOI-HOP-DA-AGENT.md`, `docs/research/DIVINATION_SOURCES.md`.
+## 10. Bước tiếp theo
+
+1. Mở PR từ nhánh `agent/BOITOAN-20260723-04-remove-ai-guides-v2`.
+2. Chạy role-system CI và coordination guard.
+3. Chỉ merge khi cả hai đạt.
+4. Chờ workflow production ghi `SUCCESS` cho commit mới.
+5. Kiểm tra source production không còn các marker khung luận.
+6. BaoMinh tải lại app trên iPhone để xác nhận trực quan.
+
+---
+
+Xem thêm: `AGENTS.md`, `docs/handover/ROLE_SYSTEM.md`, `docs/handover/PHOI-HOP-DA-AGENT.md`, `docs/handover/NHAT-KY-PHOI-HOP.md`, `docs/handover/PRODUCTION_STATUS.md`.
