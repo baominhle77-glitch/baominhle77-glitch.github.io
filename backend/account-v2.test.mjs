@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createHmac, randomUUID } from "node:crypto";
+import { createHmac, randomBytes, randomUUID, pbkdf2Sync } from "node:crypto";
 import { handleCommunity } from "./community.js";
 
 class MemoryKV {
@@ -14,8 +14,15 @@ class MemoryKV {
 }
 
 const secret = "s".repeat(64);
+const adminPassword = "test-admin-password";
+const adminSalt = randomBytes(16);
+const adminIterations = 1500;
+const adminHash = pbkdf2Sync(adminPassword, adminSalt, adminIterations, 32, "sha256").toString("base64");
 const env = {
-  KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "admin-pass",
+  KV: new MemoryKV(), SESSION_SECRET: secret, ADMIN_TOKEN: "legacy-admin-token",
+  ADMIN_PASSWORD_SALT_B64: adminSalt.toString("base64"),
+  ADMIN_PASSWORD_HASH_B64: adminHash,
+  ADMIN_PASSWORD_ITERATIONS: String(adminIterations),
   PUBLIC_RATE_LIMITER: { async limit() { throw new Error("simulated_binding_failure"); } },
 };
 async function call(path, { method = "GET", token = "", body, admin = false, device = "" } = {}) {
@@ -73,14 +80,23 @@ assert.equal(result.data.profile.id, readerId);
 assert.equal(result.data.profile.role, "reader");
 const readerToken = result.data.token;
 
-result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: ownerDid, replace: true } });
-assert.equal(result.status, 200);
-result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: randomUUID(), replace: true } });
-assert.equal(result.status, 200);
-result = await call("/api/community/admin/bind-owner-device", { method: "POST", admin: true, device: ownerDid, body: { device_id: ownerDid, replace: true } });
-assert.equal(result.status, 200);
+result = await call("/api/community/admin/login", { method: "POST", device: ownerDid, body: { password: "wrong-password", device_id: ownerDid, remember: true } });
+assert.equal(result.status, 401);
+assert.equal(result.data.error, "invalid_admin_login");
+result = await call("/api/community/admin/login", { method: "POST", device: ownerDid, body: { password: adminPassword, device_id: ownerDid, remember: true } });
+assert.equal(result.status, 200, "Admin phải đăng nhập một lần qua backend");
+assert.ok(result.data.token);
+assert.equal(result.data.primary, true);
+assert.equal(result.data.device_id, ownerDid);
+assert.equal(await env.KV.get("community-owner-device"), ownerDid, "thiết bị đăng nhập phải tự thành Admin tổng");
+const adminToken = result.data.token;
 
-result = await call("/api/community/admin/posts", { method: "POST", admin: true, device: ownerDid, body: { title: "Chủ đề chung", text: "Mọi member cùng trao đổi." } });
+result = await call("/api/community/admin/users", { token: adminToken, device: ownerDid });
+assert.equal(result.status, 200, "JWT Admin phải tải dữ liệu mà không hỏi mật khẩu lần hai");
+result = await call("/api/community/admin/users", { token: adminToken, device: randomUUID() });
+assert.equal(result.status, 401, "JWT Admin phải gắn đúng thiết bị");
+
+result = await call("/api/community/admin/posts", { method: "POST", token: adminToken, device: ownerDid, body: { title: "Chủ đề chung", text: "Mọi member cùng trao đổi." } });
 assert.equal(result.status, 201);
 const postId = result.data.post.id;
 result = await call("/api/community/posts", { token: guestToken });
@@ -88,7 +104,7 @@ assert.equal(result.status, 200);
 result = await call(`/api/community/posts/${postId}/comments`, { method: "POST", token: guestToken, body: { text: "Bình luận đầu tiên" } });
 assert.equal(result.status, 201);
 
-result = await call(`/api/community/admin/users/${guestId}/impersonate`, { method: "POST", admin: true, device: ownerDid });
+result = await call(`/api/community/admin/users/${guestId}/impersonate`, { method: "POST", token: adminToken, device: ownerDid });
 assert.equal(result.status, 200);
 const impersonationToken = result.data.token;
 result = await call(`/api/community/posts/${postId}/comments`, { method: "POST", token: impersonationToken, body: { text: "Không được đăng dưới danh nghĩa member" } });
@@ -99,10 +115,10 @@ assert.equal(result.status, 403, "phiên impersonation không được xóa memb
 
 result = await call(`/api/community/readers/${readerId}/reviews`, { method: "POST", token: guestToken, body: { rating: 5, text: "Đánh giá thử" } });
 assert.equal(result.status, 201);
-result = await call(`/api/community/admin/reviews/${readerId}/${guestId}`, { method: "DELETE", admin: true, device: ownerDid });
+result = await call(`/api/community/admin/reviews/${readerId}/${guestId}`, { method: "DELETE", token: adminToken, device: ownerDid });
 assert.equal(result.status, 200);
 
-result = await call(`/api/community/admin/users/${guestId}`, { method: "DELETE", admin: true, device: ownerDid });
+result = await call(`/api/community/admin/users/${guestId}`, { method: "DELETE", token: adminToken, device: ownerDid });
 assert.equal(result.status, 200);
 result = await call("/api/community/login", { method: "POST", body: { entry: true, device_id: guestDid, username: "v2_guest", password: "password-guest" } });
 assert.equal(result.status, 401);
@@ -123,6 +139,11 @@ for (const prefix of ["community-session:", "session:", "community-device:"]) {
   }
 }
 
+result = await call("/api/community/admin/session", { method: "DELETE", token: adminToken, device: ownerDid });
+assert.equal(result.status, 200);
+result = await call("/api/community/admin/users", { token: adminToken, device: ownerDid });
+assert.equal(result.status, 401, "đăng xuất phải thu hồi JWT Admin");
+
 const audits = await env.KV.list({ prefix: "community-audit:" });
 assert.ok(audits.keys.length >= 5);
-console.log("Account V4 edge authentication tests PASS");
+console.log("Account V5 single Admin session and Account V4 edge authentication tests PASS");
