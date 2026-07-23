@@ -17,7 +17,7 @@ await edit("assets/gate.js", (source) => {
 
   const startMarker = "\n  function start() {";
   const startIndex = source.lastIndexOf(startMarker);
-  const bootMarker = '\n\n  if (document.readyState === "loading") {';
+  const bootMarker = '\n  if (document.readyState === "loading") {';
   const bootIndex = source.indexOf(bootMarker, startIndex + startMarker.length);
   if (startIndex < 0 || bootIndex < 0) throw new Error("Không tìm thấy startup gate hiện hành");
 
@@ -89,7 +89,8 @@ await edit("assets/gate.js", (source) => {
     startWithoutAdminReturn();
   }`;
 
-  return source.slice(0, source.indexOf(bootMarker)) + wrapper + source.slice(source.indexOf(bootMarker));
+  const insertionIndex = source.indexOf(bootMarker);
+  return source.slice(0, insertionIndex) + wrapper + source.slice(insertionIndex);
 });
 
 await edit("boitoan/community-admin.html", (source) => {
