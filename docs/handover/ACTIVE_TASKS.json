@@ -1,41 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T13:40:00+07:00",
+  "updated_at": "2026-07-23T13:56:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-06",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-06-onboarding-admin-roles",
-      "base_sha": "daf65806bda430d991043b9e289746bfb5365632",
+      "branch": "agent/BOITOAN-20260723-06-closeout",
+      "base_sha": "52083fda3aa54ea03c727d5a11aba8871c54b9ab",
       "paths": [
-        "tools/apply-account-v2.mjs",
-        "tools/apply-account-v2-runner.mjs",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/deploy-pages.yml",
-        "assets/gate.js",
-        "assets/gate.css",
-        "assets/community.js",
-        "assets/community-admin.js",
-        "assets/community.css",
-        "backend/community.js",
-        "backend/account-v2.test.mjs",
-        "assets/account-v2.test.mjs",
-        "boitoan/community.html",
-        "boitoan/community-admin.html",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/ROLE_SYSTEM.md",
-        "docs/handover/PRODUCTION_STATUS.md",
         "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T13:12:00+07:00",
-      "heartbeat_at": "2026-07-23T13:40:00+07:00",
-      "summary": "Sửa lỗi đăng ký thành viên do frontend luôn cố giải mã trang Bói toán dù source hiện là plaintext; thiết kế onboarding hai màn hình tách biệt; phân giao diện theo vai trò; bổ sung badge tài khoản; mở rộng Admin xóa review, xóa member, tạo bài thảo luận; thiết bị Admin tổng tự khóa owner-device sau đăng nhập và được xem chat, xem giao diện member bằng phiên impersonation chỉ đọc có audit. Không ghi mật khẩu hoặc mã thiết bị cụ thể vào source. Runner xử lý template sinh mã Account V2; PRODUCTION_STATUS được thêm vào phạm vi vì main có commit bot mới hơn base của task và coordination guard dùng diff hai đầu."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T13:56:00+07:00",
+      "summary": "PR #31 merge thành 61c0dc0efbddf3c865c44d001d022d80cf0185d9. CI coordination run 29986274969 và Account/Frontend/Worker run 29986275030 đều success. Production run 29986415052 ghi SUCCESS: Pages/Admin/CSS/Gate 200; Worker và API thảo luận không phiên 401; onboarding invalid payload 400; marker Account V2 tồn tại. Đã tách onboarding thành màn chọn và màn thao tác riêng, sửa đăng ký plaintext và input iPhone, hiển thị badge vai trò, phân giao diện Khách/Reader, mở rộng Admin xóa review/member và bài thảo luận, Admin tổng xem chat và giao diện member bằng phiên chỉ đọc có audit. PR #30 trùng phạm vi, không mergeable và có workflow failure đã được đóng không merge. Không lưu mật khẩu, IP hoặc mã thiết bị cụ thể trong source."
+    },
     {
       "id": "BOITOAN-20260723-05",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -49,7 +32,7 @@
       "status": "completed",
       "started_at": "2026-07-23T12:01:00+07:00",
       "completed_at": "2026-07-23T12:20:00+07:00",
-      "summary": "PR #28 merge thành d48ef93137c35e38ee64004dfb0cdaee9c04fd83. CI coordination run 29981811502 và role-system run 29981811526 đều success. Production run 29981841325 ghi SUCCESS: Pages/CSS/Gate 200, Worker không phiên 401, onboarding công khai trả 400 invalid_account với dữ liệu kiểm thử không hợp lệ, branding Spirituality Market và marker buildBoitoanEntryUI tồn tại. Đã đổi branding/watermark, chuẩn hóa Admin, đưa đăng nhập/đăng ký Khách hoặc Reader/Người xem bói lên cửa đầu, cấp phiên vào app ngay và gửi Telegram thông tin tài khoản cùng dữ liệu thiết bị tối thiểu có công bố rõ."
+      "summary": "PR #28 merge thành d48ef93137c35e38ee64004dfb0cdaee9c04fd83. CI coordination run 29981811502 và role-system run 29981811526 đều success. Production run 29981841325 ghi SUCCESS. Đã đổi branding thành Spirituality Market, chuẩn hóa Admin và đưa đăng nhập/đăng ký thành viên lên cửa đầu; lớp này sau đó được chỉnh lại trong BOITOAN-20260723-06 theo nghiệm thu trực tiếp trên iPhone."
     },
     {
       "id": "BOITOAN-20260723-04",
@@ -65,7 +48,7 @@
       "status": "completed",
       "started_at": "2026-07-23T09:59:00+07:00",
       "completed_at": "2026-07-23T10:26:15+07:00",
-      "summary": "PR #26 merge tại 3322b7c899aeeee3d2e98e26e4cbc97931390a77 và production run 29976968849 ghi SUCCESS. Đã gỡ toàn bộ các hộp Khung luận và Kết nối toàn trải bài do lớp bổ sung tạo ra; giữ nguyên giao diện mobile được người dùng xác nhận đạt, branding, Cộng đồng, Luận giải chuyên sâu và thuật toán gốc. Nhánh closeout chỉ chốt ba file bàn giao."
+      "summary": "PR #26 merge tại 3322b7c899aeeee3d2e98e26e4cbc97931390a77 và production run 29976968849 ghi SUCCESS. Đã gỡ toàn bộ các hộp Khung luận và Kết nối toàn trải bài do lớp bổ sung tạo ra; giữ nguyên giao diện, Cộng đồng, Luận giải chuyên sâu và thuật toán gốc."
     },
     {
       "id": "DEPLOY-20260723-03",
@@ -107,28 +90,7 @@
       "status": "completed",
       "started_at": "2026-07-23T04:55:00+07:00",
       "completed_at": "2026-07-23T05:16:00+07:00",
-      "summary": "Source UI mobile và branding Cái Chợ của Hiên Nhi đã qua CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; các khung luận bổ sung sau đó bị người dùng đánh giá không hữu ích và đã được gỡ trong BOITOAN-20260723-04."
-    },
-    {
-      "id": "COORD-20260723-01",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "chore/multi-agent-coordination-20260723",
-      "base_sha": "fc5a147596b34d62ed2464fbcaea038530be83cc",
-      "paths": [
-        "AGENTS.md",
-        ".github/copilot-instructions.md",
-        ".github/pull_request_template.md",
-        ".github/workflows/coordination-guard.yml",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/PHOI-HOP-DA-AGENT.md",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "HANDOVER.md",
-        "tools/validate-coordination.mjs"
-      ],
-      "status": "completed",
-      "started_at": "2026-07-23T04:24:00+07:00",
-      "completed_at": "2026-07-23T04:31:00+07:00",
-      "summary": "Thiết lập quy tắc, khóa phạm vi, mẫu PR và CI điều phối nhiều agent; hai workflow PR đạt; không thay đổi logic ứng dụng."
+      "summary": "Source UI mobile và branding cũ đã qua CI và merge tại ed63ad7dfd8cf85dd58135095175d40a0a913e42; branding và onboarding sau đó đã được thay thế bởi các task mới hơn."
     }
   ]
 }

@@ -2,18 +2,18 @@
 
 > **Mọi agent phải đọc `AGENTS.md` trước file này.** Sau đó đọc `docs/handover/ACTIVE_TASKS.json` và `docs/handover/NHAT-KY-PHOI-HOP.md` trước khi sửa.
 
-**Cập nhật:** 23/07/2026 12:22 (GMT+7)  
-**Source ứng dụng đã deploy:** `d48ef93137c35e38ee64004dfb0cdaee9c04fd83`  
-**Commit ghi trạng thái production:** `dd008ff5edaeac0f33144b88fb0a07f24d8064c4`  
+**Cập nhật:** 23/07/2026 13:56 (GMT+7)  
+**Source ứng dụng đã deploy:** `61c0dc0efbddf3c865c44d001d022d80cf0185d9`  
+**Commit ghi trạng thái production:** `52083fda3aa54ea03c727d5a11aba8871c54b9ab`  
 **Task đang hoạt động:** không có.  
 **Production:** `SUCCESS`.
 
 ## Nguyên tắc độ tin cậy bắt buộc
 
 - **Tuyệt đối không bịa.**
-- Mọi khẳng định về source, production, thuật toán hoặc nội dung chuyên môn phải có căn cứ từ source, log, test hoặc tài liệu đã kiểm chứng.
-- Khi chưa đủ dữ liệu, ghi rõ **chưa xác lập/chưa đủ chứng cứ**; không tự tạo nội dung chung chung để làm giao diện có vẻ đầy đủ.
-- Phân biệt rõ dữ kiện đã kiểm tra, suy luận kỹ thuật và phần chưa xác minh.
+- Mọi kết luận về source, production, thuật toán hoặc nội dung chuyên môn phải có căn cứ từ source, log, test hoặc tài liệu đã kiểm chứng.
+- Khi chưa đủ dữ liệu, ghi rõ **chưa xác lập/chưa đủ chứng cứ**.
+- Không đưa mật khẩu, token, IP đầy đủ, mã thiết bị cá nhân, QR, chat hoặc secret vào repository.
 
 ---
 
@@ -29,165 +29,178 @@ Repository `baominhle77-glitch.github.io` là nguồn chuẩn duy nhất.
 
 ### Bằng chứng production gần nhất
 
-`docs/handover/PRODUCTION_STATUS.md` ghi cho source commit `d48ef931…`:
+`docs/handover/PRODUCTION_STATUS.md` ghi cho source commit `61c0dc0e…`:
 
 - Cloudflare Pages `200`;
+- trang Admin `200`;
 - Community CSS `200`;
 - Gate runtime JS `200`;
-- Worker API không phiên `401 unauthorized`, đúng kỳ vọng;
+- Worker API Reader không phiên `401 unauthorized`, đúng kỳ vọng;
+- API thảo luận không phiên `401 unauthorized`, đúng kỳ vọng;
 - onboarding công khai `400 invalid_account` với dữ liệu kiểm thử không hợp lệ;
-- branding `Spirituality Market` tồn tại;
-- marker `community-role-card`, `community-role-options`, `buildBoitoanEntryUI` tồn tại;
-- workflow run `29981841325` hoàn tất thành công.
+- marker Account V2 tồn tại: onboarding hai màn hình, nhánh plaintext không ép giải mã, badge vai trò và Admin tổng;
+- workflow production `29986415052` hoàn tất thành công;
+- thứ tự deploy: Pages trước, Worker sau.
 
 ---
 
-## 2. Trạng thái giao diện và branding
+## 2. `BOITOAN-20260723-06` — Account V2 hoàn tất
 
-Ngày 23/07/2026, BaoMinh kiểm tra trên điện thoại và xác nhận giao diện mobile đạt yêu cầu. Sau đó:
+PR #31 merge thành `61c0dc0efbddf3c865c44d001d022d80cf0185d9`.
 
-- branding và watermark `Cái Chợ của Hiên Nhi` đã được đổi thành `Spirituality Market`;
-- tên PWA Bói toán đã đổi thành `Spirituality Market`;
-- cách gọi quyền quản trị được chuẩn hóa thành `Admin`;
-- thuật ngữ nghiệp vụ ngân hàng `Tên chủ tài khoản` được giữ nguyên;
-- bottom nav 5 mục, nút Cộng đồng, logo/sigil và bố cục mobile được giữ nguyên.
+### Lỗi đã sửa
+
+Người dùng kiểm tra trực tiếp trên iPhone và xác nhận bản trước có ba vấn đề:
+
+1. Đăng nhập, đăng ký và Admin hiển thị chồng trong một card dài.
+2. Checkbox/radio bị CSS input toàn cục kéo thành thanh dài.
+3. Đăng ký báo lỗi chung sau khi gửi.
+
+Nguyên nhân lỗi đăng ký đã được xác lập: trang Bói toán production hiện là HTML plaintext được gate che, nhưng frontend cũ vẫn luôn gọi `decryptPayload()` sau khi backend đã tạo account. Account có thể đã được tạo rồi frontend mới lỗi vì DOM không có payload AES.
+
+Account V2 xử lý như sau:
+
+- nếu DOM không có `application/gate-payload`, frontend mở app trực tiếp bằng token hợp lệ;
+- chỉ giải mã khi payload mã hóa thực sự tồn tại;
+- checkbox/radio trên iPhone được trả về kích thước và appearance native;
+- lỗi backend cụ thể được chuyển thành thông báo rõ hơn thay vì chỉ báo lỗi chung.
+
+### Onboarding hai màn hình
+
+- **Màn 1:** chỉ có ba lựa chọn `Đăng nhập`, `Đăng ký`, `Admin`.
+- **Màn 2:** chỉ hiện đúng biểu mẫu đã chọn và có nút quay lại.
+- Đăng ký yêu cầu chọn `Khách` hoặc `Reader / Người xem bói`.
+- Sau đăng ký/đăng nhập thành công, hệ thống lưu gate token, community token và profile để vào app ngay.
+
+Nếu một username đã được tạo trong lần lỗi cũ, người dùng nên chọn **Đăng nhập** bằng đúng thông tin đã dùng thay vì đăng ký lại cùng username.
+
+### Hiển thị vai trò và giao diện theo tài khoản
+
+Vai trò hiện cạnh tên/avatar và trong giao diện theo dạng badge:
+
+- `Khách`;
+- `Reader / Người xem bói`;
+- `Admin`;
+- `Admin tổng` trên thiết bị owner-device đã khóa.
+
+Giao diện theo vai trò:
+
+- Khách mặc định vào danh sách Reader, có trò chuyện, review, thảo luận và trang cá nhân.
+- Reader mặc định vào khu khách hàng/hội thoại, có hồ sơ chuyên môn, nhận phí, thảo luận và trang cá nhân.
+- Cả Khách và Reader đều xem được bài thảo luận chung và bình luận khi bài còn mở.
+
+### Quyền Admin
+
+Admin hiện có thể:
+
+- xem danh sách member;
+- khóa/mở khóa member;
+- xóa tài khoản member;
+- xóa review công khai;
+- tạo, đóng, mở lại hoặc xóa bài thảo luận chung.
+
+### Admin tổng
+
+- Thiết bị Admin tổng được bind động vào Workers KV sau khi đăng nhập Admin hợp lệ trên chính thiết bị đó hoặc bấm nút đặt thiết bị trong trang quản trị.
+- Không hardcode mật khẩu, mã trình duyệt hoặc IP của chủ sở hữu vào source.
+- Chỉ đúng owner-device mới đọc được nội dung hội thoại riêng.
+- Owner-device có thể mở giao diện của một member bằng token `impersonation` **chỉ đọc**.
+- Backend chặn mọi thao tác ghi dưới danh nghĩa member trong phiên này và ghi audit KV cho thao tác Admin nhạy cảm.
+
+### Xóa member
+
+Xóa member loại bỏ hồ sơ, thông tin đăng nhập, phiên và các chỉ mục liên quan. Nội dung hội thoại đã tồn tại vẫn tuân theo TTL 30 ngày và không biến thành quyền đăng bài dưới danh nghĩa người đã xóa.
 
 ---
 
-## 3. `BOITOAN-20260723-05` — onboarding tài khoản hoàn tất
+## 3. Telegram khi đăng ký mới
 
-PR #28 merge thành `d48ef93137c35e38ee64004dfb0cdaee9c04fd83`.
-
-### Cửa sổ đầu ứng dụng
-
-Bói toán ở chế độ approval hiện có ba luồng ngay trên cửa sổ đầu:
-
-1. `Đăng nhập` — dành cho tài khoản Khách hoặc Reader đã có;
-2. `Tạo tài khoản` — phải chọn `Khách` hoặc `Reader / Người xem bói`;
-3. `Admin` — dùng mật khẩu mã hóa hiện hành để mở app.
-
-Khi đăng ký hoặc đăng nhập thành viên thành công, Worker cấp đồng thời:
-
-- gate JWT để mở app;
-- community JWT để dùng hồ sơ, Reader, chat, review và thanh toán;
-- khóa giải mã Bói toán từ binding `DECRYPT_KEY_BOITOAN` hoặc fallback `DECRYPT_KEY`.
-
-Thành viên mới vào app ngay, không chờ Admin duyệt Telegram.
-
-### Thông báo Telegram khi đăng ký mới
-
-Thông báo best-effort gửi cho Admin gồm:
+Thông báo best-effort gửi Admin gồm:
 
 - vai trò;
 - tên hiển thị;
 - tên đăng nhập;
 - mã hồ sơ trình duyệt;
-- browser và platform;
+- browser/platform;
 - kích thước màn hình;
 - ngôn ngữ và múi giờ;
 - quốc gia;
-- IP đã rút gọn `/24` hoặc `/64`;
+- IP rút gọn `/24` hoặc `/64`;
 - thời điểm đăng ký.
 
-Không gửi mật khẩu, thông tin ngân hàng hoặc QR. Cửa sổ đăng ký công bố rõ dữ liệu thiết bị được gửi trước khi người dùng bấm tạo tài khoản.
+Không gửi mật khẩu, thông tin ngân hàng hoặc QR. Giao diện công bố rõ phạm vi dữ liệu trước khi đăng ký.
 
-### An toàn và chống lạm dụng
-
-- Public onboarding chỉ áp dụng cho app `boitoan`.
-- `device_id` phải là UUID hợp lệ.
-- Username/password/role/profile vẫn dùng validator hiện hữu.
-- Endpoint onboarding dùng Cloudflare rate limiter khi binding khả dụng.
-- Hồ sơ Reader vẫn cấm đường dẫn trong nội dung công khai và thông tin nhận phí.
-- Telegram lỗi không làm mất tài khoản hoặc chặn thành viên vào app; phản hồi trả rõ `telegram_notified`.
-
-### Bằng chứng CI
-
-- coordination guard run `29981811502`: success;
-- role system/frontend/Worker run `29981811526`: success;
-- production run `29981841325`: success.
+**Chưa nghiệm thu thực tế:** cần một đăng ký thật trên điện thoại sau khi tải Account V2 để xác nhận Telegram nhận đúng thông báo. CI chỉ xác nhận contract và luồng best-effort, không thay thế lần kiểm tra bot thật.
 
 ---
 
-## 4. `BOITOAN-20260723-04` — gỡ khung luận AI hoàn tất
+## 4. Bằng chứng CI và điều phối
 
-PR #26 merge thành `3322b7c899aeeee3d2e98e26e4cbc97931390a77`.
+- coordination guard run `29986274969`: success;
+- Account V2/frontend/Worker run `29986275030`: success;
+- production run `29986415052`: success.
 
-Đã gỡ hoàn toàn:
+PR #30 dùng cùng Task-ID/phạm vi đã được đóng không merge vì:
 
-- `Khung luận Tarot`;
-- `Khung luận Lenormand`;
-- `Khung luận Bài Tây`;
-- `Khung luận Kinh Dịch`;
-- `Khung luận Tử Vi`;
-- `Khung luận Bát Tự`;
-- `Kết nối toàn trải bài`;
-- các hàm/call/CSS phục vụ riêng các hộp trên.
+- trùng với PR #31;
+- không mergeable sau khi source mới được tích hợp;
+- workflow chuyên biệt của PR #30 còn failure;
+- merge tiếp có nguy cơ ghi đè production đã nghiệm thu.
 
-Đã giữ nguyên thuật toán Tarot/Lenormand/Bài Tây/Kinh Dịch/Tử Vi/Bát Tự, payload mã hóa, `Luận giải chuyên sâu`, tài khoản, chat, review và thanh toán.
+Hiện không còn PR mở.
 
 ---
 
-## 5. Gate, mã hóa và quyền truy cập
+## 5. Runtime và build
 
-- Nội dung app nằm trong payload AES-256-GCM; không chỉnh ciphertext bằng tay.
-- Dùng `tools/decrypt.mjs`, `tools/encrypt.mjs`, `tools/set-password.mjs`; không commit `*.src.html`.
-- SPARE ưu tiên `DECRYPT_KEY_SPARE`; Bói toán ưu tiên `DECRYPT_KEY_BOITOAN`, nếu thiếu dùng `DECRYPT_KEY` chung.
-- Worker production: `hiennhi89-gate.hiennhi89.workers.dev`.
-- Không ghi mật khẩu, token, khóa, QR, chat hoặc secret vào repository.
+Các file chính:
+
+- `tools/apply-role-system.mjs`: lớp tích hợp tài khoản nền;
+- `tools/apply-account-v2.mjs`: template Account V2;
+- `tools/apply-account-v2-runner.mjs`: runner build dùng trong CI/deploy để sinh runtime an toàn;
+- `assets/gate.js`, `assets/gate.css`: gate, staged onboarding và badge trong app;
+- `assets/community.js`, `assets/community-admin.js`, `assets/community.css`: giao diện member/Admin theo vai trò;
+- `backend/community.js`: account, Reader, review, chat, post, Admin và audit;
+- `assets/account-v2.test.mjs`, `backend/account-v2.test.mjs`: contract frontend và integration backend;
+- `.github/workflows/validate-role-system.yml`: CI PR;
+- `.github/workflows/deploy-pages.yml`: build, test, Pages → Worker và smoke test.
+
+Không chạy trực tiếp template Account V2 trong quy trình chuẩn; workflow dùng `tools/apply-account-v2-runner.mjs`.
 
 ---
 
-## 6. Khách / Reader / Admin
+## 6. Gate, dữ liệu và bảo mật
 
-- Khách và Reader đăng ký/đăng nhập ngay tại cửa sổ đầu của Bói toán.
-- Reader có hồ sơ, chuyên môn, thông tin nhận phí và QR; backend từ chối link trong hồ sơ/thanh toán.
+- Trang Bói toán hiện là plaintext được gate kiểm soát; frontend vẫn hỗ trợ payload mã hóa nếu được đưa trở lại sau này.
+- SPARE ưu tiên `DECRYPT_KEY_SPARE`; Bói toán có thể dùng `DECRYPT_KEY_BOITOAN` hoặc fallback `DECRYPT_KEY` khi cần payload mã hóa.
+- Mật khẩu member được băm PBKDF2; không lưu plaintext.
+- Community session tối đa 30 ngày; chat giữ tối đa 30 ngày.
+- Reader vẫn bị cấm chèn đường dẫn vào hồ sơ và thông tin nhận phí.
 - Review 1–5 sao; Khách gỡ review của mình, Admin gỡ được, Reader không gỡ được.
-- Chat Reader–Khách giữ tối đa 30 ngày, có báo phí và trạng thái thanh toán.
-- Chat cộng đồng không sao chép sang Telegram.
-- Admin chỉ đọc chat khi có `ADMIN_TOKEN` và đúng owner-device ID đã khóa.
-
-Các file chính: `backend/community.js`, `assets/community*.js/css`, `assets/gate.*`, `boitoan/community*.html`, `tools/apply-role-system.mjs`.
+- Dữ liệu “thiết bị” là hồ sơ trình duyệt best-effort, không chứng minh chắc chắn một thiết bị vật lý duy nhất.
 
 ---
 
-## 7. Nguồn Drive/Canva
+## 7. Những phần giữ nguyên
 
-Bản đồ nguồn nằm tại `docs/research/DIVINATION_SOURCES.md`.
-
-- Tarot, Lenormand, cartomancy/Bài Tây và Tử Vi đã có danh sách tài liệu tham khảo.
-- Canva có `Giáo trình tarot hình ảnh`, 63 trang.
-- Kinh Dịch: chưa xác định được giáo trình chuyên biệt đủ rõ.
-- Danh sách nguồn không tự động chứng minh mọi câu luận là đúng; nội dung mới chỉ được đưa vào app khi có quy tắc cụ thể, nguồn đối chiếu và test riêng.
-- Không sao chép nguyên văn tài liệu có bản quyền vào source.
-
----
-
-## 8. OpenAI Developers
-
-- Đã loại khỏi kế hoạch theo yêu cầu người dùng.
-- App và quy trình deploy hiện tại không cần OpenAI API key.
-- Không thêm dependency OpenAI cho phần này.
-
----
-
-## 9. PWA và thiết bị
-
-- Root và Bói toán có manifest/service worker; không cache navigation, payload HTML hoặc API.
-- PWA Bói toán hiển thị tên `Spirituality Market`.
+- Branding `Spirituality Market` và tên PWA.
+- Bottom navigation, Cộng đồng và `Luận giải chuyên sâu`.
+- Thuật toán Tarot, Lenormand, Bài Tây, Kinh Dịch, Tử Vi và Bát Tự hiện hữu.
+- Các hộp `Khung luận…` và `Kết nối toàn trải bài` vẫn đã được gỡ theo `BOITOAN-20260723-04`.
+- OpenAI API vẫn không thuộc dependency của app.
 - Đóng gói App Store/Google Play chưa hoàn tất.
-- Dữ liệu “thiết bị” trong hệ thống là hồ sơ trình duyệt best-effort, không khẳng định là định danh thiết bị vật lý duy nhất.
 
 ---
 
-## 10. Điều phối đa-agent và trạng thái cuối
+## 8. Trạng thái cuối
 
-- Một PR = một Task-ID.
-- `docs/handover/ACTIVE_TASKS.json` hiện không có task đang hoạt động.
-- `PRODUCTION_STATUS.md` là nguồn chuẩn về deploy; không suy đoán từ trạng thái merge.
-- Production: **SUCCESS**.
+- Account V2 source: **đã merge**.
+- Cloudflare production: **SUCCESS**.
+- PR trùng: **đã đóng không merge**.
+- Active task: **không có**.
 - Khóa file: **đã giải phóng**.
-- Việc còn lại: kiểm tra trực quan onboarding và thực hiện một đăng ký thật trên điện thoại để xác nhận Telegram nhận đúng thông báo thực tế; chưa coi lần gửi Telegram thực tế đã được nghiệm thu cho đến khi có đăng ký thật.
+- Việc cần người dùng kiểm tra: đóng hẳn tab/PWA cũ, mở lại; đăng nhập hoặc tạo một username mới; đăng nhập Admin một lần trên đúng iPhone cần đặt làm Admin tổng; xác nhận Telegram nhận thông báo đăng ký thật.
 
 ---
 
-Xem thêm: `AGENTS.md`, `docs/handover/ROLE_SYSTEM.md`, `docs/handover/PHOI-HOP-DA-AGENT.md`, `docs/handover/NHAT-KY-PHOI-HOP.md`, `docs/handover/PRODUCTION_STATUS.md`.
+Xem thêm: `AGENTS.md`, `docs/handover/ROLE_SYSTEM.md`, `docs/handover/NHAT-KY-PHOI-HOP.md`, `docs/handover/PRODUCTION_STATUS.md`.
