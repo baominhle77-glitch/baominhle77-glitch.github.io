@@ -2,13 +2,13 @@
 
 > **Mọi agent phải đọc `AGENTS.md` trước file này.** Sau đó đọc `docs/handover/ACTIVE_TASKS.json` và `docs/handover/NHAT-KY-PHOI-HOP.md` trước khi sửa.
 
-**Cập nhật:** 23/07/2026 15:58 (GMT+7)  
-**Source ứng dụng đã deploy:** `541194fbc63a73633fb857d4b90c221935b06309`  
-**Commit ghi trạng thái production:** `fd2f7e11be0b7e619eb453e8610da20a666447d6`  
-**Commit ghi E2E Reader:** `d8b3605e8d4a7bd2fb682e8745732f472cabf977`  
+**Cập nhật:** 23/07/2026 16:47 (GMT+7)  
+**Source ứng dụng đã deploy:** `bc8016a23c342ff93416003293148c06263242f8`  
+**Commit ghi trạng thái production:** `b29e3ca66ee1da27631d881be34086ad4e3ac2d5`  
+**Commit ghi E2E Reader + WebKit:** `1768f2c073571f51de9ba550a84786ba7b75573c`  
 **Task đang hoạt động:** không có.  
 **Production:** `SUCCESS`.  
-**Reader production E2E:** `SUCCESS — 201/200/200/200/401/401`.
+**Reader + WebKit production E2E:** `SUCCESS — 201/200/200/200/200/401/401`.
 
 ## Nguyên tắc độ tin cậy bắt buộc
 
@@ -30,9 +30,9 @@ Repository `baominhle77-glitch/baominhle77-glitch.github.io` là nguồn chuẩn
 
 ### Bằng chứng production gần nhất
 
-`docs/handover/PRODUCTION_STATUS.md` ghi cho source `541194fbc63a73633fb857d4b90c221935b06309`:
+`docs/handover/PRODUCTION_STATUS.md` cho source `bc8016a23c342ff93416003293148c06263242f8`:
 
-- workflow deploy `29993031238`: success;
+- workflow deploy `29996510949`: success;
 - Cloudflare Pages `200`;
 - trang Admin `200`;
 - Community CSS `200`;
@@ -41,136 +41,124 @@ Repository `baominhle77-glitch/baominhle77-glitch.github.io` là nguồn chuẩn
 - onboarding payload sai `400 invalid_account`;
 - thứ tự deploy: Pages trước, Worker sau.
 
-`docs/handover/READER_E2E_STATUS.md` ghi workflow `29993081236`: success:
+`docs/handover/READER_E2E_STATUS.md` ghi workflow `29996558091`: success:
 
-| Bước | HTTP |
+| Bước | HTTP/kết quả |
 |---|---:|
 | Đăng ký Reader thật | `201` |
 | Đăng nhập từ thiết bị/nền tảng thứ hai | `200` |
 | Đọc `/api/community/me` | `200` |
+| WebKit gate production | `200` |
 | Tự xóa tài khoản thử | `200` |
 | Dùng lại token cũ | `401` |
 | Đăng nhập lại sau xóa | `401 invalid_login` |
 
-Mã lỗi an toàn: `none`. Tài khoản thử `e2e_reader_*` đã tự xóa trong cùng workflow.
+Mã lỗi: `none`. Tài khoản thử `e2e_reader_*` đã tự xóa trong cùng workflow.
 
 ---
 
-## 2. `BOITOAN-20260723-08` — Hotfix Admin và Reader đa nền tảng
+## 2. `BOITOAN-20260723-09` — WebKit/iPhone crash loop
 
-### Lỗi người dùng nghiệm thu
+### Triệu chứng người dùng xác nhận
 
-1. Phiên Admin trên app chính chỉ hiện badge; không có lối quản trị rõ ràng.
-2. Đăng ký Reader trên một thiết bị/nền tảng khác báo lỗi chung.
+Safari/WebKit trên iPhone hiển thị: trang `/boitoan/` gặp sự cố liên tục và không thể mở.
+
+### Lỗi gốc
+
+- `applyMarketBranding()` tạo `MutationObserver` theo dõi `childList`.
+- Observer gọi `injectCommunity()` sau mỗi mutation.
+- Bản Account V3 từng gán `textContent` nhãn `Cộng đồng/Quản trị` vô điều kiện.
+- Gán `textContent` tự tạo child-list mutation mới, observer lại gọi hàm, tạo vòng lặp vô hạn và làm tab WebKit sập.
+
+### Runtime đã sửa
+
+`injectCommunity()` hiện idempotent:
+
+- chỉ đổi `href` nếu khác;
+- chỉ đổi `textContent` nếu nhãn khác;
+- chỉ đổi `aria-label` nếu khác;
+- chỉ thêm body class nếu chưa có;
+- vẫn giữ đúng một link Cộng đồng/Quản trị.
+
+Marker production: `Account V3 iOS mutation guard`.
+
+PR #43 merge runtime guard thành `4c4fa6911637ff6da5e2cf4da986f496d06ca8e3`.
+
+### WebKit checker
+
+`tools/webkit-production-check.mjs`:
+
+1. mở HTML/CSS/JS production thật trong context WebKit iPhone sạch và theo dõi page crash;
+2. tạo document plaintext tối thiểu cùng origin bằng route fulfill;
+3. nạp đúng `/assets/gate.js` và `/assets/gate.css` production;
+4. kích hoạt phiên Reader, `applyMarketBranding`, `MutationObserver` và `injectCommunity`;
+5. yêu cầu đúng một `#gate-community-link`, nhãn đúng, tổng mutation hữu hạn và mutation delta ổn định;
+6. xác nhận asset production có marker iOS guard;
+7. ghi lỗi cụ thể qua `WEBKIT_E2E_ERROR` nếu thất bại.
+
+Script không phụ thuộc `DECRYPT_KEY` hoặc login key, được `node --check` ở PR CI và ngay trước production run.
+
+PR #45 merge checker cuối thành source `bc8016a23c342ff93416003293148c06263242f8`.
+
+### Bằng chứng
+
+- Account/frontend/Worker CI `29996444259`: success;
+- coordination guard `29996444031`: success;
+- production deploy `29996510949`: success;
+- WebKit production E2E `29996558091`: success;
+- WebKit không crash, DOM contract đạt, mutation ổn định.
+
+---
+
+## 3. `BOITOAN-20260723-08` — Hotfix Admin và Reader đa nền tảng
 
 ### Lối quản trị Admin
 
 - Badge Admin là liên kết cảm ứng tới `community-admin.html`.
 - Nhãn hiển thị `Admin · Mở quản trị` hoặc `Admin tổng · Mở quản trị`.
 - Bottom navigation đổi mục `Cộng đồng` thành `Quản trị` khi đang ở phiên Admin.
-- Trang quản trị có:
-  - danh sách member;
-  - khóa/mở khóa/xóa member;
-  - `Xem trang cá nhân`;
-  - xóa review;
-  - tạo/đóng/mở lại/xóa bài thảo luận;
-  - đọc hội thoại riêng trên đúng thiết bị Admin tổng.
+- Trang quản trị có danh sách member, khóa/mở khóa/xóa member, `Xem trang cá nhân`, xóa review, quản lý bài thảo luận và đọc hội thoại riêng trên đúng thiết bị Admin tổng.
 
 ### Contract đăng ký/đăng nhập
 
-- Trang Bói toán hiện là plaintext sau gate; public entry không phụ thuộc `DECRYPT_KEY`.
-- Đăng ký/đăng nhập thành công luôn trả:
-  - community token;
-  - gate token;
-  - profile.
+- Public entry không phụ thuộc `DECRYPT_KEY` khi trang plaintext.
+- Đăng ký/đăng nhập thành công trả community token, gate token và profile.
 - `key` chỉ được trả khi thực sự có secret/payload mã hóa.
-- Kiểm tra `SESSION_SECRET` diễn ra trước khi tạo account để tránh account mồ côi do lỗi cấp phiên.
+- Kiểm tra `SESSION_SECRET` diễn ra trước khi tạo account.
 
-### Account V4 — xác thực phù hợp edge
+### Account V4
 
-- Account mới dùng HMAC-SHA256 với:
-  - salt ngẫu nhiên riêng từng tài khoản;
-  - pepper phía server lấy từ `SESSION_SECRET`.
+- Account mới dùng HMAC-SHA256 với salt riêng và pepper phía server từ `SESSION_SECRET`.
 - Không lưu mật khẩu plaintext hoặc pepper trong KV/source.
-- Verify PBKDF2 cũ vẫn được giữ để tương thích account đã tạo trước Account V4.
-- PUBLIC_RATE_LIMITER là lớp chống spam best-effort; lỗi binding không được làm hỏng đăng ký hợp lệ.
-- Register/login có mã lỗi theo pha để chẩn đoán an toàn.
-
-### Lỗi gốc `500 server`
-
-`handleCommunity()` có `try/catch` nhưng dispatcher từng dùng `return handleRegister(...)`/`return handleLogin(...)` mà không `await`. Rejection bất đồng bộ thoát khỏi catch của module Cộng đồng và bị Worker ngoài cùng đổi thành `{ error: "server" }`.
-
-Bản cuối dùng `return await ...` cho toàn bộ async route, nên:
-
-- lỗi được bắt đúng lớp;
-- mã pha được trả đúng;
-- production E2E đã vượt toàn bộ luồng.
+- Verify PBKDF2 cũ vẫn được giữ để tương thích dữ liệu cũ.
+- PUBLIC_RATE_LIMITER là best-effort; lỗi binding không làm hỏng đăng ký hợp lệ.
+- Dispatcher dùng `return await ...` để bắt rejection bất đồng bộ đúng lớp.
 
 ### Tự xóa và thu hồi phiên
 
-`DELETE /api/community/me` cho member đã xác thực tự xóa chính mình:
-
-- xóa login;
-- xóa profile;
-- xóa Reader index;
-- xóa device mapping;
-- thu hồi community session;
-- thu hồi gate session.
-
-Token `impersonation` bị chặn bằng `read_only_impersonation`, không thể xóa member.
-
-### Bằng chứng CI/merge
-
-- PR #41 merge source `541194fbc63a73633fb857d4b90c221935b06309`.
-- Coordination guard `29992908287`: success.
-- Account V4/frontend/Worker `29992908212`: success.
-- Production deploy `29993031238`: success.
-- Reader production E2E `29993081236`: success.
+`DELETE /api/community/me` xóa login, profile, Reader index, device mapping, community session và gate session. Token impersonation bị chặn bằng `read_only_impersonation`.
 
 ---
 
-## 3. Admin tổng xem Trang cá nhân member
+## 4. Admin tổng xem Trang cá nhân member
 
 - Danh sách tài khoản Admin có nút **`Xem trang cá nhân`**.
 - URL dùng `admin_view=profile`.
 - Token `mode=impersonation` mở thẳng `renderProfile()`.
-- Hồ sơ hiển thị tên đăng nhập, tên hiển thị, vai trò và giới thiệu.
-- Reader còn hiển thị chuyên môn, ngân hàng, số tài khoản, tên chủ tài khoản và QR nếu có.
+- Hồ sơ hiển thị tên đăng nhập, tên hiển thị, vai trò, giới thiệu; Reader còn có chuyên môn và dữ liệu nhận phí/QR nếu có.
 - Toàn bộ trường bị khóa, ghi rõ `Chế độ chỉ đọc`.
 - Có `Quay lại Admin` và `← Quay lại khu vực Admin`.
 
 ---
 
-## 4. Account V2 và vai trò
+## 5. Account V2 và vai trò
 
-### Onboarding
-
-- Màn đầu chỉ có `Đăng nhập`, `Đăng ký`, `Admin`.
-- Chọn xong mới mở biểu mẫu riêng và có nút quay lại.
-- Đăng ký phải chọn `Khách` hoặc `Reader / Người xem bói`.
+- Màn đầu chỉ có `Đăng nhập`, `Đăng ký`, `Admin`; chọn xong mới mở form riêng.
+- Đăng ký chọn `Khách` hoặc `Reader / Người xem bói`.
 - Checkbox/radio trên iPhone dùng kích thước native.
-
-### Giao diện theo role
-
 - Khách: danh sách Reader, chat, review, thảo luận, trang cá nhân.
 - Reader: khách hàng/hội thoại, hồ sơ chuyên môn, nhận phí, thảo luận, trang cá nhân.
 - Badge vai trò: `Khách`, `Reader / Người xem bói`, `Admin`, `Admin tổng`.
-
-### Quyền Admin
-
-- khóa/mở khóa/xóa member;
-- xóa review;
-- tạo/đóng/mở lại/xóa bài thảo luận;
-- xem trang cá nhân member;
-- Admin tổng đọc chat và impersonation chỉ đọc có audit.
-
----
-
-## 5. Telegram khi đăng ký mới
-
-Thông báo best-effort có thể gồm vai trò, tên hiển thị, username, browser/platform, màn hình, ngôn ngữ, múi giờ, quốc gia, IP rút gọn, mã hồ sơ trình duyệt và thời điểm.
-
-Không gửi mật khẩu, thông tin ngân hàng hoặc QR. Telegram chưa có bằng chứng riêng biệt rằng bot đã nhận mọi lần; E2E production xác nhận luồng account, không thay thế kiểm tra delivery của Telegram.
 
 ---
 
@@ -182,14 +170,15 @@ Các file chính:
 - `tools/apply-account-v2.mjs` — template Account V2;
 - `tools/apply-account-v2-runner.mjs` — runner build;
 - `tools/apply-account-v2-profile-view.mjs` — Admin mở hồ sơ member;
-- `tools/apply-account-v3-hotfix.mjs` — public entry, Admin navigation, self-delete/session cleanup;
+- `tools/apply-account-v3-hotfix.mjs` — public entry, Admin navigation, self-delete/session cleanup, iOS mutation guard;
 - `tools/apply-account-v4-edge-auth.mjs` — HMAC account mới, limiter fail-open, dispatcher await;
+- `tools/webkit-production-check.mjs` — nghiệm thu WebKit production;
 - `assets/gate.js`, `assets/gate.css` — gate/onboarding/Admin navigation;
 - `assets/community.js`, `assets/community-admin.js`, `assets/community.css` — giao diện member/Admin;
 - `backend/community.js` — account, Reader, review, chat, post, Admin, audit;
 - `.github/workflows/validate-role-system.yml` — CI PR;
 - `.github/workflows/deploy-pages.yml` — build/test/deploy/smoke;
-- `.github/workflows/e2e-reader-production.yml` — E2E thật sau deploy.
+- `.github/workflows/e2e-reader-production.yml` — Reader + WebKit E2E thật sau deploy.
 
 Các lớp V3/V4 phải idempotent; CI chạy lặp để bắt lỗi nhân đôi mã.
 
@@ -207,15 +196,12 @@ Các lớp V3/V4 phải idempotent; CI chạy lặp để bắt lỗi nhân đô
 
 ## 8. Trạng thái cuối
 
+- Lỗi WebKit/iPhone crash loop: **đã sửa và nghiệm thu bằng WebKit production**.
 - Lối quản trị Admin trên app chính: **đã deploy**.
 - Reader đăng ký đa nền tảng: **đã nghiệm thu production thật**.
 - Admin tổng xem Trang cá nhân member: **đã deploy**.
 - Cloudflare production: **SUCCESS**.
-- Reader production E2E: **SUCCESS**.
+- Reader + WebKit production E2E: **SUCCESS**.
 - Active task: **không có**.
 - Khóa file: **đã giải phóng**.
 - Đóng gói App Store/Google Play: chưa hoàn tất.
-
----
-
-Xem thêm: `AGENTS.md`, `docs/handover/ACTIVE_TASKS.json`, `docs/handover/NHAT-KY-PHOI-HOP.md`, `docs/handover/PRODUCTION_STATUS.md`, `docs/handover/READER_E2E_STATUS.md`.

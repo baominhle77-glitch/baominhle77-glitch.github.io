@@ -20,6 +20,35 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-23 16:47 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-09 — HOÀN TẤT ✅
+
+- Người dùng mở `/boitoan/` trên iPhone lúc 16:07 và WebKit báo trang gặp sự cố liên tục.
+- Lỗi gốc đã xác lập từ source:
+  - `applyMarketBranding()` tạo `MutationObserver` theo dõi `childList` và gọi `injectCommunity()`;
+  - Account V3 từng gán `textContent` nhãn Cộng đồng/Quản trị ở mọi lần gọi;
+  - thao tác đó tự tạo mutation mới, observer gọi lại hàm vô hạn, làm tab WebKit tăng tải và sập.
+- Runtime sửa thành idempotent:
+  - chỉ đổi `href`, `textContent`, `aria-label` và body class khi giá trị thực sự khác;
+  - marker production: `Account V3 iOS mutation guard`;
+  - contract test cấm quay lại cách gán `textContent` vô điều kiện.
+- PR #43 merge runtime guard thành `4c4fa6911637ff6da5e2cf4da986f496d06ca8e3`.
+- Bài browser test được tách thành `tools/webkit-production-check.mjs`, bắt buộc `node --check`, không phụ thuộc khóa giải mã bí mật.
+- PR #45 merge checker cuối thành source `bc8016a23c342ff93416003293148c06263242f8`.
+- CI trước merge:
+  - Account/frontend/Worker `29996444259`: success;
+  - coordination guard `29996444031`: success.
+- Production deploy `29996510949`: success; Pages/Admin/CSS/Gate `200`, API không phiên `401`, onboarding payload sai `400`.
+- **WebKit production E2E** run `29996558091`: success:
+  - register Reader `201`;
+  - login thiết bị/nền tảng thứ hai `200`;
+  - `/api/community/me` `200`;
+  - WebKit gate production `200` — trang sạch không crash; fixture cùng origin nạp đúng `gate.js` production, đúng một link Cộng đồng và mutation ổn định;
+  - tự xóa account `200`;
+  - token cũ `401`;
+  - login lại `401 invalid_login`;
+  - mã lỗi `none`.
+- Tài khoản thử `e2e_reader_*` đã tự xóa. Task chuyển `completed`; không còn khóa file.
+
 ### 2026-07-23 15:58 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-08 — HOÀN TẤT ✅
 
 - Người dùng nghiệm thu trực tiếp trên iPhone và một nền tảng khác, phát hiện:
@@ -78,17 +107,3 @@
 
 - PR #26 merge source `3322b7c899aeeee3d2e98e26e4cbc97931390a77`.
 - Gỡ các hộp `Khung luận…` và `Kết nối toàn trải bài`; giữ thuật toán gốc, Cộng đồng, tài khoản, chat, review và thanh toán.
-
-### 2026-07-23 10:14 GMT+7 — ChatGPT GPT-5.6 — DEPLOY-20260723-03 — PRODUCTION SUCCESS ✅
-
-- PR #25 sửa hậu kiểm Cloudflare Clean URLs HTTP 308.
-- Workflow `29976466953`: Pages/CSS/Gate `200`, Worker `401 unauthorized` đúng kỳ vọng.
-
-### 2026-07-23 04:31 GMT+7 — ChatGPT GPT-5.6 — COORD-20260723-01 — ĐIỀU PHỐI ĐA-AGENT ✅
-
-- PR #18 merge source `a5d3f7afa78f62e7002e151b48121bb4894d2e1f`.
-- Tạo quy tắc, khóa phạm vi, mẫu PR và CI điều phối nhiều agent.
-
----
-
-Chi tiết kiến trúc và trạng thái hiện hành: `HANDOVER.md`, `docs/ARCHITECTURE.md`, `docs/handover/PRODUCTION_STATUS.md`, `docs/handover/READER_E2E_STATUS.md`.

@@ -1,31 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T16:42:00+07:00",
+  "updated_at": "2026-07-23T16:47:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-09",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-09-webkit-script",
-      "base_sha": "adab6be8eb7e9a72e7c5bcfd45d88007e06f2033",
+      "branch": "agent/BOITOAN-20260723-09-closeout",
+      "base_sha": "1768f2c073571f51de9ba550a84786ba7b75573c",
       "paths": [
-        "tools/apply-account-v3-hotfix.mjs",
-        "tools/webkit-production-check.mjs",
-        "assets/account-v2.test.mjs",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/e2e-reader-production.yml",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T16:08:00+07:00",
-      "heartbeat_at": "2026-07-23T16:42:00+07:00",
-      "summary": "Runtime guard đã deploy tại 4c4fa691. E2E WebKit fixture lần hai vẫn dừng ngoài catch và không tạo file lỗi, nên tách browser test thành tools/webkit-production-check.mjs độc lập, bắt buộc node --check trong PR/deploy CI, bọc toàn bộ khởi động trong main().catch và ghi mã lỗi cụ thể. Fixture cùng origin nạp đúng gate.js production, không phụ thuộc secret, đo mutation delta và page crash."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T16:47:00+07:00",
+      "summary": "Người dùng báo iPhone WebKit crash liên tục tại /boitoan/. Xác định vòng lặp MutationObserver: injectCommunity gán textContent vô điều kiện, tự tạo childList mutation và gọi lại vô hạn. Runtime guard idempotent merge PR #43, source 4c4fa691. Sau khi sửa chính xác browser harness, checker độc lập merge PR #45, source bc8016a2. CI Account 29996444259 và coordination 29996444031 success; deploy 29996510949 success; WebKit production E2E 29996558091 success với register/login/me/WebKit/delete/token revoked/relogin = 201/200/200/200/200/401/401, error none. Tài khoản thử tự xóa; task và khóa đã giải phóng."
+    },
     {
       "id": "BOITOAN-20260723-08",
       "owner": "ChatGPT GPT-5.6 Thinking",
