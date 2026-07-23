@@ -55,27 +55,14 @@ jobs:
             echo "MATERIALIZE_TRAVEL_DIAGNOSTIC_V2"
             echo "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "source_commit=$GITHUB_SHA"
-            echo
-            echo "== Ghép Base64 =="
             cat .travel-bundle/chunk-* > "$RUNNER_TEMP/vietnam-travel-source.tar.gz.b64"
             base64 --decode "$RUNNER_TEMP/vietnam-travel-source.tar.gz.b64" > "$ARCHIVE"
             echo "archive_bytes=$(wc -c < "$ARCHIVE")"
-
-            echo
-            echo "== Kiểm SHA-256 =="
             echo "1511d9f80024a4a495e955e88680b4400a3d20973afd530edcb509457dbcad30  $ARCHIVE" | sha256sum -c -
 
-            echo
-            echo "== Danh sách gói =="
-            tar -tzf "$ARCHIVE"
-
-            echo
-            echo "== Tạo bản staging =="
             tar --exclude='.git' -cf - . | tar -xf - -C "$STAGE/repo"
-            tar -xzf "$ARCHIVE" -C "$STAGE/repo"
+            tar -xzf "$ARCHIVE" -C "$STAGE/repo" --exclude='.github/workflows/*'
 
-            echo
-            echo "== Kiểm tra source =="
             cd "$STAGE/repo"
             node --check backend/travel.js
             node --test backend/travel.test.mjs
@@ -89,14 +76,13 @@ jobs:
 
           cd "$GITHUB_WORKSPACE"
           {
-            echo
             echo "completed_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "status=$STATUS"
           } >> "$LOG"
           cp "$LOG" docs/handover/MATERIALIZE_TRAVEL_DIAGNOSTIC.log
 
           if [ "$STATUS" -eq 0 ]; then
-            tar -xzf "$ARCHIVE" -C "$GITHUB_WORKSPACE"
+            tar -xzf "$ARCHIVE" -C "$GITHUB_WORKSPACE" --exclude='.github/workflows/*'
             rm -rf .travel-bundle
             echo 'success=true' >> "$GITHUB_OUTPUT"
           else
