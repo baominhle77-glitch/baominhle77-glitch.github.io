@@ -1,28 +1,18 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T02:26:00+07:00",
+  "updated_at": "2026-07-24T02:41:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260724-15",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260724-15-prod-audit",
-      "base_sha": "b298d8b226a3634f6259ce6d2885da0ca2a4535c",
-      "paths": [
-        "boitoan/**",
-        "assets/**",
-        "backend/**",
-        "tools/**",
-        ".github/workflows/**",
-        "docs/handover/**"
-      ],
-      "status": "in_progress",
-      "started_at": "2026-07-24T01:29:00+07:00",
-      "heartbeat_at": "2026-07-24T02:26:00+07:00",
-      "summary": "V11 đã merge main và đang hậu kiểm Cloudflare production. Tiêu chí: Worker/API sẵn sàng, Pages phục vụ gate v19, payload AES được giải mã rồi bơm DOM trước reveal, WebKit mở đủ giao diện chứ không chỉ khung ngoài."
-    }
-  ],
-  "recently_completed": [
+      "branch": "agent/BOITOAN-20260724-15-closeout",
+      "paths": ["docs/handover/**"],
+      "status": "completed",
+      "completed_at": "2026-07-24T02:39:00+07:00",
+      "summary": "Bói toán V11 đã thay chuỗi patch V2–V10 bằng source trực tiếp. Admin/Member nhận khóa từ backend, bắt buộc decryptPayload → injectHtml → kiểm DOM → reveal; không còn mở khung rỗng. Worker deploy trước Pages. CI source/frontend/Worker/WebKit AES thật đạt; production audit static/API/WebKit đạt; deploy cuối run 30038693404 SUCCESS."
+    },
     {
       "id": "BOITOAN-20260724-14",
       "owner": "ChatGPT GPT-5.6 Thinking",
