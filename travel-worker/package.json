@@ -1,0 +1,19 @@
+{
+  "name": "vietnam-travel-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/index.js",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create vietnam-travel-db",
+    "db:migrate:local": "wrangler d1 migrations apply vietnam-travel-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply vietnam-travel-db --remote",
+    "db:seed:local": "wrangler d1 execute vietnam-travel-db --local --file=./seed.sql",
+    "db:seed:remote": "wrangler d1 execute vietnam-travel-db --remote --file=./seed.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
