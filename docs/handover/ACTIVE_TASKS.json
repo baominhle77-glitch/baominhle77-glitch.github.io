@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T17:19:00+07:00",
+  "updated_at": "2026-07-23T17:53:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -15,13 +15,15 @@
         "tools/apply-travel-system.mjs",
         ".github/workflows/validate-vietnam-travel.yml",
         ".github/workflows/deploy-vietnam-travel.yml",
+        ".github/workflows/materialize-vietnam-travel.yml",
+        ".travel-bundle/**",
         "docs/handover/VIETNAM_TRAVEL.md",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:19:00+07:00",
-      "heartbeat_at": "2026-07-23T17:19:00+07:00",
+      "heartbeat_at": "2026-07-23T17:53:00+07:00",
       "summary": "Xây app PWA lưu địa điểm du lịch Việt Nam tại /vietnam-travel/, API Cloudflare KV và điều khiển thêm/sửa/ẩn/hiện/xóa qua Telegram bot hiện có; không ghi token vào source."
     }
   ],
