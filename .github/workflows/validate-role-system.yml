@@ -67,6 +67,9 @@ jobs:
             account-v9-apply.log
             account-v9-frontend.log
             account-v9-worker.log
+            assets/gate.js
+            assets/community-admin.js
+            boitoan/community-admin.html
           if-no-files-found: warn
           retention-days: 3
       - name: Kết luận
