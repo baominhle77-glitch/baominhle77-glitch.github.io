@@ -6,6 +6,7 @@ on:
     types: [completed]
 
 permissions:
+  actions: read
   contents: write
 
 concurrency:
@@ -23,8 +24,50 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Đọc kết quả các bước triển khai thực tế
+        id: inspect
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPLOY_RUN_ID: ${{ github.event.workflow_run.id }}
+          DEPLOY_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${DEPLOY_RUN_ID}/jobs?per_page=100" > "$RUNNER_TEMP/deploy-jobs.json"
+          node - <<'NODE' "$RUNNER_TEMP/deploy-jobs.json" "$GITHUB_OUTPUT" "$DEPLOY_CONCLUSION"
+          const fs = require("node:fs");
+          const data = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          const output = process.argv[3];
+          const workflowConclusion = String(process.argv[4] || "");
+          const steps = (data.jobs || []).flatMap((job) => job.steps || []);
+          const result = Object.fromEntries(steps.map((step) => [step.name, step.conclusion || step.status || "unknown"]));
+          const critical = [
+            "Deploy lên Cloudflare Pages",
+            "Deploy Worker sau Pages",
+            "Hậu kiểm production Travel và Account V6",
+          ];
+          const productionPassed = critical.every((name) => result[name] === "success");
+          const status = workflowConclusion === "success" || productionPassed ? "SUCCESS" : "FAILURE";
+          const note = productionPassed && workflowConclusion !== "success"
+            ? "Production đã đạt; workflow chỉ lỗi tại bước ghi trạng thái cũ sau deploy."
+            : workflowConclusion === "success"
+              ? "Toàn bộ workflow deploy và hậu kiểm đã đạt."
+              : "Một hoặc nhiều bước triển khai/hậu kiểm production đã thất bại.";
+          fs.appendFileSync(output, `status=${status}\n`);
+          fs.appendFileSync(output, `production_passed=${productionPassed}\n`);
+          fs.appendFileSync(output, `note=${note}\n`);
+          fs.appendFileSync(output, `pages=${result["Deploy lên Cloudflare Pages"] || "unknown"}\n`);
+          fs.appendFileSync(output, `worker=${result["Deploy Worker sau Pages"] || "unknown"}\n`);
+          fs.appendFileSync(output, `smoke=${result["Hậu kiểm production Travel và Account V6"] || "unknown"}\n`);
+          NODE
+
       - name: Ghi trạng thái workflow deploy
         env:
+          STATUS: ${{ steps.inspect.outputs.status }}
+          PRODUCTION_PASSED: ${{ steps.inspect.outputs.production_passed }}
+          NOTE: ${{ steps.inspect.outputs.note }}
+          PAGES_RESULT: ${{ steps.inspect.outputs.pages }}
+          WORKER_RESULT: ${{ steps.inspect.outputs.worker }}
+          SMOKE_RESULT: ${{ steps.inspect.outputs.smoke }}
           DEPLOY_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
           DEPLOY_RUN_ID: ${{ github.event.workflow_run.id }}
@@ -33,16 +76,17 @@ jobs:
           set -euo pipefail
           mkdir -p docs/handover
           completed_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          status=$(printf '%s' "$DEPLOY_CONCLUSION" | tr '[:lower:]' '[:upper:]')
           cat > docs/handover/PRODUCTION_STATUS.md <<EOF
           # Trạng thái production
 
-          - Trạng thái: \`$status\`
+          - Trạng thái production: \`$STATUS\`
+          - Kết luận workflow gốc: \`$(printf '%s' "$DEPLOY_CONCLUSION" | tr '[:lower:]' '[:upper:]')\`
           - Source commit: \`$SOURCE_SHA\`
           - Hoàn tất UTC: \`$completed_utc\`
           - Workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/$DEPLOY_RUN_ID\`
           - Sự kiện: \`$DEPLOY_EVENT\`
-          - Workflow deploy đã tự chạy build, toàn bộ test Account/Travel/Worker, triển khai Pages trước Worker và hậu kiểm production.
+          - Cloudflare Pages / Worker / hậu kiểm production: \`$PAGES_RESULT/$WORKER_RESULT/$SMOKE_RESULT\`
+          - Ghi chú: $NOTE
           - Account V6: cùng một mục Admin; backend phân cấp \`regular\` và \`primary\`; trang Quản trị không hỏi mật khẩu lần hai.
           - Admin thường: quản lý member, review và bài thảo luận.
           - Admin tổng: toàn bộ quyền Admin thường, thêm hội thoại riêng và trang cá nhân member; chỉ một thiết bị primary hoạt động.
@@ -52,6 +96,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/handover/PRODUCTION_STATUS.md
-          git commit -m "docs: record production deploy $status" || exit 0
+          git commit -m "docs: record production deploy $STATUS" || exit 0
           git pull --rebase origin main
           git push origin HEAD:main
