@@ -49,10 +49,12 @@ jobs:
           npm install --no-save playwright@1.52.0
           npx playwright install --with-deps webkit
 
-      - name: Tạo Reader thật, mở app bằng WebKit, đăng nhập nền tảng thứ hai và tự xóa
+      - name: Tạo Reader thật, kiểm tra gate.js production bằng WebKit và tự xóa
         id: e2e
         if: steps.marker.outputs.run == 'true'
         continue-on-error: true
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -uo pipefail
           api="https://hiennhi89-gate.hiennhi89.workers.dev"
@@ -128,56 +130,100 @@ jobs:
           cat > "$RUNNER_TEMP/webkit-production-check.mjs" <<'NODE'
           import fs from "node:fs";
           import { webkit } from "playwright";
-          const login = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-          if (!login.key || !login.token || !login.gate_token || !login.profile) throw new Error("webkit_entry_contract");
-          const browser = await webkit.launch({ headless: true });
-          let crashed = false;
-          try {
-            const context = await browser.newContext({
-              viewport: { width: 390, height: 844 },
-              userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 Version/18.5 Mobile/15E148 Safari/604.1",
-            });
-            const page = await context.newPage();
-            page.on("crash", () => { crashed = true; });
-            await page.addInitScript((state) => {
-              localStorage.setItem("gate_key_boitoan", state.key);
-              localStorage.setItem("gate_remember_boitoan", "1");
-              localStorage.setItem("gate_token_boitoan", state.gate_token);
-              localStorage.setItem("community_token_boitoan", state.token);
-              localStorage.setItem("community_profile_boitoan", JSON.stringify(state.profile));
-              localStorage.removeItem("market_admin_session");
-              localStorage.removeItem("market_admin_primary");
-              sessionStorage.setItem("gate_ok_boitoan", "1");
-              window.__e2eChildMutations = 0;
-              new MutationObserver((records) => {
-                window.__e2eChildMutations += records.reduce((sum, record) => sum + record.addedNodes.length + record.removedNodes.length, 0);
-              }).observe(document, { childList: true, subtree: true });
-            }, login);
-            const response = await page.goto(`https://hiennhi89.pages.dev/boitoan/?webkit=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 45000 });
-            await page.waitForTimeout(4000);
-            if (crashed) throw new Error("webkit_page_crashed");
-            if (!response || response.status() !== 200) throw new Error(`webkit_http_${response ? response.status() : "none"}`);
-            const result = await page.evaluate(() => ({
-              locked: document.documentElement.classList.contains("gate-locked"),
-              nav: !!document.querySelector("#gate-content nav, body nav"),
-              communityLinks: document.querySelectorAll("#gate-community-link").length,
-              labels: document.querySelectorAll("#gate-community-link .market-nav-label").length,
-              mutations: Number(window.__e2eChildMutations || 0),
-              title: document.title,
-            }));
-            if (result.locked || !result.nav || result.communityLinks !== 1 || result.labels !== 1) throw new Error(`webkit_dom_contract:${JSON.stringify(result)}`);
-            if (result.mutations > 1000) throw new Error(`webkit_mutation_loop:${result.mutations}`);
-            console.log(`WebKit production PASS; mutations=${result.mutations}; title=${result.title}`);
-            await context.close();
-          } finally {
-            await browser.close();
+
+          const state = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          const errorPath = process.argv[3];
+          const sourceSha = process.argv[4];
+          if (!state.token || !state.gate_token || !state.profile) throw new Error("webkit_entry_contract");
+          const origin = "https://hiennhi89.pages.dev";
+          const iphoneUA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 Version/18.5 Mobile/15E148 Safari/604.1";
+
+          async function run() {
+            const browser = await webkit.launch({ headless: true });
+            try {
+              // Pha 1: mở đúng trang production ở trạng thái sạch. Việc này bắt crash khi tải HTML/CSS/JS thật.
+              const lockedContext = await browser.newContext({ viewport: { width: 390, height: 844 }, userAgent: iphoneUA });
+              const lockedPage = await lockedContext.newPage();
+              let lockedCrashed = false;
+              lockedPage.on("crash", () => { lockedCrashed = true; });
+              const lockedResponse = await lockedPage.goto(`${origin}/boitoan/?webkit-locked=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 45000 });
+              await lockedPage.waitForTimeout(2000);
+              if (lockedCrashed) throw new Error("locked_page_crashed");
+              if (!lockedResponse || lockedResponse.status() !== 200) throw new Error(`locked_http_${lockedResponse ? lockedResponse.status() : "none"}`);
+              await lockedContext.close();
+
+              // Pha 2: tài liệu plaintext tối thiểu cùng origin, nhưng nạp đúng gate.js production.
+              // Nhờ vậy kiểm tra chính xác MutationObserver + injectCommunity mà không cần khóa giải mã bí mật.
+              const context = await browser.newContext({ viewport: { width: 390, height: 844 }, userAgent: iphoneUA });
+              await context.addInitScript((loginState) => {
+                localStorage.setItem("gate_token_boitoan", loginState.gate_token);
+                localStorage.setItem("community_token_boitoan", loginState.token);
+                localStorage.setItem("community_profile_boitoan", JSON.stringify(loginState.profile));
+                localStorage.setItem("gate_remember_boitoan", "1");
+                localStorage.removeItem("market_admin_session");
+                localStorage.removeItem("market_admin_primary");
+                sessionStorage.setItem("gate_ok_boitoan", "1");
+                window.__e2eChildMutations = 0;
+                new MutationObserver((records) => {
+                  window.__e2eChildMutations += records.reduce((sum, record) => sum + record.addedNodes.length + record.removedNodes.length, 0);
+                }).observe(document, { childList: true, subtree: true });
+              }, state);
+              const page = await context.newPage();
+              let fixtureCrashed = false;
+              const pageErrors = [];
+              page.on("crash", () => { fixtureCrashed = true; });
+              page.on("pageerror", (error) => pageErrors.push(String(error.message || error)));
+              await page.route("**/boitoan/?webkit-fixture=*", async (route) => {
+                if (!route.request().isNavigationRequest()) return route.continue();
+                const html = `<!doctype html><html lang="vi" class="gate-locked"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WebKit Gate Fixture</title><link rel="stylesheet" href="/assets/gate.css?webkit=${sourceSha}"><script>window.GATE={app:'boitoan',mode:'approval',backend:'https://hiennhi89-gate.hiennhi89.workers.dev',owner:'Spirituality Market',title:'Spirituality Market',subtitle:'E2E WebKit'};</script></head><body><div id="gate-content"><div class="wrap"><header><h1>Spirituality Market</h1></header><main><section class="screen"><h2>Trang thử WebKit</h2></section></main><nav><button type="button"><span class="i">⌂</span><span>Trang chủ</span></button></nav></div></div><script src="/assets/gate.js?webkit=${sourceSha}"></script></body></html>`;
+                await route.fulfill({ status: 200, contentType: "text/html; charset=utf-8", body: html });
+              });
+              const response = await page.goto(`${origin}/boitoan/?webkit-fixture=${Date.now()}`, { waitUntil: "domcontentloaded", timeout: 45000 });
+              await page.waitForTimeout(2000);
+              const mutationsAtTwoSeconds = await page.evaluate(() => Number(window.__e2eChildMutations || 0));
+              await page.waitForTimeout(2000);
+              if (fixtureCrashed) throw new Error("fixture_page_crashed");
+              if (!response || response.status() !== 200) throw new Error(`fixture_http_${response ? response.status() : "none"}`);
+              if (pageErrors.length) throw new Error(`fixture_pageerror:${pageErrors.slice(0, 3).join("|")}`);
+              const result = await page.evaluate((firstCount) => ({
+                locked: document.documentElement.classList.contains("gate-locked"),
+                nav: !!document.querySelector("#gate-content nav, body nav"),
+                communityLinks: document.querySelectorAll("#gate-community-link").length,
+                labels: document.querySelectorAll("#gate-community-link .market-nav-label").length,
+                label: document.querySelector("#gate-community-link .market-nav-label")?.textContent || "",
+                mutations: Number(window.__e2eChildMutations || 0),
+                mutationDelta: Number(window.__e2eChildMutations || 0) - firstCount,
+                marker: document.documentElement.outerHTML.includes("gate-community-link"),
+                title: document.title,
+              }), mutationsAtTwoSeconds);
+              if (result.locked || !result.nav || result.communityLinks !== 1 || result.labels !== 1 || result.label !== "Cộng đồng") {
+                throw new Error(`fixture_dom_contract:${JSON.stringify(result)}`);
+              }
+              if (result.mutations > 1000 || result.mutationDelta > 100) throw new Error(`fixture_mutation_loop:${JSON.stringify(result)}`);
+              console.log(`WebKit production gate PASS; mutations=${result.mutations}; delta=${result.mutationDelta}; title=${result.title}`);
+              await context.close();
+            } finally {
+              await browser.close();
+            }
           }
+
+          run().catch((error) => {
+            const message = String(error && error.message || error || "webkit_unknown").slice(0, 300).replace(/[\r\n]+/g, " ");
+            fs.writeFileSync(errorPath, message, "utf8");
+            console.error(`WEBKIT_E2E_ERROR: ${message}`);
+            process.exit(1);
+          });
           NODE
-          if timeout 90s node "$RUNNER_TEMP/webkit-production-check.mjs" "$RUNNER_TEMP/login-response.json"; then
+          if timeout 120s node "$RUNNER_TEMP/webkit-production-check.mjs" "$RUNNER_TEMP/login-response.json" "$RUNNER_TEMP/webkit-error.txt" "$SOURCE_SHA"; then
             webkit_code="200"
           else
-            webkit_code="crash"
-            error_code="webkit_page_failure"
+            webkit_code="failure"
+            if [ -s "$RUNNER_TEMP/webkit-error.txt" ]; then
+              detail=$(cat "$RUNNER_TEMP/webkit-error.txt" | tr -cd '[:alnum:]_:.|{}\[\], -' | cut -c1-180)
+              error_code="webkit_${detail// /_}"
+            else
+              error_code="webkit_timeout_or_process_failure"
+            fi
             exit 1
           fi
 
@@ -228,9 +274,10 @@ jobs:
           - Hoàn tất UTC: \`$completed_utc\`
           - Deploy workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/$DEPLOY_RUN_ID\`
           - E2E workflow run: \`https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\`
-          - Register / login thiết bị 2 / me / WebKit app / delete / token revoked / login sau xóa: \`${REGISTER_CODE:-n/a}/${LOGIN_CODE:-n/a}/${ME_CODE:-n/a}/${WEBKIT_CODE:-n/a}/${DELETE_CODE:-n/a}/${REVOKED_CODE:-n/a}/${RELOGIN_CODE:-n/a}\`
+          - Register / login thiết bị 2 / me / WebKit gate / delete / token revoked / login sau xóa: \`${REGISTER_CODE:-n/a}/${LOGIN_CODE:-n/a}/${ME_CODE:-n/a}/${WEBKIT_CODE:-n/a}/${DELETE_CODE:-n/a}/${REVOKED_CODE:-n/a}/${RELOGIN_CODE:-n/a}\`
           - Mã lỗi an toàn: \`${ERROR_CODE:-none}\`
-          - WebKit: mở trang \`/boitoan/\` sau khi nạp phiên Reader đã xác thực; tab không crash, chỉ có một link Cộng đồng và tổng mutation hữu hạn.
+          - WebKit pha 1: mở HTML/CSS/JS production thật ở trạng thái sạch và theo dõi crash.
+          - WebKit pha 2: tài liệu plaintext tối thiểu cùng origin nạp đúng \`/assets/gate.js\` production, kích hoạt phiên Reader, MutationObserver và nav; yêu cầu đúng một link và mutation ổn định.
           - Dữ liệu thử: tài khoản có tiền tố \`e2e_reader_\`; workflow gọi API tự xóa và xác nhận token cùng đăng nhập đều bị thu hồi.
           EOF
           git config user.name "github-actions[bot]"

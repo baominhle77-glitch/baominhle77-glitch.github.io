@@ -41,13 +41,19 @@ assert.match(e2eWorkflow, /Reader production verification/, "E2E chỉ chạy ch
 assert.match(e2eWorkflow, /role:'reader'/, "E2E phải tạo tài khoản Reader thật");
 assert.match(e2eWorkflow, /E2E iPad Safari/, "E2E phải đăng nhập trên nền tảng thứ hai");
 assert.match(e2eWorkflow, /playwright@1\.52\.0/, "E2E phải cài Playwright cố định phiên bản");
-assert.match(e2eWorkflow, /webkit\.launch/, "E2E phải mở app bằng engine WebKit thực tế");
-assert.match(e2eWorkflow, /webkit_page_crashed/, "E2E phải phát hiện tab WebKit bị crash");
-assert.match(e2eWorkflow, /webkit_mutation_loop/, "E2E phải phát hiện vòng lặp DOM mutation");
+assert.match(e2eWorkflow, /webkit\.launch/, "E2E phải dùng engine WebKit thực tế");
+assert.match(e2eWorkflow, /locked_page_crashed/, "E2E phải phát hiện trang production sạch bị crash");
+assert.match(e2eWorkflow, /fixture_page_crashed/, "E2E phải phát hiện fixture gate bị crash");
+assert.match(e2eWorkflow, /route\.fulfill/, "fixture phải cùng origin và nạp đúng asset production");
+assert.match(e2eWorkflow, /\/assets\/gate\.js\?webkit=/, "fixture phải tải gate.js production");
+assert.match(e2eWorkflow, /fixture_mutation_loop/, "E2E phải phát hiện vòng lặp DOM mutation");
+assert.match(e2eWorkflow, /mutationDelta/, "E2E phải đo mutation có ổn định sau khi render hay không");
 assert.match(e2eWorkflow, /#gate-community-link/, "E2E phải xác nhận chỉ có một lối Cộng đồng\/Quản trị");
+assert.doesNotMatch(e2eWorkflow, /!state\.key|!login\.key/, "E2E mutation không được phụ thuộc khóa giải mã bí mật");
+assert.match(e2eWorkflow, /WEBKIT_E2E_ERROR/, "E2E phải ghi lỗi WebKit cụ thể để chẩn đoán");
 assert.match(e2eWorkflow, /-X DELETE[\s\S]*\/api\/community\/me/, "E2E phải xóa tài khoản qua API đã xác thực");
 assert.match(e2eWorkflow, /token_not_revoked/);
 assert.match(e2eWorkflow, /account_still_loginable/);
 assert.match(e2eWorkflow, /READER_E2E_STATUS\.md/);
 
-console.log("Account V3 iOS mutation guard, frontend and WebKit production E2E contracts PASS");
+console.log("Account V3 iOS mutation guard, frontend and same-origin WebKit production E2E contracts PASS");

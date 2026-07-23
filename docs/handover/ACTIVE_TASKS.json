@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T16:10:00+07:00",
+  "updated_at": "2026-07-23T16:27:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "BOITOAN-20260723-09",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-09-ios-mutation-loop",
-      "base_sha": "433f430c21d4fe544fdf9cddcd71ee31e65ceb9e",
+      "branch": "agent/BOITOAN-20260723-09-webkit-fixture",
+      "base_sha": "b505c342670b638aca939b149f224eec57f983ff",
       "paths": [
         "tools/apply-account-v3-hotfix.mjs",
         "assets/account-v2.test.mjs",
@@ -18,8 +18,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T16:08:00+07:00",
-      "heartbeat_at": "2026-07-23T16:10:00+07:00",
-      "summary": "Người dùng mở /boitoan/ trên iPhone lúc 16:07 và WebKit báo trang gặp sự cố liên tục. Đã xác định vòng lặp DOM: applyMarketBranding có MutationObserver gọi injectCommunity; Account V3 injectCommunity luôn gán textContent cho nhãn, chính thao tác này tạo childList mutation mới và gọi lại observer vô hạn. Sửa hàm thành idempotent, chỉ thay DOM khi giá trị thực sự đổi; thêm contract test và E2E WebKit production sau deploy."
+      "heartbeat_at": "2026-07-23T16:27:00+07:00",
+      "summary": "Runtime guard đã deploy thành công tại 4c4fa691, nhưng E2E WebKit đầu thất bại ở cách dựng phiên mở khóa vì phụ thuộc login.key bí mật; API register/login/me vẫn 201/200/200. Chuyển bài test sang hai pha: mở trang production thật ở trạng thái khóa để bắt crash tải trang, rồi route-fulfill một tài liệu plaintext tối thiểu cùng origin nhưng nạp đúng /assets/gate.js production, kích hoạt session Reader, MutationObserver và nav gây lỗi; kiểm tra tab không crash, đúng một link và mutation hữu hạn."
     }
   ],
   "recently_completed": [
