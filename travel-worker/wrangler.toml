@@ -1,0 +1,14 @@
+name = "vietnam-travel-api"
+main = "src/index.js"
+compatibility_date = "2026-07-23"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://baominhle77-glitch.github.io,https://hiennhi89.pages.dev"
+WEB_APP_URL = "https://baominhle77-glitch.github.io/dulich-viet-nam/"
+
+[[d1_databases]]
+binding = "TRAVEL_DB"
+database_name = "vietnam-travel-db"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
