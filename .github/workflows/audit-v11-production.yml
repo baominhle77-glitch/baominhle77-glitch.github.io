@@ -1,0 +1,57 @@
+name: Hậu kiểm Cloudflare Bói toán V11
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/audit-v11-production.yml
+      - docs/handover/ACTIVE_TASKS.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - name: Đợi Worker và Pages đồng bộ V11
+        run: |
+          set -euo pipefail
+          bust="audit=${GITHUB_RUN_ID}"
+          for attempt in $(seq 1 45); do
+            app_code=$(curl -sSL -o "$RUNNER_TEMP/index.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/?$bust" || true)
+            gate_code=$(curl -sSL -o "$RUNNER_TEMP/gate.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/assets/gate.js?$bust" || true)
+            admin_code=$(curl -sSL -o "$RUNNER_TEMP/admin.html" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/community-admin.html?$bust" || true)
+            sw_code=$(curl -sSL -o "$RUNNER_TEMP/sw.js" -w "%{http_code}" --max-time 20 "https://hiennhi89.pages.dev/boitoan/sw.js?$bust" || true)
+            health_code=$(curl -sS -o "$RUNNER_TEMP/health.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/health" || true)
+            session_code=$(curl -sS -o "$RUNNER_TEMP/session.json" -w "%{http_code}" --max-time 20 "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/admin/session" || true)
+            if [ "$app_code/$gate_code/$admin_code/$sw_code/$health_code/$session_code" = "200/200/200/200/200/401" ] \
+              && grep -q 'application/gate-payload' "$RUNNER_TEMP/index.html" \
+              && grep -q '/assets/gate.js?v=19' "$RUNNER_TEMP/index.html" \
+              && grep -q 'Bói toán V11' "$RUNNER_TEMP/gate.js" \
+              && grep -q 'openAppContent(data.key, "admin-session")' "$RUNNER_TEMP/gate.js" \
+              && grep -q 'admin_return=1&v=19' "$RUNNER_TEMP/admin.html" \
+              && grep -q 'boitoan-v19' "$RUNNER_TEMP/sw.js" \
+              && grep -q '"ok":true' "$RUNNER_TEMP/health.json" \
+              && grep -q '"unauthorized"' "$RUNNER_TEMP/session.json"; then
+              echo "Cloudflare production V11 đồng bộ ở lần $attempt"
+              exit 0
+            fi
+            echo "Lần $attempt: HTTP $app_code/$gate_code/$admin_code/$sw_code/$health_code/$session_code"
+            sleep 4
+          done
+          echo "Cloudflare chưa đạt hợp đồng V11" >&2
+          exit 1
+
+      - name: Mở payload AES thật bằng WebKit
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.52.0
+          npx playwright install --with-deps webkit
+          node tools/admin-v9-return-webkit-check.mjs "b298d8b226a3634f6259ce6d2885da0ca2a4535c"
