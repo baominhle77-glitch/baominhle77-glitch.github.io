@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T18:21:00+07:00",
+  "updated_at": "2026-07-23T18:23:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "TRAVEL-20260723-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/TRAVEL-20260723-01-materialize-v2",
-      "base_sha": "2d70bd5965f2ab7f757c76642c955fcaa3ae18b8",
+      "branch": "agent/TRAVEL-20260723-01-trigger-v2",
+      "base_sha": "f30a2dc0db744655cf3961ee586f2cc4d296f7c5",
       "paths": [
         "vietnam-travel/**",
         "backend/travel.js",
@@ -25,8 +25,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-23T17:19:00+07:00",
-      "heartbeat_at": "2026-07-23T18:21:00+07:00",
-      "summary": "Tiếp tục app PWA /vietnam-travel/, API Cloudflare KV và Telegram bot. PR #47 chứa bundle; PR #49 sửa nội dung nhưng workflow cũ không phát sinh run/source/log. Chuyển sang workflow V2 có tên file mới, không dùng path-filter, kèm staging, checksum, test và log chẩn đoán."
+      "heartbeat_at": "2026-07-23T18:23:00+07:00",
+      "summary": "App PWA /vietnam-travel/, API Cloudflare KV và Telegram bot đang materialize. Workflow V2 đã có trên main tại f30a2dc0; branch này tạo push riêng để kích hoạt V2, sau đó kiểm source thật, test và production trước khi đóng task."
     }
   ],
   "recently_completed": [
