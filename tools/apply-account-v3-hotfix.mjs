@@ -48,14 +48,14 @@ await edit("backend/community.js", (source) => {
   const existingRegister = `  if (entry.existingGate) {
     return json({ token: await issueCommunitySession(env, created.profile, entry.did), profile: publicProfile(created.profile, true) }, 201);
   }
-`;
+ `;
   if (!source.includes(existingRegister)) throw new Error("Không tìm thấy nhánh register existingGate cũ");
   source = source.replace(existingRegister, "");
 
   const existingLogin = `  if (entry.existingGate) {
     return json({ token: await issueCommunitySession(env, authenticated.profile, entry.did), profile: publicProfile(authenticated.profile, true) });
   }
-`;
+ `;
   if (!source.includes(existingLogin)) throw new Error("Không tìm thấy nhánh login existingGate cũ");
   source = source.replace(existingLogin, "");
 
@@ -102,10 +102,21 @@ await edit("assets/gate.js", (source) => {
       nav.appendChild(link);
     }
     var admin = marketAdminSession();
-    link.href = new URL(admin ? "community-admin.html" : "community.html", location.href).href;
-    link.querySelector(".market-nav-label").textContent = admin ? "Quản trị" : "Cộng đồng";
-    link.setAttribute("aria-label", admin ? "Mở khu vực quản trị Spirituality Market" : "Mở Spirituality Market");
-    document.body.classList.add("market-has-community-nav");
+    var targetHref = new URL(admin ? "community-admin.html" : "community.html", location.href).href;
+    var targetLabel = admin ? "Quản trị" : "Cộng đồng";
+    var targetAria = admin ? "Mở khu vực quản trị Spirituality Market" : "Mở Spirituality Market";
+    if (link.href !== targetHref) link.href = targetHref;
+    var labelNode = link.querySelector(".market-nav-label");
+    if (!labelNode) {
+      labelNode = document.createElement("span");
+      labelNode.className = "market-nav-label";
+      link.appendChild(labelNode);
+    }
+    // MutationObserver của applyMarketBranding theo dõi childList. Không được gán
+    // textContent vô điều kiện vì chính thao tác đó tạo mutation mới và lặp vô hạn trên WebKit.
+    if (labelNode.textContent !== targetLabel) labelNode.textContent = targetLabel;
+    if (link.getAttribute("aria-label") !== targetAria) link.setAttribute("aria-label", targetAria);
+    if (!document.body.classList.contains("market-has-community-nav")) document.body.classList.add("market-has-community-nav");
   }
 
 `;
@@ -116,7 +127,7 @@ await edit("assets/gate.js", (source) => {
   source = replaceRequired(source, '          localStorage.removeItem("community_token_boitoan");\n        } catch (e) {}\n        return claimPrimaryAdminDevice(pass);', '          localStorage.removeItem("community_token_boitoan");\n        } catch (e) {}\n        injectAccountIdentity("password");\n        injectCommunity();\n        return claimPrimaryAdminDevice(pass);', "hiện lối quản trị ngay sau đăng nhập Admin");
   const startup = "  if (document.readyState === \"loading\") {";
   if (!source.includes(startup)) throw new Error("Không tìm thấy điểm khởi động gate");
-  source = source.replace(startup, "  /* Account V3 admin navigation */\n" + startup);
+  source = source.replace(startup, "  /* Account V3 admin navigation */\n  /* Account V3 iOS mutation guard */\n" + startup);
   return source;
 });
 
@@ -135,8 +146,9 @@ const gate = await readFile("assets/gate.js", "utf8");
 for (const marker of ["Account V3 plaintext public entry", "Account V3 self delete cleanup", "if (key) payload.key = key", "gate_token: gateToken", 'request.method === "DELETE"', '"session:"']) {
   if (!backend.includes(marker)) throw new Error(`Thiếu marker backend: ${marker}`);
 }
-for (const marker of ["Account V3 admin navigation", "community-admin.html", "Mở quản trị", "marketAdminSession"]) {
+for (const marker of ["Account V3 admin navigation", "Account V3 iOS mutation guard", "community-admin.html", "Mở quản trị", "marketAdminSession", "labelNode.textContent !== targetLabel"]) {
   if (!gate.includes(marker)) throw new Error(`Thiếu marker frontend: ${marker}`);
 }
+if (gate.includes('link.querySelector(".market-nav-label").textContent = admin ?')) throw new Error("injectCommunity vẫn gán textContent vô điều kiện và có thể lặp MutationObserver");
 if (backend.includes('if (!entry.existingGate && !entryDecryptKey(env))')) throw new Error("Backend vẫn bắt buộc DECRYPT_KEY cho public entry");
-console.log("Account V3 hotfix: Admin có lối quản trị; Reader đa nền tảng; tài khoản E2E tự xóa và thu hồi phiên.");
+console.log("Account V3 hotfix: Admin có lối quản trị; Reader đa nền tảng; iOS không còn vòng lặp MutationObserver.");
