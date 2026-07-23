@@ -1,34 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-23T15:54:00+07:00",
+  "updated_at": "2026-07-23T15:58:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260723-08",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260723-08-dispatch-await-fix",
-      "base_sha": "f442bb449ee47ac7b687bca784b9415bf92f0a14",
+      "branch": "agent/BOITOAN-20260723-08-closeout",
+      "base_sha": "d8b3605e8d4a7bd2fb682e8745732f472cabf977",
       "paths": [
-        "tools/apply-account-v3-hotfix.mjs",
-        "tools/apply-account-v4-edge-auth.mjs",
-        "tools/apply-account-v2-runner.mjs",
-        "assets/account-v2.test.mjs",
-        "backend/account-v2.test.mjs",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/e2e-reader-production.yml",
-        "docs/handover/READER_E2E_STATUS.md",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "HANDOVER.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-23T14:50:00+07:00",
-      "heartbeat_at": "2026-07-23T15:54:00+07:00",
-      "summary": "PR #40 deploy/smoke thành công nhưng E2E vẫn trả 500 server. Đã xác định lỗi gốc dispatcher: handleCommunity đặt try/catch nhưng return Promise của các async handler không await, nên rejection thoát ra Worker ngoài và bị đổi thành server. Đang buộc await cho mọi route, thêm contract test; giữ Account V4 HMAC/limiter fail-open. E2E thật vẫn phải đạt 201/200/200/200/401/401."
-    }
-  ],
-  "recently_completed": [
+      "completed_at": "2026-07-23T15:58:00+07:00",
+      "summary": "Người dùng nghiệm thu trên iPhone và nền tảng khác: Admin không có lối quản trị rõ, Reader register lỗi. Đã triển khai badge Admin bấm được và bottom nav Quản trị; public entry không phụ thuộc DECRYPT_KEY; luôn cấp community+gate token; DELETE /me tự xóa và thu hồi cả hai phiên; Account V4 HMAC-SHA256 salt+pepper, limiter fail-open; sửa dispatcher await để bắt rejection đúng lớp. PR #41 merge source 541194fbc63a73633fb857d4b90c221935b06309. CI coordination 29992908287 và Account V4 29992908212 success. Deploy 29993031238 SUCCESS. E2E production 29993081236 SUCCESS với register/login thiết bị 2/me/delete/token revoked/relogin = 201/200/200/200/401/401, error none; tài khoản thử tự xóa."
+    },
     {
       "id": "BOITOAN-20260723-07",
       "owner": "ChatGPT GPT-5.6 Thinking",
