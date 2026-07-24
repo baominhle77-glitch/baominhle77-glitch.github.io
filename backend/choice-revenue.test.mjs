@@ -34,10 +34,8 @@ function env(extra = {}) {
   };
 }
 
-function todayIso(hour = 8) {
-  const value = new Date();
-  value.setUTCHours(hour, 0, 0, 0);
-  return value.toISOString();
+function todayIso() {
+  return new Date().toISOString();
 }
 
 test("chuẩn hóa order và transaction không giữ dữ liệu khách hàng", () => {
@@ -67,11 +65,12 @@ test("chuẩn hóa order và transaction không giữ dữ liệu khách hàng",
 });
 
 test("snapshot tính doanh số, hoa hồng, click, EPC và sản phẩm", () => {
-  const date = __test.vnDate(todayIso());
+  const now = todayIso();
+  const date = __test.vnDate(now);
   const orders = [__test.normalizeOrder({
     order_id: "A-1",
     merchant: "shop",
-    sales_time: todayIso(),
+    sales_time: now,
     billing: 500000,
     pub_commission: 50000,
     order_pending: 1,
@@ -79,7 +78,7 @@ test("snapshot tính doanh số, hoa hồng, click, EPC và sản phẩm", () =>
   })];
   const transactions = [__test.normalizeTransaction({
     transaction_id: "A-1",
-    transaction_time: todayIso(),
+    transaction_time: now,
     status: 0,
     transaction_value: 500000,
     commission: 50000,
@@ -103,7 +102,8 @@ test("snapshot tính doanh số, hoa hồng, click, EPC và sản phẩm", () =>
 
 test("đồng bộ gần thời gian thực từ order-list và transactions", async () => {
   const e = env({ ACCESSTRADE_API_TOKEN: "token-valid-12345678901234567890" });
-  const date = __test.vnDate(todayIso());
+  const now = todayIso();
+  const date = __test.vnDate(now);
   await e.KV.put("choice:click-day:" + date + ":goi-y-creator-source-1", "12");
   await e.KV.put("choice:catalog:v1", JSON.stringify({ products: [{
     id: "goi-y-creator-source-1",
@@ -115,7 +115,7 @@ test("đồng bộ gần thời gian thực từ order-list và transactions", a
     if (String(url).includes("/v1/order-list")) return new Response(JSON.stringify({ data: [{
       order_id: "ORDER-1",
       merchant: "shop",
-      sales_time: todayIso(),
+      sales_time: now,
       billing: 700000,
       pub_commission: 70000,
       order_pending: 1,
@@ -126,7 +126,7 @@ test("đồng bộ gần thời gian thực từ order-list và transactions", a
     if (String(url).includes("/v1/transactions")) return new Response(JSON.stringify({ data: [{
       transaction_id: "ORDER-1",
       merchant: "shop",
-      transaction_time: todayIso(),
+      transaction_time: now,
       status: 0,
       transaction_value: 700000,
       commission: 70000,
