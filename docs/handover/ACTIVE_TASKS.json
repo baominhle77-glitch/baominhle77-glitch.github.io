@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T21:00:00+07:00",
+  "updated_at": "2026-07-24T21:29:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "AFFILIATE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/AFFILIATE-20260724-01-hoi-chon-dung-mvp",
-      "base_sha": "bf8fbe9640a62a676de4eef95416c11c55234862",
       "paths": [
         "hoi-chon-dung/**",
         "backend/choice.js",
@@ -19,13 +19,10 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "docs/handover/HOI_CHON_DUNG.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-24T20:50:00+07:00",
-      "heartbeat_at": "2026-07-24T21:00:00+07:00",
-      "summary": "Triển khai MVP công khai Hội Chọn Đúng: PWA tư vấn lựa chọn, sản phẩm affiliate, bình chọn cộng đồng dùng KV, theo dõi click, quản trị sản phẩm qua Telegram và deploy Cloudflare Pages/Worker."
-    }
-  ],
-  "recently_completed": [
+      "status": "completed",
+      "completed_at": "2026-07-24T21:29:00+07:00",
+      "summary": "Triển khai production Hội Chọn Đúng tại /hoi-chon-dung/: PWA chọn sản phẩm theo nhu cầu, 12 sản phẩm seed, so sánh/lưu/bình chọn, API catalog, redirect đo click, quản trị link affiliate qua Telegram, SEO/sitemap/robots. PR #84 merge f57023af442839da852354672bea8036e579a9fd; CI 30100845932 và 30100845901 SUCCESS; production deploy + hậu kiểm run 30100989464 SUCCESS."
+    },
     {
       "id": "HANDOVER-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
