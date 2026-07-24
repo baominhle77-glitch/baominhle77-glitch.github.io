@@ -22,6 +22,19 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 02:40 GMT+7 — Claude Code — BOITOAN-20260725-01 — ĐANG LÀM ⏳
+
+- Chủ sở hữu chỉ ra ba lỗi còn sót sau BOITOAN-20260724-16, đã sửa cả ba:
+  1. **Tên lá bài hiển thị bằng tiếng Anh** trên toàn app (Rider, Scythe, Anchor…), không còn
+     tên Việt. Thêm `enName()` và áp cho Lenormand, Tarot, lá bài ngày và lịch sử tra cứu.
+  2. **Bỏ hết từ ngữ meta**: `bàn bài`, `Nói thẳng ra thì`, `mở đầu, cho thấy`, `đây mới là chỗ
+     mọi chuyện đi về`, `Đọc gọn lại`, và đoạn khuyên mang giọng lên lớp (`lenAdvice` đã gỡ).
+  3. **Đọc hẳn ra thay vì hướng dẫn cách đọc**: `lenParas` nay ghép các lá thành một câu chuyện
+     liền và nói thẳng kết quả; bỏ mọi câu chỉ dẫn người dùng tự suy.
+- Nghĩa mỗi lá cắt tới dấu chấm phẩy đầu tiên nên câu trọn ý, không bị cụt giữa chừng.
+- Kiểm thử: quét toàn file còn 0 cụm meta, 0 chỗ hiển thị tên Việt; `node --check` toàn bộ khối
+  script hợp lệ; vòng mã hoá/giải mã khớp; vùng `<head>` giống hệt bản cũ.
+
 ### 2026-07-25 01:45 GMT+7 — Claude Code — BOITOAN-20260724-16 — ĐANG LÀM ⏳
 
 - Phạm vi: `boitoan/index.html` (máy diễn giải Lenormand), sổ khóa và nhật ký.
