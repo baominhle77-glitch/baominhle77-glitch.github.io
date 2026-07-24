@@ -1,24 +1,38 @@
 import { readFile, writeFile } from "node:fs/promises";
 
-const path = "backend/worker.js";
+const workerPath = "backend/worker.js";
+const autopilotPath = "backend/choice-autopilot.js";
 const choiceImportLine = 'import { handleChoiceRequest, handleChoiceTelegramUpdate } from "./choice.js";';
-const autopilotImportLine = 'import { handleChoiceAutopilotRequest, handleChoiceAutopilotTelegram, runChoiceAutopilot } from "./choice-autopilot.js";';
+const oldAutopilotImportLine = 'import { handleChoiceAutopilotRequest, handleChoiceAutopilotTelegram, runChoiceAutopilot } from "./choice-autopilot.js";';
+const autopilotImportLine = 'import { handleChoiceAutopilotTelegram, runChoiceAutopilot } from "./choice-autopilot.js";';
 const requestMarker = "Hội Chọn Đúng API integration v2";
 const telegramMarker = "Hội Chọn Đúng Telegram integration v2";
 const scheduledMarker = "Hội Chọn Đúng Autopilot scheduled v2";
+const privateStatusMarker = "Hội Chọn Đúng internal status boundary v3";
 
-let source = await readFile(path, "utf8");
+let source = await readFile(workerPath, "utf8");
 
 if (!source.includes(choiceImportLine)) source = `${choiceImportLine}\n${source}`;
+source = source.replace(oldAutopilotImportLine, autopilotImportLine);
 if (!source.includes(autopilotImportLine)) source = `${autopilotImportLine}\n${source}`;
+
+const oldPublicStatusHook = `const choiceAutopilotResponse = await handleChoiceAutopilotRequest(request, env);\n  if (choiceAutopilotResponse) return withCors(choiceAutopilotResponse, cors);`;
+const privateStatusHook = `// ${privateStatusMarker}\n  if (url.pathname.startsWith("/api/choice/autopilot/")) {\n    return withCors(json({ error: "not_found" }, 404), cors);\n  }`;
+source = source.replace(oldPublicStatusHook, privateStatusHook);
 
 if (!source.includes(requestMarker)) {
   const tryPattern = /(\n[ \t]*try \{\r?\n)([ \t]*)(?=(?:\/\/ Travel API integration v1|const travelResponse|const communityResponse|if \(url\.pathname === "\/api\/request"))/;
   const match = source.match(tryPattern);
   if (!match) throw new Error("Không tìm thấy điểm nối Hội Chọn Đúng API trong backend/worker.js");
   const indent = match[2];
-  const hook = `${match[1]}${indent}// ${requestMarker}\n${indent}// Hội Chọn Đúng API integration v1 compatibility marker\n${indent}if (url.pathname === "/api/choice/autopilot/run" && request.method === "POST") {\n${indent}  const expected = String(env.CHOICE_AUTOPILOT_TRIGGER || "");\n${indent}  const provided = String(request.headers.get("x-choice-autopilot-trigger") || "");\n${indent}  if (!expected || !secureEqual(expected, provided)) return withCors(json({ error: "unauthorized" }, 401), cors);\n${indent}  return withCors(json(await runChoiceAutopilot(env, { trigger: "deploy" })), cors);\n${indent}}\n${indent}const choiceAutopilotResponse = await handleChoiceAutopilotRequest(request, env);\n${indent}if (choiceAutopilotResponse) return withCors(choiceAutopilotResponse, cors);\n${indent}const choiceResponse = await handleChoiceRequest(request, env);\n${indent}if (choiceResponse) return withCors(choiceResponse, cors);\n\n${indent}`;
+  const hook = `${match[1]}${indent}// ${requestMarker}\n${indent}// Hội Chọn Đúng API integration v1 compatibility marker\n${indent}if (url.pathname === "/api/choice/autopilot/run" && request.method === "POST") {\n${indent}  const expected = String(env.CHOICE_AUTOPILOT_TRIGGER || "");\n${indent}  const provided = String(request.headers.get("x-choice-autopilot-trigger") || "");\n${indent}  if (!expected || !secureEqual(expected, provided)) return withCors(json({ error: "unauthorized" }, 401), cors);\n${indent}  return withCors(json(await runChoiceAutopilot(env, { trigger: "deploy" })), cors);\n${indent}}\n${indent}// ${privateStatusMarker}\n${indent}if (url.pathname.startsWith("/api/choice/autopilot/")) {\n${indent}  return withCors(json({ error: "not_found" }, 404), cors);\n${indent}}\n${indent}const choiceResponse = await handleChoiceRequest(request, env);\n${indent}if (choiceResponse) return withCors(choiceResponse, cors);\n\n${indent}`;
   source = source.replace(tryPattern, hook);
+}
+
+if (!source.includes(privateStatusMarker)) {
+  const runEnd = '  return withCors(json(await runChoiceAutopilot(env, { trigger: "deploy" })), cors);\n  }';
+  if (!source.includes(runEnd)) throw new Error("Không tìm thấy điểm khóa status Autopilot");
+  source = source.replace(runEnd, `${runEnd}\n  // ${privateStatusMarker}\n  if (url.pathname.startsWith("/api/choice/autopilot/")) {\n    return withCors(json({ error: "not_found" }, 404), cors);\n  }`);
 }
 
 if (!source.includes(telegramMarker)) {
@@ -37,5 +51,27 @@ if (!source.includes(scheduledMarker)) {
   source = source.slice(0, index) + addition + source.slice(index + scheduledNeedle.length);
 }
 
-await writeFile(path, source);
-console.log("choice-system-ok: API, Telegram và cron Affiliate Autopilot đã được tích hợp idempotent");
+await writeFile(workerPath, source);
+
+let autopilot = await readFile(autopilotPath, "utf8");
+autopilot = autopilot.replace(
+  /\nexport async function handleChoiceAutopilotRequest\(request, env\) \{[\s\S]*?\n\}\n\n(?=function send\()/,
+  "\n"
+);
+const replacements = [
+  ['utm_medium: "autopilot"', 'utm_medium: "recommendation"'],
+  ['slugify(`at-${candidate.category}-${candidate.source_id}`)', 'slugify(`goi-y-${candidate.category}-${candidate.source_id}`)'],
+  ['summary: `${candidate.title} từ ${candidate.shop_name}; ${soldText}, ${discountText}. Hệ thống tự chọn dựa trên độ phù hợp, sức bán và tính khả dụng.`', 'summary: `${candidate.title} từ ${candidate.shop_name}; ${soldText}, ${discountText}. Phù hợp để tham khảo khi bạn ưu tiên tính khả dụng và thông tin bán hàng rõ ràng.`'],
+  ['`Được Autopilot xếp hạng ${candidate.opportunity_score}/100`', '"Thông tin sản phẩm đã được đối chiếu trước khi đưa vào danh sách"'],
+  ['tags: [...new Set([candidate.keyword, candidate.shop_name, "autopilot", "accesstrade"])]', 'tags: [...new Set([candidate.keyword, candidate.shop_name])]']
+];
+for (const [before, after] of replacements) autopilot = autopilot.replace(before, after);
+for (const forbidden of [
+  'handleChoiceAutopilotRequest', '/api/choice/autopilot/status', 'cache-control": "public',
+  'utm_medium: "autopilot"', 'Được Autopilot xếp hạng', '"autopilot", "accesstrade"', 'Hệ thống tự chọn dựa trên'
+]) {
+  if (autopilot.includes(forbidden)) throw new Error(`Module còn đường public/nội dung nội bộ bị cấm: ${forbidden}`);
+}
+await writeFile(autopilotPath, autopilot);
+
+console.log("choice-system-ok: xóa status handler, khóa route public, giữ Telegram/cron và làm sạch dữ liệu sản phẩm");

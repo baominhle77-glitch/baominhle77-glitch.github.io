@@ -1,125 +1,104 @@
 # HỘI CHỌN ĐÚNG — AFFILIATE AUTOPILOT
 
-**Task:** `AFFILIATE-20260724-02` — `completed`  
+**Runtime task:** `AFFILIATE-20260724-02` — `completed`  
+**Governance task:** `GOVERNANCE-20260724-01` — `in_progress`  
 **Production:** `https://hiennhi89.pages.dev/hoi-chon-dung/`  
-**Backend:** `https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/*`  
-**Runtime source:** `c4591418ae92adc77d0201e8e55737cd6ce929db` — PR #86  
-**Recorder source:** `5ba62c6e67ff15eb49e1eb155e3763fa52f71508` — PR #87  
-**Production deploy:** `30105568525` — SUCCESS  
-**Production recorder:** `30105641911` — SUCCESS  
-**Mode hiện tại:** `onboarding_required`
+**Backend public:** `https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/*`
 
-## 1. Mô hình vận hành chuẩn
+## 1. Phân tách public và nội bộ
 
-V1 từng yêu cầu admin chọn sản phẩm và gắn từng link. V2 loại bỏ luồng vận hành thủ công đó. Chủ sở hữu chỉ đưa ý tưởng, bất chợt xem thành quả và khiếu nại; công ty tự vận hành toàn bộ phần còn lại.
+Sự cố ngày 24/07/2026: bước build đã chèn trạng thái Affiliate Autopilot, chế độ dự phòng và thông điệp dành cho chủ sở hữu vào footer public. Đây là lỗi nghiêm trọng vì trang người dùng bị dùng như bảng điều hành nội bộ.
 
-Affiliate Autopilot thực hiện:
+Quy tắc mới:
+
+- Public UI chỉ chứa thông tin giúp người dùng hiểu, so sánh hoặc mua an toàn.
+- Trạng thái credential, onboarding/KYC, nguồn dữ liệu, cron, Worker, KV, deploy, production và hướng dẫn owner chỉ tồn tại trong Telegram/admin/handover nội bộ.
+- Public status route `/api/choice/autopilot/status` bị khóa và phải trả `404`.
+- Recorder đọc `choice:autopilot:status:v1` trực tiếp từ Cloudflare KV bằng quyền CI.
+- PWA tăng cache từ `hoi-chon-dung-v2` lên `hoi-chon-dung-v3` để xóa HTML/JS cũ khỏi thiết bị.
+- `tools/check-public-content.mjs` chặn deploy nếu HTML/JavaScript công khai chứa nội dung owner/internal.
+
+## 2. Nội dung public được phép
+
+Người dùng được xem:
+
+- nhu cầu, ngân sách và ưu tiên của chính họ;
+- điểm mạnh, điểm yếu, mức phù hợp và thông tin nơi bán;
+- giá, tồn kho, tương thích, bảo hành, đổi trả và cảnh báo an toàn;
+- công bố affiliate/hoa hồng cần thiết;
+- thông tin quyền riêng tư và giới hạn dịch vụ.
+
+Người dùng không được xem:
+
+- trạng thái Autopilot hoặc credential;
+- việc chủ sở hữu cần đăng nhập/KYC;
+- tên chế độ như `onboarding_required`, `error`, `fallback`;
+- API key, secret, trigger, cron, Worker, KV, source, commit, workflow hoặc production;
+- hoa hồng/doanh thu nội bộ và lỗi nguồn.
+
+## 3. Mô hình vận hành nội bộ
+
+Affiliate Autopilot vẫn thực hiện trong nền:
 
 1. Lấy datafeed sản phẩm từ AccessTrade.
-2. Lọc sản phẩm rủi ro, thiếu tồn kho, thiếu shop, URL không an toàn, giá hoặc hoa hồng không hợp lệ.
-3. Chấm điểm theo độ phù hợp ngách, sức bán, hoa hồng, mức giảm giá và giao dịch 7 ngày.
-4. Tuyển tối đa 6 sản phẩm cho mỗi nhóm Tarot, sáng tạo nội dung và in 3D.
-5. Tạo deep link có UTM/sub-ID riêng cho từng sản phẩm.
-6. Thay catalog seed khi đã có đủ sản phẩm xác minh; giữ catalog gần nhất nếu nguồn ngoài lỗi.
-7. Đọc giao dịch 7 ngày để điều chỉnh trọng số.
-8. Chạy ngay sau deploy và theo cron mỗi 6 giờ.
-9. Tự gửi trạng thái/cảnh báo qua Telegram.
-10. Tự ghi mode production vào `docs/handover/CHOICE_AUTOPILOT_STATUS.md` sau mỗi deploy.
+2. Lọc hàng rủi ro, thiếu tồn kho, URL không an toàn hoặc dữ liệu không hợp lệ.
+3. Chấm điểm theo mức phù hợp, sức bán, giá, giảm giá, hoa hồng và giao dịch 7 ngày.
+4. Tuyển tối đa 6 sản phẩm cho mỗi nhóm Tarot, creator và in 3D.
+5. Tạo deep link và cập nhật catalog.
+6. Giữ catalog gần nhất khi nguồn lỗi.
+7. Chạy sau deploy và theo cron mỗi 6 giờ.
+8. Gửi trạng thái qua Telegram owner và ghi hồ sơ nội bộ.
 
-## 2. Trạng thái production đã xác minh
+Các chi tiết trên không được xuất hiện trên sản phẩm public.
 
-Recorder production ghi:
+## 4. Điểm chạm owner
 
-- mode: `onboarding_required`;
-- credential AccessTrade: chưa kết nối;
-- cần đăng nhập/KYC một lần: có;
-- vòng chạy gần nhất: `2026-07-24T15:31:11.990Z`;
-- source deploy: `5ba62c6e67ff15eb49e1eb155e3763fa52f71508`;
-- deploy run: `30105568525`;
-- recorder run: `30105641911`.
+Kết nối AccessTrade một lần:
 
-Đây không phải lỗi hệ thống. Worker, trigger bí mật, cron, Pages, PWA, status API và smoke test đều đã đạt. Autopilot dừng đúng ở ranh giới công ty không thể tự giả danh chủ tài khoản để đăng ký, đăng nhập hoặc hoàn thành KYC với mạng affiliate.
-
-## 3. Điểm chạm con người duy nhất
-
-Bot Telegram đã được thiết kế để tự gửi hướng dẫn kết nối một lần:
-
-1. Đăng nhập hoặc đăng ký tại `https://pub2.accesstrade.vn/`.
+1. Đăng nhập/đăng ký tại `https://pub2.accesstrade.vn/`.
 2. Mở `https://pub2.accesstrade.vn/profile/api_key`.
-3. Gửi `/atkey <API_KEY>` trong đúng Telegram owner.
+3. Gửi `/atkey <API_KEY>` trong Telegram owner.
 
-Sau đó:
+Webhook kiểm tra đồng thời `chat.id` và `from.id`, yêu cầu xóa tin nhắn chứa key và mã hóa AES-GCM trước khi lưu KV. Đây là luồng owner/private, không được hiển thị trên website.
 
-- webhook kiểm tra đồng thời `chat.id` và `from.id`;
-- yêu cầu xóa tin nhắn chứa key;
-- key được mã hóa AES-GCM bằng khóa dẫn xuất từ `SESSION_SECRET` trước khi lưu KV;
-- Autopilot tự chạy ngay;
-- chủ sở hữu không chọn sản phẩm, không tạo deep link, không cập nhật từng URL.
+## 5. API public và private
 
-Có thể dùng Worker secret `ACCESSTRADE_API_TOKEN` thay cho `/atkey`.
-
-## 4. Nguồn và rào chắn
-
-| Danh mục | Cụm truy vấn | Rào chắn |
+| Route | Phân loại | Chức năng |
 |---|---|---|
-| Tarot | bài Tarot, khăn trải, túi đựng | loại claim chữa bệnh/đổi vận; bắt buộc giá, tồn kho, shop |
-| Creator | micro cài áo, tripod, đèn LED | kiểm tra tương thích; loại hàng cấm/rủi ro |
-| In 3D | PLA, PETG, resin | cảnh báo kích thước, profile và an toàn resin |
+| `GET /api/choice/products` | Public | catalog đã được làm sạch, không lộ URL đích thô hoặc metadata vận hành |
+| `POST /api/choice/vote` | Public | bình chọn khử lặp |
+| `GET /r/choice/:id` | Public | chuyển tới nơi bán và đo click ẩn danh |
+| `GET /api/choice/health` | Public tối giản | kiểm tra dịch vụ, không trả trạng thái kinh doanh/credential |
+| `POST /api/choice/autopilot/run` | Internal | bắt buộc trigger secret |
+| `GET /api/choice/autopilot/status` | Disabled public | trả `404`; recorder đọc KV trực tiếp |
 
-Blocklist cứng gồm thuốc, sản phẩm giảm/tăng cân, thực phẩm chức năng, rượu bia, nicotine, chất gây nghiện, vũ khí và sản phẩm người lớn.
+## 6. Làm sạch dữ liệu sản phẩm
 
-## 5. API, cron và KV
+Dữ liệu public không chứa:
 
-| Route | Chức năng |
-|---|---|
-| `GET /api/choice/autopilot/status` | trạng thái công khai tối giản |
-| `POST /api/choice/autopilot/run` | trigger nội bộ bắt buộc secret header |
-| `GET /api/choice/products` | catalog công khai, không lộ URL đích thô |
-| `GET /r/choice/:id` | đo click và chuyển tới deep link |
-| `POST /api/choice/vote` | tín hiệu cộng đồng, khử lặp theo ngày |
+- nhãn `Autopilot` hoặc `AccessTrade`;
+- điểm xếp hạng nội bộ;
+- UTM medium mang tên cơ chế vận hành;
+- metadata `source`, credential hoặc trạng thái nội bộ.
 
-Cron Cloudflare: `17 */6 * * *`.
+Ngôn ngữ public chỉ giải thích giá trị cho người mua, ví dụ “thông tin sản phẩm đã được đối chiếu trước khi đưa vào danh sách”.
 
-KV:
+## 7. Rào chắn sản phẩm
 
-- `choice:catalog:v1`;
-- `choice:autopilot:status:v1`;
-- `choice:autopilot:credential:v1`;
-- `choice:autopilot:lock:v1`;
-- `choice:autopilot:onboarding-notice:v1`;
-- các khóa vote/click hiện hữu.
+Blocklist gồm thuốc, sản phẩm giảm/tăng cân, thực phẩm chức năng, rượu bia, nicotine, chất gây nghiện, vũ khí và sản phẩm người lớn.
 
-## 6. Telegram
+Không bịa review, đơn hàng, giá, tồn kho hoặc lợi nhuận. Khi nguồn lỗi, giữ catalog gần nhất; cảnh báo chi tiết chỉ gửi nội bộ.
 
-Luồng chính:
+## 8. Kiểm thử bắt buộc
 
-- `/chon`, `/autopilot`, `/congty`: bảng điều hành;
-- `/atkey <API_KEY>`: kết nối một lần;
-- `/autopilot-chay`: chạy lại khi thanh tra/phục hồi.
+- `node tools/check-public-content.mjs` trên source sau materialize và `_site` trước deploy.
+- `backend/choice-public-boundary.test.mjs` kiểm tra status route bị khóa và dữ liệu public không chứa nhãn nội bộ.
+- `hoi-chon-dung/app.test.mjs` kiểm tra HTML public, PWA V3 và không gọi status API.
+- Smoke production kiểm tra nội dung hữu ích có mặt, nội dung owner/internal vắng mặt và status route trả `404`.
 
-Các lệnh V1 thêm/sửa/ẩn/xóa sản phẩm chỉ còn là break-glass recovery, không phải công việc thường lệ của chủ sở hữu.
-
-## 7. Bảo mật và tính trung thực
-
-- Trigger deploy là secret ngẫu nhiên đặt bằng `wrangler secret put`.
-- Public UI không nhận credential.
-- API catalog không trả affiliate URL thô.
-- Không lưu IP thô trong thống kê click/vote.
-- Không xuất bản sản phẩm thuộc blocklist hoặc thiếu dữ liệu bắt buộc.
-- Không bịa review, đơn hàng, giá, tồn kho hoặc lợi nhuận.
-- AccessTrade lỗi thì giữ catalog gần nhất và ghi `error`; không giả báo thành công.
-- Recorder không ghi key, trigger, URL affiliate thô hoặc doanh thu riêng tư.
-
-## 8. Bằng chứng kiểm thử và production
-
-- Module Autopilot: encryption, safety filter, onboarding, tuyển 18 sản phẩm/deep-link mock và status không rò credential — đạt.
-- Integration script idempotent, owner guard, trigger secret, alias `/chon`, scheduled handler — đạt.
-- Frontend Bói toán, Account, Service Worker, Community backend, Worker lõi, Affiliate Autopilot và WebKit AES thật — run `30104948983` SUCCESS.
-- Điều phối đa-agent — run `30104948933` SUCCESS.
-- Production runtime — run `30105078450` SUCCESS.
-- Production recorder deploy — run `30105568525` SUCCESS.
-- Recorder status — run `30105641911` SUCCESS.
+Task chỉ được closeout sau CI, merge, deploy, cache V3 và hậu kiểm production thành công.
 
 ## 9. Mốc khôi phục
 
-V1 production source `f57023af442839da852354672bea8036e579a9fd`, PR #84, run `30100989464`. Chỉ dùng làm mốc rollback; V2 là kiến trúc vận hành chuẩn.
+- V2 runtime trước governance fix: `c4591418ae92adc77d0201e8e55737cd6ce929db`, PR #86.
+- V1: `f57023af442839da852354672bea8036e579a9fd`, PR #84.

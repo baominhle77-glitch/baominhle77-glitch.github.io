@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   runChoiceAutopilot,
-  handleChoiceAutopilotRequest,
   __test
 } from "./choice-autopilot.js";
 
@@ -102,7 +101,7 @@ test("lọc sản phẩm nguy cơ và chuẩn hóa ứng viên", () => {
   assert.equal(item.discount_percent, 20);
 });
 
-test("thiếu AccessTrade token chuyển sang onboarding, không giả hoàn tất", async () => {
+test("thiếu AccessTrade token chuyển sang onboarding nội bộ, không giả hoàn tất", async () => {
   const env = makeEnv(false);
   const result = await runChoiceAutopilot(env, { trigger: "cron", fetchImpl: mockFetch() });
   assert.equal(result.ok, false);
@@ -135,7 +134,7 @@ test("Autopilot tự tuyển, tạo deep link và thay catalog seed", async () =
   assert.ok(generated.every((item) => item.last_verified_at));
 });
 
-test("status API chỉ trả trạng thái vận hành, không lộ credential", async () => {
+test("trạng thái chỉ được đọc nội bộ từ KV, không có public handler", async () => {
   const env = makeEnv(true);
   await env.KV.put(__test.STATUS_KEY, JSON.stringify({
     mode: "active",
@@ -146,14 +145,8 @@ test("status API chỉ trả trạng thái vận hành, không lộ credential",
     commission_7d: 100000,
     last_run_at: "2026-07-24T14:00:00Z"
   }));
-  const res = await handleChoiceAutopilotRequest(
-    new Request("https://worker.example/api/choice/autopilot/status"),
-    env
-  );
-  assert.equal(res.status, 200);
-  const data = await res.json();
+  const data = await __test.readStatus(env);
   assert.equal(data.mode, "active");
   assert.equal(data.selected_products, 18);
-  assert.equal(data.commission_7d, undefined);
-  assert.equal(JSON.stringify(data).includes("token"), false);
+  assert.equal(data.commission_7d, 100000);
 });

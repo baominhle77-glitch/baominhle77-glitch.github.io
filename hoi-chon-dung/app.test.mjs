@@ -5,7 +5,7 @@ import { CHOICE_CATEGORIES, SEED_PRODUCTS } from "./data/seed-products.js";
 
 const read = (name) => readFile(new URL(name, import.meta.url), "utf8");
 
-test("HTML nguồn có SEO, PWA, structured data và công bố affiliate", async () => {
+test("HTML public có SEO, PWA, structured data và chỉ chứa nội dung hữu ích cho người dùng", async () => {
   const html = await read("./index.html");
   assert.match(html, /<title>Hội Chọn Đúng/);
   assert.match(html, /rel="canonical" href="https:\/\/hiennhi89\.pages\.dev\/hoi-chon-dung\/"/);
@@ -15,6 +15,11 @@ test("HTML nguồn có SEO, PWA, structured data và công bố affiliate", asyn
   assert.match(html, /CÔNG BỐ LIÊN KẾT TIẾP THỊ/);
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /type="module" src="\.\/app\.js"/);
+  assert.match(html, /Public audience boundary v3/);
+  assert.match(html, /Tôn trọng quyền riêng tư/);
+  assert.match(html, /Trước khi mua/);
+  assert.doesNotMatch(html, /Autopilot|autopilotBadge|autopilotFooter|onboarding_required|chủ sở hữu|Cloudflare Worker|API key/i);
+  assert.doesNotMatch(html, /autopilot-ui\.js/);
 });
 
 test("catalog dự phòng có ba danh mục, ID duy nhất và URL HTTPS an toàn", () => {
@@ -34,10 +39,10 @@ test("catalog dự phòng có ba danh mục, ID duy nhất và URL HTTPS an toà
   }
 });
 
-test("service worker cache app shell V2 gồm trạng thái Autopilot và có offline navigation fallback", async () => {
+test("service worker V3 loại cache giao diện nội bộ và có offline navigation fallback", async () => {
   const sw = await read("./sw.js");
-  assert.match(sw, /hoi-chon-dung-v2/);
-  assert.match(sw, /autopilot-ui\.js/);
+  assert.match(sw, /hoi-chon-dung-v3/);
+  assert.doesNotMatch(sw, /autopilot-ui\.js/);
   assert.match(sw, /data\/seed-products\.js/);
   assert.match(sw, /request\.mode === "navigate"/);
   assert.match(sw, /caches\.match\("\.\/index\.html"\)/);
@@ -49,14 +54,12 @@ test("frontend dùng redirect backend và không lấy URL affiliate thô từ A
   assert.match(app, /\/api\/choice\/vote/);
   assert.match(app, /outbound_path/);
   assert.match(app, /serviceWorker\.register/);
+  assert.doesNotMatch(app, /\/api\/choice\/autopilot\/status|onboarding_required|chủ sở hữu|Autopilot/i);
 });
 
-test("giao diện Autopilot chỉ đọc status công khai và không chứa credential", async () => {
+test("module legacy không còn logic gọi trạng thái nội bộ", async () => {
   const source = await read("./autopilot-ui.js");
-  assert.match(source, /\/api\/choice\/autopilot\/status/);
-  assert.match(source, /mode === "active"/);
-  assert.match(source, /mode === "onboarding_required"/);
-  assert.doesNotMatch(source, /ACCESSTRADE_API_TOKEN|x-choice-autopilot-trigger|\/atkey/);
+  assert.doesNotMatch(source, /fetch\(|\/api\/choice\/autopilot\/status|onboarding_required|chủ sở hữu/i);
 });
 
 test("sitemap chỉ công khai ứng dụng mới", async () => {
