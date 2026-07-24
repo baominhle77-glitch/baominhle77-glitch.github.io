@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T21:55:00+07:00",
+  "updated_at": "2026-07-24T22:02:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -19,13 +19,15 @@
         "hoi-chon-dung/index.html",
         "hoi-chon-dung/app.js",
         "hoi-chon-dung/autopilot-ui.js",
+        "hoi-chon-dung/sw.js",
+        "hoi-chon-dung/app.test.mjs",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "docs/handover/HOI_CHON_DUNG.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-24T21:45:00+07:00",
-      "heartbeat_at": "2026-07-24T21:55:00+07:00",
+      "heartbeat_at": "2026-07-24T22:02:00+07:00",
       "summary": "Nâng Hội Chọn Đúng thành Affiliate Autopilot: tự lấy datafeed AccessTrade, chấm điểm và chọn sản phẩm, tạo deep link, tự cập nhật catalog theo cron, tự tối ưu theo click/đơn hàng, onboarding API key một lần qua Telegram owner-only, không giao việc vận hành cho chủ sở hữu."
     }
   ],
