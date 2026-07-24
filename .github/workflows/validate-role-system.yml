@@ -29,17 +29,23 @@ jobs:
           grep -q 'Bói toán V11' assets/gate.js
           grep -q 'openAppContent(data.key, "admin-session")' assets/gate.js
 
-      - name: Kiểm tra frontend Bói toán
+      - name: Kiểm tra cú pháp frontend Bói toán
         run: |
           set -euo pipefail
           node --check assets/gate.js
           node --check assets/community.js
           node --check assets/community-admin.js
           node --check tools/admin-v9-return-webkit-check.mjs
-          node assets/gate.test.mjs
-          node assets/account-v2.test.mjs
           node --check boitoan/sw.js
-          node boitoan/sw.test.mjs
+
+      - name: Kiểm tra Gate frontend
+        run: node assets/gate.test.mjs
+
+      - name: Kiểm tra Account frontend
+        run: node assets/account-v2.test.mjs
+
+      - name: Kiểm tra Service Worker Bói toán
+        run: node boitoan/sw.test.mjs
 
       - name: Kiểm tra Community backend
         run: |
