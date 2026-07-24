@@ -87,10 +87,12 @@ if (!autopilot.includes("const selectedSourceIds = new Set()")) {
     '        if (rank >= MAX_PRODUCTS_PER_CATEGORY) break;',
     '      }'
   ].join("\n");
-  autopilot = autopilot.replace(
-    /      const shortlist = group\.candidates\.slice\(0, MAX_PRODUCTS_PER_CATEGORY \* 2\);[\s\S]*?      \}/,
-    diverseSelection
-  );
+  const selectionStartMarker = "      const shortlist = group.candidates.slice(0, MAX_PRODUCTS_PER_CATEGORY * 2);";
+  const selectionEndMarker = "\n    }\n\n    if (selected.length";
+  const selectionStart = autopilot.indexOf(selectionStartMarker);
+  const selectionEnd = selectionStart >= 0 ? autopilot.indexOf(selectionEndMarker, selectionStart) : -1;
+  if (selectionStart < 0 || selectionEnd < 0) throw new Error("Không tìm thấy ranh giới block tuyển sản phẩm cũ");
+  autopilot = autopilot.slice(0, selectionStart) + diverseSelection + autopilot.slice(selectionEnd);
 }
 
 if (!autopilot.includes("trend_score: candidate.trend_score")) {
