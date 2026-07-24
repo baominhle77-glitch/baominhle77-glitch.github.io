@@ -22,18 +22,18 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-25 02:15 GMT+7 — ChatGPT GPT-5.6 — GROWTH-20260725-02 — ĐANG TRIỂN KHAI 🟡
+### 2026-07-25 02:40 GMT+7 — Claude Code — BOITOAN-20260725-01 — ĐANG LÀM ⏳
 
-- Chủ sở hữu yêu cầu mở sẵn các điểm đăng ký/đăng nhập/cấp quyền, giải thích nhận và rút tiền affiliate, mở rộng nhiều lĩnh vực theo xu hướng, tự cập nhật web và đẩy SEO trên nền tảng lớn.
-- Đã tạo `backend/choice-setup.js`: đúng Telegram owner dùng `/ketnoi`, `/caidat` hoặc `/setup` để nhận vé một lần 10 phút; đổi thành cookie `HttpOnly; Secure; SameSite=Strict` 12 giờ; truy cập không phiên trả `401`; mọi response `noindex/no-store`, CSP và frame deny.
-- Trung tâm kết nối chứa sẵn link ACCESSTRADE đăng ký/đăng nhập, khai báo ngân hàng, lịch sử thanh toán, API key, Google Search Console, Bing Webmaster Tools và Pinterest Business. Không có link public tới trang này.
-- Đã thêm taxonomy 12 lĩnh vực: Tarot, creator, in 3D, công nghệ, gia dụng, làm đẹp, thời trang, mẹ & bé, thú cưng, văn phòng, vận động và du lịch.
-- Discovery dùng đồng thời `BEST_SELLERS`, `RECOMMENDED`, `HIGH_COMMISSION_RATE`; chấm trend score, giới hạn trùng shop/dải giá và giữ sản phẩm cũ của nhóm chưa có dữ liệu mới.
-- Blocklist mở rộng cho thuốc/thực phẩm bổ sung, chất gây nghiện, vũ khí, hóa chất độc, hàng người lớn, cá cược và hàng giả.
-- SEO publisher được materialize để tạo landing page và hướng dẫn cho mọi danh mục, kể cả khi chưa kết nối nguồn; sitemap/RSS/IndexNow bao phủ taxonomy mới.
-- PWA nâng lên `hoi-chon-dung-v4` để xóa cache taxonomy ba danh mục cũ.
-- Đã thêm test cho taxonomy, trend scoring, setup owner, vé/cookie, public-private boundary, SEO mọi danh mục và production smoke.
-- PR #94 đang draft; CI, merge và production chưa được kết luận tại thời điểm ghi nhật ký.
+- Chủ sở hữu chỉ ra ba lỗi còn sót sau BOITOAN-20260724-16, đã sửa cả ba:
+  1. **Tên lá bài hiển thị bằng tiếng Anh** trên toàn app (Rider, Scythe, Anchor…), không còn
+     tên Việt. Thêm `enName()` và áp cho Lenormand, Tarot, lá bài ngày và lịch sử tra cứu.
+  2. **Bỏ hết từ ngữ meta**: `bàn bài`, `Nói thẳng ra thì`, `mở đầu, cho thấy`, `đây mới là chỗ
+     mọi chuyện đi về`, `Đọc gọn lại`, và đoạn khuyên mang giọng lên lớp (`lenAdvice` đã gỡ).
+  3. **Đọc hẳn ra thay vì hướng dẫn cách đọc**: `lenParas` nay ghép các lá thành một câu chuyện
+     liền và nói thẳng kết quả; bỏ mọi câu chỉ dẫn người dùng tự suy.
+- Nghĩa mỗi lá cắt tới dấu chấm phẩy đầu tiên nên câu trọn ý, không bị cụt giữa chừng.
+- Kiểm thử: quét toàn file còn 0 cụm meta, 0 chỗ hiển thị tên Việt; `node --check` toàn bộ khối
+  script hợp lệ; vòng mã hoá/giải mã khớp; vùng `<head>` giống hệt bản cũ.
 
 ### 2026-07-25 01:45 GMT+7 — Claude Code — BOITOAN-20260724-16 — ĐANG LÀM ⏳
 
