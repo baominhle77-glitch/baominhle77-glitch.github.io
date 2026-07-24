@@ -1,0 +1,119 @@
+name: Ghi trạng thái Affiliate Autopilot production
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/record-choice-autopilot-status.yml
+      - docs/handover/ACTIVE_TASKS.json
+  workflow_run:
+    workflows: ["Deploy lên Cloudflare Pages (hiennhi89.pages.dev)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: choice-autopilot-production-status
+  cancel-in-progress: true
+
+jobs:
+  record:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.ref }}
+
+      - name: Đọc trạng thái production
+        id: status
+        run: |
+          set -euo pipefail
+          endpoint="https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/status"
+          for attempt in $(seq 1 20); do
+            if curl -fsS --max-time 15 "$endpoint" -o "$RUNNER_TEMP/choice-autopilot.json"; then
+              break
+            fi
+            sleep 3
+          done
+          test -s "$RUNNER_TEMP/choice-autopilot.json"
+          node - <<'NODE' "$RUNNER_TEMP/choice-autopilot.json" "$GITHUB_OUTPUT" "$GITHUB_EVENT_NAME"
+          const fs = require('node:fs');
+          const [jsonPath, outputPath, eventName] = process.argv.slice(2);
+          const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+          const modes = new Set(['active', 'onboarding_required', 'error', 'not_started']);
+          if (!modes.has(data.mode)) throw new Error(`Autopilot mode không hợp lệ: ${data.mode}`);
+          const clean = (value, max = 160) => String(value ?? '').replace(/[\r\n]/g, ' ').slice(0, max);
+          const fields = {
+            mode: data.mode,
+            configured: Boolean(data.configured),
+            updated_at: clean(data.updated_at, 60),
+            last_run_at: clean(data.last_run_at, 60),
+            selected_products: Number(data.selected_products || 0),
+            catalog_products: Number(data.catalog_products || 0),
+            orders_7d: Number(data.orders_7d || 0),
+            needs_owner_login: Boolean(data.needs_owner_login),
+            next_run_hint: clean(data.next_run_hint, 80),
+          };
+          fs.appendFileSync(outputPath, Object.entries(fields).map(([key, value]) => `${key}=${value}`).join('\n') + '\n');
+          console.log(JSON.stringify({ event: eventName, ...fields }));
+          NODE
+
+      - name: Autopilot ACTIVE
+        if: steps.status.outputs.mode == 'active'
+        run: echo "Affiliate Autopilot đã kết nối và tự vận hành catalog production."
+
+      - name: Autopilot ONBOARDING_REQUIRED
+        if: steps.status.outputs.mode == 'onboarding_required'
+        run: echo "Hạ tầng đã chạy; còn điểm chạm bắt buộc đăng nhập/KYC AccessTrade một lần."
+
+      - name: Autopilot ERROR
+        if: steps.status.outputs.mode == 'error'
+        run: echo "Autopilot giữ catalog gần nhất và đang ở chế độ tự thử lại."
+
+      - name: Autopilot NOT_STARTED
+        if: steps.status.outputs.mode == 'not_started'
+        run: echo "Worker phản hồi nhưng chưa có vòng chạy Autopilot."
+
+      - name: Sinh hồ sơ production
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          source_sha="${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}"
+          deploy_run="${{ github.event_name == 'workflow_run' && github.event.workflow_run.html_url || format('https://github.com/{0}/actions/runs/{1}', github.repository, github.run_id) }}"
+          cat > docs/handover/CHOICE_AUTOPILOT_STATUS.md <<EOF
+          # Trạng thái Hội Chọn Đúng Affiliate Autopilot
+
+          - Production mode: \`${{ steps.status.outputs.mode }}\`
+          - Credential đã kết nối: \`${{ steps.status.outputs.configured }}\`
+          - Cần chủ sở hữu đăng nhập/KYC một lần: \`${{ steps.status.outputs.needs_owner_login }}\`
+          - Sản phẩm tự tuyển ở vòng gần nhất: \`${{ steps.status.outputs.selected_products }}\`
+          - Tổng sản phẩm catalog: \`${{ steps.status.outputs.catalog_products }}\`
+          - Đơn ghi nhận 7 ngày: \`${{ steps.status.outputs.orders_7d }}\`
+          - Lần chạy gần nhất: \`${{ steps.status.outputs.last_run_at }}\`
+          - Trạng thái cập nhật: \`${{ steps.status.outputs.updated_at }}\`
+          - Gợi ý vòng tiếp theo: \`${{ steps.status.outputs.next_run_hint }}\`
+          - Source deploy: \`$source_sha\`
+          - Workflow deploy: \`$deploy_run\`
+          - Workflow recorder: \`https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\`
+
+          File này do workflow tự đọc API production và cập nhật; không chứa API key, trigger secret, URL affiliate thô hoặc doanh thu riêng tư.
+          EOF
+
+      - name: Ghi hồ sơ vào main
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/handover/CHOICE_AUTOPILOT_STATUS.md
+          if git diff --cached --quiet; then
+            echo "Trạng thái không đổi."
+            exit 0
+          fi
+          git commit -m "docs: record Affiliate Autopilot production status"
+          git pull --rebase origin main
+          git push origin HEAD:main
