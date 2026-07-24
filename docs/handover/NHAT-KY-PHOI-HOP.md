@@ -22,6 +22,33 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 02:15 GMT+7 — ChatGPT GPT-5.6 — GROWTH-20260725-02 — ĐANG TRIỂN KHAI 🟡
+
+- Chủ sở hữu yêu cầu mở sẵn các điểm đăng ký/đăng nhập/cấp quyền, giải thích nhận và rút tiền affiliate, mở rộng nhiều lĩnh vực theo xu hướng, tự cập nhật web và đẩy SEO trên nền tảng lớn.
+- Đã tạo `backend/choice-setup.js`: đúng Telegram owner dùng `/ketnoi`, `/caidat` hoặc `/setup` để nhận vé một lần 10 phút; đổi thành cookie `HttpOnly; Secure; SameSite=Strict` 12 giờ; truy cập không phiên trả `401`; mọi response `noindex/no-store`, CSP và frame deny.
+- Trung tâm kết nối chứa sẵn link ACCESSTRADE đăng ký/đăng nhập, khai báo ngân hàng, lịch sử thanh toán, API key, Google Search Console, Bing Webmaster Tools và Pinterest Business. Không có link public tới trang này.
+- Đã thêm taxonomy 12 lĩnh vực: Tarot, creator, in 3D, công nghệ, gia dụng, làm đẹp, thời trang, mẹ & bé, thú cưng, văn phòng, vận động và du lịch.
+- Discovery dùng đồng thời `BEST_SELLERS`, `RECOMMENDED`, `HIGH_COMMISSION_RATE`; chấm trend score, giới hạn trùng shop/dải giá và giữ sản phẩm cũ của nhóm chưa có dữ liệu mới.
+- Blocklist mở rộng cho thuốc/thực phẩm bổ sung, chất gây nghiện, vũ khí, hóa chất độc, hàng người lớn, cá cược và hàng giả.
+- SEO publisher được materialize để tạo landing page và hướng dẫn cho mọi danh mục, kể cả khi chưa kết nối nguồn; sitemap/RSS/IndexNow bao phủ taxonomy mới.
+- PWA nâng lên `hoi-chon-dung-v4` để xóa cache taxonomy ba danh mục cũ.
+- Đã thêm test cho taxonomy, trend scoring, setup owner, vé/cookie, public-private boundary, SEO mọi danh mục và production smoke.
+- PR #94 đang draft; CI, merge và production chưa được kết luận tại thời điểm ghi nhật ký.
+
+### 2026-07-25 01:45 GMT+7 — Claude Code — BOITOAN-20260724-16 — ĐANG LÀM ⏳
+
+- Phạm vi: `boitoan/index.html` (máy diễn giải Lenormand), sổ khóa và nhật ký.
+- Vấn đề: phần diễn giải lắp ghép rời rạc — mỗi lá một khối nghĩa riêng, lộ nhãn kỹ thuật
+  `Là chủ thể / Là bổ nghĩa` và các đoạn giảng phương pháp ra màn hình người dùng; trải 1–3 lá
+  đổ nghĩa cả ba lĩnh vực kể cả khi khách đã chọn một lĩnh vực.
+- Đã sửa: đọc theo tổ hợp thành một mạch (nền → chuyện chính → lá cuối chốt); lọc đúng lĩnh vực
+  được chọn; bỏ nhãn `Máy ghép câu` và các đoạn giải thích ngữ pháp bàn bài; đổi giọng khối trả lời;
+  đổi tiêu đề `Tổng luận phối hợp` → `Lời quẻ`.
+- Giữ nguyên: dữ liệu 36 lá, thuật toán rút bài, toàn bộ `<head>` (pbkdf2, backend, `mode: 'approval'`).
+- Kiểm thử: vòng tròn giải mã → sửa → mã hóa lại → giải mã lại khớp nội dung, file mã hóa không rò
+  plaintext; `node --check` 10 khối script inline hợp lệ; vùng `<head>` giống hệt bản cũ.
+- Còn chờ: CI của PR #92 và nghiệm thu thực tế trên iPhone.
+
 ### 2026-07-25 01:22 GMT+7 — ChatGPT GPT-5.6 — SEO-20260725-01 — HOÀN TẤT KỸ THUẬT ✅
 
 - Triển khai Growth Autopilot khép kín: tìm sản phẩm → lọc → tạo deep link affiliate → cập nhật catalog/web → dựng SEO → gửi IndexNow → đồng bộ click/đơn/hoa hồng → dashboard owner.
