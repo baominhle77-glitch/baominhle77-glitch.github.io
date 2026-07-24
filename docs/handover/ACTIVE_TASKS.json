@@ -1,45 +1,44 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T01:22:00+07:00",
+  "updated_at": "2026-07-25T02:10:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
-  "recently_completed": [
+  "active_tasks": [
     {
-      "id": "SEO-20260725-01",
+      "id": "GROWTH-20260725-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/SEO-20260725-01-closeout",
+      "branch": "agent/GROWTH-20260725-02-multisector-owner-setup",
+      "base_sha": "main",
       "paths": [
-        "backend/choice.js",
-        "backend/choice-autopilot.js",
+        "backend/choice-trend-v3.js",
+        "backend/choice-owner-setup.js",
+        "backend/choice-growth-v3.test.mjs",
         "backend/choice-revenue.js",
         "backend/choice-revenue.test.mjs",
-        "backend/choice-public-boundary.test.mjs",
-        "backend/wrangler.toml",
-        "tools/apply-choice-system.mjs",
         "tools/apply-choice-revenue.mjs",
-        "tools/apply-choice-public-product.mjs",
+        "tools/apply-choice-multisector.mjs",
+        "tools/apply-choice-owner-setup.mjs",
         "tools/build-choice-seo.mjs",
-        "tools/submit-indexnow.mjs",
-        "tools/submit-google-sitemap.mjs",
-        "tools/choice-seo.test.mjs",
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/choice-growth-autopilot.yml",
-        "e4c968d6c15b4ef69083f88f4f8d1e76.txt",
-        "hoi-chon-dung/san-pham/**",
-        "hoi-chon-dung/danh-muc/**",
-        "hoi-chon-dung/huong-dan/**",
-        "hoi-chon-dung/sitemap.xml",
-        "hoi-chon-dung/feed.xml",
-        "robots.txt",
+        "hoi-chon-dung/data/seed-products.js",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "docs/handover/HOI_CHON_DUNG.md",
         "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"
       ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T02:10:00+07:00",
+      "heartbeat_at": "2026-07-25T02:10:00+07:00",
+      "summary": "Mở rộng Growth Autopilot sang đa ngành và bắt xu hướng; kết hợp top sản phẩm toàn mạng, TikTok Shop và hiệu quả nội bộ; thêm trung tâm cài đặt owner-only với link đăng nhập/cấp quyền miễn phí, hướng dẫn nhận tiền và Telegram /caidat, /thanhtoan."
+    }
+  ],
+  "recently_completed": [
+    {
+      "id": "SEO-20260725-01",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/SEO-20260725-01-closeout",
+      "paths": ["backend/choice.js", "backend/choice-autopilot.js", "backend/choice-revenue.js", "tools/build-choice-seo.mjs", ".github/workflows/**", "hoi-chon-dung/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-25T01:22:00+07:00",
-      "summary": "Growth Autopilot production SUCCESS. PR #91 merge source a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0; CI điều phối 30116008064 và validation Growth/Revenue/SEO/WebKit 30116312380 SUCCESS; production 30116421342 SUCCESS toàn bộ source, SEO build, Worker, Growth cycle, Pages, IndexNow, Google step và smoke; recorder 30116490615 SUCCESS. Dashboard doanh thu owner-only đồng bộ 5 phút, SEO publish 6 giờ. AccessTrade hiện chưa kết nối nên mode nội bộ onboarding_required; cần owner đăng nhập/KYC và gửi /atkey một lần để có link/đơn/hoa hồng thật. Google Search Console service account là tùy chọn một lần để submit sitemap qua API."
+      "summary": "Growth Autopilot production SUCCESS. Dashboard doanh thu owner-only đồng bộ 5 phút, SEO publish 6 giờ; AccessTrade hiện chưa kết nối."
     },
     {
       "id": "GOVERNANCE-20260724-01",
@@ -58,15 +57,6 @@
       "status": "completed",
       "completed_at": "2026-07-24T22:34:00+07:00",
       "summary": "Affiliate Autopilot V2 production SUCCESS; trạng thái kinh doanh chỉ còn trong kênh nội bộ."
-    },
-    {
-      "id": "AFFILIATE-20260724-01",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/AFFILIATE-20260724-01-closeout",
-      "paths": ["hoi-chon-dung/**", "backend/choice.js", "docs/handover/**"],
-      "status": "completed",
-      "completed_at": "2026-07-24T21:29:00+07:00",
-      "summary": "Triển khai Hội Chọn Đúng V1; sau đó được V2 thay thế về mô hình vận hành."
     },
     {
       "id": "HANDOVER-20260724-01",
