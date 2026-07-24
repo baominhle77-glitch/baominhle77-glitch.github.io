@@ -60,9 +60,11 @@ jobs:
         run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
 
       - name: Thông báo URL mới cho IndexNow
+        continue-on-error: true
         run: node tools/submit-indexnow.mjs "$RUNNER_TEMP/choice-seo/seo-urls.json"
 
       - name: Gửi sitemap tới Google Search Console khi đã cấp quyền
+        continue-on-error: true
         run: node tools/submit-google-sitemap.mjs
 
       - name: Hậu kiểm SEO production
