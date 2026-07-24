@@ -16,6 +16,10 @@ ADMIN_V8_REGULAR_PASSWORD_HASH_B64 = "WP5H0yPnvX7DJ1Gg2ODMiz9m+tAlFhYzf+S4JTXJur
 ADMIN_V8_PRIMARY_PASSWORD_HASH_B64 = "nyCS+HxOceWo77FTxDQySuSTZOhKt+HuRHPBM/7uHZM="
 ADMIN_V8_PASSWORD_ITERATIONS = "10000"
 
+# Hội Chọn Đúng Affiliate Autopilot tự nghiên cứu, tạo deep link và làm mới catalog mỗi 6 giờ.
+[triggers]
+crons = ["17 */6 * * *"]
+
 # Bộ nhớ KV để lưu yêu cầu + nhật ký (workflow tự tạo & điền id).
 [[kv_namespaces]]
 binding = "KV"
@@ -39,4 +43,6 @@ namespace_id = "89002"
 # Bí mật (KHÔNG ghi ở đây) — workflow setup hoặc Wrangler đặt:
 #   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_WEBHOOK_SECRET,
 #   ADMIN_TOKEN, SESSION_SECRET, DECRYPT_KEY,
-#   PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY
+#   PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY.
+# AccessTrade có thể dùng secret ACCESSTRADE_API_TOKEN; nếu chưa có, owner kết nối một lần
+# bằng /atkey và token được mã hóa AES-GCM trong KV bằng khóa dẫn xuất từ SESSION_SECRET.
