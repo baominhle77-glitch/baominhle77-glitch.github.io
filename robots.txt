@@ -1,8 +1,11 @@
-# Khu vực riêng tư — chặn mọi bot/công cụ tìm kiếm lập chỉ mục.
+# Root vẫn là kho riêng. Chỉ công khai ứng dụng Hội Chọn Đúng cho máy tìm kiếm.
 User-agent: *
+Allow: /hoi-chon-dung/
 Disallow: /
 
-# Chặn thêm một số bot AI/scraper phổ biến (một số bot bỏ qua wildcard trên).
+Sitemap: https://hiennhi89.pages.dev/hoi-chon-dung/sitemap.xml
+
+# Không cho phép dùng nội dung để huấn luyện/thu thập bởi các bot AI phổ biến.
 User-agent: GPTBot
 Disallow: /
 User-agent: CCBot
@@ -19,5 +22,3 @@ User-agent: Bytespider
 Disallow: /
 User-agent: Amazonbot
 Disallow: /
-
-# Không cung cấp sitemap (không muốn được khám phá).
