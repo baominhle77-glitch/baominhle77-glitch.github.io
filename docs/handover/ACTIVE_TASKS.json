@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T22:57:00+07:00",
+  "updated_at": "2026-07-24T23:09:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -11,13 +11,16 @@
       "paths": [
         "AGENTS.md",
         "tools/check-public-content.mjs",
+        "tools/apply-choice-system.mjs",
+        "tools/apply-choice-autopilot-ui.mjs",
+        "backend/choice-public-boundary.test.mjs",
         ".github/workflows/deploy-pages.yml",
         ".github/workflows/validate-role-system.yml",
+        ".github/workflows/record-choice-autopilot-status.yml",
         "hoi-chon-dung/index.html",
         "hoi-chon-dung/sw.js",
         "hoi-chon-dung/app.test.mjs",
         "hoi-chon-dung/autopilot-ui.js",
-        "tools/apply-choice-autopilot-ui.mjs",
         "docs/handover/AUDIENCE_PRIVACY_STANDARD.md",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
@@ -25,8 +28,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-24T22:56:00+07:00",
-      "heartbeat_at": "2026-07-24T22:57:00+07:00",
-      "summary": "Khắc phục khẩn cấp việc đưa trạng thái vận hành nội bộ và thông tin chỉ dành cho chủ sở hữu lên giao diện công khai; gỡ khỏi Hội Chọn Đúng, xóa cơ chế build chèn lại, làm mới PWA cache và bổ sung chuẩn/CI bắt buộc cho mọi dự án."
+      "heartbeat_at": "2026-07-24T23:09:00+07:00",
+      "summary": "Khắc phục khẩn cấp rò nội dung owner/internal lên public UI: gỡ build injection, khóa status API public, chuyển recorder sang KV nội bộ, làm sạch dữ liệu sản phẩm, tăng PWA cache V3 và áp dụng cổng CI/chuẩn bắt buộc cho mọi dự án."
     }
   ],
   "recently_completed": [
