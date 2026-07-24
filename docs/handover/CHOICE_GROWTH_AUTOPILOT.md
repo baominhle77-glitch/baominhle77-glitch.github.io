@@ -1,8 +1,10 @@
 # HỘI CHỌN ĐÚNG — GROWTH AUTOPILOT, LINK AFFILIATE VÀ DOANH THU
 
-**Task-ID:** `SEO-20260725-01`  
-**Nhánh:** `agent/SEO-20260725-01-growth-autopilot`  
-**Trạng thái:** đang chờ CI, merge, deploy và hậu kiểm production. Không kết luận hoàn tất trước khi có bằng chứng.
+**Task-ID:** `SEO-20260725-01` — `completed`  
+**Runtime source:** `a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0` — PR #91  
+**Production deploy:** `30116421342` — SUCCESS  
+**Internal recorder:** `30116490615` — SUCCESS  
+**Trạng thái nguồn affiliate:** `onboarding_required`; chưa có credential, sản phẩm affiliate thật hoặc doanh thu thật.
 
 ## 1. Mục tiêu vận hành
 
@@ -124,7 +126,7 @@ IndexNow và Google là lớp thông báo/lập chỉ mục, không phải cam k
 2. Mở `https://pub2.accesstrade.vn/profile/api_key`.
 3. Gửi `/atkey <API_KEY>` trong Telegram owner.
 
-Sau đó hệ thống tự tạo link, cập nhật web và đồng bộ doanh thu.
+Sau đó hệ thống tự tạo link, cập nhật web và đồng bộ doanh thu. Recorder production hiện xác nhận credential `false`, sản phẩm tự tuyển `0` và đơn 7 ngày `0`; đây là trạng thái đúng trước khi kết nối.
 
 ### Google Search Console
 
@@ -158,12 +160,19 @@ Owner/private:
 
 `tools/check-public-content.mjs` tiếp tục chặn nội dung owner/internal xuất hiện trong site public.
 
-## 9. Kiểm thử bắt buộc
+## 9. Bằng chứng kiểm thử và production
 
-- `backend/choice-revenue.test.mjs`: dữ liệu, EPC, sync mock, ticket/cookie, owner guard.
-- `backend/choice-public-boundary.test.mjs`: route riêng, noindex, cron và public status 404.
-- `tools/choice-seo.test.mjs`: Product/Offer/Article/FAQ schema, sitemap, RSS, IndexNow/Google dry-run.
-- regression Bói toán, Account, Community, Worker và WebKit AES thật.
-- production smoke: owner dashboard không phiên `401`, public status `404`, trang SEO sạch, sitemap/feed/key tồn tại.
+- PR #91 merge source `a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0`.
+- Điều phối PR `30116008064`: SUCCESS.
+- Validation cuối `30116312380`: source, Worker, Affiliate Autopilot, Revenue, SEO, privacy, frontend và WebKit AES thật đều SUCCESS.
+- Production `30116421342`: cấu hình, source, SEO build, Worker-before-Pages, Growth trigger, Pages, IndexNow, Google step và production smoke đều SUCCESS.
+- Production recorder commit `915178f6ead00c4052391caf925ceea385b5fc75`.
+- Internal status recorder `30116490615`: SUCCESS; commit `e9ee55f3d55c14d10b83bbbb48efc794a7c0a6c6`.
+- Smoke xác nhận dashboard không phiên `401/noindex`, public status `404`, Product schema, sitemap, RSS, IndexNow key và public boundary đều đạt.
 
-Bằng chứng CI, PR, source và production sẽ được bổ sung sau khi triển khai đạt.
+## 10. Việc không được diễn giải sai
+
+- Production hạ tầng đã hoàn tất, nhưng **chưa có link affiliate thật/doanh thu thật** vì AccessTrade chưa kết nối.
+- “Google step SUCCESS” có thể là nhánh bỏ qua an toàn khi chưa có service account; không đồng nghĩa Search Console đã được cấp quyền.
+- IndexNow đã gửi thành công trong deploy production.
+- Không cam kết thứ hạng SEO hoặc doanh thu.
