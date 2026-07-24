@@ -13,7 +13,7 @@
 - **SPARE** (`/`) dùng mật khẩu riêng.
 - **Bói toán** (`/boitoan/`) có hai cấp Admin; chỉ lưu PBKDF2 hash + salt, không lưu plaintext.
 - **MEDORA** (`/medora/`) giữ cơ chế truy cập riêng hiện hành.
-- **Hội Chọn Đúng** (`/hoi-chon-dung/`) có Affiliate Autopilot nội bộ; giao diện public không được hiển thị trạng thái vận hành.
+- **Hội Chọn Đúng** (`/hoi-chon-dung/`) có Affiliate Autopilot nội bộ; giao diện public không hiển thị trạng thái vận hành.
 - Không commit `*.src.html`, mật khẩu, token hoặc secret.
 - Production frontend: `hiennhi89.pages.dev`.
 - Backend: `hiennhi89-gate.hiennhi89.workers.dev`.
@@ -22,22 +22,28 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-24 22:57 GMT+7 — ChatGPT GPT-5.6 — GOVERNANCE-20260724-01 — ĐANG KHẮC PHỤC KHẨN CẤP 🔴
+### 2026-07-24 23:41 GMT+7 — ChatGPT GPT-5.6 — GOVERNANCE-20260724-01 — HOÀN TẤT ✅
 
-- Chủ sở hữu phát hiện đúng một lỗi nghiêm trọng: build đã chèn trạng thái Autopilot, chế độ dự phòng và thông điệp dành cho chủ sở hữu lên footer của trang công khai.
-- Nguyên nhân gốc: `tools/apply-choice-autopilot-ui.mjs` biến trang người dùng thành bảng báo cáo vận hành; `autopilot-ui.js` gọi status API public; PWA V2 cache lại nội dung sai đối tượng.
-- Phạm vi sửa không dừng ở đoạn chữ: gỡ cơ chế chèn, bỏ status module khỏi bundle, tăng cache V3, khóa status route public, làm sạch nhãn nội bộ trong dữ liệu sản phẩm và chuyển recorder sang đọc KV bằng quyền CI.
-- Ban hành `docs/handover/AUDIENCE_PRIVACY_STANDARD.md`; cập nhật `AGENTS.md` và quy chế công ty để mọi dự án bắt buộc phân loại public/member/admin/owner trước khi viết nội dung.
-- Thêm `tools/check-public-content.mjs`; CI và deploy phải thất bại nếu public HTML/JS có nội dung owner/internal bị cấm.
-- Hậu kiểm production mới phải xác nhận trang không chứa `Autopilot`, `onboarding_required`, `chủ sở hữu`, tên hạ tầng hoặc hướng dẫn credential; status endpoint public phải trả `404`.
-- Task còn `in_progress`; chưa được kết luận hoàn tất trước khi CI, merge, deploy, làm mới PWA cache và smoke production đạt.
+- Chủ sở hữu phát hiện đúng một lỗi nghiêm trọng: build đã chèn trạng thái Autopilot, chế độ dự phòng và thông điệp dành cho chủ sở hữu lên footer public.
+- Đã gỡ hoàn toàn badge/footer/script nội bộ; thay bằng nội dung có ích cho người mua về quyền riêng tư, tương thích, bảo hành, đổi trả và giá cuối cùng.
+- PWA tăng từ `hoi-chon-dung-v2` lên `hoi-chon-dung-v3`, xóa cache cũ khi activate và không còn cache module trạng thái.
+- Đã xóa public status handler khỏi module materialized; Worker trả `404` cho route trạng thái, còn trigger run nội bộ vẫn bắt buộc secret.
+- Recorder không gọi API public; đọc `choice:autopilot:status:v1` trực tiếp từ Cloudflare KV bằng quyền CI và ghi rõ tài liệu owner/internal.
+- Dữ liệu sản phẩm public không còn nhãn Autopilot/AccessTrade, điểm xếp hạng nội bộ hoặc UTM mang tên cơ chế vận hành.
+- Ban hành `docs/handover/AUDIENCE_PRIVACY_STANDARD.md`, cập nhật `AGENTS.md`, và merge quy chế công ty toàn cục tại `4f2c6bf2ba61c041d737e90c12d5aa82205f1d8a`.
+- Cổng `tools/check-public-content.mjs` chạy trên source sau materialize và toàn bộ `_site`; một vi phạm public/private sẽ chặn merge/deploy.
+- PR #89 merge source `d72e3552a5a71e6f4ef14a4205b3e6f4ed2d25b5`.
+- CI: điều phối `30108929684`, regression/public-private/WebKit `30108929401`, recorder nội bộ `30108929479` — success.
+- Production `30109841905`: source boundary, Worker, Pages, PWA V3 và hậu kiểm production đều success; status public trả `404` và nội dung owner/internal không tồn tại trên HTML công khai.
+- Recorder `30109889703` đọc KV nội bộ thành công; commit hồ sơ `a22f0ef29f7712077e0202d7c89444b0ff288f03`.
+- Task chuyển `completed`; toàn bộ khóa được giải phóng.
 
 ### 2026-07-24 22:34 GMT+7 — ChatGPT GPT-5.6 — AFFILIATE-20260724-02 — HOÀN TẤT KỸ THUẬT ✅
 
 - Triển khai Affiliate Autopilot: tự lấy datafeed, lọc rủi ro, tuyển sản phẩm, tạo deep link, đọc giao dịch, cập nhật catalog và chạy theo cron.
 - PR #86 runtime source `c4591418ae92adc77d0201e8e55737cd6ce929db`; CI `30104948933`, `30104948983`; production `30105078450`: success.
 - PR #87 recorder source `5ba62c6e67ff15eb49e1eb155e3763fa52f71508`; production `30105568525`, recorder `30105641911`: success.
-- Thiếu credential AccessTrade nên nội bộ ở trạng thái onboarding; lỗi GOVERNANCE-20260724-01 phát hiện sau đó là đã đưa trạng thái này lên public UI và đang được khắc phục.
+- Trạng thái kinh doanh và onboarding sau governance fix chỉ còn trong kênh owner/internal.
 
 ### 2026-07-24 21:29 GMT+7 — ChatGPT GPT-5.6 — AFFILIATE-20260724-01 — HOÀN TẤT ✅
 
