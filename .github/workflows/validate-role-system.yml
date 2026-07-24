@@ -66,10 +66,13 @@ jobs:
           set -euo pipefail
           node --check tools/choice-taxonomy.mjs
           node --check tools/apply-choice-multiniche.mjs
+          node --check tools/apply-choice-seo-multiniche.mjs
           node --check tools/apply-choice-setup.mjs
           node tools/apply-travel-system.mjs
           node tools/apply-choice-multiniche.mjs
           node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-seo-multiniche.mjs
+          node tools/apply-choice-seo-multiniche.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
@@ -148,7 +151,7 @@ jobs:
           grep -q 'x-choice-autopilot-trigger' backend/worker.js
           grep -q 'choiceAutopilotIsOwner' backend/worker.js
           grep -q 'choiceAutopilotCommand === "/chon"' backend/worker.js
-          grep -q 'hoi-chon-dung-v3' hoi-chon-dung/sw.js
+          grep -q 'hoi-chon-dung-v4' hoi-chon-dung/sw.js
           ! grep -qiE 'autopilotBadge|autopilotFooter|autopilot-ui\.js|onboarding_required|chủ sở hữu|Cloudflare Worker|API key' hoi-chon-dung/index.html
 
       - name: Kiểm tra frontend Hội Chọn Đúng
