@@ -78,24 +78,39 @@ jobs:
           node tools/apply-choice-seo-multiniche.mjs
           node --check tools/build-choice-seo.mjs
 
-      - name: Materialize Worker, setup và revenue
+      - name: Materialize Choice system lõi
+        run: |
+          set -euo pipefail
+          node tools/apply-travel-system.mjs
+          node --check tools/apply-choice-system.mjs
+          node tools/apply-choice-system.mjs
+          node tools/apply-choice-system.mjs
+          node --check backend/worker.js
+
+      - name: Materialize trung tâm kết nối owner
         run: |
           set -euo pipefail
           node --check tools/apply-choice-setup.mjs
-          node tools/apply-travel-system.mjs
-          node tools/apply-choice-system.mjs
-          node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-setup.mjs
+          node --check backend/choice-setup.js
+          node --check backend/worker.js
+
+      - name: Materialize revenue và public UI
+        run: |
+          set -euo pipefail
+          node --check tools/apply-choice-revenue.mjs
           node tools/apply-choice-revenue.mjs
           node tools/apply-choice-revenue.mjs
           node tools/apply-choice-autopilot-ui.mjs
           node tools/apply-choice-autopilot-ui.mjs
           node --check tools/check-public-content.mjs
-          node --check tools/apply-choice-system.mjs
-          node --check tools/apply-choice-revenue.mjs
           node --check tools/apply-choice-public-product.mjs
           node --check backend/worker.js
+
+      - name: Kiểm tra Worker sau materialize
+        run: |
+          set -euo pipefail
           node backend/worker.test.mjs
 
       - name: Kiểm tra marker và cron Growth
