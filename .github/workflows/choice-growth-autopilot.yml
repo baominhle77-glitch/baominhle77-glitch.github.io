@@ -1,0 +1,93 @@
+name: Hội Chọn Đúng Growth Autopilot
+
+on:
+  schedule:
+    - cron: "32 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: false
+
+jobs:
+  publish-seo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: "997944c1bfcc2dcaca32718124cd718c"
+      GOOGLE_SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON }}
+      GOOGLE_SEARCH_CONSOLE_SITE_URL: "https://hiennhi89.pages.dev/"
+      GOOGLE_SEARCH_CONSOLE_SITEMAP_URL: "https://hiennhi89.pages.dev/hoi-chon-dung/sitemap.xml"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - name: Kiểm tra và tạo nội dung SEO
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          node tools/apply-choice-autopilot-ui.mjs
+          node --check tools/build-choice-seo.mjs
+          node --check tools/submit-indexnow.mjs
+          node --check tools/submit-google-sitemap.mjs
+          node --test tools/choice-seo.test.mjs
+          node tools/build-choice-seo.mjs --out "$RUNNER_TEMP/choice-seo"
+          node tools/check-public-content.mjs
+
+      - name: Gộp site với trang SEO mới
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data _site/hoi-chon-dung/data
+          cp index.html manifest.webmanifest sw.js robots.txt e4c968d6c15b4ef69083f88f4f8d1e76.txt _site/
+          cp assets/gate.js assets/gate.css assets/community.js assets/community-admin.js assets/community.css _site/assets/
+          cp boitoan/index.html boitoan/community.html boitoan/community-admin.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
+          cp medora/index.html _site/medora/index.html
+          cp vietnam-travel/index.html vietnam-travel/app.css vietnam-travel/app.js vietnam-travel/manifest.webmanifest vietnam-travel/sw.js vietnam-travel/icon.svg _site/vietnam-travel/
+          cp vietnam-travel/data/seed-places.js _site/vietnam-travel/data/
+          cp hoi-chon-dung/index.html hoi-chon-dung/app.css hoi-chon-dung/app.js hoi-chon-dung/manifest.webmanifest hoi-chon-dung/sw.js hoi-chon-dung/icon.svg hoi-chon-dung/og-image.svg _site/hoi-chon-dung/
+          cp hoi-chon-dung/data/seed-products.js _site/hoi-chon-dung/data/
+          cp "$RUNNER_TEMP/choice-seo/sitemap.xml" "$RUNNER_TEMP/choice-seo/feed.xml" _site/hoi-chon-dung/
+          cp -R "$RUNNER_TEMP/choice-seo/san-pham" "$RUNNER_TEMP/choice-seo/danh-muc" "$RUNNER_TEMP/choice-seo/huong-dan" _site/hoi-chon-dung/
+          node tools/check-public-content.mjs _site
+
+      - name: Deploy Pages SEO
+        run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
+
+      - name: Thông báo URL mới cho IndexNow
+        continue-on-error: true
+        run: node tools/submit-indexnow.mjs "$RUNNER_TEMP/choice-seo/seo-urls.json"
+
+      - name: Gửi sitemap tới Google Search Console khi đã cấp quyền
+        continue-on-error: true
+        run: node tools/submit-google-sitemap.mjs
+
+      - name: Hậu kiểm SEO production
+        run: |
+          set -euo pipefail
+          sample=$(node -e 'const x=require(process.argv[1]); console.log(x.urls.find(u=>u.includes("/san-pham/"))||"")' "$RUNNER_TEMP/choice-seo/seo-urls.json")
+          test -n "$sample"
+          for attempt in $(seq 1 25); do
+            sitemap=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/sitemap.xml?run=$GITHUB_RUN_ID" || true)
+            feed=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/feed.xml?run=$GITHUB_RUN_ID" || true)
+            page=$(curl -fsSL "$sample?run=$GITHUB_RUN_ID" || true)
+            key=$(curl -fsSL "https://hiennhi89.pages.dev/e4c968d6c15b4ef69083f88f4f8d1e76.txt?run=$GITHUB_RUN_ID" || true)
+            if grep -q '<urlset' <<<"$sitemap" \
+              && grep -q '/san-pham/' <<<"$sitemap" \
+              && grep -q '<rss version="2.0">' <<<"$feed" \
+              && grep -q '"@type":"Product"' <<<"$page" \
+              && grep -q 'Công bố liên kết tiếp thị' <<<"$page" \
+              && grep -q 'e4c968d6c15b4ef69083f88f4f8d1e76' <<<"$key" \
+              && ! grep -qiE 'Autopilot|onboarding_required|Cloudflare Worker|API key|chủ sở hữu' <<<"$page"; then
+              echo "Growth SEO production đạt ở lần $attempt"
+              exit 0
+            fi
+            sleep 4
+          done
+          echo "Growth SEO production chưa đồng bộ" >&2
+          exit 1

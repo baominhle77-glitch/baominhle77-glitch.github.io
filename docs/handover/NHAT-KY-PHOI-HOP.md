@@ -13,7 +13,7 @@
 - **SPARE** (`/`) dùng mật khẩu riêng.
 - **Bói toán** (`/boitoan/`) có hai cấp Admin; chỉ lưu PBKDF2 hash + salt, không lưu plaintext.
 - **MEDORA** (`/medora/`) giữ cơ chế truy cập riêng hiện hành.
-- **Hội Chọn Đúng** (`/hoi-chon-dung/`) có Affiliate Autopilot nội bộ; giao diện public không hiển thị trạng thái vận hành.
+- **Hội Chọn Đúng** (`/hoi-chon-dung/`) có Growth Autopilot nội bộ; giao diện public không hiển thị trạng thái vận hành hoặc doanh thu.
 - Không commit `*.src.html`, mật khẩu, token hoặc secret.
 - Production frontend: `hiennhi89.pages.dev`.
 - Backend: `hiennhi89-gate.hiennhi89.workers.dev`.
@@ -21,6 +21,20 @@
 ---
 
 ## Nhật ký thay đổi — mới nhất trên cùng
+
+### 2026-07-25 01:10 GMT+7 — ChatGPT GPT-5.6 — SEO-20260725-01 — ĐANG TRIỂN KHAI 🟡
+
+- Chủ sở hữu yêu cầu triển khai ngay hệ thống tự tìm sản phẩm, gắn link affiliate thật, tự cập nhật web, đẩy SEO trên nền tảng lớn và kiểm soát doanh thu gần thời gian thực.
+- Task đã khóa branch `agent/SEO-20260725-01-growth-autopilot`; không có task khác đang giữ phạm vi.
+- Growth cycle được thiết kế hai nhịp: Worker mỗi 5 phút đồng bộ click/đơn/hoa hồng; discovery và tạo/thay deep link chỉ chạy khi đủ 6 giờ.
+- `backend/choice-revenue.js` đã được thêm: đọc AccessTrade order-list/transactions, click KV, tính doanh số, pending/approved/rejected commission, conversion rate, EPC, biểu đồ 30 ngày, top sản phẩm/campaign và cảnh báo bất thường.
+- Dashboard doanh thu là owner-only tại `/owner/choice/revenue`: chỉ đúng Telegram owner dùng `/doanhthu` mới nhận vé một lần 10 phút; sau đổi vé dùng cookie `HttpOnly; Secure; SameSite=Strict` 12 giờ; route không phiên trả `401`, mọi response `noindex/no-store`.
+- Lệnh owner đã thiết kế: `/doanhthu`, `/doanhthu-ngay`, `/doanhthu7`, `/doanhthu30`, `/dongbo-doanhthu`.
+- SEO publisher đã được thêm: tự tạo HTML tĩnh sản phẩm/danh mục/hướng dẫn, Product/Offer/Breadcrumb/ItemList/FAQ/Article JSON-LD, canonical, Open Graph, Twitter metadata, sitemap và RSS.
+- IndexNow key và bulk submission đã được thêm; Google Search Console API script sẵn sàng nhưng chỉ hoạt động sau một lần owner xác minh property/cấp service account.
+- Workflow production và workflow 6 giờ đã được cập nhật để dựng/deploy SEO, gửi IndexNow, tùy chọn gửi Google sitemap và hậu kiểm trang/route/private boundary.
+- Public API sản phẩm được materialize thêm ảnh và thời điểm xác minh, không lộ affiliate URL thô hoặc metadata vận hành.
+- Test source đã được viết cho doanh thu, one-time ticket/cookie, owner guard, SEO schema, sitemap/RSS, IndexNow và Google dry-run. CI/merge/deploy/production chưa được kết luận tại thời điểm ghi nhật ký này.
 
 ### 2026-07-24 23:41 GMT+7 — ChatGPT GPT-5.6 — GOVERNANCE-20260724-01 — HOÀN TẤT ✅
 

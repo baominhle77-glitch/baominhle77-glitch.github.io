@@ -29,3 +29,30 @@ test("dữ liệu sản phẩm công khai không chứa nhãn vận hành hoặc
   assert.doesNotMatch(source, /Hệ thống tự chọn dựa trên/);
   assert.doesNotMatch(source, /"autopilot", "accesstrade"/);
 });
+
+test("dashboard doanh thu là route owner riêng, noindex và phiên HttpOnly", async () => {
+  const [worker, revenue] = await Promise.all([
+    read("./worker.js"),
+    read("./choice-revenue.js")
+  ]);
+  assert.match(worker, /Hội Chọn Đúng owner revenue route v1/);
+  assert.match(worker, /handleChoiceRevenueRequest\(request, env\)/);
+  assert.match(worker, /Hội Chọn Đúng owner revenue Telegram v1/);
+  assert.match(revenue, /x-robots-tag": "noindex, nofollow, noarchive"/);
+  assert.match(revenue, /HttpOnly; Secure; SameSite=Strict/);
+  assert.match(revenue, /String\(message\?\.chat\?\.id/);
+  assert.match(revenue, /String\(message\?\.from\?\.id/);
+  assert.doesNotMatch(revenue, /customer_phone|customer_email|customer_name/);
+});
+
+test("Growth cycle chạy đồng bộ doanh thu 5 phút nhưng chỉ khám phá sản phẩm khi đủ 6 giờ", async () => {
+  const [worker, revenue, wrangler] = await Promise.all([
+    read("./worker.js"),
+    read("./choice-revenue.js"),
+    read("./wrangler.toml")
+  ]);
+  assert.match(worker, /runChoiceGrowthCycle/);
+  assert.match(worker, /Hội Chọn Đúng growth cycle 5m v1/);
+  assert.match(revenue, /DISCOVERY_INTERVAL_MS = 6 \* 60 \* 60 \* 1000/);
+  assert.match(wrangler, /crons = \["\*\/5 \* \* \* \*"\]/);
+});

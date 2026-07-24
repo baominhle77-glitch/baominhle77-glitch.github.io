@@ -16,9 +16,9 @@ ADMIN_V8_REGULAR_PASSWORD_HASH_B64 = "WP5H0yPnvX7DJ1Gg2ODMiz9m+tAlFhYzf+S4JTXJur
 ADMIN_V8_PRIMARY_PASSWORD_HASH_B64 = "nyCS+HxOceWo77FTxDQySuSTZOhKt+HuRHPBM/7uHZM="
 ADMIN_V8_PASSWORD_ITERATIONS = "10000"
 
-# Hội Chọn Đúng Affiliate Autopilot tự nghiên cứu, tạo deep link và làm mới catalog mỗi 6 giờ.
+# Growth cycle chạy 5 phút/lần: đồng bộ doanh thu; tự khám phá/tạo link sản phẩm khi đủ chu kỳ 6 giờ.
 [triggers]
-crons = ["17 */6 * * *"]
+crons = ["*/5 * * * *"]
 
 # Bộ nhớ KV để lưu yêu cầu + nhật ký (workflow tự tạo & điền id).
 [[kv_namespaces]]
