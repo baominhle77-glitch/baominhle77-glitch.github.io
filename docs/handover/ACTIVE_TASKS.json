@@ -1,26 +1,23 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T04:55:00+07:00",
+  "updated_at": "2026-07-25T05:20:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260725-02",
       "owner": "Claude Code",
       "branch": "claude/rune-tealeaf-random",
-      "base_sha": "146a3ff4fbc9b0e743aca20aeecfb48843feff6c",
       "paths": [
         "boitoan/index.html",
         "backend/community.js",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-25T03:40:00+07:00",
-      "heartbeat_at": "2026-07-25T04:55:00+07:00",
-      "summary": "Them mon Rune va Bai Tra; ap chuan doc cho Tarot/Bai Tay; rut bai ngau nhien that su; backend cong dong them tra loi + thich binh luan, thich bai va endpoint dem thanh vien cong khai."
-    }
-  ],
-  "recently_completed": [
+      "status": "completed",
+      "completed_at": "2026-07-25T05:20:00+07:00",
+      "summary": "Them mon Rune va Bai Tra; ap chuan doc cho Tarot/Bai Tay; sua loi loc linh vuc; rut bai ngau nhien that su; cong dong them tra loi/thich binh luan va GET /api/community/stats. PR #98 merge b72f5dd; CI 4/4 success; deploy run 30122583291; da kiem chung production: app HTTP 200 co RUNES/TEALEAF/scr-rune/scr-baitra, rnd rejection sampling, 0 gieo hat, 3/3 loc linh vuc, mode approval nguyen ven; API stats tra HTTP 200 {members:1,readers:1}."
+    },
     {
       "id": "GROWTH-20260725-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
