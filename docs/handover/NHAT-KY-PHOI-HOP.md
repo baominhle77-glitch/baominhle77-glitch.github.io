@@ -3,7 +3,7 @@
 > File này để các AI/công cụ cùng làm trên repository nắm được phạm vi, bằng chứng kiểm thử và việc còn chờ.
 
 **Thương hiệu hiển thị:** Spirituality Market.  
-**Quy tắc điều phối:** đọc `AGENTS.md` và `docs/handover/ACTIVE_TASKS.json` trước khi sửa; không ghi mật khẩu, token hoặc secret vào repository.  
+**Quy tắc điều phối:** đọc `AGENTS.md`, `docs/handover/ACTIVE_TASKS.json` và chuẩn đối tượng trước khi sửa; không ghi mật khẩu, token hoặc secret vào repository.  
 **Quy tắc độ tin cậy:** không kết luận source/production đã hoàn tất nếu chưa có log, test hoặc nghiệm thu thực tế.
 
 ---
@@ -11,9 +11,9 @@
 ## Trạng thái mật khẩu và hạ tầng
 
 - **SPARE** (`/`) dùng mật khẩu riêng.
-- **Bói toán** (`/boitoan/`) có hai cấp Admin được backend phân loại bằng hai mật khẩu khác nhau; chỉ lưu PBKDF2 hash + salt, không lưu plaintext.
+- **Bói toán** (`/boitoan/`) có hai cấp Admin; chỉ lưu PBKDF2 hash + salt, không lưu plaintext.
 - **MEDORA** (`/medora/`) giữ cơ chế truy cập riêng hiện hành.
-- **Hội Chọn Đúng** (`/hoi-chon-dung/`) là PWA công khai; catalog/vote/click chạy qua Worker và link affiliate được quản trị owner-only qua Telegram.
+- **Hội Chọn Đúng** (`/hoi-chon-dung/`) có Growth Autopilot nội bộ; giao diện public không hiển thị trạng thái vận hành hoặc doanh thu.
 - Không commit `*.src.html`, mật khẩu, token hoặc secret.
 - Production frontend: `hiennhi89.pages.dev`.
 - Backend: `hiennhi89-gate.hiennhi89.workers.dev`.
@@ -22,7 +22,7 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-25 01:30 GMT+7 — Claude Code — BOITOAN-20260724-16 — ĐANG LÀM ⏳
+### 2026-07-25 01:45 GMT+7 — Claude Code — BOITOAN-20260724-16 — ĐANG LÀM ⏳
 
 - Phạm vi: `boitoan/index.html` (máy diễn giải Lenormand), sổ khóa và nhật ký.
 - Vấn đề: phần diễn giải lắp ghép rời rạc — mỗi lá một khối nghĩa riêng, lộ nhãn kỹ thuật
@@ -36,146 +36,60 @@
   plaintext; `node --check` 10 khối script inline hợp lệ; vùng `<head>` giống hệt bản cũ.
 - Còn chờ: CI của PR #92 và nghiệm thu thực tế trên iPhone.
 
+### 2026-07-25 01:22 GMT+7 — ChatGPT GPT-5.6 — SEO-20260725-01 — HOÀN TẤT KỸ THUẬT ✅
+
+- Triển khai Growth Autopilot khép kín: tìm sản phẩm → lọc → tạo deep link affiliate → cập nhật catalog/web → dựng SEO → gửi IndexNow → đồng bộ click/đơn/hoa hồng → dashboard owner.
+- Worker cron chạy 5 phút để đồng bộ doanh thu; discovery/tạo lại link và SEO chỉ chạy khi đủ 6 giờ. Deploy trigger chạy ngay vòng đầu.
+- `backend/choice-revenue.js` đọc AccessTrade order-list/transactions và click KV; tính doanh số, commission pending/approved/rejected, conversion, EPC, approved EPC, AOV, biểu đồ 30 ngày, top sản phẩm/campaign và cảnh báo.
+- Dashboard owner-only `/owner/choice/revenue`: đúng Telegram owner dùng `/doanhthu` nhận vé một lần 10 phút; cookie `HttpOnly; Secure; SameSite=Strict` 12 giờ; không phiên `401`; mọi response `noindex/no-store`; không giữ tên, điện thoại hoặc email khách hàng.
+- Lệnh owner: `/doanhthu`, `/doanhthu-ngay`, `/doanhthu7`, `/doanhthu30`, `/dongbo-doanhthu`.
+- SEO publisher tự tạo HTML tĩnh sản phẩm/danh mục/hướng dẫn, Product/Offer/Breadcrumb/ItemList/FAQ/Article JSON-LD, canonical, Open Graph, Twitter metadata, sitemap và RSS.
+- IndexNow key và bulk submission đã deploy; production step IndexNow success. Google Search Console script có nhánh skip an toàn khi chưa có service account.
+- Public API sản phẩm có ảnh/thời điểm xác minh nhưng không lộ URL affiliate thô, metadata vận hành hoặc doanh thu.
+- PR #91 merge source `a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0`.
+- CI điều phối `30116008064`: success.
+- Validation cuối `30116312380`: Worker, Affiliate, Revenue, SEO, public-private boundary, frontend và WebKit AES thật đều success.
+- Production `30116421342`: source, SEO build, Worker-before-Pages, Growth trigger, Pages, IndexNow, Google step và smoke đều success.
+- Production recorder commit `915178f6ead00c4052391caf925ceea385b5fc75`; internal recorder `30116490615`, commit `e9ee55f3d55c14d10b83bbbb48efc794a7c0a6c6`.
+- Recorder xác nhận `onboarding_required`, credential false, sản phẩm/đơn thật bằng 0. Đây là external onboarding AccessTrade bắt buộc một lần, không phải lỗi kỹ thuật.
+- Sau khi owner đăng nhập/KYC và gửi `/atkey <API_KEY>`, hệ thống tự tạo link, cập nhật web và đồng bộ doanh thu; owner không vận hành từng sản phẩm.
+- Task chuyển `completed`; toàn bộ khóa được giải phóng.
+
+### 2026-07-24 23:41 GMT+7 — ChatGPT GPT-5.6 — GOVERNANCE-20260724-01 — HOÀN TẤT ✅
+
+- Chủ sở hữu phát hiện đúng một lỗi nghiêm trọng: build đã chèn trạng thái Autopilot, chế độ dự phòng và thông điệp dành cho chủ sở hữu lên footer public.
+- Đã gỡ hoàn toàn badge/footer/script nội bộ; thay bằng nội dung có ích cho người mua về quyền riêng tư, tương thích, bảo hành, đổi trả và giá cuối cùng.
+- PWA tăng từ `hoi-chon-dung-v2` lên `hoi-chon-dung-v3`, xóa cache cũ khi activate và không còn cache module trạng thái.
+- Đã xóa public status handler khỏi module materialized; Worker trả `404` cho route trạng thái, còn trigger run nội bộ vẫn bắt buộc secret.
+- Recorder không gọi API public; đọc `choice:autopilot:status:v1` trực tiếp từ Cloudflare KV bằng quyền CI và ghi rõ tài liệu owner/internal.
+- Dữ liệu sản phẩm public không còn nhãn Autopilot/AccessTrade, điểm xếp hạng nội bộ hoặc UTM mang tên cơ chế vận hành.
+- Ban hành `docs/handover/AUDIENCE_PRIVACY_STANDARD.md`, cập nhật `AGENTS.md`, và merge quy chế công ty toàn cục tại `4f2c6bf2ba61c041d737e90c12d5aa82205f1d8a`.
+- Cổng `tools/check-public-content.mjs` chạy trên source sau materialize và toàn bộ `_site`; một vi phạm public/private sẽ chặn merge/deploy.
+- PR #89 merge source `d72e3552a5a71e6f4ef14a4205b3e6f4ed2d25b5`.
+- CI: điều phối `30108929684`, regression/public-private/WebKit `30108929401`, recorder nội bộ `30108929479` — success.
+- Production `30109841905`: source boundary, Worker, Pages, PWA V3 và hậu kiểm production đều success; status public trả `404` và nội dung owner/internal không tồn tại trên HTML công khai.
+- Recorder `30109889703` đọc KV nội bộ thành công; commit hồ sơ `a22f0ef29f7712077e0202d7c89444b0ff288f03`.
+- Task chuyển `completed`; toàn bộ khóa được giải phóng.
+
+### 2026-07-24 22:34 GMT+7 — ChatGPT GPT-5.6 — AFFILIATE-20260724-02 — HOÀN TẤT KỸ THUẬT ✅
+
+- Triển khai Affiliate Autopilot: tự lấy datafeed, lọc rủi ro, tuyển sản phẩm, tạo deep link, đọc giao dịch, cập nhật catalog và chạy theo cron.
+- PR #86 runtime source `c4591418ae92adc77d0201e8e55737cd6ce929db`; CI `30104948933`, `30104948983`; production `30105078450`: success.
+- PR #87 recorder source `5ba62c6e67ff15eb49e1eb155e3763fa52f71508`; production `30105568525`, recorder `30105641911`: success.
+- Trạng thái kinh doanh và onboarding sau governance fix chỉ còn trong kênh owner/internal.
+
 ### 2026-07-24 21:29 GMT+7 — ChatGPT GPT-5.6 — AFFILIATE-20260724-01 — HOÀN TẤT ✅
 
-- Triển khai PWA công khai **Hội Chọn Đúng** tại `/hoi-chon-dung/`, tối ưu mobile, có bộ chọn theo danh mục/ngân sách/ưu tiên/nhu cầu, so sánh tối đa ba sản phẩm, lưu cục bộ, chia sẻ, cài PWA và bình chọn cộng đồng.
-- Seed 12 sản phẩm thuộc Tarot, sáng tạo nội dung và in 3D; `affiliate_url` để trống, link hiện tại chỉ là link tham khảo HTTPS cho tới khi owner gắn link aff thật.
-- Backend `backend/choice.js` cung cấp catalog/meta/health, vote khử lặp theo ngày và redirect `/r/choice/:id` đo click có khử lặp 5 phút; API catalog không lộ URL đích thô và không lưu IP thô.
-- Quản trị Telegram owner-only: `/chon`, `/dssp`, `/xemsp`, `/themsp`, `/suasp`, `/ansp`, `/hiensp`, `/xoasp`, `/thongkesp`.
-- SEO/PWA đủ title, description, canonical, Open Graph, JSON-LD, sitemap, robots chỉ mở ứng dụng mới và app shell offline.
-- Test cục bộ: frontend/SEO/PWA `5/5`; backend/API/vote/click/Telegram `6/6`; script tích hợp Worker idempotent.
-- PR #84 merge thành `f57023af442839da852354672bea8036e579a9fd`.
-- CI trước merge: điều phối `30100845932` success; frontend/Worker/WebKit `30100845901` success.
-- Production run `30100989464`, job `89506673059`: kiểm cấu hình Cloudflare, source, build, deploy Worker trước Pages, deploy Pages và hậu kiểm production đều success.
-- Recorder production commit `a5dfe91920171f1af1b65f1e090e1ac42b9eb070` ghi source trên ở trạng thái `SUCCESS`.
-- Task chuyển `completed`; toàn bộ khóa điều phối đã giải phóng.
+- Triển khai PWA **Hội Chọn Đúng** tại `/hoi-chon-dung/`, có bộ chọn nhu cầu, so sánh, lưu, chia sẻ và bình chọn.
+- PR #84 merge `f57023af442839da852354672bea8036e579a9fd`; CI và production `30100989464`: success.
+- V1 sau đó được V2 thay thế về mô hình vận hành.
 
 ### 2026-07-23 19:33 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-10 — HOÀN TẤT ✅
 
-- Sửa dứt điểm lỗi xác thực hai lớp: người dùng chỉ đăng nhập **một lần** tại cùng mục `Admin`, backend nhận diện mật khẩu và cấp JWT gắn đúng `device_id`; trang Quản trị không hỏi mật khẩu lần hai.
-- Phân cấp:
-  - `regular` — Admin thường: quản lý, khóa/mở khóa và xóa member; xóa review; tạo, đóng, mở lại và xóa bài thảo luận chung.
-  - `primary` — Admin tổng: toàn bộ quyền Admin thường, cộng quyền xem danh sách/nội dung hội thoại riêng và mở trang cá nhân member ở chế độ impersonation chỉ đọc.
-- Backend cưỡng chế quyền độc lập với UI:
-  - Admin thường gọi API hội thoại hoặc impersonation nhận `403 owner_device_required`;
-  - JWT Admin chỉ dùng được trên đúng thiết bị đã đăng nhập;
-  - chỉ một phiên/thiết bị Admin tổng hoạt động; đăng nhập primary trên thiết bị mới thu hồi primary cũ nhưng không thu hồi các phiên regular.
-- `ADMIN_TOKEN` cũ không còn được chấp nhận tại Community API.
-- Hai mật khẩu chỉ tồn tại dưới dạng PBKDF2-SHA256 hash + salt; không có plaintext trong source, test, log hoặc handover.
-- Frontend lưu `market_admin_token` và cấp quyền do server trả về; Admin thường không thấy tab Hội thoại/nút `Xem trang cá nhân`, Admin tổng thấy đầy đủ.
-- Cache Bói toán tăng `boitoan-v14` để Safari/iPhone nhận asset mới.
-- PR #64 merge Account V6 thành `f5ac80b72005e1bc9f2d934ca4ffbdb57ec427a8`.
-- CI cuối trước merge:
-  - coordination `30005276397`: success;
-  - Account V6/frontend/Worker `30005276313`: success.
-- Production run `30007344122`:
-  - Cloudflare Pages: success;
-  - Worker: success;
-  - hậu kiểm production Account V6/Travel/MEDORA: success;
-  - trang Quản trị có badge cấp quyền, không còn form mật khẩu lần hai;
-  - gate production có endpoint Admin login V6;
-  - API phiên Admin không token trả `401 unauthorized`.
-- Recorder ghi production `SUCCESS` tại source `b5ed52305192455d161c3e22934e3aeaada61eb3`; workflow gốc chỉ từng báo failure do bước ghi file trạng thái cũ sau khi deployment và smoke test đã đạt.
-- Task chuyển `completed`; toàn bộ khóa điều phối đã giải phóng.
+- Hoàn thiện xác thực hai cấp Admin, JWT gắn thiết bị và không lưu mật khẩu plaintext.
+- PR #64 merge `f5ac80b72005e1bc9f2d934ca4ffbdb57ec427a8`; CI và production success.
 
 ### 2026-07-23 18:54 GMT+7 — ChatGPT GPT-5.6 — TRAVEL-20260723-01 — HOÀN TẤT ✅
 
-- Tạo PWA công khai `/vietnam-travel/`, tối ưu mobile/iPhone, có tìm kiếm không dấu, lọc vùng/loại, sắp xếp, yêu thích, chi tiết, bản đồ, chia sẻ và offline shell.
-- Bộ seed gồm 20 địa điểm nổi tiếng/đặc thù của Việt Nam.
-- Dữ liệu động lưu tại Cloudflare KV, khóa `travel:places:v1`; API công khai chỉ đọc ở `/api/travel/*`.
-- Điều khiển Telegram owner-only: `/travel`, `/ds`, `/xem`, `/them`, `/sua`, `/an`, `/hien`, `/xoa` có xác nhận và `/thongke`.
-- Bảo mật: webhook giữ secret header; module kiểm tra cả `chat.id` và `from.id` khớp `TELEGRAM_CHAT_ID`; source không chứa token, webhook secret hay Telegram ID dạng giá trị.
-- Source thật materialize tại `b3a29cbd5416424a6df16bb4a7bd392a75287f5c`; bundle trung gian đã xóa.
-- Travel unit test `5/5`, syntax và idempotent integration đạt.
-- Validation run `30004367095`: success.
-- Production deploy + smoke run `30004367100`, job `89196797196`: success; Pages, Worker, Travel health/API, dữ liệu seed và các app cũ đều đạt.
-- Workflow kích hoạt tạm đã xóa; workflow production chuẩn `.github/workflows/deploy-pages.yml` đã bao gồm Vietnam Travel.
-- Task chuyển `completed`; khóa điều phối đã giải phóng.
-
-### 2026-07-23 16:47 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-09 — HOÀN TẤT ✅
-
-- Người dùng mở `/boitoan/` trên iPhone lúc 16:07 và WebKit báo trang gặp sự cố liên tục.
-- Lỗi gốc đã xác lập từ source:
-  - `applyMarketBranding()` tạo `MutationObserver` theo dõi `childList` và gọi `injectCommunity()`;
-  - Account V3 từng gán `textContent` nhãn Cộng đồng/Quản trị ở mọi lần gọi;
-  - thao tác đó tự tạo mutation mới, observer gọi lại hàm vô hạn, làm tab WebKit tăng tải và sập.
-- Runtime sửa thành idempotent:
-  - chỉ đổi `href`, `textContent`, `aria-label` và body class khi giá trị thực sự khác;
-  - marker production: `Account V3 iOS mutation guard`;
-  - contract test cấm quay lại cách gán `textContent` vô điều kiện.
-- PR #43 merge runtime guard thành `4c4fa6911637ff6da5e2cf4da986f496d06ca8e3`.
-- Bài browser test được tách thành `tools/webkit-production-check.mjs`, bắt buộc `node --check`, không phụ thuộc khóa giải mã bí mật.
-- PR #45 merge checker cuối thành source `bc8016a23c342ff93416003293148c06263242f8`.
-- CI trước merge:
-  - Account/frontend/Worker `29996444259`: success;
-  - coordination guard `29996444031`: success.
-- Production deploy `29996510949`: success; Pages/Admin/CSS/Gate `200`, API không phiên `401`, onboarding payload sai `400`.
-- **WebKit production E2E** run `29996558091`: success:
-  - register Reader `201`;
-  - login thiết bị/nền tảng thứ hai `200`;
-  - `/api/community/me` `200`;
-  - WebKit gate production `200` — trang sạch không crash; fixture cùng origin nạp đúng `gate.js` production, đúng một link Cộng đồng và mutation ổn định;
-  - tự xóa account `200`;
-  - token cũ `401`;
-  - login lại `401 invalid_login`;
-  - mã lỗi `none`.
-- Tài khoản thử `e2e_reader_*` đã tự xóa. Task chuyển `completed`; không còn khóa file.
-
-### 2026-07-23 15:58 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-08 — HOÀN TẤT ✅
-
-- Người dùng nghiệm thu trực tiếp trên iPhone và một nền tảng khác, phát hiện:
-  - giao diện Admin chỉ có badge nhưng không có lối quản trị rõ ràng;
-  - đăng ký Reader báo `Không thực hiện được`.
-- Đã triển khai lối quản trị rõ:
-  - badge `Admin/Admin tổng · Mở quản trị` là liên kết cảm ứng tới `community-admin.html`;
-  - mục `Cộng đồng` ở bottom navigation đổi thành `Quản trị` khi đang ở phiên Admin;
-  - trong trang quản trị vẫn có `Tài khoản member → Xem trang cá nhân`.
-- Đã sửa contract đăng ký/đăng nhập:
-  - trang plaintext không còn phụ thuộc `DECRYPT_KEY`;
-  - mọi public entry thành công trả cả community token và gate token;
-  - `key` chỉ là tùy chọn khi có payload mã hóa.
-- Đã bổ sung `DELETE /api/community/me` cho member tự xóa tài khoản đã xác thực; xóa login, profile, Reader index, device mapping, community session và gate session. Phiên impersonation không được tự xóa member.
-- Account V4:
-  - account mới dùng HMAC-SHA256 với salt ngẫu nhiên và pepper phía server từ `SESSION_SECRET`;
-  - không lưu mật khẩu plaintext hoặc pepper trong KV/source;
-  - vẫn đọc được bản ghi PBKDF2 cũ;
-  - rate limiter best-effort fail-open nếu binding lỗi.
-- Lỗi gốc production `500 server` được xác định: `handleCommunity()` return Promise của các async handler mà không `await`, khiến rejection thoát khỏi `try/catch`. Đã đổi dispatcher thành `return await ...` cho mọi route async.
-- PR #41 merge source `541194fbc63a73633fb857d4b90c221935b06309`.
-- CI trước merge:
-  - coordination guard `29992908287`: success;
-  - Account V4/frontend/Worker `29992908212`: success.
-- Production deploy `29993031238`: success; Pages/Admin/CSS/Gate `200`, API không phiên `401`, onboarding dữ liệu sai `400`.
-- **E2E production thật** run `29993081236`: success:
-  - register Reader `201`;
-  - login từ thiết bị/nền tảng thứ hai `200`;
-  - đọc `/me` `200`;
-  - tự xóa `200`;
-  - token cũ bị thu hồi `401`;
-  - login lại sau xóa `401 invalid_login`;
-  - mã lỗi an toàn `none`.
-- Tài khoản thử có tiền tố `e2e_reader_` đã tự xóa trong cùng workflow.
-- Task chuyển `completed`; không còn khóa file.
-
-### 2026-07-23 14:34 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-07 — HOÀN TẤT ✅
-
-- Nút `Xem giao diện` cũ chỉ mở dashboard mặc định, không gọi `renderProfile()`.
-- PR #33 merge source `9a6b53cc7e99d78ab53410df4d3d531aeef31caa`.
-- Đổi thành `Xem trang cá nhân`, dùng `admin_view=profile`, mở hồ sơ đúng member ở chế độ chỉ đọc, có nút quay lại Admin.
-- CI `29988447066`, `29988447104` và production `29988531212` đều success.
-
-### 2026-07-23 13:56 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-06 — HOÀN TẤT ✅
-
-- PR #31 merge source `61c0dc0efbddf3c865c44d001d022d80cf0185d9`.
-- Triển khai Account V2: onboarding hai màn hình, input iPhone, nhánh plaintext, badge vai trò, giao diện theo role, quyền Admin và impersonation chỉ đọc.
-- CI `29986274969`, `29986275030`; production `29986415052`: success.
-
-### 2026-07-23 12:20 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-05 — HOÀN TẤT ✅
-
-- PR #28 merge source `d48ef93137c35e38ee64004dfb0cdaee9c04fd83`.
-- Đổi branding thành `Spirituality Market`, chuẩn hóa `Admin`, đưa đăng nhập/đăng ký member lên cửa đầu. Bố cục này sau đó được Account V2 thay thế.
-
-### 2026-07-23 10:30 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-04 — HOÀN TẤT ✅
-
-- PR #26 merge source `3322b7c899aeeee3d2e98e26e4cbc97931390a77`.
-- Gỡ các hộp `Khung luận…` và `Kết nối toàn trải bài`; giữ thuật toán gốc, Cộng đồng, tài khoản, chat, review và thanh toán.
+- Tạo PWA `/vietnam-travel/`, có tìm kiếm, lọc, yêu thích, bản đồ, chia sẻ và offline shell.
+- Validation `30004367095`; production `30004367100`: success.

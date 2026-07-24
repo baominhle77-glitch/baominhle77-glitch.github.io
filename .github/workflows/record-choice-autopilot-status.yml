@@ -1,0 +1,134 @@
+name: Ghi trạng thái Affiliate Autopilot nội bộ
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/record-choice-autopilot-status.yml
+      - backend/wrangler.toml
+      - docs/handover/ACTIVE_TASKS.json
+  workflow_run:
+    workflows: ["Deploy lên Cloudflare Pages (hiennhi89.pages.dev)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: choice-autopilot-internal-status
+  cancel-in-progress: true
+
+jobs:
+  record:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: "997944c1bfcc2dcaca32718124cd718c"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.ref }}
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - name: Đọc trạng thái nội bộ từ KV
+        id: status
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            cat > "$RUNNER_TEMP/choice-autopilot.json" <<'JSON'
+          {"mode":"not_started","configured":false,"updated_at":"","last_run_at":"","selected_products":0,"catalog_products":0,"orders_7d":0,"next_run_hint":""}
+          JSON
+          else
+            test -n "$CLOUDFLARE_API_TOKEN"
+            npx --yes wrangler@4.112.0 kv key get \
+              --binding=KV \
+              "choice:autopilot:status:v1" \
+              --text \
+              --remote \
+              --config backend/wrangler.toml \
+              > "$RUNNER_TEMP/choice-autopilot.json"
+          fi
+          test -s "$RUNNER_TEMP/choice-autopilot.json"
+          node - <<'NODE' "$RUNNER_TEMP/choice-autopilot.json" "$GITHUB_OUTPUT" "$GITHUB_EVENT_NAME"
+          const fs = require('node:fs');
+          const [jsonPath, outputPath, eventName] = process.argv.slice(2);
+          const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+          const modes = new Set(['active', 'onboarding_required', 'error', 'not_started']);
+          if (!modes.has(data.mode)) throw new Error(`Autopilot mode không hợp lệ: ${data.mode}`);
+          const clean = (value, max = 160) => String(value ?? '').replace(/[\r\n]/g, ' ').slice(0, max);
+          const fields = {
+            mode: data.mode,
+            configured: Boolean(data.configured),
+            updated_at: clean(data.updated_at, 60),
+            last_run_at: clean(data.last_run_at, 60),
+            selected_products: Number(data.selected_products || 0),
+            catalog_products: Number(data.catalog_products || 0),
+            orders_7d: Number(data.orders_7d || 0),
+            needs_owner_login: data.mode === 'onboarding_required',
+            next_run_hint: clean(data.next_run_hint, 80),
+          };
+          fs.appendFileSync(outputPath, Object.entries(fields).map(([key, value]) => `${key}=${value}`).join('\n') + '\n');
+          console.log(JSON.stringify({ event: eventName, ...fields }));
+          NODE
+
+      - name: Trạng thái ACTIVE
+        if: steps.status.outputs.mode == 'active'
+        run: echo "Affiliate Autopilot đã kết nối và tự vận hành catalog."
+
+      - name: Trạng thái ONBOARDING_REQUIRED
+        if: steps.status.outputs.mode == 'onboarding_required'
+        run: echo "Còn điểm chạm bắt buộc đăng nhập/KYC AccessTrade một lần."
+
+      - name: Trạng thái ERROR
+        if: steps.status.outputs.mode == 'error'
+        run: echo "Catalog gần nhất được giữ và hệ thống sẽ tự thử lại."
+
+      - name: Trạng thái NOT_STARTED
+        if: steps.status.outputs.mode == 'not_started'
+        run: echo "Chưa có vòng chạy Affiliate Autopilot."
+
+      - name: Sinh hồ sơ nội bộ
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          source_sha="${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}"
+          deploy_run="${{ github.event_name == 'workflow_run' && github.event.workflow_run.html_url || format('https://github.com/{0}/actions/runs/{1}', github.repository, github.run_id) }}"
+          cat > docs/handover/CHOICE_AUTOPILOT_STATUS.md <<EOF
+          # Trạng thái nội bộ Hội Chọn Đúng Affiliate Autopilot
+
+          > Tài liệu owner/internal. Không sao chép nội dung này lên giao diện hoặc API công khai.
+
+          - Mode: \`${{ steps.status.outputs.mode }}\`
+          - Credential đã kết nối: \`${{ steps.status.outputs.configured }}\`
+          - Cần chủ sở hữu đăng nhập/KYC một lần: \`${{ steps.status.outputs.needs_owner_login }}\`
+          - Sản phẩm tự tuyển ở vòng gần nhất: \`${{ steps.status.outputs.selected_products }}\`
+          - Tổng sản phẩm catalog: \`${{ steps.status.outputs.catalog_products }}\`
+          - Đơn ghi nhận 7 ngày: \`${{ steps.status.outputs.orders_7d }}\`
+          - Lần chạy gần nhất: \`${{ steps.status.outputs.last_run_at }}\`
+          - Trạng thái cập nhật: \`${{ steps.status.outputs.updated_at }}\`
+          - Gợi ý vòng tiếp theo: \`${{ steps.status.outputs.next_run_hint }}\`
+          - Source deploy: \`$source_sha\`
+          - Workflow deploy: \`$deploy_run\`
+          - Workflow recorder: \`https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\`
+
+          File này được đọc trực tiếp từ Cloudflare KV bằng quyền CI; không có endpoint status public.
+          EOF
+
+      - name: Ghi hồ sơ vào main
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/handover/CHOICE_AUTOPILOT_STATUS.md
+          if git diff --cached --quiet; then
+            echo "Trạng thái không đổi."
+            exit 0
+          fi
+          git commit -m "docs: record internal Affiliate Autopilot status"
+          git pull --rebase origin main
+          git push origin HEAD:main

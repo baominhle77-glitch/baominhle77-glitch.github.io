@@ -9,6 +9,7 @@ File này áp dụng cho **mọi AI/agent/công cụ** làm việc trong reposit
 3. `docs/handover/ACTIVE_TASKS.json` — phạm vi đang được agent khác giữ.
 4. `docs/handover/NHAT-KY-PHOI-HOP.md` — lịch sử thay đổi.
 5. File bàn giao chuyên biệt của phần định sửa, nếu có.
+6. `docs/handover/AUDIENCE_PRIVACY_STANDARD.md` khi thay đổi UI, nội dung, API hoặc build public.
 
 Không bắt đầu chỉnh sửa khi chưa đọc đủ các file trên.
 
@@ -87,7 +88,7 @@ Mọi PR mã nguồn phải cập nhật ít nhất một trong các file:
 ## 7. Quy tắc Cloudflare và deploy
 
 - `backend/wrangler.toml` và workflow trong repository là nguồn chuẩn cấu hình; không sửa lệch trên dashboard rồi bỏ quên source.
-- Deploy production theo thứ tự: **Pages trước, Worker sau**.
+- Deploy theo thứ tự và contract hiện hành trong workflow production; không tự đổi thứ tự nếu chưa cập nhật toàn bộ test liên quan.
 - Không deploy Worker riêng nếu contract frontend/API vừa thay đổi.
 - Sau deploy phải hậu kiểm endpoint công khai, kiểm soát truy cập API, CORS và cập nhật `docs/handover/PRODUCTION_STATUS.md`.
 - Secret chỉ đặt bằng GitHub Secrets/Cloudflare Worker Secrets.
@@ -98,6 +99,7 @@ Chạy các kiểm tra có liên quan; với thay đổi hệ thống chung ph�
 
 ```bash
 node tools/validate-coordination.mjs
+node tools/check-public-content.mjs
 node --check assets/gate.js
 node --check assets/community.js
 node --check assets/community-admin.js
@@ -134,3 +136,15 @@ Trước khi kết thúc task:
 5. Nội dung PR/issue cũ.
 
 Khi không chắc, dừng ở trạng thái an toàn và ghi `blocked`; không tự ý sửa rộng để “cho xong”.
+
+## 11. Phân tách đối tượng và thông tin nội bộ — BẮT BUỘC
+
+- Trước khi thêm bất kỳ nội dung, trạng thái, nút hoặc thông báo nào, phải xác định người đọc là public user, member, admin/operator hay owner/internal.
+- Giao diện public chỉ được chứa thông tin có giá trị trực tiếp cho người dùng cuối.
+- Không dùng trang công khai làm dashboard vận hành hoặc báo cáo cho chủ sở hữu.
+- Cấm đưa lên public UI: việc owner cần làm, onboarding/KYC owner, trạng thái credential, `onboarding_required`, chế độ dự phòng, Worker, KV, cron, pipeline, source, branch, commit, deploy, production, secret, trigger, API key, trạng thái lỗi nguồn nội bộ, doanh thu/hoa hồng nội bộ hoặc hướng dẫn Telegram owner.
+- API trạng thái nội bộ không được public; phải yêu cầu xác thực hoặc được đọc trực tiếp từ hạ tầng nội bộ.
+- Nội dung minh bạch cần thiết cho người dùng như affiliate, quảng cáo, quyền riêng tư, giá, tồn kho, bảo hành, đổi trả và giới hạn dịch vụ được phép hiển thị, nhưng phải viết theo ngôn ngữ người dùng và không tiết lộ kiến trúc nội bộ.
+- Kiểm tra cả source lẫn nội dung được chèn ở bước build, thông báo lỗi và PWA cache.
+- Mọi thay đổi public phải chạy `node tools/check-public-content.mjs`; một vi phạm là lỗi nghiêm trọng và chặn merge/deploy.
+- Chi tiết đầy đủ nằm tại `docs/handover/AUDIENCE_PRIVACY_STANDARD.md`.
