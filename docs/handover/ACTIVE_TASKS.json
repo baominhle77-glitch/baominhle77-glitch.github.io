@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T23:22:00+07:00",
+  "updated_at": "2026-07-24T23:41:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "GOVERNANCE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GOVERNANCE-20260724-01-public-private-boundary",
-      "base_sha": "e0053652dad2184ad1b82d8f229a6a3cdebcdc72",
+      "branch": "agent/GOVERNANCE-20260724-01-closeout",
       "paths": [
         "AGENTS.md",
         "tools/check-public-content.mjs",
@@ -28,13 +28,10 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "docs/handover/HOI_CHON_DUNG.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-24T22:56:00+07:00",
-      "heartbeat_at": "2026-07-24T23:22:00+07:00",
-      "summary": "Khắc phục khẩn cấp rò nội dung owner/internal: gỡ build injection, xóa hoàn toàn public status handler, chuyển recorder sang KV nội bộ, làm sạch dữ liệu sản phẩm, tăng PWA cache V3 và áp dụng cổng CI/chuẩn bắt buộc cho mọi dự án."
-    }
-  ],
-  "recently_completed": [
+      "status": "completed",
+      "completed_at": "2026-07-24T23:41:00+07:00",
+      "summary": "Khắc phục hoàn toàn lỗi đưa nội dung owner/internal lên public UI. Quy chế công ty toàn cục merge 4f2c6bf2; PR #89 merge d72e3552; CI điều phối 30108929684, regression/public-private/WebKit 30108929401 và recorder nội bộ 30108929479 SUCCESS; production 30109841905 SUCCESS. Public UI đã gỡ trạng thái vận hành, PWA cache V3 xóa cache cũ, public status handler bị xóa và route trả 404, recorder đọc trực tiếp Cloudflare KV."
+    },
     {
       "id": "AFFILIATE-20260724-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -42,7 +39,7 @@
       "paths": ["backend/choice-autopilot.js", "hoi-chon-dung/**", ".github/workflows/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T22:34:00+07:00",
-      "summary": "Affiliate Autopilot V2 production SUCCESS; production hiện onboarding_required do chưa kết nối AccessTrade."
+      "summary": "Affiliate Autopilot V2 production SUCCESS; trạng thái kinh doanh chỉ còn trong kênh nội bộ sau governance fix."
     },
     {
       "id": "AFFILIATE-20260724-01",
