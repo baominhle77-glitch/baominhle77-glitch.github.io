@@ -74,12 +74,15 @@ jobs:
           grep -q 'Bói toán V11' assets/gate.js
           grep -q '/assets/gate.js?v=19' boitoan/index.html
           grep -q 'boitoan-v19' boitoan/sw.js
+          test "$(grep -c 'Hội Chọn Đúng API integration v1' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng API integration v2' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng Telegram integration v1' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng Telegram integration v2' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng Autopilot scheduled v2' backend/worker.js)" -eq 1
           test "$(grep -c 'Affiliate Autopilot UI v2' hoi-chon-dung/index.html)" -eq 1
           grep -q 'x-choice-autopilot-trigger' backend/worker.js
           grep -q 'choiceAutopilotIsOwner' backend/worker.js
+          grep -q 'choiceAutopilotCommand === "/chon"' backend/worker.js
           grep -q 'update?.message?.from?.id' backend/worker.js
           grep -q 'crons = \["17 \*/6 \* \* \*"\]' backend/wrangler.toml
           grep -q 'autopilotBadge' hoi-chon-dung/index.html
@@ -99,18 +102,23 @@ jobs:
           cp hoi-chon-dung/index.html hoi-chon-dung/app.css hoi-chon-dung/app.js hoi-chon-dung/autopilot-ui.js hoi-chon-dung/manifest.webmanifest hoi-chon-dung/sw.js hoi-chon-dung/icon.svg hoi-chon-dung/og-image.svg hoi-chon-dung/sitemap.xml _site/hoi-chon-dung/
           cp hoi-chon-dung/data/seed-products.js _site/hoi-chon-dung/data/
 
-      - name: Deploy Worker và khởi động Affiliate Autopilot
+      - name: Deploy Worker trước Pages
         working-directory: backend
         run: |
           set -euo pipefail
           trigger="$(openssl rand -hex 32)"
           echo "::add-mask::$trigger"
+          echo "CHOICE_AUTOPILOT_TRIGGER_RUNTIME=$trigger" >> "$GITHUB_ENV"
           printf '%s' "$trigger" | npx --yes wrangler@4.112.0 secret put CHOICE_AUTOPILOT_TRIGGER
           npx --yes wrangler@4.112.0 deploy
+
+      - name: Khởi động Affiliate Autopilot
+        run: |
+          set -euo pipefail
           for attempt in $(seq 1 20); do
             code=$(curl -sS -o "$RUNNER_TEMP/autopilot-start.json" -w '%{http_code}' \
               -X POST \
-              -H "x-choice-autopilot-trigger: $trigger" \
+              -H "x-choice-autopilot-trigger: $CHOICE_AUTOPILOT_TRIGGER_RUNTIME" \
               "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/run" || true)
             if [ "$code" = "200" ] && grep -Eq '"ok":(true|false)' "$RUNNER_TEMP/autopilot-start.json"; then
               cat "$RUNNER_TEMP/autopilot-start.json"
