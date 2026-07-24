@@ -57,27 +57,38 @@ if (!autopilot.includes('const sortFields = ["BEST_SELLERS", "RECOMMENDED", "HIG
   );
 }
 
-if (!autopilot.includes("const shopCounts = new Map()")) {
+if (!autopilot.includes("const selectedSourceIds = new Set()")) {
   const diverseSelection = [
     '      const shortlist = group.candidates.slice(0, MAX_PRODUCTS_PER_CATEGORY * 5);',
     '      const shopCounts = new Map();',
     '      const priceBands = new Set();',
+    '      const selectedSourceIds = new Set();',
     '      let rank = 0;',
-    '      for (const candidate of shortlist) {',
+    '      for (const preferNewPriceBand of [true, false]) {',
+    '        for (const candidate of shortlist) {',
+    '          if (rank >= MAX_PRODUCTS_PER_CATEGORY) break;',
+    '          if (selectedSourceIds.has(candidate.source_id)) continue;',
+    '          const shopCount = shopCounts.get(candidate.shop_name) || 0;',
+    '          const priceBand = candidate.price_min < 200000 ? "low" : candidate.price_min < 1000000 ? "mid" : "high";',
+    '          if (shopCount >= 2) continue;',
+    '          if (preferNewPriceBand && priceBands.has(priceBand)) continue;',
+    '          try {',
+    '            const affiliateUrl = await createAffiliateLink(credential.token, candidate, runId, fetchImpl);',
+    '            if (!affiliateUrl) continue;',
+    '            selected.push(toProduct(candidate, affiliateUrl, rank, previousBySource.get(candidate.source_id)));',
+    '            selectedSourceIds.add(candidate.source_id);',
+    '            shopCounts.set(candidate.shop_name, shopCount + 1);',
+    '            priceBands.add(priceBand);',
+    '            rank += 1;',
+    '          } catch (error) {',
+    '            errors.push(`${candidate.source_id}:${clean(error?.message, 160)}`);',
+    '          }',
+    '        }',
     '        if (rank >= MAX_PRODUCTS_PER_CATEGORY) break;',
-    '        const shopCount = shopCounts.get(candidate.shop_name) || 0;',
-    '        const priceBand = candidate.price_min < 200000 ? "low" : candidate.price_min < 1000000 ? "mid" : "high";',
-    '        if (shopCount >= 2 || (priceBands.has(priceBand) && rank < 3)) continue;',
-    '        try {',
-    '          const affiliateUrl = await createAffiliateLink(credential.token, candidate, runId, fetchImpl);',
-    '          if (!affiliateUrl) continue;',
-    '          selected.push(toProduct(candidate, affiliateUrl, rank, previousBySource.get(candidate.source_id)));',
-    '          shopCounts.set(candidate.shop_name, shopCount + 1);',
-    '          priceBands.add(priceBand);',
-    '          rank += 1;'
+    '      }'
   ].join("\n");
   autopilot = autopilot.replace(
-    /      const shortlist = group\.candidates\.slice\(0, MAX_PRODUCTS_PER_CATEGORY \* 2\);[\s\S]*?          rank \+= 1;/,
+    /      const shortlist = group\.candidates\.slice\(0, MAX_PRODUCTS_PER_CATEGORY \* 2\);[\s\S]*?      \}/,
     diverseSelection
   );
 }
@@ -113,7 +124,9 @@ if (!autopilot.includes("categories_covered:")) {
 for (const required of [
   'id: "tech"', 'id: "travel"', "trend_score: trendScore",
   'const sortFields = ["BEST_SELLERS", "RECOMMENDED", "HIGH_COMMISSION_RATE"]',
-  "const shopCounts = new Map()", "const refreshedCategories = new Set", "const MAX_PRODUCTS_PER_CATEGORY = 4;"
+  "const shopCounts = new Map()", "const selectedSourceIds = new Set()",
+  "for (const preferNewPriceBand of [true, false])", "const refreshedCategories = new Set",
+  "const MAX_PRODUCTS_PER_CATEGORY = 4;"
 ]) {
   if (!autopilot.includes(required)) throw new Error(`Autopilot đa lĩnh vực thiếu: ${required}`);
 }
@@ -141,4 +154,4 @@ for (const required of [
 }
 await writeFile(seoPath, seo);
 
-console.log(`choice-multiniche-ok: ${CHOICE_TAXONOMY.length} lĩnh vực, trend scoring, đa dạng shop/giá và SEO danh mục động`);
+console.log(`choice-multiniche-ok: ${CHOICE_TAXONOMY.length} lĩnh vực, trend scoring, tuyển hai vòng và SEO danh mục động`);
