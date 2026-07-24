@@ -22,9 +22,14 @@ test("HTML public có SEO, PWA, structured data và chỉ chứa nội dung hữ
   assert.doesNotMatch(html, /autopilot-ui\.js/);
 });
 
-test("catalog dự phòng có ba danh mục, ID duy nhất và URL HTTPS an toàn", () => {
-  assert.equal(CHOICE_CATEGORIES.length, 3);
+test("catalog dự phòng có taxonomy đa lĩnh vực, ID duy nhất và URL HTTPS an toàn", () => {
+  assert.ok(CHOICE_CATEGORIES.length >= 12);
   assert.ok(SEED_PRODUCTS.length >= 12);
+  const categoryIds = CHOICE_CATEGORIES.map((item) => item.id);
+  assert.equal(new Set(categoryIds).size, categoryIds.length);
+  for (const required of ["tarot", "creator", "3d", "tech", "home", "beauty", "fashion", "mom-baby", "pets", "office", "fitness", "travel"]) {
+    assert.ok(categoryIds.includes(required), `thiếu danh mục ${required}`);
+  }
   const ids = SEED_PRODUCTS.map((item) => item.id);
   assert.equal(new Set(ids).size, ids.length);
   for (const item of SEED_PRODUCTS) {
@@ -39,9 +44,9 @@ test("catalog dự phòng có ba danh mục, ID duy nhất và URL HTTPS an toà
   }
 });
 
-test("service worker V3 loại cache giao diện nội bộ và có offline navigation fallback", async () => {
+test("service worker V4 xóa cache taxonomy cũ và có offline navigation fallback", async () => {
   const sw = await read("./sw.js");
-  assert.match(sw, /hoi-chon-dung-v3/);
+  assert.match(sw, /hoi-chon-dung-v4/);
   assert.doesNotMatch(sw, /autopilot-ui\.js/);
   assert.match(sw, /data\/seed-products\.js/);
   assert.match(sw, /request\.mode === "navigate"/);
