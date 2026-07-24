@@ -1,9 +1,13 @@
 # HỘI CHỌN ĐÚNG — BÀN GIAO MVP
 
 **Task-ID:** `AFFILIATE-20260724-01`  
-**Đường dẫn dự kiến:** `https://hiennhi89.pages.dev/hoi-chon-dung/`  
+**Production:** `https://hiennhi89.pages.dev/hoi-chon-dung/`  
 **Backend:** `https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/*`  
-**Trạng thái tài liệu:** source đã dựng và kiểm thử cục bộ; chỉ ghi production đạt sau khi CI/deploy và smoke test thành công.
+**Trạng thái:** `SUCCESS` — đã deploy và hậu kiểm production ngày 24/07/2026.  
+**Source production:** `f57023af442839da852354672bea8036e579a9fd`  
+**PR:** `#84`  
+**CI trước merge:** `30100845932`, `30100845901` — SUCCESS  
+**Deploy + production smoke:** `30100989464`, job `89506673059` — SUCCESS
 
 ## 1. Mục tiêu
 
@@ -64,13 +68,17 @@ Link affiliate: https://link-affiliate-hop-le.example/...
 
 ## 5. Trạng thái link lúc seed
 
-`affiliate_url` của 12 sản phẩm mẫu đang để trống. `merchant_url` chỉ là link tìm kiếm tham khảo HTTPS để ứng dụng không dẫn tới trang giả hoặc gian hàng chưa xác minh. Vì vậy MVP có thể chạy và đo hành vi nhưng **chưa phát sinh hoa hồng** cho tới khi owner cập nhật link affiliate thật qua Telegram.
+`affiliate_url` của 12 sản phẩm mẫu đang để trống. `merchant_url` chỉ là link tìm kiếm tham khảo HTTPS để ứng dụng không dẫn tới trang giả hoặc gian hàng chưa xác minh. Vì vậy production hiện có thể chạy, đo hành vi và kiểm chứng luồng chuyển hướng nhưng **chưa phát sinh hoa hồng** cho tới khi owner cập nhật link affiliate thật qua Telegram.
 
-## 6. Kiểm thử
+## 6. Kiểm thử và bằng chứng production
 
-- `node --test hoi-chon-dung/app.test.mjs`: SEO/PWA/disclosure/catalog/service worker.
-- `node --test backend/choice.test.mjs`: URL an toàn, API không lộ link, vote dedupe, click redirect/dedupe, quyền Telegram, lọc danh mục.
-- Workflow production chạy regression hiện có, deploy Worker trước Pages và smoke test trang/API mới.
+- `node --test hoi-chon-dung/app.test.mjs`: 5/5 đạt — SEO/PWA/disclosure/catalog/service worker.
+- `node --test backend/choice.test.mjs`: 6/6 đạt — URL an toàn, API không lộ link, vote dedupe, click redirect/dedupe, quyền Telegram, lọc danh mục.
+- PR #84 merge thành source `f57023af442839da852354672bea8036e579a9fd`.
+- Điều phối đa-agent `30100845932`: success.
+- Frontend/Worker/WebKit hiện hữu `30100845901`: success.
+- Workflow production `30100989464`, job `89506673059`: success toàn bộ các bước kiểm tra cấu hình Cloudflare, source, build site, deploy Worker trước Pages, deploy Pages và hậu kiểm production.
+- Recorder production commit `a5dfe91920171f1af1b65f1e090e1ac42b9eb070` ghi source trên ở trạng thái `SUCCESS`.
 
 ## 7. Giới hạn MVP
 

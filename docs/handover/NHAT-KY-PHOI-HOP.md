@@ -13,6 +13,7 @@
 - **SPARE** (`/`) dùng mật khẩu riêng.
 - **Bói toán** (`/boitoan/`) có hai cấp Admin được backend phân loại bằng hai mật khẩu khác nhau; chỉ lưu PBKDF2 hash + salt, không lưu plaintext.
 - **MEDORA** (`/medora/`) giữ cơ chế truy cập riêng hiện hành.
+- **Hội Chọn Đúng** (`/hoi-chon-dung/`) là PWA công khai; catalog/vote/click chạy qua Worker và link affiliate được quản trị owner-only qua Telegram.
 - Không commit `*.src.html`, mật khẩu, token hoặc secret.
 - Production frontend: `hiennhi89.pages.dev`.
 - Backend: `hiennhi89-gate.hiennhi89.workers.dev`.
@@ -20,6 +21,20 @@
 ---
 
 ## Nhật ký thay đổi — mới nhất trên cùng
+
+### 2026-07-24 21:29 GMT+7 — ChatGPT GPT-5.6 — AFFILIATE-20260724-01 — HOÀN TẤT ✅
+
+- Triển khai PWA công khai **Hội Chọn Đúng** tại `/hoi-chon-dung/`, tối ưu mobile, có bộ chọn theo danh mục/ngân sách/ưu tiên/nhu cầu, so sánh tối đa ba sản phẩm, lưu cục bộ, chia sẻ, cài PWA và bình chọn cộng đồng.
+- Seed 12 sản phẩm thuộc Tarot, sáng tạo nội dung và in 3D; `affiliate_url` để trống, link hiện tại chỉ là link tham khảo HTTPS cho tới khi owner gắn link aff thật.
+- Backend `backend/choice.js` cung cấp catalog/meta/health, vote khử lặp theo ngày và redirect `/r/choice/:id` đo click có khử lặp 5 phút; API catalog không lộ URL đích thô và không lưu IP thô.
+- Quản trị Telegram owner-only: `/chon`, `/dssp`, `/xemsp`, `/themsp`, `/suasp`, `/ansp`, `/hiensp`, `/xoasp`, `/thongkesp`.
+- SEO/PWA đủ title, description, canonical, Open Graph, JSON-LD, sitemap, robots chỉ mở ứng dụng mới và app shell offline.
+- Test cục bộ: frontend/SEO/PWA `5/5`; backend/API/vote/click/Telegram `6/6`; script tích hợp Worker idempotent.
+- PR #84 merge thành `f57023af442839da852354672bea8036e579a9fd`.
+- CI trước merge: điều phối `30100845932` success; frontend/Worker/WebKit `30100845901` success.
+- Production run `30100989464`, job `89506673059`: kiểm cấu hình Cloudflare, source, build, deploy Worker trước Pages, deploy Pages và hậu kiểm production đều success.
+- Recorder production commit `a5dfe91920171f1af1b65f1e090e1ac42b9eb070` ghi source trên ở trạng thái `SUCCESS`.
+- Task chuyển `completed`; toàn bộ khóa điều phối đã giải phóng.
 
 ### 2026-07-23 19:33 GMT+7 — ChatGPT GPT-5.6 — BOITOAN-20260723-10 — HOÀN TẤT ✅
 
