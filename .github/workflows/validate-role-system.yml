@@ -29,7 +29,7 @@ jobs:
           grep -q 'Bói toán V11' assets/gate.js
           grep -q 'openAppContent(data.key, "admin-session")' assets/gate.js
 
-      - name: Kiểm tra frontend và Worker
+      - name: Kiểm tra frontend Bói toán
         run: |
           set -euo pipefail
           node --check assets/gate.js
@@ -40,12 +40,49 @@ jobs:
           node assets/account-v2.test.mjs
           node --check boitoan/sw.js
           node boitoan/sw.test.mjs
+
+      - name: Kiểm tra Community backend
+        run: |
+          set -euo pipefail
           node --check backend/community.js
           node backend/community.test.mjs
           node backend/account-v2.test.mjs
           node backend/admin-v8-health.test.mjs
+
+      - name: Kiểm tra Worker lõi
+        run: |
+          set -euo pipefail
           node --check backend/worker.js
           node backend/worker.test.mjs
+
+      - name: Kiểm tra Hội Chọn Đúng Affiliate Autopilot
+        run: |
+          set -euo pipefail
+          node tools/apply-travel-system.mjs
+          node tools/apply-choice-system.mjs
+          node tools/apply-choice-system.mjs
+          node tools/apply-choice-autopilot-ui.mjs
+          node tools/apply-choice-autopilot-ui.mjs
+          node --check backend/worker.js
+          node backend/worker.test.mjs
+          node --check backend/choice.js
+          node --test backend/choice.test.mjs
+          node --check backend/choice-autopilot.js
+          node --test backend/choice-autopilot.test.mjs
+          node --check hoi-chon-dung/app.js
+          node --check hoi-chon-dung/autopilot-ui.js
+          node --check hoi-chon-dung/sw.js
+          node --test hoi-chon-dung/app.test.mjs
+          test "$(grep -c 'Hội Chọn Đúng API integration v1' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng API integration v2' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng Telegram integration v1' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng Telegram integration v2' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng Autopilot scheduled v2' backend/worker.js)" -eq 1
+          test "$(grep -c 'Affiliate Autopilot UI v2' hoi-chon-dung/index.html)" -eq 1
+          grep -q 'x-choice-autopilot-trigger' backend/worker.js
+          grep -q 'choiceAutopilotIsOwner' backend/worker.js
+          grep -q 'choiceAutopilotCommand === "/chon"' backend/worker.js
+          grep -q 'hoi-chon-dung-v2' hoi-chon-dung/sw.js
 
       - name: Kiểm tra WebKit với payload AES thật
         run: |
