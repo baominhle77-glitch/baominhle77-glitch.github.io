@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Biểu tượng Hội Chọn Đúng</title>
+  <desc id="desc">Dấu chọn trong khung tròn màu xanh đậm trên nền kem</desc>
+  <rect width="512" height="512" rx="112" fill="#f7f3ea"/>
+  <circle cx="256" cy="256" r="174" fill="#123b35"/>
+  <path d="M154 263l67 68 139-153" fill="none" stroke="#f8c66a" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="256" r="218" fill="none" stroke="#d9cdb8" stroke-width="12"/>
+</svg>
