@@ -15,7 +15,7 @@ concurrency:
 jobs:
   publish-seo:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: "997944c1bfcc2dcaca32718124cd718c"
@@ -27,16 +27,25 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
 
-      - name: Kiểm tra và tạo nội dung SEO
+      - name: Kiểm tra và tạo nội dung SEO đa lĩnh vực
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
+          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-seo-multiniche.mjs
           node tools/apply-choice-autopilot-ui.mjs
+          node --check tools/choice-taxonomy.mjs
+          node --check tools/apply-choice-multiniche.mjs
+          node --check tools/apply-choice-seo-multiniche.mjs
           node --check tools/build-choice-seo.mjs
           node --check tools/submit-indexnow.mjs
           node --check tools/submit-google-sitemap.mjs
+          node --test tools/choice-multiniche.test.mjs
           node --test tools/choice-seo.test.mjs
           node tools/build-choice-seo.mjs --out "$RUNNER_TEMP/choice-seo"
+          test -s "$RUNNER_TEMP/choice-seo/danh-muc/cong-nghe-phu-kien-so/index.html"
+          test -s "$RUNNER_TEMP/choice-seo/danh-muc/nha-cua-gia-dung/index.html"
+          test -s "$RUNNER_TEMP/choice-seo/danh-muc/du-lich-di-chuyen/index.html"
           node tools/check-public-content.mjs
 
       - name: Gộp site với trang SEO mới
@@ -60,14 +69,13 @@ jobs:
         run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
 
       - name: Thông báo URL mới cho IndexNow
-        continue-on-error: true
         run: node tools/submit-indexnow.mjs "$RUNNER_TEMP/choice-seo/seo-urls.json"
 
       - name: Gửi sitemap tới Google Search Console khi đã cấp quyền
         continue-on-error: true
         run: node tools/submit-google-sitemap.mjs
 
-      - name: Hậu kiểm SEO production
+      - name: Hậu kiểm SEO production đa lĩnh vực
         run: |
           set -euo pipefail
           sample=$(node -e 'const x=require(process.argv[1]); console.log(x.urls.find(u=>u.includes("/san-pham/"))||"")' "$RUNNER_TEMP/choice-seo/seo-urls.json")
@@ -76,18 +84,24 @@ jobs:
             sitemap=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/sitemap.xml?run=$GITHUB_RUN_ID" || true)
             feed=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/feed.xml?run=$GITHUB_RUN_ID" || true)
             page=$(curl -fsSL "$sample?run=$GITHUB_RUN_ID" || true)
+            tech=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/danh-muc/cong-nghe-phu-kien-so/?run=$GITHUB_RUN_ID" || true)
+            travel=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/danh-muc/du-lich-di-chuyen/?run=$GITHUB_RUN_ID" || true)
             key=$(curl -fsSL "https://hiennhi89.pages.dev/e4c968d6c15b4ef69083f88f4f8d1e76.txt?run=$GITHUB_RUN_ID" || true)
             if grep -q '<urlset' <<<"$sitemap" \
               && grep -q '/san-pham/' <<<"$sitemap" \
+              && grep -q '/danh-muc/cong-nghe-phu-kien-so/' <<<"$sitemap" \
+              && grep -q '/danh-muc/du-lich-di-chuyen/' <<<"$sitemap" \
               && grep -q '<rss version="2.0">' <<<"$feed" \
               && grep -q '"@type":"Product"' <<<"$page" \
               && grep -q 'Công bố liên kết tiếp thị' <<<"$page" \
+              && grep -q 'Chọn phụ kiện công nghệ đáng mua' <<<"$tech" \
+              && grep -q 'Chọn đồ du lịch và phụ kiện di chuyển' <<<"$travel" \
               && grep -q 'e4c968d6c15b4ef69083f88f4f8d1e76' <<<"$key" \
-              && ! grep -qiE 'Autopilot|onboarding_required|Cloudflare Worker|API key|chủ sở hữu' <<<"$page"; then
-              echo "Growth SEO production đạt ở lần $attempt"
+              && ! grep -qiE 'Autopilot|onboarding_required|Cloudflare Worker|API key|chủ sở hữu' <<<"$page$tech$travel"; then
+              echo "Growth SEO đa lĩnh vực production đạt ở lần $attempt"
               exit 0
             fi
             sleep 4
           done
-          echo "Growth SEO production chưa đồng bộ" >&2
+          echo "Growth SEO đa lĩnh vực production chưa đồng bộ" >&2
           exit 1

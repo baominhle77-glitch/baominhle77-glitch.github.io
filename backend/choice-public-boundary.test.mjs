@@ -30,6 +30,25 @@ test("dữ liệu sản phẩm công khai không chứa nhãn vận hành hoặc
   assert.doesNotMatch(source, /"autopilot", "accesstrade"/);
 });
 
+test("trung tâm kết nối là route owner riêng, noindex và phiên HttpOnly", async () => {
+  const [worker, setup] = await Promise.all([
+    read("./worker.js"),
+    read("./choice-setup.js")
+  ]);
+  assert.match(worker, /Hội Chọn Đúng owner setup route v1/);
+  assert.match(worker, /handleChoiceSetupRequest\(request, env\)/);
+  assert.match(worker, /Hội Chọn Đúng owner setup Telegram v1/);
+  assert.match(setup, /x-robots-tag": "noindex, nofollow, noarchive"/);
+  assert.match(setup, /HttpOnly; Secure; SameSite=Strict/);
+  assert.match(setup, /String\(message\?\.chat\?\.id/);
+  assert.match(setup, /String\(message\?\.from\?\.id/);
+  assert.match(setup, /workspace\.accesstrade\.vn\/authentication\/register/);
+  assert.match(setup, /pub2\.accesstrade\.vn\/profile\/payment/);
+  assert.match(setup, /search\.google\.com\/search-console/);
+  assert.match(setup, /bing\.com\/webmasters/);
+  assert.doesNotMatch(setup, /Global API Key|customer_phone|customer_email|customer_name/);
+});
+
 test("dashboard doanh thu là route owner riêng, noindex và phiên HttpOnly", async () => {
   const [worker, revenue] = await Promise.all([
     read("./worker.js"),
@@ -55,4 +74,16 @@ test("Growth cycle chạy đồng bộ doanh thu 5 phút nhưng chỉ khám phá
   assert.match(worker, /Hội Chọn Đúng growth cycle 5m v1/);
   assert.match(revenue, /DISCOVERY_INTERVAL_MS = 6 \* 60 \* 60 \* 1000/);
   assert.match(wrangler, /crons = \["\*\/5 \* \* \* \*"\]/);
+});
+
+test("discovery đa lĩnh vực có trend scoring, đa dạng shop và giữ nhóm cũ khi nguồn thiếu", async () => {
+  const source = await read("./choice-autopilot.js");
+  for (const id of ["tech", "home", "beauty", "fashion", "mom-baby", "pets", "office", "fitness", "travel"]) {
+    assert.match(source, new RegExp(`id: ["']${id}["']`));
+  }
+  assert.match(source, /BEST_SELLERS.+RECOMMENDED.+HIGH_COMMISSION_RATE/s);
+  assert.match(source, /trend_score: trendScore/);
+  assert.match(source, /const shopCounts = new Map\(\)/);
+  assert.match(source, /const refreshedCategories = new Set/);
+  assert.match(source, /return !refreshedCategories\.has/);
 });

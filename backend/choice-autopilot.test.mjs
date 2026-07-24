@@ -29,7 +29,7 @@ function response(body, status = 200) {
   });
 }
 
-function candidate(id, title, units = 1000, rate = 2500) {
+function candidate(id, title, units = 1000, rate = 2500, price = 400000) {
   return {
     id,
     title,
@@ -39,8 +39,8 @@ function candidate(id, title, units = 1000, rate = 2500) {
     units_sold: units,
     sale_region: "VN",
     shop: { name: `Shop ${id}` },
-    original_price: { currency: "VND", minimum_amount: "500000", maximum_amount: "550000" },
-    sales_price: { currency: "VND", minimum_amount: "400000", maximum_amount: "450000" },
+    original_price: { currency: "VND", minimum_amount: String(Math.round(price * 1.25)), maximum_amount: String(Math.round(price * 1.35)) },
+    sales_price: { currency: "VND", minimum_amount: String(price), maximum_amount: String(Math.round(price * 1.1)) },
     commission: { currency: "VND", amount: "50000", rate }
   };
 }
@@ -71,11 +71,12 @@ function mockFetch() {
     if (target.pathname === "/v2/tiktokshop_product_feeds") {
       const keyword = target.searchParams.get("title_keywords") || "micro";
       const base = keyword.replace(/\s+/g, "-");
+      const prices = [120000, 350000, 1400000, 420000, 180000, 900000, 2200000, 650000];
       return response({
         status: true,
         data: {
           products: Array.from({ length: 8 }, (_, index) =>
-            candidate(`${base}-${index + 1}`, `${keyword} loại ${index + 1}`, 5000 - index * 100, 2800 - index * 50)
+            candidate(`${base}-${index + 1}`, `${keyword} loại ${index + 1}`, 5000 - index * 100, 2800 - index * 50, prices[index])
           )
         }
       });
@@ -91,13 +92,16 @@ test("mã hóa credential và giải mã đúng", async () => {
   assert.equal(await __test.decryptCredential(env, encrypted), "abc-token-12345678901234567890");
 });
 
-test("lọc sản phẩm nguy cơ và chuẩn hóa ứng viên", () => {
+test("lọc sản phẩm nguy cơ và chuẩn hóa ứng viên có trend metadata", () => {
   const portfolio = __test.PORTFOLIO[0];
   assert.equal(__test.blockedTitle("Viên uống giảm cân cấp tốc"), true);
+  assert.equal(__test.blockedTitle("Rượu vang nhập khẩu"), true);
   assert.equal(__test.normalizeCandidate(candidate("1", "Viên uống giảm cân"), portfolio, "tarot"), null);
-  const item = __test.normalizeCandidate(candidate("2", "Bộ bài tarot nghệ thuật"), portfolio, "bài tarot");
+  const item = __test.normalizeCandidate(candidate("2", "Bộ bài tarot nghệ thuật", 5000), portfolio, "bài tarot");
   assert.equal(item.category, "tarot");
-  assert.ok(item.opportunity_score >= 50);
+  assert.ok(item.opportunity_score >= 40);
+  assert.ok(item.trend_score > 0);
+  assert.equal(item.trend_label, "ban-chay");
   assert.equal(item.discount_percent, 20);
 });
 
@@ -111,7 +115,7 @@ test("thiếu AccessTrade token chuyển sang onboarding nội bộ, không gi�
   assert.equal(status.configured, false);
 });
 
-test("Autopilot tự tuyển, tạo deep link và thay catalog seed", async () => {
+test("Autopilot tự tuyển đủ quota đa lĩnh vực, tạo deep link và thay catalog seed", async () => {
   const env = makeEnv(true);
   await env.KV.put(__test.STORE_KEY, JSON.stringify({
     version: 1,
@@ -121,17 +125,21 @@ test("Autopilot tự tuyển, tạo deep link và thay catalog seed", async () =
     ]
   }));
   const result = await runChoiceAutopilot(env, { trigger: "cron", fetchImpl: mockFetch() });
+  const expected = __test.PORTFOLIO.length * 4;
   assert.equal(result.ok, true);
   assert.equal(result.status.mode, "active");
-  assert.equal(result.status.selected_products, 18);
+  assert.equal(result.status.selected_products, expected);
+  assert.equal(result.status.categories_covered, __test.PORTFOLIO.length);
   const catalog = JSON.parse(await env.KV.get(__test.STORE_KEY));
   assert.equal(catalog.version, 2);
   assert.equal(catalog.products.some((item) => item.id === "rider-waite-smith-tarot"), false);
   assert.equal(catalog.products.some((item) => item.id === "manual-safe"), true);
   const generated = catalog.products.filter((item) => item.autopilot_managed);
-  assert.equal(generated.length, 18);
+  assert.equal(generated.length, expected);
   assert.ok(generated.every((item) => item.affiliate_url.startsWith("https://go.isclix.com/")));
   assert.ok(generated.every((item) => item.last_verified_at));
+  assert.ok(generated.every((item) => Number.isFinite(item.trend_score)));
+  assert.ok(generated.every((item) => ["ban-chay", "dang-duoc-quan-tam", "moi-phat-hien"].includes(item.trend_label)));
 });
 
 test("trạng thái chỉ được đọc nội bộ từ KV, không có public handler", async () => {
@@ -139,14 +147,14 @@ test("trạng thái chỉ được đọc nội bộ từ KV, không có public 
   await env.KV.put(__test.STATUS_KEY, JSON.stringify({
     mode: "active",
     configured: true,
-    selected_products: 18,
-    catalog_products: 18,
+    selected_products: 48,
+    catalog_products: 48,
     orders_7d: 2,
     commission_7d: 100000,
     last_run_at: "2026-07-24T14:00:00Z"
   }));
   const data = await __test.readStatus(env);
   assert.equal(data.mode, "active");
-  assert.equal(data.selected_products, 18);
+  assert.equal(data.selected_products, 48);
   assert.equal(data.commission_7d, 100000);
 });
