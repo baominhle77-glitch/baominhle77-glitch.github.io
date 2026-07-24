@@ -1,28 +1,28 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T02:30:00+07:00",
+  "updated_at": "2026-07-25T02:45:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
-      "id": "BOITOAN-20260724-16",
+      "id": "BOITOAN-20260725-01",
       "owner": "Claude Code",
-      "branch": "claude/lenormand-reading-voice",
-      "base_sha": "15065a234eb189bf5cea912c375ae6cd9928d18b",
+      "branch": "claude/lenormand-english-names",
+      "base_sha": "871e70a1845ba7ee09fd3e78c7b9d46d980a0ed8",
       "paths": [
         "boitoan/index.html",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
       "status": "in_progress",
-      "started_at": "2026-07-25T01:20:00+07:00",
-      "heartbeat_at": "2026-07-25T01:45:00+07:00",
-      "summary": "Sua may dien giai Lenormand: doc theo to hop thay vi lap ghep roi rac, loc dung linh vuc duoc chon, bo cac nhan ky thuat va doan giang phuong phap lo ra man hinh nguoi dung."
+      "started_at": "2026-07-25T02:30:00+07:00",
+      "heartbeat_at": "2026-07-25T02:40:00+07:00",
+      "summary": "Ten la bai hien bang tieng Anh toan app; loi que doc thang ra thanh cau ket hop cac la, bo het tu ngu meta va giong len lop."
     },
     {
       "id": "GROWTH-20260725-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-02-multiniche-trends-onboarding",
-      "base_sha": "871e70a1845ba7ee09fd3e78c7b9d46d980a0ed8",
+      "base_sha": "ad0e10543e5c715b96073d817fe2256a9ca077cb",
       "paths": [
         "backend/choice.js",
         "backend/choice-autopilot.js",
@@ -51,11 +51,24 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T01:45:00+07:00",
-      "heartbeat_at": "2026-07-25T02:30:00+07:00",
+      "heartbeat_at": "2026-07-25T02:45:00+07:00",
       "summary": "Mở rộng affiliate sang 12 lĩnh vực an toàn theo xu hướng; xây Trung tâm kết nối owner với link đăng ký/đăng nhập/ngân hàng/API/SEO; tự động hóa catalog, PWA V4, landing page/hướng dẫn đa danh mục, IndexNow và báo cáo doanh thu."
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260724-16",
+      "owner": "Claude Code",
+      "branch": "claude/lenormand-reading-voice",
+      "paths": [
+        "boitoan/index.html",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "completed_at": "2026-07-25T02:00:00+07:00",
+      "summary": "Sua may dien giai Lenormand: doc theo to hop, loc dung linh vuc khach chon, bo nhan ky thuat va doan giang phuong phap. PR #92 squash-merge commit d014813; CI 4/4 success; deploy run 30118917493 success; da kiem chung production tra HTTP 200 va payload chua ma nguon moi."
+    },
     {
       "id": "SEO-20260725-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
