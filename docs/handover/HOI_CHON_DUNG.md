@@ -1,21 +1,24 @@
 # HỘI CHỌN ĐÚNG — AFFILIATE AUTOPILOT
 
 **Runtime task:** `AFFILIATE-20260724-02` — `completed`  
-**Governance task:** `GOVERNANCE-20260724-01` — `in_progress`  
+**Governance task:** `GOVERNANCE-20260724-01` — `completed`  
 **Production:** `https://hiennhi89.pages.dev/hoi-chon-dung/`  
-**Backend public:** `https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/*`
+**Backend public:** `https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/*`  
+**Governance source:** `d72e3552a5a71e6f4ef14a4205b3e6f4ed2d25b5` — PR #89  
+**Production run:** `30109841905` — SUCCESS
 
 ## 1. Phân tách public và nội bộ
 
 Sự cố ngày 24/07/2026: bước build đã chèn trạng thái Affiliate Autopilot, chế độ dự phòng và thông điệp dành cho chủ sở hữu vào footer public. Đây là lỗi nghiêm trọng vì trang người dùng bị dùng như bảng điều hành nội bộ.
 
-Quy tắc mới:
+Trạng thái khắc phục production:
 
 - Public UI chỉ chứa thông tin giúp người dùng hiểu, so sánh hoặc mua an toàn.
 - Trạng thái credential, onboarding/KYC, nguồn dữ liệu, cron, Worker, KV, deploy, production và hướng dẫn owner chỉ tồn tại trong Telegram/admin/handover nội bộ.
-- Public status route `/api/choice/autopilot/status` bị khóa và phải trả `404`.
+- Public status route `/api/choice/autopilot/status` trả `404`.
+- Public status handler đã bị xóa khỏi module materialized, không chỉ bị ẩn ở router.
 - Recorder đọc `choice:autopilot:status:v1` trực tiếp từ Cloudflare KV bằng quyền CI.
-- PWA tăng cache từ `hoi-chon-dung-v2` lên `hoi-chon-dung-v3` để xóa HTML/JS cũ khỏi thiết bị.
+- PWA sử dụng cache `hoi-chon-dung-v3`, xóa cache V2 và không còn module status trong app shell.
 - `tools/check-public-content.mjs` chặn deploy nếu HTML/JavaScript công khai chứa nội dung owner/internal.
 
 ## 2. Nội dung public được phép
@@ -49,7 +52,7 @@ Affiliate Autopilot vẫn thực hiện trong nền:
 7. Chạy sau deploy và theo cron mỗi 6 giờ.
 8. Gửi trạng thái qua Telegram owner và ghi hồ sơ nội bộ.
 
-Các chi tiết trên không được xuất hiện trên sản phẩm public.
+Các chi tiết trên không xuất hiện trên sản phẩm public.
 
 ## 4. Điểm chạm owner
 
@@ -59,7 +62,7 @@ Kết nối AccessTrade một lần:
 2. Mở `https://pub2.accesstrade.vn/profile/api_key`.
 3. Gửi `/atkey <API_KEY>` trong Telegram owner.
 
-Webhook kiểm tra đồng thời `chat.id` và `from.id`, yêu cầu xóa tin nhắn chứa key và mã hóa AES-GCM trước khi lưu KV. Đây là luồng owner/private, không được hiển thị trên website.
+Webhook kiểm tra đồng thời `chat.id` và `from.id`, yêu cầu xóa tin nhắn chứa key và mã hóa AES-GCM trước khi lưu KV. Đây là luồng owner/private, không hiển thị trên website.
 
 ## 5. API public và private
 
@@ -83,22 +86,30 @@ Dữ liệu public không chứa:
 
 Ngôn ngữ public chỉ giải thích giá trị cho người mua, ví dụ “thông tin sản phẩm đã được đối chiếu trước khi đưa vào danh sách”.
 
-## 7. Rào chắn sản phẩm
+## 7. Tiêu chuẩn toàn công ty
+
+- Quy chế công ty toàn cục đã merge tại `4f2c6bf2ba61c041d737e90c12d5aa82205f1d8a`.
+- `AGENTS.md` bắt buộc mọi agent phân loại public/member/admin/owner trước khi thiết kế nội dung hoặc API.
+- `docs/handover/AUDIENCE_PRIVACY_STANDARD.md` là chuẩn kiểm duyệt áp dụng cho mọi dự án hiện tại và tương lai.
+- Ban Thanh tra phải kiểm tra cả source, build-generated content, API, lỗi hiển thị và PWA cache.
+- Một nội dung sai đối tượng là lỗi nghiêm trọng và chặn merge/deploy.
+
+## 8. Rào chắn sản phẩm
 
 Blocklist gồm thuốc, sản phẩm giảm/tăng cân, thực phẩm chức năng, rượu bia, nicotine, chất gây nghiện, vũ khí và sản phẩm người lớn.
 
 Không bịa review, đơn hàng, giá, tồn kho hoặc lợi nhuận. Khi nguồn lỗi, giữ catalog gần nhất; cảnh báo chi tiết chỉ gửi nội bộ.
 
-## 8. Kiểm thử bắt buộc
+## 9. Bằng chứng kiểm thử và production
 
-- `node tools/check-public-content.mjs` trên source sau materialize và `_site` trước deploy.
-- `backend/choice-public-boundary.test.mjs` kiểm tra status route bị khóa và dữ liệu public không chứa nhãn nội bộ.
-- `hoi-chon-dung/app.test.mjs` kiểm tra HTML public, PWA V3 và không gọi status API.
-- Smoke production kiểm tra nội dung hữu ích có mặt, nội dung owner/internal vắng mặt và status route trả `404`.
+- CI điều phối: `30108929684` — SUCCESS.
+- Regression Bói toán/Account/Community/Worker, public-private scanner và WebKit AES thật: `30108929401` — SUCCESS.
+- Recorder nội bộ trên PR: `30108929479` — SUCCESS.
+- Production build/deploy/smoke: `30109841905` — SUCCESS.
+- Hậu kiểm production xác nhận public HTML sạch, PWA V3, status public `404`, Worker và Pages đều đạt.
+- Recorder KV nội bộ: `30109889703` — SUCCESS; hồ sơ commit `a22f0ef29f7712077e0202d7c89444b0ff288f03`.
 
-Task chỉ được closeout sau CI, merge, deploy, cache V3 và hậu kiểm production thành công.
+## 10. Mốc khôi phục
 
-## 9. Mốc khôi phục
-
-- V2 runtime trước governance fix: `c4591418ae92adc77d0201e8e55737cd6ce929db`, PR #86.
+- Runtime trước governance fix: `c4591418ae92adc77d0201e8e55737cd6ce929db`, PR #86.
 - V1: `f57023af442839da852354672bea8036e579a9fd`, PR #84.
