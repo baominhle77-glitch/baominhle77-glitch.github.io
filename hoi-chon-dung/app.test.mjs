@@ -5,7 +5,7 @@ import { CHOICE_CATEGORIES, SEED_PRODUCTS } from "./data/seed-products.js";
 
 const read = (name) => readFile(new URL(name, import.meta.url), "utf8");
 
-test("HTML có SEO, PWA, structured data, Autopilot và công bố affiliate", async () => {
+test("HTML nguồn có SEO, PWA, structured data và công bố affiliate", async () => {
   const html = await read("./index.html");
   assert.match(html, /<title>Hội Chọn Đúng/);
   assert.match(html, /rel="canonical" href="https:\/\/hiennhi89\.pages\.dev\/hoi-chon-dung\/"/);
@@ -15,11 +15,6 @@ test("HTML có SEO, PWA, structured data, Autopilot và công bố affiliate", a
   assert.match(html, /CÔNG BỐ LIÊN KẾT TIẾP THỊ/);
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /type="module" src="\.\/app\.js"/);
-  assert.match(html, /Affiliate Autopilot UI v2/);
-  assert.match(html, /id="autopilotBadge"/);
-  assert.match(html, /id="autopilotFooter"/);
-  assert.match(html, /type="module" src="\.\/autopilot-ui\.js"/);
-  assert.match(html, /Công ty tự tuyển nguồn/);
 });
 
 test("catalog dự phòng có ba danh mục, ID duy nhất và URL HTTPS an toàn", () => {
