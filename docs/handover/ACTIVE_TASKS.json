@@ -1,8 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T01:22:00+07:00",
+  "updated_at": "2026-07-25T01:45:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260724-16",
+      "owner": "Claude Code",
+      "branch": "claude/lenormand-reading-voice",
+      "base_sha": "15065a234eb189bf5cea912c375ae6cd9928d18b",
+      "paths": [
+        "boitoan/index.html",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T01:20:00+07:00",
+      "heartbeat_at": "2026-07-25T01:45:00+07:00",
+      "summary": "Sua may dien giai Lenormand: doc theo to hop thay vi lap ghep roi rac, loc dung linh vuc duoc chon, bo cac nhan ky thuat va doan giang phuong phap lo ra man hinh nguoi dung."
+    }
+  ],
   "recently_completed": [
     {
       "id": "SEO-20260725-01",
@@ -45,7 +61,13 @@
       "id": "GOVERNANCE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GOVERNANCE-20260724-01-closeout",
-      "paths": ["AGENTS.md", "backend/**", ".github/workflows/**", "hoi-chon-dung/**", "docs/handover/**"],
+      "paths": [
+        "AGENTS.md",
+        "backend/**",
+        ".github/workflows/**",
+        "hoi-chon-dung/**",
+        "docs/handover/**"
+      ],
       "status": "completed",
       "completed_at": "2026-07-24T23:41:00+07:00",
       "summary": "Khắc phục hoàn toàn lỗi đưa nội dung owner/internal lên public UI; production public-private boundary SUCCESS."
@@ -54,7 +76,12 @@
       "id": "AFFILIATE-20260724-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/AFFILIATE-20260724-02-closeout",
-      "paths": ["backend/choice-autopilot.js", "hoi-chon-dung/**", ".github/workflows/**", "docs/handover/**"],
+      "paths": [
+        "backend/choice-autopilot.js",
+        "hoi-chon-dung/**",
+        ".github/workflows/**",
+        "docs/handover/**"
+      ],
       "status": "completed",
       "completed_at": "2026-07-24T22:34:00+07:00",
       "summary": "Affiliate Autopilot V2 production SUCCESS; trạng thái kinh doanh chỉ còn trong kênh nội bộ."
@@ -63,7 +90,11 @@
       "id": "AFFILIATE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/AFFILIATE-20260724-01-closeout",
-      "paths": ["hoi-chon-dung/**", "backend/choice.js", "docs/handover/**"],
+      "paths": [
+        "hoi-chon-dung/**",
+        "backend/choice.js",
+        "docs/handover/**"
+      ],
       "status": "completed",
       "completed_at": "2026-07-24T21:29:00+07:00",
       "summary": "Triển khai Hội Chọn Đúng V1; sau đó được V2 thay thế về mô hình vận hành."
@@ -72,7 +103,10 @@
       "id": "HANDOVER-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/HANDOVER-20260724-01",
-      "paths": ["HANDOVER.md", "docs/handover/ACTIVE_TASKS.json"],
+      "paths": [
+        "HANDOVER.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
       "status": "completed",
       "completed_at": "2026-07-24T03:03:00+07:00",
       "summary": "Chuẩn hóa HANDOVER.md."
