@@ -1,178 +1,90 @@
-# HỘI CHỌN ĐÚNG — GROWTH AUTOPILOT, LINK AFFILIATE VÀ DOANH THU
+# HỘI CHỌN ĐÚNG — GROWTH AUTOPILOT ĐA LĨNH VỰC
 
-**Task-ID:** `SEO-20260725-01` — `completed`  
-**Runtime source:** `a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0` — PR #91  
-**Production deploy:** `30116421342` — SUCCESS  
-**Internal recorder:** `30116490615` — SUCCESS  
-**Trạng thái nguồn affiliate:** `onboarding_required`; chưa có credential, sản phẩm affiliate thật hoặc doanh thu thật.
+**Task-ID hiện hành:** `GROWTH-20260725-02` — `completed`  
+**Runtime source:** `8b5ee3de54844aa50e6af87adfaec58d502e7f99` — PR #94  
+**Production deploy:** `30121531643` — SUCCESS  
+**Internal recorder:** `30121578951` — SUCCESS  
+**Trạng thái nguồn affiliate:** chưa kết nối ACCESSTRADE credential; chưa có sản phẩm/link/doanh thu thật.
 
-## 1. Mục tiêu vận hành
+## 1. Chu trình tự động
 
-Growth Autopilot khép kín chu trình:
+Growth Autopilot thực hiện:
 
-1. Tìm sản phẩm từ nguồn affiliate đã kết nối.
-2. Lọc sản phẩm rủi ro, thiếu tồn kho, URL không an toàn hoặc thông tin không đủ.
-3. Tự chấm điểm và tuyển sản phẩm theo ba ngách Tarot, sáng tạo nội dung và in 3D.
-4. Tự tạo deep link affiliate có UTM/sub-ID riêng cho từng sản phẩm.
-5. Cập nhật catalog và trang công khai.
-6. Tạo HTML tĩnh cho sản phẩm, danh mục và hướng dẫn.
-7. Cập nhật sitemap/RSS và gửi URL thay đổi tới công cụ tìm kiếm.
-8. Đồng bộ click, đơn hàng, doanh số và hoa hồng về dashboard owner riêng.
-9. Dùng hiệu quả thực tế để điều chỉnh vòng tuyển sản phẩm tiếp theo.
+1. Lấy sản phẩm từ nguồn affiliate đã kết nối.
+2. Tìm theo ba tín hiệu `BEST_SELLERS`, `RECOMMENDED`, `HIGH_COMMISSION_RATE`.
+3. Lọc URL/tồn kho/dữ liệu và danh mục rủi ro.
+4. Tính trend score và opportunity score.
+5. Tuyển hai vòng: ưu tiên đa dạng dải giá trước, sau đó lấp quota; tối đa hai sản phẩm mỗi shop.
+6. Tạo deep link có UTM/sub-ID để đối chiếu click và đơn hàng.
+7. Cập nhật catalog mà không xóa nhóm cũ nếu nguồn mới chưa đủ dữ liệu.
+8. Tạo HTML tĩnh, landing page, hướng dẫn, sitemap và RSS.
+9. Gửi URL mới/cập nhật tới IndexNow.
+10. Đồng bộ click, đơn, doanh số và hoa hồng vào dashboard owner.
 
-Chủ sở hữu không chọn từng sản phẩm, không gắn từng link và không nhập từng đơn hàng.
+Chủ sở hữu không chọn từng sản phẩm, không gắn từng link và không nhập từng đơn.
 
-## 2. Nhịp tự động
+## 2. Taxonomy production
+
+Hệ thống hiện hỗ trợ 12 lĩnh vực an toàn:
+
+- Tarot & không gian thực hành.
+- Sáng tạo nội dung.
+- In 3D.
+- Công nghệ & phụ kiện số.
+- Nhà cửa & gia dụng.
+- Làm đẹp & chăm sóc cá nhân, không gồm thuốc/supplement.
+- Thời trang & phụ kiện.
+- Mẹ & bé.
+- Thú cưng.
+- Học tập & văn phòng.
+- Thể thao & vận động, không gồm sản phẩm giảm cân.
+- Du lịch & di chuyển.
+
+Blocklist gồm thuốc, thực phẩm bổ sung, rượu/nicotine/chất gây nghiện, vũ khí/chất nổ, sản phẩm người lớn, cờ bạc, hóa chất độc, chất phóng xạ và hàng giả.
+
+## 3. Nhịp vận hành
 
 | Nhịp | Công việc |
 |---|---|
-| Mỗi 5 phút | Đồng bộ đơn hàng/giao dịch, đọc click nội bộ, cập nhật snapshot doanh thu và cảnh báo. |
-| Mỗi 6 giờ | Rà lại sản phẩm, tạo/thay deep link, xuất bản lại trang SEO, sitemap, RSS và gửi tín hiệu IndexNow. |
-| Khi deploy | Chạy ngay Growth Autopilot, đồng bộ doanh thu, dựng SEO và hậu kiểm production. |
-| Theo yêu cầu owner | `/dongbo-doanhthu` đồng bộ ngay; `/autopilot-chay` chạy lại vòng sản phẩm. |
+| Mỗi 5 phút | Đồng bộ click, đơn hàng, giao dịch, snapshot doanh thu và cảnh báo. |
+| Mỗi 6 giờ | Rà sản phẩm, tạo/thay deep link, dựng lại SEO, sitemap/RSS và gửi IndexNow. |
+| Khi deploy | Chạy Growth cycle ngay, dựng SEO và hậu kiểm production. |
+| Owner yêu cầu | `/dongbo-doanhthu`, `/autopilot-chay`, `/doanhthu`, `/ketnoi`. |
 
-AccessTrade có thể ghi nhận/cập nhật đơn hàng chậm theo thời gian cache và đối soát của nguồn. Dashboard được gọi là **gần thời gian thực**, không cam kết tức thời tuyệt đối.
+Dữ liệu doanh thu được gọi là **gần thời gian thực** vì phụ thuộc thời gian ghi nhận/cache/đối soát của mạng affiliate.
 
-## 3. Link affiliate
+## 4. SEO và phân phối
 
-Module `backend/choice-autopilot.js`:
+Mỗi danh mục có landing page và trang hướng dẫn ngay cả khi đang chờ dữ liệu sản phẩm. Trang sản phẩm có canonical, Open Graph, Twitter Card và JSON-LD `Product`, `Offer`, `BreadcrumbList`. Trang danh mục/hướng dẫn có `ItemList`, `FAQPage` và `Article` phù hợp.
 
-- lấy sản phẩm từ AccessTrade Publisher API;
-- tạo deep link cho từng sản phẩm;
-- dùng `utm_source=hoi-chon-dung`;
-- dùng `utm_medium=recommendation` ở dữ liệu public đã materialize;
-- gắn campaign theo danh mục/vòng chạy;
-- gắn `utm_content` theo source product ID để đối chiếu đơn hàng;
-- không đưa affiliate URL thô vào API catalog công khai;
-- người dùng đi qua `/r/choice/:id`, hệ thống đo click ẩn danh rồi chuyển hướng.
+- Sitemap/RSS bao phủ 12 danh mục.
+- IndexNow được gửi tự động sau deploy SEO.
+- Google Search Console API hoạt động khi owner đã xác minh property và cấp service account; thiếu credential thì nhánh Google được bỏ qua an toàn.
+- Metadata chia sẻ hỗ trợ hiển thị đường dẫn trên Facebook, Zalo, X, LinkedIn, Pinterest và ứng dụng nhắn tin; hệ thống không tự spam tài khoản chưa được cấp quyền.
 
-Catalog chỉ thay sản phẩm cũ khi vòng mới có đủ sản phẩm và link đã xác minh. Khi nguồn lỗi, giữ catalog gần nhất.
+## 5. PWA và public/private
 
-## 4. Trung tâm doanh thu owner-only
+- PWA cache hiện hành: `hoi-chon-dung-v4`; cache V3 cũ bị xóa khi activate.
+- Public API không trả affiliate URL thô hoặc metadata vận hành.
+- Public status route `/api/choice/autopilot/status` trả `404`.
+- Owner setup và revenue dashboard không có phiên trả `401/noindex`.
+- Public scanner chặn onboarding, credential, Worker/KV/cron, doanh thu và nội dung owner khỏi site công khai.
 
-Module `backend/choice-revenue.js` cung cấp dashboard riêng tại:
+## 6. Owner endpoints
 
-`https://hiennhi89-gate.hiennhi89.workers.dev/owner/choice/revenue`
+- `/owner/choice/setup` — trung tâm kết nối, mở bằng `/ketnoi`.
+- `/owner/choice/revenue` — dashboard doanh thu, mở bằng `/doanhthu`.
 
-Không có liên kết công khai. Luồng truy cập:
+Cả hai dùng vé một lần 10 phút và cookie `HttpOnly; Secure; SameSite=Strict` 12 giờ.
 
-1. Đúng tài khoản Telegram owner gửi `/doanhthu`.
-2. Bot tạo vé ngẫu nhiên dùng một lần, hết hạn sau 10 phút.
-3. Vé được đổi thành cookie `HttpOnly; Secure; SameSite=Strict`, hiệu lực 12 giờ.
-4. Dashboard và API riêng đều `no-store`, `noindex`, `DENY frame`, CSP chặt.
-5. Truy cập trực tiếp không có phiên nhận `401`.
+## 7. Bằng chứng production
 
-Dashboard hiển thị:
+- Điều phối: `30121459380` — SUCCESS.
+- Validation: `30121459426` — SUCCESS, gồm source, materializer, Worker, Affiliate, setup, revenue, SEO, boundary, frontend và WebKit.
+- Production: `30121531643` — SUCCESS.
+- Production recorder: `3d5373ac6627fe183d0b02f9d72449ad675cea7c`.
+- Internal status recorder: `30121578951` — SUCCESS; commit `023328ed3779ea0a63e7852438892cda3fc0ab43`.
 
-- hôm nay, 7 ngày và 30 ngày;
-- click, số đơn, doanh số ghi nhận;
-- hoa hồng tổng, đang chờ, đã duyệt và bị từ chối;
-- tỷ lệ đơn/click;
-- EPC tổng và EPC đã duyệt;
-- giá trị đơn trung bình;
-- biểu đồ 30 ngày;
-- sản phẩm và campaign tạo doanh thu;
-- đơn hàng gần nhất;
-- cảnh báo nhiều click không có đơn, tỷ lệ từ chối cao hoặc hoa hồng giảm.
+## 8. Trạng thái kinh doanh trung thực
 
-Dashboard không lưu/hiển thị tên, số điện thoại hoặc email khách hàng.
-
-### Lệnh Telegram owner
-
-- `/doanhthu` — tóm tắt 7 ngày và link dashboard riêng.
-- `/doanhthu-ngay` — số liệu hôm nay.
-- `/doanhthu7` — số liệu 7 ngày.
-- `/doanhthu30` — số liệu 30 ngày.
-- `/dongbo-doanhthu` — buộc đồng bộ ngay.
-
-## 5. SEO publisher
-
-`tools/build-choice-seo.mjs` tạo HTML tĩnh trực tiếp từ catalog công khai:
-
-- `/hoi-chon-dung/san-pham/<id>/`;
-- `/hoi-chon-dung/danh-muc/tarot/`;
-- `/hoi-chon-dung/danh-muc/sang-tao-noi-dung/`;
-- `/hoi-chon-dung/danh-muc/in-3d/`;
-- ba trang hướng dẫn nền tảng cho Tarot, quay video và vật liệu in 3D.
-
-Mỗi trang sản phẩm có:
-
-- title, description, canonical;
-- Open Graph và Twitter Card;
-- JSON-LD `Product`, `Offer`, `BreadcrumbList`;
-- khoảng giá, đối tượng phù hợp, ưu/nhược điểm;
-- công bố affiliate cạnh điểm chuyển đổi;
-- link ngoài `rel="sponsored nofollow noopener"`;
-- nội dung HTML có sẵn trong response, không phụ thuộc JavaScript.
-
-Trang danh mục có `ItemList`, `FAQPage`; trang hướng dẫn có `Article` và breadcrumbs.
-
-## 6. Phân phối tìm kiếm và nền tảng lớn
-
-- **Google:** sitemap tự động; script Search Console API sẵn sàng sau một lần cấp service account.
-- **Bing và các máy tìm kiếm hỗ trợ IndexNow:** URL mới/cập nhật được gửi tự động sau deploy SEO.
-- **Facebook, Zalo, X, LinkedIn, Pinterest và ứng dụng nhắn tin:** Open Graph/Twitter metadata giúp đường dẫn có tiêu đề, mô tả và ảnh chia sẻ rõ ràng. Hệ thống không tự spam/đăng vào tài khoản chưa được cấp quyền.
-- **RSS:** `/hoi-chon-dung/feed.xml` giúp công cụ đọc feed hoặc workflow phân phối nội dung tiếp nhận cập nhật mới.
-
-IndexNow và Google là lớp thông báo/lập chỉ mục, không phải cam kết xếp hạng. Nội dung, trải nghiệm người dùng, uy tín nguồn và cạnh tranh vẫn quyết định hiệu quả SEO.
-
-## 7. Điểm chạm bắt buộc một lần
-
-### AccessTrade
-
-Để có link affiliate thật và doanh thu thật:
-
-1. Đăng nhập/đăng ký/KYC tại `https://pub2.accesstrade.vn/`.
-2. Mở `https://pub2.accesstrade.vn/profile/api_key`.
-3. Gửi `/atkey <API_KEY>` trong Telegram owner.
-
-Sau đó hệ thống tự tạo link, cập nhật web và đồng bộ doanh thu. Recorder production hiện xác nhận credential `false`, sản phẩm tự tuyển `0` và đơn 7 ngày `0`; đây là trạng thái đúng trước khi kết nối.
-
-### Google Search Console
-
-IndexNow, sitemap public và HTML SEO không cần bước này. Để workflow tự gửi sitemap qua Google Search Console API, cần một lần:
-
-1. Xác minh property `https://hiennhi89.pages.dev/` trong Search Console.
-2. Tạo Google Cloud service account và bật Search Console API.
-3. Thêm email service account vào property Search Console.
-4. Lưu JSON credential thành GitHub secret `GOOGLE_SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON`.
-
-Nếu secret chưa có, workflow bỏ qua Google API nhưng vẫn deploy sitemap và gửi IndexNow.
-
-## 8. Ranh giới public/private
-
-Public:
-
-- trang sản phẩm/danh mục/hướng dẫn;
-- giá và thông tin lựa chọn;
-- disclosure affiliate;
-- sitemap, RSS, metadata chia sẻ;
-- redirect đo click ẩn danh.
-
-Owner/private:
-
-- credential;
-- doanh số/hoa hồng;
-- đơn hàng;
-- trạng thái nguồn;
-- cảnh báo kinh doanh;
-- dashboard và lệnh vận hành.
-
-`tools/check-public-content.mjs` tiếp tục chặn nội dung owner/internal xuất hiện trong site public.
-
-## 9. Bằng chứng kiểm thử và production
-
-- PR #91 merge source `a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0`.
-- Điều phối PR `30116008064`: SUCCESS.
-- Validation cuối `30116312380`: source, Worker, Affiliate Autopilot, Revenue, SEO, privacy, frontend và WebKit AES thật đều SUCCESS.
-- Production `30116421342`: cấu hình, source, SEO build, Worker-before-Pages, Growth trigger, Pages, IndexNow, Google step và production smoke đều SUCCESS.
-- Production recorder commit `915178f6ead00c4052391caf925ceea385b5fc75`.
-- Internal status recorder `30116490615`: SUCCESS; commit `e9ee55f3d55c14d10b83bbbb48efc794a7c0a6c6`.
-- Smoke xác nhận dashboard không phiên `401/noindex`, public status `404`, Product schema, sitemap, RSS, IndexNow key và public boundary đều đạt.
-
-## 10. Việc không được diễn giải sai
-
-- Production hạ tầng đã hoàn tất, nhưng **chưa có link affiliate thật/doanh thu thật** vì AccessTrade chưa kết nối.
-- “Google step SUCCESS” có thể là nhánh bỏ qua an toàn khi chưa có service account; không đồng nghĩa Search Console đã được cấp quyền.
-- IndexNow đã gửi thành công trong deploy production.
-- Không cam kết thứ hạng SEO hoặc doanh thu.
+Production kỹ thuật đã hoàn tất. Recorder vẫn xác nhận chưa có ACCESSTRADE credential, sản phẩm thật hoặc đơn thật. Owner cần đăng nhập/KYC, khai báo ngân hàng và gửi `/atkey <API_KEY>` một lần. Sau đó hệ thống tự vận hành.
