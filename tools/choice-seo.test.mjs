@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { execFile } from "node:child_process";
+import { CHOICE_TAXONOMY } from "./choice-taxonomy.mjs";
 
 const exec = promisify(execFile);
 const ROOT = resolve(new URL("..", import.meta.url).pathname);
@@ -15,60 +16,29 @@ async function buildFixture() {
   const output = join(dir, "out");
   const products = [
     {
-      id: "micro-test",
-      name: "Micro cài áo thử nghiệm",
-      category: "creator",
+      id: "micro-test", name: "Micro cài áo thử nghiệm", category: "creator",
       summary: "Micro nhỏ gọn dùng quay video bằng điện thoại trong môi trường nói chuyện gần.",
-      price_min: 350000,
-      price_max: 550000,
-      currency: "VND",
-      best_for: ["Người quay video bằng điện thoại"],
-      avoid_if: ["Thiết bị không tương thích cổng kết nối"],
-      pros: ["Nhỏ gọn", "Dễ mang theo"],
-      cons: ["Cần kiểm tra đầu chuyển"],
-      tags: ["micro", "điện thoại"],
-      merchant: "Shop thử nghiệm",
-      link_type: "affiliate",
-      link_ready: true,
-      outbound_path: "/r/choice/micro-test",
-      updated_at: "2026-07-25T00:00:00Z",
-      votes: 12
+      price_min: 350000, price_max: 550000, currency: "VND",
+      best_for: ["Người quay video bằng điện thoại"], avoid_if: ["Thiết bị không tương thích cổng kết nối"],
+      pros: ["Nhỏ gọn", "Dễ mang theo"], cons: ["Cần kiểm tra đầu chuyển"], tags: ["micro", "điện thoại"],
+      merchant: "Shop thử nghiệm", link_type: "affiliate", link_ready: true,
+      outbound_path: "/r/choice/micro-test", updated_at: "2026-07-25T00:00:00Z", votes: 12
     },
     {
-      id: "tarot-test",
-      name: "Bộ bài Tarot thử nghiệm",
-      category: "tarot",
+      id: "tarot-test", name: "Bộ bài Tarot thử nghiệm", category: "tarot",
       summary: "Bộ bài có hệ biểu tượng rõ để người mới đối chiếu và học từng lá.",
-      price_min: 250000,
-      price_max: 450000,
-      currency: "VND",
-      best_for: ["Người mới học Tarot"],
-      avoid_if: ["Muốn phong cách hình ảnh tối giản"],
-      pros: ["Biểu tượng rõ"],
-      cons: ["Cần kiểm tra chất lượng in"],
-      merchant: "Shop thử nghiệm",
-      link_type: "affiliate",
-      link_ready: true,
-      outbound_path: "/r/choice/tarot-test",
-      updated_at: "2026-07-25T00:00:00Z"
+      price_min: 250000, price_max: 450000, currency: "VND",
+      best_for: ["Người mới học Tarot"], avoid_if: ["Muốn phong cách hình ảnh tối giản"],
+      pros: ["Biểu tượng rõ"], cons: ["Cần kiểm tra chất lượng in"], merchant: "Shop thử nghiệm",
+      link_type: "affiliate", link_ready: true, outbound_path: "/r/choice/tarot-test", updated_at: "2026-07-25T00:00:00Z"
     },
     {
-      id: "pla-test",
-      name: "PLA thử nghiệm cho máy in 3D",
-      category: "3d",
+      id: "pla-test", name: "PLA thử nghiệm cho máy in 3D", category: "3d",
       summary: "Filament PLA phổ thông cho mẫu trang trí và người mới làm quen in FDM.",
-      price_min: 300000,
-      price_max: 500000,
-      currency: "VND",
-      best_for: ["Người mới in FDM"],
-      avoid_if: ["Ứng dụng cần chịu nhiệt cao"],
-      pros: ["Dễ bắt đầu"],
-      cons: ["Cần bảo quản khô"],
-      merchant: "Shop thử nghiệm",
-      link_type: "affiliate",
-      link_ready: true,
-      outbound_path: "/r/choice/pla-test",
-      updated_at: "2026-07-25T00:00:00Z"
+      price_min: 300000, price_max: 500000, currency: "VND",
+      best_for: ["Người mới in FDM"], avoid_if: ["Ứng dụng cần chịu nhiệt cao"],
+      pros: ["Dễ bắt đầu"], cons: ["Cần bảo quản khô"], merchant: "Shop thử nghiệm",
+      link_type: "affiliate", link_ready: true, outbound_path: "/r/choice/pla-test", updated_at: "2026-07-25T00:00:00Z"
     }
   ];
   await writeFile(input, JSON.stringify({ products }), "utf8");
@@ -89,21 +59,32 @@ test("tạo trang sản phẩm HTML tĩnh có canonical, Product schema và affi
   assert.doesNotMatch(html, /Autopilot|onboarding_required|Cloudflare Worker|API key|chủ sở hữu/i);
 });
 
-test("tạo trang danh mục, hướng dẫn, sitemap và RSS", async () => {
+test("tạo landing page và hướng dẫn cho mọi lĩnh vực, kể cả khi chưa có sản phẩm", async () => {
   const { output } = await buildFixture();
-  const category = await readFile(join(output, "danh-muc/sang-tao-noi-dung/index.html"), "utf8");
-  const guide = await readFile(join(output, "huong-dan/chon-micro-quay-video-bang-dien-thoai/index.html"), "utf8");
+  for (const config of CHOICE_TAXONOMY) {
+    const category = await readFile(join(output, "danh-muc", config.slug, "index.html"), "utf8");
+    const guide = await readFile(join(output, "huong-dan", config.guideSlug, "index.html"), "utf8");
+    assert.match(category, /"@type":"ItemList"/);
+    assert.match(category, /"@type":"FAQPage"/);
+    assert.match(guide, /"@type":"Article"/);
+    assert.match(category, new RegExp(config.title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  const emptyCategory = await readFile(join(output, "danh-muc", "cong-nghe-phu-kien-so", "index.html"), "utf8");
+  assert.match(emptyCategory, /Danh sách lựa chọn sẽ xuất hiện khi có đủ dữ liệu/);
+});
+
+test("sitemap, RSS và URL list chứa toàn bộ danh mục/hướng dẫn", async () => {
+  const { output } = await buildFixture();
   const sitemap = await readFile(join(output, "sitemap.xml"), "utf8");
   const feed = await readFile(join(output, "feed.xml"), "utf8");
   const urls = JSON.parse(await readFile(join(output, "seo-urls.json"), "utf8"));
-  assert.match(category, /"@type":"ItemList"/);
-  assert.match(category, /"@type":"FAQPage"/);
-  assert.match(guide, /"@type":"Article"/);
   assert.match(sitemap, /\/san-pham\/micro-test\//);
-  assert.match(sitemap, /\/danh-muc\/tarot\//);
-  assert.match(sitemap, /\/huong-dan\/chon-vat-lieu-in-3d-phu-hop\//);
+  for (const config of CHOICE_TAXONOMY) {
+    assert.match(sitemap, new RegExp(`/danh-muc/${config.slug}/`));
+    assert.match(sitemap, new RegExp(`/huong-dan/${config.guideSlug}/`));
+  }
   assert.match(feed, /<rss version="2\.0">/);
-  assert.ok(urls.urls.length >= 10);
+  assert.ok(urls.urls.length >= CHOICE_TAXONOMY.length * 2 + 4);
   assert.ok(urls.urls.every((url) => url.startsWith("https://hiennhi89.pages.dev/hoi-chon-dung/")));
 });
 
