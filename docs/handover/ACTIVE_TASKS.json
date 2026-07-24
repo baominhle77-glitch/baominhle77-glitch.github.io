@@ -1,8 +1,29 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T03:03:00+07:00",
+  "updated_at": "2026-07-24T20:50:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "AFFILIATE-20260724-01",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/AFFILIATE-20260724-01-hoi-chon-dung-mvp",
+      "base_sha": "bf8fbe9640a62a676de4eef95416c11c55234862",
+      "paths": [
+        "hoi-chon-dung/**",
+        "backend/choice.js",
+        "backend/choice.test.mjs",
+        "tools/apply-choice-system.mjs",
+        ".github/workflows/deploy-pages.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/HOI_CHON_DUNG.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-24T20:50:00+07:00",
+      "heartbeat_at": "2026-07-24T20:50:00+07:00",
+      "summary": "Triển khai MVP công khai Hội Chọn Đúng: PWA tư vấn lựa chọn, sản phẩm affiliate, bình chọn cộng đồng dùng KV, theo dõi click, quản trị sản phẩm qua Telegram và deploy Cloudflare Pages/Worker."
+    }
+  ],
   "recently_completed": [
     {
       "id": "HANDOVER-20260724-01",
