@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T01:45:00+07:00",
+  "updated_at": "2026-07-25T02:15:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -17,6 +17,42 @@
       "started_at": "2026-07-25T01:20:00+07:00",
       "heartbeat_at": "2026-07-25T01:45:00+07:00",
       "summary": "Sua may dien giai Lenormand: doc theo to hop thay vi lap ghep roi rac, loc dung linh vuc duoc chon, bo cac nhan ky thuat va doan giang phuong phap lo ra man hinh nguoi dung."
+    },
+    {
+      "id": "GROWTH-20260725-02",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/GROWTH-20260725-02-multiniche-trends-onboarding",
+      "base_sha": "15065a234eb189bf5cea912c375ae6cd9928d18b",
+      "paths": [
+        "backend/choice.js",
+        "backend/choice-autopilot.js",
+        "backend/choice-revenue.js",
+        "backend/choice-setup.js",
+        "backend/choice-setup.test.mjs",
+        "backend/choice-public-boundary.test.mjs",
+        "backend/wrangler.toml",
+        "hoi-chon-dung/data/seed-products.js",
+        "hoi-chon-dung/app.test.mjs",
+        "hoi-chon-dung/sw.js",
+        "tools/choice-taxonomy.mjs",
+        "tools/apply-choice-multiniche.mjs",
+        "tools/apply-choice-seo-multiniche.mjs",
+        "tools/apply-choice-setup.mjs",
+        "tools/choice-multiniche.test.mjs",
+        "tools/build-choice-seo.mjs",
+        "tools/choice-seo.test.mjs",
+        ".github/workflows/deploy-pages.yml",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/choice-growth-autopilot.yml",
+        "docs/handover/CHOICE_OWNER_SETUP.md",
+        "docs/handover/CHOICE_GROWTH_AUTOPILOT.md",
+        "docs/handover/HOI_CHON_DUNG.md",
+        "docs/handover/GROWTH-20260725-02-PR.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T01:45:00+07:00",
+      "heartbeat_at": "2026-07-25T02:15:00+07:00",
+      "summary": "Mở rộng affiliate sang 12 lĩnh vực an toàn theo xu hướng; xây Trung tâm kết nối owner với link đăng ký/đăng nhập/ngân hàng/API/SEO; tự động hóa catalog, PWA V4, landing page/hướng dẫn đa danh mục, IndexNow và báo cáo doanh thu."
     }
   ],
   "recently_completed": [
@@ -61,13 +97,7 @@
       "id": "GOVERNANCE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GOVERNANCE-20260724-01-closeout",
-      "paths": [
-        "AGENTS.md",
-        "backend/**",
-        ".github/workflows/**",
-        "hoi-chon-dung/**",
-        "docs/handover/**"
-      ],
+      "paths": ["AGENTS.md", "backend/**", ".github/workflows/**", "hoi-chon-dung/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T23:41:00+07:00",
       "summary": "Khắc phục hoàn toàn lỗi đưa nội dung owner/internal lên public UI; production public-private boundary SUCCESS."
@@ -76,12 +106,7 @@
       "id": "AFFILIATE-20260724-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/AFFILIATE-20260724-02-closeout",
-      "paths": [
-        "backend/choice-autopilot.js",
-        "hoi-chon-dung/**",
-        ".github/workflows/**",
-        "docs/handover/**"
-      ],
+      "paths": ["backend/choice-autopilot.js", "hoi-chon-dung/**", ".github/workflows/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T22:34:00+07:00",
       "summary": "Affiliate Autopilot V2 production SUCCESS; trạng thái kinh doanh chỉ còn trong kênh nội bộ."
@@ -90,11 +115,7 @@
       "id": "AFFILIATE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/AFFILIATE-20260724-01-closeout",
-      "paths": [
-        "hoi-chon-dung/**",
-        "backend/choice.js",
-        "docs/handover/**"
-      ],
+      "paths": ["hoi-chon-dung/**", "backend/choice.js", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T21:29:00+07:00",
       "summary": "Triển khai Hội Chọn Đúng V1; sau đó được V2 thay thế về mô hình vận hành."
@@ -103,10 +124,7 @@
       "id": "HANDOVER-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/HANDOVER-20260724-01",
-      "paths": [
-        "HANDOVER.md",
-        "docs/handover/ACTIVE_TASKS.json"
-      ],
+      "paths": ["HANDOVER.md", "docs/handover/ACTIVE_TASKS.json"],
       "status": "completed",
       "completed_at": "2026-07-24T03:03:00+07:00",
       "summary": "Chuẩn hóa HANDOVER.md."
