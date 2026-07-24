@@ -1,25 +1,61 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T02:40:00+07:00",
+  "updated_at": "2026-07-25T03:00:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
+    {
+      "id": "GROWTH-20260725-02",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/GROWTH-20260725-02-multiniche-trends-onboarding",
+      "base_sha": "ad0e10543e5c715b96073d817fe2256a9ca077cb",
+      "paths": [
+        "backend/choice.js",
+        "backend/choice-autopilot.js",
+        "backend/choice-autopilot.test.mjs",
+        "backend/choice-revenue.js",
+        "backend/choice-setup.js",
+        "backend/choice-setup.test.mjs",
+        "backend/choice-public-boundary.test.mjs",
+        "backend/wrangler.toml",
+        "hoi-chon-dung/data/seed-products.js",
+        "hoi-chon-dung/app.test.mjs",
+        "hoi-chon-dung/sw.js",
+        "tools/choice-taxonomy.mjs",
+        "tools/apply-choice-multiniche.mjs",
+        "tools/apply-choice-seo-multiniche.mjs",
+        "tools/apply-choice-setup.mjs",
+        "tools/choice-multiniche.test.mjs",
+        "tools/build-choice-seo.mjs",
+        "tools/choice-seo.test.mjs",
+        ".github/workflows/deploy-pages.yml",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/choice-growth-autopilot.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/CHOICE_OWNER_SETUP.md",
+        "docs/handover/CHOICE_GROWTH_AUTOPILOT.md",
+        "docs/handover/HOI_CHON_DUNG.md",
+        "docs/handover/GROWTH-20260725-02-PR.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T01:45:00+07:00",
+      "heartbeat_at": "2026-07-25T03:00:00+07:00",
+      "summary": "Mở rộng affiliate sang 12 lĩnh vực an toàn theo xu hướng; xây Trung tâm kết nối owner với link đăng ký/đăng nhập/ngân hàng/API/SEO; tự động hóa catalog, PWA V4, landing page/hướng dẫn đa danh mục, IndexNow và báo cáo doanh thu."
+    }
+  ],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260725-01",
       "owner": "Claude Code",
       "branch": "claude/lenormand-english-names",
-      "base_sha": "871e70a1845ba7ee09fd3e78c7b9d46d980a0ed8",
       "paths": [
         "boitoan/index.html",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-25T02:30:00+07:00",
-      "heartbeat_at": "2026-07-25T02:40:00+07:00",
-      "summary": "Ten la bai hien bang tieng Anh toan app; loi que doc thang ra thanh cau ket hop cac la, bo het tu ngu meta va giong len lop."
-    }
-  ],
-  "recently_completed": [
+      "status": "completed",
+      "completed_at": "2026-07-25T02:15:00+07:00",
+      "summary": "Tên lá bài hiển thị tiếng Anh toàn app và lời quẻ đọc thẳng thành câu kết hợp. PR #95 merge commit 73d852032c1f893e7b436cab6315288077e87ca9; production run 30119895119 SUCCESS; internal recorder 30119935115 SUCCESS."
+    },
     {
       "id": "BOITOAN-20260724-16",
       "owner": "Claude Code",
@@ -31,7 +67,7 @@
       ],
       "status": "completed",
       "completed_at": "2026-07-25T02:00:00+07:00",
-      "summary": "Sua may dien giai Lenormand: doc theo to hop, loc dung linh vuc khach chon, bo nhan ky thuat va doan giang phuong phap. PR #92 squash-merge commit d014813; CI 4/4 success; deploy run 30118917493 success; da kiem chung production tra HTTP 200 va payload chua ma nguon moi."
+      "summary": "Sửa máy diễn giải Lenormand: đọc theo tổ hợp, lọc đúng lĩnh vực khách chọn, bỏ nhãn kỹ thuật và đoạn giảng phương pháp. PR #92 merge commit d014813dbc1aae04d88cfd3f470dc7fad1532a4b; production 30118917493 SUCCESS."
     },
     {
       "id": "SEO-20260725-01",
@@ -68,19 +104,13 @@
       ],
       "status": "completed",
       "completed_at": "2026-07-25T01:22:00+07:00",
-      "summary": "Growth Autopilot production SUCCESS. PR #91 merge source a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0; CI điều phối 30116008064 và validation Growth/Revenue/SEO/WebKit 30116312380 SUCCESS; production 30116421342 SUCCESS toàn bộ source, SEO build, Worker, Growth cycle, Pages, IndexNow, Google step và smoke; recorder 30116490615 SUCCESS. Dashboard doanh thu owner-only đồng bộ 5 phút, SEO publish 6 giờ. AccessTrade hiện chưa kết nối nên mode nội bộ onboarding_required; cần owner đăng nhập/KYC và gửi /atkey một lần để có link/đơn/hoa hồng thật. Google Search Console service account là tùy chọn một lần để submit sitemap qua API."
+      "summary": "Growth Autopilot production SUCCESS. PR #91 merge source a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0; validation 30116312380 và production 30116421342 SUCCESS; dashboard doanh thu owner-only đồng bộ 5 phút, SEO publish 6 giờ."
     },
     {
       "id": "GOVERNANCE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GOVERNANCE-20260724-01-closeout",
-      "paths": [
-        "AGENTS.md",
-        "backend/**",
-        ".github/workflows/**",
-        "hoi-chon-dung/**",
-        "docs/handover/**"
-      ],
+      "paths": ["AGENTS.md", "backend/**", ".github/workflows/**", "hoi-chon-dung/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T23:41:00+07:00",
       "summary": "Khắc phục hoàn toàn lỗi đưa nội dung owner/internal lên public UI; production public-private boundary SUCCESS."
@@ -89,12 +119,7 @@
       "id": "AFFILIATE-20260724-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/AFFILIATE-20260724-02-closeout",
-      "paths": [
-        "backend/choice-autopilot.js",
-        "hoi-chon-dung/**",
-        ".github/workflows/**",
-        "docs/handover/**"
-      ],
+      "paths": ["backend/choice-autopilot.js", "hoi-chon-dung/**", ".github/workflows/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T22:34:00+07:00",
       "summary": "Affiliate Autopilot V2 production SUCCESS; trạng thái kinh doanh chỉ còn trong kênh nội bộ."
@@ -103,26 +128,10 @@
       "id": "AFFILIATE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/AFFILIATE-20260724-01-closeout",
-      "paths": [
-        "hoi-chon-dung/**",
-        "backend/choice.js",
-        "docs/handover/**"
-      ],
+      "paths": ["hoi-chon-dung/**", "backend/choice.js", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T21:29:00+07:00",
       "summary": "Triển khai Hội Chọn Đúng V1; sau đó được V2 thay thế về mô hình vận hành."
-    },
-    {
-      "id": "HANDOVER-20260724-01",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/HANDOVER-20260724-01",
-      "paths": [
-        "HANDOVER.md",
-        "docs/handover/ACTIVE_TASKS.json"
-      ],
-      "status": "completed",
-      "completed_at": "2026-07-24T03:03:00+07:00",
-      "summary": "Chuẩn hóa HANDOVER.md."
     }
   ]
 }

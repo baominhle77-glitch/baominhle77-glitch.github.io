@@ -11,7 +11,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 32
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -61,35 +61,104 @@ jobs:
           node --check backend/worker.js
           node backend/worker.test.mjs
 
-      - name: Materialize Growth Autopilot và Worker
+      - name: Materialize taxonomy và discovery đa lĩnh vực
+        run: |
+          set -euo pipefail
+          node --check tools/choice-taxonomy.mjs
+          node --check tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-multiniche.mjs
+          node --check backend/choice-autopilot.js
+
+      - name: Materialize SEO mọi danh mục
+        run: |
+          set -euo pipefail
+          node --check tools/apply-choice-seo-multiniche.mjs
+          node tools/apply-choice-seo-multiniche.mjs
+          node tools/apply-choice-seo-multiniche.mjs
+          node --check tools/build-choice-seo.mjs
+
+      - name: Materialize Choice system lõi
         run: |
           set -euo pipefail
           node tools/apply-travel-system.mjs
+          node --check tools/apply-choice-system.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-system.mjs
+          node --check backend/worker.js
+
+      - name: Materialize trung tâm kết nối owner
+        run: |
+          set -euo pipefail
+          node --check tools/apply-choice-setup.mjs
+          node tools/apply-choice-setup.mjs
+          node tools/apply-choice-setup.mjs
+          node --check backend/choice-setup.js
+          node --check backend/worker.js
+
+      - name: Materialize revenue và public UI
+        run: |
+          set -euo pipefail
+          node --check tools/apply-choice-revenue.mjs
           node tools/apply-choice-revenue.mjs
           node tools/apply-choice-revenue.mjs
           node tools/apply-choice-autopilot-ui.mjs
           node tools/apply-choice-autopilot-ui.mjs
           node --check tools/check-public-content.mjs
-          node --check tools/apply-choice-system.mjs
-          node --check tools/apply-choice-revenue.mjs
           node --check tools/apply-choice-public-product.mjs
           node --check backend/worker.js
-          node backend/worker.test.mjs
+
+      - name: Kiểm tra Worker sau materialize
+        id: worker_after_materialize
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          node backend/worker.test.mjs > "$RUNNER_TEMP/worker-test.log" 2>&1
+
+      - name: Lưu stack trace Worker
+        if: steps.worker_after_materialize.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-test-log
+          path: ${{ runner.temp }}/worker-test.log
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Chặn khi Worker regression thất bại
+        if: steps.worker_after_materialize.outcome == 'failure'
+        run: |
+          echo "Worker regression thất bại; stack trace đã được lưu trong artifact worker-test-log."
+          exit 1
+
+      - name: Kiểm tra marker và cron Growth
+        run: |
+          set -euo pipefail
           test "$(grep -c 'Hội Chọn Đúng API integration v1' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng API integration v2' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng Telegram integration v1' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng Telegram integration v2' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng Autopilot scheduled v2' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng internal status boundary v3' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng owner setup route v1' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng owner setup Telegram v1' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng owner revenue route v1' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng owner revenue Telegram v1' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng growth cycle 5m v1' backend/worker.js)" -eq 1
+          grep -q 'handleChoiceSetupRequest' backend/worker.js
+          grep -q 'handleChoiceSetupTelegram' backend/worker.js
           grep -q 'handleChoiceRevenueRequest' backend/worker.js
           grep -q 'handleChoiceRevenueTelegram' backend/worker.js
           grep -q 'runChoiceGrowthCycle' backend/worker.js
           grep -q 'crons = \["\*/5 \* \* \* \*"\]' backend/wrangler.toml
+
+      - name: Kiểm tra taxonomy và discovery đa lĩnh vực
+        run: |
+          set -euo pipefail
+          node --test tools/choice-multiniche.test.mjs
+          grep -q 'id: "tech"' backend/choice-autopilot.js
+          grep -q 'id: "travel"' backend/choice-autopilot.js
+          grep -q 'trend_score: trendScore' backend/choice-autopilot.js
+          grep -q 'BEST_SELLERS.*RECOMMENDED.*HIGH_COMMISSION_RATE' backend/choice-autopilot.js
 
       - name: Kiểm tra catalog và Affiliate Autopilot
         run: |
@@ -98,6 +167,12 @@ jobs:
           node --test backend/choice.test.mjs
           node --check backend/choice-autopilot.js
           node --test backend/choice-autopilot.test.mjs
+
+      - name: Kiểm tra trung tâm kết nối owner
+        run: |
+          set -euo pipefail
+          node --check backend/choice-setup.js
+          node --test backend/choice-setup.test.mjs
 
       - name: Kiểm tra đồng bộ và dashboard doanh thu
         run: |
@@ -122,7 +197,7 @@ jobs:
           grep -q 'x-choice-autopilot-trigger' backend/worker.js
           grep -q 'choiceAutopilotIsOwner' backend/worker.js
           grep -q 'choiceAutopilotCommand === "/chon"' backend/worker.js
-          grep -q 'hoi-chon-dung-v3' hoi-chon-dung/sw.js
+          grep -q 'hoi-chon-dung-v4' hoi-chon-dung/sw.js
           ! grep -qiE 'autopilotBadge|autopilotFooter|autopilot-ui\.js|onboarding_required|chủ sở hữu|Cloudflare Worker|API key' hoi-chon-dung/index.html
 
       - name: Kiểm tra frontend Hội Chọn Đúng
