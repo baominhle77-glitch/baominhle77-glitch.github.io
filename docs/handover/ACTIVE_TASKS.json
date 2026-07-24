@@ -1,36 +1,48 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T23:41:00+07:00",
+  "updated_at": "2026-07-25T00:05:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "SEO-20260725-01",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/SEO-20260725-01-growth-autopilot",
+      "base_sha": "68e99400cb4990f03cc88de526e524b979111874",
+      "paths": [
+        "backend/choice-autopilot.js",
+        "backend/choice-revenue.js",
+        "backend/choice-revenue.test.mjs",
+        "backend/wrangler.toml",
+        "tools/apply-choice-system.mjs",
+        "tools/build-choice-seo.mjs",
+        "tools/submit-indexnow.mjs",
+        "tools/choice-seo.test.mjs",
+        ".github/workflows/deploy-pages.yml",
+        ".github/workflows/choice-growth-autopilot.yml",
+        "hoi-chon-dung/seo/**",
+        "hoi-chon-dung/sitemap.xml",
+        "hoi-chon-dung/feed.xml",
+        "robots.txt",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/HOI_CHON_DUNG.md",
+        "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T00:05:00+07:00",
+      "heartbeat_at": "2026-07-25T00:05:00+07:00",
+      "summary": "Thiết lập Growth Autopilot: tự tìm và gắn link affiliate thật, đồng bộ doanh thu gần thời gian thực, dashboard owner qua link Telegram một lần, tự tạo trang sản phẩm/category SEO, sitemap/RSS, gửi IndexNow và chuẩn bị kết nối Google Search Console."
+    }
+  ],
   "recently_completed": [
     {
       "id": "GOVERNANCE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GOVERNANCE-20260724-01-closeout",
-      "paths": [
-        "AGENTS.md",
-        "tools/check-public-content.mjs",
-        "tools/apply-choice-system.mjs",
-        "tools/apply-choice-autopilot-ui.mjs",
-        "backend/choice-autopilot.js",
-        "backend/choice-autopilot.test.mjs",
-        "backend/choice-public-boundary.test.mjs",
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/record-choice-autopilot-status.yml",
-        "hoi-chon-dung/index.html",
-        "hoi-chon-dung/sw.js",
-        "hoi-chon-dung/app.test.mjs",
-        "hoi-chon-dung/autopilot-ui.js",
-        "docs/handover/AUDIENCE_PRIVACY_STANDARD.md",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/HOI_CHON_DUNG.md"
-      ],
+      "paths": ["AGENTS.md", "backend/**", ".github/workflows/**", "hoi-chon-dung/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T23:41:00+07:00",
-      "summary": "Khắc phục hoàn toàn lỗi đưa nội dung owner/internal lên public UI. Quy chế công ty toàn cục merge 4f2c6bf2; PR #89 merge d72e3552; CI điều phối 30108929684, regression/public-private/WebKit 30108929401 và recorder nội bộ 30108929479 SUCCESS; production 30109841905 SUCCESS. Public UI đã gỡ trạng thái vận hành, PWA cache V3 xóa cache cũ, public status handler bị xóa và route trả 404, recorder đọc trực tiếp Cloudflare KV."
+      "summary": "Khắc phục hoàn toàn lỗi đưa nội dung owner/internal lên public UI; production public-private boundary SUCCESS."
     },
     {
       "id": "AFFILIATE-20260724-02",
@@ -39,7 +51,7 @@
       "paths": ["backend/choice-autopilot.js", "hoi-chon-dung/**", ".github/workflows/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T22:34:00+07:00",
-      "summary": "Affiliate Autopilot V2 production SUCCESS; trạng thái kinh doanh chỉ còn trong kênh nội bộ sau governance fix."
+      "summary": "Affiliate Autopilot V2 production SUCCESS; trạng thái kinh doanh chỉ còn trong kênh nội bộ."
     },
     {
       "id": "AFFILIATE-20260724-01",
