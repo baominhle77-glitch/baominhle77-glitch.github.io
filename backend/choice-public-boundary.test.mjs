@@ -4,12 +4,18 @@ import { readFile } from "node:fs/promises";
 
 const read = (name) => readFile(new URL(name, import.meta.url), "utf8");
 
-test("Worker không công khai API trạng thái vận hành", async () => {
-  const worker = await read("./worker.js");
+test("Worker và module không công khai API trạng thái vận hành", async () => {
+  const [worker, moduleSource] = await Promise.all([
+    read("./worker.js"),
+    read("./choice-autopilot.js")
+  ]);
   assert.match(worker, /Hội Chọn Đúng internal status boundary v3/);
   assert.match(worker, /url\.pathname\.startsWith\("\/api\/choice\/autopilot\/"\)/);
   assert.match(worker, /json\(\{ error: "not_found" \}, 404\)/);
   assert.doesNotMatch(worker, /handleChoiceAutopilotRequest/);
+  assert.doesNotMatch(moduleSource, /handleChoiceAutopilotRequest/);
+  assert.doesNotMatch(moduleSource, /\/api\/choice\/autopilot\/status/);
+  assert.doesNotMatch(moduleSource, /cache-control[^\n]+public/);
 });
 
 test("dữ liệu sản phẩm công khai không chứa nhãn vận hành hoặc nguồn nội bộ", async () => {
