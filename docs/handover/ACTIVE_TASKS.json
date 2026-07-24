@@ -1,8 +1,39 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T01:22:00+07:00",
+  "updated_at": "2026-07-25T01:45:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "GROWTH-20260725-02",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/GROWTH-20260725-02-multiniche-trends-onboarding",
+      "base_sha": "15065a234eb189bf5cea912c375ae6cd9928d18b",
+      "paths": [
+        "backend/choice.js",
+        "backend/choice-autopilot.js",
+        "backend/choice-revenue.js",
+        "backend/choice-setup.js",
+        "backend/*.test.mjs",
+        "backend/wrangler.toml",
+        "hoi-chon-dung/data/seed-products.js",
+        "tools/build-choice-seo.mjs",
+        "tools/check-public-content.mjs",
+        "tools/apply-choice-system.mjs",
+        ".github/workflows/deploy-pages.yml",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/choice-growth-autopilot.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/HOI_CHON_DUNG.md",
+        "docs/handover/CHOICE_GROWTH_AUTOPILOT.md",
+        "docs/handover/CHOICE_OWNER_SETUP.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T01:45:00+07:00",
+      "heartbeat_at": "2026-07-25T01:45:00+07:00",
+      "summary": "Mở rộng affiliate sang nhiều lĩnh vực an toàn theo xu hướng; xây Trung tâm kết nối owner với link đăng ký/đăng nhập/nhận tiền/rút tiền; tự động hóa catalog, SEO, Google/Bing/IndexNow và báo cáo doanh thu mà chủ sở hữu chỉ thực hiện các bước đăng nhập/cấp quyền bắt buộc một lần."
+    }
+  ],
   "recently_completed": [
     {
       "id": "SEO-20260725-01",
