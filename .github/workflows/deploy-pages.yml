@@ -47,6 +47,7 @@ jobs:
           set -euo pipefail
           node tools/apply-travel-system.mjs
           node tools/apply-choice-system.mjs
+          node tools/apply-choice-autopilot-ui.mjs
           node --check assets/gate.js
           node --check assets/community.js
           node --check assets/community-admin.js
@@ -62,14 +63,30 @@ jobs:
           node --test backend/travel.test.mjs
           node --check backend/choice.js
           node --test backend/choice.test.mjs
+          node --check backend/choice-autopilot.js
+          node --test backend/choice-autopilot.test.mjs
+          node --check tools/apply-choice-system.mjs
+          node --check tools/apply-choice-autopilot-ui.mjs
           node --check hoi-chon-dung/app.js
+          node --check hoi-chon-dung/autopilot-ui.js
           node --check hoi-chon-dung/sw.js
           node --test hoi-chon-dung/app.test.mjs
           grep -q 'Bói toán V11' assets/gate.js
           grep -q '/assets/gate.js?v=19' boitoan/index.html
           grep -q 'boitoan-v19' boitoan/sw.js
           test "$(grep -c 'Hội Chọn Đúng API integration v1' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng API integration v2' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng Telegram integration v1' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng Telegram integration v2' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng Autopilot scheduled v2' backend/worker.js)" -eq 1
+          test "$(grep -c 'Affiliate Autopilot UI v2' hoi-chon-dung/index.html)" -eq 1
+          grep -q 'x-choice-autopilot-trigger' backend/worker.js
+          grep -q 'choiceAutopilotIsOwner' backend/worker.js
+          grep -q 'choiceAutopilotCommand === "/chon"' backend/worker.js
+          grep -q 'update?.message?.from?.id' backend/worker.js
+          grep -q 'crons = \["17 \*/6 \* \* \*"\]' backend/wrangler.toml
+          grep -q 'autopilotBadge' hoi-chon-dung/index.html
+          grep -q 'autopilotFooter' hoi-chon-dung/index.html
 
       - name: Gộp site
         run: |
@@ -82,12 +99,37 @@ jobs:
           cp medora/index.html _site/medora/index.html
           cp vietnam-travel/index.html vietnam-travel/app.css vietnam-travel/app.js vietnam-travel/manifest.webmanifest vietnam-travel/sw.js vietnam-travel/icon.svg _site/vietnam-travel/
           cp vietnam-travel/data/seed-places.js _site/vietnam-travel/data/
-          cp hoi-chon-dung/index.html hoi-chon-dung/app.css hoi-chon-dung/app.js hoi-chon-dung/manifest.webmanifest hoi-chon-dung/sw.js hoi-chon-dung/icon.svg hoi-chon-dung/og-image.svg hoi-chon-dung/sitemap.xml _site/hoi-chon-dung/
+          cp hoi-chon-dung/index.html hoi-chon-dung/app.css hoi-chon-dung/app.js hoi-chon-dung/autopilot-ui.js hoi-chon-dung/manifest.webmanifest hoi-chon-dung/sw.js hoi-chon-dung/icon.svg hoi-chon-dung/og-image.svg hoi-chon-dung/sitemap.xml _site/hoi-chon-dung/
           cp hoi-chon-dung/data/seed-products.js _site/hoi-chon-dung/data/
 
       - name: Deploy Worker trước Pages
         working-directory: backend
-        run: npx --yes wrangler@4.112.0 deploy
+        run: |
+          set -euo pipefail
+          trigger="$(openssl rand -hex 32)"
+          echo "::add-mask::$trigger"
+          echo "CHOICE_AUTOPILOT_TRIGGER_RUNTIME=$trigger" >> "$GITHUB_ENV"
+          printf '%s' "$trigger" | npx --yes wrangler@4.112.0 secret put CHOICE_AUTOPILOT_TRIGGER
+          npx --yes wrangler@4.112.0 deploy
+
+      - name: Khởi động Affiliate Autopilot
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 20); do
+            code=$(curl -sS -o "$RUNNER_TEMP/autopilot-start.json" -w '%{http_code}' \
+              -X POST \
+              -H "x-choice-autopilot-trigger: $CHOICE_AUTOPILOT_TRIGGER_RUNTIME" \
+              "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/run" || true)
+            if [ "$code" = "200" ] && grep -Eq '"ok":(true|false)' "$RUNNER_TEMP/autopilot-start.json"; then
+              cat "$RUNNER_TEMP/autopilot-start.json"
+              echo "Affiliate Autopilot đã nhận lệnh khởi động ở lần $attempt"
+              exit 0
+            fi
+            sleep 3
+          done
+          cat "$RUNNER_TEMP/autopilot-start.json" 2>/dev/null || true
+          echo "Không thể khởi động Affiliate Autopilot sau deploy" >&2
+          exit 1
 
       - name: Deploy Pages
         run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
@@ -95,7 +137,7 @@ jobs:
       - name: Hậu kiểm production
         run: |
           set -euo pipefail
-          bust="v11=${GITHUB_SHA}-${GITHUB_RUN_ID}"
+          bust="autopilot=${GITHUB_SHA}-${GITHUB_RUN_ID}"
           for attempt in $(seq 1 30); do
             app=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/?$bust" || true)
             gate=$(curl -fsSL "https://hiennhi89.pages.dev/assets/gate.js?$bust" || true)
@@ -104,6 +146,7 @@ jobs:
             choice_app=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/?$bust" || true)
             choice_health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/health" || true)
             choice_products=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/products" || true)
+            choice_autopilot=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/status" || true)
             if grep -q 'application/gate-payload' <<<"$app" \
               && grep -q '/assets/gate.js?v=19' <<<"$app" \
               && grep -q 'Bói toán V11' <<<"$gate" \
@@ -115,12 +158,16 @@ jobs:
               && grep -q '"decrypt_key_configured":true' <<<"$health" \
               && grep -q 'HỘI CHỌN ĐÚNG' <<<"$choice_app" \
               && grep -q 'CÔNG BỐ LIÊN KẾT TIẾP THỊ' <<<"$choice_app" \
+              && grep -q 'Affiliate Autopilot UI v2' <<<"$choice_app" \
+              && grep -q 'autopilotBadge' <<<"$choice_app" \
               && grep -q '"service":"hoi-chon-dung"' <<<"$choice_health" \
-              && grep -q 'rider-waite-smith-tarot' <<<"$choice_products"; then
-              echo "Production V11 + Hội Chọn Đúng đạt ở lần $attempt"
+              && grep -q '"products":\[' <<<"$choice_products" \
+              && grep -q '"count":' <<<"$choice_products" \
+              && grep -Eq '"mode":"(active|onboarding_required|error|not_started)"' <<<"$choice_autopilot"; then
+              echo "Production V11 + Hội Chọn Đúng Affiliate Autopilot đạt ở lần $attempt"
               exit 0
             fi
             sleep 4
           done
-          echo "Production chưa đồng bộ V11 hoặc Hội Chọn Đúng" >&2
+          echo "Production chưa đồng bộ V11 hoặc Affiliate Autopilot" >&2
           exit 1

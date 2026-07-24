@@ -1,9 +1,10 @@
-const CACHE_NAME = "hoi-chon-dung-v1";
+const CACHE_NAME = "hoi-chon-dung-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./app.css",
   "./app.js",
+  "./autopilot-ui.js",
   "./data/seed-products.js",
   "./manifest.webmanifest",
   "./icon.svg"
