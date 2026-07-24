@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T22:27:00+07:00",
+  "updated_at": "2026-07-24T22:34:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "AFFILIATE-20260724-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/AFFILIATE-20260724-02-production-status",
-      "base_sha": "a7ce570259c383eb7e3d949af930d2678873a786",
+      "branch": "agent/AFFILIATE-20260724-02-closeout",
       "paths": [
         "backend/choice.js",
         "backend/choice-autopilot.js",
@@ -28,13 +28,10 @@
         "docs/handover/HOI_CHON_DUNG.md",
         "docs/handover/CHOICE_AUTOPILOT_STATUS.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-24T21:45:00+07:00",
-      "heartbeat_at": "2026-07-24T22:27:00+07:00",
-      "summary": "Affiliate Autopilot V2 đã merge và production deploy SUCCESS ở source c4591418; bổ sung recorder tự động để sau mỗi deploy ghi mode active/onboarding/error, số sản phẩm và điểm chạm đăng nhập vào hồ sơ bàn giao trước khi closeout."
-    }
-  ],
-  "recently_completed": [
+      "status": "completed",
+      "completed_at": "2026-07-24T22:34:00+07:00",
+      "summary": "Hội Chọn Đúng đã chuyển sang Affiliate Autopilot full-auto. PR #86 merge source c4591418ae92adc77d0201e8e55737cd6ce929db; CI điều phối 30104948933 và validation/WebKit 30104948983 SUCCESS; production 30105078450 SUCCESS. PR #87 merge recorder 5ba62c6e67ff15eb49e1eb155e3763fa52f71508; production 30105568525 và recorder 30105641911 SUCCESS. Mode production hiện là onboarding_required vì chưa kết nối tài khoản AccessTrade; đây là điểm chạm đăng nhập/KYC một lần, sau đó hệ thống tự tuyển sản phẩm, tạo link, cập nhật và tối ưu."
+    },
     {
       "id": "AFFILIATE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -52,7 +49,7 @@
       ],
       "status": "completed",
       "completed_at": "2026-07-24T21:29:00+07:00",
-      "summary": "Triển khai production Hội Chọn Đúng V1; PR #84 merge f57023af442839da852354672bea8036e579a9fd; production run 30100989464 SUCCESS."
+      "summary": "Triển khai production Hội Chọn Đúng V1; PR #84 merge f57023af442839da852354672bea8036e579a9fd; production run 30100989464 SUCCESS. V1 sau đó được V2 Autopilot thay thế về mô hình vận hành."
     },
     {
       "id": "HANDOVER-20260724-01",
