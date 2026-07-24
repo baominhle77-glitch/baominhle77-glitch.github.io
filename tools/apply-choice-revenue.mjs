@@ -34,4 +34,5 @@ for (const forbidden of ["fetch(force?'./api/", "fetch('./logout'"]) {
 }
 
 await writeFile(path, source);
-console.log("choice-revenue-ok: sửa cửa sổ so sánh 7 ngày và endpoint dashboard tuyệt đối");
+await import("./apply-choice-public-product.mjs");
+console.log("choice-revenue-ok: sửa dashboard doanh thu và materialize dữ liệu sản phẩm SEO công khai");
