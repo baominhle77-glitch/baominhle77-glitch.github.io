@@ -583,13 +583,54 @@ async function handlePosts(request, env, path) {
     const text = clean(body && body.text, 2000);
     if (!text) return json({ error: "invalid_comment" }, 400);
     const now = Date.now(), id = crypto.randomUUID();
-    const comment = { id, post_id: postId, author_id: auth.profile.id, author_name: auth.profile.display_name, author_role: auth.profile.role, text, created_at: now };
+    const parentId = clean(body && body.parent_id, 60);
+    if (parentId && !isUuid(parentId)) return json({ error: "invalid_parent" }, 400);
+    if (parentId && !(await findComment(env, postId, parentId))) return json({ error: "parent_not_found" }, 404);
+    const comment = { id, post_id: postId, parent_id: parentId || null, author_id: auth.profile.id, author_name: auth.profile.display_name, author_role: auth.profile.role, text, created_at: now, likes: 0, liked_by: [] };
     await putJson(env, postCommentKey(postId, now, id), comment, ACCOUNT_TTL);
     post.comment_count = Number(post.comment_count || 0) + 1; post.updated_at = now;
     await putJson(env, postKey(postId), post, ACCOUNT_TTL);
     return json({ comment }, 201);
   }
+  /* Bật/tắt thích một bình luận */
+  if (action === "comment-like" && request.method === "POST") {
+    if (auth.claims.mode === "impersonation") return json({ error: "read_only_impersonation" }, 403);
+    const body = await readJson(request);
+    const commentId = clean(body && body.comment_id, 60);
+    if (!isUuid(commentId)) return json({ error: "invalid_comment" }, 400);
+    const found = await findComment(env, postId, commentId);
+    if (!found) return json({ error: "not_found" }, 404);
+    const { key, comment } = found;
+    const likedBy = Array.isArray(comment.liked_by) ? comment.liked_by : [];
+    const uid = auth.profile.id;
+    const already = likedBy.indexOf(uid) >= 0;
+    comment.liked_by = already ? likedBy.filter((x) => x !== uid) : likedBy.concat([uid]);
+    comment.likes = comment.liked_by.length;
+    await putJson(env, key, comment, ACCOUNT_TTL);
+    return json({ liked: !already, likes: comment.likes });
+  }
+  /* Bật/tắt thích cả bài đăng */
+  if (action === "like" && request.method === "POST") {
+    if (auth.claims.mode === "impersonation") return json({ error: "read_only_impersonation" }, 403);
+    const likedBy = Array.isArray(post.liked_by) ? post.liked_by : [];
+    const uid = auth.profile.id;
+    const already = likedBy.indexOf(uid) >= 0;
+    post.liked_by = already ? likedBy.filter((x) => x !== uid) : likedBy.concat([uid]);
+    post.likes = post.liked_by.length;
+    await putJson(env, postKey(postId), post, ACCOUNT_TTL);
+    return json({ liked: !already, likes: post.likes });
+  }
   return json({ error: "not_found" }, 404);
+}
+/* Tìm một bình luận theo id trong phạm vi bài đăng (khoá có gắn timestamp nên phải quét). */
+async function findComment(env, postId, commentId) {
+  const page = await env.KV.list({ prefix: postCommentPrefix(postId), limit: 1000 });
+  for (const key of page.keys) {
+    if (!key.name.endsWith(`:${commentId}`)) continue;
+    const comment = await getJson(env, key.name);
+    if (comment) return { key: key.name, comment };
+  }
+  return null;
 }
 
 /* Account V5 single admin session */
@@ -810,11 +851,39 @@ async function handleAdmin(request, env, path) {
 /* Account V4 edge authentication */
 /* Account V4 awaited dispatcher */
 /* Account V5 admin JWT */
+
+/* Số thành viên — công khai, đếm theo thời gian thực, có cache ngắn để đỡ tốn KV. */
+const STATS_CACHE_KEY = "community-stats-cache";
+const STATS_CACHE_TTL = 20;
+async function handleStats(request, env) {
+  const cached = await getJson(env, STATS_CACHE_KEY);
+  if (cached && Date.now() - Number(cached.at || 0) < STATS_CACHE_TTL * 1000) {
+    return json({ ...cached.value, cached: true });
+  }
+  let guests = 0, readers = 0, admins = 0, cursor;
+  do {
+    const page = await env.KV.list({ prefix: "community-profile:", limit: 1000, cursor });
+    for (const key of page.keys) {
+      const profile = await getJson(env, key.name);
+      if (!profile) continue;
+      if (profile.role === "reader") readers += 1;
+      else if (profile.role === "admin") admins += 1;
+      else guests += 1;
+    }
+    cursor = page.list_complete ? null : page.cursor;
+  } while (cursor);
+  const value = { members: guests + readers + admins, guests, readers, admins, updated_at: Date.now() };
+  await putJson(env, STATS_CACHE_KEY, { at: Date.now(), value }, 60);
+  return json(value);
+}
+
 export async function handleCommunity(request, env) {
   const url = new URL(request.url);
   const path = url.pathname;
   if (!path.startsWith("/api/community/")) return null;
   try {
+    /* Công khai: ai cũng xem được số thành viên, không cần đăng nhập. */
+    if (path === "/api/community/stats" && request.method === "GET") return await handleStats(request, env);
     if (path === "/api/community/register" && request.method === "POST") return await handleRegister(request, env);
     if (path === "/api/community/login" && request.method === "POST") return await handleLogin(request, env);
     if (path === "/api/community/me" && (request.method === "GET" || request.method === "PUT" || request.method === "DELETE")) return await handleMe(request, env);
