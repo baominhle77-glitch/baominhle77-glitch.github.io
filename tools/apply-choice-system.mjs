@@ -54,6 +54,10 @@ if (!source.includes(scheduledMarker)) {
 await writeFile(workerPath, source);
 
 let autopilot = await readFile(autopilotPath, "utf8");
+autopilot = autopilot.replace(
+  /\nexport async function handleChoiceAutopilotRequest\(request, env\) \{[\s\S]*?\n\}\n\n(?=function send\()/,
+  "\n"
+);
 const replacements = [
   ['utm_medium: "autopilot"', 'utm_medium: "recommendation"'],
   ['slugify(`at-${candidate.category}-${candidate.source_id}`)', 'slugify(`goi-y-${candidate.category}-${candidate.source_id}`)'],
@@ -62,9 +66,12 @@ const replacements = [
   ['tags: [...new Set([candidate.keyword, candidate.shop_name, "autopilot", "accesstrade"])]', 'tags: [...new Set([candidate.keyword, candidate.shop_name])]']
 ];
 for (const [before, after] of replacements) autopilot = autopilot.replace(before, after);
-for (const forbidden of ['utm_medium: "autopilot"', 'Được Autopilot xếp hạng', '"autopilot", "accesstrade"', 'Hệ thống tự chọn dựa trên']) {
-  if (autopilot.includes(forbidden)) throw new Error(`Dữ liệu public còn nhãn nội bộ: ${forbidden}`);
+for (const forbidden of [
+  'handleChoiceAutopilotRequest', '/api/choice/autopilot/status', 'cache-control": "public',
+  'utm_medium: "autopilot"', 'Được Autopilot xếp hạng', '"autopilot", "accesstrade"', 'Hệ thống tự chọn dựa trên'
+]) {
+  if (autopilot.includes(forbidden)) throw new Error(`Module còn đường public/nội dung nội bộ bị cấm: ${forbidden}`);
 }
 await writeFile(autopilotPath, autopilot);
 
-console.log("choice-system-ok: API nội bộ đã khóa, Telegram/cron giữ nguyên và dữ liệu public đã được làm sạch");
+console.log("choice-system-ok: xóa status handler, khóa route public, giữ Telegram/cron và làm sạch dữ liệu sản phẩm");
