@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T22:18:00+07:00",
+  "updated_at": "2026-07-24T22:27:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "AFFILIATE-20260724-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/AFFILIATE-20260724-02-autopilot",
-      "base_sha": "3421034689584463146e57579c43540f38d819c0",
+      "branch": "agent/AFFILIATE-20260724-02-production-status",
+      "base_sha": "a7ce570259c383eb7e3d949af930d2678873a786",
       "paths": [
         "backend/choice.js",
         "backend/choice-autopilot.js",
@@ -17,6 +17,7 @@
         "tools/apply-choice-autopilot-ui.mjs",
         ".github/workflows/deploy-pages.yml",
         ".github/workflows/validate-role-system.yml",
+        ".github/workflows/record-choice-autopilot-status.yml",
         "hoi-chon-dung/index.html",
         "hoi-chon-dung/app.js",
         "hoi-chon-dung/autopilot-ui.js",
@@ -24,12 +25,13 @@
         "hoi-chon-dung/app.test.mjs",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/HOI_CHON_DUNG.md"
+        "docs/handover/HOI_CHON_DUNG.md",
+        "docs/handover/CHOICE_AUTOPILOT_STATUS.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-24T21:45:00+07:00",
-      "heartbeat_at": "2026-07-24T22:18:00+07:00",
-      "summary": "Nâng Hội Chọn Đúng thành Affiliate Autopilot: tự lấy datafeed AccessTrade, chấm điểm và chọn sản phẩm, tạo deep link, tự cập nhật catalog theo cron, tự tối ưu theo click/đơn hàng, onboarding API key một lần qua Telegram owner-only, không giao việc vận hành cho chủ sở hữu; đồng thời tách CI để định danh lỗi frontend/Community/Worker/Autopilot."
+      "heartbeat_at": "2026-07-24T22:27:00+07:00",
+      "summary": "Affiliate Autopilot V2 đã merge và production deploy SUCCESS ở source c4591418; bổ sung recorder tự động để sau mỗi deploy ghi mode active/onboarding/error, số sản phẩm và điểm chạm đăng nhập vào hồ sơ bàn giao trước khi closeout."
     }
   ],
   "recently_completed": [
