@@ -22,19 +22,24 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-25 01:10 GMT+7 — ChatGPT GPT-5.6 — SEO-20260725-01 — ĐANG TRIỂN KHAI 🟡
+### 2026-07-25 01:22 GMT+7 — ChatGPT GPT-5.6 — SEO-20260725-01 — HOÀN TẤT KỸ THUẬT ✅
 
-- Chủ sở hữu yêu cầu triển khai ngay hệ thống tự tìm sản phẩm, gắn link affiliate thật, tự cập nhật web, đẩy SEO trên nền tảng lớn và kiểm soát doanh thu gần thời gian thực.
-- Task đã khóa branch `agent/SEO-20260725-01-growth-autopilot`; không có task khác đang giữ phạm vi.
-- Growth cycle được thiết kế hai nhịp: Worker mỗi 5 phút đồng bộ click/đơn/hoa hồng; discovery và tạo/thay deep link chỉ chạy khi đủ 6 giờ.
-- `backend/choice-revenue.js` đã được thêm: đọc AccessTrade order-list/transactions, click KV, tính doanh số, pending/approved/rejected commission, conversion rate, EPC, biểu đồ 30 ngày, top sản phẩm/campaign và cảnh báo bất thường.
-- Dashboard doanh thu là owner-only tại `/owner/choice/revenue`: chỉ đúng Telegram owner dùng `/doanhthu` mới nhận vé một lần 10 phút; sau đổi vé dùng cookie `HttpOnly; Secure; SameSite=Strict` 12 giờ; route không phiên trả `401`, mọi response `noindex/no-store`.
-- Lệnh owner đã thiết kế: `/doanhthu`, `/doanhthu-ngay`, `/doanhthu7`, `/doanhthu30`, `/dongbo-doanhthu`.
-- SEO publisher đã được thêm: tự tạo HTML tĩnh sản phẩm/danh mục/hướng dẫn, Product/Offer/Breadcrumb/ItemList/FAQ/Article JSON-LD, canonical, Open Graph, Twitter metadata, sitemap và RSS.
-- IndexNow key và bulk submission đã được thêm; Google Search Console API script sẵn sàng nhưng chỉ hoạt động sau một lần owner xác minh property/cấp service account.
-- Workflow production và workflow 6 giờ đã được cập nhật để dựng/deploy SEO, gửi IndexNow, tùy chọn gửi Google sitemap và hậu kiểm trang/route/private boundary.
-- Public API sản phẩm được materialize thêm ảnh và thời điểm xác minh, không lộ affiliate URL thô hoặc metadata vận hành.
-- Test source đã được viết cho doanh thu, one-time ticket/cookie, owner guard, SEO schema, sitemap/RSS, IndexNow và Google dry-run. CI/merge/deploy/production chưa được kết luận tại thời điểm ghi nhật ký này.
+- Triển khai Growth Autopilot khép kín: tìm sản phẩm → lọc → tạo deep link affiliate → cập nhật catalog/web → dựng SEO → gửi IndexNow → đồng bộ click/đơn/hoa hồng → dashboard owner.
+- Worker cron chạy 5 phút để đồng bộ doanh thu; discovery/tạo lại link và SEO chỉ chạy khi đủ 6 giờ. Deploy trigger chạy ngay vòng đầu.
+- `backend/choice-revenue.js` đọc AccessTrade order-list/transactions và click KV; tính doanh số, commission pending/approved/rejected, conversion, EPC, approved EPC, AOV, biểu đồ 30 ngày, top sản phẩm/campaign và cảnh báo.
+- Dashboard owner-only `/owner/choice/revenue`: đúng Telegram owner dùng `/doanhthu` nhận vé một lần 10 phút; cookie `HttpOnly; Secure; SameSite=Strict` 12 giờ; không phiên `401`; mọi response `noindex/no-store`; không giữ tên, điện thoại hoặc email khách hàng.
+- Lệnh owner: `/doanhthu`, `/doanhthu-ngay`, `/doanhthu7`, `/doanhthu30`, `/dongbo-doanhthu`.
+- SEO publisher tự tạo HTML tĩnh sản phẩm/danh mục/hướng dẫn, Product/Offer/Breadcrumb/ItemList/FAQ/Article JSON-LD, canonical, Open Graph, Twitter metadata, sitemap và RSS.
+- IndexNow key và bulk submission đã deploy; production step IndexNow success. Google Search Console script có nhánh skip an toàn khi chưa có service account.
+- Public API sản phẩm có ảnh/thời điểm xác minh nhưng không lộ URL affiliate thô, metadata vận hành hoặc doanh thu.
+- PR #91 merge source `a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0`.
+- CI điều phối `30116008064`: success.
+- Validation cuối `30116312380`: Worker, Affiliate, Revenue, SEO, public-private boundary, frontend và WebKit AES thật đều success.
+- Production `30116421342`: source, SEO build, Worker-before-Pages, Growth trigger, Pages, IndexNow, Google step và smoke đều success.
+- Production recorder commit `915178f6ead00c4052391caf925ceea385b5fc75`; internal recorder `30116490615`, commit `e9ee55f3d55c14d10b83bbbb48efc794a7c0a6c6`.
+- Recorder xác nhận `onboarding_required`, credential false, sản phẩm/đơn thật bằng 0. Đây là external onboarding AccessTrade bắt buộc một lần, không phải lỗi kỹ thuật.
+- Sau khi owner đăng nhập/KYC và gửi `/atkey <API_KEY>`, hệ thống tự tạo link, cập nhật web và đồng bộ doanh thu; owner không vận hành từng sản phẩm.
+- Task chuyển `completed`; toàn bộ khóa được giải phóng.
 
 ### 2026-07-24 23:41 GMT+7 — ChatGPT GPT-5.6 — GOVERNANCE-20260724-01 — HOÀN TẤT ✅
 

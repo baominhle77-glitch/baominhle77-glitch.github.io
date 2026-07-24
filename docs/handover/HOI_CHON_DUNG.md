@@ -2,12 +2,12 @@
 
 **Runtime task:** `AFFILIATE-20260724-02` — `completed`  
 **Governance task:** `GOVERNANCE-20260724-01` — `completed`  
-**Growth task:** `SEO-20260725-01` — `in_progress`  
+**Growth task:** `SEO-20260725-01` — `completed`  
 **Production:** `https://hiennhi89.pages.dev/hoi-chon-dung/`  
 **Backend public:** `https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/*`  
-**Governance source:** `d72e3552a5a71e6f4ef14a4205b3e6f4ed2d25b5` — PR #89  
-**Production run hiện hành:** `30109841905` — SUCCESS  
-**Growth V1:** đang chờ CI, merge, deploy và hậu kiểm; xem `CHOICE_GROWTH_AUTOPILOT.md`.
+**Growth source:** `a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0` — PR #91  
+**Production run hiện hành:** `30116421342` — SUCCESS  
+**Internal recorder:** `30116490615` — SUCCESS; xem `CHOICE_GROWTH_AUTOPILOT.md`.
 
 ## 1. Phân tách public và nội bộ
 
@@ -68,6 +68,8 @@ Các chi tiết vận hành không xuất hiện trên sản phẩm public.
 
 Webhook kiểm tra đồng thời `chat.id` và `from.id`, yêu cầu xóa tin nhắn chứa key và mã hóa AES-GCM trước khi lưu KV. Sau đó hệ thống tự tìm sản phẩm, tạo link, cập nhật web và đồng bộ doanh thu.
 
+Production recorder hiện xác nhận `mode=onboarding_required`, credential `false`, sản phẩm tự tuyển `0`, đơn 7 ngày `0`; đây là trạng thái đúng trước khi kết nối AccessTrade.
+
 ### Dashboard doanh thu
 
 - `/doanhthu` — tóm tắt 7 ngày và link dashboard riêng dùng một lần.
@@ -78,7 +80,7 @@ Dashboard route `/owner/choice/revenue` không được liên kết công khai. 
 
 ### Google Search Console một lần
 
-Để workflow tự gửi sitemap qua Google API, cần xác minh property, tạo service account, cấp quyền property và đặt GitHub secret `GOOGLE_SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON`. Nếu chưa có, sitemap/HTML/IndexNow vẫn hoạt động bình thường; workflow chỉ bỏ qua Google API.
+Để workflow tự gửi sitemap qua Google API, cần xác minh property, tạo service account, cấp quyền property và đặt GitHub secret `GOOGLE_SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON`. Nếu chưa có, sitemap/HTML/IndexNow vẫn hoạt động bình thường; workflow bỏ qua Google API an toàn.
 
 ## 5. API public và private
 
@@ -121,6 +123,8 @@ Growth publisher tự tạo:
 
 Metadata chia sẻ giúp đường dẫn hiển thị rõ trên Facebook, Zalo, X, LinkedIn, Pinterest và ứng dụng nhắn tin; hệ thống không tự spam hoặc đăng vào tài khoản mạng xã hội chưa được cấp quyền.
 
+Production run xác nhận IndexNow step SUCCESS, sitemap/RSS và trang Product schema đều đã deploy.
+
 ## 8. Trung tâm doanh thu
 
 Snapshot nội bộ 30 ngày bao gồm:
@@ -151,18 +155,20 @@ Blocklist gồm thuốc, sản phẩm giảm/tăng cân, thực phẩm chức n�
 
 Không bịa review, đơn hàng, giá, tồn kho hoặc lợi nhuận. Khi nguồn lỗi, giữ catalog/snapshot gần nhất; cảnh báo chi tiết chỉ gửi nội bộ.
 
-## 11. Bằng chứng hiện hành và việc đang chờ
+## 11. Bằng chứng Growth production
 
-Governance production hiện hành:
+- PR #91 merge source `a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0`.
+- CI điều phối `30116008064` — SUCCESS.
+- Validation cuối `30116312380` — Growth, Revenue, SEO, privacy và WebKit AES thật SUCCESS.
+- Production `30116421342` — cấu hình, source, SEO build, Worker, Growth trigger, Pages, IndexNow, Google step và smoke SUCCESS.
+- Production recorder commit `915178f6ead00c4052391caf925ceea385b5fc75`.
+- Internal recorder `30116490615` — SUCCESS; commit `e9ee55f3d55c14d10b83bbbb48efc794a7c0a6c6`.
+- Smoke xác nhận dashboard không phiên `401/noindex`, status public `404`, Product schema, sitemap, RSS, IndexNow key và public boundary đạt.
 
-- CI điều phối `30108929684` — SUCCESS.
-- Regression/public-private/WebKit `30108929401` — SUCCESS.
-- Production build/deploy/smoke `30109841905` — SUCCESS.
-- Recorder KV nội bộ `30109889703` — SUCCESS.
+## 12. Trạng thái kinh doanh cần hiểu đúng
 
-Growth task `SEO-20260725-01` chưa được kết luận. Bằng chứng PR, CI, production, IndexNow, dashboard private và SEO smoke sẽ được bổ sung sau khi triển khai đạt.
-
-## 12. Mốc khôi phục
-
-- Runtime trước governance fix: `c4591418ae92adc77d0201e8e55737cd6ce929db`, PR #86.
-- V1: `f57023af442839da852354672bea8036e579a9fd`, PR #84.
+- Hạ tầng Growth/Revenue/SEO đã hoàn tất production.
+- Link affiliate thật và doanh thu thật chưa thể phát sinh trước khi AccessTrade được kết nối một lần.
+- Google Search Console API chưa được coi là đã cấp quyền chỉ vì workflow step SUCCESS; script có nhánh skip an toàn nếu thiếu secret.
+- IndexNow đã được gửi trong production deploy.
+- Không cam kết thứ hạng SEO hoặc doanh thu.
