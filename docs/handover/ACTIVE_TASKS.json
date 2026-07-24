@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T00:30:00+07:00",
+  "updated_at": "2026-07-25T01:22:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "SEO-20260725-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/SEO-20260725-01-growth-autopilot",
-      "base_sha": "68e99400cb4990f03cc88de526e524b979111874",
+      "branch": "agent/SEO-20260725-01-closeout",
       "paths": [
         "backend/choice.js",
         "backend/choice-autopilot.js",
@@ -37,13 +37,10 @@
         "docs/handover/HOI_CHON_DUNG.md",
         "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-25T00:05:00+07:00",
-      "heartbeat_at": "2026-07-25T00:30:00+07:00",
-      "summary": "Thiết lập Growth Autopilot: tự tìm và gắn deep link affiliate thật, đồng bộ doanh thu gần thời gian thực 5 phút, dashboard owner bằng vé Telegram một lần, tự xuất bản trang sản phẩm/danh mục/hướng dẫn SEO 6 giờ, sitemap/RSS, IndexNow và kết nối Google Search Console sau một lần cấp quyền."
-    }
-  ],
-  "recently_completed": [
+      "status": "completed",
+      "completed_at": "2026-07-25T01:22:00+07:00",
+      "summary": "Growth Autopilot production SUCCESS. PR #91 merge source a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0; CI điều phối 30116008064 và validation Growth/Revenue/SEO/WebKit 30116312380 SUCCESS; production 30116421342 SUCCESS toàn bộ source, SEO build, Worker, Growth cycle, Pages, IndexNow, Google step và smoke; recorder 30116490615 SUCCESS. Dashboard doanh thu owner-only đồng bộ 5 phút, SEO publish 6 giờ. AccessTrade hiện chưa kết nối nên mode nội bộ onboarding_required; cần owner đăng nhập/KYC và gửi /atkey một lần để có link/đơn/hoa hồng thật. Google Search Console service account là tùy chọn một lần để submit sitemap qua API."
+    },
     {
       "id": "GOVERNANCE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
