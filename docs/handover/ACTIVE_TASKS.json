@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T02:25:00+07:00",
+  "updated_at": "2026-07-25T02:30:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -21,7 +21,7 @@
     {
       "id": "GROWTH-20260725-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-02-multiniche-trends-v2",
+      "branch": "agent/GROWTH-20260725-02-multiniche-trends-onboarding",
       "base_sha": "871e70a1845ba7ee09fd3e78c7b9d46d980a0ed8",
       "paths": [
         "backend/choice.js",
@@ -51,7 +51,7 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T01:45:00+07:00",
-      "heartbeat_at": "2026-07-25T02:25:00+07:00",
+      "heartbeat_at": "2026-07-25T02:30:00+07:00",
       "summary": "Mở rộng affiliate sang 12 lĩnh vực an toàn theo xu hướng; xây Trung tâm kết nối owner với link đăng ký/đăng nhập/ngân hàng/API/SEO; tự động hóa catalog, PWA V4, landing page/hướng dẫn đa danh mục, IndexNow và báo cáo doanh thu."
     }
   ],
