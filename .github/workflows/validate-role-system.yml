@@ -109,9 +109,26 @@ jobs:
           node --check backend/worker.js
 
       - name: Kiểm tra Worker sau materialize
+        id: worker_after_materialize
+        continue-on-error: true
         run: |
-          set -euo pipefail
-          node backend/worker.test.mjs
+          set -uo pipefail
+          node backend/worker.test.mjs > "$RUNNER_TEMP/worker-test.log" 2>&1
+
+      - name: Lưu stack trace Worker
+        if: steps.worker_after_materialize.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-test-log
+          path: ${{ runner.temp }}/worker-test.log
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Chặn khi Worker regression thất bại
+        if: steps.worker_after_materialize.outcome == 'failure'
+        run: |
+          echo "Worker regression thất bại; stack trace đã được lưu trong artifact worker-test-log."
+          exit 1
 
       - name: Kiểm tra marker và cron Growth
         run: |
