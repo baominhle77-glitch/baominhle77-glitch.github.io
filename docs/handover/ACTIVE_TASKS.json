@@ -1,8 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T21:40:00+07:00",
+  "updated_at": "2026-07-25T01:30:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260724-16",
+      "owner": "Claude Code",
+      "branch": "claude/lenormand-reading-voice",
+      "base_sha": "3421034689584463146e57579c43540f38d819c0",
+      "paths": [
+        "boitoan/index.html",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T01:20:00+07:00",
+      "heartbeat_at": "2026-07-25T01:30:00+07:00",
+      "summary": "Sua may dien giai Lenormand: doc theo to hop thay vi lap ghep roi rac, loc dung linh vuc duoc chon, bo cac nhan ky thuat va doan giang phuong phap lo ra man hinh nguoi dung."
+    }
+  ],
   "recently_completed": [
     {
       "id": "AFFILIATE-20260724-01",
@@ -39,7 +55,9 @@
       "id": "BOITOAN-20260724-15",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/BOITOAN-20260724-15-closeout",
-      "paths": ["docs/handover/**"],
+      "paths": [
+        "docs/handover/**"
+      ],
       "status": "completed",
       "completed_at": "2026-07-24T02:39:00+07:00",
       "summary": "Bói toán V11 đã thay chuỗi patch V2–V10 bằng source trực tiếp. Admin/Member nhận khóa từ backend, bắt buộc decryptPayload → injectHtml → kiểm DOM → reveal; không còn mở khung rỗng. Worker deploy trước Pages. CI source/frontend/Worker/WebKit AES thật đạt; production audit static/API/WebKit đạt; deploy cuối run 30038693404 SUCCESS."
