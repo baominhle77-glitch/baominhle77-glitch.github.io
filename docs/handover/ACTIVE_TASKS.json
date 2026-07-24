@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T03:00:00+07:00",
+  "updated_at": "2026-07-25T03:15:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "GROWTH-20260725-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-02-multiniche-trends-onboarding",
-      "base_sha": "ad0e10543e5c715b96073d817fe2256a9ca077cb",
+      "branch": "agent/GROWTH-20260725-02-closeout",
       "paths": [
         "backend/choice.js",
         "backend/choice-autopilot.js",
@@ -36,22 +36,15 @@
         "docs/handover/HOI_CHON_DUNG.md",
         "docs/handover/GROWTH-20260725-02-PR.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-25T01:45:00+07:00",
-      "heartbeat_at": "2026-07-25T03:00:00+07:00",
-      "summary": "Mở rộng affiliate sang 12 lĩnh vực an toàn theo xu hướng; xây Trung tâm kết nối owner với link đăng ký/đăng nhập/ngân hàng/API/SEO; tự động hóa catalog, PWA V4, landing page/hướng dẫn đa danh mục, IndexNow và báo cáo doanh thu."
-    }
-  ],
-  "recently_completed": [
+      "status": "completed",
+      "completed_at": "2026-07-25T03:15:00+07:00",
+      "summary": "Affiliate đa lĩnh vực và Trung tâm kết nối owner production SUCCESS. PR #94 merge source 8b5ee3de54844aa50e6af87adfaec58d502e7f99; điều phối 30121459380 và validation 30121459426 SUCCESS; production 30121531643 SUCCESS với Worker-before-Pages, Growth cycle, PWA V4, 12 landing page/hướng dẫn, IndexNow và smoke setup/revenue private; recorder 30121578951 SUCCESS. ACCESSTRADE chưa kết nối nên sản phẩm/link/doanh thu thật vẫn bằng 0; owner cần đăng nhập/KYC/ngân hàng và gửi /atkey một lần."
+    },
     {
       "id": "BOITOAN-20260725-01",
       "owner": "Claude Code",
       "branch": "claude/lenormand-english-names",
-      "paths": [
-        "boitoan/index.html",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md"
-      ],
+      "paths": ["boitoan/index.html", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md"],
       "status": "completed",
       "completed_at": "2026-07-25T02:15:00+07:00",
       "summary": "Tên lá bài hiển thị tiếng Anh toàn app và lời quẻ đọc thẳng thành câu kết hợp. PR #95 merge commit 73d852032c1f893e7b436cab6315288077e87ca9; production run 30119895119 SUCCESS; internal recorder 30119935115 SUCCESS."
@@ -60,11 +53,7 @@
       "id": "BOITOAN-20260724-16",
       "owner": "Claude Code",
       "branch": "claude/lenormand-reading-voice",
-      "paths": [
-        "boitoan/index.html",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md"
-      ],
+      "paths": ["boitoan/index.html", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md"],
       "status": "completed",
       "completed_at": "2026-07-25T02:00:00+07:00",
       "summary": "Sửa máy diễn giải Lenormand: đọc theo tổ hợp, lọc đúng lĩnh vực khách chọn, bỏ nhãn kỹ thuật và đoạn giảng phương pháp. PR #92 merge commit d014813dbc1aae04d88cfd3f470dc7fad1532a4b; production 30118917493 SUCCESS."
@@ -73,35 +62,7 @@
       "id": "SEO-20260725-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/SEO-20260725-01-closeout",
-      "paths": [
-        "backend/choice.js",
-        "backend/choice-autopilot.js",
-        "backend/choice-revenue.js",
-        "backend/choice-revenue.test.mjs",
-        "backend/choice-public-boundary.test.mjs",
-        "backend/wrangler.toml",
-        "tools/apply-choice-system.mjs",
-        "tools/apply-choice-revenue.mjs",
-        "tools/apply-choice-public-product.mjs",
-        "tools/build-choice-seo.mjs",
-        "tools/submit-indexnow.mjs",
-        "tools/submit-google-sitemap.mjs",
-        "tools/choice-seo.test.mjs",
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/choice-growth-autopilot.yml",
-        "e4c968d6c15b4ef69083f88f4f8d1e76.txt",
-        "hoi-chon-dung/san-pham/**",
-        "hoi-chon-dung/danh-muc/**",
-        "hoi-chon-dung/huong-dan/**",
-        "hoi-chon-dung/sitemap.xml",
-        "hoi-chon-dung/feed.xml",
-        "robots.txt",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/HOI_CHON_DUNG.md",
-        "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"
-      ],
+      "paths": ["backend/choice.js", "backend/choice-autopilot.js", "backend/choice-revenue.js", "backend/choice-revenue.test.mjs", "backend/choice-public-boundary.test.mjs", "backend/wrangler.toml", "tools/**", ".github/workflows/**", "hoi-chon-dung/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-25T01:22:00+07:00",
       "summary": "Growth Autopilot production SUCCESS. PR #91 merge source a73a807c7fedbcf7d8adad6ad8b0a0cd5d83e4b0; validation 30116312380 và production 30116421342 SUCCESS; dashboard doanh thu owner-only đồng bộ 5 phút, SEO publish 6 giờ."
