@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Hội Chọn Đúng</title>
+  <desc id="desc">Chọn theo nhu cầu, không theo quảng cáo</desc>
+  <rect width="1200" height="630" fill="#f7f3ea"/>
+  <circle cx="1010" cy="94" r="250" fill="#f8c66a" opacity=".42"/>
+  <circle cx="110" cy="590" r="250" fill="#79a89d" opacity=".25"/>
+  <rect x="76" y="72" width="1048" height="486" rx="42" fill="#fffdf8" stroke="#d9cdb8" stroke-width="3"/>
+  <circle cx="180" cy="176" r="58" fill="#123b35"/>
+  <path d="M148 177l23 24 45-50" fill="none" stroke="#f8c66a" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="266" y="188" fill="#123b35" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" letter-spacing="2">HỘI CHỌN ĐÚNG</text>
+  <text x="108" y="320" fill="#172c29" font-family="Georgia, Times New Roman, serif" font-size="66">Chọn theo nhu cầu,</text>
+  <text x="108" y="400" fill="#2f756a" font-family="Georgia, Times New Roman, serif" font-size="66" font-style="italic">không theo quảng cáo.</text>
+  <text x="110" y="478" fill="#5c6f6b" font-family="Arial, Helvetica, sans-serif" font-size="27">Hỏi thật · So sánh rõ · Mua chủ động</text>
+</svg>

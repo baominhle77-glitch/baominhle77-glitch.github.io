@@ -1,0 +1,37 @@
+{
+  "name": "Hội Chọn Đúng",
+  "short_name": "Chọn Đúng",
+  "description": "Mô tả nhu cầu, nhận bảng chọn, so sánh và tham khảo bình chọn cộng đồng trước khi mua.",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f7f3ea",
+  "theme_color": "#f7f3ea",
+  "categories": ["shopping", "lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tạo bảng chọn",
+      "short_name": "Chọn ngay",
+      "description": "Mô tả nhu cầu và nhận gợi ý phù hợp",
+      "url": "./#chon",
+      "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Cộng đồng chọn",
+      "short_name": "Cộng đồng",
+      "description": "Xem lựa chọn được quan tâm",
+      "url": "./#cong-dong",
+      "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

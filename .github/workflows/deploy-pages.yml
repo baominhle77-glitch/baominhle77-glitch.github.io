@@ -46,6 +46,7 @@ jobs:
         run: |
           set -euo pipefail
           node tools/apply-travel-system.mjs
+          node tools/apply-choice-system.mjs
           node --check assets/gate.js
           node --check assets/community.js
           node --check assets/community-admin.js
@@ -59,21 +60,30 @@ jobs:
           node --check backend/worker.js
           node backend/worker.test.mjs
           node --test backend/travel.test.mjs
+          node --check backend/choice.js
+          node --test backend/choice.test.mjs
+          node --check hoi-chon-dung/app.js
+          node --check hoi-chon-dung/sw.js
+          node --test hoi-chon-dung/app.test.mjs
           grep -q 'Bói toán V11' assets/gate.js
           grep -q '/assets/gate.js?v=19' boitoan/index.html
           grep -q 'boitoan-v19' boitoan/sw.js
+          test "$(grep -c 'Hội Chọn Đúng API integration v1' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng Telegram integration v1' backend/worker.js)" -eq 1
 
       - name: Gộp site
         run: |
           set -euo pipefail
           rm -rf _site
-          mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data
+          mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data _site/hoi-chon-dung/data
           cp index.html manifest.webmanifest sw.js robots.txt _site/
           cp assets/gate.js assets/gate.css assets/community.js assets/community-admin.js assets/community.css _site/assets/
           cp boitoan/index.html boitoan/community.html boitoan/community-admin.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
           cp medora/index.html _site/medora/index.html
           cp vietnam-travel/index.html vietnam-travel/app.css vietnam-travel/app.js vietnam-travel/manifest.webmanifest vietnam-travel/sw.js vietnam-travel/icon.svg _site/vietnam-travel/
           cp vietnam-travel/data/seed-places.js _site/vietnam-travel/data/
+          cp hoi-chon-dung/index.html hoi-chon-dung/app.css hoi-chon-dung/app.js hoi-chon-dung/manifest.webmanifest hoi-chon-dung/sw.js hoi-chon-dung/icon.svg hoi-chon-dung/og-image.svg hoi-chon-dung/sitemap.xml _site/hoi-chon-dung/
+          cp hoi-chon-dung/data/seed-products.js _site/hoi-chon-dung/data/
 
       - name: Deploy Worker trước Pages
         working-directory: backend
@@ -91,6 +101,9 @@ jobs:
             gate=$(curl -fsSL "https://hiennhi89.pages.dev/assets/gate.js?$bust" || true)
             admin=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/community-admin.html?$bust" || true)
             health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/admin/health" || true)
+            choice_app=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/?$bust" || true)
+            choice_health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/health" || true)
+            choice_products=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/products" || true)
             if grep -q 'application/gate-payload' <<<"$app" \
               && grep -q '/assets/gate.js?v=19' <<<"$app" \
               && grep -q 'Bói toán V11' <<<"$gate" \
@@ -99,11 +112,15 @@ jobs:
               && grep -q '"auth_version":"2026-07-24-v11"' <<<"$health" \
               && grep -q '"config_ok":true' <<<"$health" \
               && grep -q '"crypto_ok":true' <<<"$health" \
-              && grep -q '"decrypt_key_configured":true' <<<"$health"; then
-              echo "Production V11 đạt ở lần $attempt"
+              && grep -q '"decrypt_key_configured":true' <<<"$health" \
+              && grep -q 'HỘI CHỌN ĐÚNG' <<<"$choice_app" \
+              && grep -q 'CÔNG BỐ LIÊN KẾT TIẾP THỊ' <<<"$choice_app" \
+              && grep -q '"service":"hoi-chon-dung"' <<<"$choice_health" \
+              && grep -q 'rider-waite-smith-tarot' <<<"$choice_products"; then
+              echo "Production V11 + Hội Chọn Đúng đạt ở lần $attempt"
               exit 0
             fi
             sleep 4
           done
-          echo "Production chưa đồng bộ V11" >&2
+          echo "Production chưa đồng bộ V11 hoặc Hội Chọn Đúng" >&2
           exit 1
