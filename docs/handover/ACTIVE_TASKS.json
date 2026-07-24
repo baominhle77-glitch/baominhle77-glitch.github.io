@@ -1,8 +1,32 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T21:40:00+07:00",
+  "updated_at": "2026-07-24T21:45:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "AFFILIATE-20260724-02",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/AFFILIATE-20260724-02-autopilot",
+      "base_sha": "3421034689584463146e57579c43540f38d819c0",
+      "paths": [
+        "backend/choice.js",
+        "backend/choice-autopilot.js",
+        "backend/choice-autopilot.test.mjs",
+        "backend/wrangler.toml",
+        "tools/apply-choice-system.mjs",
+        ".github/workflows/deploy-pages.yml",
+        "hoi-chon-dung/index.html",
+        "hoi-chon-dung/app.js",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/HOI_CHON_DUNG.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-24T21:45:00+07:00",
+      "heartbeat_at": "2026-07-24T21:45:00+07:00",
+      "summary": "Nâng Hội Chọn Đúng thành Affiliate Autopilot: tự lấy datafeed AccessTrade, chấm điểm và chọn sản phẩm, tạo deep link, tự cập nhật catalog theo cron, tự tối ưu theo click/đơn hàng, onboarding API key một lần qua Telegram owner-only, không giao việc vận hành cho chủ sở hữu."
+    }
+  ],
   "recently_completed": [
     {
       "id": "AFFILIATE-20260724-01",
@@ -27,13 +51,10 @@
       "id": "HANDOVER-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/HANDOVER-20260724-01",
-      "paths": [
-        "HANDOVER.md",
-        "docs/handover/ACTIVE_TASKS.json"
-      ],
+      "paths": ["HANDOVER.md", "docs/handover/ACTIVE_TASKS.json"],
       "status": "completed",
       "completed_at": "2026-07-24T03:03:00+07:00",
-      "summary": "Thay HANDOVER.md dài và lẫn lịch sử bằng bản chuẩn ngắn: sơ đồ hệ thống, trạng thái V11, bất biến kỹ thuật, source map, quy trình tiếp tục, test tối thiểu và liên kết tới tài liệu chi tiết."
+      "summary": "Thay HANDOVER.md dài và lẫn lịch sử bằng bản chuẩn ngắn."
     },
     {
       "id": "BOITOAN-20260724-15",
@@ -42,22 +63,7 @@
       "paths": ["docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-24T02:39:00+07:00",
-      "summary": "Bói toán V11 đã thay chuỗi patch V2–V10 bằng source trực tiếp. Admin/Member nhận khóa từ backend, bắt buộc decryptPayload → injectHtml → kiểm DOM → reveal; không còn mở khung rỗng. Worker deploy trước Pages. CI source/frontend/Worker/WebKit AES thật đạt; production audit static/API/WebKit đạt; deploy cuối run 30038693404 SUCCESS."
-    },
-    {
-      "id": "BOITOAN-20260724-14",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/BOITOAN-20260724-14-closeout",
-      "status": "cancelled",
-      "completed_at": "2026-07-24T01:14:00+07:00",
-      "summary": "V10 bị V11 thay thế vì chỉ reveal lớp ngoài, không giải mã và bơm payload; fixture plaintext đã che lỗi."
-    },
-    {
-      "id": "BOITOAN-20260723-13",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "status": "cancelled",
-      "completed_at": "2026-07-24T00:00:00+07:00",
-      "summary": "V9 bị V11 thay thế vì không kiểm payload mã hóa thật."
+      "summary": "Bói toán V11 production SUCCESS."
     }
   ]
 }
