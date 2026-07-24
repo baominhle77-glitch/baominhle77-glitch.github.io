@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T00:05:00+07:00",
+  "updated_at": "2026-07-25T00:30:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -9,17 +9,26 @@
       "branch": "agent/SEO-20260725-01-growth-autopilot",
       "base_sha": "68e99400cb4990f03cc88de526e524b979111874",
       "paths": [
+        "backend/choice.js",
         "backend/choice-autopilot.js",
         "backend/choice-revenue.js",
         "backend/choice-revenue.test.mjs",
+        "backend/choice-public-boundary.test.mjs",
         "backend/wrangler.toml",
         "tools/apply-choice-system.mjs",
+        "tools/apply-choice-revenue.mjs",
+        "tools/apply-choice-public-product.mjs",
         "tools/build-choice-seo.mjs",
         "tools/submit-indexnow.mjs",
+        "tools/submit-google-sitemap.mjs",
         "tools/choice-seo.test.mjs",
         ".github/workflows/deploy-pages.yml",
+        ".github/workflows/validate-role-system.yml",
         ".github/workflows/choice-growth-autopilot.yml",
-        "hoi-chon-dung/seo/**",
+        "e4c968d6c15b4ef69083f88f4f8d1e76.txt",
+        "hoi-chon-dung/san-pham/**",
+        "hoi-chon-dung/danh-muc/**",
+        "hoi-chon-dung/huong-dan/**",
         "hoi-chon-dung/sitemap.xml",
         "hoi-chon-dung/feed.xml",
         "robots.txt",
@@ -30,8 +39,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T00:05:00+07:00",
-      "heartbeat_at": "2026-07-25T00:05:00+07:00",
-      "summary": "Thiết lập Growth Autopilot: tự tìm và gắn link affiliate thật, đồng bộ doanh thu gần thời gian thực, dashboard owner qua link Telegram một lần, tự tạo trang sản phẩm/category SEO, sitemap/RSS, gửi IndexNow và chuẩn bị kết nối Google Search Console."
+      "heartbeat_at": "2026-07-25T00:30:00+07:00",
+      "summary": "Thiết lập Growth Autopilot: tự tìm và gắn deep link affiliate thật, đồng bộ doanh thu gần thời gian thực 5 phút, dashboard owner bằng vé Telegram một lần, tự xuất bản trang sản phẩm/danh mục/hướng dẫn SEO 6 giờ, sitemap/RSS, IndexNow và kết nối Google Search Console sau một lần cấp quyền."
     }
   ],
   "recently_completed": [
