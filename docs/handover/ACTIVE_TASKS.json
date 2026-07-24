@@ -1,25 +1,38 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T02:40:00+07:00",
+  "updated_at": "2026-07-25T04:10:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
-      "id": "BOITOAN-20260725-01",
+      "id": "BOITOAN-20260725-02",
       "owner": "Claude Code",
-      "branch": "claude/lenormand-english-names",
-      "base_sha": "871e70a1845ba7ee09fd3e78c7b9d46d980a0ed8",
+      "branch": "claude/rune-tealeaf-random",
+      "base_sha": "ad0e10543e5c715b96073d817fe2256a9ca077cb",
       "paths": [
         "boitoan/index.html",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
       "status": "in_progress",
-      "started_at": "2026-07-25T02:30:00+07:00",
-      "heartbeat_at": "2026-07-25T02:40:00+07:00",
-      "summary": "Ten la bai hien bang tieng Anh toan app; loi que doc thang ra thanh cau ket hop cac la, bo het tu ngu meta va giong len lop."
+      "started_at": "2026-07-25T03:40:00+07:00",
+      "heartbeat_at": "2026-07-25T04:10:00+07:00",
+      "summary": "Them mon Rune (24 Elder Futhark) va Bai Tra; ap chuan doc cho Tarot va Bai Tay; rut bai ngau nhien that su (bo thien lech modulo, bo gieo hat theo ngay)."
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260725-01",
+      "owner": "Claude Code",
+      "branch": "claude/lenormand-english-names",
+      "paths": [
+        "boitoan/index.html",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "completed_at": "2026-07-25T03:25:00+07:00",
+      "summary": "Ten la bai hien tieng Anh toan app; loi que doc thang ra; bo tu ngu meta va giong len lop. PR #95 merge 73d8520; deploy run 30119895119 success; da kiem chung production."
+    },
     {
       "id": "BOITOAN-20260724-16",
       "owner": "Claude Code",

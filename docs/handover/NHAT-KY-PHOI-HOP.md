@@ -22,6 +22,21 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 04:10 GMT+7 — Claude Code — BOITOAN-20260725-02 — ĐANG LÀM ⏳
+
+- **Thêm hai môn mới**: `Rune` (24 rune Elder Futhark, rút 1 hoặc 3, có nghĩa theo lĩnh vực) và
+  `Bài Trà` (đọc bã trà theo vùng tách: vành / thân / đáy / gần quai / đối diện quai, 24 biểu tượng).
+- **Áp chuẩn đọc của Lenormand cho Tarot và Bài Tây**: lời quẻ kể liền một mạch, bỏ mũi tên `→`,
+  bỏ các câu hướng dẫn cách đọc (`đọc cả nghĩa…`, `đối chiếu lá 7 với lá 8…`, `trực giác của bạn
+  là một nửa của quẻ bài`, `Trải móng ngựa đọc theo cung…`).
+- **Sửa lỗi lọc lĩnh vực ở Tarot và Bài Tây** — cùng lỗi đã sửa cho Lenormand: trải 1–3 lá trước
+  đây luôn hiện cả ba/bốn lĩnh vực dù khách đã chọn một.
+- **Rút bài ngẫu nhiên thật sự**: `rnd()` bỏ thiên lệch modulo bằng rejection sampling trên
+  `crypto.getRandomValues`; `Lá bài ngày` không còn gieo hạt theo ngày (`mulberry32(seed)` đã gỡ),
+  nay rút ngẫu nhiên mỗi lần mở.
+- Kiểm thử: `node --check` toàn bộ khối script hợp lệ; quét toàn file còn 0 cụm meta, 0 mũi tên
+  trong lời quẻ, 0 chỗ gieo hạt; chạy thử lời quẻ Rune và Bài Trà cho kết quả trọn ý.
+
 ### 2026-07-25 02:40 GMT+7 — Claude Code — BOITOAN-20260725-01 — ĐANG LÀM ⏳
 
 - Chủ sở hữu chỉ ra ba lỗi còn sót sau BOITOAN-20260724-16, đã sửa cả ba:
