@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-24T21:36:00+07:00",
+  "updated_at": "2026-07-24T21:40:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
     {
       "id": "AFFILIATE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/AFFILIATE-20260724-01-hoi-chon-dung-mvp",
+      "branch": "agent/AFFILIATE-20260724-01-closeout",
       "paths": [
         "hoi-chon-dung/**",
         "backend/choice.js",
@@ -21,7 +21,7 @@
       ],
       "status": "completed",
       "completed_at": "2026-07-24T21:29:00+07:00",
-      "summary": "Triển khai production Hội Chọn Đúng tại /hoi-chon-dung/: PWA chọn sản phẩm theo nhu cầu, 12 sản phẩm seed, so sánh/lưu/bình chọn, API catalog, redirect đo click, quản trị link affiliate qua Telegram, SEO/sitemap/robots. PR #84 merge f57023af442839da852354672bea8036e579a9fd; CI 30100845932 và 30100845901 SUCCESS; production deploy + hậu kiểm run 30100989464 SUCCESS; hồ sơ closeout qua PR #85."
+      "summary": "Triển khai production Hội Chọn Đúng tại /hoi-chon-dung/: PWA chọn sản phẩm theo nhu cầu, 12 sản phẩm seed, so sánh/lưu/bình chọn, API catalog, redirect đo click, quản trị link affiliate qua Telegram, SEO/sitemap/robots. Runtime branch agent/AFFILIATE-20260724-01-hoi-chon-dung-mvp; PR #84 merge f57023af442839da852354672bea8036e579a9fd; CI 30100845932 và 30100845901 SUCCESS; production deploy + hậu kiểm run 30100989464 SUCCESS; hồ sơ closeout qua PR #85."
     },
     {
       "id": "HANDOVER-20260724-01",
