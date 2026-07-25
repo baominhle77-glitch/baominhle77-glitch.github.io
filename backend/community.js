@@ -1206,6 +1206,23 @@ async function handleAdmin(request, env, path) {
     }
     const post = isUuid(postId) && await getJson(env, postKey(postId));
     if (!post) return json({ error: "not_found" }, 404);
+    /* Admin phải ĐỌC được bình luận thì mới quản được thảo luận: trước đây chỉ mở và xoá bài. */
+    if (parts[5] === "comments" && !parts[6] && request.method === "GET") {
+      const comments = (await listByPrefix(env, postCommentPrefix(postId), 200))
+        .sort((x, y) => x.created_at - y.created_at);
+      return json({ post, comments });
+    }
+    if (parts[5] === "comments" && parts[6] && request.method === "DELETE") {
+      const page = await env.KV.list({ prefix: postCommentPrefix(postId), limit: 1000 });
+      const hit = page.keys.find((k) => k.name.endsWith(":" + parts[6]));
+      if (!hit) return json({ error: "not_found" }, 404);
+      await env.KV.delete(hit.name);
+      post.comment_count = Math.max(0, Number(post.comment_count || 0) - 1);
+      post.updated_at = Date.now();
+      await putJson(env, postKey(postId), post, ACCOUNT_TTL);
+      await adminAudit(env, request, "post_comment_deleted", parts[6], { post: postId });
+      return json({ ok: true, post });
+    }
     if (request.method === "PATCH") {
       const body = await readJson(request);
       if (typeof body.closed === "boolean") post.closed = body.closed;
