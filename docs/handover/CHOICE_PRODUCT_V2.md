@@ -52,11 +52,17 @@ Materializer giải nén 23 file V2, sau đó các materializer taxonomy/AccessT
 - Frontend: năm màn hình, không import seed, không Google/merchant fallback, media/rating/offer, service worker V5.
 - SEO: chỉ catalog live, đủ 12 danh mục, không seed fallback.
 
-Chưa được ghi “production hoàn tất” cho đến khi PR merge, Worker deploy trước Pages, catalog tái tạo và production smoke kiểm tra link offer thật.
+Kiểm thử cục bộ: backend 8/8; marketplace 4/4; frontend 5/5; SEO 2/2.
 
-## 7. Việc còn lại
+## 7. Trạng thái thực hiện
 
-1. CI chính thức trên PR.
+- Nhánh review sạch: `agent/GROWTH-20260725-04-rebuild-v2-clean` trên `main` sau PR #119.
+- PR #120 đóng không merge vì nhánh cũ lệch lịch sử sổ điều phối; không mất mã.
+- Chưa được ghi “production hoàn tất” cho đến khi PR sạch merge, Worker deploy trước Pages, catalog tái tạo và production smoke kiểm tra link offer thật.
+
+## 8. Việc còn lại
+
+1. CI chính thức trên PR sạch.
 2. Sửa mọi regression do materializer/workflow.
 3. Merge khi toàn bộ guard xanh.
 4. Deploy Worker trước Pages.
