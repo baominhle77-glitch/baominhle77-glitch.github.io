@@ -22,6 +22,25 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 17:20 GMT+7 — Claude Code — BOITOAN-20260725-12 — ĐANG LÀM ⏳
+
+**Ba lỗi chủ sở hữu báo, cùng một gốc: nick mô phỏng sống trong chỉ mục chứ không có khoá hồ sơ riêng,
+nhưng nhiều chỗ trong mã vẫn chỉ tra và ghi ở khoá hồ sơ.**
+
+| Lỗi chủ sở hữu thấy | Gốc | Cách sửa |
+|---|---|---|
+| Sửa tên một nick khách xong, số thành viên nhảy 386 → 387 | `PUT /api/community/me` ghi ra **khoá hồ sơ mới** cho nick vốn nằm trong chỉ mục, thành hai bản ghi cho cùng một nick | Ghi thẳng vào chỉ mục, xoá khoá hồ sơ thừa, xoá cache đếm |
+| Bấm vào reader trong khoang riêng thì báo *Không thực hiện được* | Mở hội thoại tra reader bằng `getJson(profileKey)` → nick mô phỏng không có khoá đó → `reader_not_found` | Thêm `getProfileAny()` tra **cả hai nơi**; áp cho mở hội thoại, xem hồ sơ reader, tính lại điểm đánh giá |
+| 385 nick nhưng chỉ có **40 tên** khác nhau, mỗi tên lặp 10 lần | `simProfile` lấy `index * hằng số` rồi chia dư, chu kỳ đúng bằng 40 (độ dài danh sách tên) | Tên ghép theo cặp (tên riêng, chữ đệm) lấy từ số thứ tự **toàn cục**; kiểm lại: **385/385 tên khác nhau** |
+
+Thêm `saveProfileAny()` để mọi lần ghi hồ sơ về đúng nơi nó sống, và `POST .../simulated/repair`
+nhận `{"force":true}` để dựng lại toàn bộ 385 nick theo công thức tên mới (giữ nguyên id và tên tài khoản).
+
+**Đo trên production trước khi sửa:** `/api/community/readers` trả 277 reader trong ~350ms và
+`/messages` ~300ms — tức là danh sách và tin nhắn vốn nhanh; lỗi nằm ở chỗ tra hồ sơ, không phải
+ở tốc độ. `POST /api/community/conversations` với một reader mô phỏng trả đúng `reader_not_found`,
+tái hiện được lỗi chủ sở hữu gặp.
+
 ### 2026-07-25 16:20 GMT+7 — Claude Code — BOITOAN-20260725-11 — ĐANG LÀM ⏳
 
 **1. Sửa lỗi bấm nick trong khoang riêng** (chủ sở hữu báo: bấm nick thì hiện `not_simulated`).
