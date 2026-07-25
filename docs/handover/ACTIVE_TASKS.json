@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T18:30:00+07:00",
+  "updated_at": "2026-07-25T18:35:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -9,99 +9,45 @@
       "branch": "agent/GROWTH-20260725-04-rebuild-product-flow",
       "base_sha": "585fd685edc61dfef3a4d98a15bb58b31af3a87e",
       "paths": [
-        "backend/choice.js",
-        "backend/choice.test.mjs",
-        "backend/choice-autopilot.js",
-        "backend/choice-autopilot.test.mjs",
-        "backend/choice-public-boundary.test.mjs",
-        "backend/choice-vn-marketplace.test.mjs",
-        "backend/choice-revenue.js",
-        "backend/choice-revenue.test.mjs",
-        "tools/apply-choice-product-v2.mjs",
-        "tools/choice-v2-payload/**",
-        "tools/apply-choice-autopilot-ui.mjs",
-        "tools/apply-choice-access-fallback.mjs",
-        "tools/apply-choice-vn-marketplace.mjs",
-        "tools/apply-choice-global-dedupe.mjs",
-        "tools/apply-choice-marketplace-scale.mjs",
-        "tools/choice-marketplace-scale.test.mjs",
-        "tools/build-choice-seo.mjs",
-        "tools/choice-seo.test.mjs",
-        "hoi-chon-dung/**",
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/validate-role-system.yml",
-        ".github/workflows/choice-growth-autopilot.yml",
-        ".github/workflows/validate-choice-vn-marketplace.yml",
-        ".github/workflows/choice-vn-marketplace-production.yml",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/CHOICE_PRODUCT_V2.md",
-        "docs/handover/CHOICE_10_DAY_GROWTH_SPRINT.md"
+        "backend/choice.js", "backend/choice.test.mjs", "backend/choice-autopilot.js", "backend/choice-autopilot.test.mjs", "backend/choice-public-boundary.test.mjs", "backend/choice-vn-marketplace.test.mjs", "backend/choice-revenue.js", "backend/choice-revenue.test.mjs",
+        "tools/apply-choice-product-v2.mjs", "tools/choice-v2-payload/**", "tools/apply-choice-autopilot-ui.mjs", "tools/apply-choice-access-fallback.mjs", "tools/apply-choice-vn-marketplace.mjs", "tools/apply-choice-global-dedupe.mjs", "tools/apply-choice-marketplace-scale.mjs", "tools/choice-marketplace-scale.test.mjs", "tools/build-choice-seo.mjs", "tools/choice-seo.test.mjs",
+        "hoi-chon-dung/**", ".github/workflows/deploy-pages.yml", ".github/workflows/validate-role-system.yml", ".github/workflows/choice-growth-autopilot.yml", ".github/workflows/validate-choice-vn-marketplace.yml", ".github/workflows/choice-vn-marketplace-production.yml",
+        "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/CHOICE_PRODUCT_V2.md", "docs/handover/CHOICE_10_DAY_GROWTH_SPRINT.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T18:30:00+07:00",
+      "heartbeat_at": "2026-07-25T18:35:00+07:00",
       "summary": "Làm lại Hội Chọn Đúng thành ứng dụng khám phá xu hướng và so sánh nhiều shop: năm màn hình riêng, mô hình offer-first, chỉ deeplink affiliate sàn Việt Nam đã xác minh, không Google/merchant/seed fallback, media và rating/review chỉ khi nguồn có dữ liệu, SEO live-only và production smoke trên WebKit/iPhone."
     }
   ],
   "recently_completed": [
     {
-      "id": "BOITOAN-20260725-13",
-      "owner": "Claude Code",
-      "branch": "claude/affiliate-community-strategy-oft750",
-      "base_sha": "b5462211b3d0e6dff64545af0f48cdab03925c2b",
-      "paths": ["backend/community.js", "assets/community-admin.js", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
-      "status": "completed",
-      "started_at": "2026-07-25T17:50:00+07:00",
-      "summary": "Them chuc nang xoa hoi thoai cho Admin va don du lieu kiem thu.",
-      "completed_at": "2026-07-25T17:50:00+07:00"
+      "id": "BOITOAN-20260725-14", "owner": "Claude Code", "branch": "claude/affiliate-community-strategy-oft750", "base_sha": "585fd685edc61dfef3a4d98a15bb58b31af3a87e",
+      "paths": ["backend/community.js", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"], "status": "completed", "started_at": "2026-07-25T18:10:00+07:00", "summary": "Ten nick da dang nhu nguoi dung that: chu hoa, chu thuong, so, gach duoi, dau cham, biet danh.", "completed_at": "2026-07-25T18:10:00+07:00"
     },
     {
-      "id": "BOITOAN-20260725-12",
-      "owner": "Claude Code",
-      "branch": "claude/affiliate-community-strategy-oft750",
-      "base_sha": "30b2db13f16d13260208ae708af40e06ca8ace08",
-      "paths": ["backend/community.js", "assets/community.js", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
-      "status": "completed",
-      "started_at": "2026-07-25T17:20:00+07:00",
-      "summary": "Sua ba loi chu so huu bao: so thanh vien tang khi sua ten nick, bam vao reader mo phong bao loi, va 385 nick chi co 40 ten khac nhau.",
-      "completed_at": "2026-07-25T17:20:00+07:00"
+      "id": "BOITOAN-20260725-13", "owner": "Claude Code", "branch": "claude/affiliate-community-strategy-oft750", "base_sha": "b5462211b3d0e6dff64545af0f48cdab03925c2b",
+      "paths": ["backend/community.js", "assets/community-admin.js", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"], "status": "completed", "started_at": "2026-07-25T17:50:00+07:00", "summary": "Them chuc nang xoa hoi thoai cho Admin va don du lieu kiem thu.", "completed_at": "2026-07-25T17:50:00+07:00"
     },
     {
-      "id": "BOITOAN-20260725-11",
-      "owner": "Claude Code",
-      "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": ["backend/community.js", "assets/community.js", "assets/community-admin.js", "boitoan/community-admin.html", "docs/handover/SO-DO-HE-THONG.md", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
-      "status": "completed",
-      "completed_at": "2026-07-25T16:35:00+07:00",
-      "summary": "PR #116 merge commit 04df1e6e92eb06b163178adb4bed66fa02545cf6; production và recorder SUCCESS."
+      "id": "BOITOAN-20260725-12", "owner": "Claude Code", "branch": "claude/affiliate-community-strategy-oft750", "base_sha": "30b2db13f16d13260208ae708af40e06ca8ace08",
+      "paths": ["backend/community.js", "assets/community.js", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"], "status": "completed", "started_at": "2026-07-25T17:20:00+07:00", "summary": "Sua ba loi chu so huu bao: so thanh vien tang khi sua ten nick, bam vao reader mo phong bao loi, va 385 nick chi co 40 ten khac nhau.", "completed_at": "2026-07-25T17:20:00+07:00"
     },
     {
-      "id": "BOITOAN-20260725-10",
-      "owner": "Claude Code",
-      "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": ["boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
-      "status": "completed",
-      "completed_at": "2026-07-25T16:10:00+07:00",
-      "summary": "PR #114 merge commit 8c4597e02f318398164d240320349c96e33e6133; production và recorder SUCCESS."
+      "id": "BOITOAN-20260725-11", "owner": "Claude Code", "branch": "claude/affiliate-community-strategy-oft750",
+      "paths": ["backend/community.js", "assets/community.js", "assets/community-admin.js", "boitoan/community-admin.html", "docs/handover/SO-DO-HE-THONG.md", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"], "status": "completed", "completed_at": "2026-07-25T16:35:00+07:00", "summary": "PR #116 merge commit 04df1e6e92eb06b163178adb4bed66fa02545cf6; production và recorder SUCCESS."
     },
     {
-      "id": "GROWTH-20260725-03",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-03-closeout",
-      "paths": ["backend/choice-autopilot.test.mjs", "backend/choice-credential-bootstrap.js", "backend/choice-credential-bootstrap.test.mjs", "tools/apply-choice-access-fallback.mjs", "tools/apply-choice-credential-bootstrap.mjs", ".github/workflows/deploy-pages.yml", ".github/workflows/choice-growth-autopilot.yml", ".github/workflows/validate-role-system.yml", "google91001f63e8104533.html", "BingSiteAuth.xml", "docs/handover/ACTIVE_TASKS.json", "docs/handover/CHOICE_OWNER_SETUP.md", "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"],
-      "status": "completed",
-      "completed_at": "2026-07-25T12:15:00+07:00",
-      "summary": "AccessTrade credential, Publisher fallback và Google/Bing production hoàn tất."
+      "id": "BOITOAN-20260725-10", "owner": "Claude Code", "branch": "claude/affiliate-community-strategy-oft750",
+      "paths": ["boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"], "status": "completed", "completed_at": "2026-07-25T16:10:00+07:00", "summary": "PR #114 merge commit 8c4597e02f318398164d240320349c96e33e6133; production và recorder SUCCESS."
     },
     {
-      "id": "GROWTH-20260725-02",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-02-closeout",
-      "paths": ["backend/choice.js", "backend/choice-autopilot.js", "backend/choice-revenue.js", "backend/choice-setup.js", "hoi-chon-dung/**", "tools/**", ".github/workflows/**", "docs/handover/**"],
-      "status": "completed",
-      "completed_at": "2026-07-25T03:15:00+07:00",
-      "summary": "Affiliate đa lĩnh vực và Growth Autopilot production hoàn tất."
+      "id": "GROWTH-20260725-03", "owner": "ChatGPT GPT-5.6 Thinking", "branch": "agent/GROWTH-20260725-03-closeout",
+      "paths": ["backend/choice-autopilot.test.mjs", "backend/choice-credential-bootstrap.js", "backend/choice-credential-bootstrap.test.mjs", "tools/apply-choice-access-fallback.mjs", "tools/apply-choice-credential-bootstrap.mjs", ".github/workflows/deploy-pages.yml", ".github/workflows/choice-growth-autopilot.yml", ".github/workflows/validate-role-system.yml", "google91001f63e8104533.html", "BingSiteAuth.xml", "docs/handover/ACTIVE_TASKS.json", "docs/handover/CHOICE_OWNER_SETUP.md", "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"], "status": "completed", "completed_at": "2026-07-25T12:15:00+07:00", "summary": "AccessTrade credential, Publisher fallback và Google/Bing production hoàn tất."
+    },
+    {
+      "id": "GROWTH-20260725-02", "owner": "ChatGPT GPT-5.6 Thinking", "branch": "agent/GROWTH-20260725-02-closeout",
+      "paths": ["backend/choice.js", "backend/choice-autopilot.js", "backend/choice-revenue.js", "backend/choice-setup.js", "hoi-chon-dung/**", "tools/**", ".github/workflows/**", "docs/handover/**"], "status": "completed", "completed_at": "2026-07-25T03:15:00+07:00", "summary": "Affiliate đa lĩnh vực và Growth Autopilot production hoàn tất."
     }
   ]
 }
