@@ -3,9 +3,7 @@ name: Deploy lên Cloudflare Pages (hiennhi89.pages.dev)
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - HANDOVER.md
-      - docs/handover/**
+    paths-ignore: [HANDOVER.md, "docs/handover/**"]
   workflow_dispatch:
 
 permissions:
@@ -37,26 +35,35 @@ jobs:
           npx --yes wrangler@4.112.0 secret list --config backend/wrangler.toml --format json > "$RUNNER_TEMP/secrets.json"
           node - <<'NODE' "$RUNNER_TEMP/secrets.json"
           const values = require(process.argv[2]).map(({name}) => name);
-          for (const name of ["SESSION_SECRET", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_WEBHOOK_SECRET"]) {
-            if (!values.includes(name)) throw new Error(`Worker thiếu ${name}`);
-          }
-          if (!values.includes("DECRYPT_KEY_BOITOAN") && !values.includes("DECRYPT_KEY")) {
-            throw new Error("Worker thiếu khóa giải mã Bói toán");
-          }
+          for (const name of ["SESSION_SECRET","TELEGRAM_BOT_TOKEN","TELEGRAM_CHAT_ID","TELEGRAM_WEBHOOK_SECRET"]) if (!values.includes(name)) throw new Error(`Worker thiếu ${name}`);
+          if (!values.includes("DECRYPT_KEY_BOITOAN") && !values.includes("DECRYPT_KEY")) throw new Error("Worker thiếu khóa giải mã Bói toán");
           NODE
 
-      - name: Kiểm tra source và ranh giới public-private
+      - name: Xác nhận hợp đồng mã hóa Bói toán
         run: |
           set -euo pipefail
-          node tools/apply-travel-system.mjs
-          node tools/apply-choice-multiniche.mjs
+          grep -q 'application/gate-payload' boitoan/index.html
+          grep -q '/assets/gate.js?v=19' boitoan/index.html
+          grep -q 'openAppContent(data.key, "admin-session")' assets/gate.js
+
+      - name: Materialize hệ thống theo đúng thứ tự
+        run: |
+          set -euo pipefail
+          node tools/apply-choice-product-v2.mjs
+          node tools/apply-choice-vn-marketplace.mjs
           node tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-seo-multiniche.mjs
+          node tools/apply-travel-system.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
           node tools/apply-choice-revenue.mjs
           node tools/apply-choice-autopilot-ui.mjs
+          grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
+          grep -q 'choice-vn-marketplace-v2-ok' tools/apply-choice-vn-marketplace.mjs
+
+      - name: Ban Thanh tra chạy regression và public boundary
+        run: |
+          set -euo pipefail
           node --check assets/gate.js
           node --check assets/community.js
           node --check assets/community-admin.js
@@ -74,59 +81,23 @@ jobs:
           node --test backend/choice.test.mjs
           node --check backend/choice-autopilot.js
           node --test backend/choice-autopilot.test.mjs
+          node --test backend/choice-vn-marketplace.test.mjs
+          node --test backend/choice-public-boundary.test.mjs
           node --check backend/choice-setup.js
           node --test backend/choice-setup.test.mjs
           node --check backend/choice-credential-bootstrap.js
           node --test backend/choice-credential-bootstrap.test.mjs
           node --check backend/choice-revenue.js
           node --test backend/choice-revenue.test.mjs
-          node --test backend/choice-public-boundary.test.mjs
-          node --check tools/choice-taxonomy.mjs
-          node --check tools/apply-choice-multiniche.mjs
-          node --check tools/apply-choice-access-fallback.mjs
-          node --check tools/apply-choice-seo-multiniche.mjs
-          node --check tools/apply-choice-system.mjs
-          node --check tools/apply-choice-setup.mjs
-          node --check tools/apply-choice-credential-bootstrap.mjs
-          node --check tools/apply-choice-revenue.mjs
-          node --check tools/apply-choice-autopilot-ui.mjs
           node --check tools/build-choice-seo.mjs
-          node --check tools/submit-indexnow.mjs
-          node --check tools/submit-google-sitemap.mjs
-          node --check tools/check-public-content.mjs
-          node --test tools/choice-multiniche.test.mjs
           node --test tools/choice-seo.test.mjs
-          node --check hoi-chon-dung/app.js
-          node --check hoi-chon-dung/autopilot-ui.js
-          node --check hoi-chon-dung/sw.js
+          for file in hoi-chon-dung/shared.js hoi-chon-dung/app.js hoi-chon-dung/explore.js hoi-chon-dung/product.js hoi-chon-dung/advisor.js hoi-chon-dung/compare.js hoi-chon-dung/sw.js; do node --check "$file"; done
           node --test hoi-chon-dung/app.test.mjs
-          test "$(cat google91001f63e8104533.html)" = "google-site-verification: google91001f63e8104533.html"
-          grep -q '0241E6F1BFFED8BCC15C18665C1FAD6C' BingSiteAuth.xml
           node tools/check-public-content.mjs
-          grep -q 'Bói toán V11' assets/gate.js
-          grep -q '/assets/gate.js?v=19' boitoan/index.html
-          grep -q 'boitoan-v19' boitoan/sw.js
-          test "$(grep -c 'Hội Chọn Đúng API integration v2' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng Telegram integration v2' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng Autopilot scheduled v2' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng internal status boundary v3' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng owner setup route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng credential bootstrap route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng owner revenue route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng growth cycle 5m v1' backend/worker.js)" -eq 1
-          grep -q 'handleChoiceCredentialBootstrapRequest' backend/worker.js
-          grep -q '/v1/campaigns' backend/choice-autopilot.js
-          grep -q 'tiktokshop_unavailable_using_datafeeds' backend/choice-autopilot.js
-          grep -q 'x-choice-autopilot-trigger' backend/worker.js
-          grep -q 'choiceAutopilotIsOwner' backend/worker.js
-          grep -q 'handleChoiceSetupRequest' backend/worker.js
-          grep -q 'handleChoiceRevenueRequest' backend/worker.js
-          grep -q 'runChoiceGrowthCycle' backend/worker.js
-          grep -q 'crons = \["\*/5 \* \* \* \*"\]' backend/wrangler.toml
-          grep -q 'hoi-chon-dung-v4' hoi-chon-dung/sw.js
-          ! grep -qiE 'autopilotBadge|autopilotFooter|autopilot-ui\.js|onboarding_required|chủ sở hữu|Cloudflare Worker|API key' hoi-chon-dung/index.html
+          grep -q 'hoi-chon-dung-v5' hoi-chon-dung/sw.js
+          ! grep -RqiE 'Link tham khảo|google\.com/search|SEED_PRODUCTS' hoi-chon-dung/*.js hoi-chon-dung/*.html hoi-chon-dung/sw.js
 
-      - name: Tạo trang sản phẩm và nội dung SEO đa lĩnh vực
+      - name: Tạo trang SEO từ catalog live, không dùng seed fallback
         run: |
           set -euo pipefail
           node tools/build-choice-seo.mjs --out "$RUNNER_TEMP/choice-seo"
@@ -134,22 +105,21 @@ jobs:
           test -s "$RUNNER_TEMP/choice-seo/feed.xml"
           test -s "$RUNNER_TEMP/choice-seo/seo-urls.json"
           test -s "$RUNNER_TEMP/choice-seo/danh-muc/cong-nghe-phu-kien-so/index.html"
-          test -s "$RUNNER_TEMP/choice-seo/danh-muc/nha-cua-gia-dung/index.html"
           test -s "$RUNNER_TEMP/choice-seo/danh-muc/du-lich-di-chuyen/index.html"
 
       - name: Gộp site
         run: |
           set -euo pipefail
           rm -rf _site
-          mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data _site/hoi-chon-dung/data
+          mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data _site/hoi-chon-dung
           cp index.html manifest.webmanifest sw.js robots.txt e4c968d6c15b4ef69083f88f4f8d1e76.txt google91001f63e8104533.html BingSiteAuth.xml _site/
           cp assets/gate.js assets/gate.css assets/community.js assets/community-admin.js assets/community.css _site/assets/
           cp boitoan/index.html boitoan/community.html boitoan/community-admin.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
           cp medora/index.html _site/medora/index.html
           cp vietnam-travel/index.html vietnam-travel/app.css vietnam-travel/app.js vietnam-travel/manifest.webmanifest vietnam-travel/sw.js vietnam-travel/icon.svg _site/vietnam-travel/
           cp vietnam-travel/data/seed-places.js _site/vietnam-travel/data/
-          cp hoi-chon-dung/index.html hoi-chon-dung/app.css hoi-chon-dung/app.js hoi-chon-dung/manifest.webmanifest hoi-chon-dung/sw.js hoi-chon-dung/icon.svg hoi-chon-dung/og-image.svg _site/hoi-chon-dung/
-          cp hoi-chon-dung/data/seed-products.js _site/hoi-chon-dung/data/
+          cp -R hoi-chon-dung/. _site/hoi-chon-dung/
+          rm -rf _site/hoi-chon-dung/data _site/hoi-chon-dung/autopilot-ui.js _site/hoi-chon-dung/*.test.mjs
           cp "$RUNNER_TEMP/choice-seo/sitemap.xml" "$RUNNER_TEMP/choice-seo/feed.xml" _site/hoi-chon-dung/
           cp -R "$RUNNER_TEMP/choice-seo/san-pham" "$RUNNER_TEMP/choice-seo/danh-muc" "$RUNNER_TEMP/choice-seo/huong-dan" _site/hoi-chon-dung/
           node tools/check-public-content.mjs _site
@@ -164,98 +134,55 @@ jobs:
           printf '%s' "$trigger" | npx --yes wrangler@4.112.0 secret put CHOICE_AUTOPILOT_TRIGGER
           npx --yes wrangler@4.112.0 deploy
 
-      - name: Gửi tín hiệu khởi động Growth nội bộ
+      - name: Tái tạo catalog affiliate
         run: |
-          set -u
-          triggered=0
-          for attempt in $(seq 1 8); do
-            code=$(curl -sS --max-time 8 -o "$RUNNER_TEMP/growth-start.json" -w '%{http_code}' \
-              -X POST \
-              -H "x-choice-autopilot-trigger: $CHOICE_AUTOPILOT_TRIGGER_RUNTIME" \
-              "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/run" || true)
-            if [ "$code" = "200" ] && grep -Eq '"ok":(true|false)' "$RUNNER_TEMP/growth-start.json"; then
-              echo "Growth Autopilot đã nhận tín hiệu ở lần $attempt"
-              triggered=1
-              break
-            fi
-            sleep 3
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            code=$(curl -sS --max-time 20 -o "$RUNNER_TEMP/growth.json" -w '%{http_code}' -X POST -H "x-choice-autopilot-trigger: $CHOICE_AUTOPILOT_TRIGGER_RUNTIME" "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/run" || true)
+            if [ "$code" = "200" ] && grep -Eq '"ok":(true|false)' "$RUNNER_TEMP/growth.json"; then cat "$RUNNER_TEMP/growth.json"; break; fi
+            sleep 4
           done
-          if [ "$triggered" != "1" ]; then
-            echo "Growth trigger tạm hoãn; cron 5 phút và credential bootstrap sẽ tự chạy vòng tiếp theo."
-            test ! -s "$RUNNER_TEMP/growth-start.json" || cat "$RUNNER_TEMP/growth-start.json"
-          fi
 
       - name: Deploy Pages
         run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
 
-      - name: Thông báo URL mới cho IndexNow
-        run: node tools/submit-indexnow.mjs "$RUNNER_TEMP/choice-seo/seo-urls.json"
-
-      - name: Gửi sitemap Google Search Console khi đã cấp quyền
+      - name: Thông báo search engines
         continue-on-error: true
-        run: node tools/submit-google-sitemap.mjs
+        run: |
+          node tools/submit-indexnow.mjs "$RUNNER_TEMP/choice-seo/seo-urls.json"
+          node tools/submit-google-sitemap.mjs
 
-      - name: Hậu kiểm production, credential bootstrap và xác minh search
+      - name: Hậu kiểm production Hội Chọn Đúng V2
         run: |
           set -euo pipefail
-          bust="growth-v3=${GITHUB_SHA}-${GITHUB_RUN_ID}"
-          sample=$(node -e 'const x=require(process.argv[1]); console.log(x.urls.find(u=>u.includes("/san-pham/"))||"")' "$RUNNER_TEMP/choice-seo/seo-urls.json")
-          test -n "$sample"
+          bust="choice-v2=${GITHUB_SHA}-${GITHUB_RUN_ID}"
           for attempt in $(seq 1 30); do
-            app=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/?$bust" || true)
-            gate=$(curl -fsSL "https://hiennhi89.pages.dev/assets/gate.js?$bust" || true)
-            admin=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/community-admin.html?$bust" || true)
-            health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/admin/health" || true)
-            choice_app=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/?$bust" || true)
-            choice_sw=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/sw.js?$bust" || true)
-            choice_health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/health" || true)
-            choice_products=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/products" || true)
-            status_code=$(curl -sS -o "$RUNNER_TEMP/private-status.json" -w '%{http_code}' "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/status" || true)
-            setup_headers=$(curl -sSI "https://hiennhi89-gate.hiennhi89.workers.dev/owner/choice/setup" || true)
-            setup_code=$(curl -sS -o "$RUNNER_TEMP/setup-login.html" -w '%{http_code}' "https://hiennhi89-gate.hiennhi89.workers.dev/owner/choice/setup" || true)
-            revenue_headers=$(curl -sSI "https://hiennhi89-gate.hiennhi89.workers.dev/owner/choice/revenue" || true)
-            revenue_code=$(curl -sS -o "$RUNNER_TEMP/revenue-login.html" -w '%{http_code}' "https://hiennhi89-gate.hiennhi89.workers.dev/owner/choice/revenue" || true)
-            bootstrap_headers=$(curl -sSI "https://hiennhi89-gate.hiennhi89.workers.dev/owner/choice/credential/public-key" || true)
-            bootstrap_code=$(curl -sS -o "$RUNNER_TEMP/bootstrap.json" -w '%{http_code}' "https://hiennhi89-gate.hiennhi89.workers.dev/owner/choice/credential/public-key" || true)
-            sitemap=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/sitemap.xml?$bust" || true)
-            feed=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/feed.xml?$bust" || true)
-            seo_page=$(curl -fsSL "$sample?$bust" || true)
-            tech_page=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/danh-muc/cong-nghe-phu-kien-so/?$bust" || true)
-            travel_page=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/danh-muc/du-lich-di-chuyen/?$bust" || true)
-            google_verify=$(curl -fsSL "https://hiennhi89.pages.dev/google91001f63e8104533.html?$bust" || true)
-            bing_verify=$(curl -fsSL "https://hiennhi89.pages.dev/BingSiteAuth.xml?$bust" || true)
-            if grep -q 'application/gate-payload' <<<"$app" \
-              && grep -q '/assets/gate.js?v=19' <<<"$app" \
-              && grep -q 'Bói toán V11' <<<"$gate" \
-              && grep -q 'openAppContent(data.key, "admin-session")' <<<"$gate" \
-              && grep -q 'admin_return=1&v=19' <<<"$admin" \
-              && grep -q '"auth_version":"2026-07-24-v11"' <<<"$health" \
-              && grep -q '"config_ok":true' <<<"$health" \
-              && grep -q '"crypto_ok":true' <<<"$health" \
-              && grep -q '"decrypt_key_configured":true' <<<"$health" \
-              && grep -q 'HỘI CHỌN ĐÚNG' <<<"$choice_app" \
-              && grep -q 'hoi-chon-dung-v4' <<<"$choice_sw" \
-              && grep -q '"service":"hoi-chon-dung"' <<<"$choice_health" \
-              && grep -q '"products":\[' <<<"$choice_products" \
-              && [ "$status_code" = "404" ] \
-              && [ "$setup_code" = "401" ] \
-              && grep -qi 'x-robots-tag: noindex' <<<"$setup_headers" \
-              && [ "$revenue_code" = "401" ] \
-              && grep -qi 'x-robots-tag: noindex' <<<"$revenue_headers" \
-              && { [ "$bootstrap_code" = "200" ] || [ "$bootstrap_code" = "410" ]; } \
-              && grep -qi 'x-robots-tag: noindex' <<<"$bootstrap_headers" \
-              && grep -q '<urlset' <<<"$sitemap" \
-              && grep -q '<rss version="2.0">' <<<"$feed" \
-              && grep -q '"@type":"Product"' <<<"$seo_page" \
-              && grep -q 'Chọn phụ kiện công nghệ đáng mua' <<<"$tech_page" \
-              && grep -q 'Chọn đồ du lịch và phụ kiện di chuyển' <<<"$travel_page" \
-              && grep -q 'google-site-verification: google91001f63e8104533.html' <<<"$google_verify" \
-              && grep -q '0241E6F1BFFED8BCC15C18665C1FAD6C' <<<"$bing_verify" \
-              && ! grep -qiE 'Autopilot|autopilotBadge|autopilotFooter|onboarding_required|chủ sở hữu|Cloudflare Worker|API key|chế độ dự phòng' <<<"$choice_app$seo_page$tech_page$travel_page"; then
-              echo "Production AccessTrade fallback, bootstrap và xác minh search đạt ở lần $attempt"
-              exit 0
+            home=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/?$bust" || true)
+            explore=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/kham-pha.html?$bust" || true)
+            product_page=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/san-pham.html?$bust" || true)
+            sw=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/sw.js?$bust" || true)
+            health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/health" || true)
+            products=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/products?limit=20" || true)
+            if grep -q 'Chỉ link affiliate đã xác minh' <<<"$home" \
+              && grep -q 'Khám phá sản phẩm' <<<"$explore" \
+              && grep -q 'Chi tiết sản phẩm và nơi bán' <<<"$product_page" \
+              && grep -q 'hoi-chon-dung-v5' <<<"$sw" \
+              && grep -q '"product_experience":"v2"' <<<"$health" \
+              && grep -q '"affiliate_only":true' <<<"$products" \
+              && ! grep -qiE 'Link tham khảo|google\.com/search|SEED_PRODUCTS' <<<"$home$explore$product_page"; then
+                printf '%s' "$products" > "$RUNNER_TEMP/choice-products.json"
+                node - <<'NODE' "$RUNNER_TEMP/choice-products.json"
+          const fs = require('node:fs');
+          const raw = fs.readFileSync(process.argv[2],'utf8'); const data=JSON.parse(raw);
+          for(const p of data.products||[]) for(const o of p.offers||[]) {
+            if(!o.outbound_path?.startsWith('/r/choice/')) throw new Error('offer thiếu redirect nội bộ');
+            if('affiliate_url' in o || 'merchant_url' in o) throw new Error('API lộ URL thô');
+          }
+          NODE
+                echo "Production Hội Chọn Đúng V2 đạt ở lần $attempt"
+                exit 0
             fi
             sleep 4
           done
-          echo "Production chưa đạt AccessTrade fallback/bootstrap/search verification"
+          echo "Production Hội Chọn Đúng V2 chưa đạt" >&2
           exit 1

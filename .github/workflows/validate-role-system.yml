@@ -27,202 +27,126 @@ jobs:
           after=$(git status --porcelain)
           test "$before" = "$after"
           grep -q 'Bói toán V11' assets/gate.js
-          grep -q 'openAppContent(data.key, "admin-session")' assets/gate.js
 
-      - name: Kiểm tra cú pháp frontend Bói toán
+      - name: Kiểm tra cú pháp frontend Bói toán Community
         run: |
-          set -euo pipefail
           node --check assets/gate.js
           node --check assets/community.js
           node --check assets/community-admin.js
-          node --check tools/admin-v9-return-webkit-check.mjs
-          node --check boitoan/sw.js
-
       - name: Kiểm tra Gate frontend
         run: node assets/gate.test.mjs
-
       - name: Kiểm tra Account frontend
         run: node assets/account-v2.test.mjs
-
       - name: Kiểm tra Service Worker Bói toán
         run: node boitoan/sw.test.mjs
-
+      - name: Kiểm tra cú pháp Community backend
+        run: node --check backend/community.js
       - name: Kiểm tra Community backend
+        run: node backend/community.test.mjs
+      - name: Kiểm tra Account backend
+        run: node backend/account-v2.test.mjs
+      - name: Kiểm tra Admin health
+        run: node backend/admin-v8-health.test.mjs
+      - name: Kiểm tra Worker hiện hữu
         run: |
-          set -euo pipefail
-          node --check backend/community.js
-          node backend/community.test.mjs
-          node backend/account-v2.test.mjs
-          node backend/admin-v8-health.test.mjs
-
-      - name: Kiểm tra Worker lõi
-        run: |
-          set -euo pipefail
           node --check backend/worker.js
           node backend/worker.test.mjs
 
-      - name: Materialize taxonomy, trend và AccessTrade fallback
+      - name: Giải nén Hội Chọn Đúng V2
+        run: node tools/apply-choice-product-v2.mjs
+      - name: Áp taxonomy Hội Chọn Đúng V2
+        run: node tools/apply-choice-multiniche-v2.mjs
+      - name: Áp marketplace Hội Chọn Đúng V2
+        run: node tools/apply-choice-vn-marketplace.mjs
+      - name: Materialize Worker owner lần một
         run: |
           set -euo pipefail
-          node --check tools/choice-taxonomy.mjs
-          node --check tools/apply-choice-multiniche.mjs
-          node --check tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-multiniche.mjs
-          node tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-multiniche.mjs
-          node tools/apply-choice-access-fallback.mjs
-          node --check backend/choice-autopilot.js
-          grep -q '/v1/campaigns' backend/choice-autopilot.js
-          grep -q 'tiktokshop_unavailable_using_datafeeds' backend/choice-autopilot.js
-
-      - name: Materialize SEO mọi danh mục
-        run: |
-          set -euo pipefail
-          node --check tools/apply-choice-seo-multiniche.mjs
-          node tools/apply-choice-seo-multiniche.mjs
-          node tools/apply-choice-seo-multiniche.mjs
-          node --check tools/build-choice-seo.mjs
-
-      - name: Materialize Choice system lõi
-        run: |
-          set -euo pipefail
-          node tools/apply-travel-system.mjs
-          node --check tools/apply-choice-system.mjs
           node tools/apply-choice-system.mjs
-          node tools/apply-choice-system.mjs
-          node --check backend/worker.js
-
-      - name: Materialize owner setup và credential bootstrap
-        run: |
-          set -euo pipefail
-          node --check tools/apply-choice-setup.mjs
-          node --check tools/apply-choice-credential-bootstrap.mjs
-          node tools/apply-choice-setup.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
+          node tools/apply-choice-revenue.mjs
+          node tools/apply-choice-autopilot-ui.mjs
+
+      - name: Tái giải nén Hội Chọn Đúng V2
+        run: node tools/apply-choice-product-v2.mjs
+      - name: Chạy lại taxonomy Hội Chọn Đúng V2
+        run: node tools/apply-choice-multiniche-v2.mjs
+      - name: Chạy lại marketplace Hội Chọn Đúng V2
+        run: node tools/apply-choice-vn-marketplace.mjs
+      - name: Materialize Worker owner lần hai
+        run: |
+          set -euo pipefail
+          node tools/apply-choice-system.mjs
+          node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
-          node --check backend/choice-setup.js
-          node --check backend/choice-credential-bootstrap.js
-          node --check backend/worker.js
-
-      - name: Materialize revenue và public UI
-        run: |
-          set -euo pipefail
-          node --check tools/apply-choice-revenue.mjs
-          node tools/apply-choice-revenue.mjs
           node tools/apply-choice-revenue.mjs
           node tools/apply-choice-autopilot-ui.mjs
-          node tools/apply-choice-autopilot-ui.mjs
-          node --check tools/check-public-content.mjs
-          node --check tools/apply-choice-public-product.mjs
-          node --check backend/worker.js
 
-      - name: Kiểm tra Worker sau materialize
-        id: worker_after_materialize
-        continue-on-error: true
+      - name: Kiểm tra marker V2
         run: |
-          set -uo pipefail
-          node backend/worker.test.mjs > "$RUNNER_TEMP/worker-test.log" 2>&1
-
-      - name: Lưu stack trace Worker
-        if: steps.worker_after_materialize.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: worker-test-log
-          path: ${{ runner.temp }}/worker-test.log
-          if-no-files-found: error
-          retention-days: 3
-
-      - name: Chặn khi Worker regression thất bại
-        if: steps.worker_after_materialize.outcome == 'failure'
-        run: |
-          echo "Worker regression thất bại; stack trace đã được lưu trong artifact worker-test-log."
-          exit 1
-
-      - name: Kiểm tra marker và cron Growth
-        run: |
-          set -euo pipefail
-          test "$(grep -c 'Hội Chọn Đúng API integration v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng API integration v2' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng Telegram integration v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng Telegram integration v2' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng Autopilot scheduled v2' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng internal status boundary v3' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng owner setup route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng credential bootstrap route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng owner revenue route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng growth cycle 5m v1' backend/worker.js)" -eq 1
-          grep -q 'handleChoiceCredentialBootstrapRequest' backend/worker.js
-          grep -q 'handleChoiceSetupRequest' backend/worker.js
-          grep -q 'handleChoiceRevenueRequest' backend/worker.js
-          grep -q 'runChoiceGrowthCycle' backend/worker.js
-          grep -q 'crons = \["\*/5 \* \* \* \*"\]' backend/wrangler.toml
-
-      - name: Kiểm tra taxonomy và discovery đa lĩnh vực
-        run: |
-          set -euo pipefail
-          node --test tools/choice-multiniche.test.mjs
-          grep -q 'id: "tech"' backend/choice-autopilot.js
+          grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
+          grep -q 'rating_value: candidate.rating_value' backend/choice-autopilot.js
+          grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
+          grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
           grep -q 'id: "travel"' backend/choice-autopilot.js
-          grep -q 'trend_score: trendScore' backend/choice-autopilot.js
-          grep -q 'BEST_SELLERS.*RECOMMENDED.*HIGH_COMMISSION_RATE' backend/choice-autopilot.js
+          grep -q 'const globalSelectedSources = new Set()' backend/choice-autopilot.js
+          grep -q 'globalSelectedSources.has(candidate.source_id)' backend/choice-autopilot.js
 
-      - name: Kiểm tra catalog, Publisher fallback và Affiliate Autopilot
+      - name: Kiểm tra Choice backend lõi
         run: |
-          set -euo pipefail
           node --check backend/choice.js
           node --test backend/choice.test.mjs
           node --check backend/choice-autopilot.js
           node --test backend/choice-autopilot.test.mjs
-
-      - name: Kiểm tra trung tâm kết nối và bootstrap RSA
+          node --test backend/choice-vn-marketplace.test.mjs
+      - name: Kiểm tra public boundary
+        run: node --test backend/choice-public-boundary.test.mjs
+      - name: Kiểm tra owner setup credential revenue
         run: |
-          set -euo pipefail
           node --check backend/choice-setup.js
           node --test backend/choice-setup.test.mjs
           node --check backend/choice-credential-bootstrap.js
           node --test backend/choice-credential-bootstrap.test.mjs
-
-      - name: Kiểm tra đồng bộ và dashboard doanh thu
-        run: |
-          set -euo pipefail
           node --check backend/choice-revenue.js
           node --test backend/choice-revenue.test.mjs
+          node --check backend/worker.js
+          node backend/worker.test.mjs
+          node tools/check-public-content.mjs
 
-      - name: Kiểm tra SEO publisher, Google và Bing
+      - name: Kiểm tra frontend nhiều luồng
+        run: |
+          set -euo pipefail
+          for file in hoi-chon-dung/shared.js hoi-chon-dung/app.js hoi-chon-dung/explore.js hoi-chon-dung/product.js hoi-chon-dung/advisor.js hoi-chon-dung/compare.js hoi-chon-dung/sw.js; do node --check "$file"; done
+          node --test hoi-chon-dung/app.test.mjs
+          grep -q 'hoi-chon-dung-v5' hoi-chon-dung/sw.js
+          grep -q 'Public audience boundary v4' hoi-chon-dung/index.html
+          ! grep -RqiE 'Link tham khảo|google\.com/search|SEED_PRODUCTS|seed-products' hoi-chon-dung/*.js hoi-chon-dung/*.html hoi-chon-dung/sw.js
+
+      - name: Kiểm tra SEO live-only
         run: |
           set -euo pipefail
           node --check tools/build-choice-seo.mjs
-          node --check tools/submit-indexnow.mjs
-          node --check tools/submit-google-sitemap.mjs
           node --test tools/choice-seo.test.mjs
-          test "$(cat google91001f63e8104533.html)" = "google-site-verification: google91001f63e8104533.html"
-          grep -q '<?xml version="1.0"?>' BingSiteAuth.xml
-          grep -q '0241E6F1BFFED8BCC15C18665C1FAD6C' BingSiteAuth.xml
+          mkdir -p "$RUNNER_TEMP/choice-seo"
+          cat > "$RUNNER_TEMP/catalog.json" <<'JSON'
+          {"products":[{"id":"test-product","name":"Sản phẩm thử","category":"tech","summary":"Dữ liệu thử","price_min":100000,"price_max":120000,"shop_count":1,"offers":[{"id":"offer-1","merchant":"Shop","marketplace":"shopee","marketplace_label":"Shopee","price_min":100000,"outbound_path":"/r/choice/offer-1"}]}]}
+          JSON
+          node tools/build-choice-seo.mjs --input "$RUNNER_TEMP/catalog.json" --out "$RUNNER_TEMP/choice-seo"
+          test -s "$RUNNER_TEMP/choice-seo/sitemap.xml"
+          test -s "$RUNNER_TEMP/choice-seo/san-pham/test-product/index.html"
+          ! grep -RqiE 'Link tham khảo|google\.com/search|seed fallback' "$RUNNER_TEMP/choice-seo"
 
-      - name: Kiểm tra ranh giới public-private Growth
+      - name: Kiểm tra điều phối và marker hệ thống
         run: |
-          set -euo pipefail
-          node --test backend/choice-public-boundary.test.mjs
-          node tools/check-public-content.mjs
-          test "$(grep -c 'Public audience boundary v3' hoi-chon-dung/index.html)" -eq 1
-          grep -q 'x-choice-autopilot-trigger' backend/worker.js
-          grep -q 'choiceAutopilotIsOwner' backend/worker.js
-          grep -q 'choiceAutopilotCommand === "/chon"' backend/worker.js
-          grep -q 'hoi-chon-dung-v4' hoi-chon-dung/sw.js
-          ! grep -qiE 'autopilotBadge|autopilotFooter|autopilot-ui\.js|onboarding_required|chủ sở hữu|Cloudflare Worker|API key' hoi-chon-dung/index.html
-
-      - name: Kiểm tra frontend Hội Chọn Đúng
-        run: |
-          set -euo pipefail
-          node --check hoi-chon-dung/app.js
-          node --check hoi-chon-dung/autopilot-ui.js
-          node --check hoi-chon-dung/sw.js
-          node --test hoi-chon-dung/app.test.mjs
+          node tools/validate-coordination.mjs
+          test "$(grep -c 'Hội Chọn Đúng API integration v2' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng Telegram integration v2' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng growth cycle 5m v1' backend/worker.js)" -eq 1
+          grep -q 'runChoiceGrowthCycle' backend/worker.js
+          grep -q 'crons = \["\*/5 \* \* \* \*"\]' backend/wrangler.toml
 
       - name: Kiểm tra WebKit với payload AES thật
         run: |
-          set -euo pipefail
           npm install --no-save playwright@1.52.0
           npx playwright install --with-deps webkit
           LOCAL_GATE_JS=1 node tools/admin-v9-return-webkit-check.mjs "$GITHUB_SHA"

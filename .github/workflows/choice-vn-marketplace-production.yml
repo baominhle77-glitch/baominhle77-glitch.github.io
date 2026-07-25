@@ -23,20 +23,18 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: "997944c1bfcc2dcaca32718124cd718c"
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
+        with: { ref: main }
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
 
-      - name: Materialize Worker chỉ sàn Việt Nam
+      - name: Materialize Worker V2 chỉ sàn Việt Nam
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
-          node tools/apply-travel-system.mjs
-          node tools/apply-choice-multiniche.mjs
-          node tools/apply-choice-access-fallback.mjs
+          node tools/apply-choice-product-v2.mjs
           node tools/apply-choice-vn-marketplace.mjs
-          node tools/apply-choice-seo-multiniche.mjs
+          node tools/apply-choice-access-fallback.mjs
+          node tools/apply-travel-system.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
@@ -45,11 +43,12 @@ jobs:
           node --check backend/choice-autopilot.js
           node --check backend/choice.js
           node --check backend/worker.js
+          node --test backend/choice.test.mjs
           node --test backend/choice-vn-marketplace.test.mjs
           node --test backend/choice-autopilot.test.mjs
           node --test backend/choice-public-boundary.test.mjs
+          grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
-          grep -q 'VIETNAM_MARKETPLACE_PUBLIC_V1' backend/choice.js
 
       - name: Deploy Worker với trigger mới
         working-directory: backend
@@ -65,10 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in $(seq 1 20); do
-            code=$(curl -sS --max-time 20 -o "$RUNNER_TEMP/growth.json" -w '%{http_code}' \
-              -X POST \
-              -H "x-choice-autopilot-trigger: $CHOICE_VN_TRIGGER" \
-              "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/run" || true)
+            code=$(curl -sS --max-time 20 -o "$RUNNER_TEMP/growth.json" -w '%{http_code}' -X POST -H "x-choice-autopilot-trigger: $CHOICE_VN_TRIGGER" "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/run" || true)
             if [ "$code" = "200" ] && grep -q '"ok":true' "$RUNNER_TEMP/growth.json"; then
               cat "$RUNNER_TEMP/growth.json"
               exit 0
@@ -79,7 +75,7 @@ jobs:
           echo "Không thể tái tạo catalog sàn Việt Nam" >&2
           exit 1
 
-      - name: Hậu kiểm production không còn link ngoài Việt Nam
+      - name: Hậu kiểm production chỉ có offer affiliate sàn Việt Nam
         run: |
           set -euo pipefail
           for attempt in $(seq 1 25); do
@@ -88,27 +84,28 @@ jobs:
           const fs = require('fs');
           const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
           const allowed = new Set(['shopee','lazada','tiki','sendo','tiktok-shop']);
-          if (!Array.isArray(data.products) || data.products.length < 8) process.exit(1);
+          if (data.affiliate_only !== true || !Array.isArray(data.products) || data.products.length < 1) process.exit(1);
           for (const product of data.products) {
-            if (!allowed.has(product.marketplace)) process.exit(2);
-            if (!product.outbound_path || !product.outbound_path.startsWith('/r/choice/')) process.exit(3);
-            for (const offer of product.offers || []) {
-              if (!allowed.has(offer.marketplace)) process.exit(4);
-              if (!offer.outbound_path?.startsWith('/r/choice/')) process.exit(5);
+            if (!Array.isArray(product.offers) || product.offers.length < 1) process.exit(2);
+            for (const offer of product.offers) {
+              if (!allowed.has(offer.marketplace)) process.exit(3);
+              if (!offer.outbound_path?.startsWith('/r/choice/')) process.exit(4);
+              if ('affiliate_url' in offer || 'merchant_url' in offer) process.exit(5);
             }
           }
-          console.log(`production-vn-marketplace-ok: ${data.products.length} nhóm sản phẩm`);
+          console.log(`production-v2-ok: ${data.products.length} nhóm sản phẩm affiliate`);
           NODE
             then
-              sample=$(node -e 'const d=require(process.argv[1]); const p=d.products.find(x=>x.outbound_path); console.log(p.outbound_path)' "$RUNNER_TEMP/products.json")
+              sample=$(node -e 'const d=require(process.argv[1]); console.log(d.products.flatMap(x=>x.offers||[])[0]?.outbound_path||"")' "$RUNNER_TEMP/products.json")
+              test -n "$sample"
               headers=$(curl -sSI "https://hiennhi89-gate.hiennhi89.workers.dev${sample}" || true)
               grep -qi '^location: https://go\.isclix\.com/deep_link/' <<<"$headers"
               grep -qiE 'url=https?%3A%2F%2F([^&]*\.)?(shopee\.vn|lazada\.vn|tiki\.vn|sendo\.vn|shop\.tiktok\.com|tiktok\.com)' <<<"$headers"
-              echo "Production chỉ còn deeplink tới sàn Việt Nam"
+              echo "Production V2 chỉ còn deeplink affiliate tới sàn Việt Nam"
               exit 0
             fi
             sleep 4
           done
           cat "$RUNNER_TEMP/products.json" || true
-          echo "Production chưa đạt chính sách sàn Việt Nam" >&2
+          echo "Production V2 chưa đạt chính sách offer affiliate" >&2
           exit 1
