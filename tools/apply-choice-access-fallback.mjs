@@ -160,7 +160,10 @@ async function fetchPortfolioCandidates(token, portfolio, fetchImpl = fetch) {
   return { candidates: [...deduped.values()], errors };
 }
 `;
-source = replaceBetween(source, "async function fetchPortfolioCandidates", "\n\nasync function fetchTransactions", fallbackBlock);
+const fallbackStartMarker = source.includes("async function supportsTikTokProductFeeds")
+  ? "async function supportsTikTokProductFeeds"
+  : "async function fetchPortfolioCandidates";
+source = replaceBetween(source, fallbackStartMarker, "\n\nasync function fetchTransactions", fallbackBlock);
 
 if (!source.includes("if (candidate.affiliate_url) return candidate.affiliate_url;")) {
   source = source.replace(
