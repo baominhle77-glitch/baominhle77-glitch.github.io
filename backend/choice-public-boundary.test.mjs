@@ -76,7 +76,7 @@ test("Growth cycle chạy đồng bộ doanh thu 5 phút nhưng chỉ khám phá
   assert.match(wrangler, /crons = \["\*\/5 \* \* \* \*"\]/);
 });
 
-test("discovery đa lĩnh vực có trend scoring, đa dạng shop và giữ nhóm cũ khi nguồn thiếu", async () => {
+test("discovery đa lĩnh vực có trend scoring, phân loại mạnh nhất và thanh lọc link affiliate cũ", async () => {
   const source = await read("./choice-autopilot.js");
   for (const id of ["tech", "home", "beauty", "fashion", "mom-baby", "pets", "office", "fitness", "travel"]) {
     assert.match(source, new RegExp(`id: ["']${id}["']`));
@@ -84,6 +84,9 @@ test("discovery đa lĩnh vực có trend scoring, đa dạng shop và giữ nh�
   assert.match(source, /BEST_SELLERS.+RECOMMENDED.+HIGH_COMMISSION_RATE/s);
   assert.match(source, /trend_score: trendScore/);
   assert.match(source, /const shopCounts = new Map\(\)/);
+  assert.match(source, /DATAFEED_BEST_CATEGORY_V1/);
+  assert.match(source, /GLOBAL_PRODUCT_DEDUPE_V1/);
+  assert.match(source, /String\(product\?\.source \|\| ""\)\.startsWith\("accesstrade:"\)/);
   assert.match(source, /const refreshedCategories = new Set/);
-  assert.match(source, /return !refreshedCategories\.has/);
+  assert.doesNotMatch(source, /return !refreshedCategories\.has/);
 });
