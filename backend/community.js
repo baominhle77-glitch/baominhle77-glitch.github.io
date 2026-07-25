@@ -1179,6 +1179,19 @@ async function handleAdmin(request, env, path) {
     const cid = parts[4] || "";
     if (!cid && request.method === "GET") return json({ conversations: await listByPrefix(env, "community-conversation:", 100) });
     if (cid && parts[5] === "messages" && request.method === "GET") return json({ messages: (await listByPrefix(env, messagePrefix(cid), 100)).sort((a, b) => a.created_at - b.created_at) });
+    /* Xoá hẳn một hội thoại: bản ghi, toàn bộ tin nhắn và hai đường trỏ của hai bên. */
+    if (cid && !parts[5] && request.method === "DELETE") {
+      const rec = await getJson(env, conversationKey(cid));
+      if (!rec) return json({ error: "not_found" }, 404);
+      const page = await env.KV.list({ prefix: messagePrefix(cid), limit: 1000 });
+      const jobs = page.keys.map((k) => env.KV.delete(k.name));
+      jobs.push(env.KV.delete(conversationKey(cid)));
+      if (rec.guest_id) jobs.push(env.KV.delete(userConversationKey(rec.guest_id, cid)));
+      if (rec.reader_id) jobs.push(env.KV.delete(userConversationKey(rec.reader_id, cid)));
+      await Promise.all(jobs);
+      await adminAudit(env, request, "conversation_deleted", cid, { messages: page.keys.length });
+      return json({ ok: true, messages_deleted: page.keys.length });
+    }
   }
   return json({ error: "not_found" }, 404);
 }
