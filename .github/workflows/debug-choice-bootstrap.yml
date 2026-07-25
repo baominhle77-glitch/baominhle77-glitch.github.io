@@ -1,0 +1,47 @@
+name: Debug Choice Credential Bootstrap
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  debug-bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Materialize modules
+        run: |
+          set -euo pipefail
+          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-access-fallback.mjs
+          node tools/apply-choice-system.mjs
+          node tools/apply-choice-setup.mjs
+          node tools/apply-choice-credential-bootstrap.mjs
+      - name: Run bootstrap test and retain status
+        id: test
+        continue-on-error: true
+        run: |
+          set +e
+          node --test backend/choice-credential-bootstrap.test.mjs > "$RUNNER_TEMP/bootstrap-test.log" 2>&1
+          code=$?
+          echo "$code" > "$RUNNER_TEMP/bootstrap-test.exit"
+          exit "$code"
+      - name: Upload full bootstrap log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-test-log
+          path: |
+            ${{ runner.temp }}/bootstrap-test.log
+            ${{ runner.temp }}/bootstrap-test.exit
+          if-no-files-found: error
+          retention-days: 3
+      - name: Preserve failure
+        if: steps.test.outcome == 'failure'
+        run: exit 1
