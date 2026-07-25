@@ -46,6 +46,8 @@ jobs:
           test -s "$RUNNER_TEMP/choice-seo/danh-muc/cong-nghe-phu-kien-so/index.html"
           test -s "$RUNNER_TEMP/choice-seo/danh-muc/nha-cua-gia-dung/index.html"
           test -s "$RUNNER_TEMP/choice-seo/danh-muc/du-lich-di-chuyen/index.html"
+          test "$(cat google91001f63e8104533.html)" = "google-site-verification: google91001f63e8104533.html"
+          grep -q '0241E6F1BFFED8BCC15C18665C1FAD6C' BingSiteAuth.xml
           node tools/check-public-content.mjs
 
       - name: Gộp site với trang SEO mới
@@ -53,7 +55,7 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data _site/hoi-chon-dung/data
-          cp index.html manifest.webmanifest sw.js robots.txt e4c968d6c15b4ef69083f88f4f8d1e76.txt _site/
+          cp index.html manifest.webmanifest sw.js robots.txt e4c968d6c15b4ef69083f88f4f8d1e76.txt google91001f63e8104533.html BingSiteAuth.xml _site/
           cp assets/gate.js assets/gate.css assets/community.js assets/community-admin.js assets/community.css _site/assets/
           cp boitoan/index.html boitoan/community.html boitoan/community-admin.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
           cp medora/index.html _site/medora/index.html
@@ -87,6 +89,8 @@ jobs:
             tech=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/danh-muc/cong-nghe-phu-kien-so/?run=$GITHUB_RUN_ID" || true)
             travel=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/danh-muc/du-lich-di-chuyen/?run=$GITHUB_RUN_ID" || true)
             key=$(curl -fsSL "https://hiennhi89.pages.dev/e4c968d6c15b4ef69083f88f4f8d1e76.txt?run=$GITHUB_RUN_ID" || true)
+            google_verify=$(curl -fsSL "https://hiennhi89.pages.dev/google91001f63e8104533.html?run=$GITHUB_RUN_ID" || true)
+            bing_verify=$(curl -fsSL "https://hiennhi89.pages.dev/BingSiteAuth.xml?run=$GITHUB_RUN_ID" || true)
             if grep -q '<urlset' <<<"$sitemap" \
               && grep -q '/san-pham/' <<<"$sitemap" \
               && grep -q '/danh-muc/cong-nghe-phu-kien-so/' <<<"$sitemap" \
@@ -97,11 +101,13 @@ jobs:
               && grep -q 'Chọn phụ kiện công nghệ đáng mua' <<<"$tech" \
               && grep -q 'Chọn đồ du lịch và phụ kiện di chuyển' <<<"$travel" \
               && grep -q 'e4c968d6c15b4ef69083f88f4f8d1e76' <<<"$key" \
+              && grep -q 'google-site-verification: google91001f63e8104533.html' <<<"$google_verify" \
+              && grep -q '0241E6F1BFFED8BCC15C18665C1FAD6C' <<<"$bing_verify" \
               && ! grep -qiE 'Autopilot|onboarding_required|Cloudflare Worker|API key|chủ sở hữu' <<<"$page$tech$travel"; then
-              echo "Growth SEO đa lĩnh vực production đạt ở lần $attempt"
+              echo "Growth SEO đa lĩnh vực và xác minh search production đạt ở lần $attempt"
               exit 0
             fi
             sleep 4
           done
-          echo "Growth SEO đa lĩnh vực production chưa đồng bộ" >&2
+          echo "Growth SEO đa lĩnh vực production chưa đồng bộ"
           exit 1
