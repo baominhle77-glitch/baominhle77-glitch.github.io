@@ -17,15 +17,33 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
 
-      - name: Materialize V2 và marketplace Việt Nam hai lần
+      - name: Giải nén nguồn V2
         run: |
           set -euo pipefail
-          for attempt in 1 2; do
-            node tools/apply-choice-product-v2.mjs
-            node tools/apply-choice-multiniche.mjs
-            node tools/apply-choice-access-fallback.mjs
-            node tools/apply-choice-global-dedupe.mjs
-          done
+          node tools/apply-choice-product-v2.mjs
+          node --check backend/choice.js
+          grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
+
+      - name: Áp taxonomy đa lĩnh vực
+        run: node tools/apply-choice-multiniche.mjs
+
+      - name: Áp AccessTrade Publisher fallback
+        run: node tools/apply-choice-access-fallback.mjs
+
+      - name: Áp chống trùng toàn catalog
+        run: node tools/apply-choice-global-dedupe.mjs
+
+      - name: Chạy lại materializer để kiểm tra idempotency
+        run: |
+          set -euo pipefail
+          node tools/apply-choice-product-v2.mjs
+          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-access-fallback.mjs
+          node tools/apply-choice-global-dedupe.mjs
+
+      - name: Kiểm tra marker marketplace V2
+        run: |
+          set -euo pipefail
           node --check backend/choice-autopilot.js
           node --check backend/choice.js
           grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
@@ -35,12 +53,18 @@ jobs:
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
           ! grep -qiE 'fado\.vn|amazon\.|taobao|alibaba|ebay' backend/choice-autopilot.js
 
-      - name: Kiểm tra catalog, redirect và offer theo shop
+      - name: Kiểm tra catalog lõi
+        run: node --test backend/choice.test.mjs
+
+      - name: Kiểm tra redirect và offer theo shop
+        run: node --test backend/choice-vn-marketplace.test.mjs
+
+      - name: Kiểm tra Affiliate Autopilot
+        run: node --test backend/choice-autopilot.test.mjs
+
+      - name: Kiểm tra frontend affiliate-only
         run: |
           set -euo pipefail
-          node --test backend/choice.test.mjs
-          node --test backend/choice-vn-marketplace.test.mjs
-          node --test backend/choice-autopilot.test.mjs
           node --test hoi-chon-dung/app.test.mjs
           ! grep -RqiE 'Link tham khảo|google\.com/search|SEED_PRODUCTS|seed-products' hoi-chon-dung/*.js hoi-chon-dung/*.html hoi-chon-dung/sw.js
 
@@ -58,10 +82,12 @@ jobs:
           node --check backend/choice-setup.js
           node --check backend/choice-revenue.js
 
-      - name: Kiểm tra boundary và nội dung public
+      - name: Kiểm tra boundary backend
+        run: node --test backend/choice-public-boundary.test.mjs
+
+      - name: Quét nội dung public
         run: |
           set -euo pipefail
-          node --test backend/choice-public-boundary.test.mjs
           node tools/check-public-content.mjs
           grep -q 'Public audience boundary v4' hoi-chon-dung/index.html
           grep -q 'hoi-chon-dung-v5' hoi-chon-dung/sw.js
