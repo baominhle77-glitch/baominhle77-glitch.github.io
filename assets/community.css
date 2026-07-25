@@ -268,3 +268,29 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 
 /* Account V5 admin session UI */
 .community-admin-session-card{display:grid;gap:14px}.community-admin-session-copy{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.community-admin-session-copy>div{display:grid;gap:3px}.community-admin-session-copy h1,.community-admin-session-copy p{margin:0}.community-role-badge.role-admin{border-color:#f0cf72;color:#f0cf72}.community-admin-session-card>.community-secondary{justify-self:start}
+
+/* ===== Bình luận: avatar, badge, thích, trả lời ===== */
+.community-avatar{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;
+  border-radius:50%;font-size:11px;font-weight:700;letter-spacing:.02em;color:#1a1029;background:#d4a94e;flex:0 0 auto}
+.community-avatar.role-reader{background:#8b6fd0;color:#fff}
+.community-avatar.role-admin{background:#e0785a;color:#fff}
+.community-comment-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.community-comment.depth-1{margin-left:18px}
+.community-comment.depth-2{margin-left:36px}
+.community-comment.depth-3{margin-left:52px}
+.community-comment[class*="depth-"]:not(.depth-0){border-left:2px solid var(--line,#332a52);padding-left:10px}
+.community-like-bar{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.community-like,.community-reply-toggle{background:transparent;border:1px solid var(--line,#332a52);
+  color:inherit;border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:600;cursor:pointer}
+.community-like.liked{color:#e0785a;border-color:#e0785a}
+.community-like:disabled{opacity:.6}
+.community-reply-form{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+
+/* ===== Số thành viên ở đầu trang ===== */
+.community-header-right{display:flex;align-items:center;gap:10px}
+.community-member-count{font-size:12.5px;font-weight:700;text-decoration:none;color:inherit;
+  border:1px solid var(--line,#332a52);border-radius:999px;padding:5px 12px;white-space:nowrap}
+
+/* ===== Chat: tin đang gửi ===== */
+.community-message.pending{opacity:.62}
+.community-message.failed{opacity:1;border:1px solid #e0785a}

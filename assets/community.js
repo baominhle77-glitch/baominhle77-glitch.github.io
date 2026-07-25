@@ -205,14 +205,30 @@
       var card = el("section", null, "community-card");
       card.append(button("← Thảo luận", "community-secondary", renderPosts), dashboardHeader(), topTabs("posts"));
       card.append(el("h2", data.post.title), el("p", data.post.text, "community-post-body"));
-      var comments = el("div", null, "community-comment-list");
-      (data.comments || []).forEach(function (comment) {
-        var row = el("article", null, "community-comment");
-        var head = el("div", null, "community-comment-head");
-        head.append(el("strong", comment.author_name), el("span", roleLabel(comment.author_role), "community-role-badge role-" + comment.author_role));
-        row.append(head, el("p", comment.text), el("small", formatDate(comment.created_at))); comments.append(row);
+      /* Thích bài đăng */
+      var postLikes = Number(data.post.likes || 0);
+      var postLiked = (data.post.liked_by || []).indexOf(state.profile.id) >= 0;
+      var postBar = el("div", null, "community-like-bar");
+      var postLikeBtn = likeButton(postLikes, postLiked, function (btn) {
+        return api("/api/community/posts/" + encodeURIComponent(id) + "/like", jsonOptions("POST", {}))
+          .then(function (r) { paintLike(btn, r.likes, r.liked); });
       });
-      if (!(data.comments || []).length) comments.append(el("p", "Chưa có bình luận.", "community-empty"));
+      postBar.append(postLikeBtn);
+      card.append(postBar);
+
+      /* Bình luận: dựng cây trả lời từ parent_id */
+      var all = data.comments || [];
+      var children = {};
+      all.forEach(function (c) { var k = c.parent_id || "_root"; (children[k] = children[k] || []).push(c); });
+      var comments = el("div", null, "community-comment-list");
+      function renderBranch(parentKey, depth) {
+        (children[parentKey] || []).forEach(function (comment) {
+          comments.append(commentRow(comment, depth, id));
+          renderBranch(comment.id, Math.min(depth + 1, 3));
+        });
+      }
+      renderBranch("_root", 0);
+      if (!all.length) comments.append(el("p", "Chưa có bình luận.", "community-empty"));
       card.append(comments);
       if (!data.post.closed && tokenClaims().mode !== "impersonation") {
         var form = el("form", null, "community-form community-comment-form");
@@ -225,6 +241,71 @@
       } else if (data.post.closed) card.append(el("p", "Bài thảo luận đã được Admin đóng.", "community-state"));
       APP.replaceChildren(card);
     }).catch(function (error) { APP.replaceChildren(el("section", humanError(error), "community-card community-state error")); });
+  }
+
+
+  /* ----- Bình luận: avatar, badge loại nick, thích, trả lời ----- */
+  function initialsOf(name) {
+    var parts = String(name || "?").trim().split(/\s+/);
+    return ((parts[0] || "?")[0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
+  }
+  function avatarOf(name, role) {
+    var av = el("span", initialsOf(name), "community-avatar role-" + (role || "guest"));
+    av.setAttribute("aria-hidden", "true");
+    return av;
+  }
+  function paintLike(btn, likes, liked) {
+    btn.dataset.liked = liked ? "1" : "0";
+    btn.classList.toggle("liked", !!liked);
+    btn.textContent = (liked ? "♥ " : "♡ ") + "Thích" + (likes ? " · " + likes : "");
+    btn.disabled = false;
+  }
+  function likeButton(likes, liked, onToggle) {
+    var btn = el("button", "", "community-like");
+    btn.type = "button";
+    paintLike(btn, likes, liked);
+    btn.addEventListener("click", function () {
+      btn.disabled = true;
+      var was = btn.dataset.liked === "1", n = Number((btn.textContent.split("·")[1] || "0").trim()) || 0;
+      paintLike(btn, was ? Math.max(0, n - 1) : n + 1, !was); /* phản hồi ngay, không chờ mạng */
+      btn.disabled = true;
+      onToggle(btn).catch(function () { paintLike(btn, n, was); });
+    });
+    return btn;
+  }
+  function commentRow(comment, depth, postId) {
+    var row = el("article", null, "community-comment depth-" + depth);
+    var head = el("div", null, "community-comment-head");
+    head.append(avatarOf(comment.author_name, comment.author_role), el("strong", comment.author_name),
+      el("span", roleLabel(comment.author_role), "community-role-badge role-" + comment.author_role));
+    row.append(head, el("p", comment.text), el("small", formatDate(comment.created_at)));
+
+    var bar = el("div", null, "community-like-bar");
+    var liked = (comment.liked_by || []).indexOf(state.profile.id) >= 0;
+    bar.append(likeButton(Number(comment.likes || 0), liked, function (btn) {
+      return api("/api/community/posts/" + encodeURIComponent(postId) + "/comment-like",
+        jsonOptions("POST", { comment_id: comment.id })).then(function (r) { paintLike(btn, r.likes, r.liked); });
+    }));
+    if (tokenClaims().mode !== "impersonation") {
+      var replyBtn = el("button", "↩ Trả lời", "community-reply-toggle");
+      replyBtn.type = "button";
+      bar.append(replyBtn);
+      var box = el("form", null, "community-form community-reply-form");
+      box.hidden = true;
+      box.innerHTML = '<textarea name="text" rows="2" maxlength="2000" placeholder="Trả lời ' + String(comment.author_name).replace(/[<>&"]/g, "") + '…" required></textarea><button class="community-primary" type="submit">Gửi</button><p class="community-state" role="status"></p>';
+      replyBtn.addEventListener("click", function () { box.hidden = !box.hidden; if (!box.hidden) box.text.focus(); });
+      box.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var submit = box.querySelector("button"), status = box.querySelector(".community-state");
+        submit.disabled = true; setMessage(status, "Đang gửi…");
+        api("/api/community/posts/" + encodeURIComponent(postId) + "/comments",
+          jsonOptions("POST", { text: box.text.value.trim(), parent_id: comment.id }))
+          .then(function () { openPost(postId); })
+          .catch(function (error) { submit.disabled = false; setMessage(status, humanError(error), true); });
+      });
+      row.append(bar, box);
+    } else row.append(bar);
+    return row;
   }
 
   function readerCard(reader) {
@@ -361,22 +442,44 @@
     head.append(el("h2", otherName), el("small", "Tin nhắn tự xóa sau tối đa 30 ngày"));
     if (conversation.quote_amount) head.append(el("div", formatMoney(conversation.quote_amount) + " · " + paymentLabel(conversation.payment_status), "community-quote"));
     var list = el("div", null, "community-chat-messages"); list.setAttribute("aria-live", "polite");
-    function renderMessageItems(items) {
-      list.replaceChildren();
-      (items || []).forEach(function (message) {
-        var item = el("article", null, "community-message" + (message.sender_id === state.profile.id ? " mine" : "") + (message.type === "reading" ? " reading" : ""));
-        item.append(el("strong", message.sender_name + (message.type === "reading" ? " · Luận giải" : "")), el("span", message.text), el("small", formatDate(message.created_at)));
-        list.append(item);
-      });
-      list.scrollTop = list.scrollHeight;
+    var drawnIds = Object.create(null);
+    function nearBottom() { return list.scrollHeight - list.scrollTop - list.clientHeight < 80; }
+    function messageNode(message, pending) {
+      var item = el("article", null, "community-message" + (message.sender_id === state.profile.id ? " mine" : "") + (message.type === "reading" ? " reading" : "") + (pending ? " pending" : ""));
+      item.append(el("strong", message.sender_name + (message.type === "reading" ? " · Luận giải" : "")), el("span", message.text), el("small", pending ? "Đang gửi…" : formatDate(message.created_at)));
+      return item;
     }
+    /* Chỉ nối tin mới thay vì dựng lại cả danh sách — không nháy, không mất chỗ đang đọc. */
+    function renderMessageItems(items) {
+      var stick = nearBottom();
+      (items || []).forEach(function (message) {
+        if (drawnIds[message.id]) return;
+        drawnIds[message.id] = 1;
+        var pend = list.querySelector('[data-pending-text="' + cssEscape(message.text) + '"]');
+        if (pend && message.sender_id === state.profile.id) { pend.replaceWith(messageNode(message)); return; }
+        list.append(messageNode(message));
+      });
+      if (stick) list.scrollTop = list.scrollHeight;
+    }
+    function cssEscape(v) { return String(v).replace(/["\\]/g, "\\$&"); }
     renderMessageItems(messages);
     var compose = el("form", null, "community-chat-compose");
     var input = el("textarea"); input.rows = 2; input.maxLength = 3000; input.required = true; input.placeholder = "Nhập tin nhắn…";
     var send = el("button", "Gửi", "community-primary"); send.type = "submit"; compose.append(input, send);
     compose.addEventListener("submit", function (event) {
-      event.preventDefault(); var text = input.value.trim(); if (!text) return; send.disabled = true;
-      sendMessage(conversation.id, text, "text").then(function () { input.value = ""; openConversation(conversation.id); }).catch(function (error) { send.disabled = false; alert(humanError(error)); });
+      event.preventDefault(); var text = input.value.trim(); if (!text) return;
+      /* Hiện tin ngay để cảm giác tức thì, rồi mới chờ máy chủ xác nhận. */
+      var ghost = messageNode({ id: "pending", sender_id: state.profile.id, sender_name: state.profile.display_name, text: text, type: "text", created_at: Date.now() }, true);
+      ghost.setAttribute("data-pending-text", text);
+      list.append(ghost); list.scrollTop = list.scrollHeight;
+      input.value = ""; input.focus();
+      sendMessage(conversation.id, text, "text").then(function () {
+        if (state.poll) clearTimeout(state.poll);
+        state.poll = setTimeout(pollMessages, 150); /* lấy tin thật về ngay */
+      }).catch(function (error) {
+        ghost.classList.add("failed"); ghost.querySelector("small").textContent = "Gửi lỗi — " + humanError(error);
+        input.value = text;
+      });
     });
     main.append(head, list, compose);
     var tools = el("div", null, "community-chat-tools");
@@ -413,10 +516,10 @@
           lastMessageId = nextLastId;
           renderMessageItems(messages);
         }
-        state.poll = setTimeout(pollMessages, 1500);
-      }).catch(function () { state.poll = setTimeout(pollMessages, 3000); });
+        state.poll = setTimeout(pollMessages, document.hidden ? 8000 : 1200);
+      }).catch(function () { state.poll = setTimeout(pollMessages, 4000); });
     }
-    state.poll = setTimeout(pollMessages, 1500);
+    state.poll = setTimeout(pollMessages, 1200);
   }
 
   function sendMessage(id, text, type) {
@@ -498,5 +601,29 @@
   }
 
   /* Admin total member profile view */
+  /* ----- Số thành viên: công khai, ai cũng thấy, tự cập nhật ----- */
+  function startMemberCounter() {
+    var node = document.getElementById("community-member-count");
+    if (!node || !BACKEND) return;
+    var timer = null;
+    function paint(data) {
+      var n = Number((data && data.members) || 0);
+      node.textContent = new Intl.NumberFormat("vi-VN").format(n) + " thành viên";
+      node.title = "Khách: " + Number(data.guests || 0) + " · Reader: " + Number(data.readers || 0) + " · Admin: " + Number(data.admins || 0);
+    }
+    function tick() {
+      fetch(BACKEND + "/api/community/stats", { headers: { accept: "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { if (d) paint(d); })
+        .catch(function () {})
+        .then(function () { timer = setTimeout(tick, document.hidden ? 60000 : 20000); });
+    }
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) { if (timer) clearTimeout(timer); tick(); }
+    });
+    tick();
+  }
+  startMemberCounter();
+
   boot();
 }());

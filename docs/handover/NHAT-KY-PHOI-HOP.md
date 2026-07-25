@@ -22,6 +22,25 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 06:00 GMT+7 — Claude Code — BOITOAN-20260725-03 — ĐANG LÀM ⏳
+
+- **Sửa lỗi chủ sở hữu chỉ ra**: gọi đúng là **bài trà** (không phải "bã trà"), và **tên các lá
+  Bài Trà nay bằng tiếng Anh** theo bộ biểu tượng tasseography chuẩn (Anchor, Bird, Bell, Book,
+  Cat, Circle, Clover, Cross, Crown, Dog, Fish, Flower, Hand, Heart, Horseshoe, House, Key,
+  Ladder, Moon, Mountain, Ring, Ship, Snake, Star, Sun, Tree — 26 biểu tượng), đồng bộ với quy
+  tắc tên lá tiếng Anh của cả app. Bộ cũ có mục sai ("chìa vôi") đã bỏ.
+- **Trả lời và thích bình luận** (giao diện): bình luận dựng thành cây theo `parent_id`, thụt lề
+  tối đa 3 cấp; nút thích cho cả bình luận và bài đăng, bấm là đổi ngay rồi mới chờ máy chủ.
+- **Avatar chữ cái + badge loại nick** cạnh mỗi tên trong bình luận (khách/reader/admin có màu
+  riêng); badge vốn đã có ở thẻ Reader nay phủ nốt phần bình luận.
+- **Số thành viên** hiển thị ngay đầu trang cộng đồng, **ai cũng thấy kể cả chưa đăng nhập**, tự
+  cập nhật mỗi 20 giây (60 giây khi tab ẩn), rê chuột thấy tách khách/reader/admin.
+- **Chat mượt hơn**: trước đây mỗi 1,5 giây vẽ lại toàn bộ danh sách và gửi xong thì dựng lại cả
+  màn hình. Nay chỉ nối tin mới, giữ nguyên vị trí đang đọc (chỉ tự cuộn khi đang ở đáy), gửi
+  hiện tin ngay lập tức rồi đối chiếu với máy chủ, poll giãn ra 8 giây khi tab ẩn.
+- Kiểm thử: `community.test.mjs` và `gate.test.mjs` xanh; `node --check` toàn bộ script app và
+  `assets/community.js`; vòng mã hoá/giải mã khớp; vùng `<head>` app không đổi.
+
 ### 2026-07-25 04:10 GMT+7 — Claude Code — BOITOAN-20260725-02 — ĐANG LÀM ⏳
 
 - **Thêm hai môn mới**: `Rune` (24 rune Elder Futhark, rút 1 hoặc 3, có nghĩa theo lĩnh vực) và
