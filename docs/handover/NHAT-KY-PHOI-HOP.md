@@ -22,7 +22,20 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-25 11:00 GMT+7 — Claude Code — BOITOAN-20260725-05 — ĐANG LÀM ⏳
+### 2026-07-25 11:40 GMT+7 — Claude Code — BOITOAN-20260725-06 — ĐANG LÀM ⏳
+
+**Chịu lỗi hạn mức ghi KV.** Khi chạy sinh nick thật trên production đã chạm trần
+**1.000 lượt ghi/ngày của Cloudflare KV gói miễn phí** ở nick thứ **160/385**
+(đủ 109 khách + 51/276 reader). Hai lỗi lộ ra và đã sửa:
+
+- `GET /api/community/stats` **chết** khi không ghi được cache — nay bọc `try/catch`, vẫn trả số
+  liệu dù không lưu được cache. Cùng cách với `bumpStats`.
+- Sinh nick nay trả `quota_exhausted: true` kèm tiến độ thật thay vì lỗi máy chủ chung; tiến độ
+  `done` giữ nguyên nên gọi lại là chạy tiếp đúng chỗ. Giao diện hiện thông báo rõ thay vì quay vô tận.
+
+Hạn mức KV làm mới lúc 00:00 UTC (07:00 GMT+7); phần còn lại sẽ sinh tiếp khi đó.
+
+### 2026-07-25 11:00 GMT+7 — Claude Code — BOITOAN-20260725-05 — HOÀN TẤT ✅
 
 **Sửa lỗi treo ở Khoang riêng** (chủ sở hữu báo: bấm sinh nick thì kẹt ở "Đang tải khoang riêng…").
 

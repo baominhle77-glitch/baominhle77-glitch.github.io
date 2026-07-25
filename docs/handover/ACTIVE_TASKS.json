@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T11:00:00+07:00",
+  "updated_at": "2026-07-25T11:40:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
-      "id": "BOITOAN-20260725-05",
+      "id": "BOITOAN-20260725-06",
       "owner": "Claude Code",
-      "branch": "claude/fix-simulated-seed",
-      "base_sha": "375393e8fd2406d718c9d71fa3952eae0b4eae8c",
+      "branch": "claude/seed-quota-resilience",
+      "base_sha": "fb7a3802523354d1348223c2252d87b8ea3a7200",
       "paths": [
         "backend/community.js",
         "assets/community-admin.js",
@@ -15,12 +15,26 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
       "status": "in_progress",
-      "started_at": "2026-07-25T10:40:00+07:00",
-      "heartbeat_at": "2026-07-25T11:00:00+07:00",
-      "summary": "Sua loi treo o khoang rieng: danh sach nick doc tu mot khoa chi muc thay vi quet toan bo ho so; sinh nick theo lo; thong ke dung bo dem thay vi quet."
+      "started_at": "2026-07-25T11:25:00+07:00",
+      "heartbeat_at": "2026-07-25T11:40:00+07:00",
+      "summary": "Chiu loi han muc ghi KV: thong ke van tra so lieu khi khong ghi duoc cache; sinh nick bao ro quota_exhausted va giu nguyen tien do de goi lai sau."
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260725-05",
+      "owner": "Claude Code",
+      "branch": "claude/fix-simulated-seed",
+      "paths": [
+        "backend/community.js",
+        "assets/community-admin.js",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "completed_at": "2026-07-25T11:20:00+07:00",
+      "summary": "Sua loi treo o khoang rieng (chi muc mot khoa, sinh theo lo, thong ke dung bo dem). PR #102 merge 45699ff; da deploy va chay sinh nick that: 160/385 truoc khi cham han muc ghi KV trong ngay."
+    },
     {
       "id": "BOITOAN-20260725-04",
       "owner": "Claude Code",

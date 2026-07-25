@@ -821,8 +821,17 @@ async function seedSimulatedBatch(env) {
   }
   const created = stop - idx.done;
   idx.done = stop;
-  await Promise.all(writes);
-  await putJson(env, SIM_INDEX_KEY, idx);
+  try {
+    await Promise.all(writes);
+    await putJson(env, SIM_INDEX_KEY, idx);
+  } catch (error) {
+    /* Hết hạn mức ghi KV trong ngày: báo rõ để gọi lại sau, tiến độ cũ vẫn giữ nguyên. */
+    const detail = String((error && error.message) || error);
+    if (detail.includes("limit exceeded")) {
+      return { created: 0, done: idx.done - created, total, complete: false, quota_exhausted: true, detail };
+    }
+    throw error;
+  }
   await bumpStats(env, { guests: 0, readers: 0 }, true);
   return { created, done: idx.done, total, complete: idx.done >= total };
 }
@@ -1006,11 +1015,13 @@ async function rebuildStats(env) {
   readers = readerCount;
   guests = Math.max(0, total - readers - admins);
   const value = { members: total, guests, readers, admins, sim: simAccounts.length, updated_at: Date.now() };
-  await putJson(env, STATS_CACHE_KEY, value);
+  /* Ghi cache là tối ưu, không phải điều kiện bắt buộc: hết hạn mức ghi vẫn phải trả số liệu. */
+  try { await putJson(env, STATS_CACHE_KEY, value); } catch (_) {}
   return value;
 }
 /* Cộng dồn khi có thay đổi, rẻ hơn quét lại. */
 async function bumpStats(env, delta, rebuild) {
+  try {
   if (rebuild) { await env.KV.delete(STATS_CACHE_KEY); return; }
   const cur = await readStats(env);
   if (!cur) return;
@@ -1019,6 +1030,7 @@ async function bumpStats(env, delta, rebuild) {
   cur.members = cur.guests + cur.readers + Number(cur.admins || 0);
   cur.updated_at = Date.now();
   await putJson(env, STATS_CACHE_KEY, cur);
+  } catch (_) {}
 }
 async function handleStats(request, env) {
   const cached = await readStats(env);
