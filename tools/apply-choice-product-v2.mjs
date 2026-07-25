@@ -59,4 +59,16 @@ for (const required of [
   if (!written.includes(required)) throw new Error(`Payload V2 thiếu file: ${required}`);
 }
 
+// ROUTE_REGEX_VALIDATOR_V2: payload dùng RegExp cho product detail, không phải chuỗi startsWith.
+const marketplacePath = "tools/apply-choice-vn-marketplace.mjs";
+let marketplaceSource = await readFile(marketplacePath, "utf8");
+marketplaceSource = marketplaceSource.replace(
+  'for (const required of ["normalizeAffiliateUrl", "affiliate_only", "/api/choice/product/", "không chuyển bạn sang Google"])',
+  'for (const required of ["normalizeAffiliateUrl", "affiliate_only", "const productMatch = url.pathname.match", "không chuyển bạn sang Google"])'
+);
+if (!marketplaceSource.includes('"const productMatch = url.pathname.match"')) {
+  throw new Error("Không cập nhật được validator route product V2");
+}
+await writeFile(marketplacePath, marketplaceSource);
+
 console.log(`choice-product-v2-materialized: ${written.length} file(s), strict affiliate-only, no seed/google fallback`);
