@@ -8,10 +8,7 @@ const portfolioSource = `const PORTFOLIO = Object.freeze([\n${CHOICE_TAXONOMY.ma
 
 source = source.replace(/const MAX_PRODUCTS_PER_CATEGORY = \d+;/, "const MAX_PRODUCTS_PER_CATEGORY = 12;");
 source = source.replace(/const PORTFOLIO = Object\.freeze\(\[[\s\S]*?\n\]\);/, portfolioSource);
-source = source.replace(
-  /const BLOCKED_TERMS = \[[\s\S]*?\n\];/,
-  `const BLOCKED_TERMS = ${JSON.stringify(BLOCKED_AFFILIATE_TERMS, null, 2)};`
-);
+source = source.replace(/const BLOCKED_TERMS = \[[\s\S]*?\n\];/, `const BLOCKED_TERMS = ${JSON.stringify(BLOCKED_AFFILIATE_TERMS, null, 2)};`);
 
 if (!source.includes("const trendScore =")) {
   source = source.replace(
@@ -77,6 +74,22 @@ if (!source.includes("const selectedSourceIds = new Set()")) {
   source = source.slice(0, start) + diverseSelection + source.slice(end);
 }
 
+// GLOBAL_PRODUCT_DEDUPE_V2: một source chỉ được xếp vào một danh mục trên toàn catalog.
+if (!source.includes("const globalSelectedSources = new Set()")) {
+  source = source.replace(
+    "    const selected = [];\n    const errors = [];",
+    "    const selected = [];\n    const errors = [];\n    const globalSelectedSources = new Set();"
+  );
+  source = source.replace(
+    "          if (selectedSourceIds.has(candidate.source_id)) continue;",
+    "          if (selectedSourceIds.has(candidate.source_id) || globalSelectedSources.has(candidate.source_id)) continue;"
+  );
+  source = source.replace(
+    "            selectedSourceIds.add(candidate.source_id);",
+    "            selectedSourceIds.add(candidate.source_id);\n            globalSelectedSources.add(candidate.source_id);"
+  );
+}
+
 if (!source.includes("trend_score: candidate.trend_score")) {
   source = source.replace(
     `    opportunity_score: candidate.opportunity_score,\n    last_verified_at: now,`,
@@ -108,10 +121,11 @@ for (const required of [
   "trend_score: trendScore",
   'const sortFields = ["BEST_SELLERS", "RECOMMENDED", "HIGH_COMMISSION_RATE"]',
   "const shopCounts = new Map()", "const selectedSourceIds = new Set()",
+  "const globalSelectedSources = new Set()", "globalSelectedSources.has(candidate.source_id)",
   "const refreshedCategories = new Set", "const MAX_PRODUCTS_PER_CATEGORY = 12;"
 ]) {
   if (!source.includes(required)) throw new Error(`Autopilot V2 thiếu marker: ${required}`);
 }
 
 await writeFile(path, source);
-console.log(`choice-multiniche-v2-ok: ${CHOICE_TAXONOMY.length} lĩnh vực, quota 12, trend và đa dạng shop`);
+console.log(`choice-multiniche-v2-ok: ${CHOICE_TAXONOMY.length} lĩnh vực, quota 12, trend, đa dạng shop và chống trùng toàn catalog`);
