@@ -11,8 +11,8 @@
 - Lần chạy gần nhất: `2026-07-25T09:40:50.975Z`
 - Trạng thái cập nhật: `2026-07-25T09:41:43.939Z`
 - Gợi ý vòng tiếp theo: `every_6_hours`
-- Source deploy: `99db5125dc86cafc6a9bb4026a6744ed55cf0829`
-- Workflow deploy: `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/runs/30154104901`
-- Workflow recorder: `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/runs/30154143502`
+- Source deploy: `20b6691bfb8a77172a48007be4a5566ea6ab96d1`
+- Workflow deploy: `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/runs/30157172434`
+- Workflow recorder: `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/runs/30157206236`
 
 File này được đọc trực tiếp từ Cloudflare KV bằng quyền CI; không có endpoint status public.
