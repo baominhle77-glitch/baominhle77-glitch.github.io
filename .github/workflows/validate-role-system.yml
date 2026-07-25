@@ -58,7 +58,6 @@ jobs:
           node tools/apply-choice-product-v2.mjs
           node tools/apply-choice-multiniche-v2.mjs
           node tools/apply-choice-vn-marketplace.mjs
-          node tools/apply-choice-global-dedupe.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
@@ -71,7 +70,6 @@ jobs:
           node tools/apply-choice-product-v2.mjs
           node tools/apply-choice-multiniche-v2.mjs
           node tools/apply-choice-vn-marketplace.mjs
-          node tools/apply-choice-global-dedupe.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
@@ -85,7 +83,7 @@ jobs:
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
           grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
           grep -q 'id: "travel"' backend/choice-autopilot.js
-          grep -q 'GLOBAL_PRODUCT_DEDUPE_V1' backend/choice-autopilot.js
+          grep -q 'GLOBAL_PRODUCT_DEDUPE_V2' backend/choice-autopilot.js
 
       - name: Kiểm tra Choice backend lõi
         run: |
