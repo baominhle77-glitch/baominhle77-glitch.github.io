@@ -30,6 +30,7 @@ jobs:
           node --check backend/choice.js
           grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
           grep -q 'GLOBAL_PRODUCT_DEDUPE_V1' backend/choice-autopilot.js
+          grep -q 'DATAFEED_BEST_CATEGORY_V1' backend/choice-autopilot.js
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
           grep -q 'VIETNAM_MARKETPLACE_PUBLIC_V1' backend/choice.js
           ! grep -qiE 'fado\.vn|amazon\.|taobao|alibaba|ebay' backend/choice-autopilot.js
@@ -40,30 +41,11 @@ jobs:
       - name: Kiểm tra sàn Việt Nam, redirect và nhóm nhiều nơi bán
         run: node --test backend/choice-vn-marketplace.test.mjs
 
-      - name: Chạy Affiliate Autopilot có log đầy đủ
-        id: affiliate_test
-        run: |
-          set +e
-          node --test backend/choice-autopilot.test.mjs > "$RUNNER_TEMP/affiliate-test.log" 2>&1
-          code=$?
-          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
-          cat "$RUNNER_TEMP/affiliate-test.log"
-          exit 0
+      - name: Kiểm tra Affiliate Autopilot
+        run: node --test backend/choice-autopilot.test.mjs
 
-      - name: Lưu log Affiliate Autopilot
-        uses: actions/upload-artifact@v4
-        with:
-          name: affiliate-test-log
-          path: ${{ runner.temp }}/affiliate-test.log
-          if-no-files-found: error
-          retention-days: 3
+      - name: Kiểm tra boundary backend
+        run: node --test backend/choice-public-boundary.test.mjs
 
-      - name: Chặn theo mã thoát thật
-        if: steps.affiliate_test.outputs.exit_code != '0'
-        run: exit 1
-
-      - name: Kiểm tra ranh giới public-private
-        run: |
-          set -euo pipefail
-          node --test backend/choice-public-boundary.test.mjs
-          node tools/check-public-content.mjs
+      - name: Quét nội dung public
+        run: node tools/check-public-content.mjs
