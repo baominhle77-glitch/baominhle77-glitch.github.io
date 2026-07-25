@@ -22,6 +22,31 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 17:50 GMT+7 — Claude Code — BOITOAN-20260725-13 — ĐANG LÀM ⏳
+
+**Nghiệm thu ba lỗi chủ sở hữu báo, đo trên production sau khi `bc55a3d` lên:**
+
+| Lỗi | Kết quả sau khi sửa |
+|---|---|
+| Sửa tên nick làm số thành viên tăng | Dọn bản ghi thừa: `deleted 1`. Số thành viên về đúng **386** |
+| Bấm vào reader mô phỏng báo lỗi | `POST /api/community/conversations` trả **HTTP 200** kèm hội thoại, 685ms |
+| 385 nick chỉ có 40 tên | Dựng lại `force: true` → **385/385 tên khác nhau**, **0** tên vừa khách vừa reader |
+
+**Đo tốc độ chat bằng kịch bản thật** (nick khách nhắn, nick reader nhận):
+
+| Chặng | Kết quả |
+|---|---|
+| Gửi tin | **729–974ms** (3 lần) |
+| Bên kia thấy tin | **1.046ms**, hỏi đúng 1 lần là có |
+
+Máy chủ nhanh. Chậm hơn 30 giây mà chủ sở hữu gặp là do **iPhone treo hẹn giờ khi app chạy nền**;
+đã sửa bằng cách lấy tin ngay khi app hiện lại (`visibilitychange` + `focus`).
+
+**Thêm chức năng xoá hội thoại cho Admin.** Nghiệm thu xong còn lại một hội thoại kiểm thử giữa hai
+nick mô phỏng mà **không có cách nào xoá** — thiếu sót thật của trang quản trị, không riêng gì việc
+dọn rác của công ty. Nay `DELETE /api/community/admin/conversations/<id>` xoá bản ghi, toàn bộ tin
+nhắn và hai đường trỏ của hai bên; tab **Hội thoại** có nút *Xoá hội thoại* kèm bước xác nhận.
+
 ### 2026-07-25 17:20 GMT+7 — Claude Code — BOITOAN-20260725-12 — ĐANG LÀM ⏳
 
 **Ba lỗi chủ sở hữu báo, cùng một gốc: nick mô phỏng sống trong chỉ mục chứ không có khoá hồ sơ riêng,
