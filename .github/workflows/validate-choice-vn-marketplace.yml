@@ -22,12 +22,10 @@ jobs:
           node tools/apply-choice-product-v2.mjs
           node --check backend/choice.js
           grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
-
       - name: Áp taxonomy 12 lĩnh vực V2
         run: node tools/apply-choice-multiniche-v2.mjs
       - name: Áp marketplace Việt Nam V2
         run: node tools/apply-choice-vn-marketplace.mjs
-
       - name: Tái giải nén nguồn V2
         run: node tools/apply-choice-product-v2.mjs
       - name: Chạy lại taxonomy V2
@@ -35,19 +33,26 @@ jobs:
       - name: Chạy lại marketplace V2
         run: node tools/apply-choice-vn-marketplace.mjs
 
-      - name: Kiểm tra marker marketplace V2
+      - name: Kiểm tra cú pháp V2
         run: |
-          set -euo pipefail
           node --check backend/choice-autopilot.js
           node --check backend/choice.js
-          grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
-          grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
+      - name: Kiểm tra marker API sản phẩm V2
+        run: grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
+      - name: Kiểm tra marker marketplace Việt Nam
+        run: grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
+      - name: Kiểm tra chống trùng toàn catalog
+        run: |
           grep -q 'const globalSelectedSources = new Set()' backend/choice-autopilot.js
           grep -q 'globalSelectedSources.has(candidate.source_id)' backend/choice-autopilot.js
-          grep -q 'DATAFEED_BEST_CATEGORY_V1' backend/choice-autopilot.js
+      - name: Kiểm tra phân loại datafeed đúng danh mục
+        run: grep -q 'DATAFEED_BEST_CATEGORY_V1' backend/choice-autopilot.js
+      - name: Kiểm tra quota và 12 lĩnh vực
+        run: |
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
           grep -q 'id: "travel"' backend/choice-autopilot.js
-          ! grep -qiE 'fado\.vn|amazon\.|taobao|alibaba|ebay' backend/choice-autopilot.js
+      - name: Chặn nguồn ngoài sàn Việt Nam
+        run: '! grep -qiE "fado\.vn|amazon\.|taobao|alibaba|ebay" backend/choice-autopilot.js'
 
       - name: Kiểm tra catalog lõi
         run: node --test backend/choice.test.mjs
@@ -60,14 +65,18 @@ jobs:
           node --test hoi-chon-dung/app.test.mjs
           ! grep -RqiE 'Link tham khảo|google\.com/search|SEED_PRODUCTS|seed-products' hoi-chon-dung/*.js hoi-chon-dung/*.html hoi-chon-dung/sw.js
 
-      - name: Materialize đầy đủ Worker owner revenue
+      - name: Materialize Worker lõi
+        run: node tools/apply-choice-system.mjs
+      - name: Materialize owner setup
+        run: node tools/apply-choice-setup.mjs
+      - name: Materialize credential bootstrap
+        run: node tools/apply-choice-credential-bootstrap.mjs
+      - name: Materialize doanh thu
+        run: node tools/apply-choice-revenue.mjs
+      - name: Materialize UI owner
+        run: node tools/apply-choice-autopilot-ui.mjs
+      - name: Kiểm tra Worker owner revenue
         run: |
-          node tools/apply-travel-system.mjs
-          node tools/apply-choice-system.mjs
-          node tools/apply-choice-setup.mjs
-          node tools/apply-choice-credential-bootstrap.mjs
-          node tools/apply-choice-revenue.mjs
-          node tools/apply-choice-autopilot-ui.mjs
           node --check backend/worker.js
           node --check backend/choice-setup.js
           node --check backend/choice-revenue.js
