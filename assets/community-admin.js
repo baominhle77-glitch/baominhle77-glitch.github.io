@@ -74,13 +74,87 @@
   function loadPosts(){currentTab="posts";setStatus("Đang tải bài thảo luận…");api("/api/community/admin/posts").then(function(data){var box=el("div",null,"community-admin-posts"),form=el("form",null,"community-form");form.innerHTML='<label>Tiêu đề<input name="title" maxlength="160" required></label><label>Nội dung mở thảo luận<textarea name="text" rows="5" maxlength="5000" required></textarea></label><button class="community-primary" type="submit">Mở bài thảo luận</button><p class="community-state"></p>';form.addEventListener("submit",function(event){event.preventDefault();var submit=form.querySelector("button"),message=form.querySelector(".community-state");submit.disabled=true;message.textContent="Đang đăng…";api("/api/community/admin/posts",jsonOptions("POST",{title:form.title.value.trim(),text:form.text.value.trim()})).then(loadPosts).catch(function(error){submit.disabled=false;message.textContent=errorText(error);message.classList.add("error");});});box.append(form);(data.posts||[]).forEach(function(post){var item=el("article",null,"community-admin-post");item.append(el("h3",post.title),el("p",post.text),el("small",(post.closed?"Đã đóng · ":"")+Number(post.comment_count||0)+" bình luận · "+formatDate(post.updated_at)));var actions=el("div",null,"community-admin-actions");actions.append(button(post.closed?"Mở lại":"Đóng bài","community-secondary",function(){api("/api/community/admin/posts/"+post.id,jsonOptions("PATCH",{closed:!post.closed})).then(loadPosts);}),button("Xóa bài","community-danger",function(){confirmAction("Xóa bài thảo luận này?",function(){api("/api/community/admin/posts/"+post.id,{method:"DELETE"}).then(loadPosts);});}));item.append(actions);box.append(item);});content.replaceChildren(el("h2","Bài thảo luận chung"),box);setStatus("Đã tải bài thảo luận.");}).catch(function(error){setStatus(errorText(error),true);});}
   function loadConversations(){currentTab="conversations";setStatus("Đang tải hội thoại…");api("/api/community/admin/conversations").then(function(data){var list=el("div",null,"community-conversation-list");(data.conversations||[]).sort(function(a,b){return b.updated_at-a.updated_at;}).forEach(function(conversation){var item=button(conversation.guest_name+" ↔ "+conversation.reader_name,"community-conversation-item",function(){loadMessages(conversation);});item.append(el("small",formatDate(conversation.updated_at)));list.append(item);});if(!(data.conversations||[]).length)list.append(el("p","Chưa có hội thoại.","community-empty"));content.replaceChildren(el("h2","Hội thoại riêng"),list);setStatus("Đã tải hội thoại.");}).catch(function(error){content.replaceChildren(el("h2","Hội thoại riêng"),el("p",errorText(error),"community-state error"));setStatus(errorText(error),true);});}
   function loadMessages(conversation){setStatus("Đang tải nội dung hội thoại…");api("/api/community/admin/conversations/"+conversation.id+"/messages").then(function(data){var back=button("← Danh sách hội thoại","community-secondary",loadConversations),list=el("div",null,"community-chat-messages");(data.messages||[]).forEach(function(message){var item=el("article",null,"community-message"+(message.type==="reading"?" reading":""));item.append(el("strong",message.sender_name+" · "+message.sender_role),el("span",message.text),el("small",formatDate(message.created_at)));list.append(item);});content.replaceChildren(back,el("h2",conversation.guest_name+" ↔ "+conversation.reader_name),list);setStatus("Đã tải "+(data.messages||[]).length+" tin nhắn.");}).catch(function(error){setStatus(errorText(error),true);});}
-  function activateTab(tab){if(tab==="conversations"&&!primary)tab="users";document.querySelectorAll("[data-admin-tab]").forEach(function(node){node.classList.toggle("active",node.dataset.adminTab===tab);});if(tab==="users")loadUsers();else if(tab==="reviews")loadReviews();else if(tab==="posts")loadPosts();else loadConversations();}
+
+  /* ===== Khoang riêng của Admin tổng: 385 nick mô phỏng =====
+   * Chỉ Admin tổng thấy tab này. Bấm "Dùng nick này" là chuyển hẳn sang nick đó
+   * với quyền tương tác đầy đủ (chế độ puppet), giao diện đổi theo nick đang dùng.
+   */
+  var simCache = null, simFilter = "";
+  function simRoleLabel(role){ return role === "reader" ? "Reader" : role === "admin" ? "Admin" : "Khách"; }
+  function simInitials(name){
+    var parts = String(name || "?").trim().split(/\s+/);
+    return ((parts[0] || "?")[0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
+  }
+  function useSimAccount(account){
+    setStatus("Đang mở nick " + account.display_name + "…");
+    api("/api/community/admin/simulated/control", jsonOptions("POST", { uid: account.id })).then(function(result){
+      try{
+        localStorage.setItem("community_token_boitoan", result.token);
+        localStorage.setItem("community_profile_boitoan", JSON.stringify(result.profile));
+        localStorage.setItem("community_puppet_boitoan", "1");
+      }catch(_){}
+      location.assign("./community.html");
+    }).catch(function(error){ setStatus(errorText(error), true); });
+  }
+  function renderSimList(data){
+    var box = el("div", null, "community-admin-sim");
+    var counts = data.counts || { total: 0, guests: 0, readers: 0 };
+    var head = el("div", null, "community-admin-sim-head");
+    head.append(el("p", "Khoang riêng chỉ Admin tổng thấy. " + counts.total + " nick — " +
+      counts.guests + " khách, " + counts.readers + " reader. Bấm một nick để dùng nick đó tương tác."));
+    if (!counts.total) {
+      head.append(button("Sinh 385 nick (109 khách + 276 reader)", "community-primary", function(){
+        setStatus("Đang sinh nick…");
+        api("/api/community/admin/simulated", { method: "POST" }).then(function(){ simCache = null; loadSimulated(); })
+          .catch(function(error){ setStatus(errorText(error), true); });
+      }));
+    }
+    box.append(head);
+    var search = el("input"); search.type = "search"; search.placeholder = "Tìm theo tên hoặc tài khoản…";
+    search.value = simFilter; search.className = "community-admin-sim-search";
+    search.addEventListener("input", function(){ simFilter = search.value.trim().toLowerCase(); paint(); });
+    box.append(search);
+    var grid = el("div", null, "community-admin-sim-grid");
+    box.append(grid);
+    function paint(){
+      grid.replaceChildren();
+      var list = (data.accounts || []).filter(function(a){
+        if (!simFilter) return true;
+        return String(a.display_name).toLowerCase().indexOf(simFilter) >= 0 || String(a.username).toLowerCase().indexOf(simFilter) >= 0;
+      });
+      if (!list.length) { grid.append(el("p", "Không có nick nào khớp.", "community-empty")); return; }
+      list.slice(0, 400).forEach(function(account){
+        var card = el("button", null, "community-sim-card");
+        card.type = "button";
+        var av = el("span", simInitials(account.display_name), "community-avatar role-" + account.role);
+        if (typeof account.avatar_hue === "number") av.style.background = "hsl(" + account.avatar_hue + " 55% 55%)";
+        var name = el("span", account.display_name, "community-sim-name");
+        var badge = el("span", simRoleLabel(account.role), "community-role-badge role-" + account.role);
+        var meta = el("small", "@" + account.username + (account.role === "reader" && account.specialties ? " · " + [].concat(account.specialties).join(", ") : ""));
+        card.append(av, name, badge, meta);
+        card.addEventListener("click", function(){ useSimAccount(account); });
+        grid.append(card);
+      });
+      setStatus("Đang hiển thị " + Math.min(list.length, 400) + "/" + (data.accounts || []).length + " nick.");
+    }
+    paint();
+    content.replaceChildren(el("h2", "Khoang riêng — nick mô phỏng"), box);
+  }
+  function loadSimulated(){
+    currentTab = "simulated";
+    setStatus("Đang tải khoang riêng…");
+    if (simCache) { renderSimList(simCache); return; }
+    api("/api/community/admin/simulated").then(function(data){ simCache = data; renderSimList(data); })
+      .catch(function(error){ setStatus(errorText(error), true); });
+  }
+
+  function activateTab(tab){if((tab==="conversations"||tab==="simulated")&&!primary)tab="users";document.querySelectorAll("[data-admin-tab]").forEach(function(node){node.classList.toggle("active",node.dataset.adminTab===tab);});if(tab==="users")loadUsers();else if(tab==="reviews")loadReviews();else if(tab==="posts")loadPosts();else if(tab==="simulated")loadSimulated();else loadConversations();}
   document.querySelectorAll("[data-admin-tab]").forEach(function(node){node.addEventListener("click",function(){activateTab(node.dataset.adminTab);});});
   logoutButton.addEventListener("click",function(){fetch(BACKEND+"/api/community/admin/session",{method:"DELETE",headers:headers()}).catch(function(){}).finally(function(){returnToLogin();});});
   api("/api/community/admin/session").then(function(data){
     adminLevel=data.level||"regular";primary=!!data.primary&&adminLevel==="primary";
     try{localStorage.setItem("market_admin_level",adminLevel);localStorage.setItem("market_admin_auth_version",ADMIN_AUTH_VERSION);if(primary)localStorage.setItem("market_admin_primary","1");else localStorage.removeItem("market_admin_primary");}catch(_){}
-    document.querySelectorAll("[data-admin-tab]").forEach(function(node){node.hidden=node.dataset.adminTab==="conversations"&&!primary;});
+    document.querySelectorAll("[data-admin-tab]").forEach(function(node){var only=node.dataset.adminTab==="conversations"||node.dataset.adminTab==="simulated";node.hidden=only&&!primary;});
     if(content)content.hidden=false;
     var badge=document.getElementById("community-admin-level-badge"),description=document.getElementById("community-admin-level-description"),conversationTab=document.querySelector('[data-admin-tab="conversations"]');
     if(badge)badge.textContent=primary?"Admin tổng":"Admin";

@@ -294,3 +294,18 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 /* ===== Chat: tin đang gửi ===== */
 .community-message.pending{opacity:.62}
 .community-message.failed{opacity:1;border:1px solid #e0785a}
+
+/* ===== Khoang riêng: đang dùng nick mô phỏng ===== */
+.community-puppet-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;padding:8px 14px;background:#8b6fd0;color:#fff;font-size:13px;font-weight:600}
+.community-puppet-bar button{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.5);color:#fff;
+  border-radius:999px;padding:4px 12px;font-size:12.5px;cursor:pointer}
+.community-admin-sim-head{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.community-admin-sim-search{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line,#332a52);
+  background:transparent;color:inherit;margin-bottom:12px}
+.community-admin-sim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.community-sim-card{display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-align:left;cursor:pointer;
+  background:transparent;border:1px solid var(--line,#332a52);border-radius:14px;padding:10px 12px;color:inherit}
+.community-sim-card:hover{border-color:#d4a94e}
+.community-sim-name{font-weight:700;font-size:13.5px}
+.community-sim-card small{width:100%;opacity:.7;font-size:11.5px}
