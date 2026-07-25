@@ -1,0 +1,60 @@
+name: Choice Credential Bootstrap Ops
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lấy RSA public key production
+        run: |
+          set -euo pipefail
+          code=$(curl -sS --max-time 20 -o "$RUNNER_TEMP/public-key.json" -w '%{http_code}' \
+            "https://hiennhi89-gate.hiennhi89.workers.dev/owner/choice/credential/public-key")
+          test "$code" = "200"
+          node - <<'NODE' "$RUNNER_TEMP/public-key.json"
+          const data = require(process.argv[2]);
+          if (data.algorithm !== "RSA-OAEP-256" || !data.public_jwk?.n || !data.public_jwk?.e) {
+            throw new Error("invalid_public_key_response");
+          }
+          NODE
+
+      - name: Ingest ciphertext khi đã sẵn sàng
+        id: ingest
+        run: |
+          set -euo pipefail
+          cipher=$(tr -d '\r\n ' < .github/choice-bootstrap-cipher.txt)
+          if [ "$cipher" = "PENDING" ]; then
+            printf '{"mode":"pending_public_key"}\n' > "$RUNNER_TEMP/ingest-result.json"
+            echo "pending=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          test ${#cipher} -gt 300
+          code=$(curl -sS --max-time 120 -G -o "$RUNNER_TEMP/ingest-result.json" -w '%{http_code}' \
+            --data-urlencode "cipher=$cipher" \
+            "https://hiennhi89-gate.hiennhi89.workers.dev/owner/choice/credential/ingest")
+          cat "$RUNNER_TEMP/ingest-result.json"
+          test "$code" = "200"
+          node - <<'NODE' "$RUNNER_TEMP/ingest-result.json"
+          const data = require(process.argv[2]);
+          if (data.connected !== true) throw new Error(`credential_ingest_failed:${JSON.stringify(data)}`);
+          NODE
+          echo "pending=false" >> "$GITHUB_OUTPUT"
+
+      - name: Lưu bằng chứng bootstrap
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: choice-bootstrap-ops
+          path: |
+            ${{ runner.temp }}/public-key.json
+            ${{ runner.temp }}/ingest-result.json
+          if-no-files-found: error
+          retention-days: 3
