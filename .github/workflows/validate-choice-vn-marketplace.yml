@@ -23,10 +23,13 @@ jobs:
           node tools/apply-choice-multiniche.mjs
           node tools/apply-choice-access-fallback.mjs
           node tools/apply-choice-vn-marketplace.mjs
+          node tools/apply-choice-global-dedupe.mjs
           node tools/apply-choice-vn-marketplace.mjs
+          node tools/apply-choice-global-dedupe.mjs
           node --check backend/choice-autopilot.js
           node --check backend/choice.js
           grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
+          grep -q 'GLOBAL_PRODUCT_DEDUPE_V1' backend/choice-autopilot.js
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
           grep -q 'VIETNAM_MARKETPLACE_PUBLIC_V1' backend/choice.js
           ! grep -qiE 'fado\.vn|amazon\.|taobao|alibaba|ebay' backend/choice-autopilot.js
@@ -37,23 +40,8 @@ jobs:
       - name: Kiểm tra sàn Việt Nam, redirect và nhóm nhiều nơi bán
         run: node --test backend/choice-vn-marketplace.test.mjs
 
-      - name: Chạy Affiliate Autopilot và lưu log
-        id: affiliate_test
-        continue-on-error: true
-        run: node --test backend/choice-autopilot.test.mjs > "$RUNNER_TEMP/affiliate-test.log" 2>&1
-
-      - name: Lưu log Affiliate Autopilot
-        if: steps.affiliate_test.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: affiliate-test-log
-          path: ${{ runner.temp }}/affiliate-test.log
-          if-no-files-found: error
-          retention-days: 3
-
-      - name: Chặn khi Affiliate Autopilot lỗi
-        if: steps.affiliate_test.outcome == 'failure'
-        run: exit 1
+      - name: Kiểm tra Affiliate Autopilot
+        run: node --test backend/choice-autopilot.test.mjs
 
       - name: Kiểm tra ranh giới public-private
         run: |
