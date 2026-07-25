@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T17:50:00+07:00",
+  "updated_at": "2026-07-25T18:10:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,6 +42,21 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260725-14",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "585fd685edc61dfef3a4d98a15bb58b31af3a87e",
+      "paths": [
+        "backend/community.js",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-25T18:10:00+07:00",
+      "summary": "Ten nick da dang nhu nguoi dung that: chu hoa, chu thuong, so, gach duoi, dau cham, biet danh.",
+      "completed_at": "2026-07-25T18:10:00+07:00"
+    },
     {
       "id": "BOITOAN-20260725-13",
       "owner": "Claude Code",
