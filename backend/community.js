@@ -645,6 +645,8 @@ function adminSessionKey(sid) { return `community-admin-session:${sid}`; }
 /* Account V7 admin login hotfix */
 /* Account V8 edge-safe admin authentication */
 const ADMIN_AUTH_VERSION = "2026-07-24-v11";
+/* Trần số bản ghi phiên đời cũ được đọc trong một lần đăng nhập. */
+const ADMIN_SESSION_PROBE_LIMIT = 20;
 function adminPasswordConfig(env) {
   return {
     saltB64: String(env.ADMIN_V8_PASSWORD_SALT_B64 || "Wg1fGuw3MNtQz8jVKobFUA=="),
@@ -696,7 +698,12 @@ async function issueAdminSession(env, did, remember, level) {
   const ttl = remember ? ADMIN_SESSION_LONG_TTL : ADMIN_SESSION_SHORT_TTL;
   const expiresAt = Date.now() + ttl * 1000;
   const primary = level === "primary";
-  await putJson(env, adminSessionKey(sid), { active: true, did, level, primary, auth_version: ADMIN_AUTH_VERSION, expires_at: expiresAt }, ttl);
+  /* Gắn metadata để lúc đăng nhập chỉ cần list là biết phiên nào cũ, không phải đọc từng bản ghi. */
+  await env.KV.put(
+    adminSessionKey(sid),
+    JSON.stringify({ active: true, did, level, primary, auth_version: ADMIN_AUTH_VERSION, expires_at: expiresAt }),
+    { expirationTtl: ttl, metadata: { v: ADMIN_AUTH_VERSION, p: primary } },
+  );
   return {
     token: await makeJwt(sessionSecret(env), { aud: "community-admin", sid, did, role: "admin", level, primary, auth_version: ADMIN_AUTH_VERSION }, ttl),
     expires_at: expiresAt,
@@ -734,9 +741,19 @@ async function handleAdminLogin(request, env) {
   if (!level) return json({ error: "invalid_admin_login" }, 401);
   const key = entryDecryptKey(env);
   if (!key) return json({ error: "decrypt_key_unavailable" }, 503);
+  /* Quét phiên cũ bằng metadata của list; chỉ đọc bản ghi cho các phiên đời cũ chưa có metadata,
+   * và giới hạn số lần đọc để một lần đăng nhập không bao giờ chạm trần subrequest. */
   const existing = await env.KV.list({ prefix: "community-admin-session:", limit: 1000 });
   const staleOrPrimary = [];
+  let probes = 0;
   for (const key of existing.keys) {
+    const meta = key.metadata;
+    if (meta && typeof meta === "object") {
+      if (meta.v !== ADMIN_AUTH_VERSION || (level === "primary" && meta.p)) staleOrPrimary.push(key.name);
+      continue;
+    }
+    if (probes >= ADMIN_SESSION_PROBE_LIMIT) { staleOrPrimary.push(key.name); continue; }
+    probes += 1;
     const record = await getJson(env, key.name);
     if (!record || record.auth_version !== ADMIN_AUTH_VERSION || (level === "primary" && record.primary)) staleOrPrimary.push(key.name);
   }
@@ -1062,7 +1079,7 @@ export async function handleCommunity(request, env) {
     /* Hết hạn mức ghi trong ngày là lỗi hạ tầng, phải nói rõ để không bị hiểu là sai mật khẩu. */
     if (String(detail).includes("limit exceeded")) {
       return json({ error: "storage_quota_exhausted", detail,
-        message: "Hết hạn mức ghi dữ liệu trong ngày. Đăng nhập và các thao tác ghi sẽ hoạt động lại khi hạn mức làm mới, hoặc ngay sau khi nâng gói Cloudflare Workers." }, 503);
+        message: "Hệ thống đã chạm trần ghi dữ liệu của ngày hôm nay. Đăng nhập và các thao tác ghi sẽ hoạt động lại khi hạn mức làm mới." }, 503);
     }
     return json({ error: "community_server", detail }, 500);
   }

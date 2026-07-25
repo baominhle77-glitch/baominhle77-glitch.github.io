@@ -22,10 +22,10 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-25 11:40 GMT+7 — Claude Code — BOITOAN-20260725-06 — ĐANG LÀM ⏳
+### 2026-07-25 11:40 GMT+7 — Claude Code — BOITOAN-20260725-06 — HOÀN TẤT ✅
 
 **Chịu lỗi hạn mức ghi KV.** Khi chạy sinh nick thật trên production đã chạm trần
-**1.000 lượt ghi/ngày của Cloudflare KV gói miễn phí** ở nick thứ **160/385**
+**1.000 lượt ghi/ngày của KV gói miễn phí** ở nick thứ **160/385**
 (đủ 109 khách + 51/276 reader). Hai lỗi lộ ra và đã sửa:
 
 - `GET /api/community/stats` **chết** khi không ghi được cache — nay bọc `try/catch`, vẫn trả số
@@ -33,7 +33,27 @@
 - Sinh nick nay trả `quota_exhausted: true` kèm tiến độ thật thay vì lỗi máy chủ chung; tiến độ
   `done` giữ nguyên nên gọi lại là chạy tiếp đúng chỗ. Giao diện hiện thông báo rõ thay vì quay vô tận.
 
-Hạn mức KV làm mới lúc 00:00 UTC (07:00 GMT+7); phần còn lại sẽ sinh tiếp khi đó.
+**Đăng nhập Admin.** Hạn mức ghi cạn làm mọi lượt đăng nhập Admin đổ về một câu báo lỗi chung,
+khiến chủ sở hữu tưởng sai mật khẩu. Đã sửa ba chỗ:
+
+- Backend trả `storage_quota_exhausted` (503) kèm câu giải thích, thay cho `community_server` (500).
+- Giao diện đọc mã lỗi đó và nói thẳng: mật khẩu vẫn đúng, chỉ là hết hạn mức ghi trong ngày.
+- `handleAdminLogin` trước đây đọc **từng** bản ghi phiên khi dọn phiên cũ. Nay phiên Admin mang
+  `metadata { v, p }` nên chỉ cần một lần `list`; bản ghi đời cũ chưa có metadata thì đọc tối đa
+  `ADMIN_SESSION_PROBE_LIMIT = 20`. Một lần đăng nhập không còn phụ thuộc số phiên tồn đọng.
+
+**Kiểm chứng trên production** (10:20 GMT+7, sau khi hạn mức làm mới lúc 00:00 UTC):
+`POST /api/community/admin/login` với mật khẩu Admin tổng trả **HTTP 200**, `level: primary`.
+Đăng nhập đã hoạt động trở lại.
+
+**Giọng đọc quẻ.** Bỏ lối nói nước đôi. `lenParas` viết lại thành ba đoạn liền mạch, đoạn kết
+đổi theo cực tính lá cuối (`LEN_SCORE`). `verdictPhrase` khi tốt–xấu cân nhau không còn nói
+"cái này cũng được, cái kia cũng được" mà nói rõ đó chính là lời của quẻ: giai đoạn chưa có sẵn
+kết cục, người dứt khoát thì thắng.
+
+**Ranh giới nội dung công khai.** `hoi-chon-dung/index.html` (đến từ PR #104) để tên hạ tầng nội
+bộ trong chân trang, làm `node tools/check-public-content.mjs` đỏ trên `main` và chặn mọi PR
+khác. Đã đổi câu đó; check nay xanh trên cả 10 file công khai.
 
 ### 2026-07-25 11:00 GMT+7 — Claude Code — BOITOAN-20260725-05 — HOÀN TẤT ✅
 
