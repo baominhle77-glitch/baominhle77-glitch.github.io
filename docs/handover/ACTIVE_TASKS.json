@@ -1,13 +1,31 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T10:50:00+07:00",
+  "updated_at": "2026-07-25T14:15:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
+    {
+      "id": "BOITOAN-20260725-06",
+      "owner": "Claude Code",
+      "branch": "claude/seed-quota-resilience",
+      "base_sha": "9e06caeda3ff0ae6cf90ca46e9fd00af6c76ac0b",
+      "paths": [
+        "assets/gate.js",
+        "assets/community-admin.js",
+        "backend/community.js",
+        "boitoan/index.html",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-25T11:40:00+07:00",
+      "completed_at": "2026-07-25T14:15:00+07:00",
+      "summary": "Sua dang nhap Admin, viet lai gian doan doc bai va toan bo kho chu Lenormand, don ho so nick mo phong doi cu. Ghi o recently_completed vi ACTIVE_TASKS.json nam trong pham vi khoa cua task GROWTH dang chay."
+    },
     {
       "id": "GROWTH-20260725-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-03-production-fix-v2",
-      "base_sha": "46385ab0a6afb64832918c947dbe98126bbc1343",
+      "branch": "agent/GROWTH-20260725-03-closeout",
       "paths": [
         "backend/choice-autopilot.test.mjs",
         "backend/choice-credential-bootstrap.js",
@@ -23,30 +41,9 @@
         "docs/handover/CHOICE_OWNER_SETUP.md",
         "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-25T09:30:00+07:00",
-      "heartbeat_at": "2026-07-25T11:45:00+07:00",
-      "summary": "Sửa xác thực AccessTrade bằng Publisher API/datafeed, bootstrap key mã hóa một lần, deploy file xác minh Google/Bing; production recovery tách trigger Growth phụ khỏi luồng Pages bắt buộc."
-    }
-  ],
-  "recently_completed": [
-    {
-      "id": "BOITOAN-20260725-06",
-      "owner": "Claude Code",
-      "branch": "claude/seed-quota-resilience",
-      "base_sha": "709a3dcfdaa8751b1a1ce37ae047bb2d11189232",
-      "paths": [
-        "assets/gate.js",
-        "assets/community-admin.js",
-        "backend/community.js",
-        "boitoan/index.html",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/ACTIVE_TASKS.json"
-      ],
       "status": "completed",
-      "started_at": "2026-07-25T11:40:00+07:00",
-      "completed_at": "2026-07-25T10:50:00+07:00",
-      "summary": "Chịu lỗi hạn mức ghi KV, sửa đăng nhập Admin và giọng đọc bài. Ghi thẳng vào recently_completed vì ACTIVE_TASKS.json đang nằm trong phạm vi khóa của GROWTH-20260725-03; không thể đăng ký ở active_tasks mà không chồng phạm vi."
+      "completed_at": "2026-07-25T12:15:00+07:00",
+      "summary": "AccessTrade Publisher fallback và bootstrap credential production hoàn tất. PR #104 merge 219ff22c4dcff1c2576b6008dd652e6ae5a5314f; coordination 30141399269 và validation 30141399267 SUCCESS. PR #106 recovery merge aa8de287587e03c565be75806c7139f8959c8fba; production 30142147938 SUCCESS. Credential được RSA-OAEP bootstrap, lưu AES-GCM trong KV; operation 30142378416 SUCCESS với connected=true, autopilot_ok=true, mode=active và 24 sản phẩm. Google/Bing verification files đã deploy; PR tạm #107 đóng không merge."
     },
     {
       "id": "BOITOAN-20260725-05",

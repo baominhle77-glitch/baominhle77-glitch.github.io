@@ -1,31 +1,34 @@
 # HỘI CHỌN ĐÚNG — GROWTH AUTOPILOT ĐA LĨNH VỰC
 
-**Task-ID hiện hành:** `GROWTH-20260725-02` — `completed`  
-**Runtime source:** `8b5ee3de54844aa50e6af87adfaec58d502e7f99` — PR #94  
-**Production deploy:** `30121531643` — SUCCESS  
-**Internal recorder:** `30121578951` — SUCCESS  
-**Trạng thái nguồn affiliate:** chưa kết nối ACCESSTRADE credential; chưa có sản phẩm/link/doanh thu thật.
+**Task hiện hành:** `GROWTH-20260725-03` — `completed`  
+**Runtime source:** `219ff22c4dcff1c2576b6008dd652e6ae5a5314f` — PR #104  
+**Deploy recovery source:** `aa8de287587e03c565be75806c7139f8959c8fba` — PR #106  
+**Production deploy:** `30142147938` — SUCCESS  
+**Credential bootstrap:** `30142378416` — SUCCESS  
+**Trạng thái affiliate:** AccessTrade connected; Autopilot `active`; `24` sản phẩm thật ở vòng kết nối đầu tiên.
 
 ## 1. Chu trình tự động
 
 Growth Autopilot thực hiện:
 
-1. Lấy sản phẩm từ nguồn affiliate đã kết nối.
-2. Tìm theo ba tín hiệu `BEST_SELLERS`, `RECOMMENDED`, `HIGH_COMMISSION_RATE`.
-3. Lọc URL/tồn kho/dữ liệu và danh mục rủi ro.
-4. Tính trend score và opportunity score.
-5. Tuyển hai vòng: ưu tiên đa dạng dải giá trước, sau đó lấp quota; tối đa hai sản phẩm mỗi shop.
-6. Tạo deep link có UTM/sub-ID để đối chiếu click và đơn hàng.
-7. Cập nhật catalog mà không xóa nhóm cũ nếu nguồn mới chưa đủ dữ liệu.
-8. Tạo HTML tĩnh, landing page, hướng dẫn, sitemap và RSS.
-9. Gửi URL mới/cập nhật tới IndexNow.
-10. Đồng bộ click, đơn, doanh số và hoa hồng vào dashboard owner.
+1. Đọc credential AccessTrade đã mã hóa từ Worker secret hoặc Cloudflare KV.
+2. Xác thực qua Publisher API `/v1/campaigns`.
+3. Thử nguồn TikTok Shop khi tài khoản được cấp quyền.
+4. Nếu TikTok Shop không khả dụng, chuyển sang `/v1/datafeeds` và dùng `aff_link` sẵn có.
+5. Lọc URL, giá, danh mục rủi ro và nguồn không đủ dữ liệu.
+6. Tính trend score và opportunity score.
+7. Tuyển hai vòng: ưu tiên nhiều dải giá rồi lấp quota; tối đa hai sản phẩm mỗi shop.
+8. Tạo hoặc dùng deep link affiliate, UTM và sub-ID để đối chiếu click/đơn.
+9. Cập nhật catalog mà không xóa nhóm cũ nếu nguồn mới thiếu dữ liệu.
+10. Dựng HTML tĩnh, landing page, hướng dẫn, sitemap và RSS.
+11. Gửi URL mới/cập nhật tới IndexNow.
+12. Đồng bộ click, đơn, doanh số và hoa hồng vào dashboard owner.
 
 Chủ sở hữu không chọn từng sản phẩm, không gắn từng link và không nhập từng đơn.
 
 ## 2. Taxonomy production
 
-Hệ thống hiện hỗ trợ 12 lĩnh vực an toàn:
+Hệ thống hỗ trợ 12 lĩnh vực an toàn:
 
 - Tarot & không gian thực hành.
 - Sáng tạo nội dung.
@@ -48,43 +51,56 @@ Blocklist gồm thuốc, thực phẩm bổ sung, rượu/nicotine/chất gây n
 |---|---|
 | Mỗi 5 phút | Đồng bộ click, đơn hàng, giao dịch, snapshot doanh thu và cảnh báo. |
 | Mỗi 6 giờ | Rà sản phẩm, tạo/thay deep link, dựng lại SEO, sitemap/RSS và gửi IndexNow. |
-| Khi deploy | Chạy Growth cycle ngay, dựng SEO và hậu kiểm production. |
+| Khi credential được kết nối | Chạy ngay discovery và cập nhật catalog. |
+| Khi deploy | Deploy Worker trước Pages; gửi tín hiệu Growth không chặn Pages; hậu kiểm production vẫn bắt buộc. |
 | Owner yêu cầu | `/dongbo-doanhthu`, `/autopilot-chay`, `/doanhthu`, `/ketnoi`. |
 
-Dữ liệu doanh thu được gọi là **gần thời gian thực** vì phụ thuộc thời gian ghi nhận/cache/đối soát của mạng affiliate.
+Dữ liệu doanh thu là **gần thời gian thực** vì phụ thuộc thời gian ghi nhận, cache và đối soát của mạng affiliate.
 
-## 4. SEO và phân phối
+## 4. Trạng thái sản phẩm
 
-Mỗi danh mục có landing page và trang hướng dẫn ngay cả khi đang chờ dữ liệu sản phẩm. Trang sản phẩm có canonical, Open Graph, Twitter Card và JSON-LD `Product`, `Offer`, `BreadcrumbList`. Trang danh mục/hướng dẫn có `ItemList`, `FAQPage` và `Article` phù hợp.
+Bootstrap result production:
+
+- `connected`: `true`.
+- `autopilot_ok`: `true`.
+- `mode`: `active`.
+- `selected_products`: `24`.
+
+Đây là sản phẩm affiliate thật được nguồn AccessTrade chấp nhận trong vòng kết nối đầu tiên. Số lượng có thể thay đổi ở các vòng 6 giờ theo dữ liệu tồn kho, link, giá và bộ lọc an toàn.
+
+## 5. SEO và xác minh công cụ tìm kiếm
+
+Mỗi danh mục có landing page và trang hướng dẫn. Trang sản phẩm có canonical, Open Graph, Twitter Card và JSON-LD `Product`, `Offer`, `BreadcrumbList`; danh mục/hướng dẫn có `ItemList`, `FAQPage` và `Article`.
 
 - Sitemap/RSS bao phủ 12 danh mục.
-- IndexNow được gửi tự động sau deploy SEO.
-- Google Search Console API hoạt động khi owner đã xác minh property và cấp service account; thiếu credential thì nhánh Google được bỏ qua an toàn.
-- Metadata chia sẻ hỗ trợ hiển thị đường dẫn trên Facebook, Zalo, X, LinkedIn, Pinterest và ứng dụng nhắn tin; hệ thống không tự spam tài khoản chưa được cấp quyền.
+- IndexNow gửi tự động sau deploy SEO.
+- File Google Search Console live tại `/google91001f63e8104533.html`.
+- File Bing Webmaster live tại `/BingSiteAuth.xml`.
+- Hai file được giữ trong deploy chính và workflow SEO 6 giờ.
+- Google Search Console API tự gửi sitemap khi service account đã được cấp; nếu chưa có thì bỏ qua an toàn.
 
-## 5. PWA và public/private
+## 6. PWA và public/private
 
-- PWA cache hiện hành: `hoi-chon-dung-v4`; cache V3 cũ bị xóa khi activate.
-- Public API không trả affiliate URL thô hoặc metadata vận hành.
+- PWA cache hiện hành: `hoi-chon-dung-v4`.
+- Public API không trả credential, affiliate URL thô hoặc metadata vận hành.
 - Public status route `/api/choice/autopilot/status` trả `404`.
 - Owner setup và revenue dashboard không có phiên trả `401/noindex`.
+- Credential bootstrap là one-time, `noindex/no-store`; sau khi dùng, RSA keypair bị xóa và route public-key chuyển sang trạng thái đã sử dụng.
 - Public scanner chặn onboarding, credential, Worker/KV/cron, doanh thu và nội dung owner khỏi site công khai.
-
-## 6. Owner endpoints
-
-- `/owner/choice/setup` — trung tâm kết nối, mở bằng `/ketnoi`.
-- `/owner/choice/revenue` — dashboard doanh thu, mở bằng `/doanhthu`.
-
-Cả hai dùng vé một lần 10 phút và cookie `HttpOnly; Secure; SameSite=Strict` 12 giờ.
 
 ## 7. Bằng chứng production
 
-- Điều phối: `30121459380` — SUCCESS.
-- Validation: `30121459426` — SUCCESS, gồm source, materializer, Worker, Affiliate, setup, revenue, SEO, boundary, frontend và WebKit.
-- Production: `30121531643` — SUCCESS.
-- Production recorder: `3d5373ac6627fe183d0b02f9d72449ad675cea7c`.
-- Internal status recorder: `30121578951` — SUCCESS; commit `023328ed3779ea0a63e7852438892cda3fc0ab43`.
+- PR #104 coordination: `30141399269` — SUCCESS.
+- PR #104 validation: `30141399267` — SUCCESS.
+- PR #106 coordination: `30142103596` — SUCCESS.
+- PR #106 validation: `30142103615` — SUCCESS.
+- Production recovery: `30142147938` — SUCCESS.
+- Production recorder: `a770da880580d68c52981b9c59f1686c438538a3`.
+- Credential bootstrap operation: `30142378416` — SUCCESS.
+- Temporary PR #107: closed without merge.
 
 ## 8. Trạng thái kinh doanh trung thực
 
-Production kỹ thuật đã hoàn tất. Recorder vẫn xác nhận chưa có ACCESSTRADE credential, sản phẩm thật hoặc đơn thật. Owner cần đăng nhập/KYC, khai báo ngân hàng và gửi `/atkey <API_KEY>` một lần. Sau đó hệ thống tự vận hành.
+Kết nối kỹ thuật và catalog affiliate đã hoạt động. Chưa được phép diễn giải `24 sản phẩm` thành đã có đơn hoặc doanh thu. Doanh thu chỉ được ghi nhận khi AccessTrade trả giao dịch/click/hoa hồng thực tế; dashboard tiếp tục đồng bộ theo cron.
+
+Việc còn lại phía giao diện tài khoản tìm kiếm: chủ sở hữu bấm **Verify/Xác minh** trong Google Search Console và Bing Webmaster nếu hai nền tảng vẫn hiển thị trạng thái chờ. Không cần tải hoặc chèn thêm file.
