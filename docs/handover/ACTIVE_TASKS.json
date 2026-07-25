@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T16:40:00+07:00",
+  "updated_at": "2026-07-25T16:45:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -12,6 +12,7 @@
         "backend/choice.js",
         "backend/choice.test.mjs",
         "backend/choice-autopilot.test.mjs",
+        "backend/choice-public-boundary.test.mjs",
         "backend/choice-vn-marketplace.test.mjs",
         "backend/choice-revenue.js",
         "backend/choice-revenue.test.mjs",
@@ -36,8 +37,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T16:40:00+07:00",
-      "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất và chống trùng toàn catalog."
+      "heartbeat_at": "2026-07-25T16:45:00+07:00",
+      "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất, chống trùng toàn catalog và thanh lọc toàn bộ affiliate link cũ."
     }
   ],
   "recently_completed": [
