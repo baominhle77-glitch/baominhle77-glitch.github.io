@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T18:35:00+07:00",
+  "updated_at": "2026-07-25T18:40:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "GROWTH-20260725-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-04-rebuild-product-flow",
-      "base_sha": "585fd685edc61dfef3a4d98a15bb58b31af3a87e",
+      "branch": "agent/GROWTH-20260725-04-rebuild-v2-clean",
+      "base_sha": "cdae11a2bb5a8f9d2d751f7b529ca2f22f58e66b",
       "paths": [
         "backend/choice.js", "backend/choice.test.mjs", "backend/choice-autopilot.js", "backend/choice-autopilot.test.mjs", "backend/choice-public-boundary.test.mjs", "backend/choice-vn-marketplace.test.mjs", "backend/choice-revenue.js", "backend/choice-revenue.test.mjs",
         "tools/apply-choice-product-v2.mjs", "tools/choice-v2-payload/**", "tools/apply-choice-autopilot-ui.mjs", "tools/apply-choice-access-fallback.mjs", "tools/apply-choice-vn-marketplace.mjs", "tools/apply-choice-global-dedupe.mjs", "tools/apply-choice-marketplace-scale.mjs", "tools/choice-marketplace-scale.test.mjs", "tools/build-choice-seo.mjs", "tools/choice-seo.test.mjs",
@@ -16,7 +16,7 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T18:35:00+07:00",
+      "heartbeat_at": "2026-07-25T18:40:00+07:00",
       "summary": "Làm lại Hội Chọn Đúng thành ứng dụng khám phá xu hướng và so sánh nhiều shop: năm màn hình riêng, mô hình offer-first, chỉ deeplink affiliate sàn Việt Nam đã xác minh, không Google/merchant/seed fallback, media và rating/review chỉ khi nguồn có dữ liệu, SEO live-only và production smoke trên WebKit/iPhone."
     }
   ],
