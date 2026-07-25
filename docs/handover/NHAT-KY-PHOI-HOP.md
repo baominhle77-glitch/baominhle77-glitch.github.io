@@ -22,6 +22,30 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 15:00 GMT+7 — Claude Code — BOITOAN-20260725-08 — ĐANG LÀM ⏳
+
+**Trả nốt món nợ: rà kho chữ các bộ bài còn lại theo đúng chuẩn đã áp cho Lenormand.**
+
+Quét theo *loại lỗi* (Điều 1B.2) trên từng bộ dữ liệu, không tìm lại chuỗi đã biết. Kết quả quét
+xác định đúng chỗ hỏng: `TAROT_EXT` 62 chỗ, `BT_EXT` 7 chỗ, `LEN_PAIRS` 2 chỗ, `ZODIAC` 1 chỗ.
+
+Đã viết lại **69 câu** bị các lỗi sau:
+- **Ẩn dụ trong ngoặc kép** làm người đọc phải tự đoán: *thay máu · lửa nhỏ hầm lâu · ba cốc đổ ·
+  hai cốc còn · gồng nốt · nằm nghỉ · đâm sau lưng · thợ cả · gia tộc · nhà thờ*.
+- **Chữ tiếng Anh lẫn vào**: `stress`, `retreat`, `DCA`.
+- **Nhãn VIẾT HOA giữa câu**: `chọn MỘT`, `KHÔNG mang oán`.
+- **Dấu gạch chéo thay cho từ**: `em/anh`, `chồng/bạn đời`, `thắng kiện/thắng kèo`, `Dự án/vai trò`.
+- **Chữ *quẻ* lọt sang bài Tarot** (`quẻ 'về chung nhà được đấy'`).
+- Câu nối bằng dấu chấm phẩy dài lê thê, tách thành câu riêng và xưng hô với *bạn*.
+
+Quét lại sau khi sửa: `TAROT · TAROT_EXT · BAITAY · BT_EXT · RUNES · TEALEAF · LENORMAND ·
+LEN_EXT · LEN_PAIRS` đều **0** ngoặc kép ẩn dụ, **0** chữ tiếng Anh, **0** nhãn viết hoa, **0**
+chữ *quẻ*.
+
+**Cố ý giữ nguyên:** phần Kinh Dịch (`KD_EXT`) vẫn dùng chữ *quẻ* và trích nguyên văn kinh điển
+trong ngoặc kép (*kháng long hữu hối*, *chư hầu*) — đó là thuật ngữ đúng của hệ thống này, đã có
+chú giải tiếng Việt kèm theo, nên không phải lỗi cùng loại.
+
 ### 2026-07-25 14:35 GMT+7 — Claude Code — BOITOAN-20260725-07 — ĐANG LÀM ⏳
 
 **Số thành viên công khai phải tự cập nhật.** Sau khi dọn rác và sinh đủ 385 nick, `/api/community/stats`
