@@ -849,6 +849,7 @@ async function seedSimulatedBatch(env) {
   idx.done = stop;
   try {
     await putJson(env, SIM_INDEX_KEY, idx); /* 1 lượt ghi cho cả lô */
+    try { await env.KV.delete(STATS_CACHE_KEY); } catch (_) {} /* số thành viên phải đổi ngay */
   } catch (error) {
     const detail = String((error && error.message) || error);
     if (detail.includes("limit exceeded")) {
@@ -901,7 +902,7 @@ async function handleSimulated(request, env, path, auth) {
       if (item.value.role === "reader") jobs.push(env.KV.delete(readerIndexKey(item.value.id)));
     }
     await Promise.all(jobs);
-    if (doomed.length) { try { await env.KV.delete(STATS_CACHE_KEY); } catch (_) {} }
+    try { await env.KV.delete(STATS_CACHE_KEY); } catch (_) {}
     const next = page.list_complete ? null : page.cursor;
     await adminAudit(env, request, "simulated_cleanup", "batch", { scanned: page.keys.length, deleted: doomed.length });
     return json({ scanned: page.keys.length, deleted: doomed.length, cursor: next, done: !next });
@@ -1037,6 +1038,7 @@ async function handleAdmin(request, env, path) {
  * của Worker khi số thành viên lớn và làm treo request.
  */
 const STATS_CACHE_KEY = "community-stats-counters";
+const STATS_CACHE_TTL = 60; /* giây — đủ ngắn để coi là thời gian thực, đủ dài để không đếm lại liên tục. */
 async function readStats(env) {
   return (await getJson(env, STATS_CACHE_KEY)) || null;
 }
@@ -1066,8 +1068,9 @@ async function rebuildStats(env) {
   readers = readerCount + simReaders;
   guests = Math.max(0, total - readers - admins);
   const value = { members: total, guests, readers, admins, sim: simAccounts.length, updated_at: Date.now() };
-  /* Ghi cache là tối ưu, không phải điều kiện bắt buộc: hết hạn mức ghi vẫn phải trả số liệu. */
-  try { await putJson(env, STATS_CACHE_KEY, value); } catch (_) {}
+  /* Ghi cache là tối ưu, không phải điều kiện bắt buộc: hết hạn mức ghi vẫn phải trả số liệu.
+   * Hạn dùng ngắn để số thành viên tự cập nhật mà không phải xoá cache ở mọi chỗ có thay đổi. */
+  try { await putJson(env, STATS_CACHE_KEY, value, STATS_CACHE_TTL); } catch (_) {}
   return value;
 }
 /* Cộng dồn khi có thay đổi, rẻ hơn quét lại. */
