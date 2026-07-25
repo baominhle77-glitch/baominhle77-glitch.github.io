@@ -1,13 +1,13 @@
 # Trạng thái production
 
-- Trạng thái production: `FAILURE`
-- Kết luận workflow gốc: `FAILURE`
-- Source commit: `219ff22c4dcff1c2576b6008dd652e6ae5a5314f`
-- Hoàn tất UTC: `2026-07-25T03:06:47Z`
-- Workflow run: `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/runs/30141457591`
+- Trạng thái production: `SUCCESS`
+- Kết luận workflow gốc: `SUCCESS`
+- Source commit: `aa8de287587e03c565be75806c7139f8959c8fba`
+- Hoàn tất UTC: `2026-07-25T03:23:46Z`
+- Workflow run: `https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/actions/runs/30142147938`
 - Sự kiện: `push`
 - Cloudflare Pages / Worker / hậu kiểm production: `unknown/unknown/unknown`
-- Ghi chú: Một hoặc nhiều bước triển khai/hậu kiểm production đã thất bại.
+- Ghi chú: Toàn bộ workflow deploy và hậu kiểm đã đạt.
 - Account V6: cùng một mục Admin; backend phân cấp `regular` và `primary`; trang Quản trị không hỏi mật khẩu lần hai.
 - Admin thường: quản lý member, review và bài thảo luận.
 - Admin tổng: toàn bộ quyền Admin thường, thêm hội thoại riêng và trang cá nhân member; chỉ một thiết bị primary hoạt động.
