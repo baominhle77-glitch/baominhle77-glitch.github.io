@@ -1,19 +1,20 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T09:30:00+07:00",
+  "updated_at": "2026-07-25T09:55:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "GROWTH-20260725-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-03-key-fallback-secure-form",
-      "base_sha": "main",
+      "base_sha": "375393e8fd2406d718c9d71fa3952eae0b4eae8c",
       "paths": [
         "backend/choice-autopilot.js",
         "backend/choice-autopilot.test.mjs",
-        "backend/choice-setup.js",
-        "backend/choice-setup.test.mjs",
-        "tools/apply-choice-multiniche.mjs",
+        "backend/choice-credential-bootstrap.js",
+        "backend/choice-credential-bootstrap.test.mjs",
+        "tools/apply-choice-access-fallback.mjs",
+        "tools/apply-choice-credential-bootstrap.mjs",
         ".github/workflows/deploy-pages.yml",
         ".github/workflows/choice-growth-autopilot.yml",
         ".github/workflows/validate-role-system.yml",
@@ -25,8 +26,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T09:30:00+07:00",
-      "heartbeat_at": "2026-07-25T09:30:00+07:00",
-      "summary": "Sửa xác thực AccessTrade không phụ thuộc quyền TikTok Shop, thêm fallback datafeed, nhập key owner qua form/bootstrapping mã hóa một lần, và deploy file xác minh Google/Bing ở root site."
+      "heartbeat_at": "2026-07-25T09:55:00+07:00",
+      "summary": "Sửa xác thực AccessTrade không phụ thuộc quyền TikTok Shop, thêm fallback datafeed, bootstrap API key qua RSA-OAEP/AES-GCM một lần, và deploy file xác minh Google/Bing ở root site."
     }
   ],
   "recently_completed": [
