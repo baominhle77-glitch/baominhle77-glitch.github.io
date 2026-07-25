@@ -1,16 +1,17 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T17:50:00+07:00",
+  "updated_at": "2026-07-25T18:20:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "GROWTH-20260725-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-04-hotfix-vn-links",
-      "base_sha": "791cd507b9b4477af6778c9537d4474cc51bcbab",
+      "branch": "agent/GROWTH-20260725-04-rebuild-product-flow",
+      "base_sha": "585fd685edc61dfef3a4d98a15bb58b31af3a87e",
       "paths": [
         "backend/choice.js",
         "backend/choice.test.mjs",
+        "backend/choice-autopilot.js",
         "backend/choice-autopilot.test.mjs",
         "backend/choice-public-boundary.test.mjs",
         "backend/choice-vn-marketplace.test.mjs",
@@ -23,22 +24,21 @@
         "tools/choice-marketplace-scale.test.mjs",
         "tools/build-choice-seo.mjs",
         "tools/choice-seo.test.mjs",
-        "hoi-chon-dung/app.js",
-        "hoi-chon-dung/app.css",
-        "hoi-chon-dung/index.html",
-        "hoi-chon-dung/app.test.mjs",
+        "hoi-chon-dung/**",
         ".github/workflows/deploy-pages.yml",
         ".github/workflows/validate-role-system.yml",
         ".github/workflows/choice-growth-autopilot.yml",
         ".github/workflows/validate-choice-vn-marketplace.yml",
         ".github/workflows/choice-vn-marketplace-production.yml",
         "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/CHOICE_PRODUCT_V2.md",
         "docs/handover/CHOICE_10_DAY_GROWTH_SPRINT.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T16:45:00+07:00",
-      "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất, chống trùng toàn catalog và thanh lọc toàn bộ affiliate link cũ."
+      "heartbeat_at": "2026-07-25T18:20:00+07:00",
+      "summary": "Làm lại Hội Chọn Đúng thành ứng dụng khám phá xu hướng và so sánh nhiều shop: tách luồng nhiều màn hình, chỉ hiển thị offer có affiliate đã xác minh, bỏ hoàn toàn Google/dữ liệu mẫu dự phòng, bổ sung ảnh-video, giá, sao/review khi nguồn có dữ liệu, ưu-nhược điểm từng shop và kiểm thử production trên iPhone."
     }
   ],
   "recently_completed": [
