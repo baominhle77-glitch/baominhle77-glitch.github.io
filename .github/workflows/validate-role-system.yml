@@ -61,14 +61,19 @@ jobs:
           node --check backend/worker.js
           node backend/worker.test.mjs
 
-      - name: Materialize taxonomy và discovery đa lĩnh vực
+      - name: Materialize taxonomy, trend và AccessTrade fallback
         run: |
           set -euo pipefail
           node --check tools/choice-taxonomy.mjs
           node --check tools/apply-choice-multiniche.mjs
+          node --check tools/apply-choice-access-fallback.mjs
           node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-access-fallback.mjs
           node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-access-fallback.mjs
           node --check backend/choice-autopilot.js
+          grep -q '/v1/campaigns' backend/choice-autopilot.js
+          grep -q 'tiktokshop_unavailable_using_datafeeds' backend/choice-autopilot.js
 
       - name: Materialize SEO mọi danh mục
         run: |
@@ -87,13 +92,17 @@ jobs:
           node tools/apply-choice-system.mjs
           node --check backend/worker.js
 
-      - name: Materialize trung tâm kết nối owner
+      - name: Materialize owner setup và credential bootstrap
         run: |
           set -euo pipefail
           node --check tools/apply-choice-setup.mjs
+          node --check tools/apply-choice-credential-bootstrap.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-setup.mjs
+          node tools/apply-choice-credential-bootstrap.mjs
+          node tools/apply-choice-credential-bootstrap.mjs
           node --check backend/choice-setup.js
+          node --check backend/choice-credential-bootstrap.js
           node --check backend/worker.js
 
       - name: Materialize revenue và public UI
@@ -140,14 +149,12 @@ jobs:
           test "$(grep -c 'Hội Chọn Đúng Autopilot scheduled v2' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng internal status boundary v3' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng owner setup route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng owner setup Telegram v1' backend/worker.js)" -eq 1
+          test "$(grep -c 'Hội Chọn Đúng credential bootstrap route v1' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng owner revenue route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng owner revenue Telegram v1' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng growth cycle 5m v1' backend/worker.js)" -eq 1
+          grep -q 'handleChoiceCredentialBootstrapRequest' backend/worker.js
           grep -q 'handleChoiceSetupRequest' backend/worker.js
-          grep -q 'handleChoiceSetupTelegram' backend/worker.js
           grep -q 'handleChoiceRevenueRequest' backend/worker.js
-          grep -q 'handleChoiceRevenueTelegram' backend/worker.js
           grep -q 'runChoiceGrowthCycle' backend/worker.js
           grep -q 'crons = \["\*/5 \* \* \* \*"\]' backend/wrangler.toml
 
@@ -160,7 +167,7 @@ jobs:
           grep -q 'trend_score: trendScore' backend/choice-autopilot.js
           grep -q 'BEST_SELLERS.*RECOMMENDED.*HIGH_COMMISSION_RATE' backend/choice-autopilot.js
 
-      - name: Kiểm tra catalog và Affiliate Autopilot
+      - name: Kiểm tra catalog, Publisher fallback và Affiliate Autopilot
         run: |
           set -euo pipefail
           node --check backend/choice.js
@@ -168,11 +175,14 @@ jobs:
           node --check backend/choice-autopilot.js
           node --test backend/choice-autopilot.test.mjs
 
-      - name: Kiểm tra trung tâm kết nối owner
+      - name: Kiểm tra trung tâm kết nối và bootstrap RSA
         run: |
           set -euo pipefail
           node --check backend/choice-setup.js
           node --test backend/choice-setup.test.mjs
+          node --check backend/choice-credential-bootstrap.js
+          node --test backend/choice-credential-bootstrap.test.mjs
+          ! grep -R -F 'DX9kps1xWv6976Dq0y7yMqUFYtwYNm_O' backend tools .github hoi-chon-dung docs
 
       - name: Kiểm tra đồng bộ và dashboard doanh thu
         run: |
@@ -180,13 +190,16 @@ jobs:
           node --check backend/choice-revenue.js
           node --test backend/choice-revenue.test.mjs
 
-      - name: Kiểm tra SEO publisher và nền tảng lập chỉ mục
+      - name: Kiểm tra SEO publisher, Google và Bing
         run: |
           set -euo pipefail
           node --check tools/build-choice-seo.mjs
           node --check tools/submit-indexnow.mjs
           node --check tools/submit-google-sitemap.mjs
           node --test tools/choice-seo.test.mjs
+          test "$(cat google91001f63e8104533.html)" = "google-site-verification: google91001f63e8104533.html"
+          grep -q '<?xml version="1.0"?>' BingSiteAuth.xml
+          grep -q '0241E6F1BFFED8BCC15C18665C1FAD6C' BingSiteAuth.xml
 
       - name: Kiểm tra ranh giới public-private Growth
         run: |
