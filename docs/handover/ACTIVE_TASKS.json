@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T16:10:00+07:00",
+  "updated_at": "2026-07-25T16:35:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -41,6 +41,25 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260725-11",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "41d51326875cd9a8dcb19b0079e5bc4eb6ec455e",
+      "paths": [
+        "backend/community.js",
+        "assets/community.js",
+        "assets/community-admin.js",
+        "boitoan/community-admin.html",
+        "docs/handover/SO-DO-HE-THONG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-25T16:20:00+07:00",
+      "completed_at": "2026-07-25T16:35:00+07:00",
+      "summary": "Bot kiem duyet tieu chuan cong dong (may chu + giao dien), sua loi bam nick khoang rieng, so do he thong. Ghi o recently_completed vi ACTIVE_TASKS.json dang bi task khac khoa."
+    },
     {
       "id": "BOITOAN-20260725-10",
       "owner": "Claude Code",
