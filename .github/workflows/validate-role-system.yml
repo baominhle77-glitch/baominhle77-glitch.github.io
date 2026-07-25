@@ -30,35 +30,25 @@ jobs:
 
       - name: Kiểm tra cú pháp frontend Bói toán Community
         run: |
-          set -euo pipefail
           node --check assets/gate.js
           node --check assets/community.js
           node --check assets/community-admin.js
-
       - name: Kiểm tra Gate frontend
         run: node assets/gate.test.mjs
-
       - name: Kiểm tra Account frontend
         run: node assets/account-v2.test.mjs
-
       - name: Kiểm tra Service Worker Bói toán
         run: node boitoan/sw.test.mjs
-
       - name: Kiểm tra cú pháp Community backend
         run: node --check backend/community.js
-
       - name: Kiểm tra Community backend
         run: node backend/community.test.mjs
-
       - name: Kiểm tra Account backend
         run: node backend/account-v2.test.mjs
-
       - name: Kiểm tra Admin health
         run: node backend/admin-v8-health.test.mjs
-
       - name: Kiểm tra Worker hiện hữu
         run: |
-          set -euo pipefail
           node --check backend/worker.js
           node backend/worker.test.mjs
 
@@ -66,9 +56,8 @@ jobs:
         run: |
           set -euo pipefail
           node tools/apply-choice-product-v2.mjs
-          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-vn-marketplace.mjs
           node tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-seo-multiniche.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
@@ -79,9 +68,8 @@ jobs:
         run: |
           set -euo pipefail
           node tools/apply-choice-product-v2.mjs
-          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-vn-marketplace.mjs
           node tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-seo-multiniche.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
@@ -90,7 +78,6 @@ jobs:
 
       - name: Kiểm tra marker V2
         run: |
-          set -euo pipefail
           grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
           grep -q 'rating_value: candidate.rating_value' backend/choice-autopilot.js
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
@@ -98,19 +85,15 @@ jobs:
 
       - name: Kiểm tra Choice backend lõi
         run: |
-          set -euo pipefail
           node --check backend/choice.js
           node --test backend/choice.test.mjs
           node --check backend/choice-autopilot.js
           node --test backend/choice-autopilot.test.mjs
           node --test backend/choice-vn-marketplace.test.mjs
-
       - name: Kiểm tra public boundary
         run: node --test backend/choice-public-boundary.test.mjs
-
       - name: Kiểm tra owner setup credential revenue
         run: |
-          set -euo pipefail
           node --check backend/choice-setup.js
           node --test backend/choice-setup.test.mjs
           node --check backend/choice-credential-bootstrap.js
@@ -146,7 +129,6 @@ jobs:
 
       - name: Kiểm tra điều phối và marker hệ thống
         run: |
-          set -euo pipefail
           node tools/validate-coordination.mjs
           test "$(grep -c 'Hội Chọn Đúng API integration v2' backend/worker.js)" -eq 1
           test "$(grep -c 'Hội Chọn Đúng Telegram integration v2' backend/worker.js)" -eq 1
@@ -156,7 +138,6 @@ jobs:
 
       - name: Kiểm tra WebKit với payload AES thật
         run: |
-          set -euo pipefail
           npm install --no-save playwright@1.52.0
           npx playwright install --with-deps webkit
           LOCAL_GATE_JS=1 node tools/admin-v9-return-webkit-check.mjs "$GITHUB_SHA"
