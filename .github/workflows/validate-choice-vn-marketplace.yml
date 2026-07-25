@@ -1,0 +1,62 @@
+name: Kiểm tra Hội Chọn Đúng chỉ sàn Việt Nam
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-vn-marketplace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - name: Materialize marketplace Việt Nam và kiểm tra idempotency
+        run: |
+          set -euo pipefail
+          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-access-fallback.mjs
+          node tools/apply-choice-vn-marketplace.mjs
+          node tools/apply-choice-global-dedupe.mjs
+          node tools/apply-choice-vn-marketplace.mjs
+          node tools/apply-choice-global-dedupe.mjs
+          node --check backend/choice-autopilot.js
+          node --check backend/choice.js
+          grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
+          grep -q 'GLOBAL_PRODUCT_DEDUPE_V1' backend/choice-autopilot.js
+          grep -q 'DATAFEED_BEST_CATEGORY_V1' backend/choice-autopilot.js
+          grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
+          grep -q 'VIETNAM_MARKETPLACE_PUBLIC_V1' backend/choice.js
+          ! grep -qiE 'fado\.vn|amazon\.|taobao|alibaba|ebay' backend/choice-autopilot.js
+
+      - name: Kiểm tra catalog và redirect sàn Việt Nam
+        run: |
+          set -euo pipefail
+          node --test backend/choice.test.mjs
+          node --test backend/choice-vn-marketplace.test.mjs
+          node --test backend/choice-autopilot.test.mjs
+
+      - name: Materialize đầy đủ Worker owner revenue
+        run: |
+          set -euo pipefail
+          node tools/apply-travel-system.mjs
+          node tools/apply-choice-system.mjs
+          node tools/apply-choice-setup.mjs
+          node tools/apply-choice-credential-bootstrap.mjs
+          node tools/apply-choice-revenue.mjs
+          node tools/apply-choice-autopilot-ui.mjs
+          node --check backend/worker.js
+          node --check backend/choice-setup.js
+          node --check backend/choice-revenue.js
+
+      - name: Kiểm tra boundary backend
+        run: node --test backend/choice-public-boundary.test.mjs
+
+      - name: Quét nội dung public
+        run: node tools/check-public-content.mjs

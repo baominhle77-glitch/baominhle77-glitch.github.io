@@ -1,17 +1,18 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T16:35:00+07:00",
+  "updated_at": "2026-07-25T16:45:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "GROWTH-20260725-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-04-lock",
-      "base_sha": "f58fad86a7fc48a640f957ef965c53f51bf132fb",
+      "branch": "agent/GROWTH-20260725-04-hotfix-vn-links",
+      "base_sha": "791cd507b9b4477af6778c9537d4474cc51bcbab",
       "paths": [
         "backend/choice.js",
         "backend/choice.test.mjs",
         "backend/choice-autopilot.test.mjs",
+        "backend/choice-public-boundary.test.mjs",
         "backend/choice-vn-marketplace.test.mjs",
         "backend/choice-revenue.js",
         "backend/choice-revenue.test.mjs",
@@ -36,8 +37,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T15:35:00+07:00",
-      "summary": "Hotfix khẩn cấp: chỉ nhận Shopee VN, Lazada VN, Tiki, Sendo và TikTok Shop VN; tái tạo deeplink ACCESSTRADE; chặn link lỗi/ngoài Việt Nam; nhóm cùng sản phẩm chỉ khi có nhiều nơi bán thật; chống trùng toàn catalog. Sau hotfix tiếp tục sprint SEO/KPI 10 ngày."
+      "heartbeat_at": "2026-07-25T16:45:00+07:00",
+      "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất, chống trùng toàn catalog và thanh lọc toàn bộ affiliate link cũ."
     }
   ],
   "recently_completed": [
@@ -45,130 +46,37 @@
       "id": "BOITOAN-20260725-11",
       "owner": "Claude Code",
       "branch": "claude/affiliate-community-strategy-oft750",
-      "base_sha": "41d51326875cd9a8dcb19b0079e5bc4eb6ec455e",
-      "paths": [
-        "backend/community.js",
-        "assets/community.js",
-        "assets/community-admin.js",
-        "boitoan/community-admin.html",
-        "docs/handover/SO-DO-HE-THONG.md",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/ACTIVE_TASKS.json"
-      ],
+      "paths": ["backend/community.js", "assets/community.js", "assets/community-admin.js", "boitoan/community-admin.html", "docs/handover/SO-DO-HE-THONG.md", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
       "status": "completed",
-      "started_at": "2026-07-25T16:20:00+07:00",
       "completed_at": "2026-07-25T16:35:00+07:00",
-      "summary": "Bot kiem duyet tieu chuan cong dong (may chu + giao dien), sua loi bam nick khoang rieng, so do he thong. Ghi o recently_completed vi ACTIVE_TASKS.json dang bi task khac khoa."
+      "summary": "PR #116 merge commit 04df1e6e92eb06b163178adb4bed66fa02545cf6; production và recorder SUCCESS."
     },
     {
       "id": "BOITOAN-20260725-10",
       "owner": "Claude Code",
       "branch": "claude/affiliate-community-strategy-oft750",
-      "base_sha": "134033f40bfdda4a593ea8fbb4601f7c7169000e",
-      "paths": [
-        "boitoan/index.html",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/ACTIVE_TASKS.json"
-      ],
+      "paths": ["boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
       "status": "completed",
-      "started_at": "2026-07-25T15:45:00+07:00",
       "completed_at": "2026-07-25T16:10:00+07:00",
-      "summary": "Bo chu tieng Anh cuoi cung va lam tron nhom ngoac kep mia mai o kho chu Kinh Dich. Ghi o recently_completed vi ACTIVE_TASKS.json dang nam trong pham vi khoa cua GROWTH-20260725-04."
-    },
-    {
-      "id": "BOITOAN-20260725-09",
-      "owner": "Claude Code",
-      "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": [
-        "boitoan/index.html",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/ACTIVE_TASKS.json"
-      ],
-      "status": "completed",
-      "completed_at": "2026-07-25T15:35:00+07:00",
-      "summary": "PR #113 merge commit 93cfc39f61436cd3d9fc78f925221cd60a32056b; production deploy SUCCESS. Đã bỏ cụm 'cắt hợp đồng' còn sót trong kho chữ Kinh Dịch."
-    },
-    {
-      "id": "BOITOAN-20260725-08",
-      "owner": "Claude Code",
-      "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": [
-        "boitoan/index.html",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/ACTIVE_TASKS.json"
-      ],
-      "status": "completed",
-      "completed_at": "2026-07-25T15:20:00+07:00",
-      "summary": "PR #111 merge commit 50c1e35b5517ac32a87163771d89afb0c997b362; production deploy SUCCESS. Rà kho chữ Tarot, Bài Tây và các bộ còn lại."
-    },
-    {
-      "id": "BOITOAN-20260725-07",
-      "owner": "Claude Code",
-      "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": [
-        "backend/community.js",
-        "docs/handover/NHAT-KY-PHOI-HOP.md",
-        "docs/handover/ACTIVE_TASKS.json"
-      ],
-      "status": "completed",
-      "completed_at": "2026-07-25T15:00:00+07:00",
-      "summary": "PR #110 merge commit 67a95758e895ea05991c02f6dcfbbfcd8eefba2a; production SUCCESS. Số thành viên công khai tự cập nhật."
+      "summary": "PR #114 merge commit 8c4597e02f318398164d240320349c96e33e6133; production và recorder SUCCESS."
     },
     {
       "id": "GROWTH-20260725-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-03-closeout",
-      "paths": [
-        "backend/choice-autopilot.test.mjs",
-        "backend/choice-credential-bootstrap.js",
-        "backend/choice-credential-bootstrap.test.mjs",
-        "tools/apply-choice-access-fallback.mjs",
-        "tools/apply-choice-credential-bootstrap.mjs",
-        ".github/workflows/deploy-pages.yml",
-        ".github/workflows/choice-growth-autopilot.yml",
-        ".github/workflows/validate-role-system.yml",
-        "google91001f63e8104533.html",
-        "BingSiteAuth.xml",
-        "docs/handover/ACTIVE_TASKS.json",
-        "docs/handover/CHOICE_OWNER_SETUP.md",
-        "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"
-      ],
+      "paths": ["backend/choice-autopilot.test.mjs", "backend/choice-credential-bootstrap.js", "backend/choice-credential-bootstrap.test.mjs", "tools/apply-choice-access-fallback.mjs", "tools/apply-choice-credential-bootstrap.mjs", ".github/workflows/deploy-pages.yml", ".github/workflows/choice-growth-autopilot.yml", ".github/workflows/validate-role-system.yml", "google91001f63e8104533.html", "BingSiteAuth.xml", "docs/handover/ACTIVE_TASKS.json", "docs/handover/CHOICE_OWNER_SETUP.md", "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"],
       "status": "completed",
       "completed_at": "2026-07-25T12:15:00+07:00",
-      "summary": "AccessTrade Publisher fallback, credential bootstrap và xác minh Google/Bing production hoàn tất; credential active và vòng đầu có 24 sản phẩm."
+      "summary": "AccessTrade credential, Publisher fallback và Google/Bing production hoàn tất."
     },
     {
       "id": "GROWTH-20260725-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-02-closeout",
-      "paths": [
-        "backend/choice.js",
-        "backend/choice-autopilot.js",
-        "backend/choice-revenue.js",
-        "backend/choice-setup.js",
-        "hoi-chon-dung/**",
-        "tools/**",
-        ".github/workflows/**",
-        "docs/handover/**"
-      ],
+      "paths": ["backend/choice.js", "backend/choice-autopilot.js", "backend/choice-revenue.js", "backend/choice-setup.js", "hoi-chon-dung/**", "tools/**", ".github/workflows/**", "docs/handover/**"],
       "status": "completed",
       "completed_at": "2026-07-25T03:15:00+07:00",
-      "summary": "Affiliate đa lĩnh vực và Trung tâm kết nối owner production SUCCESS. PR #94."
-    },
-    {
-      "id": "GOVERNANCE-20260724-01",
-      "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GOVERNANCE-20260724-01-closeout",
-      "paths": [
-        "AGENTS.md",
-        "backend/**",
-        ".github/workflows/**",
-        "hoi-chon-dung/**",
-        "docs/handover/**"
-      ],
-      "status": "completed",
-      "completed_at": "2026-07-24T23:41:00+07:00",
-      "summary": "Khắc phục hoàn toàn lỗi đưa nội dung owner/internal lên public UI; production public-private boundary SUCCESS."
+      "summary": "Affiliate đa lĩnh vực và Growth Autopilot production hoàn tất."
     }
   ]
 }
