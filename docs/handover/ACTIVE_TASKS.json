@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T11:45:00+07:00",
+  "updated_at": "2026-07-25T12:00:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "GROWTH-20260725-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-03-production-fix-v2",
-      "base_sha": "46385ab0a6afb64832918c947dbe98126bbc1343",
+      "branch": "agent/GROWTH-20260725-03-bootstrap-ops",
+      "base_sha": "709a3dcfdaa8751b1a1ce37ae047bb2d11189232",
       "paths": [
         "backend/choice-autopilot.test.mjs",
         "backend/choice-credential-bootstrap.js",
@@ -17,6 +17,8 @@
         ".github/workflows/deploy-pages.yml",
         ".github/workflows/choice-growth-autopilot.yml",
         ".github/workflows/validate-role-system.yml",
+        ".github/workflows/choice-bootstrap-ops.yml",
+        ".github/choice-bootstrap-cipher.txt",
         "google91001f63e8104533.html",
         "BingSiteAuth.xml",
         "docs/handover/ACTIVE_TASKS.json",
@@ -25,8 +27,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T09:30:00+07:00",
-      "heartbeat_at": "2026-07-25T11:45:00+07:00",
-      "summary": "Sửa xác thực AccessTrade bằng Publisher API/datafeed, bootstrap key mã hóa một lần, deploy file xác minh Google/Bing; production recovery tách trigger Growth phụ khỏi luồng Pages bắt buộc."
+      "heartbeat_at": "2026-07-25T12:00:00+07:00",
+      "summary": "Production đã SUCCESS; đang vận hành bootstrap RSA một lần để lưu AccessTrade key mã hóa, kích hoạt catalog và xác minh Google/Bing."
     }
   ],
   "recently_completed": [
