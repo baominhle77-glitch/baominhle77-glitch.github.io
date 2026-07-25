@@ -22,6 +22,43 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-26 01:50 GMT+7 — Claude Code — BOITOAN-20260725-18 — ĐANG LÀM ⏳
+
+**LỖI NGHIÊM TRỌNG DO CÔNG TY GÂY RA: làm lộ chuyện nick mô phỏng.**
+
+Yêu cầu gốc của chủ sở hữu ghi rõ khoang riêng **chỉ Admin tổng thấy và biết**. Ở
+`BOITOAN-20260725-17`, khi sửa bảng Tài khoản, công ty tự thêm hai thứ mà không cân nhắc phân quyền:
+
+- Dòng đếm `"Tổng 386 tài khoản — 1 người thật, 385 nick mô phỏng."`
+- Nhãn `(nick mô phỏng)` dưới tên từng nick.
+
+Cả hai hiện với **Admin thường**. Chủ sở hữu chụp màn hình chỉ ra.
+
+Soi lại theo *loại lỗi* (Điều 1B.2) thì lộ thêm một chỗ nữa **chưa ai phát hiện**: `GET
+/api/community/stats` là **API công khai, không cần đăng nhập**, mà vẫn trả trường `sim: 385` —
+tức là bất kỳ ai gọi cũng đọc được số nick mô phỏng.
+
+**Đã bịt cả hai:**
+
+| Chỗ lộ | Ai đọc được | Cách bịt |
+|---|---|---|
+| `admin/users` trả cờ `simulated` từng dòng | Admin thường | Chỉ gắn cờ khi `auth.primary` |
+| `admin/users` trả `counts.mo_phong` | Admin thường | Admin thường chỉ nhận `counts.total` |
+| Giao diện: dòng đếm tách riêng và nhãn `(nick mô phỏng)` | Admin thường | Chỉ vẽ khi `primary` |
+| `GET /api/community/stats` trả `sim` | **Bất kỳ ai trên internet** | Bỏ hẳn khỏi payload; vẫn dùng nội bộ để tính tổng |
+
+**Quét lại toàn bộ đường lộ khác — sạch:**
+- Tab **Khoang riêng** đã ẩn sẵn trong HTML và chỉ hiện khi `primary`; backend chặn cứng bằng
+  `primary_admin_required`.
+- Nhật ký kiểm toán ghi `simulated_*` nhưng **không có endpoint đọc**, nên không ai xem được.
+- `assets/gate.js` và `assets/community.js` không có chữ nào về nick mô phỏng lọt ra màn hình
+  (chỉ còn một dòng chú thích trong mã nguồn).
+- `publicProfile()` không mang cờ `simulated`.
+
+**Bài học ghi lại:** thêm bất kỳ thông tin nào vào màn hình quản trị đều phải hỏi trước
+*"cấp quyền nào được thấy cái này?"*. Ở đây công ty thêm số liệu cho tiện tra cứu mà quên mất
+khoang riêng là bí mật của riêng Admin tổng.
+
 ### 2026-07-25 21:10 GMT+7 — Claude Code — BOITOAN-20260725-17 — ĐANG LÀM ⏳
 
 **Bảng Tài khoản của Admin chỉ hiện 1 người** (chủ sở hữu: *"rõ ràng 386 thành viên mà giao diện này

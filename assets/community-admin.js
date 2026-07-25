@@ -82,12 +82,15 @@
     search.type = "search"; search.placeholder = "Tìm theo tên hoặc tài khoản…"; search.value = usersFilter;
     search.addEventListener("input", function(){ usersFilter = search.value; renderUsers(); setTimeout(function(){ var n = content.querySelector('input[type=search]'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 0); });
     bar.append(search);
-    var summary = el("p", "Tổng " + counts.total + " tài khoản — " + counts.that + " người thật, " + counts.mo_phong + " nick mô phỏng." + (list.length > shown.length ? " Đang hiện " + shown.length + " dòng đầu, hãy dùng ô tìm kiếm để thu hẹp." : ""), "community-state");
+    /* Chỉ Admin tổng mới thấy phần tách riêng nick mô phỏng. Admin thường chỉ thấy tổng số. */
+    var summary = el("p", "Tổng " + counts.total + " tài khoản."
+      + (primary && counts.mo_phong ? " Trong đó " + counts.that + " người thật, " + counts.mo_phong + " nick mô phỏng." : "")
+      + (list.length > shown.length ? " Đang hiện " + shown.length + " dòng đầu, hãy dùng ô tìm kiếm để thu hẹp." : ""), "community-state");
 
     var t=table(["Tài khoản","Vai trò","Hồ sơ","Trạng thái","Thao tác"]);
     shown.forEach(function(user){
       var row=el("tr");
-      cell(row, user.username+"\n"+user.display_name+(user.simulated?"\n(nick mô phỏng)":""));
+      cell(row, user.username+"\n"+user.display_name+(primary && user.simulated?"\n(nick mô phỏng)":""));
       cell(row,user.role==="reader"?"Reader / Người xem bói":"Khách");
       cell(row,user.bio||"");
       cell(row,user.suspended?"Đã khóa":"Hoạt động");
