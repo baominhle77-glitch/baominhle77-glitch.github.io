@@ -1,9 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T14:15:00+07:00",
+  "updated_at": "2026-07-25T14:20:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
-  "recently_completed": [
+  "active_tasks": [
     {
       "id": "BOITOAN-20260725-06",
       "owner": "Claude Code",
@@ -17,11 +16,13 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "docs/handover/ACTIVE_TASKS.json"
       ],
-      "status": "completed",
+      "status": "in_progress",
       "started_at": "2026-07-25T11:40:00+07:00",
-      "completed_at": "2026-07-25T14:15:00+07:00",
-      "summary": "Sua dang nhap Admin, viet lai gian doan doc bai va toan bo kho chu Lenormand, don ho so nick mo phong doi cu. Ghi o recently_completed vi ACTIVE_TASKS.json nam trong pham vi khoa cua task GROWTH dang chay."
-    },
+      "heartbeat_at": "2026-07-25T14:20:00+07:00",
+      "summary": "Sua dang nhap Admin, viet lai gian doan doc bai va toan bo kho chu Lenormand, don ho so nick mo phong doi cu."
+    }
+  ],
+  "recently_completed": [
     {
       "id": "GROWTH-20260725-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
