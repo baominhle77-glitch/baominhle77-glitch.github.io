@@ -23,17 +23,19 @@ jobs:
           node --check backend/choice.js
           grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
 
+      - name: Áp taxonomy 12 lĩnh vực V2
+        run: node tools/apply-choice-multiniche-v2.mjs
       - name: Áp marketplace Việt Nam V2
         run: node tools/apply-choice-vn-marketplace.mjs
-
-      - name: Áp AccessTrade Publisher fallback
-        run: node tools/apply-choice-access-fallback.mjs
+      - name: Áp chống trùng toàn catalog
+        run: node tools/apply-choice-global-dedupe.mjs
 
       - name: Chạy lại materializer để kiểm tra idempotency
         run: |
           node tools/apply-choice-product-v2.mjs
+          node tools/apply-choice-multiniche-v2.mjs
           node tools/apply-choice-vn-marketplace.mjs
-          node tools/apply-choice-access-fallback.mjs
+          node tools/apply-choice-global-dedupe.mjs
 
       - name: Kiểm tra marker marketplace V2
         run: |
@@ -45,6 +47,7 @@ jobs:
           grep -q 'GLOBAL_PRODUCT_DEDUPE_V1' backend/choice-autopilot.js
           grep -q 'DATAFEED_BEST_CATEGORY_V1' backend/choice-autopilot.js
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
+          grep -q 'id: "travel"' backend/choice-autopilot.js
           ! grep -qiE 'fado\.vn|amazon\.|taobao|alibaba|ebay' backend/choice-autopilot.js
 
       - name: Kiểm tra catalog lõi
