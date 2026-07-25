@@ -188,4 +188,6 @@ for (const required of [
 }
 
 await writeFile(path, source);
-console.log("choice-access-fallback-ok: Publisher campaigns validation + TikTok/datafeed hybrid");
+await import("./apply-choice-vn-marketplace.mjs");
+await import("./apply-choice-global-dedupe.mjs");
+console.log("choice-access-fallback-ok: Publisher campaigns validation + TikTok/datafeed hybrid + Vietnam marketplace policy");
