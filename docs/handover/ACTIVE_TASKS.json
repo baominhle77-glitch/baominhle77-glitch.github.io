@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T20:50:00+07:00",
+  "updated_at": "2026-07-25T21:10:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,6 +42,23 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260725-17",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "232406afed779a2da792d83468e8209e72a6b685",
+      "paths": [
+        "backend/community.js",
+        "assets/community-admin.js",
+        "assets/account-v2.test.mjs",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-25T21:10:00+07:00",
+      "summary": "Bang tai khoan cua Admin phai hien ca nick mo phong, co tim kiem va dem ro.",
+      "completed_at": "2026-07-25T21:10:00+07:00"
+    },
     {
       "id": "BOITOAN-20260725-16",
       "owner": "Claude Code",

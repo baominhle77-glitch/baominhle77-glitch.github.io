@@ -22,6 +22,30 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 21:10 GMT+7 — Claude Code — BOITOAN-20260725-17 — ĐANG LÀM ⏳
+
+**Bảng Tài khoản của Admin chỉ hiện 1 người** (chủ sở hữu: *"rõ ràng 386 thành viên mà giao diện này
+của admin thường chỉ có 1 là sao nữa??"*).
+
+Cùng gốc với lỗi danh sách reader đã sửa ở BOITOAN-20260725-12, và **công ty đã sót chỗ này** — sửa
+một nơi mà không truy khắp sản phẩm, đúng thứ Điều 1B.1 cấm. `GET /api/community/admin/users` chỉ
+liệt kê khoá `community-profile:`, mà nick mô phỏng sống trong chỉ mục khoang riêng nên không có
+khoá đó. Sau đợt dọn rác chỉ còn **1 hồ sơ người thật**, nên bảng hiện đúng 1 dòng.
+
+Đã sửa **toàn bộ đường đi của một tài khoản**, không chỉ chỗ liệt kê:
+
+| Việc | Trước | Nay |
+|---|---|---|
+| Liệt kê tài khoản | chỉ khoá hồ sơ | ghép cả chỉ mục khoang riêng, kèm `counts` tách rõ người thật / nick mô phỏng |
+| Xem một tài khoản | `getJson(profileKey)` | `getProfileAny()` |
+| Khoá / mở khoá | ghi ra khoá hồ sơ (tạo bản ghi thừa) | `saveProfileAny()` ghi về đúng nơi, xoá cache đếm |
+| Xoá tài khoản | chỉ xoá khoá hồ sơ | nick mô phỏng thì gỡ khỏi chỉ mục và trừ `done`, xoá cache đếm |
+
+Giao diện bảng tài khoản viết lại: **ô tìm kiếm** theo tên hoặc tài khoản, dòng đếm
+*"Tổng n tài khoản — x người thật, y nick mô phỏng"*, nhãn *(nick mô phỏng)* dưới tên, và giới hạn
+**60 dòng** mỗi lượt vẽ để mở trên điện thoại không bị nặng. Nút *Xem trang cá nhân* chỉ hiện với
+nick thật, vì nick mô phỏng đã có đường điều khiển riêng ở tab Khoang riêng.
+
 ### 2026-07-25 20:50 GMT+7 — Claude Code — BOITOAN-20260725-16 — ĐANG LÀM ⏳
 
 **1. Admin không đọc được bình luận** (chủ sở hữu: *"ấn vào phần thảo luận còn không xem được là sao?"*).

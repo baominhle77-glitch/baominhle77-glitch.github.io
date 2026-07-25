@@ -47,7 +47,10 @@ assert.match(community, /Quay lại khu vực Admin/);
 assert.match(admin, /market_admin_token/);
 assert.match(admin, /\/api\/community\/admin\/session/);
 assert.match(admin, /adminAuthVersion !== ADMIN_AUTH_VERSION/);
-assert.match(admin, /if \(primary\) action\.append/);
+/* Nút xem trang cá nhân vẫn chỉ dành cho Admin tổng; thêm điều kiện bỏ qua nick mô phỏng
+   vì nick mô phỏng đã có đường điều khiển riêng ở tab Khoang riêng. */
+assert.match(admin, /if \(primary[^)]*\) action\.append/);
+assert.match(admin, /!user\.simulated/);
 assert.match(admin, /conversationTab\.hidden=!primary/);
 assert.match(admin, /Xóa tài khoản/);
 assert.match(admin, /Xem trang cá nhân/);
