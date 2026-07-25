@@ -22,6 +22,33 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 20:50 GMT+7 — Claude Code — BOITOAN-20260725-16 — ĐANG LÀM ⏳
+
+**1. Admin không đọc được bình luận** (chủ sở hữu: *"ấn vào phần thảo luận còn không xem được là sao?"*).
+
+Đúng là thiếu hẳn. Tab **Thảo luận** chỉ có mở bài, đóng bài, xoá bài — **không có đường nào đọc
+bình luận**, dù ngay dưới tiêu đề vẫn ghi "2 bình luận". Quản mà không xem được thì không quản được gì.
+
+- Thêm `GET /api/community/admin/posts/<id>/comments` trả bài kèm toàn bộ bình luận đã sắp theo thời gian.
+- Thêm `DELETE /api/community/admin/posts/<id>/comments/<cid>` để xoá một bình luận và trừ lại bộ đếm.
+- Mỗi bài trong tab Thảo luận có nút **Xem bình luận (n)**. Màn hình bình luận hiện người viết, loại
+  nick, nội dung, thời gian, số lượt thích, và **hiện cả bình luận này trả lời ai** (theo `parent_id`),
+  kèm nút xoá từng bình luận.
+
+**2. Khu thảo luận bị giấu** (chủ sở hữu: *"sinh ra nó xong giấu đi không ai biết đường mà vào à?"*).
+
+Trước đây lối vào duy nhất là nút **Cộng đồng** ở thanh dưới cùng — mở app lên không thấy gì về
+thảo luận. Nay `injectDiscussionCard()` chèn hẳn một **cửa sổ thảo luận ngay dưới khối "Hôm nay"**
+ở trang chính:
+
+- Tiêu đề, một câu mời tham gia, và **ba chủ đề mới nhất kèm số bình luận từng chủ đề**.
+- Dòng đếm tổng: *"n chủ đề · m bình luận"*.
+- Nút lớn **Vào thảo luận**.
+- Hiện cho **mọi loại nick**; Admin thì trỏ sang trang quản trị, thành viên thì trỏ sang khu cộng đồng.
+- Tự làm mới mỗi 60 giây và ngay khi app hiện lại, nên số bình luận luôn đúng.
+
+Đặt trong `reveal()` cùng chỗ với chip tài khoản nên không phải sửa file app đã mã hoá.
+
 ### 2026-07-25 18:50 GMT+7 — Claude Code — BOITOAN-20260725-15 — ĐANG LÀM ⏳
 
 **1. Số thành viên hiện ở hai màn hình chủ sở hữu chỉ ra.**

@@ -759,6 +759,77 @@
   }
   /* Số thành viên hiện ngay dưới chip tài khoản ở trang chính, cho MỌI loại nick:
    * Khách, Reader hay Admin đều thấy cùng một con số. */
+  /* Cửa sổ thảo luận ngay trên trang chính. Trước đây khu thảo luận nằm sau nút Cộng đồng ở
+   * thanh dưới nên gần như không ai biết đường vào. Nay hiện hẳn tiêu đề các chủ đề đang có
+   * cùng số bình luận, bấm là vào thẳng. Hiện cho MỌI loại nick. */
+  function injectDiscussionCard() {
+    if (APP !== "boitoan") return;
+    var old = document.getElementById("market-discussion-card");
+    if (old) old.remove();
+    var anchor = document.getElementById("todayBox");
+    var host = anchor && anchor.parentNode;
+    if (!host) return;
+    var admin = marketAdminSession();
+    var card = document.createElement("section");
+    card.id = "market-discussion-card";
+    card.className = "market-discussion-card";
+    card.innerHTML =
+      '<div class="market-discussion-head">' +
+        '<h3>Thảo luận cộng đồng</h3>' +
+        '<span class="market-discussion-live" data-discussion-count hidden></span>' +
+      '</div>' +
+      '<p class="market-discussion-sub">Hỏi một câu, kể một chuyện, hoặc trả lời người khác. Ai cũng đọc và trả lời được.</p>' +
+      '<div class="market-discussion-list" data-discussion-list></div>' +
+      '<a class="market-discussion-cta" data-discussion-cta>Vào thảo luận</a>';
+    host.insertBefore(card, anchor.nextSibling);
+
+    var cta = card.querySelector("[data-discussion-cta]");
+    cta.href = new URL(admin ? "community-admin.html" : "community.html", location.href).href;
+
+    var list = card.querySelector("[data-discussion-list]");
+    var counter = card.querySelector("[data-discussion-count]");
+    function token() {
+      try { return admin ? localStorage.getItem("market_admin_token") : localStorage.getItem("community_token_boitoan"); }
+      catch (e) { return null; }
+    }
+    function draw() {
+      var t = token();
+      if (!t) { list.innerHTML = '<p class="market-discussion-empty">Đăng nhập để đọc và tham gia thảo luận.</p>'; return; }
+      var url = BACKEND + (admin ? "/api/community/admin/posts" : "/api/community/posts");
+      var headers = { authorization: "Bearer " + t };
+      if (admin) { try { headers["x-owner-device-id"] = deviceId(); } catch (e) {} }
+      fetch(url, { headers: headers, cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          var posts = (data && data.posts) || [];
+          if (!posts.length) {
+            list.innerHTML = '<p class="market-discussion-empty">Chưa có chủ đề nào. Bạn mở chủ đề đầu tiên nhé.</p>';
+            return;
+          }
+          var total = posts.reduce(function (sum, x) { return sum + Number(x.comment_count || 0); }, 0);
+          counter.textContent = posts.length + " chủ đề · " + total + " bình luận";
+          counter.hidden = false;
+          list.innerHTML = "";
+          posts.slice(0, 3).forEach(function (post) {
+            var row = document.createElement("a");
+            row.className = "market-discussion-item";
+            row.href = cta.href;
+            var title = document.createElement("strong");
+            title.textContent = post.title || "Chủ đề";
+            var meta = document.createElement("small");
+            meta.textContent = Number(post.comment_count || 0) + " bình luận"
+              + (post.closed ? " · đã đóng" : "");
+            row.appendChild(title); row.appendChild(meta);
+            list.appendChild(row);
+          });
+        })
+        .catch(function () {});
+    }
+    draw();
+    setInterval(draw, 60000);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) draw(); });
+  }
+
   function injectMemberCountBadge(host) {
     if (APP !== "boitoan" || !host) return;
     var old = document.getElementById("market-member-count");
@@ -806,6 +877,7 @@
     var header = document.querySelector("#gate-content .wrap > header, body > .wrap > header");
     if (header) header.appendChild(chip); else document.body.appendChild(chip);
     injectMemberCountBadge(header || document.body);
+    injectDiscussionCard();
     injectCommunity();
   }
   function reveal(method) {

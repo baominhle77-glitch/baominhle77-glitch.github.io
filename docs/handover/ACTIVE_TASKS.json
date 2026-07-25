@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T18:50:00+07:00",
+  "updated_at": "2026-07-25T20:50:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,6 +42,24 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260725-16",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "8812c929323e724279de07b04bb5434477eea300",
+      "paths": [
+        "backend/community.js",
+        "assets/gate.js",
+        "assets/gate.css",
+        "assets/community-admin.js",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-25T20:50:00+07:00",
+      "summary": "Admin doc duoc binh luan bai thao luan; them cua so thao luan noi bat tren trang chinh de hut mem.",
+      "completed_at": "2026-07-25T20:50:00+07:00"
+    },
     {
       "id": "BOITOAN-20260725-15",
       "owner": "Claude Code",
