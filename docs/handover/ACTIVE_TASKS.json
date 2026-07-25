@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T15:10:00+07:00",
+  "updated_at": "2026-07-25T15:15:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "GROWTH-20260725-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-04-hotfix-vn-links",
+      "branch": "agent/GROWTH-20260725-04-lock",
       "base_sha": "696b3bd6e99a99cf8d0a3e2af64a67d86702a8f9",
       "paths": [
         "backend/choice.js",
@@ -36,7 +36,7 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T15:10:00+07:00",
+      "heartbeat_at": "2026-07-25T15:15:00+07:00",
       "summary": "Hotfix khẩn cấp: chỉ nhận Shopee VN, Lazada VN, Tiki, Sendo và TikTok Shop VN; tái tạo deeplink ACCESSTRADE; chặn link lỗi/ngoài Việt Nam; nhóm cùng sản phẩm chỉ khi có nhiều nơi bán thật; chống trùng toàn catalog. Sau hotfix tiếp tục sprint SEO/KPI 10 ngày."
     }
   ],
@@ -58,15 +58,6 @@
       "status": "completed",
       "completed_at": "2026-07-25T15:00:00+07:00",
       "summary": "PR #110 merge commit 67a95758e895ea05991c02f6dcfbbfcd8eefba2a; production run 30149234019 SUCCESS. Số thành viên công khai tự cập nhật sau thay đổi dữ liệu."
-    },
-    {
-      "id": "BOITOAN-20260725-06",
-      "owner": "Claude Code",
-      "branch": "claude/seed-quota-resilience",
-      "paths": ["assets/gate.js", "assets/community-admin.js", "backend/community.js", "boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
-      "status": "completed",
-      "completed_at": "2026-07-25T14:35:00+07:00",
-      "summary": "PR #103 merge commit 8d516458260e0f9ad83ab7ddb1f2834285659abe; production run 30148939852 SUCCESS."
     },
     {
       "id": "GROWTH-20260725-03",
