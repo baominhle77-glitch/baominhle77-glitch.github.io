@@ -13,6 +13,60 @@ const MAX_PAGE = 100;
 const READER_PAGE = 300; /* Trần số reader thật lấy trong một lần xem danh sách. */
 const enc = new TextEncoder();
 
+/* ===== Bộ lọc tiêu chuẩn cộng đồng =====
+ * Chạy trước khi lưu mọi nội dung do thành viên viết: đánh giá, bình luận, tin nhắn.
+ *   chan — không cho đăng, trả lời rõ lý do.
+ *   canh — vẫn đăng nhưng gắn cờ để Admin xem lại.
+ * Nhóm hứa hẹn bám Điều 3 quy tắc công ty: không hứa chữa bệnh, không cam kết đổi vận hay lợi nhuận. */
+const MOD_RULES = [
+  { id: "lua_dao", act: "chan", label: "Dấu hiệu lừa đảo tiền bạc",
+    re: /(chuyển\s*khoản\s*trước|đặt\s*cọc\s*ngay|cam\s*kết\s*hoàn\s*vốn|lãi\s*suất\s*cao\s*không\s*rủi\s*ro|việc\s*nhẹ\s*lương\s*cao|nạp\s*tiền\s*nhận\s*thưởng)/iu },
+  { id: "chua_benh", act: "chan", label: "Hứa chữa bệnh",
+    re: /(chữa\s*(?:khỏi|dứt\s*điểm|bách\s*bệnh)|khỏi\s*hẳn\s*ung\s*thư|không\s*cần\s*bác\s*sĩ|bỏ\s*thuốc\s*tây)/iu },
+  { id: "cam_ket_van", act: "chan", label: "Cam kết đổi vận hoặc nói chắc chắn về tương lai",
+    re: /(cam\s*kết\s*(?:đổi\s*vận|giàu|trúng|khỏi)|đảm\s*bảo\s*(?:trúng|thắng|giàu)|chắc\s*chắn\s*(?:trúng|thắng|khỏi\s*bệnh)|giải\s*hạn\s*100\s*%|hoá\s*giải\s*mọi\s*vận\s*xui)/iu },
+  { id: "de_doa", act: "chan", label: "Đe doạ hoặc gieo sợ hãi để ép người khác",
+    re: /(không\s*cúng\s*là\s*(?:chết|tai\s*hoạ|mất\s*mạng)|sẽ\s*gặp\s*đại\s*hoạ\s*nếu\s*không|nguyền\s*rủa\s*(?:cả\s*nhà|dòng\s*họ))/iu },
+  { id: "lo_thong_tin", act: "chan", label: "Lộ số điện thoại hoặc số tài khoản",
+    re: /(\b0\d{9,10}\b|(?:stk|số\s*tài\s*khoản)\s*[:：]?\s*\d{6,})/iu },
+  { id: "xuc_pham", act: "canh", label: "Lời lẽ xúc phạm",
+    re: /(đồ\s*(?:chó|ngu|khốn)|mày\s*câm|óc\s*chó|thằng\s*ngu|con\s*điên)/iu },
+  { id: "ky_thi", act: "canh", label: "Kỳ thị vùng miền, giới tính hoặc tôn giáo",
+    re: /(bọn\s*(?:bắc|nam|trung)\s*kỳ|đồ\s*(?:bê\s*đê|đồng\s*bóng))/iu },
+  { id: "spam", act: "canh", label: "Dấu hiệu spam hoặc kéo người sang nơi khác",
+    re: /(inbox\s*(?:zalo|tele)|add\s*zalo|kết\s*bạn\s*zalo\s*để\s*mua)/iu },
+];
+function moderateText(text) {
+  const value = String(text || "");
+  const hits = MOD_RULES.filter((rule) => rule.re.test(value));
+  if (!hits.length) return { action: "cho_dang", reasons: [] };
+  const blocked = hits.filter((h) => h.act === "chan");
+  return {
+    action: blocked.length ? "chan" : "canh",
+    reasons: (blocked.length ? blocked : hits).map((h) => ({ id: h.id, label: h.label })),
+  };
+}
+function moderationRejection(verdict) {
+  return json({
+    error: "vi_pham_tieu_chuan",
+    reasons: verdict.reasons,
+    message: "Nội dung này chưa đăng được vì vi phạm tiêu chuẩn cộng đồng: "
+      + verdict.reasons.map((r) => r.label.toLowerCase()).join("; ")
+      + ". Bạn hãy sửa lại rồi gửi lần nữa.",
+  }, 422);
+}
+function flagKey(at, id) { return `community-flagged:${String(at).padStart(13, "0")}:${id}`; }
+async function recordFlag(env, kind, item, verdict, author) {
+  const at = item.created_at || Date.now();
+  try {
+    await putJson(env, flagKey(at, item.id), {
+      id: item.id, kind, text: item.text, reasons: verdict.reasons,
+      author_id: author && author.id, author_name: author && author.display_name,
+      created_at: at, reviewed: false,
+    }, ACCOUNT_TTL);
+  } catch (_) {}
+}
+
 const json = (value, status = 200) => new Response(JSON.stringify(value), {
   status,
   headers: {
@@ -425,6 +479,8 @@ async function handleReaders(request, env, path) {
     const rating = Number(body && body.rating);
     const text = clean(body && body.text, 1500);
     if (!Number.isInteger(rating) || rating < 1 || rating > 5 || !text) return json({ error: "invalid_review" }, 400);
+    const modReview = moderateText(text);
+    if (modReview.action === "chan") return moderationRejection(modReview);
     const key = reviewKey(readerId, auth.profile.id);
     const old = await getJson(env, key);
     const review = {
@@ -504,6 +560,8 @@ async function handleConversations(request, env, path) {
       const type = body && body.type === "reading" && auth.profile.role === "reader" ? "reading" : "text";
       const clientId = body && body.client_id;
       if (!text || !isUuid(clientId)) return json({ error: "invalid_message" }, 400);
+      const modMessage = moderateText(text);
+      if (modMessage.action === "chan") return moderationRejection(modMessage);
       const dedupe = `community-message-done:${id}:${auth.profile.id}:${clientId}`;
       if (await env.KV.get(dedupe)) return json({ ok: true, duplicate: true });
       const now = Date.now();
@@ -594,12 +652,15 @@ async function handlePosts(request, env, path) {
     const body = await readJson(request);
     const text = clean(body && body.text, 2000);
     if (!text) return json({ error: "invalid_comment" }, 400);
+    const modComment = moderateText(text);
+    if (modComment.action === "chan") return moderationRejection(modComment);
     const now = Date.now(), id = crypto.randomUUID();
     const parentId = clean(body && body.parent_id, 60);
     if (parentId && !isUuid(parentId)) return json({ error: "invalid_parent" }, 400);
     if (parentId && !(await findComment(env, postId, parentId))) return json({ error: "parent_not_found" }, 404);
     const comment = { id, post_id: postId, parent_id: parentId || null, author_id: auth.profile.id, author_name: auth.profile.display_name, author_role: auth.profile.role, text, created_at: now, likes: 0, liked_by: [] };
     await putJson(env, postCommentKey(postId, now, id), comment, ACCOUNT_TTL);
+    if (modComment.action === "canh") await recordFlag(env, "binh_luan", comment, modComment, auth.profile);
     post.comment_count = Number(post.comment_count || 0) + 1; post.updated_at = now;
     await putJson(env, postKey(postId), post, ACCOUNT_TTL);
     return json({ comment }, 201);
@@ -831,6 +892,22 @@ async function simIndex(env) {
 function simPlan(i) {
   return i < SIM_GUESTS ? { index: i, role: "guest" } : { index: i - SIM_GUESTS, role: "reader" };
 }
+/* Một đợt sinh nick đời trước lưu bản rút gọn, thiếu cả cờ `simulated` lẫn phần hồ sơ.
+ * Những nick đó bấm vào là hỏng và trang cá nhân trống trơn. Hàm này dựng lại đủ hồ sơ
+ * từ tên tài khoản (simg000 / simr123 đã mã hoá sẵn vai trò và số thứ tự) và GIỮ NGUYÊN id. */
+function simRepair(account, now) {
+  if (!account || !account.username) return account;
+  if (account.simulated === true && account.created_at) return account;
+  const match = String(account.username).match(/^sim([gr])(\d{3})$/);
+  if (!match) return { ...account, simulated: true };
+  const role = match[1] === "r" ? "reader" : "guest";
+  const rebuilt = simProfile(Number(match[2]), role, now);
+  return { ...rebuilt, id: account.id, username: account.username, role: account.role || role };
+}
+/* Nick nằm trong chỉ mục thì đương nhiên là nick mô phỏng — không phụ thuộc cờ trong bản ghi. */
+function simHas(idx, uid) {
+  return (idx.accounts || []).some((a) => a && a.id === uid);
+}
 /* Sinh theo từng lô, gọi lại nhiều lần cho tới khi done = 385. */
 /* Sinh theo lô. Hồ sơ nick mô phỏng nằm trong CHÍNH khoá chỉ mục, không tạo mỗi nick một khoá:
  * cách cũ tốn ~661 lượt ghi cho 385 nick và đã ngốn sạch hạn mức ghi trong ngày, làm hỏng cả
@@ -862,7 +939,8 @@ async function seedSimulatedBatch(env) {
 /* Tra hồ sơ nick mô phỏng từ chỉ mục (chúng không có khoá hồ sơ riêng). */
 async function simProfileById(env, uid) {
   const idx = await simIndex(env);
-  return (idx.accounts || []).find((a) => a && a.id === uid) || null;
+  const found = (idx.accounts || []).find((a) => a && a.id === uid);
+  return found ? simRepair(found, Date.now()) : null;
 }
 async function handleSimulated(request, env, path, auth) {
   if (!auth.primary) return json({ error: "primary_admin_required" }, 403);
@@ -885,6 +963,24 @@ async function handleSimulated(request, env, path, auth) {
     const result = await seedSimulatedBatch(env);
     await adminAudit(env, request, "simulated_seed", "batch", result);
     return json(result, 201);
+  }
+  /* Dựng lại hồ sơ cho những nick lưu ở dạng rút gọn từ đợt sinh đời trước: thiếu cờ simulated,
+   * thiếu bio, ngày tạo, ngân hàng… nên bấm vào là hỏng và trang cá nhân trống. Một lượt ghi. */
+  if (uid === "repair" && request.method === "POST") {
+    const idx = await simIndex(env);
+    const now = Date.now();
+    let fixed = 0;
+    idx.accounts = (idx.accounts || []).map((a) => {
+      const next = simRepair(a, now);
+      if (next !== a) fixed += 1;
+      return next;
+    });
+    if (fixed) {
+      await putJson(env, SIM_INDEX_KEY, idx);
+      try { await env.KV.delete(STATS_CACHE_KEY); } catch (_) {}
+    }
+    await adminAudit(env, request, "simulated_repair", "index", { fixed, total: idx.accounts.length });
+    return json({ fixed, total: idx.accounts.length });
   }
   /* Dọn hồ sơ nick mô phỏng đời cũ. Bản sinh nick trước kia tạo mỗi nick một khoá hồ sơ thật;
    * chạy lại nhiều lần nên để lại hàng loạt hồ sơ trùng tên, làm số thành viên công khai sai.
@@ -911,9 +1007,15 @@ async function handleSimulated(request, env, path, auth) {
     const body = await readJson(request);
     const target = clean(body && body.uid, 60);
     if (!isUuid(target)) return json({ error: "invalid_uid" }, 400);
-    const profile = (await getJson(env, profileKey(target))) || (await simProfileById(env, target));
-    if (!profile) return json({ error: "not_found" }, 404);
-    if (!profile.simulated) return json({ error: "not_simulated" }, 403);
+    const idx = await simIndex(env);
+    const inIndex = simHas(idx, target);
+    const stored = inIndex
+      ? (idx.accounts || []).find((a) => a && a.id === target)
+      : await getJson(env, profileKey(target));
+    if (!stored) return json({ error: "not_found" }, 404);
+    /* Nằm trong chỉ mục là nick mô phỏng, kể cả bản ghi đời cũ thiếu cờ. */
+    if (!inIndex && !stored.simulated) return json({ error: "not_simulated" }, 403);
+    const profile = inIndex ? simRepair(stored, Date.now()) : stored;
     const did = clean(request.headers.get("x-owner-device-id"), 80);
     const token = await issueCommunitySession(env, profile, did, { mode: "puppet" });
     await adminAudit(env, request, "simulated_control", target, { username: profile.username, role: profile.role });
@@ -978,6 +1080,20 @@ async function handleAdmin(request, env, path) {
       await adminAudit(env, request, "member_deleted", uid, { username: profile.username, role: profile.role });
       return json({ ok: true });
     }
+  }
+  /* Bảng nội dung bị bộ lọc gắn cờ — Admin xem lại và xử. */
+  if (action === "moderation" && request.method === "GET") {
+    const page = await env.KV.list({ prefix: "community-flagged:", limit: 100 });
+    const items = (await Promise.all(page.keys.slice(-50).map((k) => getJson(env, k.name)))).filter(Boolean);
+    return json({ items: items.sort((x, y) => y.created_at - x.created_at), rules: MOD_RULES.map((r) => ({ id: r.id, label: r.label, action: r.act })) });
+  }
+  if (action === "moderation" && parts[4] && request.method === "DELETE") {
+    const page = await env.KV.list({ prefix: "community-flagged:", limit: 100 });
+    const hit = page.keys.find((k) => k.name.endsWith(":" + parts[4]));
+    if (!hit) return json({ error: "not_found" }, 404);
+    await env.KV.delete(hit.name);
+    await adminAudit(env, request, "moderation_cleared", parts[4]);
+    return json({ ok: true });
   }
   if (action === "reviews" && request.method === "GET") return json({ reviews: await listByPrefix(env, "community-review:", 100) });
   if (action === "reviews" && parts[4] && parts[5] && request.method === "DELETE") {

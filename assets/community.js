@@ -57,7 +57,10 @@
   }
   function humanError(error) {
     var code = error && error.message;
+    /* Bộ lọc tiêu chuẩn cộng đồng trả sẵn câu giải thích, dùng thẳng câu đó cho đúng lý do. */
+    if (code === "vi_pham_tieu_chuan" && error.data && error.data.message) return error.data.message;
     var map = {
+      vi_pham_tieu_chuan: "Nội dung này vi phạm tiêu chuẩn cộng đồng nên chưa đăng được.",
       gate_approval_required: "Phiên duyệt truy cập đã hết hạn. Hãy quay lại trang Bói toán và xin duyệt lại.",
       invalid_login: "Tên đăng nhập hoặc mật khẩu không đúng.",
       username_exists: "Tên đăng nhập đã được sử dụng.",

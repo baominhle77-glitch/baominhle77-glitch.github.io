@@ -22,6 +22,46 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 16:20 GMT+7 — Claude Code — BOITOAN-20260725-11 — ĐANG LÀM ⏳
+
+**1. Sửa lỗi bấm nick trong khoang riêng** (chủ sở hữu báo: bấm nick thì hiện `not_simulated`).
+
+Nguyên nhân: **160 nick đầu** được một đợt sinh đời trước lưu ở **dạng rút gọn** — thiếu cả cờ
+`simulated` lẫn phần hồ sơ (bio, ngày tạo, ngân hàng). 225 nick sinh sau đủ trường. Kiểm chứng trên
+production: `số bản ghi có cờ simulated = 225/385`, và nick trong ảnh chụp là `simg000` — đúng nick
+đầu của nhóm hỏng.
+
+Sửa hai lớp:
+- `control` không còn hỏi cờ trong bản ghi mà hỏi **nick có nằm trong chỉ mục khoang riêng không**.
+  Nằm trong là nick mô phỏng, đúng theo định nghĩa của chỉ mục.
+- Thêm `simRepair()` dựng lại đủ hồ sơ từ tên tài khoản (`simg000` / `simr123` đã mã hoá sẵn vai trò
+  và số thứ tự), **giữ nguyên id**; và `POST /api/community/admin/simulated/repair` chạy một lượt cho
+  cả 385 nick, tốn đúng một lượt ghi.
+
+**2. Bot kiểm duyệt tiêu chuẩn cộng đồng** (yêu cầu mới của chủ sở hữu).
+
+`moderateText()` chạy trước khi lưu **mọi nội dung thành viên viết**: đánh giá reader, bình luận bài,
+tin nhắn. Hai mức:
+- **chan** — không cho đăng, trả `422` kèm câu nói rõ vi phạm gì. Gồm: lừa đảo tiền bạc · hứa chữa
+  bệnh · cam kết đổi vận · đe doạ gieo sợ hãi · lộ số điện thoại hoặc số tài khoản.
+  Ba nhóm giữa bám thẳng **Điều 3 quy tắc công ty** (không hứa chữa bệnh, không cam kết đổi vận).
+- **canh** — vẫn đăng nhưng gắn cờ vào `community-flagged:` cho Admin xem lại. Gồm: xúc phạm · kỳ thị ·
+  spam kéo người sang nơi khác. Không chặn thẳng vì nhóm này dễ nhầm.
+
+Admin xem ở `GET /api/community/admin/moderation`, xử xong xoá bằng `DELETE .../moderation/<id>`.
+
+Đã thử 10 ca thật (câu bình thường, câu lừa đảo, câu hứa chữa bệnh, câu chửi, câu spam): **10/10 đúng**.
+
+**Giao diện cho bot kiểm duyệt** (không để tính năng nằm chết ở máy chủ):
+- Thành viên bị chặn **thấy đúng lý do** chứ không phải lỗi chung: `humanError` dùng thẳng câu giải
+  thích do bộ lọc trả về.
+- Trang quản trị có thêm tab **Kiểm duyệt**: danh sách nội dung bị gắn cờ kèm lý do và người viết,
+  nút *Đã xem xong* để xoá khỏi bảng, và bảng liệt kê các nhóm quy tắc đang áp dụng cùng cách xử.
+
+**3. Sơ đồ hệ thống cho người không biết code** — `docs/handover/SO-DO-HE-THONG.md`.
+Sáu sơ đồ: luồng khách mở app · ba loại tài khoản · khoang riêng · bot kiểm duyệt · quy trình đưa
+bản mới lên mạng · bảng tra sự cố. Viết bằng tiếng thường, không dùng từ kỹ thuật.
+
 ### 2026-07-25 16:00 GMT+7 — Claude Code — BOITOAN-20260725-10 — ĐANG LÀM ⏳
 
 **Trả trọn món nợ cuối: kho chữ Kinh Dịch.**
