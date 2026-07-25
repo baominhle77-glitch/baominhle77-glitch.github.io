@@ -1,8 +1,27 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T12:15:00+07:00",
+  "updated_at": "2026-07-25T14:20:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260725-06",
+      "owner": "Claude Code",
+      "branch": "claude/seed-quota-resilience",
+      "base_sha": "9e06caeda3ff0ae6cf90ca46e9fd00af6c76ac0b",
+      "paths": [
+        "assets/gate.js",
+        "assets/community-admin.js",
+        "backend/community.js",
+        "boitoan/index.html",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T11:40:00+07:00",
+      "heartbeat_at": "2026-07-25T14:20:00+07:00",
+      "summary": "Sua dang nhap Admin, viet lai gian doan doc bai va toan bo kho chu Lenormand, don ho so nick mo phong doi cu."
+    }
+  ],
   "recently_completed": [
     {
       "id": "GROWTH-20260725-03",
@@ -31,7 +50,12 @@
       "id": "BOITOAN-20260725-05",
       "owner": "Claude Code",
       "branch": "claude/fix-simulated-seed",
-      "paths": ["backend/community.js", "assets/community-admin.js", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md"],
+      "paths": [
+        "backend/community.js",
+        "assets/community-admin.js",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T11:10:00+07:00",
       "summary": "Sửa treo khoang riêng bằng chỉ mục, ghi theo lô và bộ đếm. PR #102 merge 45699fff5bbcdba15b4b8d778e203d11c8407dfd; production recorder aec8421277426603c566716114944ebe28f5eab4 và internal recorder fb7a3802523354d1348223c2252d87b8ea3a7200."
@@ -40,7 +64,15 @@
       "id": "BOITOAN-20260725-04",
       "owner": "Claude Code",
       "branch": "claude/admin-simulated-accounts",
-      "paths": ["backend/community.js", "assets/community.js", "assets/community-admin.js", "assets/community.css", "boitoan/community-admin.html", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md"],
+      "paths": [
+        "backend/community.js",
+        "assets/community.js",
+        "assets/community-admin.js",
+        "assets/community.css",
+        "boitoan/community-admin.html",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T10:15:00+07:00",
       "summary": "Khoang riêng Admin tổng và 385 nick mô phỏng. PR #100 merge dc98895; CI và production success."
@@ -49,7 +81,14 @@
       "id": "BOITOAN-20260725-03",
       "owner": "Claude Code",
       "branch": "claude/community-social-ui",
-      "paths": ["boitoan/index.html", "boitoan/community.html", "assets/community.js", "assets/community.css", "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md"],
+      "paths": [
+        "boitoan/index.html",
+        "boitoan/community.html",
+        "assets/community.js",
+        "assets/community.css",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T09:10:00+07:00",
       "summary": "Cập nhật tên lá bài trà và giao diện cộng đồng. PR #99; CI và production success."
@@ -58,7 +97,16 @@
       "id": "GROWTH-20260725-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-02-closeout",
-      "paths": ["backend/choice.js", "backend/choice-autopilot.js", "backend/choice-revenue.js", "backend/choice-setup.js", "hoi-chon-dung/**", "tools/**", ".github/workflows/**", "docs/handover/**"],
+      "paths": [
+        "backend/choice.js",
+        "backend/choice-autopilot.js",
+        "backend/choice-revenue.js",
+        "backend/choice-setup.js",
+        "hoi-chon-dung/**",
+        "tools/**",
+        ".github/workflows/**",
+        "docs/handover/**"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T03:15:00+07:00",
       "summary": "Affiliate đa lĩnh vực và Trung tâm kết nối owner production SUCCESS. PR #94; validation, production và recorder success."
@@ -67,7 +115,13 @@
       "id": "GOVERNANCE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GOVERNANCE-20260724-01-closeout",
-      "paths": ["AGENTS.md", "backend/**", ".github/workflows/**", "hoi-chon-dung/**", "docs/handover/**"],
+      "paths": [
+        "AGENTS.md",
+        "backend/**",
+        ".github/workflows/**",
+        "hoi-chon-dung/**",
+        "docs/handover/**"
+      ],
       "status": "completed",
       "completed_at": "2026-07-24T23:41:00+07:00",
       "summary": "Khắc phục hoàn toàn lỗi đưa nội dung owner/internal lên public UI; production public-private boundary SUCCESS."

@@ -22,7 +22,79 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-25 11:00 GMT+7 — Claude Code — BOITOAN-20260725-05 — ĐANG LÀM ⏳
+### 2026-07-25 11:40 GMT+7 — Claude Code — BOITOAN-20260725-06 — HOÀN TẤT ✅
+
+**Chịu lỗi hạn mức ghi KV.** Khi chạy sinh nick thật trên production đã chạm trần
+**1.000 lượt ghi/ngày của KV gói miễn phí** ở nick thứ **160/385**
+(đủ 109 khách + 51/276 reader). Hai lỗi lộ ra và đã sửa:
+
+- `GET /api/community/stats` **chết** khi không ghi được cache — nay bọc `try/catch`, vẫn trả số
+  liệu dù không lưu được cache. Cùng cách với `bumpStats`.
+- Sinh nick nay trả `quota_exhausted: true` kèm tiến độ thật thay vì lỗi máy chủ chung; tiến độ
+  `done` giữ nguyên nên gọi lại là chạy tiếp đúng chỗ. Giao diện hiện thông báo rõ thay vì quay vô tận.
+
+**Đăng nhập Admin.** Hạn mức ghi cạn làm mọi lượt đăng nhập Admin đổ về một câu báo lỗi chung,
+khiến chủ sở hữu tưởng sai mật khẩu. Đã sửa ba chỗ:
+
+- Backend trả `storage_quota_exhausted` (503) kèm câu giải thích, thay cho `community_server` (500).
+- Giao diện đọc mã lỗi đó và nói thẳng: mật khẩu vẫn đúng, chỉ là hết hạn mức ghi trong ngày.
+- `handleAdminLogin` trước đây đọc **từng** bản ghi phiên khi dọn phiên cũ. Nay phiên Admin mang
+  `metadata { v, p }` nên chỉ cần một lần `list`; bản ghi đời cũ chưa có metadata thì đọc tối đa
+  `ADMIN_SESSION_PROBE_LIMIT = 20`. Một lần đăng nhập không còn phụ thuộc số phiên tồn đọng.
+
+**Kiểm chứng trên production** (10:20 GMT+7, sau khi hạn mức làm mới lúc 00:00 UTC):
+`POST /api/community/admin/login` với mật khẩu Admin tổng trả **HTTP 200**, `level: primary`.
+Đăng nhập đã hoạt động trở lại.
+
+**Giọng đọc bài — viết lại toàn bộ theo góp ý của chủ sở hữu.** Sáu lỗi được chỉ ra và đã sửa:
+
+1. **Gọi sai tên.** Trải bài phương Tây mà dùng chữ *quẻ* (từ của Kinh Dịch). Nay Lenormand, Tarot,
+   Bài Tây dùng *trải bài · lá bài · lá cuối*; nhãn Celtic Cross đổi *Tâm quẻ* thành *Tâm bài*.
+   Chữ *quẻ* chỉ còn ở phần Kinh Dịch, nơi nó đúng.
+2. **Nghĩa lá bị cắt cụt.** `lenBit` cắt câu ở dấu chấm phẩy nên người đọc chỉ thấy một mảnh.
+   Thay bằng `lenFull`: lấy trọn nghĩa theo lĩnh vực và tách dấu chấm phẩy thành câu riêng.
+3. **Câu nối lặp y hệt mọi lượt** ("đây là cái nền đã có sẵn từ trước…"). Nay câu nối đổi theo
+   cực tính từng lá và theo chiều đi giữa các lá, chọn ổn định theo chỉ số lá nên cùng một quẻ
+   đọc lại vẫn ra đúng câu đó.
+4. **Không xưng hô.** Toàn bộ lời đọc nay nói với *bạn*.
+5. **Từ địa phương và từ lóng**: *khúc, xử, trôi, sáng ra, gợn, ngả về, networking, bàn bài* —
+   đã thay bằng từ phổ thông. Riêng *bàn bài* là từ chủ sở hữu đã cấm và vẫn còn sót trong
+   `buildAnswerPanel`; nay đã hết.
+6. **Khẳng định thứ không thể biết.** Kho chữ cũ viết "cắt hợp đồng" cho lá Scythe, trong khi lá
+   chỉ nói về một việc bị cắt dứt khoát. **Đã viết lại toàn bộ 108 câu nghĩa của `LEN_EXT`**
+   (36 lá × 3 lĩnh vực): nói dứt khoát *việc gì xảy ra* và *bạn nên làm gì*, không đoán bừa
+   *vật gì* bị tác động; bỏ hết ẩn dụ, chữ tiếng Anh và dấu ngoặc kép mỉa mai.
+
+Ngoài ra sửa hai chỗ tự mâu thuẫn: câu nối trước đây chỉ nhìn hiệu số điểm nên nói "chuyển sang
+chiều thuận hơn" ngay trước một lá xấu, và nói "giữ nguyên chiều cũ" ngay trước lá Stork (nghĩa là
+đổi thay). Nay lời bình theo **cực tính tuyệt đối** của lá đang nói, câu nối mới theo chiều đi.
+
+**Còn nợ:** kho chữ của Tarot, Bài Tây, Rune, Bài Trà chưa được rà cùng chuẩn này; mới sửa các
+chỗ lộ ra khi quét theo loại lỗi. Việc tiếp theo là rà trọn từng bộ.
+
+**Dọn rác dữ liệu nick mô phỏng.** `GET /api/community/stats` đang trả **2.086 thành viên** —
+sai. Nguyên nhân: bản sinh nick đời trước tạo **mỗi nick một khoá hồ sơ thật** và bị gọi lại nhiều
+lần, để lại hàng loạt hồ sơ `simulated: true` trùng tên; bản mới lại giữ nick trong khoá chỉ mục,
+nên cùng một nick bị đếm hai lần.
+
+- Thêm `POST /api/community/admin/simulated/cleanup` (chỉ Admin tổng): quét `community-profile:`
+  theo lô 200 kèm con trỏ, xoá hồ sơ có cờ `simulated` cùng khoá `community-reader:` của nó, rồi
+  xoá cache đếm để số thành viên tính lại từ đầu. Trả `cursor` để gọi tiếp cho tới `done`.
+- `GET /api/community/readers` trước đây **không** hiện reader mô phỏng (chúng nằm trong chỉ mục,
+  không có khoá hồ sơ). Nay ghép cả hai nguồn. Đồng thời bỏ bước đọc bản ghi trỏ — tên khoá
+  `community-reader:<uid>` đã chứa uid — nên chi phí giảm một nửa.
+
+**Ranh giới nội dung công khai.** `assets/gate.js` từng để tên hạ tầng nội bộ trong câu báo lỗi
+đăng nhập, làm `tools/check-public-content.mjs` đỏ. Đã đổi câu đó.
+
+**Bài học — đừng sửa thẳng file đã có script làm sạch.** Chân trang `hoi-chon-dung/index.html`
+cũng chứa tên hạ tầng, nhưng đó là **bản gốc trước khi làm sạch**: `tools/apply-choice-autopilot-ui.mjs`
+lấy đúng câu ấy làm mốc neo rồi thay bằng khối "Trước khi mua". Sửa thẳng file gốc khiến regex
+không khớp, khối bắt buộc không được chèn, và `validate` đỏ ở chỗ khác. Đã trả file về nguyên
+trạng. **Quy tắc rút ra: trước khi sửa một file public, kiểm tra xem có `tools/apply-*.mjs` nào
+đang sinh hoặc làm sạch file đó không — nếu có thì sửa ở script, không sửa ở file.**
+
+### 2026-07-25 11:00 GMT+7 — Claude Code — BOITOAN-20260725-05 — HOÀN TẤT ✅
 
 **Sửa lỗi treo ở Khoang riêng** (chủ sở hữu báo: bấm sinh nick thì kẹt ở "Đang tải khoang riêng…").
 

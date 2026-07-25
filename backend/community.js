@@ -10,6 +10,7 @@ const GATE_SESSION_TTL = 12 * 60 * 60;
 const MESSAGE_TTL = 30 * 24 * 60 * 60;
 const REVIEW_TTL = 3650 * 24 * 60 * 60;
 const MAX_PAGE = 100;
+const READER_PAGE = 300; /* Trần số reader thật lấy trong một lần xem danh sách. */
 const enc = new TextEncoder();
 
 const json = (value, status = 200) => new Response(JSON.stringify(value), {
@@ -140,7 +141,9 @@ async function communityAuth(request, env) {
   const claims = await verifyJwt(secret, bearer(request));
   if (!claims || claims.aud !== "community" || !isUuid(claims.sid) || !isUuid(claims.uid) || !isUuid(claims.did) || !validRole(claims.role)) return null;
   const session = await getJson(env, sessionKey(claims.sid));
-  const profile = await getJson(env, profileKey(claims.uid));
+  /* Nick mô phỏng nằm trong khoá chỉ mục chứ không có khoá hồ sơ riêng. */
+  const profile = (await getJson(env, profileKey(claims.uid)))
+    || (claims.mode === "puppet" ? await simProfileById(env, claims.uid) : null);
   if (!session || !session.active || session.expires_at <= Date.now() || session.uid !== claims.uid || session.did !== claims.did || !profile || profile.suspended) return null;
   return { claims, profile };
 }
@@ -398,9 +401,16 @@ async function handleReaders(request, env, path) {
   const action = parts[4] || "";
   if (!readerId) {
     if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405);
-    const refs = await listByPrefix(env, "community-reader:", 100);
-    const profiles = (await Promise.all(refs.map((r) => getJson(env, profileKey(r.uid))))).filter((p) => p && !p.suspended && p.role === "reader");
-    return json({ readers: profiles.map((p) => publicProfile(p, false)).sort((a, b) => b.rating - a.rating || b.review_count - a.review_count) });
+    /* Tên khoá đã chứa uid nên không phải đọc bản ghi trỏ: mỗi reader chỉ tốn một lượt đọc hồ sơ. */
+    const page = await env.KV.list({ prefix: "community-reader:", limit: READER_PAGE });
+    const uids = page.keys.map((k) => k.name.slice("community-reader:".length)).filter(isUuid);
+    const profiles = (await Promise.all(uids.map((id) => getJson(env, profileKey(id)))))
+      .filter((p) => p && !p.suspended && p.role === "reader");
+    /* Nick mô phỏng nằm trong khoá chỉ mục nên phải ghép vào đây, nếu không khoang riêng có
+     * reader mà trang tìm reader lại không thấy. */
+    const sim = ((await simIndex(env)).accounts || []).filter((a) => a && a.role === "reader" && !a.suspended);
+    const readers = [...profiles, ...sim].map((p) => publicProfile(p, false));
+    return json({ readers: readers.sort((a, b) => b.rating - a.rating || b.review_count - a.review_count) });
   }
   if (!isUuid(readerId)) return json({ error: "invalid_reader" }, 400);
   const reader = await getJson(env, profileKey(readerId));
@@ -539,9 +549,11 @@ function postCommentKey(id, at, cid) { return `${postCommentPrefix(id)}${String(
 function auditKey(at, id) { return `community-audit:${String(at).padStart(13, "0")}:${id}`; }
 async function adminAudit(env, request, action, target, extra = {}) {
   const at = Date.now();
+  try {
   await putJson(env, auditKey(at, crypto.randomUUID()), {
     action, target: clean(target, 120), device_id: clean(request.headers.get("x-owner-device-id"), 80), created_at: at, ...extra,
   }, ACCOUNT_TTL);
+  } catch (_) { /* Ghi nhật ký hỏng không được chặn đăng nhập hay thao tác quản trị. */ }
 }
 async function deleteMemberAccount(env, uid) {
   const profile = isUuid(uid) && await getJson(env, profileKey(uid));
@@ -641,6 +653,8 @@ function adminSessionKey(sid) { return `community-admin-session:${sid}`; }
 /* Account V7 admin login hotfix */
 /* Account V8 edge-safe admin authentication */
 const ADMIN_AUTH_VERSION = "2026-07-24-v11";
+/* Trần số bản ghi phiên đời cũ được đọc trong một lần đăng nhập. */
+const ADMIN_SESSION_PROBE_LIMIT = 20;
 function adminPasswordConfig(env) {
   return {
     saltB64: String(env.ADMIN_V8_PASSWORD_SALT_B64 || "Wg1fGuw3MNtQz8jVKobFUA=="),
@@ -692,7 +706,12 @@ async function issueAdminSession(env, did, remember, level) {
   const ttl = remember ? ADMIN_SESSION_LONG_TTL : ADMIN_SESSION_SHORT_TTL;
   const expiresAt = Date.now() + ttl * 1000;
   const primary = level === "primary";
-  await putJson(env, adminSessionKey(sid), { active: true, did, level, primary, auth_version: ADMIN_AUTH_VERSION, expires_at: expiresAt }, ttl);
+  /* Gắn metadata để lúc đăng nhập chỉ cần list là biết phiên nào cũ, không phải đọc từng bản ghi. */
+  await env.KV.put(
+    adminSessionKey(sid),
+    JSON.stringify({ active: true, did, level, primary, auth_version: ADMIN_AUTH_VERSION, expires_at: expiresAt }),
+    { expirationTtl: ttl, metadata: { v: ADMIN_AUTH_VERSION, p: primary } },
+  );
   return {
     token: await makeJwt(sessionSecret(env), { aud: "community-admin", sid, did, role: "admin", level, primary, auth_version: ADMIN_AUTH_VERSION }, ttl),
     expires_at: expiresAt,
@@ -730,14 +749,24 @@ async function handleAdminLogin(request, env) {
   if (!level) return json({ error: "invalid_admin_login" }, 401);
   const key = entryDecryptKey(env);
   if (!key) return json({ error: "decrypt_key_unavailable" }, 503);
+  /* Quét phiên cũ bằng metadata của list; chỉ đọc bản ghi cho các phiên đời cũ chưa có metadata,
+   * và giới hạn số lần đọc để một lần đăng nhập không bao giờ chạm trần subrequest. */
   const existing = await env.KV.list({ prefix: "community-admin-session:", limit: 1000 });
   const staleOrPrimary = [];
+  let probes = 0;
   for (const key of existing.keys) {
+    const meta = key.metadata;
+    if (meta && typeof meta === "object") {
+      if (meta.v !== ADMIN_AUTH_VERSION || (level === "primary" && meta.p)) staleOrPrimary.push(key.name);
+      continue;
+    }
+    if (probes >= ADMIN_SESSION_PROBE_LIMIT) { staleOrPrimary.push(key.name); continue; }
+    probes += 1;
     const record = await getJson(env, key.name);
     if (!record || record.auth_version !== ADMIN_AUTH_VERSION || (level === "primary" && record.primary)) staleOrPrimary.push(key.name);
   }
-  await Promise.all(staleOrPrimary.map((key) => env.KV.delete(key)));
-  if (level === "primary") await env.KV.put("community-owner-device", deviceId);
+  try { await Promise.all(staleOrPrimary.map((key) => env.KV.delete(key))); } catch (_) {}
+  if (level === "primary") { try { await env.KV.put("community-owner-device", deviceId); } catch (_) {} }
   const session = await issueAdminSession(env, deviceId, body && body.remember !== false, level);
   await adminAudit(env, request, level === "primary" ? "admin_primary_login" : "admin_regular_login", deviceId);
   return json({ ...session, role: "admin", level, primary: level === "primary", device_id: deviceId, key });
@@ -793,6 +822,7 @@ function simProfile(index, role, now) {
 }
 const SIM_INDEX_KEY = "community-simulated-index";
 const SIM_BATCH = 40; /* Mỗi lượt ghi giới hạn để không vượt trần subrequest của Worker. */
+const SIM_CLEAN_BATCH = 200; /* Số hồ sơ quét trong một lượt dọn rác. */
 /* Danh sách nick mô phỏng nằm gọn trong MỘT khoá, nên xem danh sách chỉ tốn 1 lượt đọc
  * thay vì quét toàn bộ hồ sơ (cách cũ làm treo request khi số nick lớn). */
 async function simIndex(env) {
@@ -802,29 +832,36 @@ function simPlan(i) {
   return i < SIM_GUESTS ? { index: i, role: "guest" } : { index: i - SIM_GUESTS, role: "reader" };
 }
 /* Sinh theo từng lô, gọi lại nhiều lần cho tới khi done = 385. */
+/* Sinh theo lô. Hồ sơ nick mô phỏng nằm trong CHÍNH khoá chỉ mục, không tạo mỗi nick một khoá:
+ * cách cũ tốn ~661 lượt ghi cho 385 nick và đã ngốn sạch hạn mức ghi trong ngày, làm hỏng cả
+ * đăng nhập của chủ sở hữu. Cách này chỉ tốn vài lượt ghi cho toàn bộ 385 nick. */
 async function seedSimulatedBatch(env) {
   const idx = await simIndex(env);
   const total = SIM_GUESTS + SIM_READERS;
   if (idx.done >= total) return { created: 0, done: idx.done, total, complete: true };
   const now = Date.now();
-  const writes = [];
   const stop = Math.min(idx.done + SIM_BATCH, total);
   for (let i = idx.done; i < stop; i += 1) {
     const plan = simPlan(i);
-    const p = simProfile(plan.index, plan.role, now);
-    writes.push(putJson(env, profileKey(p.id), p));
-    if (plan.role === "reader") writes.push(putJson(env, readerIndexKey(p.id), { uid: p.id, created_at: now }));
-    idx.accounts.push({
-      id: p.id, username: p.username, role: p.role, display_name: p.display_name,
-      avatar_hue: p.avatar_hue, specialties: p.specialties || [], experience_years: p.experience_years || 0,
-    });
+    idx.accounts.push(simProfile(plan.index, plan.role, now));
   }
   const created = stop - idx.done;
   idx.done = stop;
-  await Promise.all(writes);
-  await putJson(env, SIM_INDEX_KEY, idx);
-  await bumpStats(env, { guests: 0, readers: 0 }, true);
+  try {
+    await putJson(env, SIM_INDEX_KEY, idx); /* 1 lượt ghi cho cả lô */
+  } catch (error) {
+    const detail = String((error && error.message) || error);
+    if (detail.includes("limit exceeded")) {
+      return { created: 0, done: idx.done - created, total, complete: false, quota_exhausted: true, detail };
+    }
+    throw error;
+  }
   return { created, done: idx.done, total, complete: idx.done >= total };
+}
+/* Tra hồ sơ nick mô phỏng từ chỉ mục (chúng không có khoá hồ sơ riêng). */
+async function simProfileById(env, uid) {
+  const idx = await simIndex(env);
+  return (idx.accounts || []).find((a) => a && a.id === uid) || null;
 }
 async function handleSimulated(request, env, path, auth) {
   if (!auth.primary) return json({ error: "primary_admin_required" }, 403);
@@ -848,11 +885,32 @@ async function handleSimulated(request, env, path, auth) {
     await adminAudit(env, request, "simulated_seed", "batch", result);
     return json(result, 201);
   }
+  /* Dọn hồ sơ nick mô phỏng đời cũ. Bản sinh nick trước kia tạo mỗi nick một khoá hồ sơ thật;
+   * chạy lại nhiều lần nên để lại hàng loạt hồ sơ trùng tên, làm số thành viên công khai sai.
+   * Nay nick mô phỏng chỉ nằm trong khoá chỉ mục, các hồ sơ cũ đó là rác và phải xoá.
+   * Quét theo lô kèm con trỏ để một request không bao giờ chạm trần subrequest. */
+  if (uid === "cleanup" && request.method === "POST") {
+    const body = await readJson(request);
+    const cursor = clean(body && body.cursor, 1024) || undefined;
+    const page = await env.KV.list({ prefix: "community-profile:", limit: SIM_CLEAN_BATCH, cursor });
+    const records = await Promise.all(page.keys.map(async (k) => ({ name: k.name, value: await getJson(env, k.name) })));
+    const doomed = records.filter((r) => r.value && r.value.simulated === true);
+    const jobs = [];
+    for (const item of doomed) {
+      jobs.push(env.KV.delete(item.name));
+      if (item.value.role === "reader") jobs.push(env.KV.delete(readerIndexKey(item.value.id)));
+    }
+    await Promise.all(jobs);
+    if (doomed.length) { try { await env.KV.delete(STATS_CACHE_KEY); } catch (_) {} }
+    const next = page.list_complete ? null : page.cursor;
+    await adminAudit(env, request, "simulated_cleanup", "batch", { scanned: page.keys.length, deleted: doomed.length });
+    return json({ scanned: page.keys.length, deleted: doomed.length, cursor: next, done: !next });
+  }
   if (uid === "control" && request.method === "POST") {
     const body = await readJson(request);
     const target = clean(body && body.uid, 60);
     if (!isUuid(target)) return json({ error: "invalid_uid" }, 400);
-    const profile = await getJson(env, profileKey(target));
+    const profile = (await getJson(env, profileKey(target))) || (await simProfileById(env, target));
     if (!profile) return json({ error: "not_found" }, 404);
     if (!profile.simulated) return json({ error: "not_simulated" }, 403);
     const did = clean(request.headers.get("x-owner-device-id"), 80);
@@ -1002,15 +1060,19 @@ async function rebuildStats(env) {
   } while (rc);
   const simIdxValue = await getJson(env, "community-simulated-index");
   const simAccounts = (simIdxValue && simIdxValue.accounts) || [];
-  const total = scanned;
-  readers = readerCount;
+  const simReaders = simAccounts.filter((a) => a && a.role === "reader").length;
+  const simGuests = simAccounts.length - simReaders;
+  const total = scanned + simAccounts.length;
+  readers = readerCount + simReaders;
   guests = Math.max(0, total - readers - admins);
   const value = { members: total, guests, readers, admins, sim: simAccounts.length, updated_at: Date.now() };
-  await putJson(env, STATS_CACHE_KEY, value);
+  /* Ghi cache là tối ưu, không phải điều kiện bắt buộc: hết hạn mức ghi vẫn phải trả số liệu. */
+  try { await putJson(env, STATS_CACHE_KEY, value); } catch (_) {}
   return value;
 }
 /* Cộng dồn khi có thay đổi, rẻ hơn quét lại. */
 async function bumpStats(env, delta, rebuild) {
+  try {
   if (rebuild) { await env.KV.delete(STATS_CACHE_KEY); return; }
   const cur = await readStats(env);
   if (!cur) return;
@@ -1019,6 +1081,7 @@ async function bumpStats(env, delta, rebuild) {
   cur.members = cur.guests + cur.readers + Number(cur.admins || 0);
   cur.updated_at = Date.now();
   await putJson(env, STATS_CACHE_KEY, cur);
+  } catch (_) {}
 }
 async function handleStats(request, env) {
   const cached = await readStats(env);
@@ -1042,7 +1105,13 @@ export async function handleCommunity(request, env) {
     if (path.startsWith("/api/community/admin/")) return await handleAdmin(request, env, path);
     return json({ error: "not_found" }, 404);
   } catch (error) {
-    return json({ error: "community_server", detail: clean(error && error.message, 120) }, 500);
+    const detail = clean(error && error.message, 160);
+    /* Hết hạn mức ghi trong ngày là lỗi hạ tầng, phải nói rõ để không bị hiểu là sai mật khẩu. */
+    if (String(detail).includes("limit exceeded")) {
+      return json({ error: "storage_quota_exhausted", detail,
+        message: "Hệ thống đã chạm trần ghi dữ liệu của ngày hôm nay. Đăng nhập và các thao tác ghi sẽ hoạt động lại khi hạn mức làm mới." }, 503);
+    }
+    return json({ error: "community_server", detail }, 500);
   }
 }
 

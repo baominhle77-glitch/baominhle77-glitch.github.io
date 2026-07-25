@@ -101,6 +101,12 @@
   function seedAll(){
     function step(){
       api("/api/community/admin/simulated", { method: "POST" }).then(function(result){
+        if (result.quota_exhausted) {
+          simCache = null;
+          setStatus("Đã sinh " + result.done + "/" + result.total + " nick. Hạn mức ghi dữ liệu trong ngày đã hết — phần còn lại sẽ tự sinh tiếp khi hạn mức làm mới.", true);
+          loadSimulated();
+          return;
+        }
         setStatus("Đang sinh nick… " + result.done + "/" + result.total);
         if (!result.complete) { setTimeout(step, 120); return; }
         simCache = null; setStatus("Đã sinh đủ " + result.total + " nick."); loadSimulated();
