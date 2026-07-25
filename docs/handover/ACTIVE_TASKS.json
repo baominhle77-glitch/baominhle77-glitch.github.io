@@ -1,8 +1,27 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T05:20:00+07:00",
+  "updated_at": "2026-07-25T06:00:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "BOITOAN-20260725-03",
+      "owner": "Claude Code",
+      "branch": "claude/community-social-ui",
+      "base_sha": "e15e35f45da5a993315b60975f4be76c0c5241e1",
+      "paths": [
+        "boitoan/index.html",
+        "boitoan/community.html",
+        "assets/community.js",
+        "assets/community.css",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T05:30:00+07:00",
+      "heartbeat_at": "2026-07-25T06:00:00+07:00",
+      "summary": "Sua ten cac la Bai Tra sang tieng Anh chuan tasseography va sua cach goi 'bai tra'; giao dien tra loi + thich binh luan, avatar va badge loai nick; so thanh vien cong khai tren dau trang; chat gui lac quan va chi noi tin moi."
+    }
+  ],
   "recently_completed": [
     {
       "id": "BOITOAN-20260725-02",
