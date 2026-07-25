@@ -27,87 +27,73 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
 
-      - name: Kiểm tra và tạo nội dung SEO đa lĩnh vực
+      - name: Materialize V2 và tạo SEO từ catalog live
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
+          node tools/apply-choice-product-v2.mjs
           node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-access-fallback.mjs
           node tools/apply-choice-seo-multiniche.mjs
           node tools/apply-choice-autopilot-ui.mjs
-          node --check tools/choice-taxonomy.mjs
-          node --check tools/apply-choice-multiniche.mjs
-          node --check tools/apply-choice-seo-multiniche.mjs
           node --check tools/build-choice-seo.mjs
-          node --check tools/submit-indexnow.mjs
-          node --check tools/submit-google-sitemap.mjs
-          node --test tools/choice-multiniche.test.mjs
           node --test tools/choice-seo.test.mjs
+          node --test hoi-chon-dung/app.test.mjs
           node tools/build-choice-seo.mjs --out "$RUNNER_TEMP/choice-seo"
+          test -s "$RUNNER_TEMP/choice-seo/sitemap.xml"
+          test -s "$RUNNER_TEMP/choice-seo/feed.xml"
           test -s "$RUNNER_TEMP/choice-seo/danh-muc/cong-nghe-phu-kien-so/index.html"
-          test -s "$RUNNER_TEMP/choice-seo/danh-muc/nha-cua-gia-dung/index.html"
           test -s "$RUNNER_TEMP/choice-seo/danh-muc/du-lich-di-chuyen/index.html"
-          test "$(cat google91001f63e8104533.html)" = "google-site-verification: google91001f63e8104533.html"
-          grep -q '0241E6F1BFFED8BCC15C18665C1FAD6C' BingSiteAuth.xml
+          ! grep -RqiE 'Link tham khảo|google\.com/search|seed fallback|SEED_PRODUCTS' hoi-chon-dung/*.js hoi-chon-dung/*.html "$RUNNER_TEMP/choice-seo"
           node tools/check-public-content.mjs
 
-      - name: Gộp site với trang SEO mới
+      - name: Gộp site với giao diện nhiều luồng
         run: |
           set -euo pipefail
           rm -rf _site
-          mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data _site/hoi-chon-dung/data
+          mkdir -p _site/boitoan _site/assets _site/medora _site/vietnam-travel/data _site/hoi-chon-dung
           cp index.html manifest.webmanifest sw.js robots.txt e4c968d6c15b4ef69083f88f4f8d1e76.txt google91001f63e8104533.html BingSiteAuth.xml _site/
           cp assets/gate.js assets/gate.css assets/community.js assets/community-admin.js assets/community.css _site/assets/
           cp boitoan/index.html boitoan/community.html boitoan/community-admin.html boitoan/sw.js boitoan/manifest.webmanifest boitoan/icon-192.png boitoan/icon.png _site/boitoan/
           cp medora/index.html _site/medora/index.html
           cp vietnam-travel/index.html vietnam-travel/app.css vietnam-travel/app.js vietnam-travel/manifest.webmanifest vietnam-travel/sw.js vietnam-travel/icon.svg _site/vietnam-travel/
           cp vietnam-travel/data/seed-places.js _site/vietnam-travel/data/
-          cp hoi-chon-dung/index.html hoi-chon-dung/app.css hoi-chon-dung/app.js hoi-chon-dung/manifest.webmanifest hoi-chon-dung/sw.js hoi-chon-dung/icon.svg hoi-chon-dung/og-image.svg _site/hoi-chon-dung/
-          cp hoi-chon-dung/data/seed-products.js _site/hoi-chon-dung/data/
+          cp -R hoi-chon-dung/. _site/hoi-chon-dung/
+          rm -rf _site/hoi-chon-dung/data _site/hoi-chon-dung/autopilot-ui.js _site/hoi-chon-dung/*.test.mjs
           cp "$RUNNER_TEMP/choice-seo/sitemap.xml" "$RUNNER_TEMP/choice-seo/feed.xml" _site/hoi-chon-dung/
           cp -R "$RUNNER_TEMP/choice-seo/san-pham" "$RUNNER_TEMP/choice-seo/danh-muc" "$RUNNER_TEMP/choice-seo/huong-dan" _site/hoi-chon-dung/
           node tools/check-public-content.mjs _site
 
-      - name: Deploy Pages SEO
+      - name: Deploy Pages SEO V2
         run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
 
-      - name: Thông báo URL mới cho IndexNow
-        run: node tools/submit-indexnow.mjs "$RUNNER_TEMP/choice-seo/seo-urls.json"
-
-      - name: Gửi sitemap tới Google Search Console khi đã cấp quyền
+      - name: Thông báo search engines
         continue-on-error: true
-        run: node tools/submit-google-sitemap.mjs
+        run: |
+          node tools/submit-indexnow.mjs "$RUNNER_TEMP/choice-seo/seo-urls.json"
+          node tools/submit-google-sitemap.mjs
 
-      - name: Hậu kiểm SEO production đa lĩnh vực
+      - name: Hậu kiểm SEO và giao diện V2 production
         run: |
           set -euo pipefail
-          sample=$(node -e 'const x=require(process.argv[1]); console.log(x.urls.find(u=>u.includes("/san-pham/"))||"")' "$RUNNER_TEMP/choice-seo/seo-urls.json")
-          test -n "$sample"
           for attempt in $(seq 1 25); do
+            home=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/?run=$GITHUB_RUN_ID" || true)
+            explore=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/kham-pha.html?run=$GITHUB_RUN_ID" || true)
+            product=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/san-pham.html?run=$GITHUB_RUN_ID" || true)
             sitemap=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/sitemap.xml?run=$GITHUB_RUN_ID" || true)
-            feed=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/feed.xml?run=$GITHUB_RUN_ID" || true)
-            page=$(curl -fsSL "$sample?run=$GITHUB_RUN_ID" || true)
             tech=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/danh-muc/cong-nghe-phu-kien-so/?run=$GITHUB_RUN_ID" || true)
-            travel=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/danh-muc/du-lich-di-chuyen/?run=$GITHUB_RUN_ID" || true)
-            key=$(curl -fsSL "https://hiennhi89.pages.dev/e4c968d6c15b4ef69083f88f4f8d1e76.txt?run=$GITHUB_RUN_ID" || true)
-            google_verify=$(curl -fsSL "https://hiennhi89.pages.dev/google91001f63e8104533.html?run=$GITHUB_RUN_ID" || true)
-            bing_verify=$(curl -fsSL "https://hiennhi89.pages.dev/BingSiteAuth.xml?run=$GITHUB_RUN_ID" || true)
-            if grep -q '<urlset' <<<"$sitemap" \
-              && grep -q '/san-pham/' <<<"$sitemap" \
-              && grep -q '/danh-muc/cong-nghe-phu-kien-so/' <<<"$sitemap" \
-              && grep -q '/danh-muc/du-lich-di-chuyen/' <<<"$sitemap" \
-              && grep -q '<rss version="2.0">' <<<"$feed" \
-              && grep -q '"@type":"Product"' <<<"$page" \
-              && grep -q 'Công bố liên kết tiếp thị' <<<"$page" \
-              && grep -q 'Chọn phụ kiện công nghệ đáng mua' <<<"$tech" \
-              && grep -q 'Chọn đồ du lịch và phụ kiện di chuyển' <<<"$travel" \
-              && grep -q 'e4c968d6c15b4ef69083f88f4f8d1e76' <<<"$key" \
-              && grep -q 'google-site-verification: google91001f63e8104533.html' <<<"$google_verify" \
-              && grep -q '0241E6F1BFFED8BCC15C18665C1FAD6C' <<<"$bing_verify" \
-              && ! grep -qiE 'Autopilot|onboarding_required|Cloudflare Worker|API key|chủ sở hữu' <<<"$page$tech$travel"; then
-              echo "Growth SEO đa lĩnh vực và xác minh search production đạt ở lần $attempt"
-              exit 0
+            api=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/products?limit=1" || true)
+            if grep -q 'Chỉ link affiliate đã xác minh' <<<"$home" \
+              && grep -q 'Khám phá sản phẩm' <<<"$explore" \
+              && grep -q 'Chi tiết sản phẩm và nơi bán' <<<"$product" \
+              && grep -q '<urlset' <<<"$sitemap" \
+              && grep -q 'Phụ kiện công nghệ' <<<"$tech" \
+              && grep -q '"affiliate_only":true' <<<"$api" \
+              && ! grep -qiE 'Link tham khảo|google\.com/search|SEED_PRODUCTS' <<<"$home$explore$product$tech"; then
+                echo "Growth SEO Hội Chọn Đúng V2 đạt ở lần $attempt"
+                exit 0
             fi
             sleep 4
           done
-          echo "Growth SEO đa lĩnh vực production chưa đồng bộ"
+          echo "Growth SEO Hội Chọn Đúng V2 chưa đồng bộ" >&2
           exit 1
