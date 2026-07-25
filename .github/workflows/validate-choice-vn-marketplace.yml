@@ -28,11 +28,12 @@ jobs:
       - name: Áp marketplace Việt Nam V2
         run: node tools/apply-choice-vn-marketplace.mjs
 
-      - name: Chạy lại materializer để kiểm tra idempotency
-        run: |
-          node tools/apply-choice-product-v2.mjs
-          node tools/apply-choice-multiniche-v2.mjs
-          node tools/apply-choice-vn-marketplace.mjs
+      - name: Tái giải nén nguồn V2
+        run: node tools/apply-choice-product-v2.mjs
+      - name: Chạy lại taxonomy V2
+        run: node tools/apply-choice-multiniche-v2.mjs
+      - name: Chạy lại marketplace V2
+        run: node tools/apply-choice-vn-marketplace.mjs
 
       - name: Kiểm tra marker marketplace V2
         run: |
@@ -41,7 +42,8 @@ jobs:
           node --check backend/choice.js
           grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
           grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
-          grep -q 'GLOBAL_PRODUCT_DEDUPE_V2' backend/choice-autopilot.js
+          grep -q 'const globalSelectedSources = new Set()' backend/choice-autopilot.js
+          grep -q 'globalSelectedSources.has(candidate.source_id)' backend/choice-autopilot.js
           grep -q 'DATAFEED_BEST_CATEGORY_V1' backend/choice-autopilot.js
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
           grep -q 'id: "travel"' backend/choice-autopilot.js
