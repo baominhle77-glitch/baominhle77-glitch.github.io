@@ -932,7 +932,7 @@ function simProfile(index, role, now, seed) {
     `${plainDem.toLowerCase()}${plainTen.toLowerCase()}${yy}_${nn}`,
     `${plainNick.toLowerCase()}_${nn}`,
     `${plainTen.toLowerCase()}${nn}`,
-    `${plainHo.toLowerCase()}.${plainTen.toLowerCase()}_${nn}`,
+    `${plainHo.toLowerCase()}_${plainTen.toLowerCase()}_${nn}`,
     `${plainNick.toLowerCase()}${plainTen.toLowerCase()}${nn}`,
   ];
   const username = handles[s % handles.length];

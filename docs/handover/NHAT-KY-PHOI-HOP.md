@@ -42,8 +42,10 @@ Nay mỗi nick rơi vào **một trong tám kiểu đặt tên**, xoay theo số
 | Tên + họ + năm | `Hạnh Huỳnh 92` |
 | Ghép biệt danh chữ thường | `gautam_303` |
 
-Tên tài khoản cũng vậy: `@an_pham000` · `@vanbinh87_001` · `@do.giang_004` · `@kemthang305` —
-có chữ hoa, chữ thường, số, gạch dưới, dấu chấm.
+Tên tài khoản cũng đa dạng theo: `@an_pham000` · `@vanbinh87_001` · `@do_giang_004` · `@kemthang305`.
+**Tên tài khoản giữ đúng chuẩn `validUsername` của hệ thống** (`[a-z0-9_]{3,30}`) — bản đầu có dùng
+dấu chấm, đã bỏ vì chuẩn không cho; dấu chấm và chữ hoa chỉ dùng ở **tên hiển thị**, nơi không bị
+ràng buộc. Kiểm lại: 385/385 tên tài khoản hợp chuẩn.
 
 Thêm hai thứ để việc này bền:
 - Bản ghi mang **`sim_seed`** (số thứ tự toàn cục), nên dựng lại hồ sơ không còn phụ thuộc việc đọc
