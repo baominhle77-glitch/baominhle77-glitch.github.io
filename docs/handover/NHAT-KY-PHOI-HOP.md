@@ -22,7 +22,14 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-25 09:40 GMT+7 — Claude Code — BOITOAN-20260725-04 — ĐANG LÀM ⏳
+### 2026-07-25 10:15 GMT+7 — Claude Code — BOITOAN-20260725-04 — HOÀN TẤT ✅
+
+- PR #100 merge `dc98895`; CI 4/4 success. Đã kiểm chứng production: `community-admin.js` có
+  `loadSimulated`/`useSimAccount`, trang quản trị có tab `simulated`, `community.js` có `puppetBar`;
+  `GET /api/community/admin/simulated` trả **401** khi không có quyền admin; `/api/community/stats`
+  vẫn trả 200.
+- Chủ sở hữu cần bấm một lần: Admin tổng → tab **Khoang riêng** → **Sinh 385 nick**.
+
 
 - **Khoang riêng của Admin tổng**: tab `Khoang riêng` chỉ hiện khi phiên admin ở mức `primary`;
   backend chặn cứng bằng `primary_admin_required`, không chỉ ẩn nút.

@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T09:40:00+07:00",
+  "updated_at": "2026-07-25T10:15:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260725-04",
       "owner": "Claude Code",
       "branch": "claude/admin-simulated-accounts",
-      "base_sha": "7cda671321784a98f4098f46c17e3524530b30d1",
       "paths": [
         "backend/community.js",
         "assets/community.js",
@@ -17,13 +17,10 @@
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-25T09:15:00+07:00",
-      "heartbeat_at": "2026-07-25T09:40:00+07:00",
-      "summary": "Khoang rieng cua Admin tong: sinh 385 nick mo phong (109 khach + 276 reader) co ho so day du, va che do puppet cho phep Admin tong dieu khien tuong tac that bang cac nick do."
-    }
-  ],
-  "recently_completed": [
+      "status": "completed",
+      "completed_at": "2026-07-25T10:15:00+07:00",
+      "summary": "Khoang rieng Admin tong: sinh 385 nick mo phong va che do puppet dieu khien duoc. PR #100 merge dc98895; CI 4/4 success; da kiem chung production: community-admin.js co loadSimulated/useSimAccount, trang quan tri co tab simulated, community.js co puppetBar, API admin/simulated tra 401 khi khong co quyen, API stats van 200."
+    },
     {
       "id": "BOITOAN-20260725-03",
       "owner": "Claude Code",
