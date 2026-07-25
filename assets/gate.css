@@ -249,6 +249,9 @@ body.gate-advice-opened { overflow: hidden !important; }
 /* Account V2: staged onboarding */
 .gate-member-card { width:min(92vw,430px); max-height:calc(100dvh - 28px); overflow:auto; padding:24px 20px 20px; }
 .gate-entry-brand { display:grid; justify-items:center; gap:3px; margin-bottom:14px; }
+.gate-member-count { margin:-8px 0 14px; text-align:center; font-size:14px; letter-spacing:.02em;
+  color:#d8c79a; opacity:.92; }
+.gate-member-count::before { content:"● "; color:#7ddc8a; font-size:11px; vertical-align:middle; }
 .gate-entry-choice { display:grid; gap:11px; }
 .gate-entry-choice[hidden], .gate-entry-stage[hidden], .gate-member-card form[hidden] { display:none !important; }
 .gate-entry-option { position:relative; display:grid; gap:4px; width:100%; min-height:76px; padding:14px 42px 14px 15px; border:1px solid #493865; border-radius:14px; background:linear-gradient(150deg,#211831,#151020); color:#f3eef8; text-align:left; cursor:pointer; }
@@ -275,3 +278,8 @@ body.gate-advice-opened { overflow: hidden !important; }
 /* Account V3 admin navigation */
 a.market-account-identity { text-decoration:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 a.market-account-identity:active { transform:scale(.98); }
+
+.market-member-count { display:block; margin:8px auto 0; width:max-content; padding:4px 12px;
+  border:1px solid rgba(214,187,122,.35); border-radius:999px; background:rgba(20,14,34,.55);
+  color:#d8c79a; font-size:13px; letter-spacing:.02em; }
+.market-member-count::before { content:"● "; color:#7ddc8a; font-size:10px; vertical-align:middle; }

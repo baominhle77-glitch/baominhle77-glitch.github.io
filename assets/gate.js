@@ -757,6 +757,33 @@
     if (role === "guest") return "Khách";
     return "Admin";
   }
+  /* Số thành viên hiện ngay dưới chip tài khoản ở trang chính, cho MỌI loại nick:
+   * Khách, Reader hay Admin đều thấy cùng một con số. */
+  function injectMemberCountBadge(host) {
+    if (APP !== "boitoan" || !host) return;
+    var old = document.getElementById("market-member-count");
+    if (old) old.remove();
+    var badge = document.createElement("div");
+    badge.id = "market-member-count";
+    badge.className = "market-member-count";
+    badge.hidden = true;
+    host.appendChild(badge);
+    function draw() {
+      fetch(BACKEND + "/api/community/stats", { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          var n = data && Number(data.members);
+          if (!Number.isFinite(n) || n <= 0) return;
+          badge.textContent = n.toLocaleString("vi-VN") + " thành viên";
+          badge.hidden = false;
+        })
+        .catch(function () {});
+    }
+    draw();
+    setInterval(draw, 60000);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) draw(); });
+  }
+
   function injectAccountIdentity(method) {
     if (APP !== "boitoan") return;
     var old = document.getElementById("market-account-identity");
@@ -778,6 +805,7 @@
     chip.querySelector("small").textContent = admin ? ((primary ? "Admin tổng" : "Admin") + " · Mở quản trị") : accountRoleLabel(role);
     var header = document.querySelector("#gate-content .wrap > header, body > .wrap > header");
     if (header) header.appendChild(chip); else document.body.appendChild(chip);
+    injectMemberCountBadge(header || document.body);
     injectCommunity();
   }
   function reveal(method) {
@@ -899,12 +927,35 @@
     return openAppContent(data.key, method || "member");
   }
 
+  /* Số thành viên hiện ngay ở cổng vào: ai chưa đăng nhập, chưa đăng ký cũng thấy.
+   * Dùng đúng số liệu công khai của cộng đồng, tự làm mới trong lúc trang còn mở. */
+  function paintMemberCount(root) {
+    var node = root && root.querySelector("[data-member-count]");
+    if (!node) return;
+    function draw() {
+      fetch(BACKEND + "/api/community/stats", { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          var n = data && Number(data.members);
+          if (!Number.isFinite(n) || n <= 0) return;
+          node.textContent = n.toLocaleString("vi-VN") + " thành viên";
+          node.hidden = false;
+        })
+        .catch(function () {});
+    }
+    draw();
+    var timer = setInterval(draw, 60000);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) draw(); });
+    window.addEventListener("pagehide", function () { clearInterval(timer); });
+  }
+
   function buildBoitoanEntryUI() {
     var root = document.createElement("div");
     root.id = "gate-root";
     root.innerHTML =
       '<div class="gate-card gate-member-card" role="dialog" aria-modal="true" aria-label="Cổng Spirituality Market">' +
         '<div class="gate-entry-brand"><div class="gate-sigil market-gate-sigil" aria-hidden="true"><span></span></div><h1 class="gate-title">Spirituality Market</h1></div>' +
+        '<p class="gate-member-count" data-member-count hidden></p>' +
         '<section class="gate-entry-choice" aria-label="Chọn cách truy cập">' +
           '<p class="gate-sub">Chọn một mục để tiếp tục.</p>' +
           '<button type="button" class="gate-entry-option" data-entry-open="login"><strong>Đăng nhập</strong><small>Dành cho Khách hoặc Reader đã có tài khoản.</small><span>›</span></button>' +
@@ -941,6 +992,7 @@
         '<div class="gate-foot">Spirituality Market · Truy cập được ghi nhận</div>' +
       '</div>';
     document.body.appendChild(root);
+    paintMemberCount(root);
 
     var choice = root.querySelector(".gate-entry-choice");
     var stage = root.querySelector("[data-entry-stage]");

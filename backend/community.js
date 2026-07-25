@@ -896,6 +896,13 @@ function simNoTone(value) {
   return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d").replace(/Đ/g, "D").replace(/[^A-Za-z0-9]/g, "");
 }
+/* Xáo số thứ tự thành một số khó đoán nhưng cố định, để kiểu đặt tên không lặp thành nhịp
+ * cứ tám nick một vòng — lướt danh sách sẽ không thấy quy luật. */
+function simHash(n) {
+  let h = Math.imul(Number(n) + 0x9e3779b9, 0x85ebca6b);
+  h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16;
+  return Math.abs(h);
+}
 function simPick(list, n) { return list[n % list.length]; }
 /* `seed` là số thứ tự TOÀN CỤC trong 385 nick, khác `index` (số thứ tự trong nhóm khách/reader).
  * Tên ghép theo cặp (tên riêng, chữ đệm) lấy từ seed nên 385 nick ra 385 tên khác nhau:
@@ -908,8 +915,8 @@ function simProfile(index, role, now, seed) {
   const ho = simPick(SIM_HO, s * 7 + demIx * 3 + 3);
   const dem = SIM_DEM[(demIx * 7 + tenIx) % SIM_DEM.length];
   const ten = SIM_TEN[tenIx];
-  const nick = simPick(SIM_NICK, s * 3 + tenIx);
-  const tail = simPick(SIM_TAIL, s * 5 + demIx);
+  const nick = simPick(SIM_NICK, simHash(s * 5 + 11) + tenIx);
+  const tail = simPick(SIM_TAIL, simHash(s * 13 + 3) + demIx);
   const yy = String((86 + (s % 20)) % 100).padStart(2, "0"); /* năm sinh 86–05, luôn hai chữ số */
   const nn = String(s).padStart(3, "0");       /* mã duy nhất theo số thứ tự */
   const plainTen = simNoTone(ten), plainDem = simNoTone(dem), plainHo = simNoTone(ho);
@@ -926,7 +933,7 @@ function simProfile(index, role, now, seed) {
     `${ten} ${ho} ${yy}`,
     `${plainNick.toLowerCase()}${plainTen.toLowerCase()}_${nn}`,
   ];
-  const display = displays[s % displays.length];
+  const display = displays[simHash(s) % displays.length];
   const handles = [
     `${plainTen.toLowerCase()}_${plainHo.toLowerCase()}${nn}`,
     `${plainDem.toLowerCase()}${plainTen.toLowerCase()}${yy}_${nn}`,
@@ -935,7 +942,7 @@ function simProfile(index, role, now, seed) {
     `${plainHo.toLowerCase()}_${plainTen.toLowerCase()}_${nn}`,
     `${plainNick.toLowerCase()}${plainTen.toLowerCase()}${nn}`,
   ];
-  const username = handles[s % handles.length];
+  const username = handles[simHash(s * 31 + 7) % handles.length];
   const base = {
     id, username, role, display_name: display, sim_seed: s,
     bio: role === "reader" ? simPick(SIM_BIO_R, s * 3 + 1) : simPick(SIM_BIO_G, s * 2 + 1),
