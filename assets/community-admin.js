@@ -96,17 +96,30 @@
       location.assign("./community.html");
     }).catch(function(error){ setStatus(errorText(error), true); });
   }
+
+  /* Sinh theo lô và tự chạy tiếp cho tới khi đủ — chủ sở hữu chỉ bấm một lần. */
+  function seedAll(){
+    function step(){
+      api("/api/community/admin/simulated", { method: "POST" }).then(function(result){
+        setStatus("Đang sinh nick… " + result.done + "/" + result.total);
+        if (!result.complete) { setTimeout(step, 120); return; }
+        simCache = null; setStatus("Đã sinh đủ " + result.total + " nick."); loadSimulated();
+      }).catch(function(error){ setStatus(errorText(error), true); });
+    }
+    setStatus("Đang sinh nick…");
+    step();
+  }
+
   function renderSimList(data){
     var box = el("div", null, "community-admin-sim");
     var counts = data.counts || { total: 0, guests: 0, readers: 0 };
     var head = el("div", null, "community-admin-sim-head");
     head.append(el("p", "Khoang riêng chỉ Admin tổng thấy. " + counts.total + " nick — " +
       counts.guests + " khách, " + counts.readers + " reader. Bấm một nick để dùng nick đó tương tác."));
-    if (!counts.total) {
-      head.append(button("Sinh 385 nick (109 khách + 276 reader)", "community-primary", function(){
-        setStatus("Đang sinh nick…");
-        api("/api/community/admin/simulated", { method: "POST" }).then(function(){ simCache = null; loadSimulated(); })
-          .catch(function(error){ setStatus(errorText(error), true); });
+    var target = data.target || 385, done = data.done || 0;
+    if (done < target) {
+      head.append(button("Sinh nốt " + (target - done) + " nick", "community-primary", function(){
+        seedAll();
       }));
     }
     box.append(head);
