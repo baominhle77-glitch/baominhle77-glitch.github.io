@@ -1,8 +1,25 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T14:20:00+07:00",
+  "updated_at": "2026-07-25T14:35:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
+    {
+      "id": "BOITOAN-20260725-07",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "469d7c54fb12e2c9d7fb369c119aa7cf95ccb624",
+      "paths": [
+        "backend/community.js",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T14:35:00+07:00",
+      "heartbeat_at": "2026-07-25T14:35:00+07:00",
+      "summary": "So thanh vien cong khai tu cap nhat: cache dem co han dung 60 giay, sinh nick va don rac deu bo cache ngay."
+    }
+  ],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260725-06",
       "owner": "Claude Code",
@@ -16,13 +33,11 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "docs/handover/ACTIVE_TASKS.json"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-25T11:40:00+07:00",
-      "heartbeat_at": "2026-07-25T14:20:00+07:00",
-      "summary": "Sua dang nhap Admin, viet lai gian doan doc bai va toan bo kho chu Lenormand, don ho so nick mo phong doi cu."
-    }
-  ],
-  "recently_completed": [
+      "summary": "Sua dang nhap Admin, viet lai gian doan doc bai va toan bo kho chu Lenormand, don ho so nick mo phong doi cu.",
+      "completed_at": "2026-07-25T14:35:00+07:00"
+    },
     {
       "id": "GROWTH-20260725-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
