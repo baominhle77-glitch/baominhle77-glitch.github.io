@@ -31,12 +31,14 @@ jobs:
           grep -q 'VIETNAM_MARKETPLACE_PUBLIC_V1' backend/choice.js
           ! grep -qiE 'fado\.vn|amazon\.|taobao|alibaba|ebay' backend/choice-autopilot.js
 
-      - name: Kiểm tra catalog, redirect và nhóm nhiều nơi bán
-        run: |
-          set -euo pipefail
-          node --test backend/choice.test.mjs
-          node --test backend/choice-vn-marketplace.test.mjs
-          node --test backend/choice-autopilot.test.mjs
+      - name: Kiểm tra catalog cũ không hồi quy
+        run: node --test backend/choice.test.mjs
+
+      - name: Kiểm tra sàn Việt Nam, redirect và nhóm nhiều nơi bán
+        run: node --test backend/choice-vn-marketplace.test.mjs
+
+      - name: Kiểm tra Affiliate Autopilot
+        run: node --test backend/choice-autopilot.test.mjs
 
       - name: Kiểm tra ranh giới public-private
         run: |
