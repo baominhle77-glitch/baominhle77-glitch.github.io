@@ -32,10 +32,9 @@ jobs:
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
           node tools/apply-choice-product-v2.mjs
-          node tools/apply-travel-system.mjs
-          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-vn-marketplace.mjs
           node tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-seo-multiniche.mjs
+          node tools/apply-travel-system.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
