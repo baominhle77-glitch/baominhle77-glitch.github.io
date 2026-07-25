@@ -22,6 +22,38 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 18:10 GMT+7 — Claude Code — BOITOAN-20260725-14 — ĐANG LÀM ⏳
+
+**Tên nick phải đa dạng như người dùng thật** (chủ sở hữu: *"nhìn mấy trăm tên y như 1 khuôn đúc"*).
+
+Trước: mọi nick đều đúng khuôn `Họ Đệm Tên` và tên tài khoản đều là `simg000` / `simr123` — nhìn là
+biết nick tạo hàng loạt.
+
+Nay mỗi nick rơi vào **một trong tám kiểu đặt tên**, xoay theo số thứ tự:
+
+| Kiểu | Ví dụ |
+|---|---|
+| Tên đầy đủ | `Phạm Thị An` |
+| Chữ thường + gạch dưới + năm sinh | `binh_van87` |
+| Viết hoa kiểu ghép + 2k | `MinhChi2k2` |
+| Biệt danh + tên | `Xù Ngọc Dung` · `Dâu Phương Lam` |
+| Có dấu chấm + số | `giang.do004` |
+| VIẾT HOA + gạch dưới | `BOSUA_HAIHA` · `OI_TUANLONG` |
+| Tên + họ + năm | `Hạnh Huỳnh 92` |
+| Ghép biệt danh chữ thường | `gautam_303` |
+
+Tên tài khoản cũng đa dạng theo: `@an_pham000` · `@vanbinh87_001` · `@do_giang_004` · `@kemthang305`.
+**Tên tài khoản giữ đúng chuẩn `validUsername` của hệ thống** (`[a-z0-9_]{3,30}`) — bản đầu có dùng
+dấu chấm, đã bỏ vì chuẩn không cho; dấu chấm và chữ hoa chỉ dùng ở **tên hiển thị**, nơi không bị
+ràng buộc. Kiểm lại: 385/385 tên tài khoản hợp chuẩn.
+
+Thêm hai thứ để việc này bền:
+- Bản ghi mang **`sim_seed`** (số thứ tự toàn cục), nên dựng lại hồ sơ không còn phụ thuộc việc đọc
+  tên tài khoản. Bản ghi đời cũ chưa có thì vẫn đọc được từ `simg000` / `simr123` như trước.
+- `simNoTone()` bỏ dấu tiếng Việt để dựng tên tài khoản đúng kiểu người dùng thật.
+
+Kiểm lại toàn bộ 385 nick: **385 tên hiển thị khác nhau, 385 tên tài khoản khác nhau, 0 trùng.**
+
 ### 2026-07-25 17:50 GMT+7 — Claude Code — BOITOAN-20260725-13 — ĐANG LÀM ⏳
 
 **Nghiệm thu ba lỗi chủ sở hữu báo, đo trên production sau khi `bc55a3d` lên:**

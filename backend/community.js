@@ -873,6 +873,8 @@ const SIM_GUESTS = 109, SIM_READERS = 276;
 const SIM_HO = ["Nguyễn","Trần","Lê","Phạm","Hoàng","Huỳnh","Phan","Vũ","Võ","Đặng","Bùi","Đỗ","Hồ","Ngô","Dương","Lý","Đinh","Mai","Trịnh","Chu"];
 const SIM_DEM = ["Thị","Văn","Minh","Ngọc","Thu","Hải","Quang","Anh","Bảo","Gia","Khánh","Phương","Thanh","Tuấn","Hồng","Xuân","Diệu","Kim","Hữu","Đức"];
 const SIM_TEN = ["An","Bình","Chi","Dung","Giang","Hà","Hạnh","Hiếu","Hoa","Huy","Khanh","Lam","Linh","Long","Mai","Nam","Nga","Nhung","Oanh","Phúc","Quân","Quyên","Sơn","Tâm","Thảo","Thắng","Trang","Trung","Tú","Uyên","Vy","Yến","Duy","Kiên","Lộc","My","Ngân","Nhi","Phong","Thư"];
+const SIM_NICK = ["Bống","Su","Gấu","Mèo","Cà Rốt","Bơ","Sữa","Nắng","Mây","Bí","Kem","Tép","Xù","Nhím","Dâu","Táo","Mít","Nho","Bắp","Cún","Bơ Sữa","Chuối","Ổi","Khoai","Xoài","Mận","Dừa","Lê","Hồng","Quýt"];
+const SIM_TAIL = ["xinh","nhỏ","con","béo","lười","vui","hiền","cute","mộc","an"];
 const SIM_SPEC = ["Tarot","Lenormand","Bài Tây","Kinh Dịch","Tử Vi","Bát Tự","Thần số học","Rune","Bài Trà","Chiêm tinh"];
 const SIM_BIO_R = [
   "Xem bài hơn 5 năm, chuyên gỡ rối chuyện tình cảm và công việc.",
@@ -889,6 +891,11 @@ const SIM_BIO_G = [
   "Thích Tarot, đang tập tự trải bài.",
   "Vào cho vui, hỏi khi có việc cần.",
 ];
+/* Bỏ dấu tiếng Việt để dựng tên tài khoản kiểu người dùng thật (chữ thường, số, gạch dưới). */
+function simNoTone(value) {
+  return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d").replace(/Đ/g, "D").replace(/[^A-Za-z0-9]/g, "");
+}
 function simPick(list, n) { return list[n % list.length]; }
 /* `seed` là số thứ tự TOÀN CỤC trong 385 nick, khác `index` (số thứ tự trong nhóm khách/reader).
  * Tên ghép theo cặp (tên riêng, chữ đệm) lấy từ seed nên 385 nick ra 385 tên khác nhau:
@@ -899,12 +906,38 @@ function simProfile(index, role, now, seed) {
   const tenIx = s % SIM_TEN.length;
   const demIx = Math.floor(s / SIM_TEN.length) % SIM_DEM.length;
   const ho = simPick(SIM_HO, s * 7 + demIx * 3 + 3);
-  const dem = SIM_DEM[(demIx * 7 + tenIx) % SIM_DEM.length]; /* đổi cả trong cùng một khối cho tự nhiên; vẫn duy nhất vì bước nhảy 7 nguyên tố cùng nhau với 20 */
+  const dem = SIM_DEM[(demIx * 7 + tenIx) % SIM_DEM.length];
   const ten = SIM_TEN[tenIx];
-  const display = `${ho} ${dem} ${ten}`;
-  const username = `sim${role === "reader" ? "r" : "g"}${String(index).padStart(3, "0")}`;
+  const nick = simPick(SIM_NICK, s * 3 + tenIx);
+  const tail = simPick(SIM_TAIL, s * 5 + demIx);
+  const yy = String((86 + (s % 20)) % 100).padStart(2, "0"); /* năm sinh 86–05, luôn hai chữ số */
+  const nn = String(s).padStart(3, "0");       /* mã duy nhất theo số thứ tự */
+  const plainTen = simNoTone(ten), plainDem = simNoTone(dem), plainHo = simNoTone(ho);
+  const plainNick = simNoTone(nick);
+  /* Tám kiểu đặt tên khác nhau cho giống cộng đồng thật: có tên đầy đủ, có biệt danh,
+   * có tên viết thường kèm số và gạch dưới, có kiểu viết hoa. */
+  const displays = [
+    `${ho} ${dem} ${ten}`,
+    `${plainTen.toLowerCase()}_${plainDem.toLowerCase()}${yy}`,
+    `${plainDem}${plainTen}${yy < 100 ? "2k" + (s % 10) : ""}`,
+    `${nick} ${dem} ${ten}`,
+    `${plainTen.toLowerCase()}.${plainHo.toLowerCase()}${nn}`,
+    `${plainNick.toUpperCase()}_${plainDem.toUpperCase()}${plainTen.toUpperCase()}`,
+    `${ten} ${ho} ${yy}`,
+    `${plainNick.toLowerCase()}${plainTen.toLowerCase()}_${nn}`,
+  ];
+  const display = displays[s % displays.length];
+  const handles = [
+    `${plainTen.toLowerCase()}_${plainHo.toLowerCase()}${nn}`,
+    `${plainDem.toLowerCase()}${plainTen.toLowerCase()}${yy}_${nn}`,
+    `${plainNick.toLowerCase()}_${nn}`,
+    `${plainTen.toLowerCase()}${nn}`,
+    `${plainHo.toLowerCase()}_${plainTen.toLowerCase()}_${nn}`,
+    `${plainNick.toLowerCase()}${plainTen.toLowerCase()}${nn}`,
+  ];
+  const username = handles[s % handles.length];
   const base = {
-    id, username, role, display_name: display,
+    id, username, role, display_name: display, sim_seed: s,
     bio: role === "reader" ? simPick(SIM_BIO_R, s * 3 + 1) : simPick(SIM_BIO_G, s * 2 + 1),
     simulated: true, avatar_hue: (s * 37) % 360,
     qr_data: "", bank_account: "", bank_name: "",
@@ -935,11 +968,18 @@ function simRepair(account, now, force) {
   if (!account || !account.username) return account;
   if (!force && account.simulated === true && account.created_at) return account;
   const match = String(account.username).match(/^sim([gr])(\d{3})$/);
-  if (!match) return { ...account, simulated: true };
-  const role = match[1] === "r" ? "reader" : "guest";
-  const roleIndex = Number(match[2]);
-  const rebuilt = simProfile(roleIndex, role, now, role === "reader" ? SIM_GUESTS + roleIndex : roleIndex);
-  return { ...rebuilt, id: account.id, username: account.username, role: account.role || role };
+  /* Số thứ tự lấy từ chính bản ghi; bản ghi đời cũ chưa có thì đọc từ tên tài khoản simg000/simr123. */
+  let seed = Number.isFinite(account.sim_seed) ? account.sim_seed : null;
+  let role = account.role || (match && match[1] === "r" ? "reader" : "guest");
+  if (seed === null) {
+    if (!match) return { ...account, simulated: true };
+    const roleIndex = Number(match[2]);
+    role = match[1] === "r" ? "reader" : "guest";
+    seed = role === "reader" ? SIM_GUESTS + roleIndex : roleIndex;
+  }
+  const roleIndex = seed >= SIM_GUESTS ? seed - SIM_GUESTS : seed;
+  const rebuilt = simProfile(roleIndex, role, now, seed);
+  return { ...rebuilt, id: account.id, role };
 }
 /* Nick nằm trong chỉ mục thì đương nhiên là nick mô phỏng — không phụ thuộc cờ trong bản ghi. */
 function simHas(idx, uid) {
