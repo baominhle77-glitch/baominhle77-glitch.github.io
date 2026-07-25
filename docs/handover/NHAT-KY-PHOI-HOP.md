@@ -22,7 +22,7 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-25 06:00 GMT+7 — Claude Code — BOITOAN-20260725-03 — ĐANG LÀM ⏳
+### 2026-07-25 09:10 GMT+7 — Claude Code — BOITOAN-20260725-03 — HOÀN TẤT ✅
 
 - **Sửa lỗi chủ sở hữu chỉ ra**: gọi đúng là **bài trà** (không phải "bã trà"), và **tên các lá
   Bài Trà nay bằng tiếng Anh** theo bộ biểu tượng tasseography chuẩn (Anchor, Bird, Bell, Book,
@@ -38,6 +38,7 @@
 - **Chat mượt hơn**: trước đây mỗi 1,5 giây vẽ lại toàn bộ danh sách và gửi xong thì dựng lại cả
   màn hình. Nay chỉ nối tin mới, giữ nguyên vị trí đang đọc (chỉ tự cuộn khi đang ở đáy), gửi
   hiện tin ngay lập tức rồi đối chiếu với máy chủ, poll giãn ra 8 giây khi tab ẩn.
+- PR #99 merge `ea28771`; CI 4/4 success; đã kiểm chứng production (community.js, trang cộng đồng, CSS, app và API stats đều đúng bản mới).
 - Kiểm thử: `community.test.mjs` và `gate.test.mjs` xanh; `node --check` toàn bộ script app và
   `assets/community.js`; vòng mã hoá/giải mã khớp; vùng `<head>` app không đổi.
 

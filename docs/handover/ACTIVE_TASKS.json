@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T06:00:00+07:00",
+  "updated_at": "2026-07-25T09:10:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260725-03",
       "owner": "Claude Code",
       "branch": "claude/community-social-ui",
-      "base_sha": "e15e35f45da5a993315b60975f4be76c0c5241e1",
       "paths": [
         "boitoan/index.html",
         "boitoan/community.html",
@@ -16,13 +16,10 @@
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
-      "status": "in_progress",
-      "started_at": "2026-07-25T05:30:00+07:00",
-      "heartbeat_at": "2026-07-25T06:00:00+07:00",
-      "summary": "Sua ten cac la Bai Tra sang tieng Anh chuan tasseography va sua cach goi 'bai tra'; giao dien tra loi + thich binh luan, avatar va badge loai nick; so thanh vien cong khai tren dau trang; chat gui lac quan va chi noi tin moi."
-    }
-  ],
-  "recently_completed": [
+      "status": "completed",
+      "completed_at": "2026-07-25T09:10:00+07:00",
+      "summary": "Bai Tra doi ten la sang tieng Anh (26 bieu tuong tasseography) va sua cach goi; giao dien tra loi + thich binh luan, avatar + badge loai nick; so thanh vien cong khai dau trang; chat gui lac quan va chi noi tin moi. PR #99 merge ea28771; CI 4/4 success; da kiem chung production: community.js co startMemberCounter/commentRow/likeButton/avatarOf, community page co community-member-count, CSS co class moi, app co ten Anchor/Horseshoe va 0 chuoi 'ba tra', API stats HTTP 200."
+    },
     {
       "id": "BOITOAN-20260725-02",
       "owner": "Claude Code",
