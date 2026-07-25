@@ -140,7 +140,9 @@ async function communityAuth(request, env) {
   const claims = await verifyJwt(secret, bearer(request));
   if (!claims || claims.aud !== "community" || !isUuid(claims.sid) || !isUuid(claims.uid) || !isUuid(claims.did) || !validRole(claims.role)) return null;
   const session = await getJson(env, sessionKey(claims.sid));
-  const profile = await getJson(env, profileKey(claims.uid));
+  /* Nick mô phỏng nằm trong khoá chỉ mục chứ không có khoá hồ sơ riêng. */
+  const profile = (await getJson(env, profileKey(claims.uid)))
+    || (claims.mode === "puppet" ? await simProfileById(env, claims.uid) : null);
   if (!session || !session.active || session.expires_at <= Date.now() || session.uid !== claims.uid || session.did !== claims.did || !profile || profile.suspended) return null;
   return { claims, profile };
 }
@@ -539,9 +541,11 @@ function postCommentKey(id, at, cid) { return `${postCommentPrefix(id)}${String(
 function auditKey(at, id) { return `community-audit:${String(at).padStart(13, "0")}:${id}`; }
 async function adminAudit(env, request, action, target, extra = {}) {
   const at = Date.now();
+  try {
   await putJson(env, auditKey(at, crypto.randomUUID()), {
     action, target: clean(target, 120), device_id: clean(request.headers.get("x-owner-device-id"), 80), created_at: at, ...extra,
   }, ACCOUNT_TTL);
+  } catch (_) { /* Ghi nhật ký hỏng không được chặn đăng nhập hay thao tác quản trị. */ }
 }
 async function deleteMemberAccount(env, uid) {
   const profile = isUuid(uid) && await getJson(env, profileKey(uid));
@@ -736,8 +740,8 @@ async function handleAdminLogin(request, env) {
     const record = await getJson(env, key.name);
     if (!record || record.auth_version !== ADMIN_AUTH_VERSION || (level === "primary" && record.primary)) staleOrPrimary.push(key.name);
   }
-  await Promise.all(staleOrPrimary.map((key) => env.KV.delete(key)));
-  if (level === "primary") await env.KV.put("community-owner-device", deviceId);
+  try { await Promise.all(staleOrPrimary.map((key) => env.KV.delete(key))); } catch (_) {}
+  if (level === "primary") { try { await env.KV.put("community-owner-device", deviceId); } catch (_) {} }
   const session = await issueAdminSession(env, deviceId, body && body.remember !== false, level);
   await adminAudit(env, request, level === "primary" ? "admin_primary_login" : "admin_regular_login", deviceId);
   return json({ ...session, role: "admin", level, primary: level === "primary", device_id: deviceId, key });
@@ -802,38 +806,36 @@ function simPlan(i) {
   return i < SIM_GUESTS ? { index: i, role: "guest" } : { index: i - SIM_GUESTS, role: "reader" };
 }
 /* Sinh theo từng lô, gọi lại nhiều lần cho tới khi done = 385. */
+/* Sinh theo lô. Hồ sơ nick mô phỏng nằm trong CHÍNH khoá chỉ mục, không tạo mỗi nick một khoá:
+ * cách cũ tốn ~661 lượt ghi cho 385 nick và đã ngốn sạch hạn mức ghi trong ngày, làm hỏng cả
+ * đăng nhập của chủ sở hữu. Cách này chỉ tốn vài lượt ghi cho toàn bộ 385 nick. */
 async function seedSimulatedBatch(env) {
   const idx = await simIndex(env);
   const total = SIM_GUESTS + SIM_READERS;
   if (idx.done >= total) return { created: 0, done: idx.done, total, complete: true };
   const now = Date.now();
-  const writes = [];
   const stop = Math.min(idx.done + SIM_BATCH, total);
   for (let i = idx.done; i < stop; i += 1) {
     const plan = simPlan(i);
-    const p = simProfile(plan.index, plan.role, now);
-    writes.push(putJson(env, profileKey(p.id), p));
-    if (plan.role === "reader") writes.push(putJson(env, readerIndexKey(p.id), { uid: p.id, created_at: now }));
-    idx.accounts.push({
-      id: p.id, username: p.username, role: p.role, display_name: p.display_name,
-      avatar_hue: p.avatar_hue, specialties: p.specialties || [], experience_years: p.experience_years || 0,
-    });
+    idx.accounts.push(simProfile(plan.index, plan.role, now));
   }
   const created = stop - idx.done;
   idx.done = stop;
   try {
-    await Promise.all(writes);
-    await putJson(env, SIM_INDEX_KEY, idx);
+    await putJson(env, SIM_INDEX_KEY, idx); /* 1 lượt ghi cho cả lô */
   } catch (error) {
-    /* Hết hạn mức ghi KV trong ngày: báo rõ để gọi lại sau, tiến độ cũ vẫn giữ nguyên. */
     const detail = String((error && error.message) || error);
     if (detail.includes("limit exceeded")) {
       return { created: 0, done: idx.done - created, total, complete: false, quota_exhausted: true, detail };
     }
     throw error;
   }
-  await bumpStats(env, { guests: 0, readers: 0 }, true);
   return { created, done: idx.done, total, complete: idx.done >= total };
+}
+/* Tra hồ sơ nick mô phỏng từ chỉ mục (chúng không có khoá hồ sơ riêng). */
+async function simProfileById(env, uid) {
+  const idx = await simIndex(env);
+  return (idx.accounts || []).find((a) => a && a.id === uid) || null;
 }
 async function handleSimulated(request, env, path, auth) {
   if (!auth.primary) return json({ error: "primary_admin_required" }, 403);
@@ -861,7 +863,7 @@ async function handleSimulated(request, env, path, auth) {
     const body = await readJson(request);
     const target = clean(body && body.uid, 60);
     if (!isUuid(target)) return json({ error: "invalid_uid" }, 400);
-    const profile = await getJson(env, profileKey(target));
+    const profile = (await getJson(env, profileKey(target))) || (await simProfileById(env, target));
     if (!profile) return json({ error: "not_found" }, 404);
     if (!profile.simulated) return json({ error: "not_simulated" }, 403);
     const did = clean(request.headers.get("x-owner-device-id"), 80);
@@ -1011,8 +1013,10 @@ async function rebuildStats(env) {
   } while (rc);
   const simIdxValue = await getJson(env, "community-simulated-index");
   const simAccounts = (simIdxValue && simIdxValue.accounts) || [];
-  const total = scanned;
-  readers = readerCount;
+  const simReaders = simAccounts.filter((a) => a && a.role === "reader").length;
+  const simGuests = simAccounts.length - simReaders;
+  const total = scanned + simAccounts.length;
+  readers = readerCount + simReaders;
   guests = Math.max(0, total - readers - admins);
   const value = { members: total, guests, readers, admins, sim: simAccounts.length, updated_at: Date.now() };
   /* Ghi cache là tối ưu, không phải điều kiện bắt buộc: hết hạn mức ghi vẫn phải trả số liệu. */
@@ -1054,7 +1058,13 @@ export async function handleCommunity(request, env) {
     if (path.startsWith("/api/community/admin/")) return await handleAdmin(request, env, path);
     return json({ error: "not_found" }, 404);
   } catch (error) {
-    return json({ error: "community_server", detail: clean(error && error.message, 120) }, 500);
+    const detail = clean(error && error.message, 160);
+    /* Hết hạn mức ghi trong ngày là lỗi hạ tầng, phải nói rõ để không bị hiểu là sai mật khẩu. */
+    if (String(detail).includes("limit exceeded")) {
+      return json({ error: "storage_quota_exhausted", detail,
+        message: "Hết hạn mức ghi dữ liệu trong ngày. Đăng nhập và các thao tác ghi sẽ hoạt động lại khi hạn mức làm mới, hoặc ngay sau khi nâng gói Cloudflare Workers." }, 503);
+    }
+    return json({ error: "community_server", detail }, 500);
   }
 }
 

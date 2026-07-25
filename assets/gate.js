@@ -1057,7 +1057,7 @@
         location.replace("./community-admin.html");
       }).catch(function (error) {
         button.disabled = false; msg.className = "gate-msg err";
-        msg.textContent = error.code === "invalid_admin_login" ? "Mật khẩu Admin không đúng." : error.code === "admin_auth_unavailable" ? "Hệ thống xác thực Admin đang lỗi. Vui lòng tải lại sau ít phút." : "Không đăng nhập được Admin. Vui lòng thử lại.";
+        msg.textContent = error.code === "invalid_admin_login" ? "Mật khẩu Admin không đúng." : error.code === "storage_quota_exhausted" ? "Hết hạn mức ghi dữ liệu trong ngày nên chưa mở được phiên Admin. Mật khẩu của bạn vẫn đúng. Sẽ vào được khi hạn mức làm mới, hoặc ngay sau khi nâng gói Cloudflare Workers." : error.code === "admin_auth_unavailable" ? "Hệ thống xác thực Admin đang lỗi. Vui lòng tải lại sau ít phút." : "Không đăng nhập được Admin. Vui lòng thử lại.";
       });
     });
   }
