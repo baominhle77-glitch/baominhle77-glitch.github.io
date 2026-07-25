@@ -200,6 +200,7 @@ jobs:
           for attempt in $(seq 1 30); do
             app=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/?$bust" || true)
             gate=$(curl -fsSL "https://hiennhi89.pages.dev/assets/gate.js?$bust" || true)
+            admin=$(curl -fsSL "https://hiennhi89.pages.dev/boitoan/community-admin.html?$bust" || true)
             health=$(curl -fsSL "https://hiennhi89-gate.hiennhi89.workers.dev/api/community/admin/health" || true)
             choice_app=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/?$bust" || true)
             choice_sw=$(curl -fsSL "https://hiennhi89.pages.dev/hoi-chon-dung/sw.js?$bust" || true)
@@ -220,8 +221,14 @@ jobs:
             google_verify=$(curl -fsSL "https://hiennhi89.pages.dev/google91001f63e8104533.html?$bust" || true)
             bing_verify=$(curl -fsSL "https://hiennhi89.pages.dev/BingSiteAuth.xml?$bust" || true)
             if grep -q 'application/gate-payload' <<<"$app" \
+              && grep -q '/assets/gate.js?v=19' <<<"$app" \
               && grep -q 'Bói toán V11' <<<"$gate" \
+              && grep -q 'openAppContent(data.key, "admin-session")' <<<"$gate" \
+              && grep -q 'admin_return=1&v=19' <<<"$admin" \
+              && grep -q '"auth_version":"2026-07-24-v11"' <<<"$health" \
               && grep -q '"config_ok":true' <<<"$health" \
+              && grep -q '"crypto_ok":true' <<<"$health" \
+              && grep -q '"decrypt_key_configured":true' <<<"$health" \
               && grep -q 'HỘI CHỌN ĐÚNG' <<<"$choice_app" \
               && grep -q 'hoi-chon-dung-v4' <<<"$choice_sw" \
               && grep -q '"service":"hoi-chon-dung"' <<<"$choice_health" \
