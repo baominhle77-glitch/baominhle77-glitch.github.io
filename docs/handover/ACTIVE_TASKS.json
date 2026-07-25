@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T16:20:00+07:00",
+  "updated_at": "2026-07-25T16:25:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -36,7 +36,7 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T16:20:00+07:00",
+      "heartbeat_at": "2026-07-25T16:25:00+07:00",
       "summary": "Hotfix khẩn cấp: chỉ nhận Shopee VN, Lazada VN, Tiki, Sendo và TikTok Shop VN; tái tạo deeplink ACCESSTRADE; chặn link lỗi/ngoài Việt Nam; nhóm cùng sản phẩm chỉ khi có nhiều nơi bán thật; phân loại sản phẩm vào danh mục phù hợp nhất và chống trùng toàn catalog. Sau hotfix tiếp tục sprint SEO/KPI 10 ngày."
     }
   ],
