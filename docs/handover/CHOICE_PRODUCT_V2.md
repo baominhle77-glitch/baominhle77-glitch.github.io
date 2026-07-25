@@ -58,6 +58,7 @@ Kiểm thử cục bộ: backend 8/8; marketplace 4/4; frontend 5/5; SEO 2/2.
 
 - Nhánh review sạch: `agent/GROWTH-20260725-04-rebuild-v2-clean` trên `main` sau PR #119.
 - PR #120 đóng không merge vì nhánh cũ lệch lịch sử sổ điều phối; không mất mã.
+- PR thay thế được mở từ nhánh sạch và là nguồn duy nhất được phép merge.
 - Chưa được ghi “production hoàn tất” cho đến khi PR sạch merge, Worker deploy trước Pages, catalog tái tạo và production smoke kiểm tra link offer thật.
 
 ## 8. Việc còn lại
