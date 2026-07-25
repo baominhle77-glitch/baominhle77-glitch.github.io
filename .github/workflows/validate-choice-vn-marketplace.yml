@@ -44,8 +44,27 @@ jobs:
       - name: Kiểm tra Affiliate Autopilot
         run: node --test backend/choice-autopilot.test.mjs
 
-      - name: Kiểm tra boundary backend
-        run: node --test backend/choice-public-boundary.test.mjs
+      - name: Chạy boundary backend có log đầy đủ
+        id: boundary_test
+        run: |
+          set +e
+          node --test backend/choice-public-boundary.test.mjs > "$RUNNER_TEMP/boundary-test.log" 2>&1
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          cat "$RUNNER_TEMP/boundary-test.log"
+          exit 0
+
+      - name: Lưu stack trace boundary
+        uses: actions/upload-artifact@v4
+        with:
+          name: boundary-test-log
+          path: ${{ runner.temp }}/boundary-test.log
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Chặn theo mã thoát boundary
+        if: steps.boundary_test.outputs.exit_code != '0'
+        run: exit 1
 
       - name: Quét nội dung public
         run: node tools/check-public-content.mjs
