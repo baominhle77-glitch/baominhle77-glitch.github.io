@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T15:35:00+07:00",
+  "updated_at": "2026-07-25T16:10:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,10 +42,29 @@
   ],
   "recently_completed": [
     {
+      "id": "BOITOAN-20260725-10",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "134033f40bfdda4a593ea8fbb4601f7c7169000e",
+      "paths": [
+        "boitoan/index.html",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-25T15:45:00+07:00",
+      "completed_at": "2026-07-25T16:10:00+07:00",
+      "summary": "Bo chu tieng Anh cuoi cung va lam tron nhom ngoac kep mia mai o kho chu Kinh Dich. Ghi o recently_completed vi ACTIVE_TASKS.json dang nam trong pham vi khoa cua GROWTH-20260725-04."
+    },
+    {
       "id": "BOITOAN-20260725-09",
       "owner": "Claude Code",
       "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": ["boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
+      "paths": [
+        "boitoan/index.html",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T15:35:00+07:00",
       "summary": "PR #113 merge commit 93cfc39f61436cd3d9fc78f925221cd60a32056b; production deploy SUCCESS. Đã bỏ cụm 'cắt hợp đồng' còn sót trong kho chữ Kinh Dịch."
@@ -54,7 +73,11 @@
       "id": "BOITOAN-20260725-08",
       "owner": "Claude Code",
       "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": ["boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
+      "paths": [
+        "boitoan/index.html",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T15:20:00+07:00",
       "summary": "PR #111 merge commit 50c1e35b5517ac32a87163771d89afb0c997b362; production deploy SUCCESS. Rà kho chữ Tarot, Bài Tây và các bộ còn lại."
@@ -63,7 +86,11 @@
       "id": "BOITOAN-20260725-07",
       "owner": "Claude Code",
       "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": ["backend/community.js", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
+      "paths": [
+        "backend/community.js",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T15:00:00+07:00",
       "summary": "PR #110 merge commit 67a95758e895ea05991c02f6dcfbbfcd8eefba2a; production SUCCESS. Số thành viên công khai tự cập nhật."
@@ -72,7 +99,21 @@
       "id": "GROWTH-20260725-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-03-closeout",
-      "paths": ["backend/choice-autopilot.test.mjs", "backend/choice-credential-bootstrap.js", "backend/choice-credential-bootstrap.test.mjs", "tools/apply-choice-access-fallback.mjs", "tools/apply-choice-credential-bootstrap.mjs", ".github/workflows/deploy-pages.yml", ".github/workflows/choice-growth-autopilot.yml", ".github/workflows/validate-role-system.yml", "google91001f63e8104533.html", "BingSiteAuth.xml", "docs/handover/ACTIVE_TASKS.json", "docs/handover/CHOICE_OWNER_SETUP.md", "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"],
+      "paths": [
+        "backend/choice-autopilot.test.mjs",
+        "backend/choice-credential-bootstrap.js",
+        "backend/choice-credential-bootstrap.test.mjs",
+        "tools/apply-choice-access-fallback.mjs",
+        "tools/apply-choice-credential-bootstrap.mjs",
+        ".github/workflows/deploy-pages.yml",
+        ".github/workflows/choice-growth-autopilot.yml",
+        ".github/workflows/validate-role-system.yml",
+        "google91001f63e8104533.html",
+        "BingSiteAuth.xml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/CHOICE_OWNER_SETUP.md",
+        "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T12:15:00+07:00",
       "summary": "AccessTrade Publisher fallback, credential bootstrap và xác minh Google/Bing production hoàn tất; credential active và vòng đầu có 24 sản phẩm."
@@ -81,7 +122,16 @@
       "id": "GROWTH-20260725-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-02-closeout",
-      "paths": ["backend/choice.js", "backend/choice-autopilot.js", "backend/choice-revenue.js", "backend/choice-setup.js", "hoi-chon-dung/**", "tools/**", ".github/workflows/**", "docs/handover/**"],
+      "paths": [
+        "backend/choice.js",
+        "backend/choice-autopilot.js",
+        "backend/choice-revenue.js",
+        "backend/choice-setup.js",
+        "hoi-chon-dung/**",
+        "tools/**",
+        ".github/workflows/**",
+        "docs/handover/**"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T03:15:00+07:00",
       "summary": "Affiliate đa lĩnh vực và Trung tâm kết nối owner production SUCCESS. PR #94."
@@ -90,7 +140,13 @@
       "id": "GOVERNANCE-20260724-01",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GOVERNANCE-20260724-01-closeout",
-      "paths": ["AGENTS.md", "backend/**", ".github/workflows/**", "hoi-chon-dung/**", "docs/handover/**"],
+      "paths": [
+        "AGENTS.md",
+        "backend/**",
+        ".github/workflows/**",
+        "hoi-chon-dung/**",
+        "docs/handover/**"
+      ],
       "status": "completed",
       "completed_at": "2026-07-24T23:41:00+07:00",
       "summary": "Khắc phục hoàn toàn lỗi đưa nội dung owner/internal lên public UI; production public-private boundary SUCCESS."
