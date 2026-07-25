@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-26T01:50:00+07:00",
+  "updated_at": "2026-07-26T02:20:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,6 +42,21 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260726-01",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "8015fbf2cd54b3f16541f572d66570cc6e15e838",
+      "paths": [
+        "backend/community.js",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-26T02:20:00+07:00",
+      "summary": "Loi gioi thieu va chuyen mon cua nick phai da dang, khong de lo dau vet tao hang loat.",
+      "completed_at": "2026-07-26T02:20:00+07:00"
+    },
     {
       "id": "BOITOAN-20260725-18",
       "owner": "Claude Code",

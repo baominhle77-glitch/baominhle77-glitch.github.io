@@ -887,6 +887,14 @@ const SIM_DEM = ["Thị","Văn","Minh","Ngọc","Thu","Hải","Quang","Anh","B�
 const SIM_TEN = ["An","Bình","Chi","Dung","Giang","Hà","Hạnh","Hiếu","Hoa","Huy","Khanh","Lam","Linh","Long","Mai","Nam","Nga","Nhung","Oanh","Phúc","Quân","Quyên","Sơn","Tâm","Thảo","Thắng","Trang","Trung","Tú","Uyên","Vy","Yến","Duy","Kiên","Lộc","My","Ngân","Nhi","Phong","Thư"];
 const SIM_NICK = ["Bống","Su","Gấu","Mèo","Cà Rốt","Bơ","Sữa","Nắng","Mây","Bí","Kem","Tép","Xù","Nhím","Dâu","Táo","Mít","Nho","Bắp","Cún","Bơ Sữa","Chuối","Ổi","Khoai","Xoài","Mận","Dừa","Lê","Hồng","Quýt"];
 const SIM_TAIL = ["xinh","nhỏ","con","béo","lười","vui","hiền","cute","mộc","an"];
+/* Lời giới thiệu ghép từ ba mảnh nên hàng trăm nick ra hàng trăm câu khác nhau.
+ * Cách cũ chọn từ một danh sách ngắn: 386 nick chỉ có 7 câu, một câu lặp 138 lần —
+ * lướt danh sách là biết ngay hàng loạt. */
+const SIM_R_KN = ["Xem bài hơn mười năm","Theo nghề gần tám năm","Bắt đầu xem cho người quen từ 2016","Học bài từ trong nhà, làm nghề đã lâu","Vào nghề sau một biến cố của chính mình","Tự học rồi theo thầy thêm bốn năm","Làm nghề bán thời gian, xem cho khách quen là chính","Chuyển hẳn sang nghề này sau nhiều năm đi làm công sở","Nhận khách đều đặn từ 2019","Học bài bản, có theo lớp và có người kèm","Xem bài từ hồi sinh viên tới giờ","Nghỉ việc văn phòng để theo nghề này"];
+const SIM_R_PC = ["nói thẳng, không vòng vo","đọc kỹ từng lá, không đoán bừa","trả lời đúng điều được hỏi","không hù doạ, không bán bùa","thích hỏi lại cho rõ trước khi đọc","nói chậm, giải thích cặn kẽ","ngắn gọn, đi thẳng vào việc","kiên nhẫn với người mới","không nhận ca ngoài khả năng của mình","chỉ nhận câu hỏi cụ thể","thật lòng cả khi bài không đẹp","hay dặn thêm việc nên làm sau khi xem"];
+const SIM_R_TM = ["mạnh về chuyện tình cảm và gia đạo","quen các ca công việc và chuyển nghề","chuyên chuyện tiền bạc và hợp tác làm ăn","hay được hỏi về thời điểm nên quyết","quen gỡ các mối quan hệ rối","nhiều ca về học hành và thi cử","hợp với người đang phân vân giữa hai lựa chọn","chuyên chuyện nhà cửa và đất đai","hay xem cho người chuẩn bị đi xa","quen các ca hôn nhân và con cái","mạnh phần xem ngày và chọn thời điểm","hay được nhờ xem người, xem đối tác"];
+const SIM_G_LD = ["Mới tìm hiểu, đang đọc dần","Vào cho vui, hỏi khi có việc cần","Bạn rủ nên thử xem sao","Đọc được vài quyển rồi muốn hỏi người thật","Trước không tin, giờ tò mò","Đang tự học, hay ghé đọc bài của mọi người","Xem bài lần đầu cách đây vài tháng","Ghé thường xuyên nhưng ít khi hỏi","Mới đăng ký, còn đang xem quanh","Theo dõi lâu rồi mới đăng ký","Đang cần lời khuyên cho một việc cụ thể","Thích đọc hơn là hỏi"];
+const SIM_G_QT = ["quan tâm chuyện công việc","hay hỏi về tình cảm","đang tính chuyện đổi việc","quan tâm tài chính và tiết kiệm","thích Tarot, đang tập tự trải bài","hay lưu lại lá bài ngày để đối chiếu","quan tâm chuyện gia đình","đang chuẩn bị cho một quyết định lớn","thích đọc phần luận giải hơn là kết quả","quan tâm sức khoẻ và nếp sinh hoạt","hay theo dõi phần thảo luận","đang tìm một reader hợp mình"];
 const SIM_SPEC = ["Tarot","Lenormand","Bài Tây","Kinh Dịch","Tử Vi","Bát Tự","Thần số học","Rune","Bài Trà","Chiêm tinh"];
 const SIM_BIO_R = [
   "Xem bài hơn 5 năm, chuyên gỡ rối chuyện tình cảm và công việc.",
@@ -915,6 +923,7 @@ function simHash(n) {
   h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16;
   return Math.abs(h);
 }
+function simCap(v) { return String(v || "").charAt(0).toUpperCase() + String(v || "").slice(1); }
 function simPick(list, n) { return list[n % list.length]; }
 /* `seed` là số thứ tự TOÀN CỤC trong 385 nick, khác `index` (số thứ tự trong nhóm khách/reader).
  * Tên ghép theo cặp (tên riêng, chữ đệm) lấy từ seed nên 385 nick ra 385 tên khác nhau:
@@ -957,14 +966,23 @@ function simProfile(index, role, now, seed) {
   const username = handles[simHash(s * 31 + 7) % handles.length];
   const base = {
     id, username, role, display_name: display, sim_seed: s,
-    bio: role === "reader" ? simPick(SIM_BIO_R, s * 3 + 1) : simPick(SIM_BIO_G, s * 2 + 1),
+    bio: role === "reader"
+      ? simPick(SIM_R_KN, simHash(s * 3 + 1)) + ", " + simPick(SIM_R_PC, simHash(s * 7 + 5)) + ". "
+        + simCap(simPick(SIM_R_TM, simHash(s * 11 + 2))) + "."
+      : simPick(SIM_G_LD, simHash(s * 5 + 3)) + ", " + simPick(SIM_G_QT, simHash(s * 13 + 9)) + ".",
     simulated: true, avatar_hue: (s * 37) % 360,
     qr_data: "", bank_account: "", bank_name: "",
     suspended: false, rating: 0, review_count: 0, created_at: now - (s % 180) * 86400000, updated_at: now,
   };
   if (role === "reader") {
-    const a = simPick(SIM_SPEC, s * 3), c = simPick(SIM_SPEC, s * 3 + 1);
-    base.specialties = a === c ? [a] : [a, c];
+    const how = simHash(s * 17 + 4) % 10;
+    const many = how < 3 ? 1 : how < 8 ? 2 : 3;
+    const picked = [];
+    for (let k = 0; k < many; k += 1) {
+      const one = simPick(SIM_SPEC, simHash(s * 19 + k * 31 + 7));
+      if (picked.indexOf(one) < 0) picked.push(one);
+    }
+    base.specialties = picked;
     base.experience_years = 1 + (s % 15);
   }
   return base;
