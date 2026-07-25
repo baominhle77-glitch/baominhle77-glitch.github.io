@@ -791,43 +791,61 @@ function simProfile(index, role, now) {
   }
   return base;
 }
-async function seedSimulatedAccounts(env) {
-  const existing = await listByPrefix(env, "community-profile:", 1000);
-  const already = existing.filter((p) => p && p.simulated).length;
-  if (already >= SIM_GUESTS + SIM_READERS) return { created: 0, total: already };
+const SIM_INDEX_KEY = "community-simulated-index";
+const SIM_BATCH = 40; /* Mỗi lượt ghi giới hạn để không vượt trần subrequest của Worker. */
+/* Danh sách nick mô phỏng nằm gọn trong MỘT khoá, nên xem danh sách chỉ tốn 1 lượt đọc
+ * thay vì quét toàn bộ hồ sơ (cách cũ làm treo request khi số nick lớn). */
+async function simIndex(env) {
+  return (await getJson(env, SIM_INDEX_KEY)) || { accounts: [], done: 0 };
+}
+function simPlan(i) {
+  return i < SIM_GUESTS ? { index: i, role: "guest" } : { index: i - SIM_GUESTS, role: "reader" };
+}
+/* Sinh theo từng lô, gọi lại nhiều lần cho tới khi done = 385. */
+async function seedSimulatedBatch(env) {
+  const idx = await simIndex(env);
+  const total = SIM_GUESTS + SIM_READERS;
+  if (idx.done >= total) return { created: 0, done: idx.done, total, complete: true };
   const now = Date.now();
-  let created = 0;
   const writes = [];
-  for (let i = 0; i < SIM_GUESTS; i += 1) {
-    const p = simProfile(i, "guest", now);
-    writes.push(putJson(env, profileKey(p.id), p)); created += 1;
-  }
-  for (let i = 0; i < SIM_READERS; i += 1) {
-    const p = simProfile(i, "reader", now);
+  const stop = Math.min(idx.done + SIM_BATCH, total);
+  for (let i = idx.done; i < stop; i += 1) {
+    const plan = simPlan(i);
+    const p = simProfile(plan.index, plan.role, now);
     writes.push(putJson(env, profileKey(p.id), p));
-    writes.push(putJson(env, readerIndexKey(p.id), { uid: p.id, created_at: now }));
-    created += 1;
+    if (plan.role === "reader") writes.push(putJson(env, readerIndexKey(p.id), { uid: p.id, created_at: now }));
+    idx.accounts.push({
+      id: p.id, username: p.username, role: p.role, display_name: p.display_name,
+      avatar_hue: p.avatar_hue, specialties: p.specialties || [], experience_years: p.experience_years || 0,
+    });
   }
+  const created = stop - idx.done;
+  idx.done = stop;
   await Promise.all(writes);
-  await env.KV.delete(STATS_CACHE_KEY);
-  return { created, total: already + created };
+  await putJson(env, SIM_INDEX_KEY, idx);
+  await bumpStats(env, { guests: 0, readers: 0 }, true);
+  return { created, done: idx.done, total, complete: idx.done >= total };
 }
 async function handleSimulated(request, env, path, auth) {
   if (!auth.primary) return json({ error: "primary_admin_required" }, 403);
-  const parts = path.split("/").filter(Boolean); /* api community admin simulated [uid] [action] */
-  const uid = parts[4] || "", action = parts[5] || "";
+  const parts = path.split("/").filter(Boolean); /* api community admin simulated [uid] */
+  const uid = parts[4] || "";
   if (!uid && request.method === "GET") {
-    const all = await listByPrefix(env, "community-profile:", 1000);
-    const sims = all.filter((p) => p && p.simulated)
-      .sort((a, b) => String(a.username).localeCompare(String(b.username)));
+    const idx = await simIndex(env);
+    const accounts = idx.accounts || [];
     return json({
-      accounts: sims.map((p) => ({ ...publicProfile(p, true), simulated: true })),
-      counts: { total: sims.length, guests: sims.filter((p) => p.role === "guest").length, readers: sims.filter((p) => p.role === "reader").length },
+      accounts,
+      counts: {
+        total: accounts.length,
+        guests: accounts.filter((a) => a.role === "guest").length,
+        readers: accounts.filter((a) => a.role === "reader").length,
+      },
+      done: idx.done || 0, target: SIM_GUESTS + SIM_READERS,
     });
   }
   if (!uid && request.method === "POST") {
-    const result = await seedSimulatedAccounts(env);
-    await adminAudit(env, request, "simulated_seed", "all", result);
+    const result = await seedSimulatedBatch(env);
+    await adminAudit(env, request, "simulated_seed", "batch", result);
     return json(result, 201);
   }
   if (uid === "control" && request.method === "POST") {
@@ -956,29 +974,56 @@ async function handleAdmin(request, env, path) {
 /* Account V4 awaited dispatcher */
 /* Account V5 admin JWT */
 
-/* Số thành viên — công khai, đếm theo thời gian thực, có cache ngắn để đỡ tốn KV. */
-const STATS_CACHE_KEY = "community-stats-cache";
-const STATS_CACHE_TTL = 20;
-async function handleStats(request, env) {
-  const cached = await getJson(env, STATS_CACHE_KEY);
-  if (cached && Date.now() - Number(cached.at || 0) < STATS_CACHE_TTL * 1000) {
-    return json({ ...cached.value, cached: true });
-  }
-  let guests = 0, readers = 0, admins = 0, cursor;
+/* Số thành viên — công khai, thời gian thực.
+ * Đếm bằng một khoá bộ đếm thay vì quét toàn bộ hồ sơ: quét sẽ vượt trần subrequest
+ * của Worker khi số thành viên lớn và làm treo request.
+ */
+const STATS_CACHE_KEY = "community-stats-counters";
+async function readStats(env) {
+  return (await getJson(env, STATS_CACHE_KEY)) || null;
+}
+/* Đếm lại từ đầu — chỉ dùng khi chưa có bộ đếm, và có trần để không treo. */
+async function rebuildStats(env) {
+  let guests = 0, readers = 0, admins = 0, cursor, scanned = 0;
   do {
     const page = await env.KV.list({ prefix: "community-profile:", limit: 1000, cursor });
     for (const key of page.keys) {
-      const profile = await getJson(env, key.name);
-      if (!profile) continue;
-      if (profile.role === "reader") readers += 1;
-      else if (profile.role === "admin") admins += 1;
-      else guests += 1;
+      scanned += 1;
+      if (key.name.endsWith(":role:reader")) readers += 1;
     }
     cursor = page.list_complete ? null : page.cursor;
-  } while (cursor);
-  const value = { members: guests + readers + admins, guests, readers, admins, updated_at: Date.now() };
-  await putJson(env, STATS_CACHE_KEY, { at: Date.now(), value }, 60);
-  return json(value);
+  } while (cursor && scanned < 5000);
+  /* Không đọc từng hồ sơ; lấy số reader từ chỉ mục reader cho chính xác. */
+  let readerCount = 0, rc;
+  do {
+    const page = await env.KV.list({ prefix: "community-reader:", limit: 1000, cursor: rc });
+    readerCount += page.keys.length;
+    rc = page.list_complete ? null : page.cursor;
+  } while (rc);
+  const simIdxValue = await getJson(env, "community-simulated-index");
+  const simAccounts = (simIdxValue && simIdxValue.accounts) || [];
+  const total = scanned;
+  readers = readerCount;
+  guests = Math.max(0, total - readers - admins);
+  const value = { members: total, guests, readers, admins, sim: simAccounts.length, updated_at: Date.now() };
+  await putJson(env, STATS_CACHE_KEY, value);
+  return value;
+}
+/* Cộng dồn khi có thay đổi, rẻ hơn quét lại. */
+async function bumpStats(env, delta, rebuild) {
+  if (rebuild) { await env.KV.delete(STATS_CACHE_KEY); return; }
+  const cur = await readStats(env);
+  if (!cur) return;
+  cur.guests = Math.max(0, Number(cur.guests || 0) + Number(delta.guests || 0));
+  cur.readers = Math.max(0, Number(cur.readers || 0) + Number(delta.readers || 0));
+  cur.members = cur.guests + cur.readers + Number(cur.admins || 0);
+  cur.updated_at = Date.now();
+  await putJson(env, STATS_CACHE_KEY, cur);
+}
+async function handleStats(request, env) {
+  const cached = await readStats(env);
+  if (cached) return json(cached);
+  return json(await rebuildStats(env));
 }
 
 export async function handleCommunity(request, env) {

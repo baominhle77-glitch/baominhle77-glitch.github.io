@@ -22,6 +22,19 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 11:00 GMT+7 — Claude Code — BOITOAN-20260725-05 — ĐANG LÀM ⏳
+
+**Sửa lỗi treo ở Khoang riêng** (chủ sở hữu báo: bấm sinh nick thì kẹt ở "Đang tải khoang riêng…").
+
+- Nguyên nhân: `listByPrefix(env, "community-profile:", 1000)` **đọc từng hồ sơ một**, nên 385 nick
+  làm một request phát sinh cả nghìn lượt đọc KV, vượt trần subrequest của Worker → treo. Hàm sinh
+  nick cũ còn ghi 661 lượt trong một request, cũng vượt trần.
+- Sửa: danh sách nick mô phỏng nay nằm gọn trong **một khoá chỉ mục** `community-simulated-index`
+  nên xem danh sách chỉ tốn 1 lượt đọc; sinh nick chạy **theo lô 40 nick**, gọi lại nhiều lần và
+  giao diện tự lặp cho tới khi đủ 385 (chủ sở hữu chỉ bấm một lần, hoặc công ty tự chạy qua API).
+- `GET /api/community/stats` cũng có đúng lỗi này (quét mọi hồ sơ) và sẽ treo khi có 385 nick. Nay
+  đếm bằng khoá bộ đếm `community-stats-counters`, chỉ dùng `KV.list` (không đọc từng giá trị).
+
 ### 2026-07-25 10:15 GMT+7 — Claude Code — BOITOAN-20260725-04 — HOÀN TẤT ✅
 
 - PR #100 merge `dc98895`; CI 4/4 success. Đã kiểm chứng production: `community-admin.js` có
