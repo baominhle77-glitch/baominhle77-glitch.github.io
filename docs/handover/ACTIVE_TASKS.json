@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T13:35:00+07:00",
+  "updated_at": "2026-07-25T14:05:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -11,8 +11,10 @@
       "paths": [
         "backend/choice.js",
         "backend/choice.test.mjs",
+        "backend/choice-vn-marketplace.test.mjs",
         "backend/choice-revenue.js",
         "backend/choice-revenue.test.mjs",
+        "tools/apply-choice-vn-marketplace.mjs",
         "tools/apply-choice-marketplace-scale.mjs",
         "tools/choice-marketplace-scale.test.mjs",
         "tools/build-choice-seo.mjs",
@@ -24,13 +26,15 @@
         ".github/workflows/deploy-pages.yml",
         ".github/workflows/validate-role-system.yml",
         ".github/workflows/choice-growth-autopilot.yml",
+        ".github/workflows/validate-choice-vn-marketplace.yml",
+        ".github/workflows/choice-vn-marketplace-production.yml",
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/CHOICE_10_DAY_GROWTH_SPRINT.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T13:35:00+07:00",
-      "summary": "Mở rộng Hội Chọn Đúng thành marketplace so sánh cùng sản phẩm ở nhiều shop/mức giá, tăng quy mô catalog và landing SEO, thêm đo người dùng thật/click chống trùng, referral loop và dashboard KPI sprint 10 ngày."
+      "heartbeat_at": "2026-07-25T14:05:00+07:00",
+      "summary": "Hotfix khẩn cấp: chỉ nhận Shopee VN, Lazada VN, Tiki, Sendo và TikTok Shop VN; tái tạo deeplink ACCESSTRADE thay vì dùng aff_link cũ; chặn link lỗi/ngoài Việt Nam; nhóm cùng sản phẩm chỉ khi có nhiều nơi bán thật. Tiếp tục mở rộng catalog, SEO và đo KPI sprint 10 ngày."
     }
   ],
   "recently_completed": [
