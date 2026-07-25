@@ -48,6 +48,7 @@ function candidate(id, title, units = 1000, rate = 2500, price = 400000) {
 function mockFetch() {
   return async (url, options = {}) => {
     const target = new URL(url);
+    if (target.pathname === "/v1/campaigns") return response({ total: 1, data: [{ id: "campaign-1" }] });
     if (target.pathname === "/v1/transactions") {
       return response({
         data: [{
@@ -58,6 +59,7 @@ function mockFetch() {
         }]
       });
     }
+    if (target.pathname === "/v1/datafeeds") return response({ data: [] });
     if (target.pathname.endsWith("/create_link")) {
       const body = JSON.parse(options.body);
       return response({
@@ -81,6 +83,38 @@ function mockFetch() {
         }
       });
     }
+    return response({ error: "not_found" }, 404);
+  };
+}
+
+function datafeedFallbackFetch() {
+  const rows = __test.PORTFOLIO.flatMap((portfolio) => Array.from({ length: 4 }, (_, index) => {
+    const keyword = portfolio.keywords[0];
+    return {
+      product_id: `${portfolio.id}-feed-${index + 1}`,
+      sku: `${portfolio.id}-${index + 1}`,
+      name: `${keyword} lựa chọn ${index + 1}`,
+      cate: portfolio.id,
+      desc: `Sản phẩm ${keyword} phù hợp nhu cầu phổ thông`,
+      campaign: `Merchant ${portfolio.id}`,
+      domain: "merchant.example",
+      image: `https://example.com/${portfolio.id}-${index + 1}.jpg`,
+      price: 500000 + index * 250000,
+      discount: 350000 + index * 220000,
+      discount_rate: 20,
+      product_url: `https://merchant.example/${portfolio.id}-${index + 1}`,
+      url: `https://merchant.example/${portfolio.id}-${index + 1}`,
+      aff_link: `https://go.isclix.com/datafeed/${portfolio.id}-${index + 1}`,
+      update_time: "2026-07-25T00:00:00Z"
+    };
+  }));
+
+  return async (url) => {
+    const target = new URL(url);
+    if (target.pathname === "/v1/campaigns") return response({ total: 2, data: [{ id: "general" }] });
+    if (target.pathname === "/v1/transactions") return response({ data: [] });
+    if (target.pathname === "/v1/datafeeds") return response({ total: rows.length, data: rows });
+    if (target.pathname === "/v2/tiktokshop_product_feeds") return response({ message: "not_allowed" }, 403);
     return response({ error: "not_found" }, 404);
   };
 }
@@ -140,6 +174,20 @@ test("Autopilot tự tuyển đủ quota đa lĩnh vực, tạo deep link và th
   assert.ok(generated.every((item) => item.last_verified_at));
   assert.ok(generated.every((item) => Number.isFinite(item.trend_score)));
   assert.ok(generated.every((item) => ["ban-chay", "dang-duoc-quan-tam", "moi-phat-hien"].includes(item.trend_label)));
+});
+
+test("Publisher key hợp lệ vẫn chạy bằng datafeed khi TikTok Shop chưa cấp quyền", async () => {
+  const env = makeEnv(true);
+  const result = await runChoiceAutopilot(env, { trigger: "cron", fetchImpl: datafeedFallbackFetch() });
+  const expected = __test.PORTFOLIO.length * 4;
+  assert.equal(result.ok, true);
+  assert.equal(result.status.selected_products, expected);
+  assert.equal(result.status.categories_covered, __test.PORTFOLIO.length);
+  const catalog = JSON.parse(await env.KV.get(__test.STORE_KEY));
+  const generated = catalog.products.filter((item) => item.autopilot_managed);
+  assert.equal(generated.length, expected);
+  assert.ok(generated.every((item) => item.affiliate_url.includes("/datafeed/")));
+  assert.ok(result.status.errors.some((item) => item.includes("tiktokshop_unavailable_using_datafeeds")));
 });
 
 test("trạng thái chỉ được đọc nội bộ từ KV, không có public handler", async () => {
