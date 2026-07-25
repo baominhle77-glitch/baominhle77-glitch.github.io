@@ -49,6 +49,7 @@
       "base_sha": "30b2db13f16d13260208ae708af40e06ca8ace08",
       "paths": [
         "backend/community.js",
+        "assets/community.js",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "docs/handover/ACTIVE_TASKS.json"
       ],

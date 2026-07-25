@@ -36,6 +36,14 @@ nhưng nhiều chỗ trong mã vẫn chỉ tra và ghi ở khoá hồ sơ.**
 Thêm `saveProfileAny()` để mọi lần ghi hồ sơ về đúng nơi nó sống, và `POST .../simulated/repair`
 nhận `{"force":true}` để dựng lại toàn bộ 385 nick theo công thức tên mới (giữ nguyên id và tên tài khoản).
 
+**Chat chậm — một nguyên nhân thật đã sửa.** Giao diện lấy tin mỗi 1,2 giây khi app đang mở, nhưng
+hạ xuống 8 giây khi `document.hidden`, và iPhone còn treo hẹn giờ nặng hơn nữa khi app chạy nền.
+Quay lại app phải chờ hết nhịp hẹn giờ mới thấy tin mới — khớp với mô tả "hơn 30 giây". Nay nghe
+`visibilitychange` và `focus` để lấy tin **ngay khi app hiện lại**, không đợi hẹn giờ.
+
+Vẫn chưa kết luận đây là toàn bộ nguyên nhân: sau khi bản này lên phải đo đúng kịch bản hai nick
+nhắn qua lại rồi mới chốt.
+
 **Đo trên production trước khi sửa:** `/api/community/readers` trả 277 reader trong ~350ms và
 `/messages` ~300ms — tức là danh sách và tin nhắn vốn nhanh; lỗi nằm ở chỗ tra hồ sơ, không phải
 ở tốc độ. `POST /api/community/conversations` với một reader mô phỏng trả đúng `reader_not_found`,
