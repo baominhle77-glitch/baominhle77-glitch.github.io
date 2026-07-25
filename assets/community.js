@@ -523,6 +523,20 @@
         state.poll = setTimeout(pollMessages, document.hidden ? 8000 : 1200);
       }).catch(function () { state.poll = setTimeout(pollMessages, 4000); });
     }
+    /* iPhone treo hẹn giờ khi app chạy nền, nên quay lại app có thể phải chờ rất lâu mới thấy tin
+     * mới. Nghe sự kiện hiện lại và lấy tin ngay thay vì đợi hết nhịp hẹn giờ. */
+    function wakeAndPoll() {
+      if (document.hidden || state.activeConversation !== conversation.id) return;
+      if (state.poll) clearTimeout(state.poll);
+      state.poll = setTimeout(pollMessages, 0);
+    }
+    if (state.chatWake) {
+      document.removeEventListener("visibilitychange", state.chatWake);
+      window.removeEventListener("focus", state.chatWake);
+    }
+    state.chatWake = wakeAndPoll;
+    document.addEventListener("visibilitychange", wakeAndPoll);
+    window.addEventListener("focus", wakeAndPoll);
     state.poll = setTimeout(pollMessages, 1200);
   }
 

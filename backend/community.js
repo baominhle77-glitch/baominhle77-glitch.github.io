@@ -422,10 +422,28 @@ async function handleMe(request, env) {
   const validated = validateProfileBody(body || {}, auth.profile.role);
   if (validated.error) return json({ error: validated.error }, 400);
   const profile = { ...auth.profile, ...validated.value, updated_at: Date.now() };
+  /* Nick mô phỏng sống trong khoá chỉ mục. Ghi thành hồ sơ riêng sẽ tạo bản ghi thứ hai cho cùng
+   * một nick, làm số thành viên công khai đội lên mỗi lần sửa tên. Ghi thẳng vào chỉ mục. */
+  const idx = await simIndex(env);
+  const at = (idx.accounts || []).findIndex((a) => a && a.id === profile.id);
+  if (at >= 0) {
+    idx.accounts[at] = profile;
+    await putJson(env, SIM_INDEX_KEY, idx);
+    await env.KV.delete(profileKey(profile.id)); /* dọn bản ghi thừa nếu lần trước đã lỡ tạo */
+    try { await env.KV.delete(STATS_CACHE_KEY); } catch (_) {}
+    return json({ profile: publicProfile(profile, true) });
+  }
   await putJson(env, profileKey(profile.id), profile);
   return json({ profile: publicProfile(profile, true) });
 }
 
+/* Tra hồ sơ theo id ở CẢ HAI nơi: kho hồ sơ thật và chỉ mục khoang riêng.
+ * Nick mô phỏng không có khoá hồ sơ riêng, nên chỗ nào chỉ tra kho thật sẽ báo không tìm thấy —
+ * đó là lý do bấm vào một reader mô phỏng lại hiện lỗi. */
+async function getProfileAny(env, uid) {
+  if (!isUuid(uid)) return null;
+  return (await getJson(env, profileKey(uid))) || (await simProfileById(env, uid));
+}
 async function listByPrefix(env, prefix, limit = MAX_PAGE) {
   const page = await env.KV.list({ prefix, limit });
   const values = await Promise.all(page.keys.map((k) => getJson(env, k.name)));
@@ -440,12 +458,24 @@ async function reviewsForReader(env, readerId) {
 }
 async function recalculateRating(env, readerId) {
   const reviews = await reviewsForReader(env, readerId);
-  const profile = await getJson(env, profileKey(readerId));
+  const profile = await getProfileAny(env, readerId);
   if (!profile || profile.role !== "reader") return;
   profile.review_count = reviews.length;
   profile.rating = reviews.length ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10 : 0;
   profile.updated_at = Date.now();
-  await putJson(env, profileKey(readerId), profile);
+  await saveProfileAny(env, profile);
+}
+/* Ghi hồ sơ về đúng nơi nó sống: nick mô phỏng nằm trong chỉ mục khoang riêng, nick thật nằm ở
+ * khoá hồ sơ. Ghi nhầm nơi sẽ tạo bản ghi thứ hai cho cùng một nick và làm sai số thành viên. */
+async function saveProfileAny(env, profile) {
+  const idx = await simIndex(env);
+  const at = (idx.accounts || []).findIndex((a) => a && a.id === profile.id);
+  if (at >= 0) {
+    idx.accounts[at] = profile;
+    await putJson(env, SIM_INDEX_KEY, idx);
+    return;
+  }
+  await putJson(env, profileKey(profile.id), profile);
 }
 async function handleReaders(request, env, path) {
   const viewer = await communityAuth(request, env);
@@ -467,7 +497,7 @@ async function handleReaders(request, env, path) {
     return json({ readers: readers.sort((a, b) => b.rating - a.rating || b.review_count - a.review_count) });
   }
   if (!isUuid(readerId)) return json({ error: "invalid_reader" }, 400);
-  const reader = await getJson(env, profileKey(readerId));
+  const reader = await getProfileAny(env, readerId);
   if (!reader || reader.role !== "reader" || reader.suspended) return json({ error: "not_found" }, 404);
   if (!action && request.method === "GET") return json({ reader: publicProfile(reader, false), reviews: await reviewsForReader(env, readerId) });
   if (action !== "reviews") return json({ error: "not_found" }, 404);
@@ -525,7 +555,7 @@ async function handleConversations(request, env, path) {
       if (auth.profile.role !== "guest") return json({ error: "guest_only" }, 403);
       const body = await readJson(request);
       const readerId = body && body.reader_id;
-      const reader = isUuid(readerId) && await getJson(env, profileKey(readerId));
+      const reader = await getProfileAny(env, readerId);
       if (!reader || reader.role !== "reader" || reader.suspended) return json({ error: "reader_not_found" }, 404);
       const cid = await conversationId(env, auth.profile.id, readerId);
       let rec = await getJson(env, conversationKey(cid));
@@ -860,24 +890,30 @@ const SIM_BIO_G = [
   "Vào cho vui, hỏi khi có việc cần.",
 ];
 function simPick(list, n) { return list[n % list.length]; }
-function simProfile(index, role, now) {
+/* `seed` là số thứ tự TOÀN CỤC trong 385 nick, khác `index` (số thứ tự trong nhóm khách/reader).
+ * Tên ghép theo cặp (tên riêng, chữ đệm) lấy từ seed nên 385 nick ra 385 tên khác nhau:
+ * cách cũ nhân seed rồi lấy dư nên cứ 40 nick lại lặp lại đúng một tên. */
+function simProfile(index, role, now, seed) {
+  const s = Number.isFinite(seed) ? seed : index;
   const id = crypto.randomUUID();
-  const ho = simPick(SIM_HO, index * 7 + 3);
-  const dem = simPick(SIM_DEM, index * 5 + 1);
-  const ten = simPick(SIM_TEN, index * 11 + 2);
+  const tenIx = s % SIM_TEN.length;
+  const demIx = Math.floor(s / SIM_TEN.length) % SIM_DEM.length;
+  const ho = simPick(SIM_HO, s * 7 + demIx * 3 + 3);
+  const dem = SIM_DEM[(demIx * 7 + tenIx) % SIM_DEM.length]; /* đổi cả trong cùng một khối cho tự nhiên; vẫn duy nhất vì bước nhảy 7 nguyên tố cùng nhau với 20 */
+  const ten = SIM_TEN[tenIx];
   const display = `${ho} ${dem} ${ten}`;
   const username = `sim${role === "reader" ? "r" : "g"}${String(index).padStart(3, "0")}`;
   const base = {
     id, username, role, display_name: display,
-    bio: role === "reader" ? simPick(SIM_BIO_R, index * 3) : simPick(SIM_BIO_G, index * 3),
-    simulated: true, avatar_hue: (index * 37) % 360,
+    bio: role === "reader" ? simPick(SIM_BIO_R, s * 3 + 1) : simPick(SIM_BIO_G, s * 2 + 1),
+    simulated: true, avatar_hue: (s * 37) % 360,
     qr_data: "", bank_account: "", bank_name: "",
-    suspended: false, rating: 0, review_count: 0, created_at: now - (index % 180) * 86400000, updated_at: now,
+    suspended: false, rating: 0, review_count: 0, created_at: now - (s % 180) * 86400000, updated_at: now,
   };
   if (role === "reader") {
-    const a = simPick(SIM_SPEC, index * 3), c = simPick(SIM_SPEC, index * 3 + 1);
+    const a = simPick(SIM_SPEC, s * 3), c = simPick(SIM_SPEC, s * 3 + 1);
     base.specialties = a === c ? [a] : [a, c];
-    base.experience_years = 1 + (index % 15);
+    base.experience_years = 1 + (s % 15);
   }
   return base;
 }
@@ -895,13 +931,14 @@ function simPlan(i) {
 /* Một đợt sinh nick đời trước lưu bản rút gọn, thiếu cả cờ `simulated` lẫn phần hồ sơ.
  * Những nick đó bấm vào là hỏng và trang cá nhân trống trơn. Hàm này dựng lại đủ hồ sơ
  * từ tên tài khoản (simg000 / simr123 đã mã hoá sẵn vai trò và số thứ tự) và GIỮ NGUYÊN id. */
-function simRepair(account, now) {
+function simRepair(account, now, force) {
   if (!account || !account.username) return account;
-  if (account.simulated === true && account.created_at) return account;
+  if (!force && account.simulated === true && account.created_at) return account;
   const match = String(account.username).match(/^sim([gr])(\d{3})$/);
   if (!match) return { ...account, simulated: true };
   const role = match[1] === "r" ? "reader" : "guest";
-  const rebuilt = simProfile(Number(match[2]), role, now);
+  const roleIndex = Number(match[2]);
+  const rebuilt = simProfile(roleIndex, role, now, role === "reader" ? SIM_GUESTS + roleIndex : roleIndex);
   return { ...rebuilt, id: account.id, username: account.username, role: account.role || role };
 }
 /* Nick nằm trong chỉ mục thì đương nhiên là nick mô phỏng — không phụ thuộc cờ trong bản ghi. */
@@ -920,7 +957,7 @@ async function seedSimulatedBatch(env) {
   const stop = Math.min(idx.done + SIM_BATCH, total);
   for (let i = idx.done; i < stop; i += 1) {
     const plan = simPlan(i);
-    idx.accounts.push(simProfile(plan.index, plan.role, now));
+    idx.accounts.push(simProfile(plan.index, plan.role, now, i));
   }
   const created = stop - idx.done;
   idx.done = stop;
@@ -967,11 +1004,14 @@ async function handleSimulated(request, env, path, auth) {
   /* Dựng lại hồ sơ cho những nick lưu ở dạng rút gọn từ đợt sinh đời trước: thiếu cờ simulated,
    * thiếu bio, ngày tạo, ngân hàng… nên bấm vào là hỏng và trang cá nhân trống. Một lượt ghi. */
   if (uid === "repair" && request.method === "POST") {
+    const body = await readJson(request);
+    /* force = dựng lại toàn bộ, dùng khi công thức sinh tên đổi (bản cũ sinh trùng tên). */
+    const force = !!(body && body.force);
     const idx = await simIndex(env);
     const now = Date.now();
     let fixed = 0;
     idx.accounts = (idx.accounts || []).map((a) => {
-      const next = simRepair(a, now);
+      const next = simRepair(a, now, force);
       if (next !== a) fixed += 1;
       return next;
     });

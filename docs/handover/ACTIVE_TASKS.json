@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T16:45:00+07:00",
+  "updated_at": "2026-07-25T17:20:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -43,10 +43,34 @@
   ],
   "recently_completed": [
     {
+      "id": "BOITOAN-20260725-12",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "30b2db13f16d13260208ae708af40e06ca8ace08",
+      "paths": [
+        "backend/community.js",
+        "assets/community.js",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-25T17:20:00+07:00",
+      "summary": "Sua ba loi chu so huu bao: so thanh vien tang khi sua ten nick, bam vao reader mo phong bao loi, va 385 nick chi co 40 ten khac nhau.",
+      "completed_at": "2026-07-25T17:20:00+07:00"
+    },
+    {
       "id": "BOITOAN-20260725-11",
       "owner": "Claude Code",
       "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": ["backend/community.js", "assets/community.js", "assets/community-admin.js", "boitoan/community-admin.html", "docs/handover/SO-DO-HE-THONG.md", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
+      "paths": [
+        "backend/community.js",
+        "assets/community.js",
+        "assets/community-admin.js",
+        "boitoan/community-admin.html",
+        "docs/handover/SO-DO-HE-THONG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T16:35:00+07:00",
       "summary": "PR #116 merge commit 04df1e6e92eb06b163178adb4bed66fa02545cf6; production và recorder SUCCESS."
@@ -55,7 +79,11 @@
       "id": "BOITOAN-20260725-10",
       "owner": "Claude Code",
       "branch": "claude/affiliate-community-strategy-oft750",
-      "paths": ["boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
+      "paths": [
+        "boitoan/index.html",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T16:10:00+07:00",
       "summary": "PR #114 merge commit 8c4597e02f318398164d240320349c96e33e6133; production và recorder SUCCESS."
@@ -64,7 +92,21 @@
       "id": "GROWTH-20260725-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-03-closeout",
-      "paths": ["backend/choice-autopilot.test.mjs", "backend/choice-credential-bootstrap.js", "backend/choice-credential-bootstrap.test.mjs", "tools/apply-choice-access-fallback.mjs", "tools/apply-choice-credential-bootstrap.mjs", ".github/workflows/deploy-pages.yml", ".github/workflows/choice-growth-autopilot.yml", ".github/workflows/validate-role-system.yml", "google91001f63e8104533.html", "BingSiteAuth.xml", "docs/handover/ACTIVE_TASKS.json", "docs/handover/CHOICE_OWNER_SETUP.md", "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"],
+      "paths": [
+        "backend/choice-autopilot.test.mjs",
+        "backend/choice-credential-bootstrap.js",
+        "backend/choice-credential-bootstrap.test.mjs",
+        "tools/apply-choice-access-fallback.mjs",
+        "tools/apply-choice-credential-bootstrap.mjs",
+        ".github/workflows/deploy-pages.yml",
+        ".github/workflows/choice-growth-autopilot.yml",
+        ".github/workflows/validate-role-system.yml",
+        "google91001f63e8104533.html",
+        "BingSiteAuth.xml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/CHOICE_OWNER_SETUP.md",
+        "docs/handover/CHOICE_GROWTH_AUTOPILOT.md"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T12:15:00+07:00",
       "summary": "AccessTrade credential, Publisher fallback và Google/Bing production hoàn tất."
@@ -73,7 +115,16 @@
       "id": "GROWTH-20260725-02",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-02-closeout",
-      "paths": ["backend/choice.js", "backend/choice-autopilot.js", "backend/choice-revenue.js", "backend/choice-setup.js", "hoi-chon-dung/**", "tools/**", ".github/workflows/**", "docs/handover/**"],
+      "paths": [
+        "backend/choice.js",
+        "backend/choice-autopilot.js",
+        "backend/choice-revenue.js",
+        "backend/choice-setup.js",
+        "hoi-chon-dung/**",
+        "tools/**",
+        ".github/workflows/**",
+        "docs/handover/**"
+      ],
       "status": "completed",
       "completed_at": "2026-07-25T03:15:00+07:00",
       "summary": "Affiliate đa lĩnh vực và Growth Autopilot production hoàn tất."
