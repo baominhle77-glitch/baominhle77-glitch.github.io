@@ -22,6 +22,35 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 16:00 GMT+7 — Claude Code — BOITOAN-20260725-10 — ĐANG LÀM ⏳
+
+**Trả trọn món nợ cuối: kho chữ Kinh Dịch.**
+
+1. **Chữ tiếng Anh cuối cùng trong app.** Quét toàn bộ chuỗi hiển thị với danh sách từ tiếng Anh hay
+   lọt vào (`chemistry · stress · deal · team · feedback · brief · retreat · DCA · mindset · burnout`…):
+   còn đúng **một** chỗ, ở `KD_EXT`. Đã viết lại. Quét lại toàn app: **0**.
+
+2. **150 cụm ngoặc kép ở `KD_EXT` — đã tách xong hai loại và xử đúng từng loại.**
+   - **Giữ 100 cụm** là trích kinh điển thật: câu hào (`kháng long hữu hối` · `tháng tám có hung` ·
+     `vô vọng chi tật` · `quả lớn không bị ăn` · `sơ cát chung loạn`), tên quẻ (`Phục` `Bác` `dự`
+     `dật` `theo` `mọt` `khốn` `tổn` `ích` `độn` `giải` `quy muội` `đại súc`) và hình tượng của quẻ
+     (`cái vạc` `chân vạc` `nấu` `chín` `củi` · `nguồn nước` `thả gầu` `vỡ bình` · `chim non gãy
+     cánh` · `mặt trời giữa trưa` `trưa rồi sẽ xế`). Ngoặc kép ở đây là **dấu trích dẫn đúng chức
+     năng**, bỏ đi là mất nghĩa.
+   - **Bỏ ngoặc kép 50 cụm** là ngoặc kép mỉa mai, cùng loại lỗi đã sửa ở Tarot: `xem thêm` ·
+     `nhà giàu` · `xó tối` · `ông nói gà bà nói vịt` · `cứu vãn tình thế` · `trang điểm` ·
+     `giàu tắt` · `lên hạng` · `cửa thoát nhanh` · `phương án phụ` · `tạm trú`…
+   - **Viết lại tay 10 câu** mà bỏ ngoặc kép xong vẫn tối nghĩa, ví dụ *'đồng' ở cánh đồng, không
+     'đồng' sau cánh cửa* → *Việc góp chung phải làm giữa thanh thiên bạch nhật, không thoả thuận
+     riêng sau lưng người khác*; *chưa 'mưa'* → *chưa tới lúc kết quả*; *qua mọi 'ấp'* → *qua mọi
+     nơi bạn làm việc*.
+
+Quét lại `KD_EXT`: **0** cụm ngoài nhóm giữ.
+
+**Đến đây toàn bộ kho chữ của app đã được rà theo cùng một chuẩn**: Lenormand · Tarot · Bài Tây ·
+Rune · Bài Trà · Kinh Dịch. Không còn chữ tiếng Anh, không còn ngoặc kép mỉa mai, không còn nhãn
+viết hoa giữa câu, không còn khẳng định vật thể mà lá bài hay quẻ không nói tới.
+
 ### 2026-07-25 15:30 GMT+7 — Claude Code — BOITOAN-20260725-09 — ĐANG LÀM ⏳
 
 **Nghiệm thu production sau ba đợt merge hôm nay** (`8d51645` → `67a9575` → `50c1e35`).
