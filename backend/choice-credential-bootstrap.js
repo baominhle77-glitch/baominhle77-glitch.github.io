@@ -34,6 +34,11 @@ async function sha256Hex(value) {
   return [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+function expectedTokenHash(env) {
+  const override = clean(env.CHOICE_BOOTSTRAP_EXPECTED_SHA256, 64).toLowerCase();
+  return /^[a-f0-9]{64}$/.test(override) ? override : EXPECTED_TOKEN_SHA256;
+}
+
 async function deriveCredentialKey(env) {
   const secret = clean(env.SESSION_SECRET, 500);
   if (secret.length < 32) throw new Error("session_secret_missing");
@@ -114,7 +119,7 @@ async function ingestCredential(env, cipherText, fetchImpl = fetch) {
     unb64url(cipherText)
   );
   const token = clean(new TextDecoder().decode(clear), 1200);
-  if (await sha256Hex(token) !== EXPECTED_TOKEN_SHA256) throw new Error("credential_hash_mismatch");
+  if (await sha256Hex(token) !== expectedTokenHash(env)) throw new Error("credential_hash_mismatch");
   await validatePublisherToken(token, fetchImpl);
   await env.KV.put(CREDENTIAL_KEY, await encryptCredential(env, token));
   await env.KV.put(BOOTSTRAP_USED_KEY, JSON.stringify({ connected_at: new Date().toISOString() }));
@@ -134,8 +139,7 @@ function headers(contentType = "application/json; charset=utf-8") {
     "cache-control": "no-store, private",
     "x-content-type-options": "nosniff",
     "x-robots-tag": "noindex, nofollow, noarchive",
-    "referrer-policy": "no-referrer",
-    "access-control-allow-origin": "https://chatgpt.com"
+    "referrer-policy": "no-referrer"
   };
 }
 
@@ -168,9 +172,11 @@ export async function handleChoiceCredentialBootstrapRequest(request, env) {
 
 export const __test = {
   EXPECTED_TOKEN_SHA256,
+  CREDENTIAL_KEY,
   BOOTSTRAP_KEYPAIR_KEY,
   BOOTSTRAP_USED_KEY,
   sha256Hex,
+  expectedTokenHash,
   ensureBootstrapKeypair,
   ingestCredential,
   validatePublisherToken
