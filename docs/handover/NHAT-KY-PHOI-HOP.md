@@ -22,6 +22,27 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 14:35 GMT+7 — Claude Code — BOITOAN-20260725-07 — ĐANG LÀM ⏳
+
+**Số thành viên công khai phải tự cập nhật.** Sau khi dọn rác và sinh đủ 385 nick, `/api/community/stats`
+vẫn trả **161** vì bộ đếm được cache với hạn dùng bằng `ACCOUNT_TTL` và không chỗ nào xoá nó.
+
+- Cache đếm nay có hạn dùng **60 giây** (`STATS_CACHE_TTL`), nên số thành viên tự đúng lại mà không
+  phải nhớ xoá cache ở mọi chỗ có thay đổi.
+- Sinh nick xong xoá cache ngay; dọn rác cũng luôn xoá cache, kể cả lô không xoá được hồ sơ nào.
+
+**Việc đã chạy thật trên production hôm nay** (sau khi PR #103 merge `8d51645` và deploy xong):
+
+| Việc | Kết quả kiểm chứng |
+|---|---|
+| Dọn hồ sơ nick mô phỏng đời cũ | quét **2.086**, xoá **2.085** hồ sơ rác; số thành viên từ 2.086 về 161 |
+| Sinh đủ nick khoang riêng | `done: 385 / target: 385` — **109 khách + 276 reader**, đúng yêu cầu |
+| Đăng nhập Admin tổng | `POST /api/community/admin/login` trả **HTTP 200**, `level: primary` |
+
+Con số 2.086 trước đây là do bản sinh nick đời trước tạo mỗi nick một khoá hồ sơ thật và bị gọi lại
+nhiều lần. Sau khi dọn, trong KV chỉ còn **1 hồ sơ thành viên thật**; toàn bộ phần còn lại là 385 nick
+mô phỏng nằm trong khoá chỉ mục.
+
 ### 2026-07-25 11:40 GMT+7 — Claude Code — BOITOAN-20260725-06 — HOÀN TẤT ✅
 
 **Chịu lỗi hạn mức ghi KV.** Khi chạy sinh nick thật trên production đã chạm trần
