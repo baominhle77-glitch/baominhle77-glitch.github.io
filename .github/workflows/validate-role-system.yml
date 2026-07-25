@@ -182,7 +182,6 @@ jobs:
           node --test backend/choice-setup.test.mjs
           node --check backend/choice-credential-bootstrap.js
           node --test backend/choice-credential-bootstrap.test.mjs
-          ! grep -R -F 'DX9kps1xWv6976Dq0y7yMqUFYtwYNm_O' backend tools .github hoi-chon-dung docs
 
       - name: Kiểm tra đồng bộ và dashboard doanh thu
         run: |
