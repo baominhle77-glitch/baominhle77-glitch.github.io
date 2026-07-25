@@ -10,6 +10,7 @@ const GATE_SESSION_TTL = 12 * 60 * 60;
 const MESSAGE_TTL = 30 * 24 * 60 * 60;
 const REVIEW_TTL = 3650 * 24 * 60 * 60;
 const MAX_PAGE = 100;
+const READER_PAGE = 300; /* Trần số reader thật lấy trong một lần xem danh sách. */
 const enc = new TextEncoder();
 
 const json = (value, status = 200) => new Response(JSON.stringify(value), {
@@ -400,9 +401,16 @@ async function handleReaders(request, env, path) {
   const action = parts[4] || "";
   if (!readerId) {
     if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405);
-    const refs = await listByPrefix(env, "community-reader:", 100);
-    const profiles = (await Promise.all(refs.map((r) => getJson(env, profileKey(r.uid))))).filter((p) => p && !p.suspended && p.role === "reader");
-    return json({ readers: profiles.map((p) => publicProfile(p, false)).sort((a, b) => b.rating - a.rating || b.review_count - a.review_count) });
+    /* Tên khoá đã chứa uid nên không phải đọc bản ghi trỏ: mỗi reader chỉ tốn một lượt đọc hồ sơ. */
+    const page = await env.KV.list({ prefix: "community-reader:", limit: READER_PAGE });
+    const uids = page.keys.map((k) => k.name.slice("community-reader:".length)).filter(isUuid);
+    const profiles = (await Promise.all(uids.map((id) => getJson(env, profileKey(id)))))
+      .filter((p) => p && !p.suspended && p.role === "reader");
+    /* Nick mô phỏng nằm trong khoá chỉ mục nên phải ghép vào đây, nếu không khoang riêng có
+     * reader mà trang tìm reader lại không thấy. */
+    const sim = ((await simIndex(env)).accounts || []).filter((a) => a && a.role === "reader" && !a.suspended);
+    const readers = [...profiles, ...sim].map((p) => publicProfile(p, false));
+    return json({ readers: readers.sort((a, b) => b.rating - a.rating || b.review_count - a.review_count) });
   }
   if (!isUuid(readerId)) return json({ error: "invalid_reader" }, 400);
   const reader = await getJson(env, profileKey(readerId));
@@ -814,6 +822,7 @@ function simProfile(index, role, now) {
 }
 const SIM_INDEX_KEY = "community-simulated-index";
 const SIM_BATCH = 40; /* Mỗi lượt ghi giới hạn để không vượt trần subrequest của Worker. */
+const SIM_CLEAN_BATCH = 200; /* Số hồ sơ quét trong một lượt dọn rác. */
 /* Danh sách nick mô phỏng nằm gọn trong MỘT khoá, nên xem danh sách chỉ tốn 1 lượt đọc
  * thay vì quét toàn bộ hồ sơ (cách cũ làm treo request khi số nick lớn). */
 async function simIndex(env) {
@@ -875,6 +884,27 @@ async function handleSimulated(request, env, path, auth) {
     const result = await seedSimulatedBatch(env);
     await adminAudit(env, request, "simulated_seed", "batch", result);
     return json(result, 201);
+  }
+  /* Dọn hồ sơ nick mô phỏng đời cũ. Bản sinh nick trước kia tạo mỗi nick một khoá hồ sơ thật;
+   * chạy lại nhiều lần nên để lại hàng loạt hồ sơ trùng tên, làm số thành viên công khai sai.
+   * Nay nick mô phỏng chỉ nằm trong khoá chỉ mục, các hồ sơ cũ đó là rác và phải xoá.
+   * Quét theo lô kèm con trỏ để một request không bao giờ chạm trần subrequest. */
+  if (uid === "cleanup" && request.method === "POST") {
+    const body = await readJson(request);
+    const cursor = clean(body && body.cursor, 1024) || undefined;
+    const page = await env.KV.list({ prefix: "community-profile:", limit: SIM_CLEAN_BATCH, cursor });
+    const records = await Promise.all(page.keys.map(async (k) => ({ name: k.name, value: await getJson(env, k.name) })));
+    const doomed = records.filter((r) => r.value && r.value.simulated === true);
+    const jobs = [];
+    for (const item of doomed) {
+      jobs.push(env.KV.delete(item.name));
+      if (item.value.role === "reader") jobs.push(env.KV.delete(readerIndexKey(item.value.id)));
+    }
+    await Promise.all(jobs);
+    if (doomed.length) { try { await env.KV.delete(STATS_CACHE_KEY); } catch (_) {} }
+    const next = page.list_complete ? null : page.cursor;
+    await adminAudit(env, request, "simulated_cleanup", "batch", { scanned: page.keys.length, deleted: doomed.length });
+    return json({ scanned: page.keys.length, deleted: doomed.length, cursor: next, done: !next });
   }
   if (uid === "control" && request.method === "POST") {
     const body = await readJson(request);

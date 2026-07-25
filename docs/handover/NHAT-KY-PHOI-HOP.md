@@ -72,6 +72,18 @@ chiều thuận hơn" ngay trước một lá xấu, và nói "giữ nguyên chi
 **Còn nợ:** kho chữ của Tarot, Bài Tây, Rune, Bài Trà chưa được rà cùng chuẩn này; mới sửa các
 chỗ lộ ra khi quét theo loại lỗi. Việc tiếp theo là rà trọn từng bộ.
 
+**Dọn rác dữ liệu nick mô phỏng.** `GET /api/community/stats` đang trả **2.086 thành viên** —
+sai. Nguyên nhân: bản sinh nick đời trước tạo **mỗi nick một khoá hồ sơ thật** và bị gọi lại nhiều
+lần, để lại hàng loạt hồ sơ `simulated: true` trùng tên; bản mới lại giữ nick trong khoá chỉ mục,
+nên cùng một nick bị đếm hai lần.
+
+- Thêm `POST /api/community/admin/simulated/cleanup` (chỉ Admin tổng): quét `community-profile:`
+  theo lô 200 kèm con trỏ, xoá hồ sơ có cờ `simulated` cùng khoá `community-reader:` của nó, rồi
+  xoá cache đếm để số thành viên tính lại từ đầu. Trả `cursor` để gọi tiếp cho tới `done`.
+- `GET /api/community/readers` trước đây **không** hiện reader mô phỏng (chúng nằm trong chỉ mục,
+  không có khoá hồ sơ). Nay ghép cả hai nguồn. Đồng thời bỏ bước đọc bản ghi trỏ — tên khoá
+  `community-reader:<uid>` đã chứa uid — nên chi phí giảm một nửa.
+
 **Ranh giới nội dung công khai.** `assets/gate.js` từng để tên hạ tầng nội bộ trong câu báo lỗi
 đăng nhập, làm `tools/check-public-content.mjs` đỏ. Đã đổi câu đó.
 
