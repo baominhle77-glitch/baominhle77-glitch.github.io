@@ -1,8 +1,38 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T12:15:00+07:00",
+  "updated_at": "2026-07-25T13:35:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [],
+  "active_tasks": [
+    {
+      "id": "GROWTH-20260725-04",
+      "owner": "ChatGPT GPT-5.6 Thinking",
+      "branch": "agent/GROWTH-20260725-04-scale-seo-kpi",
+      "base_sha": "9e06caeda3ff0ae6cf90ca46e9fd00af6c76ac0b",
+      "paths": [
+        "backend/choice.js",
+        "backend/choice.test.mjs",
+        "backend/choice-revenue.js",
+        "backend/choice-revenue.test.mjs",
+        "tools/apply-choice-marketplace-scale.mjs",
+        "tools/choice-marketplace-scale.test.mjs",
+        "tools/build-choice-seo.mjs",
+        "tools/choice-seo.test.mjs",
+        "hoi-chon-dung/app.js",
+        "hoi-chon-dung/app.css",
+        "hoi-chon-dung/index.html",
+        "hoi-chon-dung/app.test.mjs",
+        ".github/workflows/deploy-pages.yml",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/choice-growth-autopilot.yml",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/CHOICE_10_DAY_GROWTH_SPRINT.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T13:35:00+07:00",
+      "heartbeat_at": "2026-07-25T13:35:00+07:00",
+      "summary": "Mở rộng Hội Chọn Đúng thành marketplace so sánh cùng sản phẩm ở nhiều shop/mức giá, tăng quy mô catalog và landing SEO, thêm đo người dùng thật/click chống trùng, referral loop và dashboard KPI sprint 10 ngày."
+    }
+  ],
   "recently_completed": [
     {
       "id": "GROWTH-20260725-03",
