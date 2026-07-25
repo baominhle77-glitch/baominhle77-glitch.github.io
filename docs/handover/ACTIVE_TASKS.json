@@ -7,7 +7,7 @@
       "id": "BOITOAN-20260725-08",
       "owner": "Claude Code",
       "branch": "claude/affiliate-community-strategy-oft750",
-      "base_sha": "67a95758e895ea05991c02f6dcfbbfcd8eefba2a",
+      "base_sha": "84191bbd94601902344cc7b7dc5937bd4e1d69e6",
       "paths": [
         "boitoan/index.html",
         "docs/handover/NHAT-KY-PHOI-HOP.md",
@@ -15,7 +15,7 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T15:00:00+07:00",
-      "heartbeat_at": "2026-07-25T15:00:00+07:00",
+      "heartbeat_at": "2026-07-25T14:35:00+07:00",
       "summary": "Ra kho chu Tarot, Bai Tay va cac bo con lai theo dung chuan da ap cho Lenormand."
     }
   ],
