@@ -644,7 +644,19 @@ async function adminAudit(env, request, action, target, extra = {}) {
   } catch (_) { /* Ghi nhật ký hỏng không được chặn đăng nhập hay thao tác quản trị. */ }
 }
 async function deleteMemberAccount(env, uid) {
-  const profile = isUuid(uid) && await getJson(env, profileKey(uid));
+  if (!isUuid(uid)) return null;
+  /* Nick mô phỏng nằm trong chỉ mục: xoá là gỡ khỏi chỉ mục, không có khoá hồ sơ để xoá. */
+  const idx = await simIndex(env);
+  const at = (idx.accounts || []).findIndex((a) => a && a.id === uid);
+  if (at >= 0) {
+    const gone = idx.accounts[at];
+    idx.accounts.splice(at, 1);
+    idx.done = Math.max(0, Number(idx.done || 0) - 1);
+    await putJson(env, SIM_INDEX_KEY, idx);
+    try { await env.KV.delete(STATS_CACHE_KEY); } catch (_) {}
+    return gone;
+  }
+  const profile = await getJson(env, profileKey(uid));
   if (!profile) return null;
   const deletions = [
     env.KV.delete(loginKey(profile.username)), env.KV.delete(profileKey(uid)), env.KV.delete(readerIndexKey(uid)),
@@ -1140,12 +1152,21 @@ async function handleAdmin(request, env, path) {
     return json({ ok: true, device_id: deviceId, replaced: !!old && !secureEqual(old, deviceId) });
   }
   if (action === "users" && request.method === "GET") {
-    const users = await listByPrefix(env, "community-profile:", 100);
-    return json({ users: users.map((p) => ({ ...publicProfile(p, true), suspended: !!p.suspended })) });
+    /* Nick mô phỏng sống trong chỉ mục khoang riêng, không có khoá hồ sơ riêng. Chỉ liệt kê khoá
+     * hồ sơ thì bảng tài khoản chỉ hiện vài người thật trong khi cộng đồng có hàng trăm nick. */
+    const real = await listByPrefix(env, "community-profile:", 100);
+    const sim = ((await simIndex(env)).accounts || []).map((a) => simRepair(a, Date.now()));
+    const rows = [...real, ...sim].map((p) => ({
+      ...publicProfile(p, true), suspended: !!p.suspended, simulated: !!p.simulated,
+    }));
+    return json({
+      users: rows,
+      counts: { total: rows.length, that: real.length, mo_phong: sim.length },
+    });
   }
   if (action === "users" && parts[4]) {
     const uid = parts[4];
-    const profile = isUuid(uid) && await getJson(env, profileKey(uid));
+    const profile = await getProfileAny(env, uid);
     if (!profile) return json({ error: "not_found" }, 404);
     if (parts[5] === "impersonate" && request.method === "POST") {
       if (!(await ownerDeviceOk(request, env, auth))) return json({ error: "owner_device_required" }, 403);
@@ -1158,7 +1179,8 @@ async function handleAdmin(request, env, path) {
       const body = await readJson(request);
       if (typeof body.suspended === "boolean") profile.suspended = body.suspended;
       profile.updated_at = Date.now();
-      await putJson(env, profileKey(uid), profile);
+      await saveProfileAny(env, profile);
+      try { await env.KV.delete(STATS_CACHE_KEY); } catch (_) {}
       await adminAudit(env, request, profile.suspended ? "member_suspended" : "member_restored", uid);
       return json({ profile: publicProfile(profile, true), suspended: profile.suspended });
     }
