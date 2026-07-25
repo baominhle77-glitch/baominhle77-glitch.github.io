@@ -22,6 +22,27 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 18:50 GMT+7 — Claude Code — BOITOAN-20260725-15 — ĐANG LÀM ⏳
+
+**1. Số thành viên hiện ở hai màn hình chủ sở hữu chỉ ra.**
+
+- **Cổng vào** (màn *Chọn một mục để tiếp tục*): thêm dòng số thành viên ngay dưới tên thương hiệu.
+  Người **chưa đăng nhập, chưa đăng ký** cũng thấy — đúng yêu cầu số 7 ban đầu.
+- **Trang chính trong app**: thêm huy hiệu số thành viên ngay dưới chip tài khoản. Đặt trong
+  `injectAccountIdentity` nên **mọi loại nick đều thấy cùng một con số**: Khách, Reader, Admin,
+  và cả nick mô phỏng đang được điều khiển.
+- Cả hai chỗ tự làm mới mỗi 60 giây và lấy lại ngay khi app hiện lên, dùng chung
+  `GET /api/community/stats` vốn đã công khai.
+
+**2. Xáo kiểu đặt tên để không còn nhịp lặp.** Bản trước chọn kiểu bằng `s % 8` nên cứ tám nick lại
+lặp đúng thứ tự — lướt danh sách vẫn thấy quy luật. Nay chọn qua `simHash()` (xáo cố định, không
+ngẫu nhiên nên dựng lại vẫn ra đúng tên cũ).
+
+Kiểm lại toàn bộ 385 nick: **385 tên hiển thị khác nhau · 385 tên tài khoản khác nhau · 0 tên tài
+khoản sai chuẩn**. Mười bốn nick liên tiếp không còn thấy nhịp:
+`Cún Thị An` · `Bùi Văn Bình` · `OI_MINHCHI` · `NgocDung2k3` · `ThuGiang2k4` · `ha_hai91` ·
+`Huỳnh Quang Hạnh` · `hieu_anh93` …
+
 ### 2026-07-25 18:10 GMT+7 — Claude Code — BOITOAN-20260725-14 — ĐANG LÀM ⏳
 
 **Tên nick phải đa dạng như người dùng thật** (chủ sở hữu: *"nhìn mấy trăm tên y như 1 khuôn đúc"*).
