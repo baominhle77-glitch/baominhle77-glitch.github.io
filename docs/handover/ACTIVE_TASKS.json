@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T21:10:00+07:00",
+  "updated_at": "2026-07-26T01:50:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,6 +42,22 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260725-18",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "d328201926e073fa253de0ad3fcdfc69c5157e3d",
+      "paths": [
+        "backend/community.js",
+        "assets/community-admin.js",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-26T01:50:00+07:00",
+      "summary": "Bit ro ro ri: Admin thuong va API cong khai khong duoc biet ve nick mo phong.",
+      "completed_at": "2026-07-26T01:50:00+07:00"
+    },
     {
       "id": "BOITOAN-20260725-17",
       "owner": "Claude Code",

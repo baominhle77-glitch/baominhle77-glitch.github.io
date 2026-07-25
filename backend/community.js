@@ -1156,13 +1156,16 @@ async function handleAdmin(request, env, path) {
      * hồ sơ thì bảng tài khoản chỉ hiện vài người thật trong khi cộng đồng có hàng trăm nick. */
     const real = await listByPrefix(env, "community-profile:", 100);
     const sim = ((await simIndex(env)).accounts || []).map((a) => simRepair(a, Date.now()));
-    const rows = [...real, ...sim].map((p) => ({
-      ...publicProfile(p, true), suspended: !!p.suspended, simulated: !!p.simulated,
-    }));
-    return json({
-      users: rows,
-      counts: { total: rows.length, that: real.length, mo_phong: sim.length },
+    /* CHỈ Admin tổng được biết nick nào là nick mô phỏng. Admin thường thấy một danh sách
+     * thành viên bình thường, không cờ, không số tách riêng — lộ ra là hỏng cả khoang riêng. */
+    const rows = [...real, ...sim].map((p) => {
+      const row = { ...publicProfile(p, true), suspended: !!p.suspended };
+      if (auth.primary) row.simulated = !!p.simulated;
+      return row;
     });
+    return json(auth.primary
+      ? { users: rows, counts: { total: rows.length, that: real.length, mo_phong: sim.length } }
+      : { users: rows, counts: { total: rows.length } });
   }
   if (action === "users" && parts[4]) {
     const uid = parts[4];
@@ -1322,7 +1325,8 @@ async function rebuildStats(env) {
   const total = scanned + simAccounts.length;
   readers = readerCount + simReaders;
   guests = Math.max(0, total - readers - admins);
-  const value = { members: total, guests, readers, admins, sim: simAccounts.length, updated_at: Date.now() };
+  /* KHÔNG trả số nick mô phỏng ra ngoài: đây là API công khai, ai gọi cũng đọc được. */
+  const value = { members: total, guests, readers, admins, updated_at: Date.now() };
   /* Ghi cache là tối ưu, không phải điều kiện bắt buộc: hết hạn mức ghi vẫn phải trả số liệu.
    * Hạn dùng ngắn để số thành viên tự cập nhật mà không phải xoá cache ở mọi chỗ có thay đổi. */
   try { await putJson(env, STATS_CACHE_KEY, value, STATS_CACHE_TTL); } catch (_) {}
