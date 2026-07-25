@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T11:15:00+07:00",
+  "updated_at": "2026-07-25T11:35:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "GROWTH-20260725-03",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-03-clean",
-      "base_sha": "fb7a3802523354d1348223c2252d87b8ea3a7200",
+      "branch": "agent/GROWTH-20260725-03-production-fix",
+      "base_sha": "57292356b4e6de613e622e6f1174c1cb30cb0245",
       "paths": [
         "backend/choice-autopilot.test.mjs",
         "backend/choice-credential-bootstrap.js",
@@ -25,8 +25,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T09:30:00+07:00",
-      "heartbeat_at": "2026-07-25T11:15:00+07:00",
-      "summary": "Sửa xác thực AccessTrade không phụ thuộc quyền TikTok Shop, thêm fallback datafeed, bootstrap API key qua RSA-OAEP/AES-GCM một lần, và deploy file xác minh Google/Bing ở root site."
+      "heartbeat_at": "2026-07-25T11:35:00+07:00",
+      "summary": "Sửa xác thực AccessTrade bằng Publisher API/datafeed, bootstrap key mã hóa một lần, deploy file xác minh Google/Bing; production recovery tách trigger Growth phụ khỏi luồng Pages bắt buộc."
     }
   ],
   "recently_completed": [
