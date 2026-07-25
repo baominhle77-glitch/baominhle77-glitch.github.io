@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T18:40:00+07:00",
+  "updated_at": "2026-07-25T18:45:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -16,8 +16,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T18:40:00+07:00",
-      "summary": "Làm lại Hội Chọn Đúng thành ứng dụng khám phá xu hướng và so sánh nhiều shop: năm màn hình riêng, mô hình offer-first, chỉ deeplink affiliate sàn Việt Nam đã xác minh, không Google/merchant/seed fallback, media và rating/review chỉ khi nguồn có dữ liệu, SEO live-only và production smoke trên WebKit/iPhone."
+      "heartbeat_at": "2026-07-25T18:45:00+07:00",
+      "summary": "Làm lại Hội Chọn Đúng thành ứng dụng khám phá xu hướng và so sánh nhiều shop: năm màn hình riêng, mô hình offer-first, chỉ deeplink affiliate sàn Việt Nam đã xác minh, không Google/merchant/seed fallback, media và rating/review chỉ khi nguồn có dữ liệu, SEO live-only và production smoke trên WebKit/iPhone. PR #120 được thay bằng PR sạch trên main mới nhất."
     }
   ],
   "recently_completed": [
