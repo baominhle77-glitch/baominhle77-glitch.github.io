@@ -172,9 +172,17 @@ if (!source.includes("if (candidate.affiliate_url) return candidate.affiliate_ur
   );
 }
 
+if (!source.includes("AccessTrade capability cache reset v1")) {
+  source = source.replace(
+    "export async function runChoiceAutopilot(env, options = {}) {\n  const trigger",
+    "export async function runChoiceAutopilot(env, options = {}) {\n  // AccessTrade capability cache reset v1\n  choiceTikTokCapabilityCache = null;\n  choiceDatafeedPoolCache = null;\n  const trigger"
+  );
+}
+
 for (const required of [
   "/v1/campaigns", "supportsTikTokProductFeeds", "loadDatafeedPool", "normalizeDatafeedCandidate",
-  "tiktokshop_unavailable_using_datafeeds", "if (candidate.affiliate_url) return candidate.affiliate_url;"
+  "tiktokshop_unavailable_using_datafeeds", "if (candidate.affiliate_url) return candidate.affiliate_url;",
+  "AccessTrade capability cache reset v1"
 ]) {
   if (!source.includes(required)) throw new Error(`Thiếu fallback AccessTrade: ${required}`);
 }
