@@ -46,10 +46,31 @@ khiến chủ sở hữu tưởng sai mật khẩu. Đã sửa ba chỗ:
 `POST /api/community/admin/login` với mật khẩu Admin tổng trả **HTTP 200**, `level: primary`.
 Đăng nhập đã hoạt động trở lại.
 
-**Giọng đọc quẻ.** Bỏ lối nói nước đôi. `lenParas` viết lại thành ba đoạn liền mạch, đoạn kết
-đổi theo cực tính lá cuối (`LEN_SCORE`). `verdictPhrase` khi tốt–xấu cân nhau không còn nói
-"cái này cũng được, cái kia cũng được" mà nói rõ đó chính là lời của quẻ: giai đoạn chưa có sẵn
-kết cục, người dứt khoát thì thắng.
+**Giọng đọc bài — viết lại toàn bộ theo góp ý của chủ sở hữu.** Sáu lỗi được chỉ ra và đã sửa:
+
+1. **Gọi sai tên.** Trải bài phương Tây mà dùng chữ *quẻ* (từ của Kinh Dịch). Nay Lenormand, Tarot,
+   Bài Tây dùng *trải bài · lá bài · lá cuối*; nhãn Celtic Cross đổi *Tâm quẻ* thành *Tâm bài*.
+   Chữ *quẻ* chỉ còn ở phần Kinh Dịch, nơi nó đúng.
+2. **Nghĩa lá bị cắt cụt.** `lenBit` cắt câu ở dấu chấm phẩy nên người đọc chỉ thấy một mảnh.
+   Thay bằng `lenFull`: lấy trọn nghĩa theo lĩnh vực và tách dấu chấm phẩy thành câu riêng.
+3. **Câu nối lặp y hệt mọi lượt** ("đây là cái nền đã có sẵn từ trước…"). Nay câu nối đổi theo
+   cực tính từng lá và theo chiều đi giữa các lá, chọn ổn định theo chỉ số lá nên cùng một quẻ
+   đọc lại vẫn ra đúng câu đó.
+4. **Không xưng hô.** Toàn bộ lời đọc nay nói với *bạn*.
+5. **Từ địa phương và từ lóng**: *khúc, xử, trôi, sáng ra, gợn, ngả về, networking, bàn bài* —
+   đã thay bằng từ phổ thông. Riêng *bàn bài* là từ chủ sở hữu đã cấm và vẫn còn sót trong
+   `buildAnswerPanel`; nay đã hết.
+6. **Khẳng định thứ không thể biết.** Kho chữ cũ viết "cắt hợp đồng" cho lá Scythe, trong khi lá
+   chỉ nói về một việc bị cắt dứt khoát. **Đã viết lại toàn bộ 108 câu nghĩa của `LEN_EXT`**
+   (36 lá × 3 lĩnh vực): nói dứt khoát *việc gì xảy ra* và *bạn nên làm gì*, không đoán bừa
+   *vật gì* bị tác động; bỏ hết ẩn dụ, chữ tiếng Anh và dấu ngoặc kép mỉa mai.
+
+Ngoài ra sửa hai chỗ tự mâu thuẫn: câu nối trước đây chỉ nhìn hiệu số điểm nên nói "chuyển sang
+chiều thuận hơn" ngay trước một lá xấu, và nói "giữ nguyên chiều cũ" ngay trước lá Stork (nghĩa là
+đổi thay). Nay lời bình theo **cực tính tuyệt đối** của lá đang nói, câu nối mới theo chiều đi.
+
+**Còn nợ:** kho chữ của Tarot, Bài Tây, Rune, Bài Trà chưa được rà cùng chuẩn này; mới sửa các
+chỗ lộ ra khi quét theo loại lỗi. Việc tiếp theo là rà trọn từng bộ.
 
 **Ranh giới nội dung công khai.** `assets/gate.js` từng để tên hạ tầng nội bộ trong câu báo lỗi
 đăng nhập, làm `tools/check-public-content.mjs` đỏ. Đã đổi câu đó.
