@@ -52,24 +52,30 @@ jobs:
           node --check backend/worker.js
           node backend/worker.test.mjs
 
-      - name: Materialize Hội Chọn Đúng V2 lần một
+      - name: Giải nén Hội Chọn Đúng V2
+        run: node tools/apply-choice-product-v2.mjs
+      - name: Áp taxonomy Hội Chọn Đúng V2
+        run: node tools/apply-choice-multiniche-v2.mjs
+      - name: Áp marketplace Hội Chọn Đúng V2
+        run: node tools/apply-choice-vn-marketplace.mjs
+      - name: Materialize Worker owner lần một
         run: |
           set -euo pipefail
-          node tools/apply-choice-product-v2.mjs
-          node tools/apply-choice-multiniche-v2.mjs
-          node tools/apply-choice-vn-marketplace.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
           node tools/apply-choice-revenue.mjs
           node tools/apply-choice-autopilot-ui.mjs
 
-      - name: Materialize Hội Chọn Đúng V2 lần hai
+      - name: Tái giải nén Hội Chọn Đúng V2
+        run: node tools/apply-choice-product-v2.mjs
+      - name: Chạy lại taxonomy Hội Chọn Đúng V2
+        run: node tools/apply-choice-multiniche-v2.mjs
+      - name: Chạy lại marketplace Hội Chọn Đúng V2
+        run: node tools/apply-choice-vn-marketplace.mjs
+      - name: Materialize Worker owner lần hai
         run: |
           set -euo pipefail
-          node tools/apply-choice-product-v2.mjs
-          node tools/apply-choice-multiniche-v2.mjs
-          node tools/apply-choice-vn-marketplace.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
@@ -83,7 +89,8 @@ jobs:
           grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
           grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
           grep -q 'id: "travel"' backend/choice-autopilot.js
-          grep -q 'GLOBAL_PRODUCT_DEDUPE_V2' backend/choice-autopilot.js
+          grep -q 'const globalSelectedSources = new Set()' backend/choice-autopilot.js
+          grep -q 'globalSelectedSources.has(candidate.source_id)' backend/choice-autopilot.js
 
       - name: Kiểm tra Choice backend lõi
         run: |
