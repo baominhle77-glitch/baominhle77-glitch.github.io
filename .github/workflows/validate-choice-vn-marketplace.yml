@@ -19,27 +19,21 @@ jobs:
 
       - name: Giải nén nguồn V2
         run: |
-          set -euo pipefail
           node tools/apply-choice-product-v2.mjs
           node --check backend/choice.js
           grep -q 'CHOICE_PRODUCT_EXPERIENCE_V2' backend/choice.js
 
-      - name: Áp taxonomy đa lĩnh vực
-        run: node tools/apply-choice-multiniche.mjs
+      - name: Áp marketplace Việt Nam V2
+        run: node tools/apply-choice-vn-marketplace.mjs
 
       - name: Áp AccessTrade Publisher fallback
         run: node tools/apply-choice-access-fallback.mjs
 
-      - name: Áp chống trùng toàn catalog
-        run: node tools/apply-choice-global-dedupe.mjs
-
       - name: Chạy lại materializer để kiểm tra idempotency
         run: |
-          set -euo pipefail
           node tools/apply-choice-product-v2.mjs
-          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-vn-marketplace.mjs
           node tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-global-dedupe.mjs
 
       - name: Kiểm tra marker marketplace V2
         run: |
@@ -55,24 +49,18 @@ jobs:
 
       - name: Kiểm tra catalog lõi
         run: node --test backend/choice.test.mjs
-
       - name: Kiểm tra redirect và offer theo shop
         run: node --test backend/choice-vn-marketplace.test.mjs
-
       - name: Kiểm tra Affiliate Autopilot
         run: node --test backend/choice-autopilot.test.mjs
-
       - name: Kiểm tra frontend affiliate-only
         run: |
-          set -euo pipefail
           node --test hoi-chon-dung/app.test.mjs
           ! grep -RqiE 'Link tham khảo|google\.com/search|SEED_PRODUCTS|seed-products' hoi-chon-dung/*.js hoi-chon-dung/*.html hoi-chon-dung/sw.js
 
       - name: Materialize đầy đủ Worker owner revenue
         run: |
-          set -euo pipefail
           node tools/apply-travel-system.mjs
-          node tools/apply-choice-seo-multiniche.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
@@ -84,10 +72,8 @@ jobs:
 
       - name: Kiểm tra boundary backend
         run: node --test backend/choice-public-boundary.test.mjs
-
       - name: Quét nội dung public
         run: |
-          set -euo pipefail
           node tools/check-public-content.mjs
           grep -q 'Public audience boundary v4' hoi-chon-dung/index.html
           grep -q 'hoi-chon-dung-v5' hoi-chon-dung/sw.js
