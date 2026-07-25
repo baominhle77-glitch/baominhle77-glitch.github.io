@@ -1,8 +1,25 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T15:00:00+07:00",
+  "updated_at": "2026-07-25T15:30:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
+    {
+      "id": "BOITOAN-20260725-09",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "696b3bd6e99a99cf8d0a3e2af64a67d86702a8f9",
+      "paths": [
+        "boitoan/index.html",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-07-25T15:30:00+07:00",
+      "heartbeat_at": "2026-07-25T15:30:00+07:00",
+      "summary": "Bo cum 'cat hop dong' con sot trong kho chu Kinh Dich va chot ban giao bang so lieu production."
+    }
+  ],
+  "recently_completed": [
     {
       "id": "BOITOAN-20260725-08",
       "owner": "Claude Code",
@@ -13,13 +30,11 @@
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "docs/handover/ACTIVE_TASKS.json"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-07-25T15:00:00+07:00",
-      "heartbeat_at": "2026-07-25T14:35:00+07:00",
-      "summary": "Ra kho chu Tarot, Bai Tay va cac bo con lai theo dung chuan da ap cho Lenormand."
-    }
-  ],
-  "recently_completed": [
+      "summary": "Ra kho chu Tarot, Bai Tay va cac bo con lai theo dung chuan da ap cho Lenormand.",
+      "completed_at": "2026-07-25T15:20:00+07:00"
+    },
     {
       "id": "BOITOAN-20260725-07",
       "owner": "Claude Code",

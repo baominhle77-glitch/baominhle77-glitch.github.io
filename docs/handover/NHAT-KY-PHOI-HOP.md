@@ -22,6 +22,32 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-07-25 15:30 GMT+7 — Claude Code — BOITOAN-20260725-09 — ĐANG LÀM ⏳
+
+**Nghiệm thu production sau ba đợt merge hôm nay** (`8d51645` → `67a9575` → `50c1e35`).
+Tải trang thật về, giải mã payload và đối chiếu:
+
+| Kiểm | Kết quả |
+|---|---|
+| `GET /boitoan/` | HTTP 200, `mode: 'approval'` không đổi |
+| Lời văn mới có mặt | *Lá cuối quyết định kết quả* · *Ba lá nối nhau thành một mạch* · bản Tarot đã viết lại |
+| Lỗi cũ còn sót | `bàn bài` 0 · `stress` 0 · `'thay máu'` 0 · `cái nền đã có sẵn từ trước` 0 · `Tâm quẻ` 0 |
+| Số thành viên công khai | **386** (`guests 109 · readers 277 · sim 385`), `updated_at` đổi giữa hai lần gọi → bộ đếm tự làm mới |
+| Đăng nhập Admin tổng | HTTP 200, `level: primary` |
+
+**Một lỗi lọt lưới, đã sửa.** Nghiệm thu bằng cách quét chính bản production mới lộ ra cụm
+**`cắt hợp đồng`** vẫn còn **một** chỗ — không phải ở Lenormand mà ở `KD_EXT` (quẻ Thệ Hạp).
+Đã viết lại ba câu ở đó cho phổ thông và không khẳng định vật thể cụ thể.
+
+Bài học: rà theo bộ dữ liệu là chưa đủ, **phải quét lại chính bản đã deploy** — đó mới là thứ
+chủ sở hữu nhìn thấy.
+
+**Còn nợ, nói thẳng:** `KD_EXT` còn **151 cụm trong ngoặc kép**. Chúng **không cùng một loại**:
+một phần là trích nguyên văn kinh điển (*kháng long hữu hối*, *tháng tám có hung*, *quả lớn không
+bị ăn*, tên quẻ *Phục* / *Bác*) — thứ này đúng và nên giữ; phần còn lại là ngoặc kép mỉa mai như
+mọi chỗ khác (*xem thêm*, *trang điểm*, *nhà giàu*, *ông nói gà bà nói vịt*, *xó tối*). **Chưa tách
+xong hai loại này**, nên chưa dám tuyên bố Kinh Dịch đã sạch. Đây là việc tiếp theo.
+
 ### 2026-07-25 15:00 GMT+7 — Claude Code — BOITOAN-20260725-08 — ĐANG LÀM ⏳
 
 **Trả nốt món nợ: rà kho chữ các bộ bài còn lại theo đúng chuẩn đã áp cho Lenormand.**
