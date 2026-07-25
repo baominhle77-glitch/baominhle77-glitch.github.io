@@ -14,8 +14,7 @@ const COMPLETE_V2_MARKERS = [
   'const shopCounts = new Map()',
   'const selectedSourceIds = new Set()',
   'const globalSelectedSources = new Set()',
-  'globalSelectedSources.has(candidate.source_id)',
-  'const refreshedCategories = new Set'
+  'globalSelectedSources.has(candidate.source_id)'
 ];
 
 if (COMPLETE_V2_MARKERS.every((marker) => source.includes(marker))) {
@@ -120,13 +119,7 @@ source = source.replace(
   '    if (selected.length < Math.min(8, PORTFOLIO.length)) throw new Error("insufficient_verified_products");'
 );
 
-if (!source.includes("const refreshedCategories = new Set")) {
-  source = source.replace(
-    `    const preserved = existing.products.filter((product) => {\n      if (product?.autopilot_managed || product?.source === "accesstrade:tiktokshop") return false;`,
-    `    const refreshedCategories = new Set(selected.map((product) => product.category));\n    const preserved = existing.products.filter((product) => {\n      if (product?.autopilot_managed || product?.source === "accesstrade:tiktokshop") {\n        return !refreshedCategories.has(String(product?.category || ""));\n      }`
-  );
-}
-
+// Marketplace V2 chịu trách nhiệm thanh lọc toàn bộ nguồn affiliate cũ; không tái chèn refreshedCategories đời cũ.
 if (!source.includes("categories_covered:")) {
   source = source.replace(
     `      selected_products: selected.length,\n      preserved_products: preserved.length,`,
