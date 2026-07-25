@@ -39,14 +39,20 @@ jobs:
           if (!values.includes("DECRYPT_KEY_BOITOAN") && !values.includes("DECRYPT_KEY")) throw new Error("Worker thiếu khóa giải mã Bói toán");
           NODE
 
+      - name: Xác nhận hợp đồng mã hóa Bói toán
+        run: |
+          set -euo pipefail
+          grep -q 'application/gate-payload' boitoan/index.html
+          grep -q '/assets/gate.js?v=19' boitoan/index.html
+          grep -q 'openAppContent(data.key, "admin-session")' assets/gate.js
+
       - name: Materialize hệ thống theo đúng thứ tự
         run: |
           set -euo pipefail
           node tools/apply-choice-product-v2.mjs
-          node tools/apply-travel-system.mjs
-          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-vn-marketplace.mjs
           node tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-seo-multiniche.mjs
+          node tools/apply-travel-system.mjs
           node tools/apply-choice-system.mjs
           node tools/apply-choice-setup.mjs
           node tools/apply-choice-credential-bootstrap.mjs
