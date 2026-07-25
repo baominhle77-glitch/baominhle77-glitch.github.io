@@ -46,7 +46,7 @@
       "id": "BOITOAN-20260726-02",
       "owner": "Claude Code",
       "branch": "claude/affiliate-community-strategy-oft750",
-      "base_sha": "4c6836809c5ec2b83afa085dd144ee0b05ed4fc4",
+      "base_sha": "6788b26c9ed69fab749b863b781809cdd0e9819e",
       "paths": [
         "docs/handover/NHAT-KY-PHOI-HOP.md",
         "docs/handover/ACTIVE_TASKS.json"
