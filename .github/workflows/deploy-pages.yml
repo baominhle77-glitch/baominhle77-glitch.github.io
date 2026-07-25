@@ -164,22 +164,26 @@ jobs:
           printf '%s' "$trigger" | npx --yes wrangler@4.112.0 secret put CHOICE_AUTOPILOT_TRIGGER
           npx --yes wrangler@4.112.0 deploy
 
-      - name: Khởi động Growth Autopilot nội bộ
+      - name: Gửi tín hiệu khởi động Growth nội bộ
         run: |
-          set -euo pipefail
-          for attempt in $(seq 1 20); do
-            code=$(curl -sS -o "$RUNNER_TEMP/growth-start.json" -w '%{http_code}' \
+          set -u
+          triggered=0
+          for attempt in $(seq 1 8); do
+            code=$(curl -sS --max-time 8 -o "$RUNNER_TEMP/growth-start.json" -w '%{http_code}' \
               -X POST \
               -H "x-choice-autopilot-trigger: $CHOICE_AUTOPILOT_TRIGGER_RUNTIME" \
               "https://hiennhi89-gate.hiennhi89.workers.dev/api/choice/autopilot/run" || true)
             if [ "$code" = "200" ] && grep -Eq '"ok":(true|false)' "$RUNNER_TEMP/growth-start.json"; then
-              echo "Growth Autopilot đã nhận lệnh nội bộ ở lần $attempt"
-              exit 0
+              echo "Growth Autopilot đã nhận tín hiệu ở lần $attempt"
+              triggered=1
+              break
             fi
             sleep 3
           done
-          echo "Không thể khởi động Growth Autopilot sau deploy" >&2
-          exit 1
+          if [ "$triggered" != "1" ]; then
+            echo "Growth trigger tạm hoãn; cron 5 phút và credential bootstrap sẽ tự chạy vòng tiếp theo."
+            test ! -s "$RUNNER_TEMP/growth-start.json" || cat "$RUNNER_TEMP/growth-start.json"
+          fi
 
       - name: Deploy Pages
         run: npx --yes wrangler@4.112.0 pages deploy _site --project-name hiennhi89 --branch main --commit-dirty=true
