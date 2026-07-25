@@ -156,6 +156,7 @@
     var avatar = el("span", (state.profile.display_name || state.profile.username || "?").trim().slice(0, 1).toUpperCase(), "community-avatar");
     var text = el("div");
     var titleLine = el("div", null, "community-name-line");
+    puppetBar();
     titleLine.append(el("h1", "Xin chào, " + state.profile.display_name), el("span", roleLabel(state.profile.role), "community-role-badge role-" + state.profile.role));
     text.append(titleLine, el("p", state.profile.role === "reader" ? "Quản lý hồ sơ, khách hàng và nội dung luận giải." : "Tìm Reader, trò chuyện, đánh giá và tham gia thảo luận."));
     identity.append(avatar, text);
@@ -601,6 +602,29 @@
   }
 
   /* Admin total member profile view */
+  /* ----- Thanh báo đang dùng nick mô phỏng (chỉ Admin tổng thấy) ----- */
+  function puppetBar() {
+    var on = false;
+    try { on = localStorage.getItem("community_puppet_boitoan") === "1"; } catch (_) {}
+    if (!on || !state.profile) return;
+    if (document.getElementById("community-puppet-bar")) return;
+    var bar = el("div", null, "community-puppet-bar");
+    bar.id = "community-puppet-bar";
+    bar.append(el("span", "Đang dùng nick " + state.profile.display_name + " (" + roleLabel(state.profile.role) + ")"));
+    var back = el("button", "↩ Về khoang riêng", "community-secondary");
+    back.type = "button";
+    back.addEventListener("click", function () {
+      try {
+        localStorage.removeItem("community_token_boitoan");
+        localStorage.removeItem("community_profile_boitoan");
+        localStorage.removeItem("community_puppet_boitoan");
+      } catch (_) {}
+      location.assign("./community-admin.html");
+    });
+    bar.append(back);
+    document.body.insertBefore(bar, document.body.firstChild);
+  }
+
   /* ----- Số thành viên: công khai, ai cũng thấy, tự cập nhật ----- */
   function startMemberCounter() {
     var node = document.getElementById("community-member-count");

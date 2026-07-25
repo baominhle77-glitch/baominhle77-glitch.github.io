@@ -147,7 +147,7 @@ async function communityAuth(request, env) {
 async function issueCommunitySession(env, profile, did, options = {}) {
   const sid = crypto.randomUUID();
   const expiresAt = Date.now() + COMMUNITY_SESSION_TTL * 1000;
-  const mode = options.mode === "impersonation" ? "impersonation" : "member";
+  const mode = ["impersonation", "puppet"].includes(options.mode) ? options.mode : "member";
   await putJson(env, sessionKey(sid), { active: true, uid: profile.id, did, mode, expires_at: expiresAt }, COMMUNITY_SESSION_TTL);
   return makeJwt(sessionSecret(env), { aud: "community", sid, uid: profile.id, did, role: profile.role, mode });
 }
@@ -743,6 +743,108 @@ async function handleAdminLogin(request, env) {
   return json({ ...session, role: "admin", level, primary: level === "primary", device_id: deviceId, key });
 }
 
+
+/* ===== Khoang riêng của Admin tổng: nick mô phỏng =====
+ * Chỉ Admin tổng (level primary) thấy và điều khiển. Nick mô phỏng có cờ simulated=true,
+ * không đặt mật khẩu đăng nhập nên không ai đăng nhập được từ ngoài; chỉ vào được bằng
+ * phiên "puppet" do Admin tổng cấp. QR và số tài khoản để trống cho chủ sở hữu tự đặt.
+ */
+const SIM_GUESTS = 109, SIM_READERS = 276;
+const SIM_HO = ["Nguyễn","Trần","Lê","Phạm","Hoàng","Huỳnh","Phan","Vũ","Võ","Đặng","Bùi","Đỗ","Hồ","Ngô","Dương","Lý","Đinh","Mai","Trịnh","Chu"];
+const SIM_DEM = ["Thị","Văn","Minh","Ngọc","Thu","Hải","Quang","Anh","Bảo","Gia","Khánh","Phương","Thanh","Tuấn","Hồng","Xuân","Diệu","Kim","Hữu","Đức"];
+const SIM_TEN = ["An","Bình","Chi","Dung","Giang","Hà","Hạnh","Hiếu","Hoa","Huy","Khanh","Lam","Linh","Long","Mai","Nam","Nga","Nhung","Oanh","Phúc","Quân","Quyên","Sơn","Tâm","Thảo","Thắng","Trang","Trung","Tú","Uyên","Vy","Yến","Duy","Kiên","Lộc","My","Ngân","Nhi","Phong","Thư"];
+const SIM_SPEC = ["Tarot","Lenormand","Bài Tây","Kinh Dịch","Tử Vi","Bát Tự","Thần số học","Rune","Bài Trà","Chiêm tinh"];
+const SIM_BIO_R = [
+  "Xem bài hơn 5 năm, chuyên gỡ rối chuyện tình cảm và công việc.",
+  "Đọc bài theo lối truyền thống, nói thẳng, không vòng vo.",
+  "Nhận luận giải theo câu hỏi cụ thể; ưu tiên việc gần trong vài tuần tới.",
+  "Học bài từ trong nhà, quen với các ca gia đạo và hôn nhân.",
+  "Chuyên xem hướng nghề nghiệp và thời điểm nên đổi việc.",
+  "Đọc kỹ từng lá, trả lời đúng điều được hỏi.",
+];
+const SIM_BIO_G = [
+  "Mới tìm hiểu, thích đọc và học dần.",
+  "Hay ghé xem bài ngày và lưu lại để đối chiếu.",
+  "Quan tâm chuyện công việc và tài chính.",
+  "Thích Tarot, đang tập tự trải bài.",
+  "Vào cho vui, hỏi khi có việc cần.",
+];
+function simPick(list, n) { return list[n % list.length]; }
+function simProfile(index, role, now) {
+  const id = crypto.randomUUID();
+  const ho = simPick(SIM_HO, index * 7 + 3);
+  const dem = simPick(SIM_DEM, index * 5 + 1);
+  const ten = simPick(SIM_TEN, index * 11 + 2);
+  const display = `${ho} ${dem} ${ten}`;
+  const username = `sim${role === "reader" ? "r" : "g"}${String(index).padStart(3, "0")}`;
+  const base = {
+    id, username, role, display_name: display,
+    bio: role === "reader" ? simPick(SIM_BIO_R, index * 3) : simPick(SIM_BIO_G, index * 3),
+    simulated: true, avatar_hue: (index * 37) % 360,
+    qr_data: "", bank_account: "", bank_name: "",
+    suspended: false, rating: 0, review_count: 0, created_at: now - (index % 180) * 86400000, updated_at: now,
+  };
+  if (role === "reader") {
+    const a = simPick(SIM_SPEC, index * 3), c = simPick(SIM_SPEC, index * 3 + 1);
+    base.specialties = a === c ? [a] : [a, c];
+    base.experience_years = 1 + (index % 15);
+  }
+  return base;
+}
+async function seedSimulatedAccounts(env) {
+  const existing = await listByPrefix(env, "community-profile:", 1000);
+  const already = existing.filter((p) => p && p.simulated).length;
+  if (already >= SIM_GUESTS + SIM_READERS) return { created: 0, total: already };
+  const now = Date.now();
+  let created = 0;
+  const writes = [];
+  for (let i = 0; i < SIM_GUESTS; i += 1) {
+    const p = simProfile(i, "guest", now);
+    writes.push(putJson(env, profileKey(p.id), p)); created += 1;
+  }
+  for (let i = 0; i < SIM_READERS; i += 1) {
+    const p = simProfile(i, "reader", now);
+    writes.push(putJson(env, profileKey(p.id), p));
+    writes.push(putJson(env, readerIndexKey(p.id), { uid: p.id, created_at: now }));
+    created += 1;
+  }
+  await Promise.all(writes);
+  await env.KV.delete(STATS_CACHE_KEY);
+  return { created, total: already + created };
+}
+async function handleSimulated(request, env, path, auth) {
+  if (!auth.primary) return json({ error: "primary_admin_required" }, 403);
+  const parts = path.split("/").filter(Boolean); /* api community admin simulated [uid] [action] */
+  const uid = parts[4] || "", action = parts[5] || "";
+  if (!uid && request.method === "GET") {
+    const all = await listByPrefix(env, "community-profile:", 1000);
+    const sims = all.filter((p) => p && p.simulated)
+      .sort((a, b) => String(a.username).localeCompare(String(b.username)));
+    return json({
+      accounts: sims.map((p) => ({ ...publicProfile(p, true), simulated: true })),
+      counts: { total: sims.length, guests: sims.filter((p) => p.role === "guest").length, readers: sims.filter((p) => p.role === "reader").length },
+    });
+  }
+  if (!uid && request.method === "POST") {
+    const result = await seedSimulatedAccounts(env);
+    await adminAudit(env, request, "simulated_seed", "all", result);
+    return json(result, 201);
+  }
+  if (uid === "control" && request.method === "POST") {
+    const body = await readJson(request);
+    const target = clean(body && body.uid, 60);
+    if (!isUuid(target)) return json({ error: "invalid_uid" }, 400);
+    const profile = await getJson(env, profileKey(target));
+    if (!profile) return json({ error: "not_found" }, 404);
+    if (!profile.simulated) return json({ error: "not_simulated" }, 403);
+    const did = clean(request.headers.get("x-owner-device-id"), 80);
+    const token = await issueCommunitySession(env, profile, did, { mode: "puppet" });
+    await adminAudit(env, request, "simulated_control", target, { username: profile.username, role: profile.role });
+    return json({ token, profile: publicProfile(profile, true) });
+  }
+  return json({ error: "not_found" }, 404);
+}
+
 async function handleAdmin(request, env, path) {
   const parts = path.split("/").filter(Boolean);
   const action = parts[3] || "";
@@ -755,6 +857,8 @@ async function handleAdmin(request, env, path) {
     if (!key) return json({ error: "decrypt_key_unavailable" }, 503);
     return json({ role: "admin", level: auth.level, primary: !!auth.primary, device_id: auth.did, key });
   }
+  /* Khoang riêng của Admin tổng — nick mô phỏng */
+  if (action === "simulated") return await handleSimulated(request, env, path, auth);
   if (action === "session" && request.method === "DELETE") {
     if (auth.sid) await env.KV.delete(adminSessionKey(auth.sid));
     return json({ ok: true });
