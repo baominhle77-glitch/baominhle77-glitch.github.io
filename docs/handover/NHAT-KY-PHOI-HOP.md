@@ -51,9 +51,15 @@ khiến chủ sở hữu tưởng sai mật khẩu. Đã sửa ba chỗ:
 "cái này cũng được, cái kia cũng được" mà nói rõ đó chính là lời của quẻ: giai đoạn chưa có sẵn
 kết cục, người dứt khoát thì thắng.
 
-**Ranh giới nội dung công khai.** `hoi-chon-dung/index.html` (đến từ PR #104) để tên hạ tầng nội
-bộ trong chân trang, làm `node tools/check-public-content.mjs` đỏ trên `main` và chặn mọi PR
-khác. Đã đổi câu đó; check nay xanh trên cả 10 file công khai.
+**Ranh giới nội dung công khai.** `assets/gate.js` từng để tên hạ tầng nội bộ trong câu báo lỗi
+đăng nhập, làm `tools/check-public-content.mjs` đỏ. Đã đổi câu đó.
+
+**Bài học — đừng sửa thẳng file đã có script làm sạch.** Chân trang `hoi-chon-dung/index.html`
+cũng chứa tên hạ tầng, nhưng đó là **bản gốc trước khi làm sạch**: `tools/apply-choice-autopilot-ui.mjs`
+lấy đúng câu ấy làm mốc neo rồi thay bằng khối "Trước khi mua". Sửa thẳng file gốc khiến regex
+không khớp, khối bắt buộc không được chèn, và `validate` đỏ ở chỗ khác. Đã trả file về nguyên
+trạng. **Quy tắc rút ra: trước khi sửa một file public, kiểm tra xem có `tools/apply-*.mjs` nào
+đang sinh hoặc làm sạch file đó không — nếu có thì sửa ở script, không sửa ở file.**
 
 ### 2026-07-25 11:00 GMT+7 — Claude Code — BOITOAN-20260725-05 — HOÀN TẤT ✅
 
