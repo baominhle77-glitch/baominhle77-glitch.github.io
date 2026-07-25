@@ -1,0 +1,45 @@
+name: Kiểm tra Hội Chọn Đúng chỉ sàn Việt Nam
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-vn-marketplace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - name: Materialize đúng thứ tự và kiểm tra idempotency
+        run: |
+          set -euo pipefail
+          node tools/apply-choice-multiniche.mjs
+          node tools/apply-choice-access-fallback.mjs
+          node tools/apply-choice-vn-marketplace.mjs
+          node tools/apply-choice-vn-marketplace.mjs
+          node --check backend/choice-autopilot.js
+          node --check backend/choice.js
+          grep -q 'VIETNAM_MARKETPLACE_POLICY_V1' backend/choice-autopilot.js
+          grep -q 'const MAX_PRODUCTS_PER_CATEGORY = 12;' backend/choice-autopilot.js
+          grep -q 'VIETNAM_MARKETPLACE_PUBLIC_V1' backend/choice.js
+          ! grep -qiE 'fado\.vn|amazon\.|taobao|alibaba|ebay' backend/choice-autopilot.js
+
+      - name: Kiểm tra catalog, redirect và nhóm nhiều nơi bán
+        run: |
+          set -euo pipefail
+          node --test backend/choice.test.mjs
+          node --test backend/choice-vn-marketplace.test.mjs
+          node --test backend/choice-autopilot.test.mjs
+
+      - name: Kiểm tra ranh giới public-private
+        run: |
+          set -euo pipefail
+          node --test backend/choice-public-boundary.test.mjs
+          node tools/check-public-content.mjs
