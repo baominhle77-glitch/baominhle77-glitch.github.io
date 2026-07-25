@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T15:45:00+07:00",
+  "updated_at": "2026-07-25T16:20:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "GROWTH-20260725-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
       "branch": "agent/GROWTH-20260725-04-hotfix-vn-links",
-      "base_sha": "134033f40bfdda4a593ea8fbb4601f7c7169000e",
+      "base_sha": "41d51326875cd9a8dcb19b0079e5bc4eb6ec455e",
       "paths": [
         "backend/choice.js",
         "backend/choice.test.mjs",
@@ -36,11 +36,21 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T15:45:00+07:00",
-      "summary": "Hotfix khẩn cấp: chỉ nhận Shopee VN, Lazada VN, Tiki, Sendo và TikTok Shop VN; tái tạo deeplink ACCESSTRADE; chặn link lỗi/ngoài Việt Nam; nhóm cùng sản phẩm chỉ khi có nhiều nơi bán thật; chống trùng toàn catalog. Sau hotfix tiếp tục sprint SEO/KPI 10 ngày."
+      "heartbeat_at": "2026-07-25T16:20:00+07:00",
+      "summary": "Hotfix khẩn cấp: chỉ nhận Shopee VN, Lazada VN, Tiki, Sendo và TikTok Shop VN; tái tạo deeplink ACCESSTRADE; chặn link lỗi/ngoài Việt Nam; nhóm cùng sản phẩm chỉ khi có nhiều nơi bán thật; phân loại sản phẩm vào danh mục phù hợp nhất và chống trùng toàn catalog. Sau hotfix tiếp tục sprint SEO/KPI 10 ngày."
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260725-10",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "134033f40bfdda4a593ea8fbb4601f7c7169000e",
+      "paths": ["boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
+      "status": "completed",
+      "completed_at": "2026-07-25T16:10:00+07:00",
+      "summary": "PR #114 merge commit 8c4597e02f318398164d240320349c96e33e6133; production và recorder SUCCESS. Hoàn tất chuẩn hóa kho chữ Kinh Dịch."
+    },
     {
       "id": "BOITOAN-20260725-09",
       "owner": "Claude Code",
@@ -48,7 +58,7 @@
       "paths": ["boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
       "status": "completed",
       "completed_at": "2026-07-25T15:35:00+07:00",
-      "summary": "PR #113 merge commit 93cfc39f61436cd3d9fc78f925221cd60a32056b; production deploy SUCCESS. Đã bỏ cụm 'cắt hợp đồng' còn sót trong kho chữ Kinh Dịch."
+      "summary": "PR #113 merge commit 93cfc39f61436cd3d9fc78f925221cd60a32056b; production deploy SUCCESS."
     },
     {
       "id": "BOITOAN-20260725-08",
@@ -57,7 +67,7 @@
       "paths": ["boitoan/index.html", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
       "status": "completed",
       "completed_at": "2026-07-25T15:20:00+07:00",
-      "summary": "PR #111 merge commit 50c1e35b5517ac32a87163771d89afb0c997b362; production deploy SUCCESS. Rà kho chữ Tarot, Bài Tây và các bộ còn lại."
+      "summary": "PR #111 merge commit 50c1e35b5517ac32a87163771d89afb0c997b362; production deploy SUCCESS."
     },
     {
       "id": "BOITOAN-20260725-07",
@@ -66,7 +76,7 @@
       "paths": ["backend/community.js", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/ACTIVE_TASKS.json"],
       "status": "completed",
       "completed_at": "2026-07-25T15:00:00+07:00",
-      "summary": "PR #110 merge commit 67a95758e895ea05991c02f6dcfbbfcd8eefba2a; production SUCCESS. Số thành viên công khai tự cập nhật."
+      "summary": "PR #110 merge commit 67a95758e895ea05991c02f6dcfbbfcd8eefba2a; production SUCCESS."
     },
     {
       "id": "GROWTH-20260725-03",
