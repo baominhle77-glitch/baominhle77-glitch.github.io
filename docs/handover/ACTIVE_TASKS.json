@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-26T02:20:00+07:00",
+  "updated_at": "2026-07-26T03:05:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,6 +42,20 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOITOAN-20260726-02",
+      "owner": "Claude Code",
+      "branch": "claude/affiliate-community-strategy-oft750",
+      "base_sha": "4c6836809c5ec2b83afa085dd144ee0b05ed4fc4",
+      "paths": [
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-07-26T03:05:00+07:00",
+      "summary": "Ghi ket qua nghiem thu production cho BOITOAN-20260726-01: 385/385 nick da ap ho so moi, kiem lai quyen rieng tu van kin. Dang o recently_completed vi so khoa dang do task khac giu.",
+      "completed_at": "2026-07-26T03:05:00+07:00"
+    },
     {
       "id": "BOITOAN-20260726-01",
       "owner": "Claude Code",

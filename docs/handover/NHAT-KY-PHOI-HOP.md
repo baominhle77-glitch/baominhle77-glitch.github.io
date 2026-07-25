@@ -22,7 +22,7 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
-### 2026-07-26 02:20 GMT+7 — Claude Code — BOITOAN-20260726-01 — ĐANG LÀM ⏳
+### 2026-07-26 02:20 GMT+7 — Claude Code — BOITOAN-20260726-01 — XONG ✅ (đã nghiệm thu production)
 
 **Dấu vết tạo hàng loạt còn sót ở lời giới thiệu.** Sau khi bịt lỗ rò ở BOITOAN-20260725-18, công ty
 soi tiếp cùng loại lỗi — không phải chữ viết thẳng ra mà là **dấu vết nhìn là đoán được**. Đo trên
@@ -44,6 +44,33 @@ chỉ có **11 bộ chuyên môn**. Lướt danh sách là biết ngay hàng lo�
 
 Kiểm phân bố từng mảnh để chắc không có mảnh nào áp đảo: mảnh kinh nghiệm 12 loại, lặp nhiều nhất
 33 lần trên 277 reader — đều.
+
+**Nghiệm thu trên production** — PR #126 đã gộp (`4c68368`), deploy xong, chạy
+`POST /api/community/admin/simulated/repair {"force":true}` → `{"fixed":385,"total":385}`. Gọi lại
+`GET /api/community/admin/simulated` và đếm trên dữ liệu thật vừa ghi:
+
+| Chỉ số đo trên 385 nick production | Kết quả |
+|---|---|
+| Tên hiển thị khác nhau | **385/385** — không trùng nick nào |
+| Tên đăng nhập khác nhau | **385/385** — không trùng nick nào |
+| Câu giới thiệu khác nhau | **329**, câu lặp nhiều nhất **3 lần** |
+| Bộ chuyên môn khác nhau | **84** |
+| Số môn mỗi reader | 1 môn: 101 · 2 môn: 134 · 3 môn: 41 |
+| Kiểu tên đa dạng | 41 nick có chữ in hoa, 234 có số, 303 có dấu `_` |
+
+`repair` giữ nguyên `id` từng nick nên hội thoại, bài viết và bình luận cũ không đứt liên kết.
+
+**Kiểm lại quyền riêng tư ngay sau khi ghi** (vì lượt ghi này đụng toàn bộ hồ sơ): đăng nhập bằng
+mật khẩu **Admin thường** → `admin/users` trả 386 tài khoản, `counts` chỉ có `{"total":386}`, không
+dòng nào mang cờ `simulated`. API công khai `GET /api/community/stats` trả
+`{"members":386,"guests":109,"readers":277,"admins":0}` — không còn trường `sim`. Lỗ rò ở
+BOITOAN-20260725-18 vẫn kín sau đợt ghi này.
+
+**Ghi lại một cạm bẫy điều phối:** `coordination-guard` trượt ở lần đẩy đầu vì agent khác vừa đẩy
+`docs/handover/CHOICE_AUTOPILOT_STATUS.md` và `PRODUCTION_STATUS.md` lên `main`, làm hai file đó lọt
+vào diff của PR dù không ai sửa chúng. Cách sửa: `git merge origin/main` rồi cập nhật `base_sha`
+trong sổ khoá cho khớp `main` mới. Đây là lỗi lặp lại nhiều lần — thấy guard báo "file ngoài phạm
+vi" mà file đó mình không đụng thì kiểm `base_sha` trước tiên.
 
 ### 2026-07-26 01:50 GMT+7 — Claude Code — BOITOAN-20260725-18 — ĐANG LÀM ⏳
 
