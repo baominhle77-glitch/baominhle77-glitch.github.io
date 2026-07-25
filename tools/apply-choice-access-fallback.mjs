@@ -74,7 +74,8 @@ function normalizeDatafeedCandidate(raw, portfolio, keyword) {
   const terms = stripVietnamese(keyword).toLowerCase().split(/\\s+/).filter((term) => term.length >= 3);
   if (!terms.some((term) => haystack.includes(term))) return null;
 
-  const id = clean(raw?.product_id || raw?.sku || slugify(`${raw?.campaign || "feed"}-${raw?.name || "product"}`), 120);
+  const fallbackId = slugify(String(raw?.campaign || "feed") + "-" + String(raw?.name || "product"));
+  const id = clean(raw?.product_id || raw?.sku || fallbackId, 120);
   const title = clean(raw?.name, 180);
   const detailLink = safeUrl(raw?.url);
   const affiliateUrl = safeUrl(raw?.aff_link);
@@ -165,13 +166,6 @@ if (!source.includes("if (candidate.affiliate_url) return candidate.affiliate_ur
   source = source.replace(
     "async function createAffiliateLink(token, candidate, runId, fetchImpl = fetch) {",
     "async function createAffiliateLink(token, candidate, runId, fetchImpl = fetch) {\n  if (candidate.affiliate_url) return candidate.affiliate_url;"
-  );
-}
-
-if (!source.includes("choiceTikTokCapabilityCache = null;")) {
-  source = source.replace(
-    "export async function runChoiceAutopilot(env, options = {}) {\n  const trigger",
-    "export async function runChoiceAutopilot(env, options = {}) {\n  choiceTikTokCapabilityCache = null;\n  choiceDatafeedPoolCache = null;\n  const trigger"
   );
 }
 
