@@ -4,6 +4,25 @@ import { BLOCKED_AFFILIATE_TERMS, CHOICE_TAXONOMY } from "./choice-taxonomy.mjs"
 const path = "backend/choice-autopilot.js";
 let source = await readFile(path, "utf8");
 
+const COMPLETE_V2_MARKERS = [
+  'const MAX_PRODUCTS_PER_CATEGORY = 12;',
+  'id: "tech"',
+  'id: "travel"',
+  'id: "fitness"',
+  'trend_score: trendScore',
+  'const sortFields = ["BEST_SELLERS", "RECOMMENDED", "HIGH_COMMISSION_RATE"]',
+  'const shopCounts = new Map()',
+  'const selectedSourceIds = new Set()',
+  'const globalSelectedSources = new Set()',
+  'globalSelectedSources.has(candidate.source_id)',
+  'const refreshedCategories = new Set'
+];
+
+if (COMPLETE_V2_MARKERS.every((marker) => source.includes(marker))) {
+  console.log(`choice-multiniche-v2-idempotent: ${CHOICE_TAXONOMY.length} lĩnh vực đã hoàn chỉnh`);
+  process.exit(0);
+}
+
 const portfolioSource = `const PORTFOLIO = Object.freeze([\n${CHOICE_TAXONOMY.map((item) => `  {\n    id: ${JSON.stringify(item.id)},\n    visual: ${JSON.stringify(item.icon)},\n    keywords: ${JSON.stringify(item.keywords)},\n    priorities: ${JSON.stringify(item.priorities)},\n    best_for: ${JSON.stringify(item.bestFor)},\n    avoid_if: ${JSON.stringify(item.avoidIf)}\n  }`).join(",\n")}\n]);`;
 
 source = source.replace(/const MAX_PRODUCTS_PER_CATEGORY = \d+;/, "const MAX_PRODUCTS_PER_CATEGORY = 12;");
@@ -74,7 +93,6 @@ if (!source.includes("const selectedSourceIds = new Set()")) {
   source = source.slice(0, start) + diverseSelection + source.slice(end);
 }
 
-// GLOBAL_PRODUCT_DEDUPE_V2: một source chỉ được xếp vào một danh mục trên toàn catalog.
 if (!source.includes("const globalSelectedSources = new Set()")) {
   source = source.replace(
     "    const selected = [];\n    const errors = [];",
@@ -116,14 +134,7 @@ if (!source.includes("categories_covered:")) {
   );
 }
 
-for (const required of [
-  'id: "tech"', 'id: "travel"', 'id: "fitness"',
-  "trend_score: trendScore",
-  'const sortFields = ["BEST_SELLERS", "RECOMMENDED", "HIGH_COMMISSION_RATE"]',
-  "const shopCounts = new Map()", "const selectedSourceIds = new Set()",
-  "const globalSelectedSources = new Set()", "globalSelectedSources.has(candidate.source_id)",
-  "const refreshedCategories = new Set", "const MAX_PRODUCTS_PER_CATEGORY = 12;"
-]) {
+for (const required of COMPLETE_V2_MARKERS) {
   if (!source.includes(required)) throw new Error(`Autopilot V2 thiếu marker: ${required}`);
 }
 
