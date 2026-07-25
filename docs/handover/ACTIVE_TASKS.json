@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T14:05:00+07:00",
+  "updated_at": "2026-07-25T14:20:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -11,10 +11,13 @@
       "paths": [
         "backend/choice.js",
         "backend/choice.test.mjs",
+        "backend/choice-autopilot.test.mjs",
         "backend/choice-vn-marketplace.test.mjs",
         "backend/choice-revenue.js",
         "backend/choice-revenue.test.mjs",
+        "tools/apply-choice-access-fallback.mjs",
         "tools/apply-choice-vn-marketplace.mjs",
+        "tools/apply-choice-global-dedupe.mjs",
         "tools/apply-choice-marketplace-scale.mjs",
         "tools/choice-marketplace-scale.test.mjs",
         "tools/build-choice-seo.mjs",
@@ -33,8 +36,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T14:05:00+07:00",
-      "summary": "Hotfix khẩn cấp: chỉ nhận Shopee VN, Lazada VN, Tiki, Sendo và TikTok Shop VN; tái tạo deeplink ACCESSTRADE thay vì dùng aff_link cũ; chặn link lỗi/ngoài Việt Nam; nhóm cùng sản phẩm chỉ khi có nhiều nơi bán thật. Tiếp tục mở rộng catalog, SEO và đo KPI sprint 10 ngày."
+      "heartbeat_at": "2026-07-25T14:20:00+07:00",
+      "summary": "Hotfix khẩn cấp: chỉ nhận Shopee VN, Lazada VN, Tiki, Sendo và TikTok Shop VN; tái tạo deeplink ACCESSTRADE thay vì dùng aff_link cũ; chặn link lỗi/ngoài Việt Nam; nhóm cùng sản phẩm chỉ khi có nhiều nơi bán thật; chống một sản phẩm bị nhân bản ở nhiều danh mục. Tiếp tục mở rộng catalog, SEO và đo KPI sprint 10 ngày."
     }
   ],
   "recently_completed": [
