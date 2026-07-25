@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T15:35:00+07:00",
+  "updated_at": "2026-07-25T15:45:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
       "id": "GROWTH-20260725-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
-      "branch": "agent/GROWTH-20260725-04-lock",
-      "base_sha": "f58fad86a7fc48a640f957ef965c53f51bf132fb",
+      "branch": "agent/GROWTH-20260725-04-hotfix-vn-links",
+      "base_sha": "134033f40bfdda4a593ea8fbb4601f7c7169000e",
       "paths": [
         "backend/choice.js",
         "backend/choice.test.mjs",
@@ -36,7 +36,7 @@
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T15:35:00+07:00",
+      "heartbeat_at": "2026-07-25T15:45:00+07:00",
       "summary": "Hotfix khẩn cấp: chỉ nhận Shopee VN, Lazada VN, Tiki, Sendo và TikTok Shop VN; tái tạo deeplink ACCESSTRADE; chặn link lỗi/ngoài Việt Nam; nhóm cùng sản phẩm chỉ khi có nhiều nơi bán thật; chống trùng toàn catalog. Sau hotfix tiếp tục sprint SEO/KPI 10 ngày."
     }
   ],
