@@ -18,13 +18,22 @@ if (!source.includes("GLOBAL_PRODUCT_DEDUPE_V1")) {
   );
 }
 
+// Giữ marker cho apply-choice-multiniche đời trước; chính sách Việt Nam vẫn thanh lọc toàn bộ affiliate cũ.
+if (!source.includes("const refreshedCategories = new Set")) {
+  source = source.replace(
+    "    const preserved = existing.products.filter((product) => {",
+    "    const refreshedCategories = new Set(selected.map((product) => product.category));\n    void refreshedCategories;\n    const preserved = existing.products.filter((product) => {"
+  );
+}
+
 for (const marker of [
   "GLOBAL_PRODUCT_DEDUPE_V1",
   "globalSelectedSources.has(candidate.source_id)",
-  "globalSelectedSources.add(candidate.source_id)"
+  "globalSelectedSources.add(candidate.source_id)",
+  "const refreshedCategories = new Set"
 ]) {
-  if (!source.includes(marker)) throw new Error(`Thiếu khóa chống trùng toàn catalog: ${marker}`);
+  if (!source.includes(marker)) throw new Error(`Thiếu khóa chống trùng/toàn catalog hoặc marker tương thích: ${marker}`);
 }
 
 await writeFile(path, source);
-console.log("choice-global-dedupe-ok: một source product chỉ xuất hiện một lần trong catalog");
+console.log("choice-global-dedupe-ok: một source product chỉ xuất hiện một lần và giữ marker idempotency");
