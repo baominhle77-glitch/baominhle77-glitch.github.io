@@ -11,13 +11,13 @@ permissions:
 jobs:
   validate-vn-marketplace:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
 
-      - name: Materialize đúng thứ tự và kiểm tra idempotency
+      - name: Materialize marketplace Việt Nam và kiểm tra idempotency
         run: |
           set -euo pipefail
           node tools/apply-choice-multiniche.mjs
@@ -35,36 +35,28 @@ jobs:
           grep -q 'VIETNAM_MARKETPLACE_PUBLIC_V1' backend/choice.js
           ! grep -qiE 'fado\.vn|amazon\.|taobao|alibaba|ebay' backend/choice-autopilot.js
 
-      - name: Kiểm tra catalog cũ không hồi quy
-        run: node --test backend/choice.test.mjs
-
-      - name: Kiểm tra sàn Việt Nam, redirect và nhóm nhiều nơi bán
-        run: node --test backend/choice-vn-marketplace.test.mjs
-
-      - name: Kiểm tra Affiliate Autopilot
-        run: node --test backend/choice-autopilot.test.mjs
-
-      - name: Chạy boundary backend có log đầy đủ
-        id: boundary_test
+      - name: Kiểm tra catalog và redirect sàn Việt Nam
         run: |
-          set +e
-          node --test backend/choice-public-boundary.test.mjs > "$RUNNER_TEMP/boundary-test.log" 2>&1
-          code=$?
-          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
-          cat "$RUNNER_TEMP/boundary-test.log"
-          exit 0
+          set -euo pipefail
+          node --test backend/choice.test.mjs
+          node --test backend/choice-vn-marketplace.test.mjs
+          node --test backend/choice-autopilot.test.mjs
 
-      - name: Lưu stack trace boundary
-        uses: actions/upload-artifact@v4
-        with:
-          name: boundary-test-log
-          path: ${{ runner.temp }}/boundary-test.log
-          if-no-files-found: error
-          retention-days: 3
+      - name: Materialize đầy đủ Worker owner revenue
+        run: |
+          set -euo pipefail
+          node tools/apply-travel-system.mjs
+          node tools/apply-choice-system.mjs
+          node tools/apply-choice-setup.mjs
+          node tools/apply-choice-credential-bootstrap.mjs
+          node tools/apply-choice-revenue.mjs
+          node tools/apply-choice-autopilot-ui.mjs
+          node --check backend/worker.js
+          node --check backend/choice-setup.js
+          node --check backend/choice-revenue.js
 
-      - name: Chặn theo mã thoát boundary
-        if: steps.boundary_test.outputs.exit_code != '0'
-        run: exit 1
+      - name: Kiểm tra boundary backend
+        run: node --test backend/choice-public-boundary.test.mjs
 
       - name: Quét nội dung public
         run: node tools/check-public-content.mjs
