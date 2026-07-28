@@ -1,7 +1,18 @@
-# Root vẫn là kho riêng. Chỉ công khai ứng dụng Hội Chọn Đúng cho máy tìm kiếm.
+# Khu vực công khai dành cho công cụ tìm kiếm.
 User-agent: *
+Allow: /hoi-chon-dung
 Allow: /hoi-chon-dung/
-Disallow: /
+Allow: /google91001f63e8104533.html
+Allow: /BingSiteAuth.xml
+
+# Chặn đích danh các khu vực riêng tư hoặc không dành cho lập chỉ mục.
+Disallow: /$
+Disallow: /boitoan/
+Disallow: /medora/
+Disallow: /vietnam-travel/
+Disallow: /assets/
+Disallow: /owner/
+Disallow: /api/
 
 Sitemap: https://hiennhi89.pages.dev/hoi-chon-dung/sitemap.xml
 
