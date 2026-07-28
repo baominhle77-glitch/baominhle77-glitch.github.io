@@ -108,3 +108,14 @@ test("IndexNow kiểm tra host và Google Search Console hỗ trợ dry-run", as
   assert.match(google.stdout, /"dry_run":true/);
   assert.match(google.stdout, /hoi-chon-dung\/sitemap\.xml/);
 });
+
+test("robots.txt cho phép toàn bộ Hội Chọn Đúng và chỉ chặn đích danh vùng riêng tư", async () => {
+  const robots = await readFile(join(ROOT, "robots.txt"), "utf8");
+  assert.match(robots, /^Allow: \/hoi-chon-dung$/m);
+  assert.match(robots, /^Allow: \/hoi-chon-dung\/$/m);
+  assert.match(robots, /^Sitemap: https:\/\/hiennhi89\.pages\.dev\/hoi-chon-dung\/sitemap\.xml$/m);
+  assert.doesNotMatch(robots, /^Disallow:\s*\/$/m);
+  for (const privatePath of ["/boitoan/", "/medora/", "/vietnam-travel/", "/assets/", "/owner/", "/api/"]) {
+    assert.match(robots, new RegExp(`^Disallow: ${privatePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "m"));
+  }
+});
