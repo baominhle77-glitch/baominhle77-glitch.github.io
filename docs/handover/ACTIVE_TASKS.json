@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-25T18:35:00+07:00",
+  "updated_at": "2026-07-28T09:08:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -11,13 +11,13 @@
       "paths": [
         "backend/choice.js", "backend/choice.test.mjs", "backend/choice-autopilot.js", "backend/choice-autopilot.test.mjs", "backend/choice-public-boundary.test.mjs", "backend/choice-vn-marketplace.test.mjs", "backend/choice-revenue.js", "backend/choice-revenue.test.mjs",
         "tools/apply-choice-product-v2.mjs", "tools/choice-v2-payload/**", "tools/apply-choice-autopilot-ui.mjs", "tools/apply-choice-access-fallback.mjs", "tools/apply-choice-vn-marketplace.mjs", "tools/apply-choice-global-dedupe.mjs", "tools/apply-choice-marketplace-scale.mjs", "tools/choice-marketplace-scale.test.mjs", "tools/build-choice-seo.mjs", "tools/choice-seo.test.mjs",
-        "hoi-chon-dung/**", ".github/workflows/deploy-pages.yml", ".github/workflows/validate-role-system.yml", ".github/workflows/choice-growth-autopilot.yml", ".github/workflows/validate-choice-vn-marketplace.yml", ".github/workflows/choice-vn-marketplace-production.yml",
+        "hoi-chon-dung/**", "robots.txt", ".github/workflows/deploy-pages.yml", ".github/workflows/validate-role-system.yml", ".github/workflows/choice-growth-autopilot.yml", ".github/workflows/validate-choice-vn-marketplace.yml", ".github/workflows/choice-vn-marketplace-production.yml",
         "docs/handover/ACTIVE_TASKS.json", "docs/handover/NHAT-KY-PHOI-HOP.md", "docs/handover/CHOICE_PRODUCT_V2.md", "docs/handover/CHOICE_10_DAY_GROWTH_SPRINT.md"
       ],
       "status": "in_progress",
       "started_at": "2026-07-25T13:35:00+07:00",
-      "heartbeat_at": "2026-07-25T18:35:00+07:00",
-      "summary": "Làm lại Hội Chọn Đúng thành ứng dụng khám phá xu hướng và so sánh nhiều shop: năm màn hình riêng, mô hình offer-first, chỉ deeplink affiliate sàn Việt Nam đã xác minh, không Google/merchant/seed fallback, media và rating/review chỉ khi nguồn có dữ liệu, SEO live-only và production smoke trên WebKit/iPhone."
+      "heartbeat_at": "2026-07-28T09:08:00+07:00",
+      "summary": "Làm lại Hội Chọn Đúng thành ứng dụng khám phá xu hướng và so sánh nhiều shop: năm màn hình riêng, mô hình offer-first, chỉ deeplink affiliate sàn Việt Nam đã xác minh, không Google/merchant/seed fallback, media và rating/review chỉ khi nguồn có dữ liệu, SEO live-only; đồng thời sửa robots.txt từ chặn toàn miền sang cho phép rõ khu vực công khai và chặn đích danh vùng riêng tư."
     }
   ],
   "recently_completed": [
