@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0a14">
+<title>Chọn bài AI Company — Queen Linh</title>
+<style>
+:root {
+  --bg:#0d0a14; --panel:#181222; --panel2:#241934; --text:#fbf7ff;
+  --muted:#c4b6cf; --gold:#e8c36b; --violet:#8f62d9; --line:#49365f;
+  --ok:#55d69b; --danger:#ff8080;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;background:
+radial-gradient(circle at 10% 0%,#2a1640 0,transparent 35%),
+radial-gradient(circle at 90% 15%,#352046 0,transparent 34%),var(--bg);
+color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+min-height:100vh}
+main{max-width:980px;margin:0 auto;padding:22px 14px 54px}
+.hero{text-align:center;padding:8px 8px 12px}
+.hero h1{font-size:26px;line-height:1.2;margin:0 0 8px}
+.hero p{margin:0 auto;color:var(--muted);line-height:1.55;max-width:760px;font-size:15px}
+.lock{margin-top:12px;font-size:11px;color:#a996b8;word-break:break-all}
+.sticky{position:sticky;top:0;z-index:20;background:rgba(13,10,20,.93);backdrop-filter:blur(14px);
+border:1px solid var(--line);border-radius:14px;padding:10px;margin:10px 0 18px;
+display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-weight:700}
+.pill.done{border-color:var(--ok);color:#dffff0}
+section{background:rgba(24,18,34,.76);border:1px solid var(--line);border-radius:18px;padding:16px;margin:16px 0}
+section h2{font-size:20px;margin:0 0 5px}
+section .sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.card{appearance:none;border:1px solid #5b4473;background:linear-gradient(150deg,#241934,#15101e);
+color:var(--text);border-radius:12px;min-height:56px;font-size:16px;font-weight:800;cursor:pointer;
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.025)}
+.card:active{transform:scale(.96)}
+.card.selected{background:linear-gradient(145deg,#a878ec,#7046b2);border-color:#d8b8ff;
+box-shadow:0 0 0 2px rgba(216,184,255,.23),0 8px 24px rgba(0,0,0,.23)}
+.card.locked:not(.selected){opacity:.32}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+button.action{appearance:none;border:0;border-radius:13px;padding:13px 16px;font-size:15px;font-weight:800;cursor:pointer}
+.primary{background:var(--gold);color:#2a1a00}
+.secondary{background:#312440;color:#fff;border:1px solid var(--line)!important}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.result{margin-top:14px;padding:15px;border:1px solid var(--line);background:#100c18;border-radius:14px;
+white-space:pre-wrap;line-height:1.6;font-size:16px}
+.hint{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.45}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#f4e9ff;color:#24132e;
+padding:11px 16px;border-radius:999px;font-weight:800;display:none;z-index:99}
+@media(min-width:520px){.grid{grid-template-columns:repeat(10,1fr)}}
+@media(min-width:850px){.grid{grid-template-columns:repeat(13,1fr)}}
+</style>
+</head>
+<body>
+<main>
+  <div class="hero">
+    <h1>Chọn bài AI Company</h1>
+    <p>Queen Linh chọn đúng <b>7 vị trí Tarot</b> và <b>7 vị trí Lenormand</b>. Bộ bài đã được xáo và khóa trước khi trang này được tạo. Tên lá không hiển thị để giữ lựa chọn mù.</p>
+    <div class="lock">Mã khóa SHA-256: 977a729a22bbadd8e01a147c87c65b06ddaeaca2be11bbf188d47eb033e81b7d</div>
+  </div>
+
+  <div class="sticky">
+    <div id="tPill" class="pill">Tarot: <span id="tc">0</span>/7</div>
+    <div id="lPill" class="pill">Lenormand: <span id="lc">0</span>/7</div>
+  </div>
+
+  <section>
+    <h2>Tarot</h2>
+    <p class="sub">Bấm chọn 7 số từ 1 đến 78.</p>
+    <div id="tarotGrid" class="grid"></div>
+  </section>
+
+  <section>
+    <h2>Lenormand</h2>
+    <p class="sub">Bấm chọn 7 số từ 1 đến 36.</p>
+    <div id="lenorGrid" class="grid"></div>
+  </section>
+
+  <section>
+    <h2>Kết quả lựa chọn</h2>
+    <div id="result" class="result">Chưa chọn đủ 14 vị trí.</div>
+    <div class="actions">
+      <button id="copyBtn" class="action primary" disabled>Sao chép để gửi ChatGPT</button>
+      <button id="shareBtn" class="action secondary" disabled>Chia sẻ</button>
+      <button id="resetBtn" class="action secondary">Chọn lại từ đầu</button>
+    </div>
+    <p class="hint">Sau khi chọn đủ, hãy bấm “Sao chép để gửi ChatGPT”, quay lại cuộc trò chuyện và dán kết quả.</p>
+  </section>
+</main>
+<div id="toast" class="toast">Đã sao chép kết quả</div>
+
+<script>
+const LOCK_HASH = "977a729a22bbadd8e01a147c87c65b06ddaeaca2be11bbf188d47eb033e81b7d";
+const tSel = new Set();
+const lSel = new Set();
+
+function createGrid(rootId, total, set, counterId, pillId) {
+  const root = document.getElementById(rootId);
+  const frag = document.createDocumentFragment();
+  for (let i=1;i<=total;i++) {
+    const b=document.createElement('button');
+    b.type='button'; b.className='card'; b.textContent=i; b.setAttribute('aria-label','Vị trí '+i);
+    b.addEventListener('click',()=>{
+      if(set.has(i)){set.delete(i);b.classList.remove('selected')}
+      else if(set.size<7){set.add(i);b.classList.add('selected')}
+      update(rootId,set,counterId,pillId);
+    });
+    frag.appendChild(b);
+  }
+  root.appendChild(frag);
+}
+
+function arr(set){return [...set].sort((a,b)=>a-b)}
+
+function updateGridLock(rootId,set){
+  document.querySelectorAll('#'+rootId+' .card').forEach(el=>{
+    el.classList.toggle('locked', set.size===7);
+  });
+}
+
+function update(rootId,set,counterId,pillId){
+  document.getElementById(counterId).textContent=set.size;
+  document.getElementById(pillId).classList.toggle('done',set.size===7);
+  updateGridLock(rootId,set);
+  renderResult();
+}
+
+function outputText(){
+  return `Câu hỏi: Tôi nên làm gì cụ thể hơn nữa để đạt được kỳ vọng sớm nhất trong vụ AI company này?\nTarot: ${arr(tSel).join(' - ')}\nLenormand: ${arr(lSel).join(' - ')}\nMã khóa: ${LOCK_HASH}`;
+}
+
+function renderResult(){
+  const done=tSel.size===7&&lSel.size===7;
+  document.getElementById('copyBtn').disabled=!done;
+  document.getElementById('shareBtn').disabled=!done;
+  document.getElementById('result').textContent=done ? outputText() :
+    `Tarot đã chọn: ${arr(tSel).join(' - ')||'chưa có'}\nLenormand đã chọn: ${arr(lSel).join(' - ')||'chưa có'}`;
+}
+
+async function copyResult(){
+  const text=outputText();
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch(e) {
+    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');ta.remove();
+  }
+  const toast=document.getElementById('toast');toast.style.display='block';
+  setTimeout(()=>toast.style.display='none',1600);
+}
+
+document.getElementById('copyBtn').addEventListener('click',copyResult);
+document.getElementById('shareBtn').addEventListener('click',async()=>{
+  if(navigator.share){try{await navigator.share({title:'Kết quả chọn bài AI Company',text:outputText()})}catch(e){}}
+  else{copyResult()}
+});
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  tSel.clear();lSel.clear();
+  document.querySelectorAll('.card').forEach(el=>el.classList.remove('selected','locked'));
+  document.getElementById('tc').textContent='0';document.getElementById('lc').textContent='0';
+  document.getElementById('tPill').classList.remove('done');document.getElementById('lPill').classList.remove('done');
+  renderResult(); window.scrollTo({top:0,behavior:'smooth'});
+});
+
+createGrid('tarotGrid',78,tSel,'tc','tPill');
+createGrid('lenorGrid',36,lSel,'lc','lPill');
+renderResult();
+</script>
+
+<!-- SEALED_DECK_MAPPING_FOR_VERIFICATION: {"seed": "a8cf335ad64f20932d6b56ce70f08897", "tarot": [{"card": "Judgement", "orientation": "reversed"}, {"card": "Six of Pentacles", "orientation": "reversed"}, {"card": "King of Cups", "orientation": "upright"}, {"card": "Four of Swords", "orientation": "reversed"}, {"card": "Nine of Swords", "orientation": "upright"}, {"card": "Nine of Wands", "orientation": "upright"}, {"card": "Knight of Cups", "orientation": "upright"}, {"card": "The Empress", "orientation": "upright"}, {"card": "The Lovers", "orientation": "upright"}, {"card": "The Hanged Man", "orientation": "reversed"}, {"card": "Ten of Wands", "orientation": "upright"}, {"card": "The Hierophant", "orientation": "upright"}, {"card": "Nine of Cups", "orientation": "upright"}, {"card": "Page of Wands", "orientation": "reversed"}, {"card": "Eight of Wands", "orientation": "reversed"}, {"card": "Eight of Pentacles", "orientation": "reversed"}, {"card": "Page of Cups", "orientation": "upright"}, {"card": "The Magician", "orientation": "upright"}, {"card": "Eight of Cups", "orientation": "reversed"}, {"card": "Two of Cups", "orientation": "reversed"}, {"card": "Ace of Swords", "orientation": "upright"}, {"card": "The Emperor", "orientation": "upright"}, {"card": "King of Swords", "orientation": "reversed"}, {"card": "Seven of Wands", "orientation": "upright"}, {"card": "The Devil", "orientation": "upright"}, {"card": "King of Wands", "orientation": "reversed"}, {"card": "Two of Wands", "orientation": "reversed"}, {"card": "Queen of Pentacles", "orientation": "upright"}, {"card": "Knight of Swords", "orientation": "reversed"}, {"card": "The Moon", "orientation": "reversed"}, {"card": "Ten of Swords", "orientation": "reversed"}, {"card": "Queen of Cups", "orientation": "reversed"}, {"card": "Three of Cups", "orientation": "upright"}, {"card": "The Star", "orientation": "reversed"}, {"card": "Ace of Pentacles", "orientation": "reversed"}, {"card": "The Tower", "orientation": "reversed"}, {"card": "Four of Pentacles", "orientation": "reversed"}, {"card": "Ace of Cups", "orientation": "upright"}, {"card": "King of Pentacles", "orientation": "reversed"}, {"card": "Eight of Swords", "orientation": "reversed"}, {"card": "The Fool", "orientation": "upright"}, {"card": "Six of Wands", "orientation": "reversed"}, {"card": "Six of Cups", "orientation": "upright"}, {"card": "Ten of Pentacles", "orientation": "reversed"}, {"card": "Page of Pentacles", "orientation": "upright"}, {"card": "Temperance", "orientation": "reversed"}, {"card": "The World", "orientation": "upright"}, {"card": "Knight of Wands", "orientation": "upright"}, {"card": "Seven of Cups", "orientation": "upright"}, {"card": "Seven of Swords", "orientation": "upright"}, {"card": "Five of Cups", "orientation": "upright"}, {"card": "Seven of Pentacles", "orientation": "upright"}, {"card": "Two of Swords", "orientation": "upright"}, {"card": "Three of Swords", "orientation": "upright"}, {"card": "Three of Wands", "orientation": "upright"}, {"card": "Queen of Swords", "orientation": "upright"}, {"card": "Six of Swords", "orientation": "reversed"}, {"card": "Nine of Pentacles", "orientation": "reversed"}, {"card": "The Chariot", "orientation": "upright"}, {"card": "Four of Wands", "orientation": "reversed"}, {"card": "Three of Pentacles", "orientation": "reversed"}, {"card": "Wheel of Fortune", "orientation": "upright"}, {"card": "Death", "orientation": "reversed"}, {"card": "Knight of Pentacles", "orientation": "reversed"}, {"card": "Strength", "orientation": "upright"}, {"card": "Four of Cups", "orientation": "upright"}, {"card": "Page of Swords", "orientation": "upright"}, {"card": "Two of Pentacles", "orientation": "upright"}, {"card": "Ace of Wands", "orientation": "reversed"}, {"card": "Five of Swords", "orientation": "upright"}, {"card": "Justice", "orientation": "reversed"}, {"card": "Five of Pentacles", "orientation": "reversed"}, {"card": "Five of Wands", "orientation": "upright"}, {"card": "Ten of Cups", "orientation": "upright"}, {"card": "The High Priestess", "orientation": "upright"}, {"card": "Queen of Wands", "orientation": "upright"}, {"card": "The Sun", "orientation": "upright"}, {"card": "The Hermit", "orientation": "upright"}], "lenormand": [{"card": "Key"}, {"card": "House"}, {"card": "Ship"}, {"card": "Rider"}, {"card": "Mountain"}, {"card": "Clover"}, {"card": "Lilies"}, {"card": "Scythe"}, {"card": "Crossroads"}, {"card": "Snake"}, {"card": "Whip"}, {"card": "Fox"}, {"card": "Ring"}, {"card": "Sun"}, {"card": "Anchor"}, {"card": "Dog"}, {"card": "Man"}, {"card": "Fish"}, {"card": "Clouds"}, {"card": "Mice"}, {"card": "Woman"}, {"card": "Letter"}, {"card": "Tree"}, {"card": "Bear"}, {"card": "Child"}, {"card": "Birds"}, {"card": "Cross"}, {"card": "Bouquet"}, {"card": "Heart"}, {"card": "Tower"}, {"card": "Garden"}, {"card": "Coffin"}, {"card": "Stars"}, {"card": "Stork"}, {"card": "Book"}, {"card": "Moon"}]} -->
+</body>
+</html>
