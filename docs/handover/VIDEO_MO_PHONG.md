@@ -38,6 +38,15 @@ Thêm mô phỏng mới: khai báo một mục trong `SIMS` với `label`, `grou
 - "⚡ Dựng & xuất video luôn" = đọc bản dán → tối ưu → xuất video.
 - App không gửi bất kỳ yêu cầu mạng nào ra ngoài.
 
+## Bản thử trên claude.ai (Artifact, V3.1)
+
+- Link thử (riêng tư, chỉ BaoMinh mở được): https://claude.ai/artifact/QWHDGZg8RMLkrj18mgVAbb — capabilities `sample` + `downloads`.
+- Trang Artifact được sinh từ `video-mo-phong/index.html` (bỏ doctype/html/head/body, đưa `<title>` lên đầu); `app.css`, `sims.js`, `ai.js`, `app.js` đăng kèm qua `files`. Cập nhật: sinh lại trang rồi publish cùng URL.
+- Trong Artifact: nút "✨ Viết kịch bản bằng Claude" gọi `claude.use("sample")` — chạy bằng **hạn mức nick của người đang xem**, không cần API; lần đầu claude.ai hỏi cho phép. Trên web thường nút này ẩn, dùng luồng sao chép/dán.
+- Lưu video/.json qua `claude.use("downloads").save()` (người xem xác nhận); web thường dùng liên kết tải về.
+- `confirm()/alert()` bị trình xem chặn nên app dùng hộp xác nhận `<dialog>` riêng (áp dụng cho cả web thường).
+- Thu micro không dùng được trong Artifact (trình xem chặn thiết bị) — app tự xuất không tiếng.
+
 ## Phong cách & tối ưu tự động (V2)
 
 - 6 chủ đề màu (`THEMES` trong `sims.js`), 4 kiểu chữ, màu nền/chữ/nhấn tùy chỉnh, cỡ chữ chung/tiêu đề/phụ đề, cỡ hình mô phỏng, tốc độ chuyển động, vị trí + kiểu phụ đề, chuyển cảnh, thanh tiến độ.

@@ -471,6 +471,40 @@
     return node;
   }
 
+  // Hộp xác nhận ngay trong trang (trình xem Artifact chặn confirm()/alert() của trình duyệt)
+  function askConfirm(message, okLabel) {
+    const dlg = $("confirmDlg");
+    if (!dlg || typeof dlg.showModal !== "function") return Promise.resolve(window.confirm(message));
+    $("confirmMsg").textContent = message;
+    $("confirmOk").textContent = okLabel || "Đồng ý";
+    return new Promise((resolve) => {
+      const done = () => { dlg.removeEventListener("close", done); resolve(dlg.returnValue === "ok"); };
+      dlg.returnValue = "";
+      dlg.addEventListener("close", done);
+      dlg.showModal();
+    });
+  }
+
+  function notify(message) {
+    const st = $("genStatus");
+    st.textContent = message;
+    st.scrollIntoView({ block: "nearest" });
+  }
+
+  // Lưu tệp: trong Artifact dùng khả năng "downloads" (người xem xác nhận); trên web thường dùng liên kết tải về
+  async function saveFile(blob, filename) {
+    const dl = window.claude && typeof window.claude.use === "function" ? await window.claude.use("downloads").catch(() => null) : null;
+    if (dl) {
+      try { await dl.save({ filename, data: blob }); return "saved"; } catch (e) {
+        return e && e.code === "declined" ? "declined" : "failed";
+      }
+    }
+    const a = el("a", { href: URL.createObjectURL(blob), download: filename });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    return "saved";
+  }
+
   function changed(rerenderList) {
     save();
     sim = null;
@@ -517,9 +551,9 @@
     const copy = JSON.parse(JSON.stringify(project.scenes[i])); copy.id = uid();
     project.scenes.splice(i + 1, 0, copy); selected = i + 1; changed(true);
   }
-  function remove(i) {
-    if (project.scenes.length <= 1) { alert("Video cần ít nhất một cảnh."); return; }
-    if (!confirm(`Xóa cảnh “${project.scenes[i].title}”?`)) return;
+  async function remove(i) {
+    if (project.scenes.length <= 1) { notify("Video cần ít nhất một cảnh."); return; }
+    if (!(await askConfirm(`Xóa cảnh “${project.scenes[i].title}”?`, "Xóa cảnh"))) return;
     project.scenes.splice(i, 1); selected = Math.min(selected, project.scenes.length - 1); changed(true);
   }
 
@@ -644,7 +678,7 @@
   }
 
   function setBusy(on) {
-    ["btnCopyPrompt", "btnTemplate", "btnImport", "btnAuto", "btnExport", "btnPlay"].forEach((id) => { $(id).disabled = on; });
+    ["btnClaudeWrite", "btnCopyPrompt", "btnTemplate", "btnImport", "btnAuto", "btnExport", "btnPlay"].forEach((id) => { $(id).disabled = on; });
   }
 
   function needIdea(brief) {
@@ -688,17 +722,17 @@
     return scenes.length;
   }
 
-  function confirmReplace() {
-    return project.scenes.length <= 1 || confirm("Kịch bản mới sẽ thay thế các cảnh hiện tại. Tiếp tục?");
+  async function confirmReplace() {
+    return project.scenes.length <= 1 || askConfirm("Kịch bản mới sẽ thay thế các cảnh hiện tại. Tiếp tục?", "Thay kịch bản");
   }
 
-  function importPasted() {
+  async function importPasted() {
     const brief = readBrief();
     const text = $("pasteJson").value;
     if (!text.trim()) { $("genStatus").textContent = "Chưa có nội dung — hãy dán câu trả lời của Claude vào ô trên."; $("pasteJson").focus(); return false; }
     try {
       const result = window.EduAI.parseScript(text, brief);
-      if (!confirmReplace()) return false;
+      if (!(await confirmReplace())) return false;
       setPlaying(false);
       const n = applyResult(result, brief);
       $("genStatus").textContent = `Đã dựng ${n} cảnh, tổng ${fmtTime(totalDuration())}. Xem trước, chỉnh nếu cần rồi xuất video.`;
@@ -709,16 +743,66 @@
     }
   }
 
-  function useTemplate() {
+  async function useTemplate() {
     const brief = readBrief();
-    if (needIdea(brief) || !confirmReplace()) return;
+    if (needIdea(brief) || !(await confirmReplace())) return;
     setPlaying(false);
     const n = applyResult(window.EduAI.templateScript(brief), brief);
     $("genStatus").textContent = `Đã dựng kịch bản mẫu ${n} cảnh. Kịch bản mẫu chỉ có nội dung chung — hãy sửa lời thuyết minh, hoặc dùng “Sao chép lời nhắc” để Claude viết riêng theo ý tưởng.`;
   }
 
-  function autoMake() {
-    if (!importPasted()) return;
+  // Viết kịch bản bằng Claude ngay trong trang — chỉ có khi mở dưới dạng Artifact trên claude.ai (dùng hạn mức nick của người xem)
+  let claudeAbort = null;
+  const SAMPLE_ERRORS = {
+    not_granted: "Bạn chưa cho phép trang này dùng Claude. Hãy dùng cách “Sao chép lời nhắc” bên dưới.",
+    sampling_disabled: "Tài khoản này không dùng được Claude trong trang. Hãy dùng cách “Sao chép lời nhắc”.",
+    rate_limited: "Nick Claude đang hết lượt hoặc gửi quá nhanh. Đợi một lúc rồi thử lại, hoặc đổi nick.",
+    session_expired: "Phiên đăng nhập Claude đã hết hạn. Hãy đăng nhập lại claude.ai rồi thử lại.",
+    refused: "Claude từ chối ý tưởng này. Hãy diễn đạt lại theo hướng giáo dục.",
+    empty_completion: "Claude không trả lời gì. Hãy rút gọn ý tưởng rồi thử lại.",
+    prompt_too_large: "Ý tưởng quá dài. Hãy rút gọn rồi thử lại.",
+    cancelled: "Đã dừng viết kịch bản.",
+    upstream_error: "Kết nối tới Claude bị gián đoạn. Hãy thử lại."
+  };
+
+  async function writeWithClaude() {
+    const brief = readBrief();
+    if (needIdea(brief)) return false;
+    const sample = await window.claude.use("sample").catch(() => null);
+    if (!sample) { notify(SAMPLE_ERRORS.not_granted); return false; }
+    setBusy(true);
+    $("btnStopClaude").hidden = false;
+    claudeAbort = new AbortController();
+    notify("Claude đang suy nghĩ… (thường 20–90 giây)");
+    try {
+      const { text, truncated } = await sample(window.EduAI.buildPrompt(brief), {
+        signal: claudeAbort.signal,
+        onText: ({ text: t }) => { $("genStatus").textContent = `Claude đang viết… ${t.length.toLocaleString("vi-VN")} ký tự`; }
+      });
+      $("pasteJson").value = text;
+      if (truncated) { notify("Câu trả lời bị cắt giữa chừng. Hãy giảm độ dài mục tiêu rồi thử lại."); return false; }
+      const result = window.EduAI.parseScript(text, brief);
+      if (!(await confirmReplace())) return false;
+      setPlaying(false);
+      const n = applyResult(result, brief);
+      notify(`Claude đã viết xong ${n} cảnh, tổng ${fmtTime(totalDuration())}. Xem trước, chỉnh nếu cần rồi xuất video.`);
+      return true;
+    } catch (e) {
+      if (e && e.code) {
+        if (e.text) $("pasteJson").value = e.text;
+        notify(SAMPLE_ERRORS[e.code] || `Không viết được kịch bản (${e.code}). Hãy thử lại hoặc dùng “Sao chép lời nhắc”.`);
+      } else notify(e && e.message ? e.message : String(e));
+      return false;
+    } finally {
+      claudeAbort = null;
+      $("btnStopClaude").hidden = true;
+      setBusy(false);
+    }
+  }
+
+  async function autoMake() {
+    const viaClaude = !$("btnClaudeWrite").hidden && !$("pasteJson").value.trim();
+    if (!(viaClaude ? await writeWithClaude() : await importPasted())) return;
     $("genStatus").textContent += " Đang xuất video…";
     startExport();
   }
@@ -768,10 +852,13 @@
       const blob = new Blob(chunks, { type });
       const ext = /mp4/.test(type) ? "mp4" : "webm";
       const name = `${slug(project.title) || "video-mo-phong"}.${ext}`;
-      const a = el("a", { href: URL.createObjectURL(blob), download: name });
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 60000);
-      $("exportStatus").textContent = `Đã xuất “${name}” (${(blob.size / 1048576).toFixed(1)} MB).` + (ext === "webm" ? " Tệp .webm mở được trên YouTube, Facebook; nếu cần .mp4 hãy dùng công cụ chuyển đổi." : "");
+      const size = `${(blob.size / 1048576).toFixed(1)} MB`;
+      $("exportStatus").textContent = `Video đã dựng xong (${size}). Đang lưu tệp…`;
+      saveFile(blob, name).then((r) => {
+        $("exportStatus").textContent = r === "saved"
+          ? `Đã xuất “${name}” (${size}).` + (ext === "webm" ? " Tệp .webm mở được trên YouTube, Facebook; nếu cần .mp4 hãy dùng công cụ chuyển đổi." : "")
+          : r === "declined" ? "Bạn đã từ chối lưu tệp. Bấm “Xuất video” để dựng và lưu lại." : "Không lưu được tệp trong chế độ xem này.";
+      });
     };
     toggleExportUi(true);
     globalT = 0; sim = null; render(0);
@@ -849,20 +936,18 @@
     $("aspect").addEventListener("change", (e) => { project.aspect = e.target.value; save(); applySize(720); seekTo(globalT); });
     $("btnExport").addEventListener("click", startExport);
     $("btnCancel").addEventListener("click", cancelExport);
-    $("btnNew").addEventListener("click", () => {
-      if (!confirm("Bắt đầu dự án mới? Dự án hiện tại sẽ bị thay thế (hãy lưu tệp .json trước nếu cần).")) return;
+    $("btnNew").addEventListener("click", async () => {
+      if (!(await askConfirm("Bắt đầu dự án mới? Dự án hiện tại sẽ bị thay thế (hãy lưu tệp .json trước nếu cần).", "Tạo mới"))) return;
       const intro = makeScene("title"); intro.title = "Tên bài học"; intro.caption = "Giới thiệu ngắn về nội dung.";
       replaceProject({ title: "Video mới", author: project.author, aspect: project.aspect, style: project.style, brief: { ...project.brief, idea: "" }, scenes: [intro] });
     });
-    $("btnSample").addEventListener("click", () => {
-      if (!confirm("Mở dự án mẫu? Dự án hiện tại sẽ bị thay thế.")) return;
+    $("btnSample").addEventListener("click", async () => {
+      if (!(await askConfirm("Mở dự án mẫu? Dự án hiện tại sẽ bị thay thế.", "Mở mẫu"))) return;
       replaceProject(sampleProject());
     });
     $("btnSaveJson").addEventListener("click", () => {
       const blob = new Blob([JSON.stringify(project, null, 2)], { type: "application/json" });
-      const a = el("a", { href: URL.createObjectURL(blob), download: `${slug(project.title) || "du-an-video"}.json` });
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+      saveFile(blob, `${slug(project.title) || "du-an-video"}.json`).then((r) => { if (r === "failed") notify("Không lưu được tệp trong chế độ xem này."); });
     });
     $("fileImport").addEventListener("change", async (e) => {
       const file = e.target.files && e.target.files[0]; e.target.value = "";
@@ -871,7 +956,7 @@
         const next = sanitize(JSON.parse(await file.text()));
         if (!next) throw new Error("bad");
         replaceProject(next);
-      } catch (_) { alert("Tệp không đúng định dạng dự án của Xưởng Video Mô Phỏng."); }
+      } catch (_) { notify("Tệp không đúng định dạng dự án của Xưởng Video Mô Phỏng."); }
     });
 
     // Ý tưởng & AI
@@ -885,6 +970,16 @@
     $("btnTemplate").addEventListener("click", useTemplate);
     $("btnImport").addEventListener("click", importPasted);
     $("btnAuto").addEventListener("click", autoMake);
+    $("btnClaudeWrite").addEventListener("click", writeWithClaude);
+    $("btnStopClaude").addEventListener("click", () => { if (claudeAbort) claudeAbort.abort(); });
+    // Nút "Viết bằng Claude" chỉ hiện khi trang chạy trong trình xem claude.ai có khả năng gọi Claude
+    if (window.claude && typeof window.claude.use === "function") {
+      window.claude.use("sample").then((sample) => {
+        if (!sample) return;
+        $("btnClaudeWrite").hidden = false;
+        $("claudeHint").hidden = false;
+      }).catch(() => {});
+    }
 
     // Phong cách
     $("stTheme").addEventListener("change", (e) => { project.style.theme = e.target.value; project.style.bg = ""; project.style.ink = ""; project.style.accent = ""; syncStyleUi(); styleChanged(); });

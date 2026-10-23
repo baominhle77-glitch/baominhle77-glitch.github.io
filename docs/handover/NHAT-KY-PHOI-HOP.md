@@ -22,6 +22,13 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-24 03:00 GMT+7 — Claude Code — EDU-20261024-02 — XONG ✅ (bản thử Artifact)
+
+- Đăng bản thử riêng tư https://claude.ai/artifact/QWHDGZg8RMLkrj18mgVAbb (capabilities `sample`, `downloads`).
+- Code: nút "Viết kịch bản bằng Claude" qua `claude.use("sample")` (hạn mức nick người xem, chỉ hiện trong Artifact); lưu tệp qua `downloads`; thay `confirm()/alert()` bằng hộp xác nhận `<dialog>`.
+- File: `video-mo-phong/{index.html,app.css,app.js}`, `docs/handover/{VIDEO_MO_PHONG.md,DIEM-DUNG.md}`.
+- Test: `node --check`; `check-public-content` OK; Chromium (web thường): hộp xác nhận hủy/đồng ý, nút Claude ẩn, xuất `.mp4`, 0 yêu cầu ra ngoài. Chưa chạy được `sample` từ môi trường kiểm thử — chờ BaoMinh thử trên claude.ai.
+
 ### 2026-10-24 02:40 GMT+7 — Claude Code — EDU-20261024-01 — XONG SOURCE ✅ (chưa deploy)
 
 - Theo quyết định của BaoMinh (không mua API/credit), gỡ đường gọi Claude bằng khóa API và SDK đóng gói (`video-mo-phong/vendor/`). Thay bằng luồng dùng hạn mức nick: "Sao chép lời nhắc" → dán vào Claude → dán câu trả lời vào app → "Dựng kịch bản" / "Dựng & xuất video luôn".

@@ -2,20 +2,21 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 02:40 GMT+7 — Claude Code
+**Cập nhật:** 24/10/2026 03:00 GMT+7 — Claude Code
 
 ## Việc đang làm
 
 - **Dự án:** Xưởng Video Mô Phỏng — app web `video-mo-phong/` (nhập ý tưởng → kịch bản → phong cách → xuất video).
 - **Nhánh:** `claude/pensive-lovelace-96zjk7` (đã push; **chưa có PR**, chưa merge vào `main`).
-- **Task gần nhất:** `EDU-20261024-01` (V3: bỏ API, viết kịch bản bằng hạn mức nick) — completed.
+- **Task gần nhất:** `EDU-20261024-02` (bản thử Artifact: Claude trong trang, lưu tệp, hộp xác nhận) — completed.
 - **Khóa đang giữ:** không có.
 - **Tài liệu chi tiết:** `docs/handover/VIDEO_MO_PHONG.md`.
+- **Link thử cho BaoMinh:** https://claude.ai/artifact/QWHDGZg8RMLkrj18mgVAbb (Artifact riêng tư; có nút viết kịch bản bằng Claude dùng hạn mức nick). Cập nhật: sinh lại trang từ `index.html` rồi publish cùng URL (xem `VIDEO_MO_PHONG.md`).
 
 ## Trạng thái
 
 - Xong source V1–V3; kiểm thử Chromium đạt. V3: sao chép lời nhắc → dán vào Claude (hạn mức nick) → dán câu trả lời vào app → dựng video.
-- **Chưa** thử với câu trả lời thật từ claude.ai; **chưa** kiểm Safari/iPhone.
+- **Chưa** thử với câu trả lời thật từ claude.ai; **chưa** kiểm Safari/iPhone; chờ BaoMinh test link Artifact.
 - **Chưa lên production:** cần thêm thư mục vào build `_site` trong `.github/workflows/deploy-pages.yml`, nhưng file này đang bị khóa bởi task `GROWTH-20260725-04` (ChatGPT, heartbeat cuối 25/07/2026 — quá hạn khóa 24 giờ). Chờ BaoMinh xác nhận cho đóng task đó.
 
 ## Phối hợp với Studio (phiên "giám đốc dự án studio" trên máy Windows của BaoMinh)

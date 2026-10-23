@@ -53,6 +53,11 @@
       <input id="notes" type="text" maxlength="1000" placeholder="Ví dụ: nhấn mạnh tác hại của việc tự ý ngừng thuốc; kết bằng câu hỏi tương tác.">
     </div>
     <div class="how">
+      <div class="row">
+        <button id="btnClaudeWrite" type="button" class="primary" hidden>✨ Viết kịch bản bằng Claude</button>
+        <button id="btnStopClaude" type="button" hidden>Dừng</button>
+      </div>
+      <p id="claudeHint" class="hint" hidden>Claude viết ngay trong trang, dùng hạn mức nick Claude đang đăng nhập (lần đầu sẽ hỏi bạn cho phép). Hoặc làm thủ công như dưới đây.</p>
       <p class="hint"><b>Dùng hạn mức nick Claude của bạn — không cần mua API.</b> ① Bấm “Sao chép lời nhắc” → ② mở Claude, dán vào khung chat, gửi → ③ chép nguyên câu trả lời của Claude, dán vào ô bên dưới → ④ bấm “Dựng kịch bản”.</p>
       <div class="row">
         <button id="btnCopyPrompt" type="button" class="primary">📋 Sao chép lời nhắc</button>
@@ -179,6 +184,16 @@
   <p>Mô phỏng mang tính minh họa giáo dục, đã đơn giản hóa so với thực tế. Kịch bản do AI viết có thể sai sót — hãy đọc lại trước khi đăng. Nội dung y – dược chỉ phục vụ giảng dạy, không thay thế chỉ định của bác sĩ hoặc dược sĩ.</p>
   <p>Dự án được tự lưu trong trình duyệt này. Hãy “Lưu tệp .json” để sao lưu hoặc mở trên máy khác.</p>
 </footer>
+
+<dialog id="confirmDlg">
+  <form method="dialog" class="dlg">
+    <p id="confirmMsg"></p>
+    <div class="row">
+      <button value="cancel" type="submit">Hủy</button>
+      <button id="confirmOk" value="ok" type="submit" class="primary">Đồng ý</button>
+    </div>
+  </form>
+</dialog>
 
 <script src="sims.js"></script>
 <script src="ai.js"></script>

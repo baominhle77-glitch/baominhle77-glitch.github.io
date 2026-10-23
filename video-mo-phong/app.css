@@ -58,6 +58,9 @@ button.accent { background: var(--accent2); color: #2a1600; border-color: var(--
 .report { margin: 6px 0 0; padding-left: 20px; font-size: 13px; color: var(--muted); }
 .report li { margin: 2px 0; }
 .small { font-size: 12px; }
+dialog { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; max-width: min(420px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(0, 0, 0, .55); }
+.dlg p { margin: 0 0 12px; }
 .row-inline { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .row-inline label { margin: 0; }
 .row-inline input[type=number] { width: 90px; }
