@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-24T03:20:00+07:00",
+  "updated_at": "2026-10-24T03:35:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -39,7 +39,9 @@
       "started_at": "2026-07-25T13:35:00+07:00",
       "heartbeat_at": "2026-07-25T16:45:00+07:00",
       "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất, chống trùng toàn catalog và thanh lọc toàn bộ affiliate link cũ."
-    },
+    }
+  ],
+  "recently_completed": [
     {
       "id": "EDU-20261024-03",
       "owner": "Claude Code",
@@ -48,18 +50,18 @@
       "paths": [
         "video-mo-phong/**",
         "CLAUDE.md",
+        "HANDOVER.md",
         "docs/handover/VIDEO_MO_PHONG.md",
         "docs/handover/CHUYEN-TAI-KHOAN.md",
         "docs/handover/DIEM-DUNG.md",
-        "docs/handover/NHAT-KY-PHOI-HOP.md"
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-10-24T03:20:00+07:00",
-      "heartbeat_at": "2026-10-24T03:20:00+07:00",
-      "summary": "Phat hanh Xuong Video Mo Phong len main de GitHub Pages phuc vu lau dai tai /video-mo-phong/ (gom EDU-20261023-01/02, DOCS-20261023-01, EDU-20261024-01/02)."
-    }
-  ],
-  "recently_completed": [
+      "summary": "Phat hanh Xuong Video Mo Phong len main de GitHub Pages phuc vu lau dai tai /video-mo-phong/ (gom EDU-20261023-01/02, DOCS-20261023-01, EDU-20261024-01/02). O recently_completed vi ACTIVE_TASKS.json dang bi khoa boi GROWTH-20260725-04 (qua han).",
+      "completed_at": "2026-10-24T03:35:00+07:00"
+    },
     {
       "id": "EDU-20261024-02",
       "owner": "Claude Code",
