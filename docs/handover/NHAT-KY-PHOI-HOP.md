@@ -22,6 +22,43 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-24 03:00 GMT+7 — Claude Code — EDU-20261024-02 — XONG ✅ (bản thử Artifact)
+
+- Đăng bản thử riêng tư https://claude.ai/artifact/QWHDGZg8RMLkrj18mgVAbb (capabilities `sample`, `downloads`).
+- Code: nút "Viết kịch bản bằng Claude" qua `claude.use("sample")` (hạn mức nick người xem, chỉ hiện trong Artifact); lưu tệp qua `downloads`; thay `confirm()/alert()` bằng hộp xác nhận `<dialog>`.
+- File: `video-mo-phong/{index.html,app.css,app.js}`, `docs/handover/{VIDEO_MO_PHONG.md,DIEM-DUNG.md}`.
+- Test: `node --check`; `check-public-content` OK; Chromium (web thường): hộp xác nhận hủy/đồng ý, nút Claude ẩn, xuất `.mp4`, 0 yêu cầu ra ngoài. Chưa chạy được `sample` từ môi trường kiểm thử — chờ BaoMinh thử trên claude.ai.
+
+### 2026-10-24 02:40 GMT+7 — Claude Code — EDU-20261024-01 — XONG SOURCE ✅ (chưa deploy)
+
+- Theo quyết định của BaoMinh (không mua API/credit), gỡ đường gọi Claude bằng khóa API và SDK đóng gói (`video-mo-phong/vendor/`). Thay bằng luồng dùng hạn mức nick: "Sao chép lời nhắc" → dán vào Claude → dán câu trả lời vào app → "Dựng kịch bản" / "Dựng & xuất video luôn".
+- File: `video-mo-phong/{index.html,app.css,app.js,ai.js}`, xóa `video-mo-phong/vendor/**`; tài liệu `VIDEO_MO_PHONG.md`, `DIEM-DUNG.md`.
+- Test: `node --check`; `check-public-content` OK; `validate-coordination` OK; Chromium Playwright (clipboard, bóc JSON từ câu trả lời, lỗi dán, bỏ loại cảnh lạ, xuất `.mp4`, 0 yêu cầu mạng ra ngoài).
+- Còn lại: thử với câu trả lời thật từ claude.ai; đưa lên production (workflow vẫn bị khóa bởi `GROWTH-20260725-04`).
+
+### 2026-10-23 21:10 GMT+7 — Claude Code — DOCS-20261023-01 — XONG ✅
+
+- Thêm quy trình đổi tài khoản Claude giữa chừng: `CLAUDE.md` (phiên Claude nào cũng tự đọc), `docs/handover/CHUYEN-TAI-KHOAN.md` (những gì sang/không sang nick mới, câu lệnh mở đầu), `docs/handover/DIEM-DUNG.md` (điểm dừng hiện tại, cập nhật sau mỗi lượt), thêm bước 0 vào `HANDOVER.md`.
+- Chỉ tài liệu; không đụng code, workflow, secret. Test: `validate-coordination` OK.
+
+### 2026-10-23 20:40 GMT+7 — Claude Code — EDU-20261023-02 — XONG SOURCE ✅ (chưa deploy)
+
+- Nâng cấp Xưởng Video Mô Phỏng: nhập ý tưởng → kịch bản hoàn chỉnh (Claude qua khóa API của chính người dùng, hoặc kịch bản mẫu offline) → phong cách → tối ưu tự động → xuất video; nút "Làm video tự động" chạy cả chuỗi.
+- Thêm: cảnh "Ý chính", 6 chủ đề màu, 4 kiểu chữ, màu tùy chỉnh, cỡ chữ/tiêu đề/phụ đề/hình, tốc độ, vị trí + kiểu phụ đề, chuyển cảnh; phụ đề tự chia đoạn; thời lượng tự tính theo lời thoại; kiểm tương phản WCAG; xuất 1440p.
+- File: `video-mo-phong/{index.html,app.css,app.js,sims.js,ai.js}`, `video-mo-phong/vendor/anthropic-sdk-0.132.0.mjs` (+ LICENSE MIT), `docs/handover/VIDEO_MO_PHONG.md`.
+- Test: `node --check`; `check-public-content` OK; `validate-coordination` OK; Chromium Playwright với API Claude giả lập (request đúng model/effort/fallbacks/schema; lỗi 401 hiển thị tiếng Việt; sanitize thông số; tối ưu idempotent; xuất `.mp4`).
+- Không đụng backend/workflow/gate/sw; không thêm secret. Khóa API chỉ do người dùng tự nhập trên trình duyệt.
+- Còn lại: thử Claude thật bằng một khóa thật; thêm thư mục vào build `_site` (workflow vẫn bị khóa bởi `GROWTH-20260725-04`); kiểm Safari/iPhone.
+
+### 2026-10-23 10:30 GMT+7 — Claude Code — EDU-20261023-01 — XONG SOURCE ✅ (chưa deploy)
+
+- Tạo ứng dụng tĩnh mới `video-mo-phong/` (Xưởng Video Mô Phỏng): dựng kịch bản nhiều cảnh mô phỏng, chỉnh thông số, phụ đề, xem trước và xuất video MP4/WebM ngay trên trình duyệt.
+- 7 loại cảnh: tiêu đề, con lắc đơn, ném xiên, sóng trên dây, khuếch tán qua màng, dược động học nhiều liều, dịch tễ SIR.
+- File: `video-mo-phong/index.html`, `app.css`, `app.js`, `sims.js`; tài liệu `docs/handover/VIDEO_MO_PHONG.md`.
+- Test: `node --check` app/sims; `check-public-content` OK; `validate-coordination` OK; Chromium Playwright chụp đủ cảnh 16:9 + 9:16, không lỗi console, xuất thử video 3 giây ra `.mp4` thành công.
+- Không đụng backend, workflow, gate, sw hay payload mã hóa; không thêm secret.
+- Còn lại: thêm thư mục vào build `_site` của `deploy-pages.yml` (đang bị khóa bởi `GROWTH-20260725-04`, heartbeat cuối 25/07/2026 — quá hạn khóa 24 giờ, cần chủ sở hữu xác nhận giải phóng); kiểm thử Safari/iPhone thật.
+
 ### 2026-07-26 02:20 GMT+7 — Claude Code — BOITOAN-20260726-01 — XONG ✅ (đã nghiệm thu production)
 
 **Dấu vết tạo hàng loạt còn sót ở lời giới thiệu.** Sau khi bịt lỗ rò ở BOITOAN-20260725-18, công ty

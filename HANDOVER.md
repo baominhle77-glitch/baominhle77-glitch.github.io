@@ -62,6 +62,7 @@ Backend là nguồn quyết định quyền. JWT Admin gắn thiết bị. Khôn
 
 ## 5. Quy trình tiếp tục công việc
 
+0. Đọc `docs/handover/DIEM-DUNG.md` để biết việc đang dở và nhánh đang làm (đổi tài khoản Claude: xem `docs/handover/CHUYEN-TAI-KHOAN.md`).
 1. Đọc `AGENTS.md`, file này và `docs/handover/ACTIVE_TASKS.json`.
 2. Tạo Task-ID + branch riêng; đăng ký phạm vi file trong `ACTIVE_TASKS.json`.
 3. Sửa source trực tiếp; không vá nối tiếp bằng runner cũ.

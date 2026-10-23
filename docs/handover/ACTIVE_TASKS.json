@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-26T03:05:00+07:00",
+  "updated_at": "2026-10-24T03:35:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,6 +42,105 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "EDU-20261024-03",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "b9e76783a77c1c1d68f2f9f60c1ec4eb6de0c7fb",
+      "paths": [
+        "video-mo-phong/**",
+        "CLAUDE.md",
+        "HANDOVER.md",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/CHUYEN-TAI-KHOAN.md",
+        "docs/handover/DIEM-DUNG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-24T03:20:00+07:00",
+      "summary": "Phat hanh Xuong Video Mo Phong len main de GitHub Pages phuc vu lau dai tai /video-mo-phong/ (gom EDU-20261023-01/02, DOCS-20261023-01, EDU-20261024-01/02). O recently_completed vi ACTIVE_TASKS.json dang bi khoa boi GROWTH-20260725-04 (qua han).",
+      "completed_at": "2026-10-24T03:35:00+07:00"
+    },
+    {
+      "id": "EDU-20261024-02",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "170af69f0b5ef2b6cc38e56377b990b7e03247f8",
+      "paths": [
+        "video-mo-phong/**",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/DIEM-DUNG.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-24T02:45:00+07:00",
+      "completed_at": "2026-10-24T03:00:00+07:00",
+      "summary": "Ban thu Artifact: Claude trong trang (sample), luu tep (downloads), hop xac nhan dialog."
+    },
+    {
+      "id": "EDU-20261024-01",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "9bca8ce5252b05266b7ee81ec01b60eee6e985b0",
+      "paths": [
+        "video-mo-phong/**",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/DIEM-DUNG.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-24T02:20:00+07:00",
+      "summary": "Bo duong API tra phi; viet kich ban bang han muc nick Claude: sao chep loi nhac -> dan ket qua -> dung video.",
+      "completed_at": "2026-10-24T02:40:00+07:00"
+    },
+    {
+      "id": "DOCS-20261023-01",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "1dd398e2b3c8f98b548bbc8f68808ff4b00e85c6",
+      "paths": [
+        "docs/handover/CHUYEN-TAI-KHOAN.md",
+        "docs/handover/DIEM-DUNG.md",
+        "HANDOVER.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "CLAUDE.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-23T21:00:00+07:00",
+      "summary": "Quy trinh doi tai khoan Claude giua chung: file diem dung + cau lenh tiep tuc.",
+      "completed_at": "2026-10-23T21:10:00+07:00"
+    },
+    {
+      "id": "EDU-20261023-02",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "4d191fe4d03c11524317ca5c85ada45283f02896",
+      "paths": [
+        "video-mo-phong/**",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-23T20:10:00+07:00",
+      "summary": "Xuong Video Mo Phong V2: y tuong -> kich ban (Claude hoac mau offline), bang phong cach, toi uu tu dong, lam video 1 cham.",
+      "completed_at": "2026-10-23T20:40:00+07:00"
+    },
+    {
+      "id": "EDU-20261023-01",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "b9e76783a77c1c1d68f2f9f60c1ec4eb6de0c7fb",
+      "paths": [
+        "video-mo-phong/**",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-23T10:00:00+07:00",
+      "summary": "Tao app tinh /video-mo-phong/ dung va xuat video giao duc mo phong tren trinh duyet. Chua them vao build deploy (workflow dang bi khoa boi GROWTH-20260725-04).",
+      "completed_at": "2026-10-23T10:30:00+07:00"
+    },
     {
       "id": "BOITOAN-20260726-02",
       "owner": "Claude Code",
