@@ -22,6 +22,11 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-23 21:10 GMT+7 — Claude Code — DOCS-20261023-01 — XONG ✅
+
+- Thêm quy trình đổi tài khoản Claude giữa chừng: `CLAUDE.md` (phiên Claude nào cũng tự đọc), `docs/handover/CHUYEN-TAI-KHOAN.md` (những gì sang/không sang nick mới, câu lệnh mở đầu), `docs/handover/DIEM-DUNG.md` (điểm dừng hiện tại, cập nhật sau mỗi lượt), thêm bước 0 vào `HANDOVER.md`.
+- Chỉ tài liệu; không đụng code, workflow, secret. Test: `validate-coordination` OK.
+
 ### 2026-10-23 20:40 GMT+7 — Claude Code — EDU-20261023-02 — XONG SOURCE ✅ (chưa deploy)
 
 - Nâng cấp Xưởng Video Mô Phỏng: nhập ý tưởng → kịch bản hoàn chỉnh (Claude qua khóa API của chính người dùng, hoặc kịch bản mẫu offline) → phong cách → tối ưu tự động → xuất video; nút "Làm video tự động" chạy cả chuỗi.
