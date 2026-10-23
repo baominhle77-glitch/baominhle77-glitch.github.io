@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 23/10/2026 21:10 GMT+7 — Claude Code
+**Cập nhật:** 24/10/2026 01:50 GMT+7 — Claude Code
 
 ## Việc đang làm
 
@@ -17,6 +17,11 @@
 - Xong source V1 + V2; kiểm thử Chromium đạt (Claude dùng API giả lập).
 - **Chưa** gọi Claude thật bằng khóa thật; **chưa** kiểm Safari/iPhone.
 - **Chưa lên production:** cần thêm thư mục vào build `_site` trong `.github/workflows/deploy-pages.yml`, nhưng file này đang bị khóa bởi task `GROWTH-20260725-04` (ChatGPT, heartbeat cuối 25/07/2026 — quá hạn khóa 24 giờ). Chờ BaoMinh xác nhận cho đóng task đó.
+
+## Phối hợp với Studio (phiên "giám đốc dự án studio" trên máy Windows của BaoMinh)
+
+- 24/10/2026 ~01:50: đã gửi trả lời cho GĐ Studio (session_01B5Cg4xVYBsBVrjtgTDcAnZ) về web, pipeline, phần dùng chéo và đề xuất liên kết B1–B4 (định dạng chung `edu-video-script/v1`, nút "Xuất gói cho Studio", adapter Manim phía Studio, skill dùng chung). **Chưa sửa gì vì Studio** — chờ BaoMinh/GĐ duyệt.
+- Kênh liên lạc: phiên cloud này → GĐ bằng send_message (BaoMinh đã cấp quyền). GĐ trả lời bằng cách nhắn tới id phiên cloud này.
 
 ## Bước tiếp theo (chờ BaoMinh chọn)
 
