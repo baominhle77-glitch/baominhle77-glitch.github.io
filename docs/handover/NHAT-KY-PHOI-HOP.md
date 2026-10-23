@@ -22,6 +22,14 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-24 03:00 GMT+7 — Claude Code — EDU-20261024-03 — ĐÃ PHÁT HÀNH ✅
+
+- PR #128 merge vào `main`: merge commit `d69e3c24ce3c5a28d0332eb0c6fde6e0ef9ccfc8`. CI PR: coordination-guard, validate, validate-vn-marketplace, record — SUCCESS.
+- GitHub Pages `pages-build-deployment` run 40014350114: SUCCESS → https://baominhle77-glitch.github.io/video-mo-phong/
+- Cloudflare `deploy-pages` run 40014351111 (tự chạy do push main): SUCCESS; `video-mo-phong/` chưa nằm trong `_site` Cloudflare.
+- Chưa tự mở được link từ môi trường agent (proxy chặn `*.github.io`); BaoMinh xác nhận trên thiết bị.
+- Còn lại: lỗi có sẵn `check-public-content` ở `hoi-chon-dung/index.html` ("Cloudflare Worker") — ngoài phạm vi, chưa sửa.
+
 ### 2026-10-24 03:00 GMT+7 — Claude Code — EDU-20261024-02 — XONG ✅ (bản thử Artifact)
 
 - Đăng bản thử riêng tư https://claude.ai/artifact/QWHDGZg8RMLkrj18mgVAbb (capabilities `sample`, `downloads`).
