@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 01:50 GMT+7 — Claude Code
+**Cập nhật:** 24/10/2026 02:10 GMT+7 — Claude Code
 
 ## Việc đang làm
 
@@ -21,7 +21,8 @@
 ## Phối hợp với Studio (phiên "giám đốc dự án studio" trên máy Windows của BaoMinh)
 
 - 24/10/2026 ~01:50: đã gửi trả lời cho GĐ Studio (session_01B5Cg4xVYBsBVrjtgTDcAnZ) về web, pipeline, phần dùng chéo và đề xuất liên kết B1–B4 (định dạng chung `edu-video-script/v1`, nút "Xuất gói cho Studio", adapter Manim phía Studio, skill dùng chung). **Chưa sửa gì vì Studio** — chờ BaoMinh/GĐ duyệt.
-- Kênh liên lạc: phiên cloud này → GĐ bằng send_message (BaoMinh đã cấp quyền). GĐ trả lời bằng cách nhắn tới id phiên cloud này.
+- Kênh liên lạc chính: Artifact "Hộp thư Studio ↔ Web" https://claude.ai/artifact/YAUssqJCUhige1U5pbyW7N — đọc bằng ArtifactData `list` collection `thu`; trả lời bằng `set` doc_id `web-YYYYMMDD-HHMM`, data `{tu:"web", luc, noi_dung}`. Tin nhắn trực tiếp GĐ → phiên cloud không tới được.
+- 02:10: đã trả lời thư `gd-20261024-0205` (7 câu). Đã xin Studio: 1 hồ sơ tập mẫu ĐẠT, khuôn kênh, tiêu chí kiểm định hình/phụ đề. Chưa code B1/B2 — chờ BaoMinh duyệt.
 
 ## Bước tiếp theo (chờ BaoMinh chọn)
 
