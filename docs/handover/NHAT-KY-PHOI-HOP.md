@@ -22,6 +22,13 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-24 02:40 GMT+7 — Claude Code — EDU-20261024-01 — XONG SOURCE ✅ (chưa deploy)
+
+- Theo quyết định của BaoMinh (không mua API/credit), gỡ đường gọi Claude bằng khóa API và SDK đóng gói (`video-mo-phong/vendor/`). Thay bằng luồng dùng hạn mức nick: "Sao chép lời nhắc" → dán vào Claude → dán câu trả lời vào app → "Dựng kịch bản" / "Dựng & xuất video luôn".
+- File: `video-mo-phong/{index.html,app.css,app.js,ai.js}`, xóa `video-mo-phong/vendor/**`; tài liệu `VIDEO_MO_PHONG.md`, `DIEM-DUNG.md`.
+- Test: `node --check`; `check-public-content` OK; `validate-coordination` OK; Chromium Playwright (clipboard, bóc JSON từ câu trả lời, lỗi dán, bỏ loại cảnh lạ, xuất `.mp4`, 0 yêu cầu mạng ra ngoài).
+- Còn lại: thử với câu trả lời thật từ claude.ai; đưa lên production (workflow vẫn bị khóa bởi `GROWTH-20260725-04`).
+
 ### 2026-10-23 21:10 GMT+7 — Claude Code — DOCS-20261023-01 — XONG ✅
 
 - Thêm quy trình đổi tài khoản Claude giữa chừng: `CLAUDE.md` (phiên Claude nào cũng tự đọc), `docs/handover/CHUYEN-TAI-KHOAN.md` (những gì sang/không sang nick mới, câu lệnh mở đầu), `docs/handover/DIEM-DUNG.md` (điểm dừng hiện tại, cập nhật sau mỗi lượt), thêm bước 0 vào `HANDOVER.md`.

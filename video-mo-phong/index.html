@@ -46,29 +46,28 @@
       <label>Ngôn ngữ
         <select id="lang"><option value="vi">Tiếng Việt</option><option value="en">English</option></select>
       </label>
-      <label class="check"><input id="autoStyle" type="checkbox" checked> Để AI chọn màu &amp; font hợp chủ đề</label>
+      <label class="check"><input id="autoStyle" type="checkbox" checked> Để Claude chọn màu &amp; font hợp chủ đề</label>
     </div>
     <div class="field">
       <label for="notes">Yêu cầu thêm (không bắt buộc)</label>
       <input id="notes" type="text" maxlength="1000" placeholder="Ví dụ: nhấn mạnh tác hại của việc tự ý ngừng thuốc; kết bằng câu hỏi tương tác.">
     </div>
-    <details class="ai-settings">
-      <summary>Cài đặt AI (Claude) — <span id="aiBadge" class="badge"></span></summary>
+    <div class="how">
+      <p class="hint"><b>Dùng hạn mức nick Claude của bạn — không cần mua API.</b> ① Bấm “Sao chép lời nhắc” → ② mở Claude, dán vào khung chat, gửi → ③ chép nguyên câu trả lời của Claude, dán vào ô bên dưới → ④ bấm “Dựng kịch bản”.</p>
+      <div class="row">
+        <button id="btnCopyPrompt" type="button" class="primary">📋 Sao chép lời nhắc</button>
+        <a class="btn-link" href="https://claude.ai/new" target="_blank" rel="noopener">Mở Claude ↗</a>
+        <button id="btnTemplate" type="button">Kịch bản mẫu nhanh (không cần Claude)</button>
+      </div>
+      <textarea id="promptOut" rows="6" readonly hidden aria-label="Lời nhắc để dán vào Claude"></textarea>
       <div class="field">
-        <label for="aiKey">Khóa API Claude</label>
-        <input id="aiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-...">
+        <label for="pasteJson">Dán câu trả lời của Claude vào đây</label>
+        <textarea id="pasteJson" rows="5" placeholder="Dán nguyên câu trả lời — app tự tìm phần kịch bản JSON trong đó."></textarea>
       </div>
       <div class="row">
-        <label class="check"><input id="aiRemember" type="checkbox"> Ghi nhớ trên trình duyệt này</label>
-        <label>Mô hình <select id="aiModel"></select></label>
-        <button id="btnForgetKey" type="button">Xóa khóa</button>
+        <button id="btnImport" type="button" class="primary">✨ Dựng kịch bản</button>
+        <button id="btnAuto" type="button" class="accent">⚡ Dựng &amp; xuất video luôn</button>
       </div>
-      <p class="hint">Khóa chỉ lưu trên trình duyệt của bạn và chỉ được gửi tới máy chủ Claude của Anthropic để viết kịch bản. Chi phí tính vào tài khoản Anthropic của bạn. Lấy khóa tại <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a>. Không có khóa, app vẫn dựng được kịch bản mẫu từ từ khóa trong ý tưởng (nội dung chung, cần tự sửa lời).</p>
-    </details>
-    <div class="row">
-      <button id="btnGenerate" type="button" class="primary">✨ Viết kịch bản</button>
-      <button id="btnAuto" type="button" class="accent">⚡ Làm video tự động</button>
-      <button id="btnStopGen" type="button" hidden>Hủy</button>
     </div>
     <p id="genStatus" class="status" role="status"></p>
   </div>

@@ -1,16 +1,11 @@
-/* Biến ý tưởng thành kịch bản video.
- * - Có khóa API Claude: gọi Claude (SDK chính thức, chạy thẳng trên trình duyệt) để viết kịch bản riêng theo ý tưởng.
- * - Không có khóa: dựng kịch bản mẫu từ từ khóa trong ý tưởng (offline, nội dung chung).
+/* Biến ý tưởng thành kịch bản video — chỉ dùng hạn mức của nick Claude, không cần API trả phí.
+ * - buildPrompt(): soạn sẵn lời nhắc đầy đủ (thư viện cảnh + định dạng JSON) để dán vào claude.ai hoặc bất kỳ phiên Claude nào.
+ * - parseScript(): đọc câu trả lời Claude dán ngược lại (tự bóc khối JSON khỏi phần chữ/khối mã xung quanh).
+ * - templateScript(): kịch bản mẫu offline theo từ khóa khi không muốn dùng Claude.
  * Kết quả luôn đi qua sanitize() của app nên thông số sai/thừa đều bị loại hoặc kẹp lại. */
 (function (global) {
   "use strict";
   const { SIMS, THEMES, FONTS } = global.EduSims;
-  const SDK_URL = "./vendor/anthropic-sdk-0.132.0.mjs";
-  const MODELS = {
-    "claude-opus-5-5": { label: "Claude Opus 5.5 (chất lượng cao nhất)", fallbacks: true },
-    "claude-sonnet-5-5": { label: "Claude Sonnet 5.5 (nhanh, rẻ hơn)", fallbacks: true },
-    "claude-haiku-5-5": { label: "Claude Haiku 5.5 (rẻ nhất)", fallbacks: false }
-  };
 
   const AUDIENCES = {
     pho_thong: "đại chúng, không cần kiến thức nền",
@@ -35,46 +30,29 @@
     }).join("\n");
   }
 
-  function schema() {
-    return {
-      type: "object",
-      additionalProperties: false,
-      required: ["title", "scenes", "style"],
-      properties: {
-        title: { type: "string", description: "Tên video" },
-        scenes: {
-          type: "array",
-          items: {
-            type: "object",
-            additionalProperties: false,
-            required: ["type", "title", "narration", "bullets", "duration", "params"],
-            properties: {
-              type: { type: "string", enum: Object.keys(SIMS) },
-              title: { type: "string", description: "Tiêu đề hiện trên màn hình, ngắn" },
-              narration: { type: "string", description: "Lời thuyết minh/phụ đề của cảnh" },
-              bullets: { type: "array", items: { type: "string" }, description: "Chỉ dùng cho cảnh bullets; cảnh khác để mảng rỗng" },
-              duration: { type: "number", description: "Thời lượng cảnh, giây" },
-              params: {
-                type: "array",
-                items: {
-                  type: "object", additionalProperties: false, required: ["key", "value"],
-                  properties: { key: { type: "string" }, value: { type: "number" } }
-                }
-              }
-            }
-          }
-        },
-        style: {
-          type: "object",
-          additionalProperties: false,
-          required: ["theme", "font"],
-          properties: {
-            theme: { type: "string", enum: Object.keys(THEMES) },
-            font: { type: "string", enum: Object.keys(FONTS) }
-          }
-        }
-      }
+  // Mẫu định dạng JSON đưa vào lời nhắc (Claude bản chat không có chế độ ép schema nên mô tả bằng ví dụ + luật)
+  function formatSpec() {
+    const example = {
+      title: "Tên video",
+      style: { theme: Object.keys(THEMES)[0], font: Object.keys(FONTS)[0] },
+      scenes: [
+        { type: "title", title: "Câu hỏi mở đầu", narration: "Lời thuyết minh 1–3 câu.", bullets: [], duration: 6, params: [] },
+        { type: "pk", title: "Tiêu đề cảnh", narration: "…", bullets: [], duration: 15, params: [{ key: "tau", value: 8 }, { key: "thalf", value: 6 }] },
+        { type: "bullets", title: "Ghi nhớ", narration: "…", bullets: ["Ý 1", "Ý 2", "Ý 3"], duration: 10, params: [] }
+      ]
     };
+    return [
+      "ĐỊNH DẠNG TRẢ LỜI (bắt buộc):",
+      "Chỉ trả lời bằng ĐÚNG MỘT khối mã ```json chứa một object JSON hợp lệ, không thêm chữ nào khác, không chú thích trong JSON.",
+      `- style.theme là một trong: ${Object.keys(THEMES).join(", ")}; style.font là một trong: ${Object.keys(FONTS).join(", ")}.`,
+      `- scenes[].type là một trong: ${Object.keys(SIMS).join(", ")}.`,
+      "- bullets: mảng chuỗi, chỉ có nội dung với cảnh bullets; cảnh khác để [].",
+      "- duration: số giây; params: mảng {key, value} với value là số.",
+      "Ví dụ cấu trúc (thay nội dung cho đúng ý tưởng):",
+      "```json",
+      JSON.stringify(example, null, 2),
+      "```"
+    ].join("\n");
   }
 
   function systemPrompt() {
@@ -108,52 +86,33 @@
     ].filter(Boolean).join("\n");
   }
 
-  /* ---------- Gọi Claude ---------- */
+  /* ---------- Lời nhắc & đọc kết quả dán vào ---------- */
 
-  let sdkPromise = null;
-  function loadSdk() {
-    if (!sdkPromise) sdkPromise = import(SDK_URL).then((m) => m.default);
-    return sdkPromise;
+  function buildPrompt(input) {
+    return [systemPrompt(), "", "YÊU CẦU CỦA TÔI:", userPrompt(input), "", formatSpec()].join("\n");
   }
 
-  async function withClaude(input, opts) {
-    const Anthropic = await loadSdk();
-    const client = new Anthropic({ apiKey: opts.apiKey, dangerouslyAllowBrowser: true, maxRetries: 2 });
-    const model = MODELS[opts.model] ? opts.model : "claude-opus-5-5";
-    const params = {
-      model,
-      max_tokens: 64000,
-      system: systemPrompt(),
-      messages: [{ role: "user", content: userPrompt(input) }],
-      output_config: { effort: "medium", format: { type: "json_schema", schema: schema() } }
-    };
-    // Nếu bị bộ lọc an toàn từ chối, máy chủ tự chạy lại bằng mô hình dự phòng phù hợp
-    if (MODELS[model].fallbacks) { params.betas = ["server-side-fallback-2026-07-01"]; params.fallbacks = "default"; }
-    let message;
-    try {
-      const stream = client.beta.messages.stream(params, { signal: opts.signal });
-      if (opts.onProgress) stream.on("text", (_delta, snapshot) => opts.onProgress(snapshot.length));
-      message = await stream.finalMessage();
-    } catch (err) {
-      throw new Error(explainError(Anthropic, err));
+  // Lấy object JSON từ câu trả lời: ưu tiên khối ```json, nếu không thì cắt từ { đầu tiên tới } cuối cùng
+  function extractJson(text) {
+    const raw = String(text || "").trim();
+    const fence = /```(?:json)?\s*([\s\S]*?)```/i.exec(raw);
+    const body = fence ? fence[1] : raw;
+    const a = body.indexOf("{"); const b = body.lastIndexOf("}");
+    if (a < 0 || b <= a) throw new Error("Không thấy phần kịch bản (JSON) trong nội dung đã dán. Hãy chép nguyên câu trả lời của Claude.");
+    const candidate = body.slice(a, b + 1);
+    try { return JSON.parse(candidate); } catch (_) { /* thử sửa lỗi sao chép phổ biến bên dưới */ }
+    const repaired = candidate
+      .replace(/[\u201c\u201d]/g, '"') // ngoặc kép cong do sao chép từ một số trình soạn thảo
+      .replace(/,\s*([}\]])/g, "$1"); // dấu phẩy thừa cuối mảng/object
+    try { return JSON.parse(repaired); } catch (err) {
+      throw new Error("Phần JSON bị lỗi cú pháp (có thể câu trả lời bị cắt giữa chừng). Hãy bảo Claude \"viết lại đầy đủ JSON\" rồi dán lại.");
     }
-    if (message.stop_reason === "refusal") throw new Error("Claude từ chối viết kịch bản cho ý tưởng này. Hãy diễn đạt lại ý tưởng theo hướng giáo dục.");
-    if (message.stop_reason === "max_tokens") throw new Error("Kịch bản quá dài nên bị cắt giữa chừng. Hãy giảm độ dài mục tiêu rồi thử lại.");
-    const text = message.content.filter((b) => b.type === "text").map((b) => b.text).join("");
-    let data;
-    try { data = JSON.parse(text); } catch (_) { throw new Error("Không đọc được kịch bản trả về. Hãy thử lại."); }
-    return toProject(data, input, "ai");
   }
 
-  function explainError(Anthropic, err) {
-    if (err instanceof Anthropic.APIUserAbortError) return "Đã hủy tạo kịch bản.";
-    if (err instanceof Anthropic.AuthenticationError) return "Khóa API không đúng hoặc đã bị thu hồi. Kiểm tra lại trong mục Cài đặt AI.";
-    if (err instanceof Anthropic.PermissionDeniedError) return "Khóa API này chưa được phép dùng mô hình đã chọn.";
-    if (err instanceof Anthropic.RateLimitError) return "Đang gửi quá nhiều yêu cầu hoặc tài khoản hết hạn mức. Đợi một chút rồi thử lại.";
-    if (err instanceof Anthropic.BadRequestError) return `Yêu cầu không hợp lệ: ${err.message}`;
-    if (err instanceof Anthropic.APIConnectionError) return "Không kết nối được tới Claude. Kiểm tra mạng rồi thử lại.";
-    if (err instanceof Anthropic.APIError) return `Claude đang gặp sự cố (${err.status || "?"}). Thử lại sau ít phút.`;
-    return `Không tạo được kịch bản: ${err && err.message ? err.message : err}`;
+  function parseScript(text, input) {
+    const data = extractJson(text);
+    if (!data || !Array.isArray(data.scenes) || !data.scenes.length) throw new Error("Kịch bản không có cảnh nào. Hãy kiểm tra lại nội dung đã dán.");
+    return toProject(data, input || {}, "claude");
   }
 
   /* ---------- Kịch bản mẫu offline ---------- */
@@ -171,7 +130,7 @@
     return String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase();
   }
 
-  function offline(input) {
+  function templateScript(input) {
     const idea = String(input.idea || "").trim();
     // So khớp theo nguyên cụm từ để "liều" không dính vào "tài liệu", "nguyên liệu"…
     const key = ` ${plain(idea).replace(/[^a-z0-9]+/g, " ")} `;
@@ -199,7 +158,8 @@
   function toProject(data, input, source) {
     const scenes = (Array.isArray(data.scenes) ? data.scenes : []).filter((s) => s && SIMS[s.type]).map((s) => {
       const params = {};
-      (Array.isArray(s.params) ? s.params : []).forEach((kv) => { if (kv && typeof kv.key === "string") params[kv.key] = Number(kv.value); });
+      if (Array.isArray(s.params)) s.params.forEach((kv) => { if (kv && typeof kv.key === "string") params[kv.key] = Number(kv.value); });
+      else if (s.params && typeof s.params === "object") Object.entries(s.params).forEach(([k, v]) => { params[k] = Number(v); });
       return {
         type: s.type,
         title: String(s.title || ""),
@@ -218,10 +178,5 @@
     };
   }
 
-  async function generate(input, opts) {
-    if (opts && opts.apiKey) return withClaude(input, opts);
-    return offline(input);
-  }
-
-  global.EduAI = { generate, MODELS, AUDIENCES, TONES };
+  global.EduAI = { buildPrompt, parseScript, templateScript, AUDIENCES, TONES };
 })(typeof window !== "undefined" ? window : globalThis);

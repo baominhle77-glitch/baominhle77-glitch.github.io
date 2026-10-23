@@ -15,8 +15,7 @@
 | `video-mo-phong/app.css` | Giao diện, responsive (≤900px chuyển 1 cột) |
 | `video-mo-phong/sims.js` | Thư viện mô phỏng `window.EduSims.SIMS` |
 | `video-mo-phong/app.js` | Kịch bản cảnh, dòng thời gian, phụ đề tự chia đoạn, phong cách, tối ưu tự động, lưu/mở dự án, xuất video |
-| `video-mo-phong/ai.js` | Ý tưởng → kịch bản: gọi Claude (structured output JSON) hoặc dựng kịch bản mẫu offline theo từ khóa |
-| `video-mo-phong/vendor/anthropic-sdk-0.132.0.mjs` | SDK chính thức `@anthropic-ai/sdk@0.132.0` (MIT) đóng gói ESM cho trình duyệt bằng esbuild; nạp lười khi bấm viết kịch bản |
+| `video-mo-phong/ai.js` | Ý tưởng → kịch bản: soạn lời nhắc cho Claude (bản chat), đọc câu trả lời dán vào, hoặc dựng kịch bản mẫu offline theo từ khóa |
 
 ## Mô phỏng hiện có
 
@@ -27,14 +26,17 @@
 
 Thêm mô phỏng mới: khai báo một mục trong `SIMS` với `label`, `group`, `title`, `caption`, `params[]` và `create(values, durationSec)` trả về `{ step(dt), draw(ctx, box, t) }`. `step` luôn nhận bước cố định 1/60 s để xem trước và video xuất ra giống hệt nhau.
 
-## Ý tưởng → kịch bản (V2)
+## Ý tưởng → kịch bản (V3 — chỉ dùng hạn mức nick Claude)
+
+**Quyết định của BaoMinh (24/10/2026):** không mua API/credit, chỉ dùng hạn mức nick Claude. Đường gọi API bằng khóa (V2) đã **gỡ bỏ** cùng SDK đóng gói; không đưa lại nếu chưa được BaoMinh yêu cầu.
 
 - Người dùng nhập ý tưởng, người xem, giọng văn, độ dài mục tiêu, nền tảng (quyết định khung 16:9/9:16/1:1), ngôn ngữ, yêu cầu thêm.
-- **Có khóa API Claude của chính người dùng:** gọi `client.beta.messages.stream` với `model` mặc định `claude-opus-5-5` (cho chọn Sonnet 5.5/Haiku 5.5), `output_config.effort: "medium"`, `output_config.format` JSON schema (enum loại cảnh, theme, font), `fallbacks: "default"` + beta `server-side-fallback-2026-07-01` (chỉ Opus/Sonnet). Kiểm `stop_reason` refusal/max_tokens; lỗi SDK được dịch sang tiếng Việt theo lớp lỗi.
-- Khóa chỉ nằm trong trình duyệt người dùng (localStorage nếu tick "Ghi nhớ"), gửi thẳng tới Anthropic; không qua backend của hệ thống. Không bao giờ đưa khóa của chủ sở hữu vào source.
-- **Không có khóa:** kịch bản mẫu offline — so khớp nguyên cụm từ khóa (không dấu) để chọn mô phỏng; nội dung chung, UI ghi rõ cần tự sửa lời.
+- "📋 Sao chép lời nhắc": `EduAI.buildPrompt()` ghép thư viện cảnh (tự sinh từ `SIMS`), nguyên tắc biên kịch, yêu cầu của người dùng và định dạng JSON bắt buộc (một khối ```json). Người dùng dán vào claude.ai (hoặc phiên Claude Code bất kỳ) → chép nguyên câu trả lời → dán vào ô "Dán câu trả lời".
+- `EduAI.parseScript()`: bóc khối JSON khỏi chữ xung quanh, chỉ sửa lỗi sao chép (ngoặc cong, dấu phẩy thừa) khi lần đọc đầu thất bại; nhận `params` dạng mảng `{key,value}` hoặc object.
+- "Kịch bản mẫu nhanh": kịch bản offline theo từ khóa (so khớp nguyên cụm, không dấu).
 - Mọi kịch bản đi qua `sanitizeScene()`: bỏ loại cảnh lạ, bỏ thông số lạ, kẹp thông số vào khoảng cho phép.
-- "⚡ Làm video tự động" = viết kịch bản → tối ưu → xuất video ngay.
+- "⚡ Dựng & xuất video luôn" = đọc bản dán → tối ưu → xuất video.
+- App không gửi bất kỳ yêu cầu mạng nào ra ngoài.
 
 ## Phong cách & tối ưu tự động (V2)
 
@@ -52,7 +54,7 @@ Thêm mô phỏng mới: khai báo một mục trong `SIMS` với `label`, `grou
 
 ## Lưu trữ
 
-- Tự lưu `localStorage` khóa `video-mo-phong:v2` (đọc được dự án cũ `v1`), cài đặt AI ở `video-mo-phong:ai`; mọi truy cập có try/catch.
+- Tự lưu `localStorage` khóa `video-mo-phong:v2` (đọc được dự án cũ `v1`), mọi truy cập có try/catch.
 - Xuất/nhập dự án `.json`; dữ liệu nhập được làm sạch và kẹp trong giới hạn thông số.
 
 ## Kiểm thử đã chạy (23/10/2026)
@@ -66,7 +68,12 @@ Thêm mô phỏng mới: khai báo một mục trong `SIMS` với `label`, `grou
 
 - `node --check` 3 file JS; `check-public-content video-mo-phong` OK (4 file); `validate-coordination` OK. File vendor `.mjs` không nằm trong phạm vi quét của checker (chỉ quét `.html`/`.js`).
 - Chromium Playwright: kịch bản offline (chọn đúng mô phỏng theo ý tưởng, không bắt nhầm "tài liệu"/"nồng độ"); luồng Claude chạy với **API giả lập** bằng `page.route` — xác nhận request gửi `claude-opus-5-5`, effort `medium`, `fallbacks: "default"`, beta header, `json_schema`, stream, header truy cập trực tiếp từ trình duyệt; khóa sai (401) báo lỗi tiếng Việt; thông số lạ bị bỏ, `n=99` kẹp còn 20; đổi chủ đề/font/cỡ chữ/phụ đề; cảnh báo + tự sửa tương phản; tối ưu lặp lại không báo thay đổi giả; "Làm video tự động" tải về `.mp4`.
-- **Chưa gọi Claude thật** (môi trường kiểm thử chặn mạng ra Anthropic và không có khóa): cần một lần thử với khóa thật để xác nhận chất lượng kịch bản.
+- (Phần API ở V2 đã gỡ ở V3.)
+
+### V3 (24/10/2026)
+
+- `node --check`, `check-public-content video-mo-phong` OK. Chromium: chặn khi chưa có ý tưởng; sao chép lời nhắc vào clipboard (4,9 nghìn ký tự, có ý tưởng và khối ```json); báo lỗi khi dán rỗng/không có JSON; dán câu trả lời có chữ bao quanh → dựng 4 cảnh, bỏ loại cảnh lạ; kịch bản mẫu; "Dựng & xuất video luôn" tải `.mp4`; **0 yêu cầu mạng ra ngoài**.
+- Chưa thử với câu trả lời thật từ claude.ai.
 
 ## Triển khai
 
@@ -74,9 +81,7 @@ Chưa được thêm vào bước build `_site` của `.github/workflows/deploy-
 
 ```
 mkdir -p _site/video-mo-phong
-mkdir -p _site/video-mo-phong/vendor
 cp video-mo-phong/index.html video-mo-phong/app.css video-mo-phong/app.js video-mo-phong/sims.js video-mo-phong/ai.js _site/video-mo-phong/
-cp video-mo-phong/vendor/anthropic-sdk-0.132.0.mjs video-mo-phong/vendor/LICENSE-anthropic-sdk.txt _site/video-mo-phong/vendor/
 ```
 
-Lưu ý: file `.mjs` phải được phục vụ với MIME `text/javascript` (Cloudflare Pages làm sẵn). Thêm `video-mo-phong/index.html`, `video-mo-phong/app.js`, `video-mo-phong/sims.js`, `video-mo-phong/ai.js` vào `DEFAULT_ROOTS` của `tools/check-public-content.mjs`.
+Thêm `video-mo-phong/index.html`, `video-mo-phong/app.js`, `video-mo-phong/sims.js`, `video-mo-phong/ai.js` vào `DEFAULT_ROOTS` của `tools/check-public-content.mjs`.

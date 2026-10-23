@@ -1,10 +1,9 @@
 (function () {
   "use strict";
   const { SIMS, C, THEMES, FONTS, setTheme, contrast, font, roundRect, wrapLines } = window.EduSims;
-  const { MODELS, AUDIENCES, TONES } = window.EduAI;
+  const { AUDIENCES, TONES } = window.EduAI;
   const STORE_KEY = "video-mo-phong:v2";
   const OLD_STORE_KEY = "video-mo-phong:v1";
-  const AI_KEY = "video-mo-phong:ai";
   const DT = 1 / 60;
   const WPS = 2.5; // tốc độ đọc phụ đề trung bình (từ/giây)
   const SIZES = { "16:9": [16, 9], "9:16": [9, 16], "1:1": [1, 1] };
@@ -31,8 +30,6 @@
   let sim = null;
   let spokenScene = -1;
   let exporting = null;
-  let genAbort = null;
-  let aiKey = "";
   const chunkCache = new Map();
 
   /* ---------- Dữ liệu dự án ---------- */
@@ -646,79 +643,82 @@
     return project.brief;
   }
 
-  function loadAiSettings() {
-    try {
-      const raw = JSON.parse(localStorage.getItem(AI_KEY) || "null");
-      if (raw && typeof raw === "object") {
-        if (typeof raw.key === "string") { aiKey = raw.key; $("aiKey").value = raw.key; $("aiRemember").checked = true; }
-        if (MODELS[raw.model]) $("aiModel").value = raw.model;
-      }
-    } catch (_) { /* bỏ qua */ }
-    updateAiBadge();
-  }
-
-  function saveAiSettings() {
-    aiKey = $("aiKey").value.trim();
-    try {
-      if ($("aiRemember").checked) localStorage.setItem(AI_KEY, JSON.stringify({ key: aiKey, model: $("aiModel").value }));
-      else localStorage.setItem(AI_KEY, JSON.stringify({ model: $("aiModel").value }));
-    } catch (_) { /* bỏ qua */ }
-    updateAiBadge();
-  }
-
-  function updateAiBadge() {
-    $("aiBadge").textContent = aiKey ? `Đang dùng AI: ${MODELS[$("aiModel").value].label}` : "Chưa kết nối AI — sẽ dùng kịch bản mẫu offline (nội dung chung)";
-    $("aiBadge").classList.toggle("on", Boolean(aiKey));
-  }
-
   function setBusy(on) {
-    ["btnGenerate", "btnAuto", "btnExport", "btnPlay"].forEach((id) => { $(id).disabled = on; });
-    $("btnStopGen").hidden = !on;
+    ["btnCopyPrompt", "btnTemplate", "btnImport", "btnAuto", "btnExport", "btnPlay"].forEach((id) => { $(id).disabled = on; });
   }
 
-  async function generateScript() {
+  function needIdea(brief) {
+    if (words(brief.idea) >= 2) return false;
+    $("genStatus").textContent = "Hãy nhập ý tưởng (ít nhất vài từ) trước.";
+    $("idea").focus();
+    return true;
+  }
+
+  async function copyPrompt() {
     const brief = readBrief();
-    if (words(brief.idea) < 2) { $("genStatus").textContent = "Hãy nhập ý tưởng (ít nhất vài từ) trước."; $("idea").focus(); return false; }
-    const hasOld = project.scenes.length > 1 && !confirm("Kịch bản mới sẽ thay thế các cảnh hiện tại. Tiếp tục?");
-    if (hasOld) return false;
-    setPlaying(false);
-    setBusy(true);
-    genAbort = new AbortController();
-    $("genStatus").textContent = aiKey ? "Claude đang viết kịch bản… (thường mất 20–60 giây)" : "Đang dựng kịch bản mẫu…";
+    if (needIdea(brief)) return;
+    const text = window.EduAI.buildPrompt(brief);
+    const box = $("promptOut");
+    box.value = text;
+    let copied = false;
+    try { await navigator.clipboard.writeText(text); copied = true; } catch (_) { /* trình duyệt chặn: cho người dùng tự chép */ }
+    if (!copied) {
+      box.hidden = false; box.focus(); box.select();
+      try { copied = document.execCommand("copy"); } catch (_) { copied = false; }
+    }
+    $("genStatus").textContent = copied
+      ? "Đã sao chép lời nhắc. Mở Claude, dán vào khung chat và gửi; xong chép nguyên câu trả lời dán vào ô bên dưới."
+      : "Trình duyệt không cho tự sao chép — hãy chép nội dung trong ô xám ở trên (Ctrl/Cmd + C).";
+  }
+
+  // Thay kịch bản hiện tại bằng kết quả mới, rồi tối ưu và hiện báo cáo
+  function applyResult(result, brief) {
+    const scenes = result.scenes.map(sanitizeScene).filter(Boolean);
+    if (!scenes.length) throw new Error("Kịch bản không có cảnh hợp lệ (loại cảnh không có trong thư viện).");
+    project.scenes = scenes;
+    project.title = result.title;
+    project.aspect = PLATFORMS[brief.platform].aspect;
+    if (brief.autoStyle && result.style) project.style = sanitizeStyle({ ...project.style, ...result.style, bg: "", ink: "", accent: "" });
+    selected = 0;
+    $("projTitle").value = project.title; $("aspect").value = project.aspect;
+    applySize(720);
+    showReport(optimize());
+    syncStyleUi();
+    changed(true); seekTo(0);
+    return scenes.length;
+  }
+
+  function confirmReplace() {
+    return project.scenes.length <= 1 || confirm("Kịch bản mới sẽ thay thế các cảnh hiện tại. Tiếp tục?");
+  }
+
+  function importPasted() {
+    const brief = readBrief();
+    const text = $("pasteJson").value;
+    if (!text.trim()) { $("genStatus").textContent = "Chưa có nội dung — hãy dán câu trả lời của Claude vào ô trên."; $("pasteJson").focus(); return false; }
     try {
-      const result = await window.EduAI.generate(brief, {
-        apiKey: aiKey, model: $("aiModel").value, signal: genAbort.signal,
-        onProgress: (n) => { $("genStatus").textContent = `Claude đang viết kịch bản… đã nhận ${n.toLocaleString("vi-VN")} ký tự`; }
-      });
-      const scenes = result.scenes.map(sanitizeScene).filter(Boolean);
-      if (!scenes.length) throw new Error("Kịch bản trả về không có cảnh hợp lệ. Hãy thử lại.");
-      project.scenes = scenes;
-      project.title = result.title;
-      project.aspect = PLATFORMS[brief.platform].aspect;
-      if (brief.autoStyle && result.style) project.style = sanitizeStyle({ ...project.style, ...result.style, bg: "", ink: "", accent: "" });
-      selected = 0;
-      $("projTitle").value = project.title; $("aspect").value = project.aspect;
-      applySize(720);
-      const report = optimize();
-      showReport(report);
-      syncStyleUi();
-      changed(true); seekTo(0);
-      $("genStatus").textContent = result.source === "ai"
-        ? `Đã viết xong ${scenes.length} cảnh, tổng ${fmtTime(totalDuration())}. Xem trước, chỉnh nếu cần rồi xuất video.`
-        : `Đã dựng kịch bản mẫu ${scenes.length} cảnh. Kịch bản mẫu chỉ có nội dung chung — hãy sửa lời thuyết minh, hoặc kết nối AI để có kịch bản viết riêng theo ý tưởng.`;
+      const result = window.EduAI.parseScript(text, brief);
+      if (!confirmReplace()) return false;
+      setPlaying(false);
+      const n = applyResult(result, brief);
+      $("genStatus").textContent = `Đã dựng ${n} cảnh, tổng ${fmtTime(totalDuration())}. Xem trước, chỉnh nếu cần rồi xuất video.`;
       return true;
     } catch (err) {
       $("genStatus").textContent = err && err.message ? err.message : String(err);
       return false;
-    } finally {
-      genAbort = null;
-      setBusy(false);
     }
   }
 
-  async function autoMake() {
-    const ok = await generateScript();
-    if (!ok) return;
+  function useTemplate() {
+    const brief = readBrief();
+    if (needIdea(brief) || !confirmReplace()) return;
+    setPlaying(false);
+    const n = applyResult(window.EduAI.templateScript(brief), brief);
+    $("genStatus").textContent = `Đã dựng kịch bản mẫu ${n} cảnh. Kịch bản mẫu chỉ có nội dung chung — hãy sửa lời thuyết minh, hoặc dùng “Sao chép lời nhắc” để Claude viết riêng theo ý tưởng.`;
+  }
+
+  function autoMake() {
+    if (!importPasted()) return;
     $("genStatus").textContent += " Đang xuất video…";
     startExport();
   }
@@ -795,7 +795,7 @@
 
   function toggleExportUi(on) {
     $("btnExport").hidden = on; $("btnCancel").hidden = !on;
-    ["btnPlay", "btnRestart", "seek", "aspect", "quality", "btnAdd", "btnNew", "btnSample", "btnGenerate", "btnAuto"].forEach((id) => { $(id).disabled = on; });
+    ["btnPlay", "btnRestart", "seek", "aspect", "quality", "btnAdd", "btnNew", "btnSample", "btnCopyPrompt", "btnTemplate", "btnImport", "btnAuto"].forEach((id) => { $(id).disabled = on; });
     document.body.classList.toggle("is-exporting", on);
   }
 
@@ -834,7 +834,6 @@
     fillSelect("audience", Object.entries(AUDIENCES).map(([k, v]) => [k, v.charAt(0).toUpperCase() + v.slice(1)]));
     fillSelect("tone", Object.entries(TONES).map(([k, v]) => [k, v.charAt(0).toUpperCase() + v.slice(1)]));
     fillSelect("platform", Object.entries(PLATFORMS).map(([k, v]) => [k, v.label]));
-    fillSelect("aiModel", Object.entries(MODELS).map(([k, v]) => [k, v.label]));
     fillSelect("stTheme", Object.entries(THEMES).map(([k, v]) => [k, v.label]));
     fillSelect("stFont", Object.entries(FONTS).map(([k, v]) => [k, v.label]));
 
@@ -882,13 +881,10 @@
       project.aspect = PLATFORMS[project.brief.platform].aspect; $("aspect").value = project.aspect;
       save(); applySize(720); seekTo(globalT);
     });
-    $("btnGenerate").addEventListener("click", generateScript);
+    $("btnCopyPrompt").addEventListener("click", copyPrompt);
+    $("btnTemplate").addEventListener("click", useTemplate);
+    $("btnImport").addEventListener("click", importPasted);
     $("btnAuto").addEventListener("click", autoMake);
-    $("btnStopGen").addEventListener("click", () => { if (genAbort) genAbort.abort(); });
-    $("aiKey").addEventListener("change", saveAiSettings);
-    $("aiRemember").addEventListener("change", saveAiSettings);
-    $("aiModel").addEventListener("change", saveAiSettings);
-    $("btnForgetKey").addEventListener("click", () => { $("aiKey").value = ""; $("aiRemember").checked = false; saveAiSettings(); });
 
     // Phong cách
     $("stTheme").addEventListener("change", (e) => { project.style.theme = e.target.value; project.style.bg = ""; project.style.ink = ""; project.style.accent = ""; syncStyleUi(); styleChanged(); });
@@ -908,7 +904,6 @@
     if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
 
     syncProjectFields();
-    loadAiSettings();
     applySize(720);
     renderList();
     seekTo(0);
