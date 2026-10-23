@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="description" content="Dựng video giáo dục mô phỏng (vật lý, sinh học, dược học) ngay trên trình duyệt: chọn mô phỏng, chỉnh thông số, thêm phụ đề và xuất video.">
+<title>Xưởng Video Mô Phỏng</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Xưởng Video Mô Phỏng</h1>
+    <p>Dựng video bài giảng từ các mô phỏng khoa học — mọi thứ chạy trên máy bạn, không tải dữ liệu lên đâu cả.</p>
+  </div>
+  <div class="top-actions">
+    <button id="btnNew" type="button">Dự án mới</button>
+    <button id="btnSample" type="button">Mở mẫu</button>
+    <label class="btn-file">Mở tệp .json<input id="fileImport" type="file" accept="application/json,.json" hidden></label>
+    <button id="btnSaveJson" type="button">Lưu tệp .json</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="panel stage-panel">
+    <div class="stage-wrap">
+      <canvas id="stage" width="1280" height="720" aria-label="Khung xem trước video"></canvas>
+    </div>
+    <div class="transport">
+      <button id="btnPlay" type="button" class="primary">▶ Phát</button>
+      <button id="btnRestart" type="button">⟲ Về đầu</button>
+      <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Tua">
+      <span id="timeLabel" class="mono">0:00 / 0:00</span>
+    </div>
+    <div class="export">
+      <div class="row">
+        <label>Khung hình
+          <select id="aspect">
+            <option value="16:9">Ngang 16:9 (YouTube, bài giảng)</option>
+            <option value="9:16">Dọc 9:16 (TikTok, Reels, Shorts)</option>
+            <option value="1:1">Vuông 1:1</option>
+          </select>
+        </label>
+        <label>Chất lượng
+          <select id="quality">
+            <option value="720">HD 720p</option>
+            <option value="1080">Full HD 1080p</option>
+          </select>
+        </label>
+        <label class="check"><input id="useMic" type="checkbox"> Thu giọng đọc từ micro khi xuất</label>
+        <label class="check"><input id="readAloud" type="checkbox"> Đọc phụ đề khi xem trước</label>
+      </div>
+      <div class="row">
+        <button id="btnExport" type="button" class="primary">⬇ Xuất video</button>
+        <button id="btnCancel" type="button" hidden>Dừng xuất</button>
+        <span id="exportStatus" class="muted" role="status"></span>
+      </div>
+      <p class="hint">Video được ghi theo thời gian thực: video dài 2 phút cần khoảng 2 phút để xuất. Giữ tab này mở trong lúc xuất.</p>
+    </div>
+  </section>
+
+  <section class="panel story-panel">
+    <div class="field">
+      <label for="projTitle">Tên video</label>
+      <input id="projTitle" type="text" maxlength="120">
+    </div>
+    <div class="field">
+      <label for="projAuthor">Ghi chú góc màn hình (tên người dạy, kênh…)</label>
+      <input id="projAuthor" type="text" maxlength="80">
+    </div>
+    <div class="scene-head">
+      <h2>Kịch bản các cảnh</h2>
+      <div class="add-scene">
+        <select id="addType" aria-label="Loại cảnh"></select>
+        <button id="btnAdd" type="button" class="primary">+ Thêm cảnh</button>
+      </div>
+    </div>
+    <ol id="sceneList" class="scene-list"></ol>
+  </section>
+
+  <section class="panel editor-panel" id="editor"></section>
+</main>
+
+<footer class="foot">
+  <p>Mô phỏng mang tính minh họa giáo dục, đã đơn giản hóa so với thực tế. Nội dung y – dược chỉ phục vụ giảng dạy, không thay thế chỉ định của bác sĩ hoặc dược sĩ.</p>
+  <p>Dự án được tự lưu trong trình duyệt này. Hãy “Lưu tệp .json” để sao lưu hoặc mở trên máy khác.</p>
+</footer>
+
+<script src="sims.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

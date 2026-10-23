@@ -22,6 +22,15 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-23 10:30 GMT+7 — Claude Code — EDU-20261023-01 — XONG SOURCE ✅ (chưa deploy)
+
+- Tạo ứng dụng tĩnh mới `video-mo-phong/` (Xưởng Video Mô Phỏng): dựng kịch bản nhiều cảnh mô phỏng, chỉnh thông số, phụ đề, xem trước và xuất video MP4/WebM ngay trên trình duyệt.
+- 7 loại cảnh: tiêu đề, con lắc đơn, ném xiên, sóng trên dây, khuếch tán qua màng, dược động học nhiều liều, dịch tễ SIR.
+- File: `video-mo-phong/index.html`, `app.css`, `app.js`, `sims.js`; tài liệu `docs/handover/VIDEO_MO_PHONG.md`.
+- Test: `node --check` app/sims; `check-public-content` OK; `validate-coordination` OK; Chromium Playwright chụp đủ cảnh 16:9 + 9:16, không lỗi console, xuất thử video 3 giây ra `.mp4` thành công.
+- Không đụng backend, workflow, gate, sw hay payload mã hóa; không thêm secret.
+- Còn lại: thêm thư mục vào build `_site` của `deploy-pages.yml` (đang bị khóa bởi `GROWTH-20260725-04`, heartbeat cuối 25/07/2026 — quá hạn khóa 24 giờ, cần chủ sở hữu xác nhận giải phóng); kiểm thử Safari/iPhone thật.
+
 ### 2026-07-26 02:20 GMT+7 — Claude Code — BOITOAN-20260726-01 — XONG ✅ (đã nghiệm thu production)
 
 **Dấu vết tạo hàng loạt còn sót ở lời giới thiệu.** Sau khi bịt lỗ rò ở BOITOAN-20260725-18, công ty
