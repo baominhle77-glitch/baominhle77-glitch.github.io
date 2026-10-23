@@ -2,12 +2,12 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 03:00 GMT+7 — Claude Code
+**Cập nhật:** 24/10/2026 03:20 GMT+7 — Claude Code
 
 ## Việc đang làm
 
 - **Dự án:** Xưởng Video Mô Phỏng — app web `video-mo-phong/` (nhập ý tưởng → kịch bản → phong cách → xuất video).
-- **Nhánh:** `claude/pensive-lovelace-96zjk7` (đã push; **chưa có PR**, chưa merge vào `main`).
+- **Nhánh:** `claude/pensive-lovelace-96zjk7` — đang mở PR gộp vào `main` (task `EDU-20261024-03`). Sau khi gộp, GitHub Pages phục vụ lâu dài tại https://baominhle77-glitch.github.io/video-mo-phong/ (chỉ có luồng sao chép/dán; nút Claude trong trang chỉ có ở link Artifact).
 - **Task gần nhất:** `EDU-20261024-02` (bản thử Artifact: Claude trong trang, lưu tệp, hộp xác nhận) — completed.
 - **Khóa đang giữ:** không có.
 - **Tài liệu chi tiết:** `docs/handover/VIDEO_MO_PHONG.md`.
