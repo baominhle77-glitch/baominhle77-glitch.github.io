@@ -4,13 +4,62 @@
 (function (global) {
   "use strict";
 
-  const C = {
-    ink: "#e8eefc", muted: "#9fb0d0", grid: "rgba(159,176,208,.18)", axis: "rgba(232,238,252,.55)",
-    a: "#5ec8ff", b: "#ffb454", c: "#7ee081", d: "#ff7a90", e: "#c59bff"
+  // Bảng màu theo chủ đề. Màu chữ/nền luôn đi theo cặp đủ tương phản để đọc được trên điện thoại.
+  const THEMES = {
+    dem: { label: "Đêm xanh (mặc định)", bg1: "#0b1220", bg2: "#141b34", ink: "#e8eefc", muted: "#9fb0d0", a: "#5ec8ff", b: "#ffb454", c: "#7ee081", d: "#ff7a90", e: "#c59bff", panel: "rgba(8,14,28,.72)", capBg: "rgba(0,0,0,.6)", capInk: "#ffffff" },
+    sang: { label: "Sáng sạch (bài giảng)", bg1: "#ffffff", bg2: "#eef3fb", ink: "#14213d", muted: "#4a5a7a", a: "#1f77d0", b: "#e07b00", c: "#1e9e4a", d: "#d6334f", e: "#7a4cc2", panel: "rgba(255,255,255,.9)", capBg: "rgba(20,33,61,.86)", capInk: "#ffffff" },
+    phan: { label: "Bảng phấn", bg1: "#1f3b2d", bg2: "#28493a", ink: "#f4f1e6", muted: "#c9d3c4", a: "#f9e27d", b: "#ffb3a7", c: "#a8e6cf", d: "#ff8b94", e: "#d4b5ff", panel: "rgba(20,40,30,.75)", capBg: "rgba(10,25,18,.7)", capInk: "#fffbe8" },
+    neon: { label: "Neon công nghệ", bg1: "#07020f", bg2: "#1a0630", ink: "#f5f0ff", muted: "#b9a8d9", a: "#00f0ff", b: "#ff2fd1", c: "#7dff5a", d: "#ff4d6d", e: "#ffe14d", panel: "rgba(15,5,30,.75)", capBg: "rgba(0,0,0,.65)", capInk: "#ffffff" },
+    yte: { label: "Y khoa (trắng – xanh ngọc)", bg1: "#f4fbfb", bg2: "#dff2f1", ink: "#0f3d3e", muted: "#3f6b6c", a: "#0a9396", b: "#ee9b00", c: "#2a9d8f", d: "#ae2012", e: "#5e548e", panel: "rgba(255,255,255,.92)", capBg: "rgba(15,61,62,.88)", capInk: "#ffffff" },
+    am: { label: "Ấm áp (kem – cam)", bg1: "#fff8ef", bg2: "#fde9d2", ink: "#3b2414", muted: "#7a5a43", a: "#d9480f", b: "#1c7ed6", c: "#2b8a3e", d: "#c2255c", e: "#7048e8", panel: "rgba(255,250,243,.92)", capBg: "rgba(59,36,20,.85)", capInk: "#fffaf3" }
   };
 
-  function px(box, size) { return Math.max(10, Math.round(size * box.unit)); }
-  function font(box, size, weight) { return `${weight || 600} ${px(box, size)}px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif`; }
+  const FONTS = {
+    sans: { label: "Không chân (hiện đại)", css: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif' },
+    serif: { label: "Có chân (trang trọng)", css: 'Georgia, "Times New Roman", "Noto Serif", serif' },
+    round: { label: "Tròn mềm (thân thiện)", css: 'ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, sans-serif' },
+    mono: { label: "Đơn cách (kỹ thuật)", css: 'ui-monospace, "SFMono-Regular", Menlo, Consolas, "Courier New", monospace' }
+  };
+
+  const C = { fontCss: FONTS.sans.css, textScale: 1 };
+
+  function hexToRgb(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+    if (!m) return null;
+    const n = parseInt(m[1], 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function luminance(hex) {
+    const rgb = hexToRgb(hex); if (!rgb) return null;
+    const [r, g, b] = rgb.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+  // Tỉ lệ tương phản theo WCAG; ≥ 4,5 là dễ đọc với chữ thường
+  function contrast(h1, h2) {
+    const a = luminance(h1); const b = luminance(h2);
+    if (a == null || b == null) return 21;
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  }
+  function rgba(hex, alpha) { const rgb = hexToRgb(hex); return rgb ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})` : hex; }
+
+  // Áp chủ đề + màu tùy chỉnh của người dùng vào bảng màu dùng chung khi vẽ
+  function setTheme(style) {
+    const st = style || {};
+    const base = THEMES[st.theme] || THEMES.dem;
+    Object.assign(C, base);
+    if (hexToRgb(st.bg)) { C.bg1 = st.bg; C.bg2 = st.bg2 && hexToRgb(st.bg2) ? st.bg2 : st.bg; }
+    if (hexToRgb(st.ink)) C.ink = st.ink;
+    if (hexToRgb(st.accent)) C.a = st.accent;
+    const dark = (luminance(C.bg1) || 0) < 0.35;
+    C.grid = rgba(C.ink, dark ? 0.16 : 0.12);
+    C.axis = rgba(C.ink, 0.55);
+    if (hexToRgb(st.ink) || hexToRgb(st.bg)) C.muted = rgba(C.ink, 0.72);
+    C.fontCss = (FONTS[st.font] || FONTS.sans).css;
+    C.textScale = Math.min(1.8, Math.max(0.6, Number(st.textScale) || 1));
+  }
+
+  function px(box, size) { return Math.max(10, Math.round(size * box.unit * C.textScale)); }
+  function font(box, size, weight) { return `${weight || 600} ${px(box, size)}px ${C.fontCss}`; }
 
   // Chia vùng vẽ thành phần mô phỏng + phần đồ thị, tự đổi bố cục theo khung ngang/dọc.
   function split(box, ratio) {
@@ -109,8 +158,8 @@
     const lh = px(box, 22);
     let maxW = 0;
     rows.forEach((r) => { maxW = Math.max(maxW, ctx.measureText(`${r[0]}: ${r[1]}`).width); });
-    ctx.fillStyle = "rgba(8,14,28,.72)";
-    ctx.strokeStyle = "rgba(159,176,208,.25)";
+    ctx.fillStyle = C.panel;
+    ctx.strokeStyle = C.grid;
     roundRect(ctx, x, y, maxW + px(box, 24), lh * rows.length + px(box, 14), px(box, 10));
     ctx.fill(); ctx.stroke();
     ctx.textBaseline = "top"; ctx.textAlign = "left";
@@ -126,6 +175,16 @@
     ctx.beginPath();
     ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+
+  function wrapLines(ctx, text, maxW) {
+    const lines = []; let line = "";
+    String(text || "").split(/\s+/).filter(Boolean).forEach((word) => {
+      const test = line ? `${line} ${word}` : word;
+      if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = word; } else line = test;
+    });
+    if (line) lines.push(line);
+    return lines;
   }
 
   function arrow(ctx, x1, y1, x2, y2, color, width) {
@@ -165,6 +224,52 @@
           ctx.restore();
         },
         bigTitle: true
+      };
+    }
+  };
+
+  SIMS.bullets = {
+    label: "Ý chính (gạch đầu dòng)", group: "Chung",
+    title: "Những điều cần nhớ",
+    caption: "Tóm tắt nhanh các ý quan trọng nhất.",
+    bullets: ["Ý thứ nhất", "Ý thứ hai", "Ý thứ ba"],
+    params: [],
+    create(p, duration, scene) {
+      const items = (scene && Array.isArray(scene.bullets) ? scene.bullets : []).filter((x) => String(x).trim()).slice(0, 8);
+      let time = 0; const span = Math.max(1, (duration || 8) * 0.75);
+      return {
+        step(dt) { time += dt; },
+        draw(ctx, box) {
+          const r = { x: box.x + box.w * 0.06, y: box.y + box.h * 0.04, w: box.w * 0.88, h: box.h * 0.92 };
+          const n = Math.max(1, items.length);
+          let size = 30; ctx.font = font(box, size, 650);
+          // Thu nhỏ chữ cho tới khi mọi ý vừa khung (tối đa 2 dòng mỗi ý)
+          const fits = () => {
+            ctx.font = font(box, size, 650);
+            const lh = px(box, size) * 1.3; let total = 0;
+            items.forEach((t) => { total += Math.min(2, wrapLines(ctx, t, r.w - px(box, 60)).length) * lh + px(box, 14); });
+            return total <= r.h;
+          };
+          while (size > 14 && !fits()) size -= 1;
+          ctx.font = font(box, size, 650);
+          const lh = px(box, size) * 1.3;
+          // Canh giữa theo chiều dọc cả khối ý chính (tính theo toàn bộ danh sách để vị trí không nhảy khi ý mới hiện ra)
+          let blockH = 0;
+          items.forEach((t) => { blockH += Math.min(2, wrapLines(ctx, t, r.w - px(box, 60)).length) * lh + px(box, 14); });
+          let y = r.y + Math.max(0, (r.h - blockH) / 2);
+          items.forEach((t, i) => {
+            const appear = (i / n) * span; const k = Math.max(0, Math.min(1, (time - appear) / 0.5));
+            if (k <= 0) return;
+            const lines = wrapLines(ctx, t, r.w - px(box, 60)).slice(0, 2);
+            ctx.save(); ctx.globalAlpha *= k; ctx.translate((1 - k) * 30 * box.unit, 0);
+            ctx.fillStyle = [C.a, C.b, C.c, C.e, C.d][i % 5];
+            ctx.beginPath(); ctx.arc(r.x + px(box, 16), y + lh / 2, px(box, 9), 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+            lines.forEach((l, j) => ctx.fillText(l, r.x + px(box, 44), y + lh / 2 + j * lh));
+            ctx.restore();
+            y += lines.length * lh + px(box, 14);
+          });
+        }
       };
     }
   };
@@ -210,14 +315,14 @@
           ctx.beginPath(); ctx.moveTo(pivot.x, pivot.y); ctx.lineTo(pivot.x, pivot.y + len + 20 * box.unit); ctx.stroke();
           ctx.setLineDash([]);
           trail.forEach((a, i) => {
-            ctx.fillStyle = `rgba(94,200,255,${(i / trail.length) * 0.35})`;
+            ctx.fillStyle = rgba(C.a, (i / trail.length) * 0.35);
             ctx.beginPath(); ctx.arc(pivot.x + len * Math.sin(a), pivot.y + len * Math.cos(a), 6 * box.unit, 0, Math.PI * 2); ctx.fill();
           });
           const bx = pivot.x + len * Math.sin(th); const by = pivot.y + len * Math.cos(th);
           ctx.strokeStyle = C.ink; ctx.lineWidth = 2.5 * box.unit;
           ctx.beginPath(); ctx.moveTo(pivot.x, pivot.y); ctx.lineTo(bx, by); ctx.stroke();
           const grad = ctx.createRadialGradient(bx - 6, by - 6, 2, bx, by, 22 * box.unit);
-          grad.addColorStop(0, "#ffe2b0"); grad.addColorStop(1, C.b);
+          grad.addColorStop(0, rgba(C.b, 0.55)); grad.addColorStop(1, C.b);
           ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(bx, by, 20 * box.unit, 0, Math.PI * 2); ctx.fill();
           // vectơ vận tốc tiếp tuyến
           const v = om * p.L; const vs = scale * 0.35;
@@ -271,7 +376,7 @@
           ctx.save();
           ctx.strokeStyle = C.axis; ctx.lineWidth = 2;
           ctx.beginPath(); ctx.moveTo(r.x, oy); ctx.lineTo(r.x + r.w, oy); ctx.stroke();
-          ctx.setLineDash([5, 7]); ctx.strokeStyle = "rgba(159,176,208,.4)"; ctx.beginPath();
+          ctx.setLineDash([5, 7]); ctx.strokeStyle = rgba(C.ink, 0.35); ctx.beginPath();
           for (let i = 0; i <= 60; i++) { const q = pos(tf * i / 60); i ? ctx.lineTo(X(q[0]), Y(q[1])) : ctx.moveTo(X(q[0]), Y(q[1])); }
           ctx.stroke(); ctx.setLineDash([]);
           ctx.strokeStyle = C.a; ctx.lineWidth = 3 * box.unit; ctx.beginPath();
@@ -327,7 +432,7 @@
           ctx.stroke();
           for (let i = 0; i <= 20; i++) {
             const x = L * i / 20; const yy = x <= p.f * p.lambda * time ? y(x) : 0;
-            ctx.fillStyle = i === 10 ? C.b : "rgba(232,238,252,.7)";
+            ctx.fillStyle = i === 10 ? C.b : rgba(C.ink, 0.7);
             ctx.beginPath(); ctx.arc(r.x + x * sx, midY - yy * sy, (i === 10 ? 9 : 5) * box.unit, 0, Math.PI * 2); ctx.fill();
           }
           // Mũi tên chiều truyền sóng
@@ -386,7 +491,7 @@
           const [ra, rb] = split(box, 0.55);
           const r = inset(ra, px(box, 18));
           ctx.save();
-          ctx.fillStyle = "rgba(94,200,255,.06)"; ctx.fillRect(r.x, r.y, r.w, r.h);
+          ctx.fillStyle = rgba(C.a, 0.06); ctx.fillRect(r.x, r.y, r.w, r.h);
           ctx.strokeStyle = C.axis; ctx.lineWidth = 2; ctx.strokeRect(r.x, r.y, r.w, r.h);
           const mx = r.x + r.w / 2; const seg = r.h / gaps;
           ctx.strokeStyle = C.e; ctx.lineWidth = 6 * box.unit;
@@ -456,8 +561,8 @@
           const pts = all.filter((q) => q[0] <= tNow);
           const cNow = conc(tNow);
           const bands = [];
-          if (p.mec > 0 && p.mtc > p.mec) bands.push({ from: p.mec, to: p.mtc, color: "rgba(126,224,129,.12)", label: "vùng điều trị", text: C.c });
-          if (p.mtc > 0) bands.push({ from: p.mtc, to: yMax * 2, color: "rgba(255,122,144,.12)", label: "vùng có nguy cơ độc", text: C.d });
+          if (p.mec > 0 && p.mtc > p.mec) bands.push({ from: p.mec, to: p.mtc, color: rgba(C.c, 0.14), label: "vùng điều trị", text: C.c });
+          if (p.mtc > 0) bands.push({ from: p.mtc, to: yMax * 2, color: rgba(C.d, 0.12), label: "vùng có nguy cơ độc", text: C.d });
           const r = inset(box, px(box, 16));
           const plot = chart(ctx, box, r, {
             xMin: 0, xMax: total, yMin: 0, yMax, xDigits: 0, niceX: true,
@@ -538,5 +643,5 @@
     }
   };
 
-  global.EduSims = { SIMS, C, font, px, roundRect };
+  global.EduSims = { SIMS, C, THEMES, FONTS, setTheme, contrast, font, px, roundRect, wrapLines };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b1220">
-<meta name="description" content="Dựng video giáo dục mô phỏng (vật lý, sinh học, dược học) ngay trên trình duyệt: chọn mô phỏng, chỉnh thông số, thêm phụ đề và xuất video.">
+<meta name="description" content="Nhập ý tưởng, nhận kịch bản hoàn chỉnh và xuất video giáo dục mô phỏng (vật lý, sinh học, y dược) ngay trên trình duyệt, theo màu sắc và phong cách bạn chọn.">
 <title>Xưởng Video Mô Phỏng</title>
 <link rel="stylesheet" href="app.css">
 </head>
@@ -12,7 +12,7 @@
 <header class="top">
   <div>
     <h1>Xưởng Video Mô Phỏng</h1>
-    <p>Dựng video bài giảng từ các mô phỏng khoa học — mọi thứ chạy trên máy bạn, không tải dữ liệu lên đâu cả.</p>
+    <p>Nhập ý tưởng → nhận kịch bản hoàn chỉnh → chọn phong cách → xuất video. Video được dựng ngay trên máy bạn.</p>
   </div>
   <div class="top-actions">
     <button id="btnNew" type="button">Dự án mới</button>
@@ -22,8 +22,100 @@
   </div>
 </header>
 
+<section class="wizard">
+  <div class="panel idea-panel">
+    <h2><span class="step">1</span> Ý tưởng → kịch bản</h2>
+    <div class="field">
+      <label for="idea">Ý tưởng video của bạn</label>
+      <textarea id="idea" rows="4" maxlength="4000" placeholder="Ví dụ: Giải thích vì sao phải uống kháng sinh đúng giờ và đủ liều, cho người bệnh dễ hiểu, có minh họa nồng độ thuốc trong máu."></textarea>
+    </div>
+    <div class="grid3">
+      <label>Người xem<select id="audience"></select></label>
+      <label>Giọng văn<select id="tone"></select></label>
+      <label>Độ dài mục tiêu
+        <select id="targetSec">
+          <option value="30">30 giây</option>
+          <option value="60">1 phút</option>
+          <option value="90">1 phút 30</option>
+          <option value="120">2 phút</option>
+          <option value="180">3 phút</option>
+          <option value="300">5 phút</option>
+        </select>
+      </label>
+      <label>Nền tảng đăng<select id="platform"></select></label>
+      <label>Ngôn ngữ
+        <select id="lang"><option value="vi">Tiếng Việt</option><option value="en">English</option></select>
+      </label>
+      <label class="check"><input id="autoStyle" type="checkbox" checked> Để AI chọn màu &amp; font hợp chủ đề</label>
+    </div>
+    <div class="field">
+      <label for="notes">Yêu cầu thêm (không bắt buộc)</label>
+      <input id="notes" type="text" maxlength="1000" placeholder="Ví dụ: nhấn mạnh tác hại của việc tự ý ngừng thuốc; kết bằng câu hỏi tương tác.">
+    </div>
+    <details class="ai-settings">
+      <summary>Cài đặt AI (Claude) — <span id="aiBadge" class="badge"></span></summary>
+      <div class="field">
+        <label for="aiKey">Khóa API Claude</label>
+        <input id="aiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-...">
+      </div>
+      <div class="row">
+        <label class="check"><input id="aiRemember" type="checkbox"> Ghi nhớ trên trình duyệt này</label>
+        <label>Mô hình <select id="aiModel"></select></label>
+        <button id="btnForgetKey" type="button">Xóa khóa</button>
+      </div>
+      <p class="hint">Khóa chỉ lưu trên trình duyệt của bạn và chỉ được gửi tới máy chủ Claude của Anthropic để viết kịch bản. Chi phí tính vào tài khoản Anthropic của bạn. Lấy khóa tại <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a>. Không có khóa, app vẫn dựng được kịch bản mẫu từ từ khóa trong ý tưởng (nội dung chung, cần tự sửa lời).</p>
+    </details>
+    <div class="row">
+      <button id="btnGenerate" type="button" class="primary">✨ Viết kịch bản</button>
+      <button id="btnAuto" type="button" class="accent">⚡ Làm video tự động</button>
+      <button id="btnStopGen" type="button" hidden>Hủy</button>
+    </div>
+    <p id="genStatus" class="status" role="status"></p>
+  </div>
+
+  <div class="panel style-panel">
+    <h2><span class="step">2</span> Phong cách video</h2>
+    <div class="grid2">
+      <label>Chủ đề màu<select id="stTheme"></select></label>
+      <label>Kiểu chữ<select id="stFont"></select></label>
+    </div>
+    <div class="colors">
+      <label>Nền <input id="stBg" type="color"></label>
+      <label>Chữ <input id="stInk" type="color"></label>
+      <label>Màu nhấn <input id="stAccent" type="color"></label>
+      <button id="btnResetColors" type="button">Về màu của chủ đề</button>
+    </div>
+    <p id="contrastWarn" class="warn" hidden></p>
+    <div class="ranges">
+      <label>Cỡ chữ chung <output id="stTextScaleOut"></output><input id="stTextScale" type="range" min="0.6" max="1.8" step="0.05"></label>
+      <label>Cỡ tiêu đề <output id="stTitleScaleOut"></output><input id="stTitleScale" type="range" min="0.6" max="1.8" step="0.05"></label>
+      <label>Cỡ phụ đề <output id="stCaptionScaleOut"></output><input id="stCaptionScale" type="range" min="0.6" max="1.8" step="0.05"></label>
+      <label>Cỡ hình mô phỏng <output id="stSimScaleOut"></output><input id="stSimScale" type="range" min="0.6" max="1" step="0.05"></label>
+      <label>Tốc độ chuyển động <output id="stSpeedOut"></output><input id="stSpeed" type="range" min="0.25" max="3" step="0.25"></label>
+    </div>
+    <div class="grid3">
+      <label>Vị trí phụ đề
+        <select id="stCaptionPos"><option value="bottom">Dưới</option><option value="top">Trên</option><option value="hidden">Ẩn</option></select>
+      </label>
+      <label>Kiểu phụ đề
+        <select id="stCaptionStyle"><option value="box">Hộp nền</option><option value="bar">Dải ngang</option><option value="outline">Chữ viền</option></select>
+      </label>
+      <label>Chuyển cảnh
+        <select id="stTransition"><option value="fade">Mờ dần</option><option value="slide">Trượt</option><option value="zoom">Phóng nhẹ</option><option value="none">Không</option></select>
+      </label>
+    </div>
+    <label class="check"><input id="stProgress" type="checkbox"> Hiện thanh tiến độ cuối khung</label>
+    <div class="row">
+      <button id="btnOptimize" type="button" class="primary">🪄 Tối ưu tự động</button>
+      <span class="muted small">Cân thời lượng theo lời thoại và độ dài mục tiêu, sửa màu khó đọc, kiểm tra bố cục.</span>
+    </div>
+    <ul id="optReport" class="report"></ul>
+  </div>
+</section>
+
 <main class="layout">
   <section class="panel stage-panel">
+    <h2><span class="step">3</span> Xem trước &amp; xuất video</h2>
     <div class="stage-wrap">
       <canvas id="stage" width="1280" height="720" aria-label="Khung xem trước video"></canvas>
     </div>
@@ -37,15 +129,16 @@
       <div class="row">
         <label>Khung hình
           <select id="aspect">
-            <option value="16:9">Ngang 16:9 (YouTube, bài giảng)</option>
-            <option value="9:16">Dọc 9:16 (TikTok, Reels, Shorts)</option>
+            <option value="16:9">Ngang 16:9</option>
+            <option value="9:16">Dọc 9:16</option>
             <option value="1:1">Vuông 1:1</option>
           </select>
         </label>
         <label>Chất lượng
           <select id="quality">
             <option value="720">HD 720p</option>
-            <option value="1080">Full HD 1080p</option>
+            <option value="1080" selected>Full HD 1080p</option>
+            <option value="1440">2K 1440p</option>
           </select>
         </label>
         <label class="check"><input id="useMic" type="checkbox"> Thu giọng đọc từ micro khi xuất</label>
@@ -56,7 +149,7 @@
         <button id="btnCancel" type="button" hidden>Dừng xuất</button>
         <span id="exportStatus" class="muted" role="status"></span>
       </div>
-      <p class="hint">Video được ghi theo thời gian thực: video dài 2 phút cần khoảng 2 phút để xuất. Giữ tab này mở trong lúc xuất.</p>
+      <p class="hint">Video được ghi theo thời gian thực: video dài 2 phút cần khoảng 2 phút để xuất. Giữ tab này mở trong lúc xuất. Giọng đọc máy chỉ để nghe thử, không ghi vào video — muốn có tiếng hãy bật thu micro và đọc theo phụ đề.</p>
     </div>
   </section>
 
@@ -71,10 +164,11 @@
     </div>
     <div class="scene-head">
       <h2>Kịch bản các cảnh</h2>
-      <div class="add-scene">
-        <select id="addType" aria-label="Loại cảnh"></select>
-        <button id="btnAdd" type="button" class="primary">+ Thêm cảnh</button>
-      </div>
+      <span id="totalLabel" class="muted small"></span>
+    </div>
+    <div class="add-scene">
+      <select id="addType" aria-label="Loại cảnh"></select>
+      <button id="btnAdd" type="button" class="primary">+ Thêm cảnh</button>
     </div>
     <ol id="sceneList" class="scene-list"></ol>
   </section>
@@ -83,11 +177,12 @@
 </main>
 
 <footer class="foot">
-  <p>Mô phỏng mang tính minh họa giáo dục, đã đơn giản hóa so với thực tế. Nội dung y – dược chỉ phục vụ giảng dạy, không thay thế chỉ định của bác sĩ hoặc dược sĩ.</p>
+  <p>Mô phỏng mang tính minh họa giáo dục, đã đơn giản hóa so với thực tế. Kịch bản do AI viết có thể sai sót — hãy đọc lại trước khi đăng. Nội dung y – dược chỉ phục vụ giảng dạy, không thay thế chỉ định của bác sĩ hoặc dược sĩ.</p>
   <p>Dự án được tự lưu trong trình duyệt này. Hãy “Lưu tệp .json” để sao lưu hoặc mở trên máy khác.</p>
 </footer>
 
 <script src="sims.js"></script>
+<script src="ai.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

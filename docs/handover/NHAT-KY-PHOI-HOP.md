@@ -22,6 +22,15 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-23 20:40 GMT+7 — Claude Code — EDU-20261023-02 — XONG SOURCE ✅ (chưa deploy)
+
+- Nâng cấp Xưởng Video Mô Phỏng: nhập ý tưởng → kịch bản hoàn chỉnh (Claude qua khóa API của chính người dùng, hoặc kịch bản mẫu offline) → phong cách → tối ưu tự động → xuất video; nút "Làm video tự động" chạy cả chuỗi.
+- Thêm: cảnh "Ý chính", 6 chủ đề màu, 4 kiểu chữ, màu tùy chỉnh, cỡ chữ/tiêu đề/phụ đề/hình, tốc độ, vị trí + kiểu phụ đề, chuyển cảnh; phụ đề tự chia đoạn; thời lượng tự tính theo lời thoại; kiểm tương phản WCAG; xuất 1440p.
+- File: `video-mo-phong/{index.html,app.css,app.js,sims.js,ai.js}`, `video-mo-phong/vendor/anthropic-sdk-0.132.0.mjs` (+ LICENSE MIT), `docs/handover/VIDEO_MO_PHONG.md`.
+- Test: `node --check`; `check-public-content` OK; `validate-coordination` OK; Chromium Playwright với API Claude giả lập (request đúng model/effort/fallbacks/schema; lỗi 401 hiển thị tiếng Việt; sanitize thông số; tối ưu idempotent; xuất `.mp4`).
+- Không đụng backend/workflow/gate/sw; không thêm secret. Khóa API chỉ do người dùng tự nhập trên trình duyệt.
+- Còn lại: thử Claude thật bằng một khóa thật; thêm thư mục vào build `_site` (workflow vẫn bị khóa bởi `GROWTH-20260725-04`); kiểm Safari/iPhone.
+
 ### 2026-10-23 10:30 GMT+7 — Claude Code — EDU-20261023-01 — XONG SOURCE ✅ (chưa deploy)
 
 - Tạo ứng dụng tĩnh mới `video-mo-phong/` (Xưởng Video Mô Phỏng): dựng kịch bản nhiều cảnh mô phỏng, chỉnh thông số, phụ đề, xem trước và xuất video MP4/WebM ngay trên trình duyệt.

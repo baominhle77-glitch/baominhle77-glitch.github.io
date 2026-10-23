@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-23T10:30:00+07:00",
+  "updated_at": "2026-10-23T20:40:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,6 +42,21 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "EDU-20261023-02",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "4d191fe4d03c11524317ca5c85ada45283f02896",
+      "paths": [
+        "video-mo-phong/**",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-23T20:10:00+07:00",
+      "summary": "Xuong Video Mo Phong V2: y tuong -> kich ban (Claude hoac mau offline), bang phong cach, toi uu tu dong, lam video 1 cham.",
+      "completed_at": "2026-10-23T20:40:00+07:00"
+    },
     {
       "id": "EDU-20261023-01",
       "owner": "Claude Code",
