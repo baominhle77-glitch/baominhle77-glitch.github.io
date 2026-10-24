@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-25T00:10:00+07:00",
+  "updated_at": "2026-10-25T07:30:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -63,6 +63,21 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "BOI-20261025-01",
+      "owner": "Claude Code (session_01StJ4qUYrKmQ2u6zdJZ9mcA)",
+      "branch": "claude/boi-web",
+      "base_sha": "fc0fb2bbeaa7dd511a730121831589610888f7e0",
+      "paths": [
+        "boi/**",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-25T06:25:00+07:00",
+      "completed_at": "2026-10-25T07:30:00+07:00",
+      "summary": "Web tĩnh Bói Tarot + Lenormand tại boi/ (GitHub Pages): SPA nhiều màn, xáo commit–reveal, parser số, quy đổi tiền, động cơ luật sâu, AI tuỳ chọn bằng khoá của người dùng (chỉ localStorage), PWA. Không đụng Worker/Cloudflare."
+    },
     {
       "id": "GROWTH-20260725-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
