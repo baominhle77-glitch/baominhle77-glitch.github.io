@@ -355,13 +355,11 @@
     if (globalT >= total) {
       globalT = total;
       render(globalT - 1e-6);
-      if (exporting) { finishExport(); return; }
       setPlaying(false);
       return;
     }
     render(globalT);
     updateTransport();
-    if (exporting) $("exportStatus").textContent = `Đang ghi… ${Math.floor((globalT / total) * 100)}% — vui lòng giữ tab này mở.`;
     requestAnimationFrame(tick);
   }
 
@@ -809,75 +807,47 @@
 
   /* ---------- Xuất video ---------- */
 
-  function pickMime() {
-    if (!window.MediaRecorder) return null;
-    const list = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
-    return list.find((m) => MediaRecorder.isTypeSupported(m)) || "";
-  }
-
+  // Xuất từng khung bằng WebCodecs + mp4-muxer (engine/xuat.js) — cùng hàm render(t) với xem trước, không quay màn hình
   async function startExport() {
-    const mime = pickMime();
-    if (mime === null || !canvas.captureStream) {
-      $("exportStatus").textContent = "Trình duyệt này chưa hỗ trợ ghi video. Hãy dùng Chrome, Edge, Firefox hoặc Safari bản mới.";
+    setPlaying(false);
+    let mod;
+    try { mod = await import("./engine/xuat.js"); } catch (_) { mod = null; }
+    if (!mod || !mod.hoTroXuat()) {
+      $("exportStatus").textContent = "Trình duyệt này chưa hỗ trợ xuất từng khung (WebCodecs). Hãy dùng Chrome hoặc Edge bản mới.";
       return;
     }
-    setPlaying(false);
     const quality = Number($("quality").value);
     applySize(quality);
-    const stream = canvas.captureStream(30);
-    let mic = null;
-    if ($("useMic").checked) {
-      try {
-        mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-        mic.getAudioTracks().forEach((tr) => stream.addTrack(tr));
-      } catch (_) {
-        $("exportStatus").textContent = "Không mở được micro — video sẽ được xuất không có tiếng.";
-      }
-    }
-    const chunks = [];
-    const bitrate = quality >= 1440 ? 14e6 : quality >= 1080 ? 8e6 : 5e6;
-    let rec;
-    try { rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: bitrate } : { videoBitsPerSecond: bitrate }); }
-    catch (_) { rec = new MediaRecorder(stream); }
-    rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
-    exporting = { rec, chunks, mic, stream, cancelled: false };
-    rec.onstop = () => {
-      const job = exporting; exporting = null;
-      if (job.mic) job.mic.getTracks().forEach((tr) => tr.stop());
-      job.stream.getTracks().forEach((tr) => tr.stop());
+    exporting = { huy: new AbortController() };
+    toggleExportUi(true);
+    sim = null;
+    const total = totalDuration();
+    try {
+      const kq = await mod.xuatMp4({
+        W: canvas.width, H: canvas.height, fps: 30, thoiLuong: total,
+        bitrate: quality >= 1440 ? 14e6 : quality >= 1080 ? 8e6 : 5e6,
+        veKhung: (ctx2, t) => { globalT = t; render(Math.min(t, total - 1e-6)); ctx2.drawImage(canvas, 0, 0); },
+        huy: exporting.huy.signal,
+        onTienTrinh: (p, i, n) => { $("exportStatus").textContent = `Đang dựng từng khung… ${Math.floor(p * 100)}% (${i}/${n})`; }
+      });
+      const blob = new Blob([kq.buffer], { type: "video/mp4" });
+      const name = `${slug(project.title) || "video-mo-phong"}.mp4`;
+      const size = `${(blob.size / 1048576).toFixed(1)} MB`;
+      const r = await saveFile(blob, name);
+      $("exportStatus").textContent = r === "saved"
+        ? `Đã xuất “${name}” (${size}, ${kq.codec}, ${kq.thongKe.so_khung} khung trong ${kq.thongKe.thoi_gian_xuat_giay} s).`
+        : r === "declined" ? "Bạn đã từ chối lưu tệp. Bấm “Xuất video” để dựng và lưu lại." : "Không lưu được tệp trong chế độ xem này.";
+    } catch (err) {
+      $("exportStatus").textContent = err && err.name === "AbortError" ? "Đã dừng xuất video." : "Lỗi xuất video: " + (err && err.message);
+    } finally {
+      exporting = null;
       toggleExportUi(false);
       applySize(720); seekTo(0);
-      if (job.cancelled) { $("exportStatus").textContent = "Đã dừng xuất video."; return; }
-      const type = rec.mimeType || mime || "video/webm";
-      const blob = new Blob(chunks, { type });
-      const ext = /mp4/.test(type) ? "mp4" : "webm";
-      const name = `${slug(project.title) || "video-mo-phong"}.${ext}`;
-      const size = `${(blob.size / 1048576).toFixed(1)} MB`;
-      $("exportStatus").textContent = `Video đã dựng xong (${size}). Đang lưu tệp…`;
-      saveFile(blob, name).then((r) => {
-        $("exportStatus").textContent = r === "saved"
-          ? `Đã xuất “${name}” (${size}).` + (ext === "webm" ? " Tệp .webm mở được trên YouTube, Facebook; nếu cần .mp4 hãy dùng công cụ chuyển đổi." : "")
-          : r === "declined" ? "Bạn đã từ chối lưu tệp. Bấm “Xuất video” để dựng và lưu lại." : "Không lưu được tệp trong chế độ xem này.";
-      });
-    };
-    toggleExportUi(true);
-    globalT = 0; sim = null; render(0);
-    rec.start(1000);
-    $("exportStatus").textContent = "Đang ghi… vui lòng giữ tab này mở.";
-    setPlaying(true);
-  }
-
-  function finishExport() {
-    playing = false;
-    updateTransport();
-    // Giữ khung cuối thêm một nhịp để bộ ghi nhận đủ hình
-    setTimeout(() => { if (exporting && exporting.rec.state !== "inactive") exporting.rec.stop(); }, 300);
+    }
   }
 
   function cancelExport() {
-    if (!exporting) return;
-    exporting.cancelled = true; playing = false;
-    if (exporting.rec.state !== "inactive") exporting.rec.stop();
+    if (exporting) exporting.huy.abort();
   }
 
   function toggleExportUi(on) {

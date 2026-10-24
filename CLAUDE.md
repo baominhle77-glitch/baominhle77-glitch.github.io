@@ -7,5 +7,6 @@ Mọi phiên Claude (bất kể đăng nhập bằng tài khoản nào) làm vi�
 3. Nếu `DIEM-DUNG.md` ghi một nhánh đang làm dở: làm tiếp trên **đúng nhánh đó** (fetch rồi checkout), không mở nhánh mới cho cùng việc.
 4. Sau **mỗi lượt trả lời có thay đổi**: cập nhật `DIEM-DUNG.md`, commit và push ngay — container cloud có thể bị thu hồi và tài khoản có thể bị đổi bất cứ lúc nào; việc chưa push coi như mất.
 5. Luôn trả lời bằng tiếng Việt, gọi chủ dự án là BaoMinh.
+6. Khi code hoặc sửa Xưởng Video Mô Phỏng (`video-mo-phong/`): đọc 2 skill `.claude/skills/video-chat-luong-cao/SKILL.md` và `.claude/skills/kiem-chat-luong-video/SKILL.md` trước mỗi lượt code (lệnh GĐ Studio gd-20261024-1220, Chủ tịch duyệt).
 
 Quy trình đổi tài khoản chi tiết: `docs/handover/CHUYEN-TAI-KHOAN.md`.

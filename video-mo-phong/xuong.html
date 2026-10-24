@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1C232B">
+<title>Xưởng Video Mô Phỏng — dựng từng khung</title>
+<style>
+  :root { --bg: #14191f; --panel: #1c232b; --line: #2e3945; --text: #e9edf1; --muted: #9aa6b2; --accent: #1F6FD1; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1280px; margin: 0 auto; padding: 18px 16px 40px; display: grid; gap: 14px; }
+  h1 { margin: 0; font-size: 22px; }
+  p { margin: 0; color: var(--muted); }
+  .khung { background: #000; border-radius: 10px; overflow: hidden; display: flex; justify-content: center; }
+  .khung canvas { width: 100%; height: auto; display: block; }
+  .khung.doc canvas { width: auto; height: 72vh; max-width: 100%; }
+  .hang { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .hang input[type=range] { flex: 1; min-width: 200px; accent-color: var(--accent); }
+  button, select, .tep { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+  button.chinh { background: var(--accent); border-color: var(--accent); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .tep input { display: none; }
+  #trangThai { color: var(--text); min-height: 1.5em; }
+  .mono { font-variant-numeric: tabular-nums; color: var(--muted); }
+  a { color: #7fb0f0; }
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <h1>Xưởng Video Mô Phỏng — dựng từng khung</h1>
+    <p>Bài thi: phần mở “What Soap Does to Water’s Skin” (Meniscus Lab, tập 2, beat h1–c1, khoảng 72 giây), khuôn kênh K1. Xem trước và xuất dùng chung một hàm vẽ; video được mã hoá từng khung ngay trên máy bạn.</p>
+  </div>
+  <div class="khung"><canvas id="stage" width="1920" height="1080" aria-label="Khung xem trước"></canvas></div>
+  <div class="hang">
+    <button id="phat" type="button" class="chinh">▶ Phát</button>
+    <input id="tua" type="range" min="0" max="6000" value="0" aria-label="Tua">
+    <span id="gio" class="mono">0.0 / 60 s</span>
+  </div>
+  <div class="hang">
+    <label>Khổ <select id="kho"><option value="16x9">16:9 — 1920×1080</option><option value="9x16">9:16 — 1080×1920</option></select></label>
+    <label class="tep">🎙 Nạp giọng đọc (mp3/wav)<input id="tepGiong" type="file" accept="audio/*"></label>
+    <label class="tep">⏱ Nạp mốc từ (words.json / .srt / .vtt)<input id="tepMoc" type="file" accept=".json,.srt,.vtt,application/json,text/vtt"></label>
+    <button id="xuat" type="button" class="chinh">⬇ Xuất MP4 từng khung</button>
+    <button id="huy" type="button" hidden>Huỷ</button>
+  </div>
+  <p id="trangThai" role="status"></p>
+  <p>Giọng đọc và mốc từng từ của bài thi đã có sẵn (edge-tts của Studio, miễn phí, chạy ở máy); phụ đề và các cú máy khớp theo giọng. Muốn thay giọng thì nạp tệp mới ở trên. <a href="./">Về công cụ soạn kịch bản</a>.</p>
+</main>
+<script src="vendor/mp4-muxer-5.2.2.js"></script>
+<script type="module" src="xuong.js"></script>
+</body>
+</html>

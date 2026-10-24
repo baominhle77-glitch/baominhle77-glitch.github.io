@@ -145,7 +145,6 @@
             <option value="1440">2K 1440p</option>
           </select>
         </label>
-        <label class="check"><input id="useMic" type="checkbox"> Thu giọng đọc từ micro khi xuất</label>
         <label class="check"><input id="readAloud" type="checkbox"> Đọc phụ đề khi xem trước</label>
       </div>
       <div class="row">
@@ -153,7 +152,7 @@
         <button id="btnCancel" type="button" hidden>Dừng xuất</button>
         <span id="exportStatus" class="muted" role="status"></span>
       </div>
-      <p class="hint">Video được ghi theo thời gian thực: video dài 2 phút cần khoảng 2 phút để xuất. Giữ tab này mở trong lúc xuất. Giọng đọc máy chỉ để nghe thử, không ghi vào video — muốn có tiếng hãy bật thu micro và đọc theo phụ đề.</p>
+      <p class="hint">Video được dựng từng khung ngay trên máy bạn (không quay màn hình), nên không giật và không giới hạn độ dài. Cần Chrome hoặc Edge bản mới. Giọng đọc máy chỉ để nghe thử, không ghi vào video. <a href="xuong.html">Mở Xưởng dựng từng khung (bài K1, nạp giọng đọc)</a>.</p>
     </div>
   </section>
 
@@ -195,6 +194,7 @@
   </form>
 </dialog>
 
+<script src="vendor/mp4-muxer-5.2.2.js"></script>
 <script src="sims.js"></script>
 <script src="ai.js"></script>
 <script src="app.js"></script>

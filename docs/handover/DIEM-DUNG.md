@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 03:00 GMT+7 (sau merge) — Claude Code
+**Cập nhật:** 24/10/2026 18:20 GMT+7 — Claude Code
 
 ## Việc đang làm
 
@@ -13,6 +13,21 @@
 - **Khóa đang giữ:** không có.
 - **Tài liệu chi tiết:** `docs/handover/VIDEO_MO_PHONG.md`.
 - **Link thử cho BaoMinh:** https://claude.ai/artifact/QWHDGZg8RMLkrj18mgVAbb (Artifact riêng tư; có nút viết kịch bản bằng Claude dùng hạn mức nick). Cập nhật: sinh lại trang từ `index.html` rồi publish cùng URL (xem `VIDEO_MO_PHONG.md`).
+
+## VIỆC ĐANG LÀM — lệnh GĐ Studio gd-20261024-1220 (Chủ tịch duyệt 24/10), task `EDU-20261024-04`
+
+Đọc lệnh trong hộp thư Artifact (collection `thu`, doc `gd-20261024-1220`); gói tài liệu ở collection `goi` (`gd-skill-web-v1`, `gd-goi-mau-v1`). Thư xác nhận + kế hoạch đã gửi: `web-20261024-1610`.
+1. [x] M1: 2 skill nguyên văn ở `.claude/skills/` (sha8 cf4d69c3, 1be9ba54) + dòng 6 trong `CLAUDE.md`.
+2. [x] M2: `docs/hoc_tu_ma_nguon.md` (hyperframes Apache-2.0, motion-canvas MIT, remotion chỉ khái niệm).
+3. [x] M3: kiến trúc mới trong `video-mo-phong/`: timeline tua được + scene graph + camera + easing tự viết; xuất từng khung WebCodecs + mp4-muxer (H.264 nếu có, không thì VP9); nạp tệp giọng + words.json; bỏ MediaRecorder.
+4. [x] M4: bài thi 60 s đầu `ho_so_mau` (K1 tập 2, beat h1–c1), 16:9 + 9:16 → **đã nộp** `qa/20261024-1732_k1t2_60s/` (commit `02c538e`). Tự chấm 32/39, không trượt mục cứng; A2 16:9 dài nhất 8,25 s / TB 6,0 s; 9:16 9,25 / 5,45; kiểm chữ 0 lỗi. Thư báo GĐ: `web-20261024-1736`. **Chờ GĐ chấm**; trượt mục nào thì chỉ sửa mục đó rồi nộp lại (qa/ phiên bản mới).
+- **v2 đang làm** theo thư GĐ `gd-20261024-1650`, `-1652`, `-1705` (đọc sau khi nộp v1): nạp giọng thật `goi/gd-giong-k1t2-60s` (+ p1..p4 base64, kiểm sha256; beat h1 0/9.72, h2 10.22/13.776, h3 24.496/4.392, h4 29.388/24.72, c1 54.608/16.512 → bài ~71,62 s, cấm đổi tốc độ giọng); A2 mới: không khoảng nào > 4 s mà < 6 % khung đổi, bằng chuyển động có nghĩa (cấm rung giả); 9:16 bố cục dọc thật (vật 25–60 % chiều cao, không tràn lề 6 %, không sàn trống); phụ đề ≥ 2 từ/cụm, hộp + chữ đều tương phản ≥ 4,5:1; vũng theo profile meniscus góc θ (h = 2√(γ/ρg)·sin(θ/2)); 9:16 ~30 s không được chỉ 1 nhiệt kế; dòng nguồn ≥ 22 px, đậm hơn; chuyển beat bằng match-cut 0,4–0,7 s power3.inOut; tiêu đề < 6 từ vào bằng back.out(1.4)/stagger; qa/ thêm mp4 có tiếng 2 khổ, contact sheet 4 fps, bảng pixel-diff 0,25 s, 3 PNG giữa mỗi beat. Ghi giờ thư đúng đồng hồ.
+- **Tiến độ v2 (18:20):** mã v2 đã push (commit `8190994` trở về trước): giọng thật nhúng sẵn (`video-mo-phong/bai/k1t2_giong.mp3`, `bai/k1t2_moc.js`), bài 72 s, vũng Young–Laplace, 9:16 kệ xếp chồng, đo nhịp nhanh đạt ≤ 4 s cả hai khổ (16:9 3,5 s; 9:16 3,75 s), kiểm chữ 0 lỗi. Đã xuất thử 2 khổ có tiếng (VP9+Opus, tiếng khớp). `qa-tools/bo_dan_chung.py` đã viết bản v2 (video có tiếng, tờ ghép 4 fps, bảng pixel-diff, PNG mỗi beat).
+- **Bước tiếp v2:** (1) xuất 2 khổ bằng `window.XUONG.xuatKho(kho, {giong: "macdinh"})` trên `xuong.html` (localhost); (2) chạy `bo_dan_chung.py qa/<YYYYMMDD-HHMM>_k1t2_v2 ...`; (3) viết `tu_cham.md` v2; (4) commit + thư GĐ `web-<giờ thật>`. Bản xem thử nhánh (chưa lên Pages chính): https://raw.githack.com/baominhle77-glitch/baominhle77-glitch.github.io/8190994a0ab3c0186d9af555a3c0745f8dd0d649/video-mo-phong/xuong.html
+- Còn nợ (ghi trong `tu_cham.md`): chưa có giọng edge-tts + words.json (D1 chỉ 1 điểm); móc câu tò mò chưa vào 0–5 s (A1); vài khung gần trống khi lia (A3); xuất ×0,92 thời gian thực (chưa nhanh hơn).
+- Cách dựng lại bộ dẫn chứng: xuất 2 khổ từ `video-mo-phong/xuong.html` (hoặc `window.XUONG.xuatKho`), rồi `python3 video-mo-phong/qa-tools/bo_dan_chung.py qa/<phien_ban> v16.mp4 v9.mp4 stats16.json stats9.json meta.json` (meta = `chuyenCanh` của `taoBai` mỗi khổ).
+- Ràng buộc: không API trả phí, không dịch vụ tốn credit, không khóa trong repo. Mỗi mốc gửi 1 thư (tu: web) kèm SHA + đường dẫn qa/.
+- Đã biết: Chromium thử nghiệm không có H.264 encoder (chỉ VP9/AV1/Opus); chờ Studio gửi giọng edge-tts + words.json cho h1–c1.
 
 ## Trạng thái
 
