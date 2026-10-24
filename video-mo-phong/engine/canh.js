@@ -106,10 +106,14 @@ export function veChu(rc, text, x, y, o = {}) {
     mo = Math.min(mo, Math.max(0, tach / 24));
   }
   // chữ trong cảnh (không phải lớp màn hình) mờ đi khi lia qua dải phụ đề: không bao giờ bị hộp phụ đề che
-  if (rc.fmt && rc.fmt.daiPhuDe && rc.lopHienTai && rc.lopHienTai !== "man") {
-    const [p0, q0, p1, q1] = rc.fmt.daiPhuDe;
-    const tach = Math.max(p0 - sx1, sx0 - p1, q0 - sy1, sy0 - q1);
-    mo = Math.min(mo, Math.max(0, tach / 20));
+  if (rc.lopHienTai && rc.lopHienTai !== "man") {
+    // chữ trong cảnh mờ đi khi lia qua dải phụ đề hoặc vùng dòng nguồn: không chồng lên chữ lớp màn hình
+    for (const vung of [rc.fmt && rc.fmt.daiPhuDe, rc.fmt && rc.fmt.vungNguon]) {
+      if (!vung) continue;
+      const [p0, q0, p1, q1] = vung;
+      const tach = Math.max(p0 - sx1, sx0 - p1, q0 - sy1, sy0 - q1);
+      mo = Math.min(mo, Math.max(0, tach / 20));
+    }
   }
   mo = Math.min(1, mo);
   if (mo <= 0) return { w: total, x0, x1: x0 + total, y0: yb - asc, y1: yb + desc };

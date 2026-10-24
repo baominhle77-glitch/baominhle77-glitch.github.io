@@ -31,6 +31,8 @@
 
 ## Trạng thái
 
+- **25/10 00:06 — EDU-20261024-09, session_0129 ("web hiennhi") tiếp bản C13 của session_01357 (commit 22db989).** Thêm: cú máy ≤ 0,5 s; nhãn SDS 16:9 sang trái cốc; tiêu đề kết lên trên; chữ cảnh tự mờ ở vùng dòng nguồn (`vungNguon` + `engine/canh.js`). Kiểm chữ 0 lỗi hai khổ. **Còn hở nhịp:** 16:9 2,5→7 s (cú `M.however`), 9:16 34,25→40,75 s (cú `M.millimolar + 0.75` không đủ 6 %). Sau đó: xuất 2 khổ có tiếng, dựng `qa/` + tự chấm 10 mục, thư `hop_thu/web-…-nop-….md`. Công cụ đo: `hop_thu/dinh_kem/web-20261024-2325-cong-cu-do/` (nhánh `studio-hop-thu`). **BaoMinh nhắc tiết kiệm limit: chỉ chạy đo 1 lượt sau mỗi đợt sửa.**
+
 - **24/10/2026 23:53 — `EDU-20261024-09` TẠM DỪNG ở session_01357; khoá đã chuyển cho session_0129** (thư GĐ `gd-20261024-2348`: dùng hết limit nick Nhi trước; 01357 chỉ chạy lại khi GĐ nhắn hoặc có thư `web-…-drop.md` của 0129). Việc: dựng lại k1t2 một lần đủ C13 10 mục + màu v2 + viền mực 2 px + vignette 22 % (thư `gd-20261024-2332` mục 5; hộp thư = nhánh `studio-hop-thu`).
   - **XONG trong mã** (`video-mo-phong/bai/k1t2_60s.js`, `kenh/k1.js`, `engine/phude.js`, `engine/canh.js`):
     - Mục 1–2: mỗi cú máy đóng khung trọn một nhóm vật (`khung()` + vùng `F.vat`); sổ `VAT` (hộp bao thế giới theo t); các nhóm vật trên bàn cách xa nhau; ống nhỏ giọt trọn vẹn; thước kẹp đi theo mép vũng; hai vũng c1 trên CÙNG một bàn (bỏ kệ xếp chồng 9:16); bong bóng 9:16 bay cao 660. **Bộ kiểm cắt vật: 0 lỗi cả 2 khổ.**

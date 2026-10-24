@@ -19,12 +19,12 @@ export const KHO = {
   "16x9": {
     ten: "16x9", W: 1920, H: 1080, pip: [1552, 36, 1884, 246], an: [40, 40, 1880, 1040],
     vat: [130, 280, 1790, 925],
-    phuDe: { cx: 960, cy: 990, maxW: 1240, size: 46 }, daiPhuDe: [320, 950, 1600, 1062], nguon: { x: 1530, y: 72, size: 24, maxW: 860 }, tieuDe: { x: 960, y: 290, size: 56 }
+    phuDe: { cx: 960, cy: 990, maxW: 1240, size: 46 }, daiPhuDe: [320, 950, 1600, 1062], vungNguon: [640, 40, 1545, 225], nguon: { x: 1530, y: 72, size: 24, maxW: 860 }, tieuDe: { x: 960, y: 290, size: 56 }
   },
   "9x16": {
     ten: "9x16", W: 1080, H: 1920, pip: [62, 266, 438, 508], an: [65, 270, 1015, 1536],
     vat: [100, 560, 980, 1310],
-    phuDe: { cx: 540, cy: 1382, maxW: 860, size: 50 }, daiPhuDe: [90, 1338, 990, 1426], nguon: { x: 1005, y: 302, size: 24, maxW: 540 }, tieuDe: { x: 540, y: 640, size: 58 }
+    phuDe: { cx: 540, cy: 1382, maxW: 860, size: 50 }, daiPhuDe: [90, 1338, 990, 1426], vungNguon: [450, 278, 1015, 545], nguon: { x: 1005, y: 302, size: 24, maxW: 540 }, tieuDe: { x: 540, y: 640, size: 58 }
   }
 };
 
@@ -264,7 +264,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   let dau = 1;
   for (const [t0, dur, dich0, e] of LICH) {
     const dich = dich0.hop ? khung(dich0.hop, dich0.zMax, e ? 0 : (dau = -dau) * D) : dich0;
-    if (e === "set") datCam(t0, dich); else quay(t0, e ? dur : Math.min(dur, 0.6), dich, e);
+    if (e === "set") datCam(t0, dich); else quay(t0, e ? dur : Math.min(dur, 0.5), dich, e);
   }
 
   // ===== Lớp nền: bụi sáng trôi (parallax thấp) =====
@@ -437,7 +437,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       ctx.restore();
       veChu(rc, "our sketch", coc.x, coc.y - 16, { size: sz(rc, L.nhan * 0.7), italic: true, align: "center" });
       veNhan(rc, { x0: coc.x - coc.w * 0.2, y0: coc.y - coc.h * 0.5, x1: doc ? coc.x - 20 : coc.x - 150, y1: coc.y - coc.h - (doc ? 150 : 90), text: "soap here = SDS (lab surfactant)", u: u(t, M.soap4 + 0.2, 0.7) * ra(t, M.surfactant + 1.6, 0.3), size: sz(rc, L.nhan), align: doc ? "center" : "right" });
-      veNhan(rc, { x0: coc.x + coc.w * 0.3, y0: yMat + 4, x1: doc ? coc.x + 30 : coc.x + 60, y1: coc.y - coc.h - (doc ? 150 : 110), text: "SDS 25.0 mM in water (inferred)", u: u(t, M.millimolar + 0.5, 0.7) * ra(t, M.seven - 0.6, 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "left" });
+      veNhan(rc, { x0: coc.x + coc.w * 0.3, y0: yMat + 4, x1: doc ? coc.x + 30 : coc.x - 40, y1: coc.y - coc.h - (doc ? 150 : 110), text: "SDS 25.0 mM in water (inferred)", u: u(t, M.millimolar + 0.5, 0.7) * ra(t, M.seven - 0.6, 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "right" });
       if (vaoT(t) > 0 && raT(t) < 1) {
         veTheSDS(rc, { x: xThe(t), y: giay.y, w: giay.w, h: giay.h, size: sz(rc, 23), dong: ["SDS molecule (our sketch)", "water-loving head", "oily tail"] });
       }
@@ -537,7 +537,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     ["less pull, longer-lived film?", M.how, tX - 0.35, doc ? TD.y : 200],
     ["barely changes", M.barely, doc ? M.becomes - 0.3 : tC - 0.25, doc ? 575 : TD.y],
     ["both at 25 °C", doc ? M.twentyC + 0.4 : M.bench, M.plain - 0.25, doc ? 1300 : TD.y],
-    ["only the skin changes", M.only, THOI_LUONG, doc ? 1262 : 880]
+    ["only the skin changes", M.only, THOI_LUONG, doc ? TD.y : TD.y]
   ];
   const man = new Nut({
     ve: (rc) => {
