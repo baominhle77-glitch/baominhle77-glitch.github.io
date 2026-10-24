@@ -76,7 +76,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   const M = {
     episode: moc("h1", "episode"), five: moc("h1", "five"), however: moc("h1", "however"), poured: moc("h1", "poured"),
     now: moc("h1", "now"), soap: moc("h1", "soap"), deeper: moc("h1", "deeper"),
-    shallower: moc("h2", "shallower"), cuts: moc("h2", "cuts"), seventy: moc("h2", "seventy"), thirty: moc("h2", "thirty"),
+    shallower: moc("h2", "shallower"), sds2: moc("h2", "sds"), cuts: moc("h2", "cuts"), seventy: moc("h2", "seventy"), thirty: moc("h2", "thirty"),
     about: moc("h2", "about"), half: moc("h2", "half"), puddle: moc("h2", "puddle"), three: moc("h2", "three", 2), calculated: moc("h2", "calculated"),
     weaker: moc("h3", "weaker"), bubble: moc("h3", "bubble"), how: moc("h3", "how"), more: moc("h3", "more"),
     temperature: moc("h4", "temperature"), soap4: moc("h4", "soap"), surfactant: moc("h4", "surfactant"), millimolar: moc("h4", "millimolar"),
@@ -160,9 +160,9 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     [M.now - 0.15, 0.8, { x: L.ax - 90, y: L.ban - 260, zoom: 1.3 }],
     [M.deeper - 0.1, 0.8, { x: L.ax, y: L.camY - 20, zoom: 1.0 }],
     [ti, 0.45, { zoom: 1.28, y: L.ban - 60 }, "power3.out"], // giật máy theo cú chạm: hạ xuống sát mặt nước
-    [ti + 1.0, 0.8, { zoom: 1.05, y: L.camY - 10 }, "sine.inOut"],
+    [M.sds2 - 0.3, 0.6, { zoom: 1.0, y: L.camY - 10 }], // "Our soap, SDS": lùi ra thấy cả vũng đã loang
     // h2
-    [M.cuts - 0.3, 1.0, { x: L.ax + 300, y: L.ban - 150, zoom: zP }],
+    [M.cuts - 0.3, 0.6, { x: L.ax + 300, y: L.ban - 150, zoom: 2.1 }],
     [M.thirty - 0.2, 0.9, { x: L.ax + 120, y: L.ban - 250, zoom: 1.3 }],
     [M.about - 0.1, 0.9, { x: L.ax + 300, y: L.ban - 150, zoom: zP }],
     [M.puddle - 0.15, 0.9, { x: xKA + 220, y: L.ban - 240, zoom: 1.6 }],
@@ -521,7 +521,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   return {
     F, tl, canh, cum, chuyenCanh, M, VUNG, tu: tuTrongBai, THOI_LUONG, FPS, mocGiong: true, LOI,
     phuDe: {
-      ...F.phuDe, mau: K1.NEN_TREN, nenHop: K1.MUC, aHop: 0.92, vien: rgba(K1.NEN_TREN, 0.9),
+      ...F.phuDe, mau: K1.NEN_TREN, nenHop: K1.MUC, aHop: 1, vien: K1.NEN_TREN,
       gachChan: (w) => (CANG.test(w) ? K1.CANG : NUOC.test(w) ? K1.NUOC : null)
     },
     hauKy: (rc) => { veVien(rc); veVungPip(rc, F.pip); }

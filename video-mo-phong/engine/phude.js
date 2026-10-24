@@ -60,7 +60,7 @@ export function vePhuDe(rc, cum, t, o) {
   ctx.globalAlpha *= aHop;
   if (daNoi > 0) {
     ctx.fillRect(o.cx - tong / 2 - pad, o.cy - size * 0.78, daNoi + pad * 2, size * 1.5);
-    if (o.vien) { ctx.strokeStyle = o.vien; ctx.lineWidth = 2; ctx.strokeRect(o.cx - tong / 2 - pad - 1, o.cy - size * 0.78 - 1, daNoi + pad * 2 + 2, size * 1.5 + 2); }
+    if (o.vien) { ctx.strokeStyle = o.vien; ctx.lineWidth = 3; ctx.strokeRect(o.cx - tong / 2 - pad - 1.5, o.cy - size * 0.78 - 1.5, daNoi + pad * 2 + 3, size * 1.5 + 3); }
   }
   ctx.globalAlpha /= aHop;
   let x = o.cx - tong / 2;

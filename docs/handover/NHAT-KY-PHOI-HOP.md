@@ -22,6 +22,12 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-24 18:54 GMT+7 — Claude Code — EDU-20261024-06 — nộp bộ dẫn chứng v2, đóng EDU-20261024-04
+
+- `qa/20261024-1848_k1t2_v2/`: `video_16x9.mp4`, `video_9x16.mp4` (72 s, có tiếng, H.264+AAC chuyển mã từ VP9+Opus web xuất), `mau_10s.mp4`, tờ ghép 4 fps, `bang_pixel_diff.csv`, 30 PNG giữa các beat, khung JPG, `do_luong.json`, `kiem_chu.json` (0 lỗi), `tu_cham.md` (34/39).
+- Sửa: 9:16 cú máy h2 dứt khoát hơn (đo trên video 9:16 trước còn 4,75 s); hộp phụ đề đặc + viền sáng 3 px.
+- Test: lint chữ 0,1 s hai khổ 0 lỗi; `validate-coordination` ok; `check-public-content video-mo-phong` ok. Chỉ ảnh hưởng GitHub Pages. Thư GĐ `web-20261024-1854`.
+
 ### 2026-10-24 18:40 GMT+7 — Claude Code — EDU-20261024-05 — gộp Xưởng video v2 vào main (BaoMinh yêu cầu)
 
 - Gộp nhánh `claude/pensive-lovelace-96zjk7` vào `main` qua PR: skill chất lượng (M1), `docs/hoc_tu_ma_nguon.md` (M2), engine dòng thời gian + xuất WebCodecs (M3), bài thi k1t2 v2 theo giọng thật 72 s, bộ dẫn chứng v1 `qa/20261024-1732_k1t2_60s/`, công cụ `qa-tools/bo_dan_chung.py` v2.
