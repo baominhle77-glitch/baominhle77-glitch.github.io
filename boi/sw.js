@@ -1,0 +1,36 @@
+// Service worker của boi/: chạy offline phần luật (trang, mã, dữ liệu lá). Gọi AI luôn đi thẳng mạng, không cache.
+const CACHE = "boi-v1";
+const CORE = [
+  "./", "index.html", "manifest.webmanifest", "css/app.css",
+  "js/app.js", "js/views.js", "js/store.js", "js/state.js", "js/core.js", "js/parser.js", "js/spreads.js", "js/topic.js",
+  "js/reading.js", "js/insight.js", "js/money.js", "js/cards.js", "js/markdown.js", "js/ai.js",
+  "data/tarot.json", "data/lenormand.json",
+  "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png",
+];
+const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
+
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
+});
+self.addEventListener("activate", (e) => {
+  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith("boi-") && k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+});
+self.addEventListener("fetch", (e) => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url);
+  const same = url.origin === self.location.origin && url.pathname.startsWith(new URL(self.registration.scope).pathname);
+  const font = FONT_HOSTS.includes(url.hostname);
+  if (!same && !font) return;
+  if (font) {
+    e.respondWith(caches.open(CACHE).then(async (c) => (await c.match(req)) || fetch(req).then((r) => { if (r.ok || r.type === "opaque") c.put(req, r.clone()); return r; })));
+    return;
+  }
+  // Có sẵn thì trả ngay, đồng thời lấy bản mới cho lần sau
+  e.respondWith(caches.open(CACHE).then(async (c) => {
+    const key = req.mode === "navigate" ? "index.html" : req;
+    const hit = await c.match(key, { ignoreSearch: req.mode === "navigate" });
+    const net = fetch(req).then((r) => { if (r.ok) c.put(key, r.clone()); return r; }).catch(() => hit);
+    return hit || net;
+  }));
+});

@@ -16,7 +16,7 @@ Spec gốc + bản bổ sung (SPA nhiều màn, thiết kế cao cấp, PWA, AI 
 | 9. Mặt lá SVG riêng từng lá (js/cards.js) | xong |
 | 10. SPA hash router + 10 màn + thiết kế (index.html, css, js/app.js, js/views.js, js/store.js) | xong, đã chạy e2e Playwright (Pixel 7) không lỗi |
 | 11. AI: Gemini mặc định, dò model mạnh nhất + dự phòng 429/404, JSON có cấu trúc, streaming, hỏi tiếp (js/ai.js) | xong (chưa thử với khoá thật — không có khoá trong phiên này) |
-| 12. PWA (manifest, sw.js, icon) | chưa |
+| 12. PWA (manifest.webmanifest, sw.js, icons/) | xong |
 | 13. Kiểm trình duyệt + Lighthouse | chưa |
 | 14. Sổ khoá + PR + merge + kiểm link | chưa |
 
