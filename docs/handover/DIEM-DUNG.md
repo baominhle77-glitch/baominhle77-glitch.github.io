@@ -2,13 +2,13 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 19:31 GMT+7 — Claude Code
+**Cập nhật:** 24/10/2026 23:20 GMT+7 — Claude Code
 
 ## Việc đang làm
 
 - **Dự án:** Xưởng Video Mô Phỏng — app web `video-mo-phong/` (nhập ý tưởng → kịch bản → phong cách → xuất video).
 - **Đã phát hành:** PR #128 merge vào `main` (`d69e3c2`). App chạy lâu dài tại **https://baominhle77-glitch.github.io/video-mo-phong/** (GitHub Pages run 40014350114 SUCCESS; Cloudflare deploy run 40014351111 SUCCESS, không đổi nội dung Cloudflare).
-- **Nhánh làm tiếp:** `claude/pensive-lovelace-96zjk7` đã được đặt lại từ `main` mới nhất; việc mới mở PR mới.
+- **Nhánh làm tiếp (BaoMinh chốt 24/10):** luôn làm trên `claude/pensive-lovelace-96zjk7`, kể cả khi phiên mới được giao nhánh khác; việc mới mở PR mới.
 - **Task gần nhất:** `EDU-20261024-03` (phát hành) — completed.
 - **Khóa đang giữ:** không có.
 - **Tài liệu chi tiết:** `docs/handover/VIDEO_MO_PHONG.md`.
@@ -30,6 +30,8 @@
 - Đã biết: Chromium thử nghiệm không có H.264 encoder (chỉ VP9/AV1/Opus); chờ Studio gửi giọng edge-tts + words.json cho h1–c1.
 
 ## Trạng thái
+
+- **24/10/2026 23:20 — CẢNH BÁO hộp thư:** lệnh GĐ mới nhất (qua BaoMinh) nói hộp thư là **repo riêng tư** `baominhle77-glitch/studio-hop-thu` (nhánh main), khác với dòng EDU-20261024-08 bên dưới (nhánh `studio-hop-thu` trong repo này). Phiên cloud `session_01357…` thử: `git clone` repo riêng tư báo `could not read Username` (chưa cấp cho môi trường cloud), `add_repo` bị chặn quyền → đã báo `KHONG_VAO_DUOC_HOP_THU`. Khi vào được: đọc `README.md` + `hop_thu/gd-20261024-2320-mo-hop-thu.md`; C13 đủ 9 điều, màu K1 v2 #3F6A9E/#D1834F, vignette K1 22 %; nộp = push qa/ ở nhánh này rồi gửi `hop_thu/web-YYYYMMDD-HHMM-<chu-de>.md` kèm SHA; thư đầu kèm ý kiến về hộp thư; sắp hết limit gửi `web-...-drop.md`. **Có 2 phiên cloud cùng đẩy nhánh này** — luôn `git fetch` trước khi push.
 
 - **24/10 19:31 — task EDU-20261024-08:** GĐ Studio nhắn 3 việc qua BaoMinh. (1) Dừng khi sắp hết limit → `CLAUDE.md` mục 7. (2) Liên kết: **Chủ tịch chọn phương án A** → hộp thư `hop_thu/` trên nhánh `studio-hop-thu` (Web ghi `web-*.md`, GĐ ghi `gd-*.md`); đã gửi thư đầu `hop_thu/web-20261024-1931-lien-ket-va-c13.md`; chi tiết `docs/handover/LIEN_KET_STUDIO.md`. (3) Luật C13: đã đổi màu K1 v2 (xanh #3F6A9E, cam #D1834F) trong `video-mo-phong/kenh/k1.js`; **chưa có toàn văn 9 điều**, đã xin GĐ. Nhận đủ thì áp một lượt cho k1t2, xuất lại 2 khổ, nộp `qa/` mới. **Bước tiếp:** `git fetch origin studio-hop-thu`, đọc thư `gd-*.md` mới.
 
