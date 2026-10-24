@@ -1,0 +1,30 @@
+{
+ "16x9": {
+  "nhip_ho_tren_3_5s": [],
+  "nhip_dai_nhat": 3.5,
+  "cat_mep": [],
+  "chu": [],
+  "tuong_phan_duoi_4_5": [],
+  "vat_nho_duoi_4pt": [],
+  "co_vat_trung_vi": 0.1142875329445871,
+  "cum_phu_de_min_max": [
+   2,
+   5
+  ],
+  "co_chu_nguon": 24
+ },
+ "9x16": {
+  "nhip_ho_tren_3_5s": [],
+  "nhip_dai_nhat": 3.5,
+  "cat_mep": [],
+  "chu": [],
+  "tuong_phan_duoi_4_5": [],
+  "vat_nho_duoi_4pt": [],
+  "co_vat_trung_vi": 0.05514124557005404,
+  "cum_phu_de_min_max": [
+   2,
+   5
+  ],
+  "co_chu_nguon": 24
+ }
+}

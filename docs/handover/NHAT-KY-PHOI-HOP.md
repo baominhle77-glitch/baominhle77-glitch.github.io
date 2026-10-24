@@ -22,6 +22,13 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-25 01:02 GMT+7 — Claude Code (session_0129) — EDU-20261024-09 — nộp bản k1t2 dựng lại theo C13
+
+- Commit: 619c4a7, d23da1a, 417253c (nhánh `claude/pensive-lovelace-96zjk7`); bộ dẫn chứng `qa/20261025-0052_k1t2_c13/`.
+- File: `video-mo-phong/bai/k1t2_60s.js` (cú máy, vị trí chữ), `engine/canh.js` (chữ cảnh tránh vùng nguồn), `qa-tools/kiem_truoc.mjs` (bộ kiểm tiền kỳ mới), `CLAUDE.md` (luật 9: chuẩn bị kỹ trước khi vẽ).
+- Test: `kiem_truoc.mjs` ĐẠT TIỀN KỲ 2 khổ; đo trên video: nhịp dài nhất 3,25 s, 0 khoảng > 4 s; `validate-coordination` ok. Không deploy (GitHub Pages tự phục vụ nhánh main khi gộp).
+- Còn lại: chờ GĐ chấm; xuất vẫn chậm hơn thời gian thực (×0,70).
+
 ### 2026-10-24 19:30 GMT+7 — Claude Code — EDU-20261024-08 — liên kết GĐ Studio, luật dừng khi hết limit, màu K1 v2
 
 - `CLAUDE.md` mục 7 (sắp hết limit: dừng ở mốc gần nhất, commit + push, cập nhật DIEM-DUNG) và mục 8 (hộp thư `hop_thu/` trên nhánh `studio-hop-thu`).

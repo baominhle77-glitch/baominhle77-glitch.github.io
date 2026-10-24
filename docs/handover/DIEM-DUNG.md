@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 23:53 GMT+7 — Claude Code (session_01357, TẠM DỪNG theo thư GĐ gd-20261024-2348)
+**Cập nhật:** 25/10/2026 01:02 GMT+7 — Claude Code (session_0129 "web hiennhi") — ĐÃ NỘP bản C13
 
 ## Việc đang làm
 
@@ -30,6 +30,10 @@
 - Đã biết: Chromium thử nghiệm không có H.264 encoder (chỉ VP9/AV1/Opus); chờ Studio gửi giọng edge-tts + words.json cho h1–c1.
 
 ## Trạng thái
+
+- **25/10 01:02 — EDU-20261024-09 ĐÃ NỘP `qa/20261025-0052_k1t2_c13/`** (dựng từ commit 417253c). Video 2 khổ có tiếng, contact sheet 4 fps, `tu_cham.md` (bảng 10 mục C13 có mốc giây/khung), `kiem_truoc.json`. Đo trên video thật: khoảng tĩnh dài nhất 3,25 s cả 2 khổ, 0 khoảng > 4 s; vignette mép/giữa 0,769 (16:9) / 0,785 (9:16). Khoá đã đóng (completed). **Chờ GĐ chấm**; trượt mục nào thì mở task mới, chỉ sửa mục đó.
+  - Quy trình mới (CLAUDE.md luật 9): sửa → `node video-mo-phong/qa-tools/kiem_truoc.mjs` một lần → chỉ khi "ĐẠT TIỀN KỲ" mới xuất. Bộ kiểm giờ đo nhịp ở 4 pha lấy mẫu: lần xuất đầu lệch vì ffmpeg lấy mẫu lệch pha ~0,2 s.
+  - Xuất: script trong scratchpad của phiên (`xuat.mjs`, `meta.mjs`; bản sao ở `hop_thu/dinh_kem/web-20261024-2325-cong-cu-do/` nhánh `studio-hop-thu`), rồi `python3 -B video-mo-phong/qa-tools/bo_dan_chung.py qa/<pb> v16 v9 s16 s9 meta`.
 
 - **25/10 00:06 — EDU-20261024-09, session_0129 ("web hiennhi") tiếp bản C13 của session_01357 (commit 22db989).** Thêm: cú máy ≤ 0,5 s; nhãn SDS 16:9 sang trái cốc; tiêu đề kết lên trên; chữ cảnh tự mờ ở vùng dòng nguồn (`vungNguon` + `engine/canh.js`). Kiểm chữ 0 lỗi hai khổ. **Còn hở nhịp:** 16:9 2,5→7 s (cú `M.however`), 9:16 34,25→40,75 s (cú `M.millimolar + 0.75` không đủ 6 %). Sau đó: xuất 2 khổ có tiếng, dựng `qa/` + tự chấm 10 mục, thư `hop_thu/web-…-nop-….md`. Công cụ đo: `hop_thu/dinh_kem/web-20261024-2325-cong-cu-do/` (nhánh `studio-hop-thu`). **BaoMinh nhắc tiết kiệm limit: chỉ chạy đo 1 lượt sau mỗi đợt sửa.**
 
