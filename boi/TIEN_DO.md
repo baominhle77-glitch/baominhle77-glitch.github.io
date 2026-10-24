@@ -9,7 +9,7 @@ Nhánh: `claude/boi-web` → PR vào `main` (GitHub Pages phục vụ từ `main
 | 3. Cơ chế xáo/khoá (js/core.js, js/state.js, js/parser.js, js/spreads.js) | xong |
 | 4. Giải bài (js/reading.js) | xong |
 | 5. Quy đổi tiền (js/money.js) | xong |
-| 5b. Giao diện (js/app.js, js/ai.js) | chưa |
+| 5b. Giao diện (js/app.js, js/ai.js) | xong (chưa kiểm trình duyệt) |
 | 6. Test (test.mjs) + PR + merge | chưa |
 
 Bước tiếp theo: xem dòng "chưa" đầu tiên.
