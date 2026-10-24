@@ -2,6 +2,11 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
+## GPT 25/10: sửa riêng món nợ A1
+
+- Nhánh `gpt/k1t2-tiep-01`: thêm câu hỏi “Will soap flatten the puddle?” trong 0,6–4,6 s bằng tiêu đề động sẵn có cho 16:9 và 9:16. Giữ nguyên giọng, mốc lời, camera và logic mô phỏng; chưa xử lý B2.
+- **Chưa kiểm bằng trình duyệt:** GĐ chạy `node video-mo-phong/qa-tools/kiem_truoc.mjs` rồi `node video-mo-phong/qa-tools/kiem_cat_vat.mjs`; phản hồi lỗi để sửa cục bộ. Chưa xuất video/QA mới.
+
 **Cập nhật:** 25/10/2026 01:02 GMT+7 — Claude Code (session_0129 "web hiennhi") — ĐÃ NỘP bản C13
 
 ## Việc đang làm

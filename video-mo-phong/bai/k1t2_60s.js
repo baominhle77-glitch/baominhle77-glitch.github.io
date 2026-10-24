@@ -535,6 +535,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   const beatTai = (t) => [...LOI].reverse().find((b) => t >= b.bd) || LOI[0];
   const TD = F.tieuDe;
   const TIEU_DE = [
+    ["Will soap flatten the puddle?", 0.6, 4.6, doc ? TD.y : 420], // A1: câu hỏi tò mò trong 0–5 s
     ["deeper, or shallower?", M.deeper, ti + 0.5, doc ? TD.y : 420],
     ["less pull, longer-lived film?", M.how, tX - 0.35, doc ? TD.y : 200],
     ["barely changes", M.barely, doc ? M.becomes - 0.3 : tC - 0.25, doc ? 575 : TD.y],
