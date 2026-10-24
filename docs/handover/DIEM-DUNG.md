@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 16:20 GMT+7 — Claude Code
+**Cập nhật:** 24/10/2026 17:40 GMT+7 — Claude Code
 
 ## Việc đang làm
 
@@ -20,7 +20,10 @@
 1. [x] M1: 2 skill nguyên văn ở `.claude/skills/` (sha8 cf4d69c3, 1be9ba54) + dòng 6 trong `CLAUDE.md`.
 2. [x] M2: `docs/hoc_tu_ma_nguon.md` (hyperframes Apache-2.0, motion-canvas MIT, remotion chỉ khái niệm).
 3. [x] M3: kiến trúc mới trong `video-mo-phong/`: timeline tua được + scene graph + camera + easing tự viết; xuất từng khung WebCodecs + mp4-muxer (H.264 nếu có, không thì VP9); nạp tệp giọng + words.json; bỏ MediaRecorder.
-4. [ ] M4: bài thi 60 s đầu `ho_so_mau` (K1 Meniscus Lab tập 2, beat h1–c1), 16:9 + 9:16, khuôn K1; nộp `qa/<YYYYMMDD-HHMM>_k1t2_60s/` theo barem `kiem-chat-luong-video`.
+4. [x] M4: bài thi 60 s đầu `ho_so_mau` (K1 tập 2, beat h1–c1), 16:9 + 9:16 → **đã nộp** `qa/20261024-1732_k1t2_60s/` (commit `02c538e`). Tự chấm 32/39, không trượt mục cứng; A2 16:9 dài nhất 8,25 s / TB 6,0 s; 9:16 9,25 / 5,45; kiểm chữ 0 lỗi. Thư báo GĐ: `web-20261024-1740`. **Chờ GĐ chấm**; trượt mục nào thì chỉ sửa mục đó rồi nộp lại (qa/ phiên bản mới).
+- **v2 đang làm** theo thư GĐ `gd-20261024-1650`, `-1652`, `-1705` (đọc sau khi nộp v1): nạp giọng thật `goi/gd-giong-k1t2-60s` (+ p1..p4 base64, kiểm sha256; beat h1 0/9.72, h2 10.22/13.776, h3 24.496/4.392, h4 29.388/24.72, c1 54.608/16.512 → bài ~71,62 s, cấm đổi tốc độ giọng); A2 mới: không khoảng nào > 4 s mà < 6 % khung đổi, bằng chuyển động có nghĩa (cấm rung giả); 9:16 bố cục dọc thật (vật 25–60 % chiều cao, không tràn lề 6 %, không sàn trống); phụ đề ≥ 2 từ/cụm, hộp + chữ đều tương phản ≥ 4,5:1; vũng theo profile meniscus góc θ (h = 2√(γ/ρg)·sin(θ/2)); 9:16 ~30 s không được chỉ 1 nhiệt kế; dòng nguồn ≥ 22 px, đậm hơn; chuyển beat bằng match-cut 0,4–0,7 s power3.inOut; tiêu đề < 6 từ vào bằng back.out(1.4)/stagger; qa/ thêm mp4 có tiếng 2 khổ, contact sheet 4 fps, bảng pixel-diff 0,25 s, 3 PNG giữa mỗi beat. Ghi giờ thư đúng đồng hồ.
+- Còn nợ (ghi trong `tu_cham.md`): chưa có giọng edge-tts + words.json (D1 chỉ 1 điểm); móc câu tò mò chưa vào 0–5 s (A1); vài khung gần trống khi lia (A3); xuất ×0,92 thời gian thực (chưa nhanh hơn).
+- Cách dựng lại bộ dẫn chứng: xuất 2 khổ từ `video-mo-phong/xuong.html` (hoặc `window.XUONG.xuatKho`), rồi `python3 video-mo-phong/qa-tools/bo_dan_chung.py qa/<phien_ban> v16.mp4 v9.mp4 stats16.json stats9.json meta.json` (meta = `chuyenCanh` của `taoBai` mỗi khổ).
 - Ràng buộc: không API trả phí, không dịch vụ tốn credit, không khóa trong repo. Mỗi mốc gửi 1 thư (tu: web) kèm SHA + đường dẫn qa/.
 - Đã biết: Chromium thử nghiệm không có H.264 encoder (chỉ VP9/AV1/Opus); chờ Studio gửi giọng edge-tts + words.json cho h1–c1.
 

@@ -57,8 +57,8 @@
       ],
       "status": "in_progress",
       "started_at": "2026-10-24T16:15:00+07:00",
-      "heartbeat_at": "2026-10-24T16:15:00+07:00",
-      "summary": "Lenh GD Studio gd-20261024-1220 (Chu tich duyet): skill chat luong, hoc ma nguon mo, kien truc timeline+scene graph+WebCodecs, bai thi 60s K1 hai kho + qa/."
+      "heartbeat_at": "2026-10-24T17:40:00+07:00",
+      "summary": "M1-M4 da nop (qa/20261024-1732_k1t2_60s), cho GD cham va gui giong edge-tts. Lenh GD Studio gd-20261024-1220 (Chu tich duyet): skill chat luong, hoc ma nguon mo, kien truc timeline+scene graph+WebCodecs, bai thi 60s K1 hai kho + qa/."
     }
   ],
   "recently_completed": [

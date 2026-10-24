@@ -56,9 +56,10 @@ Thêm mô phỏng mới: khai báo một mục trong `SIMS` với `label`, `grou
 
 ## Xuất video
 
-- `canvas.captureStream(30)` + `MediaRecorder`; ưu tiên MP4 (H.264) nếu trình duyệt hỗ trợ, ngược lại WebM.
-- Ghi theo thời gian thực; người dùng phải giữ tab mở. Tùy chọn thu giọng đọc từ micro trong lúc xuất.
-- Đọc phụ đề bằng giọng máy (Web Speech) chỉ dùng khi xem trước — trình duyệt không cho ghi âm thanh này vào video.
+- (Từ 24/10/2026, lệnh GĐ gd-20261024-1220) **đã bỏ MediaRecorder**. Xuất từng khung: `engine/xuat.js` → WebCodecs `VideoEncoder` (thử H.264 `avc1.640028`, không có thì VP9/AV1) + `vendor/mp4-muxer-5.2.2.js` (MIT); tiếng từ tệp giọng nạp vào (`AudioEncoder` AAC/Opus).
+- Trang Xưởng `xuong.html` + `xuong.js`: bài thi K1 `bai/k1t2_60s.js`, dòng thời gian tua được (`engine/thoigian.js`), đồ thị cảnh + camera (`engine/canh.js`), phụ đề động (`engine/phude.js`), bộ hình K1 (`kenh/k1.js`).
+- Bộ dẫn chứng QA: `qa-tools/bo_dan_chung.py` (ffmpeg, Pillow, numpy). Bản nộp đầu: `qa/20261024-1732_k1t2_60s/`.
+- Đọc phụ đề bằng giọng máy (Web Speech) chỉ còn ở nút xem trước của trình soạn cũ — không đi vào bản xuất.
 - Khung hình: 16:9, 9:16, 1:1; chất lượng 720p/1080p/1440p.
 
 ## Lưu trữ

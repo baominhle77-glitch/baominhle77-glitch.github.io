@@ -22,6 +22,13 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-24 17:40 GMT+7 — Claude Code — EDU-20261024-04 — M4 đã nộp, chờ GĐ Studio chấm
+
+- Nhánh `claude/pensive-lovelace-96zjk7`; commit `f53eae6` (M1 skill), `5d1693a` (M2 học mã nguồn), `b8c7d60` (M3 engine), `02c538e` (M4 bài thi + bộ dẫn chứng).
+- Bộ dẫn chứng `qa/20261024-1732_k1t2_60s/`: 44 khung 16:9 + 47 khung 9:16 (JPG q82, ≤ 76 KB), `to_khung.jpg`, `mau_10s.mp4` (H.264, 2,4 MB), `do_luong.json`, `kiem_chu.json`, `tu_cham.md` (tự chấm 32/39).
+- Test: `node --check` các module video-mo-phong; lint chữ 0,1 s cả hai khổ 0 lỗi; `validate-coordination` ok; `check-public-content video-mo-phong` ok.
+- Không deploy, không đụng vùng nhạy cảm, không thêm secret. Còn nợ: giọng edge-tts + words.json từ Studio; xuất nhanh hơn thời gian thực.
+
 ### 2026-10-24 03:00 GMT+7 — Claude Code — EDU-20261024-03 — ĐÃ PHÁT HÀNH ✅
 
 - PR #128 merge vào `main`: merge commit `d69e3c24ce3c5a28d0332eb0c6fde6e0ef9ccfc8`. CI PR: coordination-guard, validate, validate-vn-marketplace, record — SUCCESS.
