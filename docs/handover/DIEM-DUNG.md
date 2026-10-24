@@ -6,15 +6,15 @@
 
 - Nhánh `gpt/k1t2-b2-01` cắt đúng SHA A1 ĐẠT `7773c443f569a76c47a7c2d28ff3cf4f237b2ac2`. GĐ đã xác nhận `kiem_truoc` + `kiem_cat_vat` A1 ĐẠT cả hai khổ.
 - **Hướng dẫn D16 0–29 s (chưa chứng nhận bằng chạy máy cho B2):** h1 0–9,72 s: bàn quang học, vũng + thước, rót và lia; h2 10,22–13,02 s: bàn, thêm SDS; h2 13,02–20,258 s: match-cut mặt nước sang cận cảnh riêng không thấy bàn, lớp xa (nền xám), giữa (màng nước có bóng), gần (hạt SDS và mũi tên cam), co sức căng ở 16,145 s; h2 20,258–23,996 s: về bàn/thước đọc 3,86 mm; h3 24,496–28,888 s: bong bóng trên bàn, camera nâng và xuyên màng. Hai khoảng tạm ngắt lời: 9,72–10,22 và 23,996–24,496 s vẫn giữ hình liên tục.
-- **Khung chính tính theo khổ:** vật h1/h2/h3 hiện hữu nằm trong vùng thiết kế 16:9 [x=130,y=280,w=1660,h=645] = 86,5%×59,7%; 9:16 [100,560,880,750] = 81,5%×39,1%. Cảnh cận mới 16:9 [250,383,1420,487] = 74,0%×45,1%; 9:16 [145,655,790,595] = 73,1%×31,0%. Lề ≥3%; chuyển động và cú máy ≤4 s.
+- **Khung chính tính theo khổ:** vật h1/h2/h3 hiện hữu nằm trong vùng thiết kế 16:9 [x=130,y=280,w=1660,h=645] = 86,5%×59,7%; 9:16 [100,560,880,750] = 81,5%×39,1%. Cảnh cận mới 16:9 [250,350,1420,520] = 74,0%×48,1%; 9:16 [145,655,790,595] = 73,1%×31,0%. Lề ≥3%; chuyển động và cú máy ≤4 s.
 - **Chữ:** cảnh B2 KHÔNG sinh chữ mới, KHÔNG đổi bất kỳ hàm chữ, camera, timeline, TTS. Bảng vị trí cố định: 16:9 nguồn [640,40,905,185], PiP [1552,36,332,210], phụ đề [320,950,1280,112]; 9:16 nguồn [450,278,565,267], PiP [62,266,376,242], phụ đề [90,1338,900,88]. Các nhãn theo camera cũ và phụ đề 2–5 từ giữ đúng mã của bản A1 ĐẠT; mô tả PR có bảng nhóm/timeline.
 - **Màu:** K1 v2 nền `#A7ADB3`/`#8E969D`, nước `#3F6A9E`, cam `#D1834F` viền mực `#1C232B` 2 px; vignette 22%. Giữ nguồn 24 px, hộp phụ đề ≥4,5:1, không vẽ mới trong vùng nguồn/PiP/phụ đề.
-- **Chờ GĐ kiểm B2 vòng 1:** `node video-mo-phong/qa-tools/kiem_truoc.mjs` và `node video-mo-phong/qa-tools/kiem_cat_vat.mjs`, đều kiểm 16:9 và 9:16. Bản xem khung/contact sheet và đánh giá mắt là bước GĐ, chưa báo ĐẠT B2.
+- **Đã sửa B2 cục bộ sau D16; chờ GĐ kiểm B2 vòng 1:** `node video-mo-phong/qa-tools/kiem_truoc.mjs` và `node video-mo-phong/qa-tools/kiem_cat_vat.mjs`, đều kiểm 16:9 và 9:16. Bản xem khung/contact sheet và đánh giá mắt là bước GĐ, chưa báo ĐẠT B2.
 
 ## GPT 25/10: sửa riêng món nợ A1
 
 - **Vòng 2:** GĐ chạy `kiem_cat_vat.mjs`: 0 lỗi cả 2 khổ; `kiem_truoc.mjs`: chỉ TRƯỢT chữ chồng ở 2,5–4,5 s do câu A1 (SHA `c39c1a9`). Thu riêng câu A1 về **0,1–2,4 s**, tắt stagger riêng câu này: vào đủ sau 0,35 s, đọc trọn từ 0,45–2,05 s (1,6 s), ra trước nhãn thước và nhãn nước; giữ vị trí y=420 (16:9)/640 (9:16). Không đổi giọng, camera, vật, các tiêu đề khác hoặc B2.
-- **Chờ GĐ kiểm vòng 2:** chạy `node video-mo-phong/qa-tools/kiem_truoc.mjs` và `node video-mo-phong/qa-tools/kiem_cat_vat.mjs`. Chưa có kết quả kiểm vòng 2, chưa xuất video/QA mới.
+- **GĐ đã nghiệm thu A1 vòng 2:** cả `kiem_truoc.mjs` và `kiem_cat_vat.mjs` ĐẠT 16:9 và 9:16 tại SHA `7773c44` (GĐ báo ngày 25/10). Chưa xuất video/QA mới tại nhánh GPT.
 
 **Cập nhật:** 25/10/2026 01:02 GMT+7 — Claude Code (session_0129 "web hiennhi") — ĐÃ NỘP bản C13
 
