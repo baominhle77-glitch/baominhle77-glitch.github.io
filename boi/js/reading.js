@@ -60,7 +60,8 @@ export function pairText(db, a, b, money) {
   else if (sa >= 0.5 && sb <= -0.5) tone = `việc tốt nhưng vướng ở khâu sau: ${b.rui_ro.toLowerCase()}`;
   else if (sa <= -0.5 && sb >= 0.5) tone = "vấn đề có lối ra, xấu chuyển dần sang được.";
   else tone = "trung tính, phải nhìn lá xung quanh.";
-  return { text: `${cap(a.chu_the)} theo hướng ${b.tinh_chat}; ${tone}`, known: false };
+  const head = a.chu_the.split(",")[0];
+  return { text: `${cap(head)} mang tính ${b.tinh_chat.split(",").slice(0, 2).join(",")} — ${tone}`, known: false };
 }
 
 function chainText(cards) {
@@ -68,7 +69,7 @@ function chainText(cards) {
   if (cards.length === 1) return `Một lá: ${cards[0].chu_the}.`;
   const first = cards[0], last = cards[cards.length - 1];
   const mid = cards.slice(1, -1).map((c) => c.tinh_chat.split(",")[0]).join(" → ");
-  return `Cả chuỗi: khởi từ ${first.chu_the}${mid ? `, diễn biến ${mid}` : ""}, kết theo hướng ${last.tinh_chat}.`;
+  return `Khởi từ ${first.chu_the.split(",")[0]}${mid ? `, diễn biến ${mid}` : ""}, kết theo hướng ${last.tinh_chat}.`;
 }
 
 export function readTier(db, session, ti, tarotCells = [], lenCells = [], opts = {}) {

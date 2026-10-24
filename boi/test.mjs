@@ -8,6 +8,8 @@ import { parseDraw, parseCorrection, splitBySizes } from "./js/parser.js";
 import { createSession, addRound, applyCorrectionText, fixCell, errorsOf, reveal, exportJSON, importJSON, loadSessions, saveSessions } from "./js/state.js";
 import { spreadById, SPREADS } from "./js/spreads.js";
 import { moneyTable, periodEstimate, roundNice } from "./js/money.js";
+import { analyze, allSentences, ruleFollowUp } from "./js/insight.js";
+import { suggestSpread } from "./js/topic.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const db = {
@@ -180,6 +182,49 @@ test("quy đổi tiền ra số hợp lệ", async () => {
   assert.ok(Number.isFinite(ym.vsPrevPct));
   assert.equal(roundNice(-3), 0);
   assert.equal(roundNice(7.3), 7.5);
+});
+
+// ---- 3 ca mẫu chạy động cơ luật: đủ mục, không lặp câu ----
+const CASES = [
+  { name: "tiền 3 tháng", q: "thu nhập 3 tháng tới", spread: "3thang", money: true, rev: false, input: `${T_IN}\n${L_IN}`, seed: SEED },
+  { name: "có/không", q: "Có nên ký hợp đồng với bên này không?", spread: "cokhong", money: false, rev: false, input: "T: 16 3 44 / 70 12 5 / 61 29 77\nL: 14 25 33 / 8 30 20 / 2 6 19", seed: "a".repeat(64) },
+  { name: "tình cảm có lá ngược", q: "Người ấy có quay lại không?", spread: "tinhcam", money: false, rev: true, input: "T: 1 2 3 4 5 6 7 8 9\nL: 24 28 29 7 13 36 31 33 4", seed: "b".repeat(64) },
+];
+const normS = (x) => x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+for (const c of CASES) {
+  test(`động cơ luật — ca ${c.name}: đủ mục, không lặp câu`, async () => {
+    const sp = spreadById(c.spread);
+    const s = await createSession({ cauHoi: c.q, spreadId: sp.id, tiers: sp.tiers(2027), money: c.money, reversals: c.rev, seed: c.seed });
+    addRound(s, c.input);
+    const r = analyze(db, s, { xungHo: "Queen Linh", thuNhap: 20, mucTieu: 30 });
+    assert.ok(r.tong_quan && r.tong_ket.startsWith("Queen Linh"), "thiếu tổng quan/tổng kết");
+    assert.ok(r.chu_de_troi.length >= 2, "thiếu chủ đề trội");
+    assert.equal(r.tang.length, 3);
+    r.tang.forEach((t, i) => {
+      assert.equal(t.tarot_doc.length, s.rounds[0].tarot[i].length, `tầng ${i + 1} thiếu đọc Tarot`);
+      assert.ok(t.dong_chay, `tầng ${i + 1} thiếu dòng chảy`);
+      assert.ok(t.lenormand_cap.length >= 1 && t.lenormand_bo_ba.length >= 1 && t.lenormand_chuoi, `tầng ${i + 1} thiếu Lenormand cặp/bộ ba/chuỗi`);
+      assert.ok(t.diem >= 1 && t.diem <= 10);
+      assert.ok(t.chot && t.diem_nghen && t.loi_khuyen, `tầng ${i + 1} thiếu chốt/nghẽn/khuyên`);
+      if (c.spread === "cokhong") assert.ok(t.tra_loi);
+    });
+    assert.ok(r.noi_tang.length >= 2 && r.mau_thuan.length >= 1 && r.loi_khuyen.length >= 1);
+    if (c.money) assert.ok(r.tien && r.tien.includes("không phải dự báo tài chính"));
+    const sents = allSentences(r).filter((x) => x.length >= 18).map(normS);
+    const dup = sents.filter((x, i) => sents.indexOf(x) !== i);
+    assert.deepEqual(dup, [], "có câu lặp");
+    const fu = ruleFollowUp(r, "tầng 2 thế nào, có rủi ro gì?");
+    assert.ok(fu.includes(r.tang[1].ten) && fu.length > 80);
+  });
+}
+
+test("gợi ý mẫu trải theo câu hỏi", () => {
+  assert.equal(suggestSpread("thu nhập 3 tháng tới").id, "3thang");
+  assert.equal(suggestSpread("Có nên ký hợp đồng này không?").id, "cokhong");
+  assert.equal(suggestSpread("Người ấy có quay lại không?").id, "tinhcam");
+  assert.equal(suggestSpread("vận hạn tháng này").id, "vanhan");
+  assert.equal(suggestSpread("tài chính năm 2027 từng tháng").id, "12thang");
+  assert.equal(suggestSpread("tổng quan cả năm 2027").year, 2027);
 });
 
 export async function run(extra = []) {
