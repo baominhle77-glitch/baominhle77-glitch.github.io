@@ -57,11 +57,32 @@
       ],
       "status": "in_progress",
       "started_at": "2026-10-24T16:15:00+07:00",
-      "heartbeat_at": "2026-10-24T17:40:00+07:00",
-      "summary": "M1-M4 da nop (qa/20261024-1732_k1t2_60s), cho GD cham va gui giong edge-tts. Lenh GD Studio gd-20261024-1220 (Chu tich duyet): skill chat luong, hoc ma nguon mo, kien truc timeline+scene graph+WebCodecs, bai thi 60s K1 hai kho + qa/."
+      "heartbeat_at": "2026-10-24T18:40:00+07:00",
+      "summary": "M1-M4 v1 da nop (qa/20261024-1732_k1t2_60s); v2 (giong that, 72 s) da code va gop vao main qua EDU-20261024-05; con: bo dan chung qa/ v2 + tu cham + thu GD. Lenh GD Studio gd-20261024-1220."
     }
   ],
   "recently_completed": [
+    {
+      "id": "EDU-20261024-05",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "d854939f1c5899f1ad555ea148bd65d8d3ed71df",
+      "paths": [
+        ".claude/skills/**",
+        "CLAUDE.md",
+        "docs/hoc_tu_ma_nguon.md",
+        "video-mo-phong/**",
+        "qa/**",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/DIEM-DUNG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-24T18:35:00+07:00",
+      "completed_at": "2026-10-24T18:40:00+07:00",
+      "summary": "Phat hanh: gop nhanh claude/pensive-lovelace-96zjk7 (Xuong video v2, skill, hoc ma nguon, bo dan chung v1) vao main theo yeu cau BaoMinh 24/10."
+    },
     {
       "id": "DOCS-20261024-01",
       "owner": "Claude Code",
