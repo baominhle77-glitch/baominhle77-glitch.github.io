@@ -1,5 +1,5 @@
 // Khởi động SPA: tải dữ liệu lá, hash router, hiệu ứng chuyển trang, nút Back.
-import { ROUTES, toast, esc } from "./views.js";
+import { ROUTES, NEEDS_DB, toast, esc } from "./views.js";
 import { store } from "./store.js";
 
 const view = document.getElementById("view");
@@ -27,6 +27,7 @@ function resolve() {
 }
 
 function render() {
+  if (!store.db && NEEDS_DB.test(parse().path)) { view.innerHTML = `<p class="note">Đang tải bộ bài…</p>`; dbReady.then(render); return; }
   const { v, tab, path } = resolve();
   if (v.redirect) { location.replace(v.redirect); return; }
   view.innerHTML = v.html;
@@ -60,17 +61,17 @@ const ctx = {
 window.addEventListener("hashchange", () => { syncIdx(false); transition(render); });
 back.onclick = () => { if (idx > 0) history.back(); else location.hash = "#/"; };
 
+const dbReady = Promise.all(["data/tarot.json", "data/lenormand.json"].map((u) => fetch(u).then((r) => { if (!r.ok) throw new Error(u); return r.json(); })))
+  .then(([tarot, lenormand]) => { store.db = { tarot, lenormand }; });
+
 async function init() {
-  try {
-    const [tarot, lenormand] = await Promise.all(["data/tarot.json", "data/lenormand.json"].map((u) => fetch(u).then((r) => { if (!r.ok) throw new Error(u); return r.json(); })));
-    store.db = { tarot, lenormand };
-  } catch (err) {
-    view.innerHTML = `<h1>Không tải được dữ liệu lá</h1><p class="err">${esc(err.message)}</p><p><button class="btn primary" onclick="location.reload()">Tải lại</button></p>`;
-    return;
-  }
+  dbReady.catch((err) => {
+    view.innerHTML = `<h1>Không tải được dữ liệu lá</h1><p class="err">${esc(err.message)}</p><p><button class="btn primary" type="button" id="rl">Tải lại</button></p>`;
+    document.getElementById("rl").onclick = () => location.reload();
+  });
   syncIdx(true);
   render();
-  if ("serviceWorker" in navigator && location.protocol === "https:") {
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }
   window.addEventListener("storage", (e) => { if (e.key?.startsWith("boi.v1.")) toast("Dữ liệu vừa đổi ở tab khác — tải lại trang để đồng bộ."); });

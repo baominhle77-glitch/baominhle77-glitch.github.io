@@ -69,8 +69,7 @@ function lockBox(s, extra = "") {
 // ================= Trang chủ =================
 function home() {
   const recent = [...store.sessions].sort((a, b) => (a.lockedAt < b.lockedAt ? 1 : -1)).slice(0, 3);
-  const db = store.db;
-  const fan = db ? [tarotSVG(db.tarot.la[17]), backSVG(), lenormandSVG(db.lenormand.la[30])].join("") : "";
+  const fan = [tarotSVG({ id: 17, nhom: "major", so: 17, bieu_tuong: "⭐", en: "The Star", vi: "Ngôi Sao" }), backSVG(), lenormandSVG({ id: 31, bieu_tuong: "☀️", en: "Sun", vi: "Mặt Trời" })].join("");
   return {
     title: "Bói Tarot + Lenormand",
     html: `
@@ -659,6 +658,8 @@ function settingsView() {
   };
 }
 
+// Màn cần dữ liệu lá (đợi JSON); các màn khác vẽ ngay
+export const NEEDS_DB = /^\/(lat|giai|hoi-tiep|kiem-chung)\//;
 export const ROUTES = [
   [/^\/?$/, () => home(), "home"],
   [/^\/hoi-moi$/, () => ask(), "ask"],

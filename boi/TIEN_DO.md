@@ -17,7 +17,7 @@ Spec gốc + bản bổ sung (SPA nhiều màn, thiết kế cao cấp, PWA, AI 
 | 10. SPA hash router + 10 màn + thiết kế (index.html, css, js/app.js, js/views.js, js/store.js) | xong, đã chạy e2e Playwright (Pixel 7) không lỗi |
 | 11. AI: Gemini mặc định, dò model mạnh nhất + dự phòng 429/404, JSON có cấu trúc, streaming, hỏi tiếp (js/ai.js) | xong (chưa thử với khoá thật — không có khoá trong phiên này) |
 | 12. PWA (manifest.webmanifest, sw.js, icons/) | xong |
-| 13. Kiểm trình duyệt + Lighthouse | chưa |
+| 13. Kiểm trình duyệt + Lighthouse | xong: e2e Pixel 7 không lỗi; offline chạy; Lighthouse mobile (local, chưa nén) Perf 94–95, A11y 100, BP 100 |
 | 14. Sổ khoá + PR + merge + kiểm link | chưa |
 
 Bước tiếp theo: dòng "chưa" đầu tiên. Chạy test: `node boi/test.mjs`.
