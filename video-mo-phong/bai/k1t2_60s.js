@@ -220,7 +220,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     [0, 0, khung(noi(bVungA(1.2), 20, 170, 20, 0), 2.0), "set"],
     [M.episode - 0.1, 1.6, K(noi(hop(bVungA(2.6), bKepA(2.6)), 40, doc ? 620 : 380, 40, 0)), "power3.inOut"], // rộng, chừa trời cho dòng rót
     [M.five - 0.25, 0.9, K(noi(nhomA(3.2), 0, 30, 0, -10), 2.0)],
-    [M.however - 0.2, 1.0, K(noi(hop(bVungA(6.6), bKepA(6.6)), 40, doc ? 260 : 180, 40, 0))], // lần rót 2: lùi vừa, dòng rót chảy vào từ trên
+    [M.however - 0.2, 1.0, K(noi(hop(bVungA(6.6), bKepA(6.6)), doc ? 40 : 160, doc ? 260 : 420, doc ? 40 : 160, 0))], // lần rót 2: lùi vừa, dòng rót chảy vào từ trên
     [M.now - 0.15, 0.8, K(hop(bVungA(7.4), bOng(7.4), bKepA(7.4)))],
     [M.deeper - 0.1, 0.8, K(noi(hop(bVungA(8), bOng(8), [L.ax - W2 / 2 - 6, L.ban - hmm(7) - 8, L.ax + W2 / 2 + 6, L.ban]), 0, 0, 170, 0))],
     [ti, 0.5, K(noi(bVungA(ti), 10, 60, 10, 10), 2.0), "power3.out"], // giọt chạm mặt: dí máy vào vũng
@@ -243,7 +243,8 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     [M.temperature + 0.2, 1.0, K(noi(bNk(tX), 120, 60, 120, 0), 1.6)],
     [M.soap4 - 0.3, 1.0, K(noi(bCoc(tX), 40, 40, 40, 0), 2.2), "power3.inOut"],
     [M.surfactant - 0.2, 0.9, K(hop(bCoc(tX), bGiay))], // thẻ phân tử SDS trượt vào cạnh cốc
-    [M.millimolar + 0.75, 0.8, K(noi(bCoc(tX), 60, doc ? 260 : 120, 60, 10), 2.2)], // thẻ đã ra: dí vào mặt nước có lớp SDS
+    [M.millimolar + 0.75, 0.8, K(noi(bCoc(tX), 60, doc ? 60 : 120, 60, 10), doc ? 2.6 : 2.2)], // thẻ đã ra: dí vào mặt nước có lớp SDS
+    [M.inferred - 0.1, 0.6, K(hop(bCoc(tX), bGiay))], // "inferred from one paper's text": lùi ra thấy cốc cạnh tờ bài báo
     [M.inferred - 0.3, 0.9, K(hop(bCoc(tX), bGiay))], // tờ bài báo vào
     [M.seven - 0.5, 1.0, K(nhomB3), "power3.inOut"],
     [M.grams - 0.25, 0.8, K(hop(bCan(tX), bBinh(tX)), 2.2)],
@@ -351,7 +352,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       if (uPh > 0) veChu(rc, "puddle 3.86 mm (calculated)", xSo, ySo - sz(rc, L.nhan) * 1.5, { size: sz(rc, L.nhan * 0.9), align: "left", color: K1.MUC });
       // nhãn h1
       const xE = doc ? L.ax - 100 : L.ax + 10;
-      veNhan(rc, { x0: L.ax + w * (doc ? -0.1 : 0.1), y0: L.ban - h * 0.55, x1: xE, y1: L.ban - h - (doc ? 260 : 170), text: "water, 20 °C (episode 1)", u: u(t, Math.max(M.episode, 1.3), 0.7) * ra(t, M.now - 0.2, 0.4), size: sz(rc, L.nhan), align: "center" });
+      veNhan(rc, { x0: L.ax + w * (doc ? -0.1 : 0.1), y0: L.ban - h * 0.55, x1: xE, y1: L.ban - h - (doc ? 260 : 170), text: "water, 20 °C (episode 1)", u: u(t, Math.max(M.episode, 1.3), 0.7) * ra(t, Math.min(M.now - 0.2, M.however - 0.2), 0.4), size: sz(rc, L.nhan), align: "center" });
       veNhan(rc, { x0: L.ax + w * 0.2, y0: L.ban - h, x1: L.ax + w * 0.2 + (doc ? 40 : 70), y1: L.ban - h - (doc ? 170 : 150), text: "shallower", u: u(t, M.shallower + 0.3, 0.6) * ra(t, M.cuts - 0.2, 0.4), size: sz(rc, L.nhan * 1.1), weight: 600 });
       // h2 — hàng γ, thanh dài đúng tỉ lệ 71.97 : 36.43
       const fs = sz(rc, L.nhan * 0.95); const dong = sz(rc, doc ? 92 : 80);
@@ -536,7 +537,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     ["deeper, or shallower?", M.deeper, ti + 0.5, doc ? TD.y : 420],
     ["less pull, longer-lived film?", M.how, tX - 0.35, doc ? TD.y : 200],
     ["barely changes", M.barely, doc ? M.becomes - 0.3 : tC - 0.25, doc ? 575 : TD.y],
-    ["both at 25 °C", doc ? M.twentyC + 0.4 : M.bench, M.plain - 0.25, doc ? 1300 : TD.y],
+    ["both at 25 °C", doc ? M.twentyC + 0.4 : M.bench, M.plain - 0.25, TD.y],
     ["only the skin changes", M.only, THOI_LUONG, doc ? TD.y : TD.y]
   ];
   const man = new Nut({

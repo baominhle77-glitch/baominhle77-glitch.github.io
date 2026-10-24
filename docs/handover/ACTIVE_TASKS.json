@@ -54,7 +54,8 @@
         "qa/**",
         "docs/handover/VIDEO_MO_PHONG.md",
         "docs/handover/DIEM-DUNG.md",
-        "docs/handover/NHAT-KY-PHOI-HOP.md"
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "CLAUDE.md"
       ],
       "status": "in_progress",
       "started_at": "2026-10-24T23:24:00+07:00",
