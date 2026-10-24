@@ -42,6 +42,11 @@ export const SPREADS = [
     tiers: () => ["Bên kia có sạch, có thật không?", "Có nhận được không?", "Giữ được lâu không?"].map((ten) => ({ ten, t: 3, l: 3, pos: POS_YN })),
   },
   {
+    id: "tinhcam", ten: "Tình cảm 3 tầng", money: false,
+    goiY: "3 tầng × 3 Tarot + 3 Lenormand: bạn đang ở đâu → người kia/đối phương → hướng đi 1–3 tháng.",
+    tiers: () => ["Bạn đang ở đâu", "Người kia nghĩ gì, muốn gì", "Hướng đi 1–3 tháng tới"].map((ten) => ({ ten, t: 3, l: 3, pos: POS_VH })),
+  },
+  {
     id: "vanhan", ten: "Vận hạn", money: false,
     goiY: "5 tầng × 3 + 3 = 15 + 15 lá (giảm còn 12 + 12 bằng cách đặt một số tầng 2 lá).",
     tiers: () => ["Tổng quan", "Hao tài", "Khía cạnh khác", "4–6 tuần tới", "Điểm sáng"].map((ten) => ({ ten, t: 3, l: 3, pos: POS_VH })),

@@ -11,7 +11,7 @@ Spec gốc + bản bổ sung (SPA nhiều màn, thiết kế cao cấp, PWA, AI 
 | 4. Giải bài cơ bản (js/reading.js) | xong |
 | 5. Quy đổi tiền (js/money.js) | xong |
 | 6. Test lõi (test.mjs) | xong |
-| 7. Nhận diện chủ đề + gợi ý mẫu trải (js/topic.js) | chưa |
+| 7. Nhận diện chủ đề + gợi ý mẫu trải (js/topic.js; thêm mẫu Tình cảm) | xong |
 | 8. Động cơ luật sâu (js/insight.js) + MAU_GIAI.md | chưa |
 | 9. Mặt lá SVG riêng từng lá (js/cards.js) | chưa |
 | 10. SPA hash router + các màn + thiết kế (index.html, css, js/app.js, js/views.js) | chưa |
