@@ -530,6 +530,127 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     }
   });
 
+  // ===== B2: match-cut mặt nước → cận cảnh vi mô → về bàn, không thêm chữ hay đổi camera/TTS =====
+  // Toàn bộ vật mới nằm trong F.vat, cách nguồn/PiP/phụ đề; màn hình vẫn giữ hộp nguồn và chữ cũ.
+  const canhB2 = new Nut({
+    ve: (rc) => {
+      const { t, ctx, W, H } = rc;
+      if (t < M.cuts || t >= M.puddle) return;
+      const aVao = layEase("power2.inOut")(kep((t - M.cuts) / 0.4));
+      const aRa = layEase("power2.inOut")(kep((M.puddle - t) / 0.4));
+      const a = Math.min(aVao, aRa);
+      if (a <= 0) return;
+
+      ctx.save();
+      ctx.globalAlpha *= a;
+      // Match-cut theo đường mặt nước: thay toàn cảnh bàn bằng mặt phân cách phóng đại.
+      // Phông sáng như K1 gốc để giữ tương phản hộp phụ đề, không phủ chữ màn hình.
+      veNen(rc);
+      const xl = doc ? 145 : 250;
+      const xr = doc ? 935 : 1670;
+      const day = doc ? 1250 : 870;
+      const co = khoang(t, M.thirty - 0.12, M.thirty + 1.05, 0, 1, "power3.inOut");
+      const mat = (doc ? 800 : 490) + co * (doc ? 160 : 100);
+      const song = (x) => 8 * Math.sin((x - xl) * 0.012 - t * 2.2);
+      const giua = (xl + xr) / 2;
+      const rong = xr - xl;
+
+      // Lớp xa: quầng sáng ở sau mặt nước và bóng tiếp xúc rộng (không có mặt bàn).
+      const bong = ctx.createRadialGradient(giua, mat + 85, 4, giua, mat + 85, rong * 0.57);
+      bong.addColorStop(0, rgba(K1.MUC, 0.26));
+      bong.addColorStop(1, rgba(K1.MUC, 0));
+      ctx.fillStyle = bong;
+      ctx.fillRect(xl - 25, mat - 110, rong + 50, 275);
+      for (let i = 0; i < 4; i++) {
+        const xx = xl + (i + 0.5) * rong / 4 + 16 * Math.sin(t * 0.35 + i);
+        const yy = mat + 75 + i * 28;
+        ctx.strokeStyle = rgba(K1.NEN_TREN, 0.24);
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.ellipse(xx, yy, rong * 0.19, 42 + i * 16, -0.15, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Lớp giữa: màng nước mặt cắt lớn, nổi khối nhờ tô chuyển sắc và đường viền.
+      const nuoc = ctx.createLinearGradient(0, mat, 0, day);
+      nuoc.addColorStop(0, rgba(K1.NUOC, 0.68));
+      nuoc.addColorStop(0.65, rgba(K1.NUOC, 0.91));
+      nuoc.addColorStop(1, rgba(K1.MUC, 0.62));
+      ctx.beginPath();
+      ctx.moveTo(xl, mat + song(xl));
+      for (let i = 1; i <= 48; i++) {
+        const x = xl + rong * i / 48;
+        ctx.lineTo(x, mat + song(x));
+      }
+      ctx.lineTo(xr, day);
+      ctx.lineTo(xl, day);
+      ctx.closePath();
+      ctx.fillStyle = nuoc;
+      ctx.fill();
+      ctx.strokeStyle = K1.MUC;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Mặt sáng và lớp gần: hạt SDS minh hoạ, cam có viền mực 2 px.
+      ctx.strokeStyle = rgba(K1.NEN_TREN, 0.78);
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      for (let i = 0; i <= 48; i++) {
+        const x = xl + rong * i / 48;
+        const y = mat + song(x) + 7;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      const coMuiTen = lerp(1, 36.43 / 71.97, co);
+      for (let i = 0; i < 9; i++) {
+        const x = xl + 62 + i * (rong - 124) / 8;
+        const y = mat + song(x) - 35 + 4 * Math.sin(t * 1.2 + i);
+        const r = doc ? 10 : 12;
+        ctx.strokeStyle = K1.MUC;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x, y - 5); ctx.lineTo(x + 7, y - 35); ctx.lineTo(x - 5, y - 55);
+        ctx.stroke();
+        ctx.fillStyle = K1.MUC;
+        ctx.beginPath(); ctx.arc(x, y, r + VIEN_MUC, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = K1.CANG;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Sức căng thu về ~0,51 lần đúng lúc đọc 36,43 mN/m; hướng kéo vào trong.
+      const mui = (x, dir) => {
+        const dai = (doc ? 148 : 210) * coMuiTen;
+        const y = mat - (doc ? 105 : 115);
+        const x2 = x + dir * dai;
+        for (const [mau, dayNet] of [[K1.MUC, 10], [K1.CANG, 6]]) {
+          ctx.strokeStyle = mau; ctx.fillStyle = mau; ctx.lineWidth = dayNet;
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x2, y); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x2, y);
+          ctx.lineTo(x2 - dir * 17, y - 12);
+          ctx.lineTo(x2 - dir * 17, y + 12);
+          ctx.closePath(); ctx.fill();
+        }
+      };
+      mui(xl + rong * 0.25, 1);
+      mui(xr - rong * 0.25, -1);
+
+      // Quét sáng có nghĩa khi đọc "millinewtons per metre" (18,0–19,2 s).
+      // Dải chuyển trên khối nước tạo nhịp đổi hình đủ lớn mà không rung camera.
+      const quet = khoang(t, 18.0, 19.2, -0.3, 1.3, "power2.inOut");
+      if (quet > -0.3 && quet < 1.3) {
+        const x = xl + quet * rong;
+        const g = ctx.createLinearGradient(x - 245, 0, x + 245, 0);
+        g.addColorStop(0, rgba(K1.NEN_TREN, 0));
+        g.addColorStop(0.5, rgba(K1.NEN_TREN, 0.72));
+        g.addColorStop(1, rgba(K1.NEN_TREN, 0));
+        ctx.fillStyle = g;
+        ctx.fillRect(Math.max(xl, x - 245), mat + 30, Math.min(xr, x + 245) - Math.max(xl, x - 245), Math.max(0, day - mat - 60));
+      }
+      ctx.restore();
+    }
+  });
+
   // ===== Lớp màn hình: dòng nguồn, tiêu đề ngắn =====
   const cum = chiaCum(tuTrongBai, { toiDa: doc ? 3 : 4 });
   const beatTai = (t) => [...LOI].reverse().find((b) => t >= b.bd) || LOI[0];
@@ -562,6 +683,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       { ten: "nen", parallax: 0.25, goc: lopNen },
       { ten: "giua", parallax: 1, goc: giua },
       { ten: "truoc", parallax: 1.35, goc: lopTruoc },
+      { ten: "b2", man: true, goc: canhB2 },
       { ten: "vignette", man: true, goc: new Nut({ ve: (rc) => veVignette(rc) }) },
       { ten: "man", man: true, goc: man }
     ]
