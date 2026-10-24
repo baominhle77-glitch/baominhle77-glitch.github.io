@@ -3,6 +3,8 @@
 // nhãn = đường dẫn mảnh + chữ trần, không khung; số đo hiện bằng thước kẹp vẽ.
 // Màu (không thêm hex, sắc độ phụ dùng độ mờ): nền #8E969D → #A7ADB3, mực #1C232B,
 // xanh nước #3F6A9E = trọng lực/khối lượng, cam #D1834F = sức căng mặt (màu v2 theo luật C13 của Studio, 24/10/2026).
+// C13 mục 10 + thư GĐ gd-20261024-2332 §4: mọi khối/mũi tên/dấu cam có viền mực 2 px (cam gần cùng độ sáng nền);
+// vignette mép 22 % (mép tối hơn giữa, tỉ lệ sáng mép/giữa ≈ 0,78) áp sau lớp cảnh, trước chữ màn hình.
 import { veChu, doChu, rng, ghiHop } from "../engine/canh.js";
 import { kep, layEase } from "../engine/easing.js";
 
@@ -33,10 +35,49 @@ export function veNen(rc) {
   const sb = ctx.createRadialGradient(sx, sy, 0, sx, sy, Math.min(W, H) * 0.45);
   sb.addColorStop(0, rgba(K1.NEN_TREN, 0.5)); sb.addColorStop(0.5, rgba(K1.NEN_TREN, 0.18)); sb.addColorStop(1, rgba(K1.NEN_TREN, 0));
   ctx.fillStyle = sb; ctx.fillRect(0, 0, W, H);
-  const v = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.78);
-  v.addColorStop(0, rgba(K1.MUC, 0)); v.addColorStop(1, rgba(K1.MUC, 0.16));
-  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
 }
+
+// Vignette K1 (C13 mục 10): nhân độ sáng theo elip — giữa giữ nguyên, mép giữa cạnh còn MUC_VIGNETTE, góc tối thêm một chút.
+// Dùng "multiply" nên tỉ lệ sáng mép/giữa không phụ thuộc vật đang ở trong khung.
+export const MUC_VIGNETTE = 0.78;
+export function veVignette(rc, muc = MUC_VIGNETTE) {
+  const { ctx, W, H } = rc;
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = "multiply";
+  ctx.translate(W / 2, H / 2); ctx.scale(W / 2, H / 2);
+  const xam = (k) => { const c = Math.round(255 * k); return `rgb(${c},${c},${c})`; };
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.SQRT2);
+  g.addColorStop(0, xam(1)); g.addColorStop(0.4 / Math.SQRT2, xam(1));
+  g.addColorStop(1 / Math.SQRT2, xam(muc)); g.addColorStop(1, xam(muc - 0.05));
+  ctx.fillStyle = g; ctx.fillRect(-1, -1, 2, 2);
+  ctx.restore();
+}
+
+// Bóng đổ tiếp xúc dưới vật đặt trên bàn (C13 mục 6: chiều sâu)
+export function veBongDo(rc, x, y, rong, dam = 0.26) {
+  const { ctx } = rc;
+  ctx.save();
+  const g = ctx.createRadialGradient(x, y + 4, 0, x, y + 4, rong * 0.62);
+  g.addColorStop(0, rgba(K1.MUC, dam)); g.addColorStop(1, rgba(K1.MUC, 0));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y + 6, rong * 0.62, Math.max(8, rong * 0.09), 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// Phản chiếu mờ của vật trên mặt bàn bóng (lật qua mép bàn y); chữ không vẽ trong phản chiếu
+export function phanChieu(rc, y, ve, a = 0.09) {
+  const { ctx } = rc;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(-1e5, y, 2e5, 1e5); ctx.clip();
+  ctx.translate(0, 2 * y); ctx.scale(1, -1); ctx.globalAlpha *= a;
+  const cu = rc.khongChu; rc.khongChu = true;
+  ve();
+  rc.khongChu = cu;
+  ctx.restore();
+}
+
+// Viền mực 2 px (màn hình) quanh khối cam: vẽ hình mực nở thêm rồi vẽ cam lên trên
+export const VIEN_MUC = 2;
 
 // Bụi sáng trôi chậm (lớp nền, parallax thấp) — hạt giống cố định
 export function taoBui(n, x0, x1, y0, y1, seed = 7) {
@@ -233,18 +274,25 @@ export function veMuiTenCang(rc, { xa, xb, y, dai, n = 6, u = 1, k = 1 }) {
   const { ctx } = rc;
   if (u <= 0) return;
   ctx.save();
-  ctx.strokeStyle = K1.CANG; ctx.fillStyle = K1.CANG; ctx.lineWidth = 5 * k; ctx.lineCap = "round";
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
   ctx.globalAlpha *= kep(u * 2);
   const mid = (xa + xb) / 2;
+  const vien = VIEN_MUC * k;
   for (let i = 0; i < n; i++) {
     const trai = i < n / 2;
-    const k = trai ? i : n - 1 - i;
-    const x = trai ? xa + 30 + k * ((mid - xa - 60) / (n / 2)) : xb - 30 - k * ((xb - mid - 60) / (n / 2));
-    const d = dai * layEase("power3.out")(kep(u * 1.2 - k * 0.08)) * (trai ? 1 : -1);
-    if (Math.abs(d) < 2) continue;
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + d, y); ctx.stroke();
+    const j = trai ? i : n - 1 - i;
+    const x = trai ? xa + 30 * k + j * ((mid - xa - 60 * k) / (n / 2)) : xb - 30 * k - j * ((xb - mid - 60 * k) / (n / 2));
+    const d = dai * layEase("power3.out")(kep(u * 1.2 - j * 0.08)) * (trai ? 1 : -1);
+    if (Math.abs(d) < 2 * k) continue;
     const s = Math.sign(d);
-    ctx.beginPath(); ctx.moveTo(x + d + s * 12 * k, y); ctx.lineTo(x + d - s * 6 * k, y - 10 * k); ctx.lineTo(x + d - s * 6 * k, y + 10 * k); ctx.closePath(); ctx.fill();
+    const muiTen = () => { ctx.beginPath(); ctx.moveTo(x + d + s * 12 * k, y); ctx.lineTo(x + d - s * 6 * k, y - 10 * k); ctx.lineTo(x + d - s * 6 * k, y + 10 * k); ctx.closePath(); };
+    // lượt 1: mực (nở 2 px mỗi phía); lượt 2: cam
+    ctx.strokeStyle = K1.MUC; ctx.fillStyle = K1.MUC;
+    ctx.lineWidth = 5 * k + 2 * vien; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + d, y); ctx.stroke();
+    ctx.lineWidth = 2 * vien; muiTen(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = K1.CANG; ctx.fillStyle = K1.CANG;
+    ctx.lineWidth = 5 * k; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + d, y); ctx.stroke();
+    muiTen(); ctx.fill();
   }
   ctx.restore();
 }
@@ -295,7 +343,7 @@ export function veBong(rc, { x, y, r, u = 1 }) {
   ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
   for (let i = 0; i < 3; i++) {
     const a0 = t * (0.5 + i * 0.17) + i * 2.1;
-    ctx.strokeStyle = rgba(i === 1 ? K1.CANG : K1.NUOC, 0.35);
+    ctx.strokeStyle = i === 1 ? rgba(K1.NEN_TREN, 0.7) : rgba(K1.NUOC, 0.35);
     ctx.lineWidth = Math.max(2, r * 0.035);
     ctx.beginPath(); ctx.arc(x, y, r * (0.93 - i * 0.025), a0, a0 + 1.4 + i * 0.3); ctx.stroke();
   }
@@ -354,10 +402,13 @@ export function veDauChi(rc, { x, y, u = 1, r = 16 }) {
   const { ctx } = rc;
   if (u <= 0) return;
   ctx.save();
-  ctx.strokeStyle = K1.CANG; ctx.lineWidth = 4; ctx.lineCap = "round";
+  ctx.lineCap = "round";
   const e = layEase("back.out(1.6)")(kep(u));
-  ctx.beginPath(); ctx.arc(x, y, r * e, -Math.PI * 0.85, Math.PI * 0.85); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x - r * 1.9 * e, y); ctx.lineTo(x - r * 3.2 * e, y); ctx.stroke();
+  for (const [mau, lw] of [[K1.MUC, 4 + 2 * VIEN_MUC], [K1.CANG, 4]]) {
+    ctx.strokeStyle = mau; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.arc(x, y, r * e, -Math.PI * 0.85, Math.PI * 0.85); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 1.9 * e, y); ctx.lineTo(x - r * 3.2 * e, y); ctx.stroke();
+  }
   ctx.restore();
 }
 
@@ -375,6 +426,7 @@ export function veVungPip(rc, [x0, y0, x1, y1]) {
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
   veNen(rc);
+  veVignette(rc);
   ctx.restore();
 }
 
@@ -383,7 +435,7 @@ function catDong(rc, s, size, maxW) {
   const tu = s.split(" "); const out = []; let dong = "";
   for (const w of tu) {
     const thu = dong ? dong + " " + w : w;
-    if (doChu(rc, thu, size) > maxW && dong) { out.push(dong); dong = w; } else dong = thu;
+    if (doChu(rc, thu, size, 600) > maxW && dong) { out.push(dong); dong = w; } else dong = thu;
   }
   if (dong) out.push(dong);
   return out;
@@ -395,7 +447,7 @@ export function veNguon(rc, dong, { x, y, size = 20, u = 1, nhan = -1, maxW = 99
   ctx.globalAlpha *= layEase("power2.out")(kep(u));
   // nền mờ mềm sau dòng nguồn (không viền, không góc): đọc được trên điện thoại kể cả khi vật thể đi qua phía sau
   let soDong = 0; let rongMax = 0;
-  dong.forEach((s) => catDong(rc, s, size, maxW).forEach((d) => { soDong++; rongMax = Math.max(rongMax, doChu(rc, d, size)); }));
+  dong.forEach((s) => catDong(rc, s, size, maxW).forEach((d) => { soDong++; rongMax = Math.max(rongMax, doChu(rc, d, size, 600)); }));
   const cao = soDong * size * 1.28 + dong.length * size * 0.25;
   const g = ctx.createLinearGradient(x - rongMax - 40, 0, x + 24, 0);
   g.addColorStop(0, rgba(K1.NEN_TREN, 0)); g.addColorStop(0.18, rgba(K1.NEN_TREN, 0.78)); g.addColorStop(1, rgba(K1.NEN_TREN, 0.78));
@@ -408,7 +460,7 @@ export function veNguon(rc, dong, { x, y, size = 20, u = 1, nhan = -1, maxW = 99
         const w = doChu(rc, d, size, 600);
         ctx.fillStyle = rgba(K1.MUC, 0.85); ctx.fillRect(x - w, yy + size * 0.28, w, 3);
       }
-      veChu(rc, d, x, yy, { size, weight: sang ? 600 : 400, color: K1.MUC, align: "right" });
+      veChu(rc, d, x, yy, { size, weight: 600, color: K1.MUC, align: "right" });
       yy += size * 1.28;
     }
     yy += size * 0.25;

@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 23:20 GMT+7 — Claude Code
+**Cập nhật:** 24/10/2026 23:41 GMT+7 — Claude Code (session_01357, phiên chính theo thư GĐ gd-20261024-2332)
 
 ## Việc đang làm
 
@@ -30,6 +30,8 @@
 - Đã biết: Chromium thử nghiệm không có H.264 encoder (chỉ VP9/AV1/Opus); chờ Studio gửi giọng edge-tts + words.json cho h1–c1.
 
 ## Trạng thái
+
+- **24/10/2026 23:41 — ĐANG LÀM `EDU-20261024-09`** (thư GĐ `hop_thu/gd-20261024-2332-c13-toan-van-va-tra-loi.md` trên nhánh `studio-hop-thu`, mục 5): dựng lại k1t2 một lần đủ C13 10 mục + màu v2 + viền mực 2 px quanh cam + vignette 22 %. Hộp thư CHỐT là nhánh `studio-hop-thu` (repo riêng tư bỏ). Đã code: khung máy theo hộp bao nhóm vật (`F.vat`, sổ `VAT`), ống nhỏ giọt trọn vẹn, thước kẹp theo mép vũng, hai vũng cùng một bàn, phân tử SDS lên mặt nước, bóng đổ + phản chiếu, vignette multiply (`veVignette`), phụ đề hiện cả cụm + quầng sáng, nguồn đậm 600. Bộ kiểm cắt vật: 0 lỗi cả 2 khổ. **Còn:** đo pixel-diff (mục 3), xuất 2 khổ có tiếng, dựng `qa/<phien_ban>/` + tự chấm 10 mục, gửi thư `web-…-nop-….md`. Công cụ tạm ở scratchpad (chup.mjs, kiemcat.mjs) — sẽ chép vào `video-mo-phong/qa-tools/`.
 
 - **24/10/2026 23:20 — CẢNH BÁO hộp thư:** lệnh GĐ mới nhất (qua BaoMinh) nói hộp thư là **repo riêng tư** `baominhle77-glitch/studio-hop-thu` (nhánh main), khác với dòng EDU-20261024-08 bên dưới (nhánh `studio-hop-thu` trong repo này). Phiên cloud `session_01357…` thử: `git clone` repo riêng tư báo `could not read Username` (chưa cấp cho môi trường cloud), `add_repo` bị chặn quyền → đã báo `KHONG_VAO_DUOC_HOP_THU`. Khi vào được: đọc `README.md` + `hop_thu/gd-20261024-2320-mo-hop-thu.md`; C13 đủ 9 điều, màu K1 v2 #3F6A9E/#D1834F, vignette K1 22 %; nộp = push qa/ ở nhánh này rồi gửi `hop_thu/web-YYYYMMDD-HHMM-<chu-de>.md` kèm SHA; thư đầu kèm ý kiến về hộp thư; sắp hết limit gửi `web-...-drop.md`. **Có 2 phiên cloud cùng đẩy nhánh này** — luôn `git fetch` trước khi push.
 

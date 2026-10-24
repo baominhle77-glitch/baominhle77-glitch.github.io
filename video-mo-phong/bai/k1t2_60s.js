@@ -2,23 +2,28 @@
 // "What Soap Does to Water's Skin" — Meniscus Lab tập 2 (storyboard sha8 dfe35144), beat h1 → c1, khuôn K1.
 // Thời gian lấy từ giọng thật của Studio (edge-tts, bai/k1t2_moc.js): beats là nguồn thời gian duy nhất, ~71,6 s.
 // Mỗi chuyển động camera neo vào mốc của từ khoá đang được nói; không rung giả.
+// Bản C13 (thư GĐ gd-20261024-2332): mỗi cú máy đóng khung TRỌN một nhóm vật (hộp bao thế giới → khung vật của khổ),
+// nên khi máy đứng không vật nào bị mép khung cắt; vật chỉ qua mép khi đang trượt vào/ra. Sổ VAT dùng cho bộ kiểm tự động.
 import { Nut, veChu, phong } from "../engine/canh.js";
 import { DongThoiGian } from "../engine/thoigian.js";
 import { kep, khoang, layEase, loXo, lerp } from "../engine/easing.js";
 import { chiaCum, uocLuongMoc } from "../engine/phude.js";
 import {
   K1, rgba, so, veNen, taoBui, veBui, veBan, veVung, veThuocKep, veNhan, veMuiTenCang, veGiot,
-  veDongRot, veBong, veNhietKe, veCan, veBinh, veDauChi, veVien, veVungPip, veNguon, veTieuDe, veToGiay
+  veDongRot, veBong, veNhietKe, veCan, veBinh, veVien, veVungPip, veNguon, veTieuDe, veToGiay,
+  veVignette, veBongDo, phanChieu, VIEN_MUC
 } from "../kenh/k1.js";
 import { MOC_GIONG, BEATS } from "./k1t2_moc.js";
 
 export const KHO = {
   "16x9": {
     ten: "16x9", W: 1920, H: 1080, pip: [1552, 36, 1884, 246], an: [40, 40, 1880, 1040],
+    vat: [130, 280, 1790, 925],
     phuDe: { cx: 960, cy: 990, maxW: 1240, size: 46 }, daiPhuDe: [320, 950, 1600, 1062], nguon: { x: 1530, y: 72, size: 24, maxW: 860 }, tieuDe: { x: 960, y: 290, size: 56 }
   },
   "9x16": {
     ten: "9x16", W: 1080, H: 1920, pip: [62, 266, 438, 508], an: [65, 270, 1015, 1536],
+    vat: [100, 560, 980, 1310],
     phuDe: { cx: 540, cy: 1382, maxW: 860, size: 50 }, daiPhuDe: [90, 1338, 990, 1426], nguon: { x: 1005, y: 302, size: 24, maxW: 540 }, tieuDe: { x: 540, y: 640, size: 58 }
   }
 };
@@ -93,13 +98,12 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
 
   // --- Bố cục theo khổ (9:16 bố cục lại thật: vật cao hơn, dải 40–60 % chiều cao, phụ đề ~68 %) ---
   const L = doc
-    ? { ban: 1120, pxmm: 34, ax: 540, w0: 460, w1: 540, w1b: 600, camY: 930, nhan: 38, so: 44, hook: 84, zDay: 1.9, pxmC: 30, wc: 560 }
+    ? { ban: 1120, pxmm: 34, ax: 540, w0: 460, w1: 540, w1b: 600, camY: 930, nhan: 38, so: 44, hook: 84, zDay: 1.9, pxmC: 30, wc: 400 }
     : { ban: 800, pxmm: 32, ax: 960, w0: 640, w1: 800, w1b: 900, camY: 580, nhan: 34, so: 40, hook: 96, zDay: 1.9, pxmC: 32, wc: 560 };
   const hmm = (mm) => mm * L.pxmm;
   const H545 = hmm(VUNG.nuoc20); const H386 = hmm(VUNG.sds25); const H543 = hmm(VUNG.nuoc25);
   const THE_TICH = L.w1b * H545; // diện tích mặt cắt (thể tích trên mỗi đơn vị sâu) sau lần rót thứ hai
   const W2 = THE_TICH / H386; // cùng thể tích, mỏng hơn → loang rộng hơn
-  const xKA = L.ax - W2 / 2 - (doc ? 30 : 70); // thước kẹp đứng yên bên trái vùng loang tối đa
   const caoK = hmm(8.6);
   const xRot = L.ax + (doc ? 120 : -200); // dòng rót, tránh số đo và nhãn
 
@@ -125,113 +129,126 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   const u = (t, t0, d = 0.6) => vaoE(kep((t - t0) / d));
   const ra = (t, t1, d = 0.3) => 1 - raE(1 - kep((t1 - t) / d));
 
-  // ===== Camera: lịch cú máy neo vào từ khoá + trôi chậm (sine) để khung không bao giờ đứng yên =====
+  // ===== Vị trí các nhóm vật trên bàn (thế giới). Mỗi nhóm cách nhóm kế đủ xa để một cú máy đóng khung trọn
+  // một nhóm mà không chạm nhóm khác (C13 mục 2); máy lia giữa các nhóm = vật trượt vào/ra khung. =====
   const OX = 4200;
-  const xNk = OX; const xCoc = OX + (doc ? 330 : 520); const xCan = OX + (doc ? 1000 : 1350); const xC = OX + (doc ? 2400 : 3200);
-  // Bộ C (h4 cuối) và c1. 16:9: hai vũng cạnh nhau, thước kẹp ở hai phía ngoài, nhiệt kế ở khe giữa.
-  // 9:16: hai kệ xếp chồng (20 °C trên, 25 °C/SDS dưới) — dùng chiều dọc, vũng rộng; thước kẹp bên trái mỗi vũng
+  const xNk = OX; const xCoc = OX + (doc ? 1150 : 1700); const xCan = OX + (doc ? 2500 : 3600); const xC = OX + (doc ? 4000 : 5800);
+  const hNk = doc ? 440 : 380;
+  const coc = { x: xCoc, y: L.ban, w: doc ? 240 : 190, h: doc ? 320 : 240 };
+  const xCanD = xCan - (doc ? 150 : 170); const xBinh = xCan + (doc ? 120 : 150); const xNk2 = xCan + (doc ? 330 : 400);
+  // Bộ C (h4 cuối, c1): hai vũng trên CÙNG một bàn ("both puddles on one bench"), thước kẹp ở hai phía ngoài.
+  // Vũng phải giữ mép trái khi biến hình nước 25 °C → SDS (loang sang phải), nên khe giữa hai vũng không đổi.
   const hmC = (mm) => mm * L.pxmC; const wc = L.wc;
-  const xL = doc ? xC + 150 : xC - 430; const xR = doc ? xC : xC + 400;
-  const yL = doc ? L.ban - 400 : L.ban; const yR = L.ban;
+  const G = doc ? 170 : 420;
+  const xL = xC - G / 2 - wc / 2; const xRl = xC + G / 2; const yL = L.ban; const yR = L.ban;
   const wSDS = (wc * hmC(VUNG.nuoc25)) / hmC(VUNG.sds25);
-  const xkL = xL - wc / 2 - 36; const xkR0 = doc ? xR - wc / 2 - 36 : xR + wc / 2 + 36; const xkR1 = doc ? xR - wSDS / 2 - 36 : xR + wSDS / 2 + 36;
-  const xTh = doc ? xC + wc / 2 + 70 : (xL + wc / 2 + xR - wSDS / 2) / 2;
+  const uM = (t) => layEase("power3.inOut")(kep((t - tC) / 0.6));
+  const hL = (t) => lerp(hmC(VUNG.nuoc20), hmC(VUNG.nuoc25), uM(t)); const hR = (t) => lerp(hmC(VUNG.nuoc25), hmC(VUNG.sds25), uM(t));
+  const wR = (t) => (wc * hmC(VUNG.nuoc25)) / hR(t); const xR = (t) => xRl + wR(t) / 2;
+  const xkL = xL - wc / 2 - 36; const xkR = (t) => xRl + wR(t) + 36;
+  const caoKC = hmC(7.5);
+  // h2: hàng γ đặt giữa phía trên vũng
+  const nx = L.ax - (doc ? 210 : 230); const ny = L.ban - H386 - (doc ? 330 : 300);
+  const bongY = (t) => L.ban - H386 - khoang(t, M.bubble - 0.2, M.bubble + 2.2, 0, doc ? 660 : 340, "power2.out");
+  const bongR = (t) => khoang(t, M.bubble - 0.2, M.bubble + 1.6, 0, doc ? 160 : 140, "back.out(1.3)");
+  // ống nhỏ giọt trọn vẹn (bóp cao su + ống thuỷ tinh): trượt vào từ trên khi "Now add soap", rút lên sau khi giọt rơi
+  const yTip = L.ban - (doc ? 470 : 420); const ongVao = M.soap - 0.6; const ongRa = ti + 0.25;
+  const yOng = (t) => yTip - (1 - layEase("power3.out")(kep((t - ongVao) / 0.6))) * 520 - layEase("power2.in")(kep((t - ongRa) / 0.7)) * 900;
+  const xKA = (t) => L.ax - wA(t) / 2 - (doc ? 64 : 84); // thước kẹp đứng sát mép vũng, lùi theo khi vũng loang
+
+  // ===== Sổ vật (hộp bao thế giới theo t): dùng để đóng khung cú máy và để tự kiểm "không vật nào bị cắt mép" =====
+  const VAT = [];
+  const vat = (ten, hop) => { VAT.push({ ten, hop }); return hop; };
+  const bVungA = vat("vũng A", (t) => (t < tX ? [L.ax - wA(t) / 2 - 6, L.ban - hA(t) - 12, L.ax + wA(t) / 2 + 6, L.ban + 18] : null));
+  const bKepA = vat("thước kẹp A", (t) => (t < tX && t > 0.15 ? [xKA(t) - 24, L.ban - caoK - 8, xKA(t) + 52, L.ban + 18] : null));
+  const bOng = vat("ống nhỏ giọt", (t) => (t > ongVao && t < ongRa + 0.7 ? [L.ax - 26, yOng(t) - 262, L.ax + 26, yOng(t) + 20] : null));
+  const bBong = vat("bong bóng", (t) => { const r = bongR(t); return t < tX && r > 0.5 ? [L.ax - r - 3, bongY(t) - r - 3, L.ax + r + 3, bongY(t) + r + 3] : null; });
+  const bNk = vat("nhiệt kế", (t) => (t >= tX ? [xNk - 30, L.ban - 30 - hNk - 4, xNk + 64, L.ban + 46] : null));
+  const bCoc = vat("cốc SDS", (t) => (t >= tX ? [coc.x - coc.w / 2 - 14, coc.y - coc.h - 4, coc.x + coc.w / 2 + 4, coc.y + 8] : null));
+  const giay = { w: doc ? 520 : 440, h: doc ? 230 : 260 };
+  giay.x = doc ? coc.x - giay.w / 2 : coc.x + coc.w / 2 + 70; giay.y = doc ? L.ban - coc.h - 320 - giay.h : L.ban - 400;
+  const vaoG = (t) => layEase("power3.out")(kep((t - M.inferred + 0.1) / 0.6)); const raG = (t) => layEase("power2.in")(kep((t - M.that + 0.3) / 0.5));
+  const xGiay = (t) => giay.x + (1 - vaoG(t)) * 1400 + raG(t) * 1400;
+  vat("tờ bài báo", (t) => (vaoG(t) > 0 && raG(t) < 1 ? [xGiay(t) - 2, giay.y - 2, xGiay(t) + giay.w + 12, giay.y + giay.h + 14] : null));
+  const bCan = vat("cân", (t) => (t >= tX ? [xCanD - 132, L.ban - 76, xCanD + 132, L.ban + 8] : null));
+  const bBinh = vat("bình 1 L", (t) => (t >= tX ? [xBinh - 154, L.ban - 304, xBinh + 154, L.ban + 8] : null));
+  const bNk2 = vat("nhiệt kế 25 °C", (t) => (t > M.degrees - 0.4 ? [xNk2 - 30, L.ban - 224, xNk2 + 52, L.ban + 30] : null));
+  const bVungL = vat("vũng trái", (t) => (t >= tX ? [xL - wc / 2 - 6, yL - hL(t) - 8, xL + wc / 2 + 6, yL + 18] : null));
+  const bVungR = vat("vũng phải", (t) => (t >= tX ? [xRl - 6, yR - hR(t) - 8, xRl + wR(t) + 6, yR + 18] : null));
+  const bKepL = vat("thước kẹp trái", (t) => (t > M.warming + 1.0 ? [xkL - 24, yL - caoKC - 8, xkL + 52, yL + 18] : null));
+  const bKepR = vat("thước kẹp phải", (t) => (t > M.warming + 1.5 ? [xkR(t) - 52, yR - caoKC - 8, xkR(t) + 24, yR + 18] : null));
+
+  // ===== Camera: mỗi cú máy = đóng khung trọn một nhóm vật vào vùng vật của khổ (F.vat), neo vào từ khoá đang nói =====
+  const [R0, R1, R2, R3] = F.vat; const RW = R2 - R0; const RH = R3 - R1; const RX = (R0 + R2) / 2; const RY = (R1 + R3) / 2;
+  const hop = (...bs) => bs.filter(Boolean).reduce((a, c) => [Math.min(a[0], c[0]), Math.min(a[1], c[1]), Math.max(a[2], c[2]), Math.max(a[3], c[3])]);
+  const noi = ([x0, y0, x1, y1], l, tr, p, d) => [x0 - l, y0 - tr, x1 + p, y1 + d];
+  // zoom vừa khít (trừ 3 % cho trôi máy), tâm hộp đặt vào tâm vùng vật
+  const khung = (b, zMax = 2.2) => {
+    const z = Math.min(zMax, (RW / (b[2] - b[0])) * 0.97, (RH / (b[3] - b[1])) * 0.97);
+    return { x: (b[0] + b[2]) / 2 - (RX - F.W / 2) / z, y: (b[1] + b[3]) / 2 - (RY - F.H / 2) / z, zoom: z };
+  };
   const camGoc = new Nut({ x: L.ax, y: L.camY, zoom: 1 });
   const cam = new Nut({
-    x: (t) => tl.lay(camGoc, "x", t, camGoc.x) + Math.sin(t * 0.23) * 6,
-    y: (t) => tl.lay(camGoc, "y", t, camGoc.y) + Math.sin(t * 0.19 + 1.3) * 4,
-    zoom: (t) => tl.lay(camGoc, "zoom", t, camGoc.zoom) * (1 + 0.012 * Math.sin(t * 0.15)),
+    x: (t) => tl.lay(camGoc, "x", t, camGoc.x) + Math.sin(t * 0.23) * 5,
+    y: (t) => tl.lay(camGoc, "y", t, camGoc.y) + Math.sin(t * 0.19 + 1.3) * 3,
+    zoom: (t) => tl.lay(camGoc, "zoom", t, camGoc.zoom) * (1 + 0.008 * Math.sin(t * 0.15)),
     rot: 0
   });
   const quay = (t0, dur, dich, e = "power3.inOut") => {
     for (const k of ["x", "y", "zoom"]) if (dich[k] != null) tl.to(camGoc, k, dich[k], t0, dur, e);
   };
   const datCam = (t0, dich) => { for (const k of ["x", "y", "zoom"]) if (dich[k] != null) tl.set(camGoc, k, dich[k], t0); };
-  const zP = L.zDay; // zoom đẩy tối đa khi vũng phải nằm gọn trong khung
-  const bongY = (t) => L.ban - H386 - khoang(t, M.bubble - 0.2, M.bubble + 2.2, 0, doc ? 380 : 340, "power2.out");
-  const bongR = (t) => khoang(t, M.bubble - 0.2, M.bubble + 1.6, 0, doc ? 160 : 140, "back.out(1.3)");
-  const mepX = L.ax + W2 / 2 - (doc ? 0 : 170);
-  const LICH = doc ? [
-    // h1
-    [0, 0, { x: L.ax + 20, y: L.ban - 170, zoom: 1.8 }, "set"],
-    [M.episode - 0.1, 1.6, { x: L.ax, y: L.camY, zoom: 1.0 }],
-    [M.five - 0.25, 0.9, { x: xKA + 230, y: L.ban - 230, zoom: 1.45 }],
-    [M.however - 0.2, 1.0, { x: L.ax, y: L.camY, zoom: 0.95 }],
-    [M.now - 0.15, 0.8, { x: L.ax - 90, y: L.ban - 260, zoom: 1.3 }],
-    [M.deeper - 0.1, 0.8, { x: L.ax, y: L.camY - 20, zoom: 1.0 }],
-    [ti, 0.45, { zoom: 1.28, y: L.ban - 60 }, "power3.out"], // giật máy theo cú chạm: hạ xuống sát mặt nước
-    [M.sds2 - 0.3, 0.6, { zoom: 1.0, y: L.camY - 10 }], // "Our soap, SDS": lùi ra thấy cả vũng đã loang
-    // h2
-    [M.cuts - 0.3, 0.6, { x: L.ax + 300, y: L.ban - 150, zoom: 2.1 }],
-    [M.thirty - 0.2, 0.9, { x: L.ax + 120, y: L.ban - 250, zoom: 1.3 }],
-    [M.about - 0.1, 0.9, { x: L.ax + 300, y: L.ban - 150, zoom: zP }],
-    [M.puddle - 0.15, 0.9, { x: xKA + 220, y: L.ban - 240, zoom: 1.6 }],
-    [M.calculated - 0.2, 1.0, { x: L.ax, y: L.camY - 30, zoom: 1.0 }],
-    // h3
-    [M.bubble - 0.3, 1.2, { x: L.ax, y: L.ban - 380, zoom: 1.1 }],
-    [M.how - 0.05, 0.7, { x: L.ax, y: L.ban - H386 - 380, zoom: 1.6 }],
+  const so5 = (t) => [xKA(t) - 30, L.ban - caoK - (doc ? 150 : 150), xKA(t) + (doc ? 300 : 280), L.ban - caoK]; // số đo trên thước kẹp
+  const thanhG = [nx - 20, ny - 60, nx + (doc ? 440 : 470), ny + (doc ? 250 : 230)];
+  const nhomA = (t) => hop(bVungA(t), bKepA(t), so5(t));
+  const nhomC = (t) => hop(bVungL(t), bVungR(t), [xkL - 24, yL - caoKC - 120, xkR(t) + 24, yL + 70]);
+  const nhomCL = (t) => hop(bVungL(t), [xkL - 24, yL - caoKC - 120, xkL + 52, yL + 70]);
+  const nhomCR = (t) => hop(bVungR(t), [xkR(t) - 52, yR - caoKC - 120, xkR(t) + 24, yR + 70]);
+  const nhomB3 = hop(bCan(tX), bBinh(tX), [xNk2 - 30, L.ban - 260, xNk2 + 52, L.ban + 30], [xCanD - 140, L.ban - 190, xCanD + 140, L.ban]);
+  const LICH = [
+    // h1 — mở bằng cận cảnh dòng rót + vũng (vật to giữa khung), lùi ra thấy thước kẹp, số đo 5.45 mm nảy lớn
+    [0, 0, khung(noi(bVungA(1.2), 20, 170, 20, 0), 2.0), "set"],
+    [M.episode - 0.1, 1.6, khung(nhomA(2.6))],
+    [M.five - 0.25, 0.9, khung(noi(nhomA(3.2), 0, 30, 0, -10), 2.0)],
+    [M.however - 0.2, 1.0, khung(noi(hop(bVungA(6.6), bKepA(6.6)), 0, 230, 0, 0))],
+    [M.now - 0.15, 0.8, khung(hop(bVungA(7.4), bOng(7.4), bKepA(7.4)))],
+    [M.deeper - 0.1, 0.8, khung(noi(hop(bVungA(8), bOng(8), [L.ax - W2 / 2 - 6, L.ban - hmm(7) - 8, L.ax + W2 / 2 + 6, L.ban]), 0, 0, 170, 0))],
+    [ti, 0.5, khung(noi(bVungA(ti), 10, 60, 10, 10), 2.0), "power3.out"], // giọt chạm mặt: dí máy vào vũng
+    [ti + 0.6, 1.3, khung(nhomA(ti + 2.2)), "power2.out"], // vũng loang: máy lùi theo
+    // h2 — sức căng: mũi tên cam dọc trọn mặt nước; hàng γ trên vũng; chiều sâu 3.86 mm
+    [M.cuts - 0.3, 0.9, khung(noi(hop(bVungA(M.cuts), bKepA(M.cuts)), 0, 60, 0, 0), 2.0)],
+    [M.seventy - 0.3, 0.9, khung(hop(bVungA(M.seventy), thanhG))],
+    [M.thirty - 0.2, 0.9, khung(noi(hop(bVungA(M.thirty), thanhG), 40, 20, 40, 60))],
+    [M.about - 0.1, 0.9, khung(noi(hop(bVungA(M.about), bKepA(M.about)), 0, 80, 0, 0), 2.0)],
+    [M.puddle - 0.15, 0.9, khung(nhomA(M.puddle + 1))],
+    [M.calculated - 0.2, 1.0, khung(noi(nhomA(M.calculated), 60, 120, 60, 20))],
+    // h3 — bong bóng mọc từ vũng SDS, máy nâng theo rồi dí vào riêng bong bóng, xuyên màng (match-cut sang h4)
+    [M.bubble - 0.3, 1.2, khung(hop(bVungA(M.bubble), bBong(M.bubble + 2.2)))],
+    [M.how - 0.05, 0.7, khung(noi(bBong(M.how + 0.7), 60, 60, 60, 60), 2.2)],
     [M.more + 0.1, tX - M.more - 0.1, { zoom: 9 }, "power3.in"],
-    // h4
-    [tX, 0, { x: xNk + 170, y: L.ban - 260, zoom: 1.9 }, "set"],
-    [tX, 1.2, { zoom: 1.2 }, "expo.out"],
-    [M.soap4 - 0.3, 1.0, { x: xCoc, y: L.ban - 220, zoom: 1.6 }],
-    [M.surfactant - 0.3, 0.8, { x: xCoc, y: L.ban - 110, zoom: 2.5 }],
-    [M.millimolar - 0.1, 0.9, { x: xCoc + 60, y: L.ban - 330, zoom: 1.2 }],
-    [M.seven - 0.6, 1.0, { x: xCan, y: L.ban - 260, zoom: 1.2 }],
-    [M.grams - 0.25, 0.8, { x: xCan - 150, y: L.ban - 60, zoom: 2.1 }],
-    [M.all - 0.2, 0.9, { x: xCan + 60, y: L.ban - 300, zoom: 1.05 }],
-    [M.warming - 0.2, 1.2, { x: xC + 20, y: L.ban - 260, zoom: 0.92 }],
-    [M.barely - 0.2, 0.8, { x: xkL + 200, y: yL - 40, zoom: 1.45 }],
-    [M.becomes - 0.25, 0.9, { x: xkR0 + 200, y: yR - 120, zoom: 1.45 }],
-    // c1
-    [tC - 0.2, 1.0, { x: xC + 20, y: L.ban - 260, zoom: 0.92 }],
-    [M.twentyC - 0.2, 0.8, { x: xC - 20, y: L.ban - 200, zoom: 1.05 }],
-    [M.plain - 0.2, 0.8, { x: xkL + 200, y: yL - 40, zoom: 1.45 }],
-    [M.sdsC - 0.25, 0.9, { x: xC - 190, y: yR - 100, zoom: 1.3 }],
-    [M.lower - 0.2, 1.0, { x: xC + 20, y: L.ban - 260, zoom: 0.92 }],
-    [M.inC - 0.2, 0.6, { x: xR + wSDS / 2 - 100, y: yR + 10, zoom: 2.1 }]
-  ] : [
-    // h1
-    [0, 0, { x: xRot + 60, y: L.ban - 130, zoom: 1.9 }, "set"],
-    [M.episode - 0.1, 1.6, { x: L.ax, y: L.camY, zoom: 1.0 }],
-    [M.five - 0.25, 0.9, { x: 760, y: 640, zoom: 1.4 }],
-    [M.however - 0.2, 1.0, { x: L.ax, y: L.camY, zoom: 0.95 }],
-    [M.now - 0.15, 0.8, { x: L.ax - 120, y: L.ban - 380, zoom: 1.3 }],
-    [M.deeper - 0.1, 0.8, { x: L.ax, y: L.camY - 20, zoom: 1.0 }],
-    [ti, 0.6, { zoom: 1.12 }, "power3.out"],
-    // h2
-    [M.cuts - 0.3, 1.0, { x: mepX, y: L.ban - H386 - 60, zoom: zP }],
-    [M.thirty - 0.2, 0.9, { x: mepX - 150, y: L.ban - H386 - 120, zoom: 1.4 }],
-    [M.about - 0.1, 1.1, { x: L.ax, y: L.camY - 20, zoom: 1.0 }],
-    [M.puddle - 0.15, 0.9, { x: xKA + 330, y: L.ban - 170, zoom: 1.55 }],
-    [M.calculated - 0.2, 1.0, { x: L.ax, y: L.camY - 40, zoom: 1.0 }],
-    // h3
-    [M.bubble - 0.3, 1.2, { x: L.ax, y: L.ban - 330, zoom: 1.15 }],
-    [M.how - 0.05, 0.7, { x: L.ax, y: L.ban - H386 - 340, zoom: 1.7 }],
-    [M.more + 0.1, tX - M.more - 0.1, { zoom: 9 }, "power3.in"],
-    // h4
-    [tX, 0, { x: xNk + 260, y: L.ban - 200, zoom: 1.9 }, "set"],
-    [tX, 1.2, { zoom: 1.25 }, "expo.out"],
-    [M.soap4 - 0.3, 1.0, { x: xCoc, y: L.ban - 190, zoom: 1.6 }],
-    [M.surfactant - 0.3, 0.8, { x: xCoc, y: L.ban - 100, zoom: 2.6 }],
-    [M.millimolar - 0.3, 0.9, { x: xCoc + 150, y: L.ban - 230, zoom: 1.25 }],
-    [M.seven - 0.5, 1.0, { x: xCan, y: L.ban - 210, zoom: 1.3 }],
-    [M.grams - 0.25, 0.8, { x: xCan - 130, y: L.ban - 40, zoom: 2.2 }],
-    [M.all - 0.2, 0.9, { x: xCan + 120, y: L.ban - 220, zoom: 1.15 }],
-    [M.warming - 0.2, 1.2, { x: xC + 60, y: L.ban - 220, zoom: 0.95 }],
-    [M.barely - 0.2, 0.8, { x: xkL + 200, y: L.ban - 150, zoom: 1.6 }],
-    [M.becomes - 0.25, 0.9, { x: xkR0 - 200, y: L.ban - 150, zoom: 1.6 }],
-    // c1
-    [tC - 0.2, 1.0, { x: xC + 60, y: L.ban - 220, zoom: 0.95 }],
-    [M.twentyC - 0.2, 0.8, { x: xTh, y: L.ban - 240, zoom: 1.4 }],
-    [M.plain - 0.2, 0.8, { x: xkL + 200, y: L.ban - 150, zoom: 1.6 }],
-    [M.sdsC - 0.25, 0.9, { x: xkR1 - 200, y: L.ban - 150, zoom: 1.6 }],
-    [M.lower - 0.2, 1.0, { x: xC + 60, y: L.ban - 220, zoom: 0.95 }],
-    [M.inC - 0.2, 1.0, { x: xR + wSDS / 2 - 140, y: L.ban - 130, zoom: 1.8 }]
+    // h4 — nhiệt kế (một nhiệt độ) → cốc SDS (+ tờ bài báo) → cân + bình (7.21 g/L) + nhiệt kế 25 °C → hai vũng
+    [tX, 0, { ...khung(bNk(tX)), zoom: khung(bNk(tX)).zoom * 1.4 }, "set"],
+    [tX, 1.2, khung(noi(bNk(tX), 40, 40, 200, 0)), "expo.out"],
+    [M.temperature + 0.2, 1.0, khung(noi(bNk(tX), 120, 60, 120, 0), 1.6)],
+    [M.soap4 - 0.3, 1.0, khung(noi(bCoc(tX), 40, 40, 40, 0), 2.2)],
+    [M.surfactant - 0.3, 0.8, khung(noi(bCoc(tX), 100, 140, 100, 10), 2.2)],
+    [M.millimolar - 0.3, 0.9, khung(hop(bCoc(tX), [giay.x, giay.y, giay.x + giay.w + 12, giay.y + giay.h + 14]))],
+    [M.seven - 0.5, 1.0, khung(nhomB3)],
+    [M.grams - 0.25, 0.8, khung(hop(bCan(tX), bBinh(tX)), 2.2)],
+    [M.all - 0.2, 0.9, khung(noi(nhomB3, 40, 40, 40, 20))],
+    [M.warming - 0.2, 1.2, khung(nhomC(M.warming + 2))],
+    [M.barely - 0.2, 0.8, khung(nhomCL(M.barely), 2.0)],
+    [M.becomes - 0.25, 0.9, khung(nhomCR(M.becomes), 2.0)],
+    // c1 — vũng 25 °C biến thành vũng SDS; đọc từng vũng; thước so chênh 1.57 mm; mũi tên sức căng trên vũng SDS
+    [tC - 0.2, 1.0, khung(nhomC(tC + 0.6))],
+    [M.twentyC - 0.2, 0.8, khung(noi(nhomC(tC + 0.6), 40, 160, 40, 40))],
+    [M.plain - 0.2, 0.8, khung(nhomCL(M.plain), 2.0)],
+    [M.sdsC - 0.25, 0.9, khung(nhomCR(M.sdsC), 2.0)],
+    [M.lower - 0.2, 1.0, khung(noi(nhomC(M.lower), 0, 60, 0, 0))],
+    [M.inC - 0.2, 1.0, khung(noi(bVungR(M.inC), 30, 90, 30, 10), 2.0)]
   ];
-  // khung dọc ít chi tiết theo chiều ngang: cú máy dứt khoát hơn (≥ 0,6 s) để mỗi nhịp đổi hình rõ
   for (const [t0, dur, dich, e] of LICH) {
-    if (e === "set") datCam(t0, dich); else quay(t0, doc && dur > 0.6 && e !== "power3.in" ? Math.max(0.6, dur * 0.72) : dur, dich, e);
+    if (e === "set") datCam(t0, dich); else quay(t0, dur, dich, e);
   }
 
   // ===== Lớp nền: bụi sáng trôi (parallax thấp) =====
@@ -278,16 +295,25 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
         if (xb - xa > 200 / rc.zoom) veMuiTenCang(rc, { xa, xb, y: L.ban - h - 22 / rc.zoom, dai: (dai * 1.2) / rc.zoom, n: 8, u: uC, k: 1 / rc.zoom });
       }
       // giọt xà phòng: ống nhỏ giọt vào, giọt hình thành, rơi, chạm mặt ở ti
-      if (t >= M.soap - 0.6 && t < ti + 0.05) {
-        const yOng = L.ban - (doc ? 640 : 560) - (1 - layEase("power3.out")(u(t, M.soap - 0.6, 0.6))) * 300;
-        ctx.save(); ctx.fillStyle = rgba(K1.MUC, 0.8);
-        ctx.fillRect(L.ax - 9, yOng - 600, 18, 600); ctx.beginPath(); ctx.moveTo(L.ax - 9, yOng); ctx.lineTo(L.ax, yOng + 16); ctx.lineTo(L.ax + 9, yOng); ctx.fill(); ctx.restore();
-        const r = 14 * layEase("power2.out")(u(t, M.soap - 0.1, 0.5));
-        const roi = kep((t - ti + 0.55) / 0.55); // giọt treo ở đầu ống rồi rơi nhanh, chạm mặt ở ti
-        const yG = lerp(yOng + 16 + r, L.ban - H545 - r * 0.6, layEase("power2.in")(roi));
-        if (r > 0.5) veGiot(rc, { x: L.ax, y: yG, r, keo: roi });
+      if (t > ongVao && t < ongRa + 0.7) {
+        const yo = yOng(t);
+        // ống thuỷ tinh 170 px (dung dịch SDS bên trong) + bóp cao su mực 70 px: cả ống luôn trọn trong khung khi đứng
+        ctx.save();
+        ctx.fillStyle = rgba(K1.NEN_TREN, 0.55); ctx.strokeStyle = rgba(K1.MUC, 0.75); ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(L.ax - 11, yo - 170); ctx.lineTo(L.ax - 11, yo - 22); ctx.lineTo(L.ax - 3, yo + 16); ctx.lineTo(L.ax + 3, yo + 16); ctx.lineTo(L.ax + 11, yo - 22); ctx.lineTo(L.ax + 11, yo - 170); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = rgba(K1.NUOC, 0.5); ctx.fillRect(L.ax - 8, yo - 80, 16, 70);
+        ctx.fillStyle = rgba(K1.MUC, 0.88);
+        ctx.beginPath(); ctx.roundRect ? ctx.roundRect(L.ax - 22, yo - 240, 44, 74, 20) : ctx.rect(L.ax - 22, yo - 240, 44, 74); ctx.fill();
+        ctx.fillRect(L.ax - 16, yo - 172, 32, 10);
+        ctx.restore();
+        if (t < ti + 0.05) {
+          const r = 14 * layEase("power2.out")(u(t, M.soap - 0.1, 0.5));
+          const roi = kep((t - ti + 0.55) / 0.55); // giọt treo ở đầu ống rồi rơi nhanh, chạm mặt ở ti
+          const yG = lerp(yo + 16 + r, L.ban - H545 - r * 0.6, layEase("power2.in")(roi));
+          if (r > 0.5) veGiot(rc, { x: L.ax, y: yG, r, keo: roi });
+        }
         const uN = u(t, M.soap, 0.6) * ra(t, M.deeper, 0.3);
-        if (uN > 0) veNhan(rc, { x0: L.ax + 18, y0: yG, x1: L.ax + (doc ? 120 : 160), y1: yG + 40, text: "+ soap", u: uN, size: sz(rc, L.nhan) });
+        if (uN > 0) veNhan(rc, { x0: L.ax + 14, y0: yo - 120, x1: L.ax + (doc ? 110 : 150), y1: yo - 150, text: "+ soap (SDS)", u: uN, size: sz(rc, L.nhan) });
       }
       // thước kẹp + số đo (móc câu 5.45 mm lớn, sau đó thu về cỡ thường)
       const uK = u(t, 0.15, 0.5);
@@ -298,10 +324,12 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       else docSo = so(khoang(t, T3, T3 + 0.7, 5.45, 3.86, "expo.out")) + " mm";
       if (t < M.five - 0.05) docSo = "";
       const sizeSo = lerp(L.so, L.hook, hook);
-      veThuocKep(rc, { x: xKA, y: L.ban, h, cao: caoK, u: uK, phai: false });
+      const xK = xKA(t);
+      if (uK > 0) { veBongDo(rc, xK + 14, L.ban, 90, 0.22 * uK); phanChieu(rc, L.ban, () => veThuocKep(rc, { x: xK, y: L.ban, h, cao: caoK, u: uK, phai: false })); }
+      veThuocKep(rc, { x: xK, y: L.ban, h, cao: caoK, u: uK, phai: false });
       ctx.save(); ctx.setLineDash([6, 8]); ctx.strokeStyle = rgba(K1.MUC, 0.5); ctx.lineWidth = 2; ctx.globalAlpha *= uK;
-      ctx.beginPath(); ctx.moveTo(xKA + 4, L.ban - h); ctx.lineTo(L.ax - w / 2 + h * 0.5, L.ban - h); ctx.stroke(); ctx.restore();
-      const ySo = L.ban - caoK - 30; const xSo = doc ? xKA + 24 : xKA - 8;
+      ctx.beginPath(); ctx.moveTo(xK + 4, L.ban - h); ctx.lineTo(L.ax - w / 2 + h * 0.5, L.ban - h); ctx.stroke(); ctx.restore();
+      const ySo = L.ban - caoK - 30; const xSo = doc ? xK + 24 : xK - 8;
       if (docSo) veChu(rc, docSo, xSo, ySo, { size: sz(rc, sizeSo), weight: 600, align: "left", color: K1.MUC });
       const uPh = u(t, T3, 0.6) * ra(t, M.calculated + 1.2, 0.4);
       if (uPh > 0) veChu(rc, "puddle 3.86 mm (calculated)", xSo, ySo - sz(rc, L.nhan) * 1.5, { size: sz(rc, L.nhan * 0.9), align: "left", color: K1.MUC });
@@ -310,7 +338,6 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       veNhan(rc, { x0: L.ax + w * (doc ? -0.1 : 0.1), y0: L.ban - h * 0.55, x1: xE, y1: L.ban - h - (doc ? 260 : 170), text: "water, 20 °C (episode 1)", u: u(t, Math.max(M.episode, 1.3), 0.7) * ra(t, M.now - 0.2, 0.4), size: sz(rc, L.nhan), align: "center" });
       veNhan(rc, { x0: L.ax + w * 0.2, y0: L.ban - h, x1: L.ax + w * 0.2 + (doc ? 40 : 70), y1: L.ban - h - (doc ? 170 : 150), text: "shallower", u: u(t, M.shallower + 0.3, 0.6) * ra(t, M.cuts - 0.2, 0.4), size: sz(rc, L.nhan * 1.1), weight: 600 });
       // h2 — hàng γ, thanh dài đúng tỉ lệ 71.97 : 36.43
-      const nx = doc ? L.ax + 60 : mepX - 300; const ny = L.ban - H386 - (doc ? 220 : 210);
       const fs = sz(rc, L.nhan * 0.95); const dong = sz(rc, doc ? 92 : 80);
       const thanh = (doc ? 420 : 420) / rc.zoom;
       const veDong = (txt, g, i, uu, k) => {
@@ -318,7 +345,11 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
         ctx.save(); ctx.globalAlpha *= uu;
         veChu(rc, txt, nx, ny + i * dong, { size: fs, align: "left" });
         const gv = khoang(t, k, k + 0.8, 0, g, "expo.out");
-        ctx.fillStyle = rgba(K1.CANG, 0.9); ctx.fillRect(nx, ny + i * dong + fs * 0.45, thanh * (gv / 71.97), fs * 0.5);
+        const bw = thanh * (gv / 71.97); const v = VIEN_MUC / rc.zoom;
+        if (bw > 0.5) {
+          ctx.fillStyle = K1.MUC; ctx.fillRect(nx - v, ny + i * dong + fs * 0.45 - v, bw + 2 * v, fs * 0.5 + 2 * v);
+          ctx.fillStyle = K1.CANG; ctx.fillRect(nx, ny + i * dong + fs * 0.45, bw, fs * 0.5);
+        }
         ctx.restore();
       };
       const het = M.puddle - 0.1;
@@ -338,7 +369,6 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
 
   // --- Bộ B (h4): nhiệt kế, cốc SDS, tờ trích bài báo, cân + bình; Bộ C: hai vũng 20/25 °C → c1: nước / SDS ---
   const nhietB = (t) => (t < M.temperature + 0.1 ? 20 : khoang(t, M.temperature + 0.1, M.temperature + 1.6, 20, 25, "power2.inOut"));
-  const coc = { x: xCoc, y: L.ban, w: doc ? 200 : 190, h: doc ? 270 : 240 };
   const phanTu = Array.from({ length: 16 }, (_, i) => ({ fx: ((i * 37) % 97) / 97, fy: ((i * 53) % 89) / 89, p: i * 1.7 }));
   giua.them(new Nut({
     opacity: (t) => (t >= tX ? 1 : 0),
@@ -352,119 +382,117 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
         ctx.save(); ctx.strokeStyle = rgba(K1.MUC, 0.5 * (1 - uv) + 0.2); ctx.lineWidth = 3 / rc.zoom + 2 * uv;
         ctx.beginPath(); ctx.arc(bx, by, rr, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
       }
+      // vật đặt trên bàn: bóng đổ + phản chiếu mờ (C13 mục 6)
+      const datBan = (x, rong, ve) => { veBongDo(rc, x, L.ban, rong); phanChieu(rc, L.ban, ve); ve(); };
       // nhiệt kế
-      const yy = veNhietKe(rc, { x: xNk, y: L.ban - 30, h: doc ? 440 : 380, gia: nhietB(t), size: L.nhan * 0.9 });
+      let yy = 0;
+      datBan(xNk, 120, () => { yy = veNhietKe(rc, { x: xNk, y: L.ban - 30, h: hNk, gia: nhietB(t), size: L.nhan * 0.9 }); });
       veNhan(rc, { x0: xNk + 6, y0: yy, x1: xNk + (doc ? 70 : 100), y1: yy - (doc ? 170 : 130), text: "one temperature: 25 °C", u: u(t, M.temperature, 0.7) * ra(t, M.soap4 - 0.3, 0.4), size: sz(rc, L.nhan), weight: 600 });
-      // cốc SDS + phân tử (đầu cam ưa nước, đuôi mực) — hình minh hoạ, ghi "our sketch"
+      // cốc SDS + phân tử (đầu cam ưa nước có viền mực, đuôi mực) — hình minh hoạ, ghi "our sketch".
+      // "a lab surfactant": phần lớn phân tử bơi lên xếp hàng ở mặt nước (đầu trong nước, đuôi chĩa ra ngoài)
+      const yMat = coc.y - coc.h * 0.7;
+      const veCoc = () => {
+        ctx.save();
+        const g = ctx.createLinearGradient(0, yMat, 0, coc.y);
+        g.addColorStop(0, rgba(K1.NUOC, 0.42)); g.addColorStop(1, rgba(K1.NUOC, 0.7));
+        ctx.fillStyle = g; ctx.fillRect(coc.x - coc.w / 2, yMat, coc.w, coc.h * 0.7);
+        ctx.strokeStyle = rgba(K1.MUC, 0.7); ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(coc.x - coc.w / 2 - 10, coc.y - coc.h); ctx.lineTo(coc.x - coc.w / 2, coc.y - coc.h + 8); ctx.lineTo(coc.x - coc.w / 2, coc.y); ctx.lineTo(coc.x + coc.w / 2, coc.y); ctx.lineTo(coc.x + coc.w / 2, coc.y - coc.h); ctx.stroke();
+        ctx.restore();
+      };
+      datBan(coc.x, coc.w * 1.3, veCoc);
       ctx.save();
-      const g = ctx.createLinearGradient(0, coc.y - coc.h * 0.7, 0, coc.y);
-      g.addColorStop(0, rgba(K1.NUOC, 0.42)); g.addColorStop(1, rgba(K1.NUOC, 0.7));
-      ctx.fillStyle = g; ctx.fillRect(coc.x - coc.w / 2, coc.y - coc.h * 0.7, coc.w, coc.h * 0.7);
-      ctx.strokeStyle = rgba(K1.MUC, 0.7); ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(coc.x - coc.w / 2 - 10, coc.y - coc.h); ctx.lineTo(coc.x - coc.w / 2, coc.y - coc.h + 8); ctx.lineTo(coc.x - coc.w / 2, coc.y); ctx.lineTo(coc.x + coc.w / 2, coc.y); ctx.lineTo(coc.x + coc.w / 2, coc.y - coc.h); ctx.stroke();
-      for (const m of phanTu) {
-        const px = coc.x - coc.w / 2 + 18 + m.fx * (coc.w - 36) + Math.sin(t * 0.9 + m.p) * 5;
-        const py = coc.y - 14 - m.fy * (coc.h * 0.7 - 30) + Math.cos(t * 0.7 + m.p * 2) * 4;
-        const a = t * 0.5 + m.p;
-        ctx.strokeStyle = rgba(K1.MUC, 0.75); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + 15 * Math.cos(a), py + 15 * Math.sin(a)); ctx.stroke();
+      const nLen = phanTu.filter((m, i) => i % 3 !== 2).length;
+      let k = 0;
+      phanTu.forEach((m, i) => {
+        let px = coc.x - coc.w / 2 + 18 + m.fx * (coc.w - 36) + Math.sin(t * 0.9 + m.p) * 5;
+        let py = coc.y - 14 - m.fy * (coc.h * 0.7 - 30) + Math.cos(t * 0.7 + m.p * 2) * 4;
+        let a = t * 0.5 + m.p;
+        if (i % 3 !== 2) { // lên mặt nước, xếp hàng đều
+          const uS = layEase("power2.inOut")(kep((t - M.surfactant - 0.1 - k * 0.06) / 1.1));
+          const xs = coc.x - coc.w / 2 + 14 + ((k + 0.5) / nLen) * (coc.w - 28);
+          px = lerp(px, xs, uS); py = lerp(py, yMat + 7, uS); a = lerp(a, -Math.PI / 2 + 0.15 * Math.sin(t + m.p), uS);
+          k++;
+        }
+        ctx.strokeStyle = rgba(K1.MUC, 0.8); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + 15 * Math.cos(a), py + 15 * Math.sin(a)); ctx.stroke();
+        ctx.fillStyle = K1.MUC; ctx.beginPath(); ctx.arc(px, py, 4.5 + VIEN_MUC / rc.zoom, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = K1.CANG; ctx.beginPath(); ctx.arc(px, py, 4.5, 0, Math.PI * 2); ctx.fill();
-      }
+      });
       ctx.restore();
-      veChu(rc, "our sketch", coc.x, coc.y - coc.h * 0.7 - 14, { size: sz(rc, L.nhan * 0.7), italic: true, align: "center" });
-      veNhan(rc, { x0: coc.x - coc.w * 0.2, y0: coc.y - coc.h * 0.5, x1: doc ? coc.x - 20 : coc.x - 150, y1: coc.y - coc.h - (doc ? 150 : 90), text: "soap here = SDS (lab surfactant)", u: u(t, M.soap4 + 0.2, 0.7) * ra(t, M.surfactant - 0.3, 0.3), size: sz(rc, L.nhan), align: doc ? "center" : "right" });
-      veNhan(rc, { x0: coc.x + coc.w * 0.2, y0: coc.y - coc.h * 0.3, x1: doc ? coc.x + 30 : coc.x + 60, y1: coc.y - coc.h - (doc ? 150 : 230), text: "SDS 25.0 mM in water (inferred)", u: u(t, M.millimolar + 0.5, 0.7) * ra(t, M.seven - 0.6, 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "left" });
+      veChu(rc, "our sketch", coc.x, coc.y - 16, { size: sz(rc, L.nhan * 0.7), italic: true, align: "center" });
+      veNhan(rc, { x0: coc.x - coc.w * 0.2, y0: coc.y - coc.h * 0.5, x1: doc ? coc.x - 20 : coc.x - 150, y1: coc.y - coc.h - (doc ? 150 : 90), text: "soap here = SDS (lab surfactant)", u: u(t, M.soap4 + 0.2, 0.7) * ra(t, M.surfactant + 1.6, 0.3), size: sz(rc, L.nhan), align: doc ? "center" : "right" });
+      veNhan(rc, { x0: coc.x + coc.w * 0.3, y0: yMat + 4, x1: doc ? coc.x + 30 : coc.x + 60, y1: coc.y - coc.h - (doc ? 150 : 110), text: "SDS 25.0 mM in water (inferred)", u: u(t, M.millimolar + 0.5, 0.7) * ra(t, M.seven - 0.6, 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "left" });
       // tờ trích bài báo trượt vào khi lời nói "inferred from one paper's text"
-      const vaoG = layEase("power3.out")(kep((t - M.inferred + 0.1) / 0.6)); const raG = layEase("power2.in")(kep((t - M.that + 0.3) / 0.5));
-      if (vaoG > 0 && raG < 1) {
-        const gw = doc ? 520 : 440; const gh = doc ? 230 : 260;
-        const gx0 = doc ? coc.x - gw / 2 + 30 : coc.x + 260; const gy0 = doc ? L.ban - 640 : L.ban - 400;
+      if (vaoG(t) > 0 && raG(t) < 1) {
         veToGiay(rc, {
-          x: gx0 + (1 - vaoG) * 1400 + raG * 1400, y: gy0, w: gw, h: gh, size: sz(rc, 23),
+          x: xGiay(t), y: giay.y, w: giay.w, h: giay.h, size: sz(rc, 23),
           dong: [["Liu et al. 2026", true], ["SDS in water (§4.3)", false], ["25.0 mM inferred from text", false], ["(near Fig. 4a)", false]]
         });
       }
       // cân + bình 1 L: 25.0 mM × 288.38 g/mol = 7.21 g/L
       const g721 = khoang(t, M.seven - 0.2, M.grams + 0.4, 0, 7.21, "power2.out");
-      const xCanD = xCan - (doc ? 150 : 130);
-      ctx.save(); ctx.fillStyle = rgba(K1.MUC, 0.18);
-      const doi = Math.sqrt(g721 / 7.21);
-      ctx.beginPath(); ctx.ellipse(xCanD, L.ban - 74, 60 * doi + 1, 26 * doi + 1, 0, Math.PI, 0); ctx.fill(); ctx.restore();
-      veCan(rc, { x: xCanD, y: L.ban, doc: so(g721) + " g", size: L.so * 0.85 });
-      const xBinh = xCan + (doc ? 170 : 190);
-      veBinh(rc, { x: xBinh, y: L.ban, h: doc ? 300 : 300, muc: 0.85 });
+      datBan(xCanD, 300, () => {
+        ctx.save(); ctx.fillStyle = rgba(K1.MUC, 0.18);
+        const doi = Math.sqrt(g721 / 7.21);
+        ctx.beginPath(); ctx.ellipse(xCanD, L.ban - 74, 60 * doi + 1, 26 * doi + 1, 0, Math.PI, 0); ctx.fill(); ctx.restore();
+        veCan(rc, { x: xCanD, y: L.ban, doc: so(g721) + " g", size: L.so * 0.85 });
+      });
+      datBan(xBinh, 320, () => veBinh(rc, { x: xBinh, y: L.ban, h: 300, muc: 0.85 }));
       veChu(rc, "1 L", xBinh, L.ban - 160, { size: sz(rc, L.nhan * 0.85), align: "center" });
       const uE = u(t, M.litre, 0.5) * ra(t, M.warming - 0.3, 0.4);
       if (uE > 0) { ctx.save(); ctx.globalAlpha *= uE; veChu(rc, "= 7.21 g/L (calculated)", xCanD, L.ban - (doc ? 150 : 140), { size: sz(rc, L.nhan * 1.1), weight: 600, align: "center" }); ctx.restore(); }
       if (t > M.degrees - 0.4) {
         const pop = layEase("back.out(1.4)")(kep((t - M.degrees + 0.3) / 0.5));
-        const xm = xCan + (doc ? 360 : 420);
-        ctx.save(); ctx.translate(xm, L.ban); ctx.scale(pop, pop); ctx.translate(-xm, -L.ban);
-        veNhietKe(rc, { x: xm, y: L.ban - 20, h: 200, gia: 25, size: L.nhan * 0.7 });
-        veChu(rc, "25 °C", xm, L.ban - 250, { size: sz(rc, L.nhan * 0.9), weight: 600, align: "center" });
+        ctx.save(); ctx.translate(xNk2, L.ban); ctx.scale(pop, pop); ctx.translate(-xNk2, -L.ban);
+        datBan(xNk2, 80, () => veNhietKe(rc, { x: xNk2, y: L.ban - 20, h: 200, gia: 25, size: L.nhan * 0.8 }));
+        veChu(rc, "25 °C", xNk2, L.ban - 250, { size: sz(rc, L.nhan * 0.9), weight: 600, align: "center" });
         ctx.restore();
       }
-      // --- Bộ C (h4 cuối) → c1: biến hình vũng 25 °C thành vũng SDS (match-cut), vũng 20 °C thành 25 °C ---
-      const uM = layEase("power3.inOut")(kep((t - tC) / 0.6));
-      const hL = lerp(hmC(VUNG.nuoc20), hmC(VUNG.nuoc25), uM); const hR = lerp(hmC(VUNG.nuoc25), hmC(VUNG.sds25), uM); const wR = (wc * hmC(VUNG.nuoc25)) / hR;
-      if (doc) { // kệ trên
-        veBan(rc, xC - 200, xC + 460, yL, 70);
-        ctx.save(); ctx.fillStyle = rgba(K1.MUC, 0.22); ctx.fillRect(xC - 200, yL, 660, 12); ctx.restore();
-      }
-      const cap = [[xL, yL, wc, hL, uM < 0.5 ? "20 °C" : "25 °C", lerp(VUNG.nuoc20, VUNG.nuoc25, uM), false], [xR, yR, wR, hR, "25 °C", lerp(VUNG.nuoc25, VUNG.sds25, uM), !doc]];
+      // --- Bộ C (h4 cuối) → c1: hai vũng trên cùng một bàn; biến hình vũng 25 °C thành vũng SDS (match-cut), 20 °C → 25 °C ---
+      const m = uM(t);
+      const cap = [
+        [xL, wc, hL(t), m < 0.5 ? "20 °C" : "25 °C", lerp(VUNG.nuoc20, VUNG.nuoc25, m), xkL, false],
+        [xR(t), wR(t), hR(t), "25 °C", lerp(VUNG.nuoc25, VUNG.sds25, m), xkR(t), true]
+      ];
       const docSoK = []; // vị trí số đọc của từng thước (để đặt nhãn c1)
-      cap.forEach(([cx, yb, ww, hh, nhan, mm, phai], i) => {
-        veVung(rc, { cx, y: yb, w: ww, h: hh });
-        veChu(rc, nhan, cx, yb + (doc ? 50 : 60), { size: sz(rc, L.nhan), weight: 600, align: "center" });
-        const xk = phai ? cx + ww / 2 + 36 : cx - ww / 2 - 36;
-        // 9:16: khi máy tập trung kệ dưới, số đọc kệ trên (đang ở mép trên khung, dưới dòng nguồn) tạm ẩn
-        const anTren = doc && i === 0 ? ra(t, M.becomes - 0.2, 0.3) + u(t, tC + 0.5, 0.4) * ra(t, M.sdsC - 0.2, 0.3) + u(t, M.lower + 0.6, 0.4) : 1;
+      cap.forEach(([cx, ww, hh, nhan, mm, xk, phai], i) => {
+        veVung(rc, { cx, y: L.ban, w: ww, h: hh });
+        veChu(rc, nhan, cx, L.ban + (doc ? 50 : 60), { size: sz(rc, L.nhan), weight: 600, align: "center" });
         const uk = u(t, M.warming + 1.0 + i * 0.5, 0.5);
-        veThuocKep(rc, { x: xk, y: yb, h: hh, cao: hmC(7.5), u: uk, phai });
-        const xs = doc ? xk + 24 : xk; const ys = yb - hmC(7.5) - 18;
+        if (uk > 0) { veBongDo(rc, xk + (phai ? -14 : 14), L.ban, 90, 0.22 * uk); phanChieu(rc, L.ban, () => veThuocKep(rc, { x: xk, y: L.ban, h: hh, cao: caoKC, u: uk, phai })); }
+        veThuocKep(rc, { x: xk, y: L.ban, h: hh, cao: caoKC, u: uk, phai });
+        const xs = xk; const ys = L.ban - caoKC - 18;
         docSoK.push([xs, ys]);
-        if (uk > 0 && anTren > 0.01) {
-          ctx.save(); ctx.globalAlpha *= Math.min(1, anTren);
+        if (uk > 0) {
           const dem = t < tC ? khoang(t, M.warming + 1.0 + i * 0.5, M.warming + 1.8 + i * 0.5, 0, mm, "expo.out") : mm;
-          veChu(rc, so(dem) + " mm", xs, ys, { size: sz(rc, L.so * 0.9), weight: 600, align: doc ? "left" : "center" });
-          ctx.restore();
+          veChu(rc, so(dem) + " mm", xs, ys, { size: sz(rc, L.so * 0.9), weight: 600, align: "center" });
         }
       });
       const uW = u(t, M.warming + 0.9, 0.6) * ra(t, M.barely - 0.2, 0.3);
-      if (uW > 0) { ctx.save(); ctx.globalAlpha *= uW; veChu(rc, "water: 5.45 → 5.43 mm (20 → 25 °C)", xC, doc ? yR + 115 : L.ban - 400, { size: sz(rc, L.nhan), align: "center" }); ctx.restore(); }
-      // c1: nhiệt kế chung, nhãn đọc số, thước so chênh 1.57 mm
+      if (uW > 0) { ctx.save(); ctx.globalAlpha *= uW; veChu(rc, "water: 5.45 → 5.43 mm (20 → 25 °C)", xC, L.ban - caoKC - (doc ? 170 : 150), { size: sz(rc, L.nhan), align: "center" }); ctx.restore(); }
+      // c1: nhãn đọc số, thước so chênh 1.57 mm
       if (t > tC + 0.3) {
-        const pop = layEase("back.out(1.4)")(kep((t - M.twentyC + 0.1) / 0.5)) * ra(t, M.inC - 0.1, 0.3);
-        if (pop > 0 && !doc) { // 9:16: nhãn "25 °C" dưới mỗi vũng đã đủ, khung dọc không còn chỗ cho nhiệt kế
-          const xm = doc ? xTh : xTh - 14; const ym = doc ? yL : L.ban;
-          ctx.save(); ctx.translate(xm, ym); ctx.scale(pop, pop); ctx.translate(-xm, -ym);
-          veNhietKe(rc, { x: xm, y: ym - 20, h: doc ? 200 : 220, gia: 25, size: L.nhan * 0.6 });
-          ctx.restore();
-        }
         const lech = sz(rc, L.so) * 1.3;
         const uPl = u(t, M.plain, 0.6) * ra(t, M.lower - 0.2, 0.3);
-        if (uPl > 0) { ctx.save(); ctx.globalAlpha *= uPl; veChu(rc, "water: 5.43 mm", docSoK[0][0], docSoK[0][1] - lech, { size: sz(rc, L.nhan), weight: 600, align: doc ? "left" : "center" }); ctx.restore(); }
+        if (uPl > 0) { ctx.save(); ctx.globalAlpha *= uPl; veChu(rc, "water: 5.43 mm", xL, docSoK[0][1] - lech, { size: sz(rc, L.nhan), weight: 600, align: "center" }); ctx.restore(); }
         const uSd = u(t, M.sdsC, 0.6) * ra(t, M.lower - 0.2, 0.3);
-        if (uSd > 0) { ctx.save(); ctx.globalAlpha *= uSd; veChu(rc, "SDS 25.0 mM (inferred): 3.86 mm", doc ? docSoK[1][0] : docSoK[1][0] - 150, docSoK[1][1] - lech, { size: sz(rc, L.nhan), weight: 600, align: doc ? "left" : "center" }); ctx.restore(); }
+        if (uSd > 0) { ctx.save(); ctx.globalAlpha *= uSd; veChu(rc, "SDS 25.0 mM (inferred): 3.86 mm", xR(t), docSoK[1][1] - lech, { size: sz(rc, L.nhan), weight: 600, align: "center" }); ctx.restore(); }
         const uLo = u(t, M.lower, 0.6) * ra(t, M.inC - 0.2, 0.3);
         if (uLo > 0) {
           const yN = yR - hmC(VUNG.nuoc25); const yS = yR - hmC(VUNG.sds25);
-          const xa = doc ? xR - wR / 2 : xL - wc / 2; const xb = xR + wR / 2;
+          const xa = xL - wc / 2; const xb = xRl + wR(t);
           ctx.save(); ctx.globalAlpha *= uLo; ctx.setLineDash([8, 7]); ctx.strokeStyle = rgba(K1.MUC, 0.7); ctx.lineWidth = 2;
           ctx.beginPath(); ctx.moveTo(xa, yN); ctx.lineTo(xa + (xb - xa) * layEase("power2.out")(uLo), yN); ctx.stroke();
           ctx.setLineDash([]); ctx.lineWidth = 3; ctx.strokeStyle = K1.MUC;
-          const xd = doc ? xR + 150 : xR; ctx.beginPath(); ctx.moveTo(xd, yN + 4); ctx.lineTo(xd, yS - 4); ctx.stroke();
+          const xd = xR(t); ctx.beginPath(); ctx.moveTo(xd, yN + 4); ctx.lineTo(xd, yS - 4); ctx.stroke();
           for (const [yy2, sg] of [[yN + 4, 1], [yS - 4, -1]]) { ctx.beginPath(); ctx.moveTo(xd - 8, yy2 + sg * 10); ctx.lineTo(xd, yy2); ctx.lineTo(xd + 8, yy2 + sg * 10); ctx.stroke(); }
           ctx.restore();
           const uLo2 = u(t, M.lower + 0.3, 0.6) * ra(t, M.inC - 0.2, 0.3);
-          if (uLo2 > 0) { ctx.save(); ctx.globalAlpha *= uLo2; veChu(rc, "1.57 mm lower (calculated)", doc ? xC + 60 : xd, doc ? yR + 115 : yR - hmC(7.5) - 18 - sz(rc, L.so) * 1.7, { size: sz(rc, L.nhan), weight: 600, align: "center" }); ctx.restore(); }
+          if (uLo2 > 0) { ctx.save(); ctx.globalAlpha *= uLo2; veChu(rc, "1.57 mm lower (calculated)", xC, L.ban - caoKC - (doc ? 170 : 150), { size: sz(rc, L.nhan), weight: 600, align: "center" }); ctx.restore(); }
         }
-        // kết: sức căng (cam) trên mép vũng SDS — "only the skin changes"
+        // kết: sức căng (cam, viền mực) dọc trọn mặt vũng SDS — "only the skin changes"
         const uK2 = u(t, M.inC, 0.8);
-        if (uK2 > 0) {
-          const nua = (rc.W / 2 - 80) / rc.zoom;
-          const xa = Math.max(xR - wR / 2, rc.camX - nua); const xb = Math.min(xR + wR / 2, rc.camX + nua);
-          if (xb - xa > 200 / rc.zoom) veMuiTenCang(rc, { xa, xb, y: yR - hmC(VUNG.sds25) - 22 / rc.zoom, dai: (60 * 1.2) / rc.zoom, n: 6, u: uK2, k: 1 / rc.zoom });
-        }
+        if (uK2 > 0) veMuiTenCang(rc, { xa: xRl, xb: xRl + wR(t), y: yR - hmC(VUNG.sds25) - 22 / rc.zoom, dai: (60 * 1.2) / rc.zoom, n: 6, u: uK2, k: 1 / rc.zoom });
       }
     }
   }));
@@ -512,6 +540,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       { ten: "nen", parallax: 0.25, goc: lopNen },
       { ten: "giua", parallax: 1, goc: giua },
       { ten: "truoc", parallax: 1.35, goc: lopTruoc },
+      { ten: "vignette", man: true, goc: new Nut({ ve: (rc) => veVignette(rc) }) },
       { ten: "man", man: true, goc: man }
     ]
   };
@@ -519,9 +548,9 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   // Các chuyển động camera/chuyển cảnh (để lấy 3 khung đầu–giữa–cuối mỗi cái trong bộ dẫn chứng)
   const chuyenCanh = LICH.filter((c) => c[3] !== "set" && c[1] >= 0.6).map(([t0, dur]) => ["cú máy", t0, t0 + dur]);
   return {
-    F, tl, canh, cum, chuyenCanh, M, VUNG, tu: tuTrongBai, THOI_LUONG, FPS, mocGiong: true, LOI,
+    F, tl, canh, cum, chuyenCanh, M, VUNG, VAT, cam, tu: tuTrongBai, THOI_LUONG, FPS, mocGiong: true, LOI,
     phuDe: {
-      ...F.phuDe, mau: K1.NEN_TREN, nenHop: K1.MUC, aHop: 1, vien: K1.NEN_TREN,
+      ...F.phuDe, mau: K1.NEN_TREN, nenHop: K1.MUC, quang: K1.NEN_TREN, doQuang: 12, vienGach: K1.MUC,
       gachChan: (w) => (CANG.test(w) ? K1.CANG : NUOC.test(w) ? K1.NUOC : null)
     },
     hauKy: (rc) => { veVien(rc); veVungPip(rc, F.pip); }

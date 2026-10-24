@@ -31,7 +31,9 @@ export function chiaCum(words, { toiDa = 4, khoangLang = 0.15 } = {}) {
 }
 
 // Vẽ phụ đề tại t trong hệ toạ độ màn hình.
-// o: {cx, cy, maxW, size, mau, nenHop, gachChan: (tu) => màu | null}
+// o: {cx, cy, maxW, size, mau, nenHop, quang, gachChan: (tu) => màu | null, vienGach}
+// C13 mục 7: cả cụm (2–5 từ) hiện cùng lúc — không khung nào chỉ có một chữ trơ; từ đang được đọc nảy nhẹ,
+// từ khoá được gạch chân màu đại lượng đúng lúc vang lên. Hộp đặc + quầng sáng, không mờ dần (tương phản giữ ≥ 4,5:1 ở mọi khung).
 export function vePhuDe(rc, cum, t, o) {
   const c = cum.find((g) => t >= g.bd && t < g.kt);
   if (!c) return;
@@ -42,45 +44,33 @@ export function vePhuDe(rc, cum, t, o) {
   while (rong() > o.maxW && size > o.size * 0.6) size -= 1;
   const tong = rong();
   const vao = layEase("power3.out"); const nay = layEase("back.out(1.6)");
-  const ra = 1 - layEase("power2.in")(1 - kep((c.kt - t) / 0.12));
-  ctx.save();
-  ctx.globalAlpha *= ra;
-  // hộp nền vuông góc (khuôn K1 cấm chip bo tròn); màu/độ mờ hộp do bài chọn (K1: hộp mực, chữ sáng, tương phản ≥ 4,5:1);
-  // hộp nở theo các từ đã nói (không để hộp rỗng)
-  let daNoi = 0; let xx = 0;
-  c.tu.forEach((w, i) => {
-    const rw = doChu(rc, w.text, size, 600);
-    const k = vao(kep((t - w.start + 0.04) / 0.22));
-    if (k > 0) daNoi = xx + rw * k;
-    xx += rw + cach();
-  });
+  const uCum = vao(kep((t - c.bd) / 0.16)); // hộp nở ngang 88 % → 100 % (không đổi độ mờ)
   const pad = size * 0.32;
-  ctx.fillStyle = o.nenHop;
-  const aHop = o.aHop == null ? 0.82 : o.aHop;
-  ctx.globalAlpha *= aHop;
-  if (daNoi > 0) {
-    ctx.fillRect(o.cx - tong / 2 - pad, o.cy - size * 0.78, daNoi + pad * 2, size * 1.5);
-    if (o.vien) { ctx.strokeStyle = o.vien; ctx.lineWidth = 3; ctx.strokeRect(o.cx - tong / 2 - pad - 1.5, o.cy - size * 0.78 - 1.5, daNoi + pad * 2 + 3, size * 1.5 + 3); }
+  const hw = (tong / 2 + pad) * (0.88 + 0.12 * uCum);
+  const y0 = o.cy - size * 0.78; const hh = size * 1.5;
+  ctx.save();
+  if (o.quang) { // quầng sáng: nền ngay quanh hộp luôn sáng → hộp mực luôn ≥ 4,5:1 so với nền quanh nó
+    const q = o.doQuang || 12;
+    ctx.fillStyle = o.quang; ctx.fillRect(o.cx - hw - q, y0 - q, 2 * (hw + q), hh + 2 * q);
   }
-  ctx.globalAlpha /= aHop;
+  ctx.fillStyle = o.nenHop; ctx.fillRect(o.cx - hw, y0, 2 * hw, hh);
+  ctx.beginPath(); ctx.rect(o.cx - hw, y0, 2 * hw, hh); ctx.clip();
   let x = o.cx - tong / 2;
   for (const w of c.tu) {
     const rw = doChu(rc, w.text, size, 600);
     const u = kep((t - w.start + 0.04) / 0.22);
-    if (u > 0) {
-      ctx.save();
-      const s = 0.86 + 0.14 * nay(u);
-      ctx.translate(x + rw / 2, o.cy + (1 - vao(u)) * size * 0.25);
-      ctx.scale(s, s);
-      ctx.globalAlpha *= vao(u);
-      veChu(rc, w.text, 0, 0, { size, weight: 600, color: o.mau, align: "center", baseline: "middle" });
-      const mg = o.gachChan && o.gachChan(w.text);
-      if (mg) {
-        ctx.fillStyle = mg;
-        ctx.fillRect(-rw / 2, size * 0.42, rw * vao(kep(u * 1.4)), Math.max(3, size * 0.09));
-      }
-      ctx.restore();
+    ctx.save();
+    const s = u > 0 && u < 1 ? 1 + 0.08 * Math.sin(Math.PI * nay(u)) : 1;
+    ctx.translate(x + rw / 2, o.cy + (1 - uCum) * size * 0.3);
+    ctx.scale(s, s);
+    veChu(rc, w.text, 0, 0, { size, weight: 600, color: o.mau, align: "center", baseline: "middle" });
+    const mg = u > 0 && o.gachChan && o.gachChan(w.text);
+    if (mg) {
+      const gw = rw * vao(kep(u * 1.4)); const gy = size * 0.42; const gh = Math.max(3, size * 0.09);
+      if (o.vienGach) { const v = 2; ctx.fillStyle = o.vienGach; ctx.fillRect(-rw / 2 - v, gy - v, gw + 2 * v, gh + 2 * v); }
+      ctx.fillStyle = mg; ctx.fillRect(-rw / 2, gy, gw, gh);
     }
+    ctx.restore();
     x += rw + cach();
   }
   ctx.restore();

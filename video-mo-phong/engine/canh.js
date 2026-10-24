@@ -76,6 +76,7 @@ export function ghiHop(rc, x0, y0, x1, y1, text) {
 export function veChu(rc, text, x, y, o = {}) {
   const { ctx } = rc;
   const size = o.size || 32;
+  if (rc.khongChu) return { w: 0, x0: x, x1: x, y0: y, y1: y }; // phản chiếu/bóng: không vẽ chữ
   ctx.font = phong(size, o.weight || 400, o.italic);
   ctx.textBaseline = "alphabetic";
   const parts = String(text).split("→");
