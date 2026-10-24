@@ -13,7 +13,7 @@ Spec gốc + bản bổ sung (SPA nhiều màn, thiết kế cao cấp, PWA, AI 
 | 6. Test lõi (test.mjs) | xong |
 | 7. Nhận diện chủ đề + gợi ý mẫu trải (js/topic.js; thêm mẫu Tình cảm) | xong |
 | 8. Động cơ luật sâu (js/insight.js, js/markdown.js) + MAU_GIAI.md (sinh bằng tools/mau-giai.mjs) + 3 ca test | xong |
-| 9. Mặt lá SVG riêng từng lá (js/cards.js) | chưa |
+| 9. Mặt lá SVG riêng từng lá (js/cards.js) | xong |
 | 10. SPA hash router + các màn + thiết kế (index.html, css, js/app.js, js/views.js) | chưa |
 | 11. AI: Gemini mặc định, model dự phòng, JSON có cấu trúc, streaming, hỏi tiếp (js/ai.js) | chưa |
 | 12. PWA (manifest, sw.js, icon) | chưa |
