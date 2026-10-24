@@ -39,6 +39,29 @@
       "started_at": "2026-07-25T13:35:00+07:00",
       "heartbeat_at": "2026-07-25T16:45:00+07:00",
       "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất, chống trùng toàn catalog và thanh lọc toàn bộ affiliate link cũ."
+    }
+  ],
+  "recently_completed": [
+    {
+      "id": "EDU-20261024-06",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "c4f02621cfa9a729bd07eb8a18860a583df84bed",
+      "paths": [
+        ".claude/skills/**",
+        "CLAUDE.md",
+        "docs/hoc_tu_ma_nguon.md",
+        "video-mo-phong/**",
+        "qa/**",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/DIEM-DUNG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-24T18:54:00+07:00",
+      "completed_at": "2026-10-24T18:54:00+07:00",
+      "summary": "Phat hanh bo dan chung qa/ v2 + sua hop phu de; dong EDU-20261024-04."
     },
     {
       "id": "EDU-20261024-04",
@@ -55,13 +78,12 @@
         "docs/handover/DIEM-DUNG.md",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-10-24T16:15:00+07:00",
-      "heartbeat_at": "2026-10-24T18:40:00+07:00",
-      "summary": "M1-M4 v1 da nop (qa/20261024-1732_k1t2_60s); v2 (giong that, 72 s) da code va gop vao main qua EDU-20261024-05; con: bo dan chung qa/ v2 + tu cham + thu GD. Lenh GD Studio gd-20261024-1220."
-    }
-  ],
-  "recently_completed": [
+      "heartbeat_at": "2026-10-24T18:54:00+07:00",
+      "summary": "Lenh GD Studio gd-20261024-1220: M1-M4 da nop; ban v2 qa/20261024-1848_k1t2_v2 (giong that, 72 s), tu cham 34/39; cho GD cham. Nop lai (neu truot) mo task moi.",
+      "completed_at": "2026-10-24T18:54:00+07:00"
+    },
     {
       "id": "EDU-20261024-05",
       "owner": "Claude Code",
