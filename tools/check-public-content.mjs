@@ -10,9 +10,7 @@ const DEFAULT_ROOTS = [
   "boitoan/community.html",
   "medora/index.html",
   "vietnam-travel/index.html",
-  "vietnam-travel/app.js",
-  "hoi-chon-dung/index.html",
-  "hoi-chon-dung/app.js"
+  "vietnam-travel/app.js"
 ];
 
 const FORBIDDEN = [

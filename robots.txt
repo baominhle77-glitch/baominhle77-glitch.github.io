@@ -1,9 +1,6 @@
-# Root vẫn là kho riêng. Chỉ công khai ứng dụng Hội Chọn Đúng cho máy tìm kiếm.
+# Root là kho riêng: không mở trang nào cho máy tìm kiếm.
 User-agent: *
-Allow: /hoi-chon-dung/
 Disallow: /
-
-Sitemap: https://hiennhi89.pages.dev/hoi-chon-dung/sitemap.xml
 
 # Không cho phép dùng nội dung để huấn luyện/thu thập bởi các bot AI phổ biến.
 User-agent: GPTBot

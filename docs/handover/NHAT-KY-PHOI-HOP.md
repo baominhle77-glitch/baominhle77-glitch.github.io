@@ -22,6 +22,15 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-25 00:10 GMT+7 — Claude Code — CHOICE-20261024-01 — xoá hẳn Hội Chọn Đúng (BaoMinh yêu cầu, cấp toàn quyền)
+- Nhánh `agent/CHOICE-20261024-01-xoa-hoi-chon-dung` (từ `main` 9e43a78); PR nháp chờ BaoMinh duyệt gộp.
+- Xoá: `hoi-chon-dung/**`, `backend/choice*.js|mjs` (12 tệp), `tools/*choice*` (15 tệp), `tools/submit-indexnow.mjs`, `tools/submit-google-sitemap.mjs`, 4 workflow `choice-*`/`record-choice-*`/`validate-choice-*`, tài liệu `CHOICE_AUTOPILOT_STATUS.md`, `CHOICE_GROWTH_AUTOPILOT.md`, `CHOICE_OWNER_SETUP.md`, `HOI_CHON_DUNG.md`.
+- Sửa: `deploy-pages.yml` (bỏ cấy mã choice vào Worker, build SEO, đặt secret `CHOICE_AUTOPILOT_TRIGGER`, gọi growth, IndexNow, sitemap Google, hậu kiểm choice; thêm hậu kiểm "đã gỡ"), `validate-role-system.yml` (bỏ bước choice, thêm kiểm "đã gỡ"), `backend/wrangler.toml` (`crons = []` để wrangler gỡ cron 5 phút), `robots.txt` (Disallow toàn bộ), `tools/check-public-content.mjs`.
+- Giữ: `google91001f63e8104533.html`, `BingSiteAuth.xml` (xác minh tên miền chung), secret dùng chung (`SESSION_SECRET`, `TELEGRAM_*`), KV binding `KV`.
+- Khoá `GROWTH-20260725-04` (quá hạn từ 25/07) chuyển `cancelled` theo yêu cầu chủ dự án.
+- Test: đủ danh sách AGENTS §8 + `backend/travel.test.mjs`, `apply-travel-system` + `worker.test.mjs` sau cấy: đạt; YAML hợp lệ; mô phỏng bước "Gộp site" + `check-public-content _site`: đạt.
+- Việc ngoài repo cho chủ (không làm được từ đây): xoá Worker secret `ACCESSTRADE_API_TOKEN`, `CHOICE_AUTOPILOT_TRIGGER`, `CHOICE_BOOTSTRAP_EXPECTED_SHA256`; khoá KV `choice:*` trong namespace `KV`; GitHub secret `GOOGLE_SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON`; sitemap `/hoi-chon-dung/sitemap.xml` trong Google Search Console/Bing; tài khoản AccessTrade.
+
 ### 2026-10-24 19:30 GMT+7 — Claude Code — EDU-20261024-08 — liên kết GĐ Studio, luật dừng khi hết limit, màu K1 v2
 
 - `CLAUDE.md` mục 7 (sắp hết limit: dừng ở mốc gần nhất, commit + push, cập nhật DIEM-DUNG) và mục 8 (hộp thư `hop_thu/` trên nhánh `studio-hop-thu`).
