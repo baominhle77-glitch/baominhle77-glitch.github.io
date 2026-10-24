@@ -40,7 +40,7 @@ const kq = await p.evaluate(async (khos) => {
       const cx = bai.cam.x(t), cy = bai.cam.y(t), z = bai.cam.zoom(t);
       const camDung = camTruoc && Math.abs(cx - camTruoc[0]) * z < 3 && Math.abs(cy - camTruoc[1]) * z < 3 && Math.abs(z / camTruoc[2] - 1) < 0.004;
       camTruoc = [cx, cy, z];
-      let vatLon = 0;
+      let vatLon = 0; let nh = null; // nh: hộp gộp các vật đang thấy (nhóm vật chính, vd. hai vũng đặt cạnh nhau để so)
       for (const v of bai.VAT || []) {
         const hp = v.hop(t); if (!hp) continue;
         const X0 = W / 2 + (hp[0] - cx) * z, X1 = W / 2 + (hp[2] - cx) * z, Y0 = H / 2 + (hp[1] - cy) * z, Y1 = H / 2 + (hp[3] - cy) * z;
@@ -50,8 +50,13 @@ const kq = await p.evaluate(async (khos) => {
         const cat = X0 < 0 || Y0 < 0 || X1 > W || Y1 > H;
         if (cat && camDung && vatDung) R.catMep.push([t, v.ten]);
         vatLon = Math.max(vatLon, ((Math.min(X1, W) - Math.max(X0, 0)) * (Math.min(Y1, H) - Math.max(Y0, 0))) / (W * H));
+        const k = [Math.max(X0, 0), Math.max(Y0, 0), Math.min(X1, W), Math.min(Y1, H)];
+        nh = nh ? [Math.min(nh[0], k[0]), Math.min(nh[1], k[1]), Math.max(nh[2], k[2]), Math.max(nh[3], k[3])] : k;
       }
-      if (t > 0.5) { R.coVat = R.coVat || []; R.coVat.push(vatLon); if (vatLon < 0.025) R.vatNho.push(t); }
+      // C13-1: khung đứng yên phải có vật chính to ở giữa: một vật ≥ 2,5 % khung, HOẶC nhóm vật trải ≥ 55 % bề ngang vùng an toàn
+      // và tâm nhóm lệch giữa < 15 % bề ngang. Lúc máy đang lia (vật trượt vào/ra) thì không xét.
+      const nhomTo = nh && nh[2] - nh[0] >= 0.55 * (a1 - a0) && Math.abs((nh[0] + nh[2]) / 2 - W / 2) < 0.15 * W;
+      if (t > 0.5) { R.coVat = R.coVat || []; R.coVat.push(vatLon); if (camDung && vatLon < 0.025 && !nhomTo) R.vatNho.push(t); }
       // chữ
       const ds = rc.khungChu.filter((h) => h.alpha > 0.2 && h.x1 > 0 && h.x0 < W && h.y1 > 0 && h.y0 < H);
       for (const h of ds) {
@@ -108,7 +113,7 @@ for (const [kho, r] of Object.entries(kq)) {
     ["Hộp phụ đề ≥ 4,5:1 với nền quanh", r.tuong_phan_duoi_4_5.length === 0, r.tuong_phan_duoi_4_5.slice(0, 8).map(([t, v]) => `${t} s: ${v}`)],
     ["C13-7 cụm phụ đề 2–5 từ", r.cum_phu_de_min_max[0] >= 2 && r.cum_phu_de_min_max[1] <= 5, [`min ${r.cum_phu_de_min_max[0]}, max ${r.cum_phu_de_min_max[1]}`]],
     ["C13-8 chữ nguồn ≥ 22 px", r.co_chu_nguon >= 22, [`${r.co_chu_nguon} px`]],
-    ["C13-1 không có khung gần trống (vật lớn nhất ≥ 2,5 % khung; soát mắt trên contact sheet)", r.vat_nho_duoi_4pt.length === 0, r.vat_nho_duoi_4pt.length ? [`${r.vat_nho_duoi_4pt.length} mẫu, từ ${r.vat_nho_duoi_4pt[0]} s; vật lớn nhất trung vị ${(r.co_vat_trung_vi * 100).toFixed(1)} % khung`] : []]
+    ["C13-1 không có khung đứng yên gần trống (một vật ≥ 2,5 % khung hoặc nhóm vật ≥ 55 % bề ngang, ở giữa; soát mắt trên contact sheet)", r.vat_nho_duoi_4pt.length === 0, r.vat_nho_duoi_4pt.length ? [`${r.vat_nho_duoi_4pt.length} mẫu, từ ${r.vat_nho_duoi_4pt[0]} s; vật lớn nhất trung vị ${(r.co_vat_trung_vi * 100).toFixed(1)} % khung`] : []]
   ];
   console.log(`\n=== ${kho} — nhịp dài nhất ${r.nhip_dai_nhat.toFixed(2)} s`);
   for (const [ten, ok, ct] of muc) { if (!ok) dat = false; console.log(`${ok ? "ĐẠT " : "TRƯỢT"}  ${ten}${ok ? "" : "\n        " + ct.slice(0, 12).join("\n        ")}`); }
