@@ -3,86 +3,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0d0a1a">
+<meta name="theme-color" content="#0b0817">
+<meta name="description" content="Bói Tarot + Lenormand tiếng Việt: xáo bài khoá công bằng, chọn số, lật lá, giải theo tầng, hỏi tiếp.">
 <meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Bói Tarot + Lenormand</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Cormorant+Garamond:wght@600;700&display=swap&subset=vietnamese" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Cormorant+Garamond:wght@600;700&display=swap&subset=vietnamese"></noscript>
 <link rel="stylesheet" href="css/app.css">
+<link rel="modulepreload" href="js/app.js">
 </head>
 <body>
-<header class="topbar">
-  <button class="icon-btn" id="btnHistory" aria-label="Lịch sử câu hỏi">☰</button>
-  <h1>Bói Tarot <span>+</span> Lenormand</h1>
-  <button class="icon-btn" id="btnSettings" aria-label="Cài đặt">⚙</button>
+<div class="sky" aria-hidden="true"></div>
+<a class="sr-only" href="#view">Bỏ qua tới nội dung</a>
+<header class="top">
+  <button class="icon-btn" id="btnBack" type="button" aria-label="Quay lại">‹</button>
+  <a class="brand" href="#/">✦ Tarot · Lenormand</a>
+  <a class="icon-btn" href="#/cai-dat" aria-label="Cài đặt">⚙</a>
 </header>
-
-<aside class="drawer" id="drawerHistory" aria-hidden="true">
-  <div class="drawer-head">
-    <strong>Lịch sử câu hỏi</strong>
-    <button class="icon-btn" data-close="drawerHistory" aria-label="Đóng">✕</button>
-  </div>
-  <button class="btn primary block" id="btnNewQ">＋ Câu hỏi mới</button>
-  <ul class="history" id="historyList"></ul>
-  <div class="drawer-foot">
-    <button class="btn small" id="btnExport">Xuất JSON</button>
-    <label class="btn small">Nhập JSON<input type="file" id="fileImport" accept="application/json,.json" hidden></label>
-  </div>
-</aside>
-
-<aside class="drawer right" id="drawerSettings" aria-hidden="true">
-  <div class="drawer-head">
-    <strong>Cài đặt</strong>
-    <button class="icon-btn" data-close="drawerSettings" aria-label="Đóng">✕</button>
-  </div>
-  <form id="formSettings" class="stack">
-    <label>Xưng hô với người hỏi<input name="xungHo" placeholder="Queen Linh"></label>
-    <fieldset>
-      <legend>Bối cảnh tiền (đơn vị: triệu đồng)</legend>
-      <label>Thu nhập hiện tại / tháng<input name="thuNhap" type="number" step="0.1" min="0" inputmode="decimal"></label>
-      <label>Mục tiêu / tháng<input name="mucTieu" type="number" step="0.1" min="0" inputmode="decimal"></label>
-      <label>Tổng thu năm trước (tuỳ chọn)<input name="namTruoc" type="number" step="0.1" min="0" inputmode="decimal"></label>
-    </fieldset>
-    <fieldset>
-      <legend>Giải sâu bằng AI (mặc định tắt)</legend>
-      <label class="row"><input type="checkbox" name="aiOn"> Bật giải sâu bằng AI</label>
-      <label>Nhà cung cấp
-        <select name="aiProvider">
-          <option value="gemini">Google Gemini</option>
-          <option value="anthropic">Anthropic Claude</option>
-          <option value="openai">OpenAI</option>
-        </select>
-      </label>
-      <label>Tên mô hình (để trống = mặc định)<input name="aiModel" autocomplete="off"></label>
-      <label>Khoá API của bạn<input name="aiKey" type="password" autocomplete="off"></label>
-      <p class="note">Khoá chỉ lưu trong trình duyệt của máy này và được gửi thẳng tới nhà cung cấp bạn chọn. Không dùng máy chung.</p>
-      <button type="button" class="btn small" id="btnForgetKey">Xoá khoá khỏi máy</button>
-    </fieldset>
-    <button class="btn primary" type="submit">Lưu cài đặt</button>
-  </form>
-</aside>
-<div class="scrim" id="scrim"></div>
-
-<main id="main">
-  <section class="card" id="secNew">
-    <h2>Câu hỏi mới</h2>
-    <form id="formNew" class="stack">
-      <label>Câu hỏi<textarea name="question" rows="2" required placeholder="Vd: 3 tháng tới thu nhập của tôi thế nào?"></textarea></label>
-      <label>Mẫu trải<select name="spread" id="selSpread"></select></label>
-      <p class="note" id="spreadHint"></p>
-      <div id="tierEditor" class="tier-editor"></div>
-      <div class="row wrap">
-        <button type="button" class="btn small" id="btnAddTier">＋ Thêm tầng</button>
-        <label class="row"><input type="checkbox" name="money"> Câu hỏi về tiền</label>
-        <label class="row"><input type="checkbox" name="reversals"> Cho phép lá ngược (Tarot)</label>
-      </div>
-      <button class="btn primary block" type="submit">Xáo &amp; khoá bài</button>
-    </form>
-  </section>
-
-  <section id="secSession" hidden></section>
+<main id="view" tabindex="-1" aria-live="polite">
+  <p class="note">Đang tải…</p>
 </main>
-
-<footer class="foot">Trải bài mang tính tham khảo, chiêm nghiệm. Mọi con số tiền là quy đổi huyền học, không phải dự báo tài chính.</footer>
-
+<nav class="tabbar" aria-label="Điều hướng chính">
+  <a href="#/" data-tab="home"><span class="ti" aria-hidden="true">☾</span>Trang chủ</a>
+  <a href="#/hoi-moi" data-tab="ask"><span class="ti" aria-hidden="true">✦</span>Hỏi mới</a>
+  <a href="#/lich-su" data-tab="history"><span class="ti" aria-hidden="true">☰</span>Lịch sử</a>
+  <a href="#/cai-dat" data-tab="settings"><span class="ti" aria-hidden="true">⚙</span>Cài đặt</a>
+</nav>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>
