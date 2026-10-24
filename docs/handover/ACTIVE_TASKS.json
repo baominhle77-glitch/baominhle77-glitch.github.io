@@ -1,8 +1,38 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-24T16:15:00+07:00",
+  "updated_at": "2026-10-25T00:10:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
+    {
+      "id": "CHOICE-20261024-01",
+      "owner": "Claude Code (session_01357)",
+      "branch": "agent/CHOICE-20261024-01-xoa-hoi-chon-dung",
+      "base_sha": "9e43a7849691056e9177bf678f783f04f2712c71",
+      "paths": [
+        "hoi-chon-dung/**",
+        "backend/choice*",
+        "tools/*choice*",
+        "tools/submit-indexnow.mjs",
+        "tools/submit-google-sitemap.mjs",
+        "tools/check-public-content.mjs",
+        ".github/workflows/deploy-pages.yml",
+        ".github/workflows/validate-role-system.yml",
+        ".github/workflows/*choice*",
+        "backend/wrangler.toml",
+        "robots.txt",
+        "docs/handover/CHOICE_*",
+        "docs/handover/HOI_CHON_DUNG.md",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/PRODUCTION_STATUS.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-10-24T23:58:00+07:00",
+      "heartbeat_at": "2026-10-25T00:10:00+07:00",
+      "summary": "Xoá hẳn Hội Chọn Đúng theo yêu cầu BaoMinh 24/10/2026: thư mục app, backend choice*, tools choice*, 4 workflow choice, bước build/deploy/hậu kiểm choice, cron 5 phút (crons = [] để gỡ trên Cloudflare), robots/sitemap, tài liệu bàn giao riêng."
+    }
+  ],
+  "recently_completed": [
     {
       "id": "GROWTH-20260725-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
@@ -35,13 +65,12 @@
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/CHOICE_10_DAY_GROWTH_SPRINT.md"
       ],
-      "status": "in_progress",
+      "status": "cancelled",
       "started_at": "2026-07-25T13:35:00+07:00",
       "heartbeat_at": "2026-07-25T16:45:00+07:00",
-      "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất, chống trùng toàn catalog và thanh lọc toàn bộ affiliate link cũ."
-    }
-  ],
-  "recently_completed": [
+      "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất, chống trùng toàn catalog và thanh lọc toàn bộ affiliate link cũ. | HỦY 25/10/2026: chủ dự án (BaoMinh) yêu cầu xoá hẳn Hội Chọn Đúng; khoá quá hạn từ 25/07/2026; thay bằng CHOICE-20261024-01.",
+      "completed_at": "2026-10-25T00:10:00+07:00"
+    },
     {
       "id": "EDU-20261024-08",
       "owner": "Claude Code",

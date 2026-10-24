@@ -61,60 +61,10 @@ jobs:
           node --check backend/worker.js
           node backend/worker.test.mjs
 
-      - name: Materialize taxonomy, trend và AccessTrade fallback
-        run: |
-          set -euo pipefail
-          node --check tools/choice-taxonomy.mjs
-          node --check tools/apply-choice-multiniche.mjs
-          node --check tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-multiniche.mjs
-          node tools/apply-choice-access-fallback.mjs
-          node tools/apply-choice-multiniche.mjs
-          node tools/apply-choice-access-fallback.mjs
-          node --check backend/choice-autopilot.js
-          grep -q '/v1/campaigns' backend/choice-autopilot.js
-          grep -q 'tiktokshop_unavailable_using_datafeeds' backend/choice-autopilot.js
-
-      - name: Materialize SEO mọi danh mục
-        run: |
-          set -euo pipefail
-          node --check tools/apply-choice-seo-multiniche.mjs
-          node tools/apply-choice-seo-multiniche.mjs
-          node tools/apply-choice-seo-multiniche.mjs
-          node --check tools/build-choice-seo.mjs
-
-      - name: Materialize Choice system lõi
+      - name: Materialize Travel vào Worker
         run: |
           set -euo pipefail
           node tools/apply-travel-system.mjs
-          node --check tools/apply-choice-system.mjs
-          node tools/apply-choice-system.mjs
-          node tools/apply-choice-system.mjs
-          node --check backend/worker.js
-
-      - name: Materialize owner setup và credential bootstrap
-        run: |
-          set -euo pipefail
-          node --check tools/apply-choice-setup.mjs
-          node --check tools/apply-choice-credential-bootstrap.mjs
-          node tools/apply-choice-setup.mjs
-          node tools/apply-choice-setup.mjs
-          node tools/apply-choice-credential-bootstrap.mjs
-          node tools/apply-choice-credential-bootstrap.mjs
-          node --check backend/choice-setup.js
-          node --check backend/choice-credential-bootstrap.js
-          node --check backend/worker.js
-
-      - name: Materialize revenue và public UI
-        run: |
-          set -euo pipefail
-          node --check tools/apply-choice-revenue.mjs
-          node tools/apply-choice-revenue.mjs
-          node tools/apply-choice-revenue.mjs
-          node tools/apply-choice-autopilot-ui.mjs
-          node tools/apply-choice-autopilot-ui.mjs
-          node --check tools/check-public-content.mjs
-          node --check tools/apply-choice-public-product.mjs
           node --check backend/worker.js
 
       - name: Kiểm tra Worker sau materialize
@@ -139,86 +89,19 @@ jobs:
           echo "Worker regression thất bại; stack trace đã được lưu trong artifact worker-test-log."
           exit 1
 
-      - name: Kiểm tra marker và cron Growth
+      - name: Kiểm tra xác minh search, ranh giới public và đã gỡ Hội Chọn Đúng
         run: |
           set -euo pipefail
-          test "$(grep -c 'Hội Chọn Đúng API integration v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng API integration v2' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng Telegram integration v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng Telegram integration v2' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng Autopilot scheduled v2' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng internal status boundary v3' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng owner setup route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng credential bootstrap route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng owner revenue route v1' backend/worker.js)" -eq 1
-          test "$(grep -c 'Hội Chọn Đúng growth cycle 5m v1' backend/worker.js)" -eq 1
-          grep -q 'handleChoiceCredentialBootstrapRequest' backend/worker.js
-          grep -q 'handleChoiceSetupRequest' backend/worker.js
-          grep -q 'handleChoiceRevenueRequest' backend/worker.js
-          grep -q 'runChoiceGrowthCycle' backend/worker.js
-          grep -q 'crons = \["\*/5 \* \* \* \*"\]' backend/wrangler.toml
-
-      - name: Kiểm tra taxonomy và discovery đa lĩnh vực
-        run: |
-          set -euo pipefail
-          node --test tools/choice-multiniche.test.mjs
-          grep -q 'id: "tech"' backend/choice-autopilot.js
-          grep -q 'id: "travel"' backend/choice-autopilot.js
-          grep -q 'trend_score: trendScore' backend/choice-autopilot.js
-          grep -q 'BEST_SELLERS.*RECOMMENDED.*HIGH_COMMISSION_RATE' backend/choice-autopilot.js
-
-      - name: Kiểm tra catalog, Publisher fallback và Affiliate Autopilot
-        run: |
-          set -euo pipefail
-          node --check backend/choice.js
-          node --test backend/choice.test.mjs
-          node --check backend/choice-autopilot.js
-          node --test backend/choice-autopilot.test.mjs
-
-      - name: Kiểm tra trung tâm kết nối và bootstrap RSA
-        run: |
-          set -euo pipefail
-          node --check backend/choice-setup.js
-          node --test backend/choice-setup.test.mjs
-          node --check backend/choice-credential-bootstrap.js
-          node --test backend/choice-credential-bootstrap.test.mjs
-
-      - name: Kiểm tra đồng bộ và dashboard doanh thu
-        run: |
-          set -euo pipefail
-          node --check backend/choice-revenue.js
-          node --test backend/choice-revenue.test.mjs
-
-      - name: Kiểm tra SEO publisher, Google và Bing
-        run: |
-          set -euo pipefail
-          node --check tools/build-choice-seo.mjs
-          node --check tools/submit-indexnow.mjs
-          node --check tools/submit-google-sitemap.mjs
-          node --test tools/choice-seo.test.mjs
           test "$(cat google91001f63e8104533.html)" = "google-site-verification: google91001f63e8104533.html"
           grep -q '<?xml version="1.0"?>' BingSiteAuth.xml
           grep -q '0241E6F1BFFED8BCC15C18665C1FAD6C' BingSiteAuth.xml
-
-      - name: Kiểm tra ranh giới public-private Growth
-        run: |
-          set -euo pipefail
-          node --test backend/choice-public-boundary.test.mjs
+          node --check tools/check-public-content.mjs
           node tools/check-public-content.mjs
-          test "$(grep -c 'Public audience boundary v3' hoi-chon-dung/index.html)" -eq 1
-          grep -q 'x-choice-autopilot-trigger' backend/worker.js
-          grep -q 'choiceAutopilotIsOwner' backend/worker.js
-          grep -q 'choiceAutopilotCommand === "/chon"' backend/worker.js
-          grep -q 'hoi-chon-dung-v4' hoi-chon-dung/sw.js
-          ! grep -qiE 'autopilotBadge|autopilotFooter|autopilot-ui\.js|onboarding_required|chủ sở hữu|Cloudflare Worker|API key' hoi-chon-dung/index.html
-
-      - name: Kiểm tra frontend Hội Chọn Đúng
-        run: |
-          set -euo pipefail
-          node --check hoi-chon-dung/app.js
-          node --check hoi-chon-dung/autopilot-ui.js
-          node --check hoi-chon-dung/sw.js
-          node --test hoi-chon-dung/app.test.mjs
+          # CHOICE-20261024-01: Hội Chọn Đúng đã gỡ hẳn — không còn mã, route, cron hay trang
+          test ! -e hoi-chon-dung
+          ! ls backend/choice* tools/*choice* >/dev/null 2>&1
+          ! grep -qiE 'choice|Hội Chọn Đúng' backend/worker.js
+          grep -q '^crons = \[\]' backend/wrangler.toml
 
       - name: Kiểm tra WebKit với payload AES thật
         run: |
