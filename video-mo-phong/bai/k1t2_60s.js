@@ -41,6 +41,16 @@ const NGUON = {
 const CANG = /^(soap|sds|skin|skin's|pull|weaker|bubble|surfactant|half)/i;
 const NUOC = /^(puddle|deeper|shallower|millimetres|grams)/i;
 
+// Mô hình vũng của tập 1 (θ 180°): chiều sâu = 2ℓc, ℓc = √(γ / ((ρl − ρv) g)); g = 9.80665 m/s².
+// Số liệu: NIST SRD 69 (nước, 293.10 K và 298.15 K), Liu et al. 2026 Fig. 5a (SDS 36.43 mN/m, 25 °C).
+const G = 9.80665;
+export function sauVungMm(gamma, rhoL, rhoV = 0) { return 2 * Math.sqrt(gamma / ((rhoL - rhoV) * G)) * 1000; }
+export const VUNG = {
+  nuoc20: 5.4521, // tập 1: 2ℓc = 5.4521 mm (so_lieu.json, NIST hàng 34, 293.10 K)
+  nuoc25: sauVungMm(0.071972, 997.0, 0.023075), // ≈ 5.43 mm
+  sds25: sauVungMm(0.03643, 997.0, 0.023075) // ≈ 3.86 mm
+};
+
 export const THOI_LUONG = 60;
 export const FPS = 30;
 
@@ -63,22 +73,22 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   };
   const M = {
     episode: moc("h1", "episode"), five: moc("h1", "five"), poured: moc("h1", "poured"), soap: moc("h1", "soap"), deeper: moc("h1", "deeper"),
-    shallower: moc("h2", "shallower"), cuts: moc("h2", "cuts"), seventy: moc("h2", "seventy"), thirty: moc("h2", "thirty"), half: moc("h2", "half"), three: moc("h2", "three"), calculated: moc("h2", "calculated"),
+    shallower: moc("h2", "shallower"), cuts: moc("h2", "cuts"), seventy: moc("h2", "seventy"), thirty: moc("h2", "thirty"), half: moc("h2", "half"), three: moc("h2", "three", 2), calculated: moc("h2", "calculated"),
     weaker: moc("h3", "weaker"), bubble: moc("h3", "bubble"), how: moc("h3", "how"), more: moc("h3", "more"),
     temperature: moc("h4", "temperature"), surfactant: moc("h4", "surfactant"), millimolar: moc("h4", "millimolar"), inferred: moc("h4", "inferred"),
-    seven: moc("h4", "seven"), grams: moc("h4", "grams"), litre: moc("h4", "litre"), celsius: moc("h4", "celsius"), warming: moc("h4", "warming"), barely: moc("h4", "barely"), becomes: moc("h4", "becomes"),
+    seven: moc("h4", "seven"), grams: moc("h4", "grams"), litre: moc("h4", "litre"), celsius: moc("h4", "celsius"), degrees: moc("h4", "degrees"), warming: moc("h4", "warming"), barely: moc("h4", "barely"), becomes: moc("h4", "becomes"),
     bench: moc("c1", "bench"), plain: moc("c1", "plain")
   };
   const ti = M.shallower - 0.12; // giọt xà phòng chạm mặt nước
-  const T3 = Math.max(M.three, M.half + 1.85); // đọc số 3.86 khi camera đã lùi xong
+  const T3 = Math.max(M.three, M.half + 1.4); // đọc số 3.86 khi camera đã lùi xong
 
   // --- Bố cục theo khổ (bố cục lại thật, không co ảnh) ---
   const L = doc
-    ? { ban: 1090, pxmm: 25, ax: 540, w0: 270, w1: 380, ox: 4200, nhan: 38, so: 42, hook: 110, camY: 930 }
+    ? { ban: 1090, pxmm: 25, ax: 540, w0: 270, w1: 380, ox: 4200, nhan: 38, so: 42, hook: 88, camY: 930 }
     : { ban: 770, pxmm: 30, ax: 1010, w0: 400, w1: 560, ox: 4200, nhan: 34, so: 38, hook: 104, camY: 560 };
   const hmm = (mm) => mm * L.pxmm;
-  const H545 = hmm(5.45); const H386 = hmm(3.86);
-  const W2 = (L.w1 * 5.45) / 3.86; // cùng thể tích, mỏng hơn → loang rộng hơn
+  const H545 = hmm(VUNG.nuoc20); const H386 = hmm(VUNG.sds25); const H543 = hmm(VUNG.nuoc25);
+  const W2 = (L.w1 * H545) / H386; // cùng thể tích, mỏng hơn → loang rộng hơn
 
   // chiều cao và bề rộng vũng A theo thời gian (vật lý: thể tích bảo toàn sau khi ngừng rót)
   const hA = (t) => (t < ti + 0.1 ? H545 : lerp(H545, H386, loXo(t - ti - 0.1, { zeta: 0.82, f: 0.9 })));
@@ -95,8 +105,10 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
 
   const tl = new DongThoiGian();
   const sz = (rc, s) => s / rc.zoom; // cỡ chữ màn hình cố định dù camera zoom
-  const u = (t, t0, d = 0.6) => kep((t - t0) / d);
-  const ra = (t, t1, d = 0.3) => kep((t1 - t) / d);
+  // hiện: power2.out; ẩn: power2.in (không có mờ dần tuyến tính ở chữ/UI)
+  const vaoE = layEase("power2.out"); const raE = layEase("power2.in");
+  const u = (t, t0, d = 0.6) => vaoE(kep((t - t0) / d));
+  const ra = (t, t1, d = 0.3) => 1 - raE(1 - kep((t1 - t) / d));
 
   // ===== Camera: nút gốc chứa tween + trôi chậm (drift) để khung không bao giờ đứng yên =====
   const camGoc = new Nut({ x: L.ax, y: L.camY, zoom: 1.22 });
@@ -110,14 +122,28 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   // h1: lùi dần từ cận cảnh vũng nước
   camTo("zoom", 1.0, 0, 3.4);
   camTo("y", L.camY - (doc ? 40 : 30), 0, 3.4);
+  // h1: đẩy vào gần khi dòng rót đã dừng và ống nhỏ giọt sắp vào (nhịp đổi hình trước câu hỏi)
+  if (doc) {
+    // 9:16 (khung dọc hẹp, vật thể chiếm ít diện tích): cận cảnh thước kẹp + mặt vũng, rồi lùi ra đón giọt xà phòng
+    camTo("zoom", 2.0, M.poured - 0.3, 1.0);
+    camTo("x", L.ax - 100, M.poured - 0.3, 1.0);
+    camTo("y", L.ban - 120, M.poured - 0.3, 1.0);
+    camTo("zoom", 1.0, M.soap + 0.2, 1.0);
+    camTo("x", L.ax, M.soap + 0.2, 1.0);
+    camTo("y", L.camY - 40, M.soap + 0.2, 1.0);
+  } else {
+    camTo("zoom", 1.5, M.poured - 0.3, 1.2);
+    camTo("x", L.ax - 30, M.poured - 0.3, 1.2);
+    camTo("y", L.ban - 250, M.poured - 0.3, 1.2);
+  }
   // h2: zoom vào mép mặt nước khi nói về sức căng, rồi lùi ra khi đọc chiều sâu
   const mepX = L.ax + W2 / 2 - (doc ? 90 : 150);
   camTo("x", mepX, M.cuts - 0.3, 1.8);
   camTo("y", L.ban - H386 + (doc ? 20 : -30), M.cuts - 0.3, 1.8);
   camTo("zoom", doc ? 2.0 : 2.3, M.cuts - 0.3, 1.8);
-  camTo("x", L.ax, M.half + 0.25, 1.9);
-  camTo("y", L.camY - (doc ? 40 : 30), M.half + 0.25, 1.9);
-  camTo("zoom", 1.0, M.half + 0.25, 1.9);
+  camTo("x", L.ax, M.half + 0.1, 1.5);
+  camTo("y", L.camY - (doc ? 40 : 30), M.half + 0.1, 1.5);
+  camTo("zoom", 1.0, M.half + 0.1, 1.5);
   // h3: bám bong bóng bay lên rồi zoom xuyên màng bóng sang bàn mới
   const bongY = (t) => L.ban - H386 - khoang(t, M.bubble - 0.2, M.bubble + 2.2, 0, doc ? 330 : 340, "power2.out");
   const bongR = (t) => khoang(t, M.bubble - 0.2, M.bubble + 1.6, 0, doc ? 150 : 140, "back.out(1.3)");
@@ -133,11 +159,14 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   tl.set(camGoc, "zoom", 1.9, tXuyen);
   camTo("zoom", 1.25, tXuyen, 1.4, "expo.out");
   camTo("x", xCoc, M.surfactant - 0.5, 1.5);
-  camTo("zoom", doc ? 1.15 : 1.2, M.surfactant - 0.5, 1.5);
+  camTo("zoom", doc ? 1.5 : 1.55, M.surfactant - 0.5, 1.5);
+  camTo("y", doc ? 930 : L.ban - 190, M.surfactant - 0.5, 1.5);
   camTo("x", xCan + (doc ? 0 : 150), M.seven - 0.6, 1.5);
-  camTo("x", xC, M.warming - 0.6, 1.8);
-  camTo("y", doc ? 940 : L.ban - 180, M.warming - 0.6, 1.8);
-  camTo("zoom", doc ? 1.1 : 1.15, M.warming - 0.6, 1.8);
+  camTo("zoom", doc ? 1.15 : 1.2, M.seven - 0.6, 1.5);
+  camTo("y", doc ? 930 : L.ban - 210, M.seven - 0.6, 1.5);
+  camTo("x", xC, M.warming - 0.15, 1.8);
+  camTo("y", doc ? 940 : L.ban - 180, M.warming - 0.15, 1.8);
+  camTo("zoom", doc ? 1.1 : 1.15, M.warming - 0.15, 1.8);
   // c1: zoom qua thang độ lớn — từ cận cảnh thước kẹp lùi ra toàn bàn
   camTo("x", xD, LOI[4].bd - 0.3, 2.2);
   camTo("zoom", doc ? 0.92 : 0.95, LOI[4].bd - 0.3, 2.2);
@@ -167,11 +196,12 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
         }
         ctx.restore();
         veChu(rc, "deeper?", L.ax + ((L.w1 * H545) / hmm(7.0)) / 2 + 14, L.ban - hmm(7.0) + 10, { size: sz(rc, L.nhan * 0.9), color: rgba(K1.MUC, 0.95), align: "left" });
-        veChu(rc, "shallower?", L.ax + W2 / 2 + 14, L.ban - H386 + 34, { size: sz(rc, L.nhan * 0.9), color: rgba(K1.MUC, 0.95), align: "left" });
+        if (doc) veChu(rc, "shallower?", L.ax + W2 / 2, L.ban + 34, { size: sz(rc, L.nhan * 0.9), color: rgba(K1.MUC, 0.95), align: "right" });
+        else veChu(rc, "shallower?", L.ax + W2 / 2 + 14, L.ban - H386 + 34, { size: sz(rc, L.nhan * 0.9), color: rgba(K1.MUC, 0.95), align: "left" });
       }
       // dòng rót (h1): dừng ở 4,6 s, đuôi rơi khỏi khung
       const tRot = 4.6;
-      veDongRot(rc, { x: L.ax + (doc ? 70 : 120), yTop: L.ban - (doc ? 1100 : 900), yBot: L.ban - h + 4, w: 22, u: 1, duoi: t < tRot ? 0 : (t - tRot) * (t - tRot) * 2600 });
+      veDongRot(rc, { x: L.ax + 120, yTop: L.ban - (doc ? 1100 : 900), yBot: L.ban - h + 4, w: 22, u: 1, duoi: t < tRot ? 0 : (t - tRot) * (t - tRot) * 2600 });
       veVung(rc, { cx: L.ax, y: L.ban, w, h, song: songA(t) });
       // mũi tên sức căng (h2): dài theo γ — nước 71.97 → SDS 36.43 mN/m
       const uC = u(t, M.cuts, 0.8) * ra(t, M.half + 1.6, 0.5);
@@ -189,11 +219,11 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
         const yG = lerp(yOng + 16 + r, L.ban - H545 - r * 0.6, layEase("power2.in")(roi));
         if (r > 0.5) veGiot(rc, { x: L.ax, y: yG, r, keo: roi });
         const uN = u(t, M.soap, 0.6) * ra(t, M.deeper + 0.1, 0.3);
-        if (uN > 0) veNhan(rc, { x0: L.ax + 18, y0: yG, x1: L.ax + (doc ? 110 : 160), y1: yG - 30, text: "+ soap", u: uN, size: sz(rc, L.nhan) });
+        if (uN > 0) veNhan(rc, { x0: L.ax + 18, y0: yG, x1: L.ax + (doc ? 110 : 160), y1: yG + (doc ? -30 : 40), text: "+ soap", u: uN, size: sz(rc, L.nhan) });
       }
       // thước kẹp + số đo (hook 5.45 mm lớn, sau đó thu về cỡ thường)
       const uK = u(t, 0.15, 0.5);
-      const hook = u(t, M.five - 0.05, 0.55) * (1 - u(t, M.soap - 0.4, 0.8));
+      const hook = u(t, M.five - 0.05, 0.55) * (1 - u(t, M.poured - 0.6, 0.6));
       let docSo = "";
       if (t < ti + 0.1) docSo = so(khoang(t, M.five - 0.05, M.five + 0.5, 0, 5.45, "expo.out")) + " mm";
       else if (t < T3) docSo = "? mm";
@@ -204,16 +234,16 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       ctx.save(); ctx.setLineDash([6, 8]); ctx.strokeStyle = rgba(K1.MUC, 0.5); ctx.lineWidth = 2; ctx.globalAlpha *= uK;
       ctx.beginPath(); ctx.moveTo(xKA - 4, L.ban - h); ctx.lineTo(L.ax - w / 2 + h / 2, L.ban - h); ctx.stroke(); ctx.restore();
       if (docSo) {
-        const sx = doc ? xKA + 20 : xKA - 26; const sy = doc ? L.ban - hmm(8.6) - 30 : L.ban - h + sizeSo * 0.35;
+        const sx = doc ? xKA - 10 : xKA - 26; const sy = doc ? L.ban - hmm(8.6) - 30 : L.ban - h + sizeSo * 0.35;
         veChu(rc, docSo, sx, sy, { size: sz(rc, sizeSo), weight: 600, align: doc ? "left" : "right", color: K1.MUC });
       }
       const uPh = u(t, T3, 0.6) * ra(t, LOI[2].bd + 0.6, 0.4);
-      if (uPh > 0) veChu(rc, "puddle 3.86 mm (calculated)", doc ? xKA + 20 : xKA - 26, doc ? L.ban - hmm(8.6) - 30 + sz(rc, L.nhan) * 1.25 : L.ban - h + sizeSo * 0.35 + sz(rc, L.nhan) * 1.3, { size: sz(rc, L.nhan * 0.9), align: doc ? "left" : "right", color: K1.MUC });
+      if (uPh > 0) veChu(rc, "puddle 3.86 mm (calculated)", doc ? xKA - 10 : xKA - 26, doc ? L.ban - hmm(8.6) - 30 - sz(rc, L.nhan) * 1.3 : L.ban - h + sizeSo * 0.35 + sz(rc, L.nhan) * 1.3, { size: sz(rc, L.nhan * 0.9), align: doc ? "left" : "right", color: K1.MUC });
       // nhãn h1/h2
-      veNhan(rc, { x0: L.ax - w * (doc ? 0.05 : 0.25), y0: L.ban - h * 0.55, x1: doc ? L.ax - 90 : L.ax - w * 0.25 - 60, y1: L.ban - h - (doc ? 300 : 120), text: "water, 20 °C (episode 1)", u: u(t, M.episode, 0.7) * ra(t, M.deeper, 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "right" });
+      veNhan(rc, { x0: L.ax + w * (doc ? 0.2 : -0.25), y0: L.ban - h * 0.55, x1: doc ? L.ax + 100 : L.ax - w * 0.25 - 60, y1: L.ban - h - (doc ? 330 : 120), text: "water, 20 °C (episode 1)", u: u(t, M.episode, 0.7) * ra(t, doc ? M.poured - 0.3 : M.deeper, 0.4), size: sz(rc, L.nhan), align: "right" });
       if (t > M.deeper - 0.2) {
         const uQ = u(t, M.deeper, 0.6) * ra(t, ti + 0.4, 0.3);
-        const qx = doc ? L.ax : L.ax; const qy = L.ban - (doc ? 470 : 420);
+        const qx = L.ax; const qy = L.ban - (doc ? 360 : 420);
         if (uQ > 0) {
           ctx.save(); ctx.globalAlpha *= layEase("power3.out")(uQ);
           const hp = veChu(rc, "deeper, or shallower?", qx, qy, { size: sz(rc, L.nhan * 1.25), weight: 600, align: "center" });
@@ -286,8 +316,10 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
         ctx.fillStyle = K1.CANG; ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2); ctx.fill();
       }
       ctx.restore();
-      veNhan(rc, { x0: coc.x - coc.w * 0.2, y0: coc.y - coc.h * 0.5, x1: doc ? coc.x : coc.x - coc.w * 0.2 - 60, y1: coc.y - coc.h - (doc ? 200 : 120), text: "soap here = SDS (lab surfactant)", u: u(t, M.surfactant, 0.7) * ra(t, M.seven - 0.4, 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "right" });
-      veNhan(rc, { x0: coc.x + coc.w * 0.25, y0: coc.y - coc.h * 0.3, x1: doc ? coc.x : coc.x + coc.w * 0.25 + 70, y1: coc.y - coc.h - (doc ? 95 : 40), text: "SDS 25.0 mM in water (inferred)", u: u(t, M.millimolar, 0.7) * ra(t, M.seven - 0.4, 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "left" });
+      veChu(rc, "our sketch", coc.x, coc.y + (doc ? 30 : 44), { size: sz(rc, L.nhan * 0.75), italic: true, align: "center" });
+      veNhan(rc, { x0: coc.x - coc.w * 0.2, y0: coc.y - coc.h * 0.5, x1: doc ? coc.x : coc.x - coc.w * 0.2 - 60, y1: coc.y - coc.h - (doc ? 200 : 120), text: "soap here = SDS (lab surfactant)", u: u(t, M.surfactant, 0.7) * ra(t, doc ? M.millimolar : M.seven - 0.4, doc ? 0.35 : 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "right" });
+      veNhan(rc, { x0: coc.x + coc.w * 0.25, y0: coc.y - coc.h * 0.3, x1: doc ? coc.x : coc.x + coc.w * 0.25 + 70, y1: coc.y - coc.h - (doc ? 200 : 40), text: "SDS 25.0 mM in water (inferred)", u: u(t, M.millimolar + (doc ? 0.05 : 0), 0.7) * ra(t, M.seven - 0.4, 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "left" });
+      // (9:16: hai nhãn cốc hiện lần lượt cùng một chỗ, để đường dẫn không cắt qua chữ)
       // cân + bình 1 L: 25.0 mM × 288.38 g/mol = 7.21 g/L
       const g721 = khoang(t, M.seven - 0.2, M.grams + 0.4, 0, 7.21, "power2.out");
       ctx.save(); ctx.fillStyle = rgba(K1.MUC, 0.18);
@@ -298,8 +330,8 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       veChu(rc, "1 L", xCan + (doc ? 170 : 300), L.ban - (doc ? 140 : 160), { size: sz(rc, L.nhan * 0.85), align: "center" });
       const uE = u(t, M.litre, 0.6);
       if (uE > 0) { ctx.save(); ctx.globalAlpha *= layEase("power3.out")(uE); veChu(rc, "= 7.21 g/L (calculated)", xCan + (doc ? 30 : 150), L.ban - (doc ? 400 : 470), { size: sz(rc, L.nhan * 1.1), weight: 600, align: "center" }); ctx.restore(); }
-      if (t > M.celsius - 0.3) {
-        ctx.save(); ctx.globalAlpha *= layEase("power3.out")(u(t, M.celsius - 0.2, 0.5));
+      if (t > M.degrees - 0.4) {
+        ctx.save(); ctx.globalAlpha *= layEase("power3.out")(u(t, M.degrees - 0.3, 0.5));
         const xm = xCan + (doc ? 390 : 470);
         veNhietKe(rc, { x: xm, y: L.ban - 20, h: 200, gia: 25, size: L.nhan * 0.7 });
         veChu(rc, "25 °C", xm, L.ban - 250, { size: sz(rc, L.nhan * 0.9), weight: 600, align: "center" });
@@ -307,16 +339,16 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       }
       // --- Bộ C: nước 20 °C và 25 °C cạnh nhau: 5.45 → 5.43 mm ---
       const wc = doc ? 250 : 420;
-      const cap = [[xC - (doc ? 205 : 300), 5.45, "20 °C"], [xC + (doc ? 175 : 300), 5.43, "25 °C"]];
+      const cap = [[xC - (doc ? 205 : 300), VUNG.nuoc20, "20 °C"], [xC + (doc ? 175 : 300), VUNG.nuoc25, "25 °C"]];
       cap.forEach(([cx, mm, nhan], i) => {
         const hh = hmm(mm);
         veVung(rc, { cx, y: L.ban, w: wc, h: hh });
         veChu(rc, nhan, cx, L.ban + (doc ? 55 : 60), { size: sz(rc, L.nhan), weight: 600, align: "center" });
-        const uk = u(t, M.warming + 0.3 + i * 0.5, 0.5);
+        const uk = u(t, M.warming + 1.0 + i * 0.5, 0.5);
         veThuocKep(rc, { x: cx + wc / 2 + 36, y: L.ban, h: hh, cao: hmm(7.5), u: uk, phai: true });
-        if (uk > 0) veChu(rc, so(khoang(t, M.warming + 0.3 + i * 0.5, M.warming + 1.1 + i * 0.5, 0, mm, "expo.out")) + " mm", cx + wc / 2 + 36, L.ban - hmm(7.5) - 18, { size: sz(rc, L.so * 0.9), weight: 600, align: "center" });
+        if (uk > 0) veChu(rc, so(khoang(t, M.warming + 1.0 + i * 0.5, M.warming + 1.8 + i * 0.5, 0, mm, "expo.out")) + " mm", cx + wc / 2 + 36, L.ban - hmm(7.5) - 18, { size: sz(rc, L.so * 0.9), weight: 600, align: "center" });
       });
-      const uW = u(t, M.warming + 0.2, 0.6);
+      const uW = u(t, M.warming + 0.9, 0.6);
       if (uW > 0) { ctx.save(); ctx.globalAlpha *= layEase("power3.out")(uW); veChu(rc, "water: 5.45 → 5.43 mm (20 → 25 °C)", xC, L.ban - (doc ? 450 : 400), { size: sz(rc, L.nhan), align: "center" }); ctx.restore(); }
       const uB = u(t, M.barely, 0.5);
       if (uB > 0) {
@@ -326,9 +358,9 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       }
       // --- Bộ D (c1): cùng một bàn, 25 °C: nước 5.43 mm, SDS 3.86 mm ---
       const dW = doc ? 340 : 440;
-      const dd = [[xD - (doc ? 240 : 320), 5.43, "water: 5.43 mm", M.plain], [xD + (doc ? 240 : 320), 3.86, "SDS 25.0 mM (inferred): 3.86 mm", THOI_LUONG + 5]];
+      const dd = [[xD - (doc ? 240 : 320), VUNG.nuoc25, "water: 5.43 mm", M.plain], [xD + (doc ? 240 : 320), VUNG.sds25, "SDS 25.0 mM (inferred): 3.86 mm", THOI_LUONG + 5]];
       dd.forEach(([cx, mm, nhan, k], i) => {
-        const hh = hmm(mm); const ww = i === 1 ? (dW * 5.43) / 3.86 * 0.8 : dW;
+        const hh = hmm(mm); const ww = i === 1 ? (dW * VUNG.nuoc25) / VUNG.sds25 * 0.8 : dW;
         veVung(rc, { cx, y: L.ban, w: ww, h: hh });
         const uk = u(t, k, 0.5);
         veThuocKep(rc, { x: cx - ww / 2 - 34, y: L.ban, h: hh, cao: hmm(7.5), u: uk, phai: false });
@@ -345,7 +377,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     ve: (rc) => {
       const { ctx, t } = rc;
       for (const b of buiTruoc) {
-        ctx.fillStyle = rgba(K1.NEN_TREN, 0.10);
+        ctx.fillStyle = rgba(K1.NEN_TREN, 0.16);
         ctx.beginPath(); ctx.arc(b.x + Math.sin(t * 0.13 + b.p) * 30, b.y + Math.cos(t * 0.11 + b.p) * 20, b.r * 9, 0, Math.PI * 2); ctx.fill();
       }
     }
@@ -377,8 +409,20 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     ]
   };
 
+  const chuyenCanh = [
+    ["h1 đẩy vào gần vũng nước", M.poured - 0.3, M.poured + (doc ? 0.7 : 0.9)],
+    ...(doc ? [["h1 lùi ra đón giọt xà phòng", M.soap + 0.2, M.soap + 1.2]] : []),
+    ["h2 zoom vào mép mặt nước", M.cuts - 0.3, M.cuts + 1.5],
+    ["h2 lùi ra toàn vũng", M.half + 0.1, M.half + 1.6],
+    ["h3 bong bóng mọc + bám camera", M.bubble - 0.2, M.bubble + 2.2],
+    ["h3→h4 zoom xuyên màng bóng", M.more + 0.3, tXuyen + 1.4],
+    ["h4 lia + đẩy vào cốc SDS", M.surfactant - 0.5, M.surfactant + 1.0],
+    ["h4 lia + lùi sang cân + bình 1 L", M.seven - 0.6, M.seven + 0.9],
+    ["h4 lia sang hai vũng 20/25 °C", M.warming - 0.15, M.warming + 1.65],
+    ["c1 lùi ra toàn bàn", LOI[4].bd - 0.3, LOI[4].bd + 1.9]
+  ];
   return {
-    F, tl, canh, cum, tu: tuTrongBai, THOI_LUONG, FPS, mocGiong: Boolean(mocTu),
+    F, tl, canh, cum, chuyenCanh, M, VUNG, tu: tuTrongBai, THOI_LUONG, FPS, mocGiong: Boolean(mocTu),
     phuDe: {
       ...F.phuDe, mau: K1.MUC, nenHop: K1.NEN_TREN,
       gachChan: (w) => (CANG.test(w) ? K1.CANG : NUOC.test(w) ? K1.NUOC : null)

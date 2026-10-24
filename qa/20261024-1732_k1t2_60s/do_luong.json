@@ -1,0 +1,75 @@
+{
+ "fps_dat": 30,
+ "so_khung": 1800,
+ "thoi_gian_xuat_giay": 64.98,
+ "thoi_luong_video_giay": 60,
+ "ti_le_nhanh_hon_thuc": 0.923,
+ "khung_lap_lai_toi_da_giay": 0.033,
+ "so_lan_doi_hinh": 9,
+ "khoang_doi_hinh_dai_nhat_giay": 8.25,
+ "chi_tiet": {
+  "cach_do": "bo_dan_chung.py: khung giải mã từ chính video xuất bằng ffmpeg; lặp = chênh lớn nhất ≤ 2/255 ở 30 fps (480 px); đổi hình = khác > 12/255 trên > 6 % diện tích, lấy mẫu 4 fps, các mẫu liền nhau gộp một lần",
+  "kho": {
+   "16x9": {
+    "fps_dat": 30,
+    "so_khung": 1800,
+    "thoi_gian_xuat_giay": 64.98,
+    "thoi_luong_video_giay": 60,
+    "ti_le_nhanh_hon_thuc": 0.923,
+    "codec_xuat_tu_web": "vp09.00.40.08",
+    "khung_lap_lai_toi_da_giay": 0.033,
+    "so_lan_doi_hinh": 9,
+    "so_mau_4fps_vuot_nguong": 30,
+    "khoang_doi_hinh_dai_nhat_giay": 8.25,
+    "khoang_doi_hinh_trung_binh_giay": 6.0,
+    "moc_doi_hinh_giay": [
+     7.0,
+     12.5,
+     19.5,
+     26.75,
+     28.75,
+     33.75,
+     40.75,
+     47.0,
+     55.25
+    ],
+    "_khoang_dai_nhat_theo_mau_4fps": 7.25,
+    "so_tep_khung": 44,
+    "tep_khung_lon_nhat_kb": 75.7
+   },
+   "9x16": {
+    "fps_dat": 30,
+    "so_khung": 1800,
+    "thoi_gian_xuat_giay": 62.93,
+    "thoi_luong_video_giay": 60,
+    "ti_le_nhanh_hon_thuc": 0.953,
+    "codec_xuat_tu_web": "vp09.00.40.08",
+    "khung_lap_lai_toi_da_giay": 0.033,
+    "so_lan_doi_hinh": 10,
+    "so_mau_4fps_vuot_nguong": 17,
+    "khoang_doi_hinh_dai_nhat_giay": 9.25,
+    "khoang_doi_hinh_trung_binh_giay": 5.45,
+    "moc_doi_hinh_giay": [
+     7.0,
+     8.25,
+     12.75,
+     19.5,
+     28.75,
+     34.25,
+     40.75,
+     47.25,
+     47.75,
+     55.5
+    ],
+    "_khoang_dai_nhat_theo_mau_4fps": 9.0,
+    "so_tep_khung": 47,
+    "tep_khung_lon_nhat_kb": 67.1
+   }
+  },
+  "mau_10s": {
+   "tep": "mau_10s.mp4",
+   "kb": 2399.3,
+   "ghi_chu": "chuyển mã H.264 (libx264) từ tệp VP9 do web xuất từng khung; không dựng lại hình"
+  }
+ }
+}

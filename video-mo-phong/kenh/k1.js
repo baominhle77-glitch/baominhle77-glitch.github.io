@@ -134,7 +134,9 @@ export function veNhan(rc, { x0, y0, x1, y1, text, u = 1, size = 32, align = "le
   const ul = kep(u / 0.55); const ut = kep((u - 0.35) / 0.65);
   ctx.save();
   ctx.strokeStyle = rgba(mau, 0.85); ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + (x1 - x0) * layEase("power2.out")(ul), y0 + (y1 - y0) * layEase("power2.out")(ul)); ctx.stroke();
+  // nhãn căn giữa: đường dẫn dừng ở mép chữ, không đâm xuyên chữ
+  const yd = align === "center" ? y1 + Math.sign(y0 - y1) * size * 0.75 : y1;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + (x1 - x0) * layEase("power2.out")(ul), y0 + (yd - y0) * layEase("power2.out")(ul)); ctx.stroke();
   ctx.fillStyle = mau; ctx.beginPath(); ctx.arc(x0, y0, 4, 0, Math.PI * 2); ctx.fill();
   let hop = null;
   if (ut > 0) {
@@ -317,7 +319,7 @@ export function veNguon(rc, dong, { x, y, size = 20, u = 1, nhan = -1, maxW = 99
     for (const d of catDong(rc, s, size, maxW)) {
       if (sang) {
         const w = doChu(rc, d, size, 600);
-        ctx.fillStyle = rgba(K1.CANG, 0.9); ctx.fillRect(x - w, yy + size * 0.28, w, 3);
+        ctx.fillStyle = rgba(K1.MUC, 0.85); ctx.fillRect(x - w, yy + size * 0.28, w, 3);
       }
       veChu(rc, d, x, yy, { size, weight: sang ? 600 : 400, color: K1.MUC, align: "right" });
       yy += size * 1.28;

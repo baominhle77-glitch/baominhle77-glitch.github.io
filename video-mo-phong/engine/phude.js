@@ -36,7 +36,7 @@ export function vePhuDe(rc, cum, t, o) {
   while (rong() > o.maxW && size > o.size * 0.6) size -= 1;
   const tong = rong();
   const vao = layEase("power3.out"); const nay = layEase("back.out(1.6)");
-  const ra = kep((c.kt - t) / 0.12);
+  const ra = 1 - layEase("power2.in")(1 - kep((c.kt - t) / 0.12));
   ctx.save();
   ctx.globalAlpha *= ra;
   // hộp nền vuông góc (khuôn K1 cấm chip bo tròn), màu nền kênh, mờ như ASS alpha 0x40 của Studio;
