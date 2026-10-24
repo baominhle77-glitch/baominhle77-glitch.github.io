@@ -10,6 +10,7 @@ import { spreadById, SPREADS } from "./js/spreads.js";
 import { moneyTable, periodEstimate, roundNice } from "./js/money.js";
 import { analyze, allSentences, ruleFollowUp } from "./js/insight.js";
 import { suggestSpread } from "./js/topic.js";
+import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING } from "./js/ai.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const db = {
@@ -225,6 +226,37 @@ test("gợi ý mẫu trải theo câu hỏi", () => {
   assert.equal(suggestSpread("vận hạn tháng này").id, "vanhan");
   assert.equal(suggestSpread("tài chính năm 2027 từng tháng").id, "12thang");
   assert.equal(suggestSpread("tổng quan cả năm 2027").year, 2027);
+});
+
+test("AI: dò model, 429 → model dự phòng, streaming SSE ghép JSON, JSON dở vẫn đọc được", async () => {
+  const s = await demoSession();
+  addRound(s, `${T_IN}\n${L_IN}`);
+  const rule = analyze(db, s, { thuNhap: 20 });
+  const answer = JSON.stringify({ tong_quan: "Tổng quan.", chu_de_troi: ["a"], tang: [{ ten: "T1", diem: 7, tarot_doc: ["x"], dong_chay: "d", lenormand_cap: ["c"], chot: "c", diem_nghen: "n", loi_khuyen: "k" }], noi_tang: ["n"], mau_thuan: ["m"], tong_ket: "Kết.", loi_khuyen: ["l"] });
+  const calls = [];
+  const sseBody = (chunks) => new ReadableStream({ start(c) { for (const ch of chunks) c.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: ch }] } }] })}\r\n\r\n`)); c.close(); } });
+  const fakeFetch = async (url, opts = {}) => {
+    calls.push(url);
+    if (url.includes("/models?")) return new Response(JSON.stringify({ models: [{ name: "models/gemini-2.5-flash", supportedGenerationMethods: ["generateContent"] }, { name: "models/gemini-9.0-pro", supportedGenerationMethods: ["generateContent"] }, { name: "models/embedding-001", supportedGenerationMethods: ["embedContent"] }] }), { status: 200 });
+    assert.equal(opts.headers["x-goog-api-key"], "KHOA-GIA");
+    const body = JSON.parse(opts.body);
+    assert.equal(body.generationConfig.responseMimeType, "application/json");
+    assert.ok(body.systemInstruction.parts[0].text.includes("lão luyện"));
+    if (url.includes("gemini-9.0-pro")) return new Response(JSON.stringify({ error: { message: "quota" } }), { status: 429 });
+    return new Response(sseBody([answer.slice(0, 40), answer.slice(40, 90), answer.slice(90)]), { status: 200 });
+  };
+  const mem = new Map();
+  const storage = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v), removeItem: (k) => mem.delete(k) };
+  const seen = [];
+  const out = await streamWithFallback({ provider: "gemini", key: "KHOA-GIA", system: SYSTEM_READING, json: true, storage, fetchImpl: fakeFetch,
+    messages: [{ role: "user", text: readingRequest(db, s, { reading: rule, money: rule._money }) }], onText: (full) => seen.push(full) });
+  assert.equal(out.model, "gemini-2.5-flash", "phải nhảy sang model dự phòng sau 429");
+  assert.ok(calls.some((u) => u.includes("gemini-9.0-pro")), "phải thử model mạnh nhất trước");
+  assert.equal(seen.length, 3, "streaming theo từng khúc");
+  const r = normalizeReading(partialJSON(out.text), rule);
+  assert.equal(r.tang[0].diem, 7);
+  assert.ok(partialJSON(seen[1]), "JSON dở dang vẫn dựng được");
+  assert.ok(!JSON.stringify(mem.get("boi.v1.models")).includes("KHOA"), "không lưu khoá vào bộ nhớ model");
 });
 
 export async function run(extra = []) {
