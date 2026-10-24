@@ -52,7 +52,7 @@ export function docMocTu(noiDung) {
       const text = w.text ?? w.word ?? w.tu;
       const start = toS(Number(w.start ?? w.offset ?? w.bd));
       const end = w.end != null ? toS(Number(w.end)) : start + toS(Number(w.duration ?? 0.3));
-      return { text: String(text), start, end };
+      return w.beat ? { text: String(text), start, end, beat: String(w.beat) } : { text: String(text), start, end };
     }).filter((w) => w.text && Number.isFinite(w.start));
   }
   const ts = (x) => { const [h, m, r] = x.replace(",", ".").split(":"); return Number(h) * 3600 + Number(m) * 60 + Number(r); };

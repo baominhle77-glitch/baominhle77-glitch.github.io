@@ -15,6 +15,12 @@ export function chiaCum(words, { toiDa = 4, khoangLang = 0.15 } = {}) {
     const ngat = DAU_NGAT.test(w.text) || !tiep || (tiep.start - w.end) >= khoangLang || hien.length >= toiDa;
     if (ngat) { cum.push(hien); hien = []; }
   });
+  // cụm tối thiểu 2 từ (barem D1: 2–5 từ): cụm 1 từ nhập vào cụm liền trước, hoặc cụm sau nếu là cụm đầu
+  for (let i = 0; i < cum.length; i++) {
+    if (cum[i].length >= 2 || cum.length < 2) continue;
+    if (i > 0 && cum[i - 1].length < 5) { cum[i - 1].push(...cum[i]); cum.splice(i, 1); i--; }
+    else if (i + 1 < cum.length && cum[i + 1].length < 5) { cum[i + 1].unshift(...cum[i]); cum.splice(i, 1); i--; }
+  }
   return cum.map((tu, i) => {
     const bd = Math.max(0.12, tu[0].start - 0.06);
     const sau = cum[i + 1];
@@ -39,7 +45,7 @@ export function vePhuDe(rc, cum, t, o) {
   const ra = 1 - layEase("power2.in")(1 - kep((c.kt - t) / 0.12));
   ctx.save();
   ctx.globalAlpha *= ra;
-  // hộp nền vuông góc (khuôn K1 cấm chip bo tròn), màu nền kênh, mờ như ASS alpha 0x40 của Studio;
+  // hộp nền vuông góc (khuôn K1 cấm chip bo tròn); màu/độ mờ hộp do bài chọn (K1: hộp mực, chữ sáng, tương phản ≥ 4,5:1);
   // hộp nở theo các từ đã nói (không để hộp rỗng)
   let daNoi = 0; let xx = 0;
   c.tu.forEach((w, i) => {
@@ -50,9 +56,13 @@ export function vePhuDe(rc, cum, t, o) {
   });
   const pad = size * 0.32;
   ctx.fillStyle = o.nenHop;
-  ctx.globalAlpha *= 0.82;
-  if (daNoi > 0) ctx.fillRect(o.cx - tong / 2 - pad, o.cy - size * 0.78, daNoi + pad * 2, size * 1.5);
-  ctx.globalAlpha /= 0.82;
+  const aHop = o.aHop == null ? 0.82 : o.aHop;
+  ctx.globalAlpha *= aHop;
+  if (daNoi > 0) {
+    ctx.fillRect(o.cx - tong / 2 - pad, o.cy - size * 0.78, daNoi + pad * 2, size * 1.5);
+    if (o.vien) { ctx.strokeStyle = o.vien; ctx.lineWidth = 2; ctx.strokeRect(o.cx - tong / 2 - pad - 1, o.cy - size * 0.78 - 1, daNoi + pad * 2 + 2, size * 1.5 + 2); }
+  }
+  ctx.globalAlpha /= aHop;
   let x = o.cx - tong / 2;
   for (const w of c.tu) {
     const rw = doChu(rc, w.text, size, 600);

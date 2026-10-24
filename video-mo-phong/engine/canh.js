@@ -65,7 +65,7 @@ export function phong(size, weight = 400, italic = false) {
   return `${italic ? "italic " : ""}${weight} ${Math.round(size * 100) / 100}px ${PHONG}, "Source Sans 3", system-ui, sans-serif`;
 }
 
-function ghiHop(rc, x0, y0, x1, y1, text) {
+export function ghiHop(rc, x0, y0, x1, y1, text) {
   const m = rc.ctx.getTransform();
   const pts = [[x0, y0], [x1, y0], [x0, y1], [x1, y1]].map(([x, y]) => [m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f]);
   const xs = pts.map((p) => p[0]); const ys = pts.map((p) => p[1]);
@@ -103,6 +103,12 @@ export function veChu(rc, text, x, y, o = {}) {
     const [p0, q0, p1, q1] = rc.fmt.pip;
     const tach = Math.max(p0 - sx1, sx0 - p1, q0 - sy1, sy0 - q1);
     mo = Math.min(mo, Math.max(0, tach / 24));
+  }
+  // chữ trong cảnh (không phải lớp màn hình) mờ đi khi lia qua dải phụ đề: không bao giờ bị hộp phụ đề che
+  if (rc.fmt && rc.fmt.daiPhuDe && rc.lopHienTai && rc.lopHienTai !== "man") {
+    const [p0, q0, p1, q1] = rc.fmt.daiPhuDe;
+    const tach = Math.max(p0 - sx1, sx0 - p1, q0 - sy1, sy0 - q1);
+    mo = Math.min(mo, Math.max(0, tach / 20));
   }
   mo = Math.min(1, mo);
   if (mo <= 0) return { w: total, x0, x1: x0 + total, y0: yb - asc, y1: yb + desc };
