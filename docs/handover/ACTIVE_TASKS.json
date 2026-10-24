@@ -62,7 +62,8 @@
       "status": "completed",
       "started_at": "2026-10-24T23:24:00+07:00",
       "heartbeat_at": "2026-10-25T01:02:00+07:00",
-      "summary": "Thu GD gd-20261024-2332 muc 5: dung lai k1t2 mot lan du C13 10 muc + mau K1 v2 + vien muc 2 px quanh cam + vignette 22%; nop qa/ moi + thu web-...-nop. | Da nop qa/20261025-0052_k1t2_c13 (commit dung 417253c), cho GD cham; truot muc nao thi mo task moi."
+      "summary": "Thu GD gd-20261024-2332 muc 5: dung lai k1t2 mot lan du C13 10 muc + mau K1 v2 + vien muc 2 px quanh cam + vignette 22%; nop qa/ moi + thu web-...-nop. | Da nop qa/20261025-0052_k1t2_c13 (commit dung 417253c), cho GD cham; truot muc nao thi mo task moi.",
+      "completed_at": "2026-10-25T01:02:00+07:00"
     },
     {
       "id": "EDU-20261024-08",
