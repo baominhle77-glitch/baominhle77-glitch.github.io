@@ -42,7 +42,7 @@
     },
     {
       "id": "EDU-20261024-09",
-      "owner": "Claude Code (session_01357)",
+      "owner": "Claude Code (session_0129, \"web hiennhi\" — nhận lại theo thư GĐ gd-20261024-2348)",
       "branch": "claude/pensive-lovelace-96zjk7",
       "base_sha": "045a3f7dd90a9218556e646fef8cf43ce63f1da4",
       "paths": [
@@ -58,7 +58,7 @@
       ],
       "status": "in_progress",
       "started_at": "2026-10-24T23:24:00+07:00",
-      "heartbeat_at": "2026-10-24T23:24:00+07:00",
+      "heartbeat_at": "2026-10-24T23:52:00+07:00",
       "summary": "Thu GD gd-20261024-2332 muc 5: dung lai k1t2 mot lan du C13 10 muc + mau K1 v2 + vien muc 2 px quanh cam + vignette 22%; nop qa/ moi + thu web-...-nop."
     }
   ],
