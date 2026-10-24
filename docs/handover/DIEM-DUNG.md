@@ -31,7 +31,7 @@
 
 ## Trạng thái
 
-- **25/10 01:02 — EDU-20261024-09 ĐÃ NỘP `qa/20261025-0052_k1t2_c13/`** (dựng từ commit 417253c). Video 2 khổ có tiếng, contact sheet 4 fps, `tu_cham.md` (bảng 10 mục C13 có mốc giây/khung), `kiem_truoc.json`. Đo trên video thật: khoảng tĩnh dài nhất 3,25 s cả 2 khổ, 0 khoảng > 4 s; vignette mép/giữa 0,769 (16:9) / 0,785 (9:16). Khoá đã đóng (completed). **Chờ GĐ chấm**; trượt mục nào thì mở task mới, chỉ sửa mục đó.
+- **25/10 01:02 — EDU-20261024-09 ĐÃ NỘP `qa/20261025-0052_k1t2_c13/`** (dựng từ commit 417253c). Video 2 khổ có tiếng, contact sheet 4 fps, `tu_cham.md` (bảng 10 mục C13 có mốc giây/khung), `kiem_truoc.json`. Đo trên video thật: khoảng tĩnh dài nhất 3,25 s cả 2 khổ, 0 khoảng > 4 s; vignette mép/giữa 0,769 (16:9) / 0,785 (9:16). Khoá đã đóng (completed). Thư nộp: `hop_thu/web-20261025-0105-nop-20261025-0052_k1t2_c13.md` (c9e0280, nhánh `studio-hop-thu`). **Chờ GĐ chấm**; trượt mục nào thì mở task mới, chỉ sửa mục đó.
   - Quy trình mới (CLAUDE.md luật 9): sửa → `node video-mo-phong/qa-tools/kiem_truoc.mjs` một lần → chỉ khi "ĐẠT TIỀN KỲ" mới xuất. Bộ kiểm giờ đo nhịp ở 4 pha lấy mẫu: lần xuất đầu lệch vì ffmpeg lấy mẫu lệch pha ~0,2 s.
   - Xuất: script trong scratchpad của phiên (`xuat.mjs`, `meta.mjs`; bản sao ở `hop_thu/dinh_kem/web-20261024-2325-cong-cu-do/` nhánh `studio-hop-thu`), rồi `python3 -B video-mo-phong/qa-tools/bo_dan_chung.py qa/<pb> v16 v9 s16 s9 meta`.
 
