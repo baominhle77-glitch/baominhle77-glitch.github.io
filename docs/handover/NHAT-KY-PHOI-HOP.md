@@ -22,6 +22,12 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-24 19:05 GMT+7 — Claude Code — EDU-20261024-07 — rút gọn luồng ý tưởng → video (BaoMinh yêu cầu)
+
+- `video-mo-phong/index.html`, `app.js`, `app.css`: một nút "✨ Tạo video bằng Claude" mở claude.ai với lời nhắc điền sẵn; quay lại tab thì tự đọc kịch bản từ bộ nhớ tạm, dựng, tự chọn phong cách, tự phát; cách thủ công gập vào mục phụ.
+- Test Playwright: link mở đúng `claude.ai/new?q=…` (13 340 ký tự), bộ nhớ tạm giữ lời nhắc; quay lại sau Copy → dựng 5 cảnh, tự phát; không quyền đọc bộ nhớ tạm → mở ô dán thủ công; dán lên trang → dựng; 0 lỗi trang. `node --check app.js` ok.
+- Chỉ ảnh hưởng GitHub Pages; không gọi API trả phí; không thêm secret.
+
 ### 2026-10-24 18:54 GMT+7 — Claude Code — EDU-20261024-06 — nộp bộ dẫn chứng v2, đóng EDU-20261024-04
 
 - `qa/20261024-1848_k1t2_v2/`: `video_16x9.mp4`, `video_9x16.mp4` (72 s, có tiếng, H.264+AAC chuyển mã từ VP9+Opus web xuất), `mau_10s.mp4`, tờ ghép 4 fps, `bang_pixel_diff.csv`, 30 PNG giữa các beat, khung JPG, `do_luong.json`, `kiem_chu.json` (0 lỗi), `tu_cham.md` (34/39).
