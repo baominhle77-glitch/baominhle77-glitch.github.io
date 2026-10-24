@@ -54,31 +54,34 @@
     </div>
     <div class="how">
       <div class="row">
-        <button id="btnClaudeWrite" type="button" class="primary" hidden>✨ Viết kịch bản bằng Claude</button>
+        <button id="btnClaudeWrite" type="button" class="primary big">✨ Tạo video bằng Claude</button>
         <button id="btnStopClaude" type="button" hidden>Dừng</button>
+        <button id="btnPasteClip" type="button" class="accent big" hidden>📥 Lấy kịch bản Claude vừa viết</button>
       </div>
-      <p id="claudeHint" class="hint" hidden>Claude viết ngay trong trang, dùng hạn mức nick Claude đang đăng nhập (lần đầu sẽ hỏi bạn cho phép). Hoặc làm thủ công như dưới đây.</p>
-      <p class="hint"><b>Dùng hạn mức nick Claude của bạn — không cần mua API.</b> ① Bấm “Sao chép lời nhắc” → ② mở Claude, dán vào khung chat, gửi → ③ chép nguyên câu trả lời của Claude, dán vào ô bên dưới → ④ bấm “Dựng kịch bản”.</p>
-      <div class="row">
-        <button id="btnCopyPrompt" type="button" class="primary">📋 Sao chép lời nhắc</button>
-        <a class="btn-link" href="https://claude.ai/new" target="_blank" rel="noopener">Mở Claude ↗</a>
-        <button id="btnTemplate" type="button">Kịch bản mẫu nhanh (không cần Claude)</button>
-      </div>
-      <textarea id="promptOut" rows="6" readonly hidden aria-label="Lời nhắc để dán vào Claude"></textarea>
-      <div class="field">
-        <label for="pasteJson">Dán câu trả lời của Claude vào đây</label>
-        <textarea id="pasteJson" rows="5" placeholder="Dán nguyên câu trả lời — app tự tìm phần kịch bản JSON trong đó."></textarea>
-      </div>
-      <div class="row">
-        <button id="btnImport" type="button" class="primary">✨ Dựng kịch bản</button>
-        <button id="btnAuto" type="button" class="accent">⚡ Dựng &amp; xuất video luôn</button>
-      </div>
+      <p id="claudeHint" class="hint"><b>Chỉ 3 bước, dùng hạn mức nick Claude — không cần API:</b> ① bấm nút trên, Claude mở ở tab mới với lời nhắc đã điền sẵn, bấm gửi → ② Claude viết xong thì bấm nút <b>Copy</b> dưới câu trả lời → ③ quay lại tab này: video tự dựng, tự chọn màu và cỡ chữ, tự phát xem trước.</p>
+      <details class="manual">
+        <summary>Cách thủ công, hoặc không dùng Claude</summary>
+        <div class="row">
+          <button id="btnCopyPrompt" type="button">📋 Sao chép lời nhắc</button>
+          <a class="btn-link" href="https://claude.ai/new" target="_blank" rel="noopener">Mở Claude ↗</a>
+          <button id="btnTemplate" type="button">Kịch bản mẫu nhanh (không cần Claude)</button>
+        </div>
+        <textarea id="promptOut" rows="6" readonly hidden aria-label="Lời nhắc để dán vào Claude"></textarea>
+        <div class="field">
+          <label for="pasteJson">Dán câu trả lời của Claude vào đây</label>
+          <textarea id="pasteJson" rows="5" placeholder="Dán nguyên câu trả lời — app tự tìm phần kịch bản JSON trong đó."></textarea>
+        </div>
+        <div class="row">
+          <button id="btnImport" type="button" class="primary">✨ Dựng kịch bản</button>
+          <button id="btnAuto" type="button" class="accent">⚡ Dựng &amp; xuất video luôn</button>
+        </div>
+      </details>
     </div>
     <p id="genStatus" class="status" role="status"></p>
   </div>
 
   <div class="panel style-panel">
-    <h2><span class="step">2</span> Phong cách video</h2>
+    <h2><span class="step">2</span> Phong cách video <small class="muted">(đã tự chọn — chỉ chỉnh nếu muốn)</small></h2>
     <div class="grid2">
       <label>Chủ đề màu<select id="stTheme"></select></label>
       <label>Kiểu chữ<select id="stFont"></select></label>

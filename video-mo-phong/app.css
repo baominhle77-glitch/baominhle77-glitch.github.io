@@ -53,6 +53,10 @@ label.check { flex-direction: row !important; align-items: center; gap: 6px; col
 }
 .btn-link:hover { border-color: var(--accent); }
 button.accent { background: var(--accent2); color: #2a1600; border-color: var(--accent2); }
+button.big { font-size: 17px; padding: 12px 20px; }
+.manual { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 6px; }
+.manual summary { cursor: pointer; color: var(--muted); font-size: 13px; padding: 4px 0; }
+h2 small { font-size: 12px; font-weight: 400; }
 .status { min-height: 1.4em; margin: 6px 0 0; font-size: 14px; }
 .warn { color: #ffd479; font-size: 13px; margin: 4px 0 8px; }
 .report { margin: 6px 0 0; padding-left: 20px; font-size: 13px; color: var(--muted); }

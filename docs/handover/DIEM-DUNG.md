@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 18:54 GMT+7 — Claude Code
+**Cập nhật:** 24/10/2026 19:05 GMT+7 — Claude Code
 
 ## Việc đang làm
 
@@ -30,6 +30,8 @@
 - Đã biết: Chromium thử nghiệm không có H.264 encoder (chỉ VP9/AV1/Opus); chờ Studio gửi giọng edge-tts + words.json cho h1–c1.
 
 ## Trạng thái
+
+- **24/10 tối:** trang soạn kịch bản rút còn 3 bước (EDU-20261024-07): ✨ Tạo video bằng Claude → bấm Copy trong Claude → quay lại tab là có video. Đang chờ BaoMinh quyết hướng "thư viện khối cảnh + kế hoạch cảnh JSON" cho Xưởng chất lượng cao.
 
 - Xong source V1–V3; kiểm thử Chromium đạt. V3: sao chép lời nhắc → dán vào Claude (hạn mức nick) → dán câu trả lời vào app → dựng video.
 - **Chưa** thử với câu trả lời thật từ claude.ai; **chưa** kiểm Safari/iPhone; trình xem Artifact của app Claude trên iPad báo "browser isn't supported" (giới hạn trình xem/iPadOS) → dùng link GitHub Pages.

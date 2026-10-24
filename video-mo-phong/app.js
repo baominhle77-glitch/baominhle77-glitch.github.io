@@ -676,7 +676,7 @@
   }
 
   function setBusy(on) {
-    ["btnClaudeWrite", "btnCopyPrompt", "btnTemplate", "btnImport", "btnAuto", "btnExport", "btnPlay"].forEach((id) => { $(id).disabled = on; });
+    ["btnClaudeWrite", "btnPasteClip", "btnCopyPrompt", "btnTemplate", "btnImport", "btnAuto", "btnExport", "btnPlay"].forEach((id) => { $(id).disabled = on; });
   }
 
   function needIdea(brief) {
@@ -780,10 +780,11 @@
       $("pasteJson").value = text;
       if (truncated) { notify("Câu trả lời bị cắt giữa chừng. Hãy giảm độ dài mục tiêu rồi thử lại."); return false; }
       const result = window.EduAI.parseScript(text, brief);
-      if (!(await confirmReplace())) return false;
       setPlaying(false);
       const n = applyResult(result, brief);
-      notify(`Claude đã viết xong ${n} cảnh, tổng ${fmtTime(totalDuration())}. Xem trước, chỉnh nếu cần rồi xuất video.`);
+      notify(`Claude đã viết xong ${n} cảnh, tổng ${fmtTime(totalDuration())}. Xem trước bên dưới; vừa ý thì bấm “Xuất video”.`);
+      setPlaying(true);
+      try { canvas.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (_) { /* trình duyệt cũ: bỏ qua */ }
       return true;
     } catch (e) {
       if (e && e.code) {
@@ -798,8 +799,62 @@
     }
   }
 
+  /* ---------- Một nút: mở Claude với lời nhắc điền sẵn, tự lấy kịch bản khi quay lại tab ---------- */
+  let coSample = false; // trang chạy trong claude.ai và được gọi Claude trực tiếp
+  let choKichBan = null; // {loiNhac, brief} khi đang chờ người dùng mang câu trả lời của Claude về
+
+  async function taoBangClaude() {
+    if (coSample) { await writeWithClaude(); return; }
+    const brief = readBrief();
+    if (needIdea(brief)) return;
+    const loiNhac = window.EduAI.buildPrompt(brief);
+    try { await navigator.clipboard.writeText(loiNhac); } catch (_) { /* không chép được cũng không sao: lời nhắc đã điền sẵn trong link */ }
+    const ma = encodeURIComponent(loiNhac);
+    const url = ma.length < 14000 ? `https://claude.ai/new?q=${ma}` : "https://claude.ai/new";
+    choKichBan = { loiNhac, brief };
+    $("btnPasteClip").hidden = false;
+    $("genStatus").textContent = "Đã mở Claude ở tab mới. Bấm gửi; khi Claude viết xong, bấm nút Copy dưới câu trả lời rồi quay lại đây — video tự dựng. (Nếu khung chat trống: bấm vào khung và dán, lời nhắc đã được chép sẵn.)";
+    window.open(url, "_blank", "noopener");
+  }
+
+  // Đọc bộ nhớ tạm; tuNut = người dùng bấm nút (trình duyệt như Safari chỉ cho đọc khi có thao tác bấm)
+  async function layTuBoNhoTam(tuNut) {
+    let text = "";
+    try { text = await navigator.clipboard.readText(); } catch (_) {
+      if (tuNut) {
+        $("pasteJson").closest("details").open = true; $("pasteJson").focus();
+        $("genStatus").textContent = "Trình duyệt không cho đọc bộ nhớ tạm. Hãy dán câu trả lời vào ô bên dưới (Ctrl/Cmd + V, hoặc giữ ngón tay → Dán).";
+      }
+      return false;
+    }
+    return nhanCauTraLoi(text, tuNut);
+  }
+
+  // Nhận câu trả lời của Claude (từ bộ nhớ tạm hoặc từ thao tác dán), dựng ngay không hỏi lại
+  async function nhanCauTraLoi(text, baoLoi) {
+    const brief = choKichBan ? choKichBan.brief : readBrief();
+    if (!text || !text.trim() || (choKichBan && text.trim() === choKichBan.loiNhac.trim())) {
+      if (baoLoi) $("genStatus").textContent = "Chưa thấy câu trả lời của Claude. Trong tab Claude, chờ viết xong rồi bấm nút Copy dưới câu trả lời, sau đó quay lại đây.";
+      return false;
+    }
+    let result;
+    try { result = window.EduAI.parseScript(text, brief); } catch (err) {
+      if (baoLoi) $("genStatus").textContent = "Câu trả lời chưa đọc được (" + (err && err.message ? err.message : err) + "). Nếu Claude chưa viết xong, chờ xong rồi bấm Copy lại.";
+      return false;
+    }
+    setPlaying(false);
+    const n = applyResult(result, brief);
+    $("pasteJson").value = text;
+    choKichBan = null;
+    $("btnPasteClip").hidden = true;
+    $("genStatus").textContent = `Xong! Đã dựng ${n} cảnh, tổng ${fmtTime(totalDuration())}, màu và cỡ chữ đã tự chọn. Xem trước bên dưới; vừa ý thì bấm “Xuất video”.`;
+    setPlaying(true);
+    try { canvas.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (_) { /* trình duyệt cũ: bỏ qua */ }
+    return true;
+  }
+
   async function autoMake() {
-    const viaClaude = !$("btnClaudeWrite").hidden && !$("pasteJson").value.trim();
+    const viaClaude = coSample && !$("pasteJson").value.trim();
     if (!(viaClaude ? await writeWithClaude() : await importPasted())) return;
     $("genStatus").textContent += " Đang xuất video…";
     startExport();
@@ -940,14 +995,26 @@
     $("btnTemplate").addEventListener("click", useTemplate);
     $("btnImport").addEventListener("click", importPasted);
     $("btnAuto").addEventListener("click", autoMake);
-    $("btnClaudeWrite").addEventListener("click", writeWithClaude);
+    $("btnClaudeWrite").addEventListener("click", taoBangClaude);
+    $("btnPasteClip").addEventListener("click", () => layTuBoNhoTam(true));
+    // Quay lại tab sau khi bấm Copy trong Claude → tự đọc kịch bản (Chrome/Edge hỏi quyền đọc bộ nhớ tạm một lần)
+    const khiQuayLai = () => { if (choKichBan && !document.hidden) layTuBoNhoTam(false); };
+    window.addEventListener("focus", khiQuayLai);
+    document.addEventListener("visibilitychange", khiQuayLai);
+    // Dán ở bất kỳ đâu trên trang (ngoài các ô nhập) cũng được nhận là câu trả lời của Claude
+    document.addEventListener("paste", (e) => {
+      const tg = e.target;
+      if (tg && (tg.tagName === "TEXTAREA" || tg.tagName === "INPUT" || tg.isContentEditable)) return;
+      const text = e.clipboardData && e.clipboardData.getData("text");
+      if (text && /"scenes"/.test(text)) { e.preventDefault(); nhanCauTraLoi(text, true); }
+    });
     $("btnStopClaude").addEventListener("click", () => { if (claudeAbort) claudeAbort.abort(); });
     // Nút "Viết bằng Claude" chỉ hiện khi trang chạy trong trình xem claude.ai có khả năng gọi Claude
     if (window.claude && typeof window.claude.use === "function") {
       window.claude.use("sample").then((sample) => {
         if (!sample) return;
-        $("btnClaudeWrite").hidden = false;
-        $("claudeHint").hidden = false;
+        coSample = true;
+        $("claudeHint").textContent = "Claude viết ngay trong trang, dùng hạn mức nick Claude đang đăng nhập (lần đầu sẽ hỏi bạn cho phép). Viết xong video tự dựng và tự chọn màu, cỡ chữ.";
       }).catch(() => {});
     }
 
