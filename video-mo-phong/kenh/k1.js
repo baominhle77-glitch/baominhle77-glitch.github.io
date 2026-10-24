@@ -2,11 +2,11 @@
 // thế giới = bàn quang học trong studio chụp ảnh; khối có bóng đổ, nước trong suốt; không lưới;
 // nhãn = đường dẫn mảnh + chữ trần, không khung; số đo hiện bằng thước kẹp vẽ.
 // Màu (không thêm hex, sắc độ phụ dùng độ mờ): nền #8E969D → #A7ADB3, mực #1C232B,
-// xanh nước #1F6FD1 = trọng lực/khối lượng, cam #E8772E = sức căng mặt.
+// xanh nước #3F6A9E = trọng lực/khối lượng, cam #D1834F = sức căng mặt (màu v2 theo luật C13 của Studio, 24/10/2026).
 import { veChu, doChu, rng, ghiHop } from "../engine/canh.js";
 import { kep, layEase } from "../engine/easing.js";
 
-export const K1 = { NEN_DUOI: "#8E969D", NEN_TREN: "#A7ADB3", MUC: "#1C232B", NUOC: "#1F6FD1", CANG: "#E8772E" };
+export const K1 = { NEN_DUOI: "#8E969D", NEN_TREN: "#A7ADB3", MUC: "#1C232B", NUOC: "#3F6A9E", CANG: "#D1834F" };
 
 export function rgba(hex, a) {
   const n = parseInt(hex.slice(1), 16);

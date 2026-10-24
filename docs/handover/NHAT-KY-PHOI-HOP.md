@@ -22,6 +22,13 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-24 19:30 GMT+7 — Claude Code — EDU-20261024-08 — liên kết GĐ Studio, luật dừng khi hết limit, màu K1 v2
+
+- `CLAUDE.md` mục 7 (sắp hết limit: dừng ở mốc gần nhất, commit + push, cập nhật DIEM-DUNG) và mục 8 (hộp thư `hop_thu/` trên nhánh `studio-hop-thu`).
+- `docs/handover/LIEN_KET_STUDIO.md`: Chủ tịch chọn phương án A — hộp thư `hop_thu/` trên nhánh riêng `studio-hop-thu` (đã tạo, thư đầu `web-20261024-1931-lien-ket-va-c13.md`, commit `e86de0b`).
+- `video-mo-phong/kenh/k1.js`, `xuong.html`: màu K1 v2 (#3F6A9E, #D1834F). Chưa xuất lại video; chờ toàn văn C13.
+- Test: `node --check` k1.js; `validate-coordination` ok.
+
 ### 2026-10-24 19:05 GMT+7 — Claude Code — EDU-20261024-07 — rút gọn luồng ý tưởng → video (BaoMinh yêu cầu)
 
 - `video-mo-phong/index.html`, `app.js`, `app.css`: một nút "✨ Tạo video bằng Claude" mở claude.ai với lời nhắc điền sẵn; quay lại tab thì tự đọc kịch bản từ bộ nhớ tạm, dựng, tự chọn phong cách, tự phát; cách thủ công gập vào mục phụ.
