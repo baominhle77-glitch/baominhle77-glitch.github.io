@@ -39,6 +39,27 @@
       "started_at": "2026-07-25T13:35:00+07:00",
       "heartbeat_at": "2026-07-25T16:45:00+07:00",
       "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất, chống trùng toàn catalog và thanh lọc toàn bộ affiliate link cũ."
+    },
+    {
+      "id": "EDU-20261024-09",
+      "owner": "Claude Code (session_01357)",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "045a3f7dd90a9218556e646fef8cf43ce63f1da4",
+      "paths": [
+        "video-mo-phong/kenh/**",
+        "video-mo-phong/bai/**",
+        "video-mo-phong/engine/**",
+        "video-mo-phong/qa-tools/**",
+        "video-mo-phong/xuong.js",
+        "qa/**",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/DIEM-DUNG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-10-24T23:24:00+07:00",
+      "heartbeat_at": "2026-10-24T23:24:00+07:00",
+      "summary": "Thu GD gd-20261024-2332 muc 5: dung lai k1t2 mot lan du C13 10 muc + mau K1 v2 + vien muc 2 px quanh cam + vignette 22%; nop qa/ moi + thu web-...-nop."
     }
   ],
   "recently_completed": [
