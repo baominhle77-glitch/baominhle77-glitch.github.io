@@ -91,12 +91,30 @@ const kq = await p.evaluate(async (khos) => {
       }
     }
     // gom kết quả
-    const sk = R.nhip.filter(([, v]) => v > 0.06).map(([t]) => t);
-    const moc = [0, ...sk, bai.THOI_LUONG]; const ho = [];
-    for (let k = 1; k < moc.length; k++) if (moc[k] - moc[k - 1] > 3.5) ho.push([moc[k - 1], moc[k], +(moc[k] - moc[k - 1]).toFixed(2)]);
+    // Nhịp: mẫu 4 fps của bộ đo trên video (ffmpeg) có thể lệch pha so với lưới 0,25 s ở đây (đo bản 20261025-0039: lệch ~0,2 s),
+    // làm một cú máy 0,5 s chia đôi phần đổi thành hai mẫu đều dưới 6 %. Nên đo thêm 3 pha lệch 2/30, 4/30, 6/30 s và lấy pha tệ nhất.
+    const doNhip = (ds) => {
+      const moc = [0, ...ds.filter(([, v]) => v > 0.06).map(([t]) => t), bai.THOI_LUONG]; const h = [];
+      for (let k = 1; k < moc.length; k++) if (moc[k] - moc[k - 1] > 3.5) h.push([moc[k - 1], moc[k], +(moc[k] - moc[k - 1]).toFixed(2)]);
+      return [h, Math.max(...moc.slice(1).map((v, k) => v - moc[k]))];
+    };
+    let [ho, nhipDai] = doNhip(R.nhip);
+    for (const ph of [2 / 30, 4 / 30, 6 / 30]) {
+      const ds = []; let tr = null;
+      for (let i = 0; i * buoc + ph <= bai.THOI_LUONG; i++) {
+        const t = +(i * buoc + ph).toFixed(4); ve(ctx, t); sx.drawImage(c, 0, 0, w4, h4);
+        const d = sx.getImageData(0, 0, w4, h4).data; const g = new Uint8Array(w4 * h4);
+        for (let k = 0; k < g.length; k++) g[k] = Math.round(0.299 * d[k * 4] + 0.587 * d[k * 4 + 1] + 0.114 * d[k * 4 + 2]);
+        if (tr) { let n = 0; for (let k = 0; k < g.length; k++) if (Math.abs(g[k] - tr[k]) > 12) n++; ds.push([+t.toFixed(2), n / g.length]); }
+        tr = g;
+      }
+      const [h2, d2] = doNhip(ds);
+      for (const x of h2) ho.push([...x, `pha +${Math.round(ph * 30)}/30 s`]);
+      nhipDai = Math.max(nhipDai, d2);
+    }
     const soTu = bai.cum.map((q) => q.tu.length);
     out[kho] = {
-      nhip_ho_tren_3_5s: ho, nhip_dai_nhat: Math.max(...moc.slice(1).map((v, k) => v - moc[k])),
+      nhip_ho_tren_3_5s: ho, nhip_dai_nhat: +nhipDai.toFixed(2),
       cat_mep: R.catMep, chu: R.chu, tuong_phan_duoi_4_5: R.tuongPhan,
       vat_nho_duoi_4pt: R.vatNho, co_vat_trung_vi: R.coVat ? R.coVat.slice().sort((u, v) => u - v)[Math.floor(R.coVat.length / 2)] : 0, cum_phu_de_min_max: [Math.min(...soTu), Math.max(...soTu)], co_chu_nguon: F.nguon.size
     };
@@ -107,7 +125,7 @@ const gom = (ds, k = 1) => { const m = new Map(); for (const x of ds) { const ke
 let dat = true;
 for (const [kho, r] of Object.entries(kq)) {
   const muc = [
-    ["C13-3 nhịp (khoảng > 3,5 s, để dư biên cho nén video)", r.nhip_ho_tren_3_5s.length === 0, r.nhip_ho_tren_3_5s.map(([a, b2, d]) => `${a}→${b2} (${d} s)`)],
+    ["C13-3 nhịp (khoảng > 3,5 s ở cả 4 pha lấy mẫu)", r.nhip_ho_tren_3_5s.length === 0, r.nhip_ho_tren_3_5s.map(([a, b2, d, ph]) => `${a}→${b2} (${d} s)${ph ? " " + ph : ""}`)],
     ["C13-2 vật bị cắt mép khi máy đứng", r.cat_mep.length === 0, gom(r.cat_mep)],
     ["Chữ: tràn / PiP / chồng", r.chu.length === 0, gom(r.chu)],
     ["Hộp phụ đề ≥ 4,5:1 với nền quanh", r.tuong_phan_duoi_4_5.length === 0, r.tuong_phan_duoi_4_5.slice(0, 8).map(([t, v]) => `${t} s: ${v}`)],

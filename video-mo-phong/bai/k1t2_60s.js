@@ -87,7 +87,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     temperature: moc("h4", "temperature"), soap4: moc("h4", "soap"), surfactant: moc("h4", "surfactant"), millimolar: moc("h4", "millimolar"),
     inferred: moc("h4", "inferred"), that: moc("h4", "that"), seven: moc("h4", "seven"), grams: moc("h4", "grams"), litre: moc("h4", "litre"),
     all: moc("h4", "all"), degrees: moc("h4", "degrees"), warming: moc("h4", "warming"), barely: moc("h4", "barely"), becomes: moc("h4", "becomes"),
-    five545: moc("h4", "five", 4),
+    five545: moc("h4", "five", 4), puddle4: moc("h4", "puddle"),
     both: moc("c1", "both"), bench: moc("c1", "bench"), twentyC: moc("c1", "twenty"), plain: moc("c1", "plain"), sdsC: moc("c1", "sds"),
     lower: moc("c1", "lower"), calcC: moc("c1", "calculated"), inC: moc("c1", "in"), only: moc("c1", "only")
   };
@@ -221,7 +221,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     [M.episode - 0.1, 1.6, K(noi(hop(bVungA(2.6), bKepA(2.6)), 40, doc ? 620 : 380, 40, 0)), "power3.inOut"], // rộng, chừa trời cho dòng rót
     [M.five - 0.25, 0.9, K(noi(nhomA(3.2), 0, 30, 0, -10), 2.0)],
     [M.however - 0.2, 1.0, K(noi(hop(bVungA(6.6), bKepA(6.6)), doc ? 40 : 160, doc ? 260 : 420, doc ? 40 : 160, 0))], // lần rót 2: lùi vừa, dòng rót chảy vào từ trên
-    [M.now - 0.15, 0.8, K(hop(bVungA(7.4), bOng(7.4), bKepA(7.4)))],
+    [M.now - 0.15, 0.6, K(doc ? [L.ax - 180, yTip - 360, L.ax + 180, yTip - 30] : [L.ax - 200, yTip - 290, L.ax + 200, yTip + 40], 2.2)], // 9:16: ống đặt cao để mép dưới khung nằm trên đỉnh vũng (vũng cao 185 px) // "Now add soap": cận ống nhỏ giọt vừa trượt vào (vũng ra ngoài khung, không bị cắt)
     [M.deeper - 0.1, 0.8, K(noi(hop(bVungA(8), bOng(8), [L.ax - W2 / 2 - 6, L.ban - hmm(7) - 8, L.ax + W2 / 2 + 6, L.ban]), 0, 0, 170, 0))],
     [ti, 0.5, K(noi(bVungA(ti), 10, 60, 10, 10), 2.0), "power3.out"], // giọt chạm mặt: dí máy vào vũng
     [ti + 0.6, 1.3, K(nhomA(ti + 2.2)), "power2.out"], // vũng loang: máy lùi theo
@@ -251,6 +251,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     [M.all - 0.2, 0.9, K(noi(nhomB3, 40, 40, 40, 20))],
     [M.warming - 0.2, 1.2, K(nhomC(M.warming + 2)), "power3.inOut"],
     [M.barely - 0.2, 0.8, K(nhomCL(M.barely), 2.0)],
+    [M.puddle4 - 0.2, 0.6, K(nhomC(M.puddle4)), "power3.inOut"], // "the puddle": lùi ra thấy cả hai vũng (đổi hình rõ giữa hai cận cảnh)
     [M.becomes - 0.25, 0.9, K(nhomCR(M.becomes), 2.0)],
     // c1 — vũng 25 °C biến thành vũng SDS; đọc từng vũng; thước so chênh 1.57 mm; mũi tên sức căng trên vũng SDS
     [tC - 0.2, 1.0, K(nhomC(tC + 0.6)), "power3.inOut"],
