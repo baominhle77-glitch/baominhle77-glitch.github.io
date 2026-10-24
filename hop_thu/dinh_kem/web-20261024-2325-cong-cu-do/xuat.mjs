@@ -1,0 +1,20 @@
+import { chromium } from "/opt/node22/lib/node_modules/playwright/index.mjs";
+import http from "node:http"; import fs from "node:fs"; import path from "node:path";
+const root = "/home/user/baominhle77-glitch.github.io/video-mo-phong";
+const types = { ".js": "text/javascript", ".html": "text/html", ".woff2": "font/woff2", ".json": "application/json", ".mp3": "audio/mpeg" };
+const srv = http.createServer((q, r) => { const f = path.join(root, decodeURIComponent(q.url.split("?")[0])); try { const b = fs.readFileSync(f); r.writeHead(200, { "content-type": types[path.extname(f)] || "application/octet-stream" }); r.end(b); } catch { r.writeHead(404); r.end(); } }).listen(8793);
+const [kho, giay, outFile] = [process.argv[2], Number(process.argv[3]), process.argv[4]];
+const b = await chromium.launch(); const p = await b.newPage();
+p.on("console", m => { if (m.type() === "error") console.log("console:", m.text()); });
+await p.goto("http://localhost:8793/xuong.html");
+await p.waitForFunction(() => window.XUONG, null, { timeout: 20000 });
+await p.evaluate(() => window.XUONG.taiPhong());
+const t0 = Date.now();
+const r = await p.evaluate(async ({ kho, giay }) => {
+  const kq = await window.XUONG.xuatKho(kho, { thoiLuong: giay || undefined, giong: "macdinh" });
+  const u8 = new Uint8Array(kq.buffer); let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return { b64: btoa(s), codec: kq.codec, thongKe: kq.thongKe };
+}, { kho, giay });
+fs.writeFileSync(outFile, Buffer.from(r.b64, "base64"));
+console.log(JSON.stringify({ codec: r.codec, ...r.thongKe, wall_s: (Date.now() - t0) / 1000 }));
+await b.close(); srv.close();
