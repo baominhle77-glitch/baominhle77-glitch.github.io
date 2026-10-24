@@ -4,8 +4,8 @@
 
 ## GPT 25/10: sửa riêng món nợ A1
 
-- Nhánh `gpt/k1t2-tiep-01`: thêm câu hỏi “Will soap flatten the puddle?” trong 0,6–4,6 s bằng tiêu đề động sẵn có cho 16:9 và 9:16. Giữ nguyên giọng, mốc lời, camera và logic mô phỏng; chưa xử lý B2.
-- **Chưa kiểm bằng trình duyệt:** GĐ chạy `node video-mo-phong/qa-tools/kiem_truoc.mjs` rồi `node video-mo-phong/qa-tools/kiem_cat_vat.mjs`; phản hồi lỗi để sửa cục bộ. Chưa xuất video/QA mới.
+- **Vòng 2:** GĐ chạy `kiem_cat_vat.mjs`: 0 lỗi cả 2 khổ; `kiem_truoc.mjs`: chỉ TRƯỢT chữ chồng ở 2,5–4,5 s do câu A1 (SHA `c39c1a9`). Thu riêng câu A1 về **0,1–2,4 s**, tắt stagger riêng câu này: vào đủ sau 0,35 s, đọc trọn từ 0,45–2,05 s (1,6 s), ra trước nhãn thước và nhãn nước; giữ vị trí y=420 (16:9)/640 (9:16). Không đổi giọng, camera, vật, các tiêu đề khác hoặc B2.
+- **Chờ GĐ kiểm vòng 2:** chạy `node video-mo-phong/qa-tools/kiem_truoc.mjs` và `node video-mo-phong/qa-tools/kiem_cat_vat.mjs`. Chưa có kết quả kiểm vòng 2, chưa xuất video/QA mới.
 
 **Cập nhật:** 25/10/2026 01:02 GMT+7 — Claude Code (session_0129 "web hiennhi") — ĐÃ NỘP bản C13
 

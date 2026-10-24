@@ -535,7 +535,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   const beatTai = (t) => [...LOI].reverse().find((b) => t >= b.bd) || LOI[0];
   const TD = F.tieuDe;
   const TIEU_DE = [
-    ["Will soap flatten the puddle?", 0.6, 4.6, doc ? TD.y : 420], // A1: câu hỏi tò mò trong 0–5 s
+    ["Will soap flatten the puddle?", 0.1, 2.4, doc ? TD.y : 420, 0], // A1: đọc trọn câu ≥ 1,5 s trước nhãn đo
     ["deeper, or shallower?", M.deeper, ti + 0.5, doc ? TD.y : 420],
     ["less pull, longer-lived film?", M.how, tX - 0.35, doc ? TD.y : 200],
     ["barely changes", M.barely, doc ? M.becomes - 0.3 : tC - 0.25, doc ? 575 : TD.y],
@@ -551,7 +551,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       const roi = sau ? ra(t, sau.bd, 0.3) : 1;
       const nhan = b.id === "h4" && t > M.inferred - 0.1 ? 0 : -1;
       veNguon(rc, NGUON[b.id], { x: F.nguon.x, y: F.nguon.y, size: F.nguon.size, maxW: F.nguon.maxW, u: vao * roi, nhan });
-      for (const [txt, t0, t1, y] of TIEU_DE) veTieuDe(rc, txt, TD.x, y, { size: TD.size, t0, t1, phong });
+      for (const [txt, t0, t1, y, nhay] of TIEU_DE) veTieuDe(rc, txt, TD.x, y, { size: TD.size, t0, t1, phong, nhay });
     }
   });
 
