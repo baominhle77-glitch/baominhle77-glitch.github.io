@@ -15,7 +15,7 @@ Spec gốc + bản bổ sung (SPA nhiều màn, thiết kế cao cấp, PWA, AI 
 | 8. Động cơ luật sâu (js/insight.js, js/markdown.js) + MAU_GIAI.md (sinh bằng tools/mau-giai.mjs) + 3 ca test | xong |
 | 9. Mặt lá SVG riêng từng lá (js/cards.js) | xong |
 | 10. SPA hash router + các màn + thiết kế (index.html, css, js/app.js, js/views.js) | chưa |
-| 11. AI: Gemini mặc định, model dự phòng, JSON có cấu trúc, streaming, hỏi tiếp (js/ai.js) | chưa |
+| 11. AI: Gemini mặc định, dò model mạnh nhất + dự phòng 429/404, JSON có cấu trúc, streaming, hỏi tiếp (js/ai.js) | xong phần lõi; nối UI ở phần 10 |
 | 12. PWA (manifest, sw.js, icon) | chưa |
 | 13. Kiểm trình duyệt + Lighthouse | chưa |
 | 14. Sổ khoá + PR + merge + kiểm link | chưa |
