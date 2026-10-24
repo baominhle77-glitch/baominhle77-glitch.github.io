@@ -11,7 +11,7 @@ import { chiaCum, uocLuongMoc } from "../engine/phude.js";
 import {
   K1, rgba, so, veNen, taoBui, veBui, veBan, veVung, veThuocKep, veNhan, veMuiTenCang, veGiot,
   veDongRot, veBong, veNhietKe, veCan, veBinh, veVien, veVungPip, veNguon, veTieuDe, veToGiay,
-  veVignette, veBongDo, phanChieu, VIEN_MUC
+  veVignette, veBongDo, phanChieu, VIEN_MUC, veTheSDS
 } from "../kenh/k1.js";
 import { MOC_GIONG, BEATS } from "./k1t2_moc.js";
 
@@ -89,7 +89,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     all: moc("h4", "all"), degrees: moc("h4", "degrees"), warming: moc("h4", "warming"), barely: moc("h4", "barely"), becomes: moc("h4", "becomes"),
     five545: moc("h4", "five", 4),
     both: moc("c1", "both"), bench: moc("c1", "bench"), twentyC: moc("c1", "twenty"), plain: moc("c1", "plain"), sdsC: moc("c1", "sds"),
-    lower: moc("c1", "lower"), inC: moc("c1", "in"), only: moc("c1", "only")
+    lower: moc("c1", "lower"), calcC: moc("c1", "calculated"), inC: moc("c1", "in"), only: moc("c1", "only")
   };
   const ti = M.shallower - 0.15; // giọt xà phòng chạm mặt nước ngay trước chữ "Shallower"
   const T3 = Math.max(M.three, M.puddle + 0.8); // đọc số 3.86 khi camera đã tới thước kẹp
@@ -169,6 +169,11 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   giay.x = doc ? coc.x - giay.w / 2 : coc.x + coc.w / 2 + 70; giay.y = doc ? L.ban - coc.h - 320 - giay.h : L.ban - 400;
   const vaoG = (t) => layEase("power3.out")(kep((t - M.inferred + 0.1) / 0.6)); const raG = (t) => layEase("power2.in")(kep((t - M.that + 0.3) / 0.5));
   const xGiay = (t) => giay.x + (1 - vaoG(t)) * 1400 + raG(t) * 1400;
+  // thẻ phân tử SDS: trượt vào ở "a lab surfactant", trượt ra trước khi tờ bài báo vào cùng chỗ
+  const vaoT = (t) => layEase("power3.out")(kep((t - M.surfactant + 0.1) / 0.6)); const raT = (t) => layEase("power2.in")(kep((t - M.millimolar - 0.2) / 0.5));
+  const xThe = (t) => giay.x + (1 - vaoT(t)) * 1400 + raT(t) * 1400;
+  vat("thẻ phân tử SDS", (t) => (vaoT(t) > 0 && raT(t) < 1 ? [xThe(t) - 2, giay.y - 2, xThe(t) + giay.w + 12, giay.y + giay.h + 14] : null));
+  const bGiay = [giay.x, giay.y - 4, giay.x + giay.w + 12, giay.y + giay.h + 14];
   vat("tờ bài báo", (t) => (vaoG(t) > 0 && raG(t) < 1 ? [xGiay(t) - 2, giay.y - 2, xGiay(t) + giay.w + 12, giay.y + giay.h + 14] : null));
   const bCan = vat("cân", (t) => (t >= tX ? [xCanD - 132, L.ban - 76, xCanD + 132, L.ban + 8] : null));
   const bBinh = vat("bình 1 L", (t) => (t >= tX ? [xBinh - 154, L.ban - 304, xBinh + 154, L.ban + 8] : null));
@@ -183,10 +188,15 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   const hop = (...bs) => bs.filter(Boolean).reduce((a, c) => [Math.min(a[0], c[0]), Math.min(a[1], c[1]), Math.max(a[2], c[2]), Math.max(a[3], c[3])]);
   const noi = ([x0, y0, x1, y1], l, tr, p, d) => [x0 - l, y0 - tr, x1 + p, y1 + d];
   // zoom vừa khít (trừ 3 % cho trôi máy), tâm hộp đặt vào tâm vùng vật
-  const khung = (b, zMax = 2.2) => {
+  // dy: lệch tâm hộp theo chiều dọc (px màn hình) — các cú chỉnh khung liền nhau lệch xen kẽ ±D để mép bàn nhảy rõ (C13 mục 3)
+  const khung = (b, zMax = 2.2, dy = 0) => {
     const z = Math.min(zMax, (RW / (b[2] - b[0])) * 0.97, (RH / (b[3] - b[1])) * 0.97);
-    return { x: (b[0] + b[2]) / 2 - (RX - F.W / 2) / z, y: (b[1] + b[3]) / 2 - (RY - F.H / 2) / z, zoom: z };
+    const du = Math.max(0, (RH - (b[3] - b[1]) * z) / 2); // chỉ lệch trong phần vùng vật còn trống: hộp không ra khỏi vùng
+    const lech = Math.max(-du, Math.min(du, dy));
+    return { x: (b[0] + b[2]) / 2 - (RX - F.W / 2) / z, y: (b[1] + b[3]) / 2 - (RY + lech - F.H / 2) / z, zoom: z };
   };
+  const K = (b, zMax = 2.2) => ({ hop: b, zMax });
+  const D = doc ? 170 : 90;
   const camGoc = new Nut({ x: L.ax, y: L.camY, zoom: 1 });
   const cam = new Nut({
     x: (t) => tl.lay(camGoc, "x", t, camGoc.x) + Math.sin(t * 0.23) * 5,
@@ -208,47 +218,53 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   const LICH = [
     // h1 — mở bằng cận cảnh dòng rót + vũng (vật to giữa khung), lùi ra thấy thước kẹp, số đo 5.45 mm nảy lớn
     [0, 0, khung(noi(bVungA(1.2), 20, 170, 20, 0), 2.0), "set"],
-    [M.episode - 0.1, 1.6, khung(nhomA(2.6))],
-    [M.five - 0.25, 0.9, khung(noi(nhomA(3.2), 0, 30, 0, -10), 2.0)],
-    [M.however - 0.2, 1.0, khung(noi(hop(bVungA(6.6), bKepA(6.6)), 0, 230, 0, 0))],
-    [M.now - 0.15, 0.8, khung(hop(bVungA(7.4), bOng(7.4), bKepA(7.4)))],
-    [M.deeper - 0.1, 0.8, khung(noi(hop(bVungA(8), bOng(8), [L.ax - W2 / 2 - 6, L.ban - hmm(7) - 8, L.ax + W2 / 2 + 6, L.ban]), 0, 0, 170, 0))],
-    [ti, 0.5, khung(noi(bVungA(ti), 10, 60, 10, 10), 2.0), "power3.out"], // giọt chạm mặt: dí máy vào vũng
-    [ti + 0.6, 1.3, khung(nhomA(ti + 2.2)), "power2.out"], // vũng loang: máy lùi theo
+    [M.episode - 0.1, 1.6, K(noi(hop(bVungA(2.6), bKepA(2.6)), 40, doc ? 620 : 380, 40, 0)), "power3.inOut"], // rộng, chừa trời cho dòng rót
+    [M.five - 0.25, 0.9, K(noi(nhomA(3.2), 0, 30, 0, -10), 2.0)],
+    [M.however - 0.2, 1.0, K(noi(hop(bVungA(6.6), bKepA(6.6)), 40, doc ? 260 : 180, 40, 0))], // lần rót 2: lùi vừa, dòng rót chảy vào từ trên
+    [M.now - 0.15, 0.8, K(hop(bVungA(7.4), bOng(7.4), bKepA(7.4)))],
+    [M.deeper - 0.1, 0.8, K(noi(hop(bVungA(8), bOng(8), [L.ax - W2 / 2 - 6, L.ban - hmm(7) - 8, L.ax + W2 / 2 + 6, L.ban]), 0, 0, 170, 0))],
+    [ti, 0.5, K(noi(bVungA(ti), 10, 60, 10, 10), 2.0), "power3.out"], // giọt chạm mặt: dí máy vào vũng
+    [ti + 0.6, 1.3, K(nhomA(ti + 2.2)), "power2.out"], // vũng loang: máy lùi theo
     // h2 — sức căng: mũi tên cam dọc trọn mặt nước; hàng γ trên vũng; chiều sâu 3.86 mm
-    [M.cuts - 0.3, 0.9, khung(noi(hop(bVungA(M.cuts), bKepA(M.cuts)), 0, 60, 0, 0), 2.0)],
-    [M.seventy - 0.3, 0.9, khung(hop(bVungA(M.seventy), thanhG))],
-    [M.thirty - 0.2, 0.9, khung(noi(hop(bVungA(M.thirty), thanhG), 40, 20, 40, 60))],
-    [M.about - 0.1, 0.9, khung(noi(hop(bVungA(M.about), bKepA(M.about)), 0, 80, 0, 0), 2.0)],
-    [M.puddle - 0.15, 0.9, khung(nhomA(M.puddle + 1))],
-    [M.calculated - 0.2, 1.0, khung(noi(nhomA(M.calculated), 60, 120, 60, 20))],
+    [M.cuts - 0.3, 0.9, K(noi(hop(bVungA(M.cuts), bKepA(M.cuts)), 0, 60, 0, 0), 2.0)],
+    [M.seventy - 0.3, 0.9, K(hop(bVungA(M.seventy), bKepA(M.seventy), thanhG))],
+    [M.thirty - 0.2, 0.9, doc ? K(noi(hop(bVungA(M.thirty), bKepA(M.thirty)), 0, 40, 0, 0), 2.0) : K(noi(hop(bVungA(M.thirty), bKepA(M.thirty), thanhG), 40, 20, 40, 60))],
+    [M.about - 0.1, 0.9, K(noi(hop(bVungA(M.about), bKepA(M.about)), 0, 80, 0, 0), 2.0)],
+    [M.puddle - 0.15, 0.9, K(nhomA(M.puddle + 1))],
+    [M.calculated - 0.2, 1.0, K(noi(nhomA(M.calculated), 60, doc ? 700 : 420, 60, 20))], // chừa trời: bong bóng sắp mọc
+    [M.weaker - 0.2, 0.8, K(noi(hop(bVungA(M.weaker), bKepA(M.weaker)), 0, 60, 0, 0), 2.0)], // "weaker skin": sát mặt vũng
     // h3 — bong bóng mọc từ vũng SDS, máy nâng theo rồi dí vào riêng bong bóng, xuyên màng (match-cut sang h4)
-    [M.bubble - 0.3, 1.2, khung(hop(bVungA(M.bubble), bBong(M.bubble + 2.2)))],
-    [M.how - 0.05, 0.7, khung(noi(bBong(M.how + 0.7), 60, 60, 60, 60), 2.2)],
+    [M.bubble - 0.3, 1.2, K(hop(bVungA(M.bubble), bBong(M.bubble + 2.2)))],
+    [M.how - 0.05, 0.7, K(noi(bBong(M.how + 0.7), 60, 60, 60, 60), 2.2), "power3.inOut"],
     [M.more + 0.1, tX - M.more - 0.1, { zoom: 9 }, "power3.in"],
     // h4 — nhiệt kế (một nhiệt độ) → cốc SDS (+ tờ bài báo) → cân + bình (7.21 g/L) + nhiệt kế 25 °C → hai vũng
     [tX, 0, { ...khung(bNk(tX)), zoom: khung(bNk(tX)).zoom * 1.4 }, "set"],
-    [tX, 1.2, khung(noi(bNk(tX), 40, 40, 200, 0)), "expo.out"],
-    [M.temperature + 0.2, 1.0, khung(noi(bNk(tX), 120, 60, 120, 0), 1.6)],
-    [M.soap4 - 0.3, 1.0, khung(noi(bCoc(tX), 40, 40, 40, 0), 2.2)],
-    [M.surfactant - 0.3, 0.8, khung(noi(bCoc(tX), 100, 140, 100, 10), 2.2)],
-    [M.millimolar - 0.3, 0.9, khung(hop(bCoc(tX), [giay.x, giay.y, giay.x + giay.w + 12, giay.y + giay.h + 14]))],
-    [M.seven - 0.5, 1.0, khung(nhomB3)],
-    [M.grams - 0.25, 0.8, khung(hop(bCan(tX), bBinh(tX)), 2.2)],
-    [M.all - 0.2, 0.9, khung(noi(nhomB3, 40, 40, 40, 20))],
-    [M.warming - 0.2, 1.2, khung(nhomC(M.warming + 2))],
-    [M.barely - 0.2, 0.8, khung(nhomCL(M.barely), 2.0)],
-    [M.becomes - 0.25, 0.9, khung(nhomCR(M.becomes), 2.0)],
+    [tX, 1.2, K(noi(bNk(tX), 40, 40, 200, 0)), "expo.out"],
+    [M.temperature + 0.2, 1.0, K(noi(bNk(tX), 120, 60, 120, 0), 1.6)],
+    [M.soap4 - 0.3, 1.0, K(noi(bCoc(tX), 40, 40, 40, 0), 2.2), "power3.inOut"],
+    [M.surfactant - 0.2, 0.9, K(hop(bCoc(tX), bGiay))], // thẻ phân tử SDS trượt vào cạnh cốc
+    [M.millimolar + 0.75, 0.8, K(noi(bCoc(tX), 60, doc ? 260 : 120, 60, 10), 2.2)], // thẻ đã ra: dí vào mặt nước có lớp SDS
+    [M.inferred - 0.3, 0.9, K(hop(bCoc(tX), bGiay))], // tờ bài báo vào
+    [M.seven - 0.5, 1.0, K(nhomB3), "power3.inOut"],
+    [M.grams - 0.25, 0.8, K(hop(bCan(tX), bBinh(tX)), 2.2)],
+    [M.all - 0.2, 0.9, K(noi(nhomB3, 40, 40, 40, 20))],
+    [M.warming - 0.2, 1.2, K(nhomC(M.warming + 2)), "power3.inOut"],
+    [M.barely - 0.2, 0.8, K(nhomCL(M.barely), 2.0)],
+    [M.becomes - 0.25, 0.9, K(nhomCR(M.becomes), 2.0)],
     // c1 — vũng 25 °C biến thành vũng SDS; đọc từng vũng; thước so chênh 1.57 mm; mũi tên sức căng trên vũng SDS
-    [tC - 0.2, 1.0, khung(nhomC(tC + 0.6))],
-    [M.twentyC - 0.2, 0.8, khung(noi(nhomC(tC + 0.6), 40, 160, 40, 40))],
-    [M.plain - 0.2, 0.8, khung(nhomCL(M.plain), 2.0)],
-    [M.sdsC - 0.25, 0.9, khung(nhomCR(M.sdsC), 2.0)],
-    [M.lower - 0.2, 1.0, khung(noi(nhomC(M.lower), 0, 60, 0, 0))],
-    [M.inC - 0.2, 1.0, khung(noi(bVungR(M.inC), 30, 90, 30, 10), 2.0)]
+    [tC - 0.2, 1.0, K(nhomC(tC + 0.6)), "power3.inOut"],
+    [M.twentyC - 0.2, 0.8, K(noi(nhomC(tC + 0.6), 40, 160, 40, 40))],
+    [M.plain - 0.2, 0.8, K(nhomCL(M.plain), 2.0)],
+    [M.sdsC - 0.25, 0.9, K(nhomCR(M.sdsC), 2.0)],
+    [M.lower - 0.2, 1.0, K(noi(nhomC(M.lower), 0, 60, 0, 0))],
+    [M.calcC - 0.2, 0.8, K(noi(nhomCR(M.calcC), 0, 40, 0, 0), 2.0)],
+    [M.inC - 0.1, 1.0, K(noi(nhomC(M.inC), 0, doc ? 200 : 100, 0, 0))]
   ];
-  for (const [t0, dur, dich, e] of LICH) {
-    if (e === "set") datCam(t0, dich); else quay(t0, dur, dich, e);
+  // chỉnh khung trong cùng nhóm vật: 0,6 s power3.inOut (dứt khoát, đổi hình rõ); lia sang nhóm khác / easing riêng: giữ thời lượng ghi
+  let dau = 1;
+  for (const [t0, dur, dich0, e] of LICH) {
+    const dich = dich0.hop ? khung(dich0.hop, dich0.zMax, e ? 0 : (dau = -dau) * D) : dich0;
+    if (e === "set") datCam(t0, dich); else quay(t0, e ? dur : Math.min(dur, 0.6), dich, e);
   }
 
   // ===== Lớp nền: bụi sáng trôi (parallax thấp) =====
@@ -422,6 +438,9 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       veChu(rc, "our sketch", coc.x, coc.y - 16, { size: sz(rc, L.nhan * 0.7), italic: true, align: "center" });
       veNhan(rc, { x0: coc.x - coc.w * 0.2, y0: coc.y - coc.h * 0.5, x1: doc ? coc.x - 20 : coc.x - 150, y1: coc.y - coc.h - (doc ? 150 : 90), text: "soap here = SDS (lab surfactant)", u: u(t, M.soap4 + 0.2, 0.7) * ra(t, M.surfactant + 1.6, 0.3), size: sz(rc, L.nhan), align: doc ? "center" : "right" });
       veNhan(rc, { x0: coc.x + coc.w * 0.3, y0: yMat + 4, x1: doc ? coc.x + 30 : coc.x + 60, y1: coc.y - coc.h - (doc ? 150 : 110), text: "SDS 25.0 mM in water (inferred)", u: u(t, M.millimolar + 0.5, 0.7) * ra(t, M.seven - 0.6, 0.4), size: sz(rc, L.nhan), align: doc ? "center" : "left" });
+      if (vaoT(t) > 0 && raT(t) < 1) {
+        veTheSDS(rc, { x: xThe(t), y: giay.y, w: giay.w, h: giay.h, size: sz(rc, 23), dong: ["SDS molecule (our sketch)", "water-loving head", "oily tail"] });
+      }
       // tờ trích bài báo trượt vào khi lời nói "inferred from one paper's text"
       if (vaoG(t) > 0 && raG(t) < 1) {
         veToGiay(rc, {

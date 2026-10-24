@@ -94,13 +94,17 @@ export function veBui(rc, bui) {
 }
 
 // Mặt bàn: đường mép + mặt bàn tối dần + bóng phản chiếu mờ
+// Mặt bàn quang học tối hơn phông (lớp gần, C13 mục 6): mép sau có viền sáng mảnh, mặt bàn tối dần rồi giữ đều tới đáy khung
 export function veBan(rc, x0, x1, y, sau = 260) {
   const { ctx } = rc;
-  const g = ctx.createLinearGradient(0, y, 0, y + sau);
-  g.addColorStop(0, rgba(K1.MUC, 0.10)); g.addColorStop(1, rgba(K1.MUC, 0.02));
-  ctx.fillStyle = g; ctx.fillRect(x0, y, x1 - x0, sau);
-  ctx.strokeStyle = rgba(K1.MUC, 0.35); ctx.lineWidth = 2;
+  const sau2 = sau + 3000;
+  const g = ctx.createLinearGradient(0, y, 0, y + sau2);
+  g.addColorStop(0, rgba(K1.MUC, 0.26)); g.addColorStop(sau / sau2, rgba(K1.MUC, 0.15)); g.addColorStop(1, rgba(K1.MUC, 0.15));
+  ctx.fillStyle = g; ctx.fillRect(x0, y, x1 - x0, sau2);
+  ctx.strokeStyle = rgba(K1.MUC, 0.45); ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+  ctx.strokeStyle = rgba(K1.NEN_TREN, 0.5); ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x0, y + 2.5); ctx.lineTo(x1, y + 2.5); ctx.stroke();
 }
 
 // Mép vũng theo phương trình Young–Laplace 2D (vũng rộng, trọng lực + sức căng mặt).
@@ -223,6 +227,28 @@ export function veToGiay(rc, { x, y, w, h, dong, size, u = 1 }) {
     veChu(rc, s, x + size * 0.8, yy, { size: dam ? size * 1.05 : size, weight: dam ? 700 : 400, color: K1.MUC });
     yy += size * (i === 0 ? 1.7 : 1.35);
   });
+  ctx.restore();
+}
+
+// Thẻ hình phân tử SDS (hình minh hoạ của kênh): đầu ưa nước (cam, viền mực) + đuôi kỵ nước (mực, gấp khúc)
+export function veTheSDS(rc, { x, y, w, h, size, dong }) {
+  const { ctx } = rc;
+  ctx.save();
+  ctx.fillStyle = rgba(K1.MUC, 0.18); ctx.fillRect(x + 10, y + 12, w, h);
+  ctx.fillStyle = K1.NEN_TREN; ctx.fillRect(x, y, w, h);
+  ctx.strokeStyle = rgba(K1.MUC, 0.6); ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
+  veChu(rc, dong[0], x + size * 0.8, y + size * 1.5, { size: size * 1.05, weight: 700, color: K1.MUC });
+  const hx = x + w * 0.2; const hy = y + h * 0.62; const r = Math.min(w, h) * 0.1;
+  ctx.strokeStyle = K1.MUC; ctx.lineWidth = Math.max(3, r * 0.22); ctx.lineJoin = "round"; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(hx + r, hy);
+  const n = 10; const dx = (w * 0.68) / n;
+  for (let i = 1; i <= n; i++) ctx.lineTo(hx + r + i * dx, hy + (i % 2 ? -r * 0.45 : r * 0.45));
+  ctx.stroke();
+  const v = VIEN_MUC / (rc.zoom || 1);
+  ctx.fillStyle = K1.MUC; ctx.beginPath(); ctx.arc(hx, hy, r + v, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = K1.CANG; ctx.beginPath(); ctx.arc(hx, hy, r, 0, Math.PI * 2); ctx.fill();
+  veChu(rc, dong[1], hx - r, hy + r + size * 1.4, { size, color: K1.MUC });
+  veChu(rc, dong[2], hx + r + w * 0.34, hy - r - size * 0.7, { size, color: K1.MUC, align: "center" });
   ctx.restore();
 }
 

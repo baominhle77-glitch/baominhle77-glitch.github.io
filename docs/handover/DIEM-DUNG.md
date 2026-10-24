@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 23:41 GMT+7 — Claude Code (session_01357, phiên chính theo thư GĐ gd-20261024-2332)
+**Cập nhật:** 24/10/2026 23:53 GMT+7 — Claude Code (session_01357, TẠM DỪNG theo thư GĐ gd-20261024-2348)
 
 ## Việc đang làm
 
@@ -31,7 +31,21 @@
 
 ## Trạng thái
 
-- **24/10/2026 23:41 — ĐANG LÀM `EDU-20261024-09`** (thư GĐ `hop_thu/gd-20261024-2332-c13-toan-van-va-tra-loi.md` trên nhánh `studio-hop-thu`, mục 5): dựng lại k1t2 một lần đủ C13 10 mục + màu v2 + viền mực 2 px quanh cam + vignette 22 %. Hộp thư CHỐT là nhánh `studio-hop-thu` (repo riêng tư bỏ). Đã code: khung máy theo hộp bao nhóm vật (`F.vat`, sổ `VAT`), ống nhỏ giọt trọn vẹn, thước kẹp theo mép vũng, hai vũng cùng một bàn, phân tử SDS lên mặt nước, bóng đổ + phản chiếu, vignette multiply (`veVignette`), phụ đề hiện cả cụm + quầng sáng, nguồn đậm 600. Bộ kiểm cắt vật: 0 lỗi cả 2 khổ. **Còn:** đo pixel-diff (mục 3), xuất 2 khổ có tiếng, dựng `qa/<phien_ban>/` + tự chấm 10 mục, gửi thư `web-…-nop-….md`. Công cụ tạm ở scratchpad (chup.mjs, kiemcat.mjs) — sẽ chép vào `video-mo-phong/qa-tools/`.
+- **24/10/2026 23:53 — `EDU-20261024-09` TẠM DỪNG ở session_01357; khoá đã chuyển cho session_0129** (thư GĐ `gd-20261024-2348`: dùng hết limit nick Nhi trước; 01357 chỉ chạy lại khi GĐ nhắn hoặc có thư `web-…-drop.md` của 0129). Việc: dựng lại k1t2 một lần đủ C13 10 mục + màu v2 + viền mực 2 px + vignette 22 % (thư `gd-20261024-2332` mục 5; hộp thư = nhánh `studio-hop-thu`).
+  - **XONG trong mã** (`video-mo-phong/bai/k1t2_60s.js`, `kenh/k1.js`, `engine/phude.js`, `engine/canh.js`):
+    - Mục 1–2: mỗi cú máy đóng khung trọn một nhóm vật (`khung()` + vùng `F.vat`); sổ `VAT` (hộp bao thế giới theo t); các nhóm vật trên bàn cách xa nhau; ống nhỏ giọt trọn vẹn; thước kẹp đi theo mép vũng; hai vũng c1 trên CÙNG một bàn (bỏ kệ xếp chồng 9:16); bong bóng 9:16 bay cao 660. **Bộ kiểm cắt vật: 0 lỗi cả 2 khổ.**
+    - Mục 3: chỉnh khung trong cùng nhóm 0,6 s power3.inOut, lệch dọc xen kẽ ±D (`D` 90/170 px), mặt bàn đậm hơn; thẻ "SDS molecule (our sketch)" ở "a lab surfactant"; phân tử SDS bơi lên xếp hàng ở mặt nước. **Đo nhanh 4 fps (khung JPEG, chưa nén video): 16:9 khoảng dài nhất 4,5 s từ 2,5 s — CÒN TRƯỢT; 9:16 4,25 s từ 34,25 s — CÒN TRƯỢT.** Các khoảng > 3 s: 16:9 từ 2,5 / 7,0 / 55,25 / 58,75 s; 9:16 từ 7,0 / 34,25 / 58,75 s.
+    - Mục 6: bóng đổ + phản chiếu (`veBongDo`, `phanChieu`) cho thước kẹp, nhiệt kế, cốc, cân, bình.
+    - Mục 7: phụ đề hiện cả cụm 2–5 từ, không mờ dần; hộp mực + quầng sáng 12 px (NEN_TREN) để hộp luôn ≥ 4,5:1 so với nền quanh nó (chưa đo trên khung).
+    - Mục 8: dòng nguồn 24 px, đậm 600.
+    - Mục 10: viền mực 2 px quanh mũi tên cam, thanh γ, đầu phân tử, gạch chân phụ đề, thẻ phân tử; dải giao thoa bong bóng bỏ màu cam; vignette mới `veVignette` (multiply, `MUC_VIGNETTE` 0,78) thay vignette cũ trong `veNen`, áp cả vùng PiP. **Chưa đo tỉ lệ sáng mép/giữa.**
+  - **CÒN LẠI (theo thứ tự):**
+    1. Sửa 2 khoảng > 4 s: 16:9 2,5–7,0 s (cú `however` đổi chưa đủ: thử chừa trời nhiều hơn hoặc tăng D); 9:16 34,25–38,5 s (cú `millimolar + 0.75`). Để dư biên vì video nén đo thấp hơn 0,5–1 điểm %.
+    2. Đo vignette mép/giữa ≈ 0,78, chỉnh `MUC_VIGNETTE`.
+    3. Soát tờ ghép bằng mắt: vị trí tiêu đề 9:16 (`TIEU_DE`), nhãn có bị đè không.
+    4. Xuất 2 khổ có tiếng: `window.XUONG.xuatKho(kho, { giong: "macdinh" })`. Dựng `qa/<YYYYMMDD-HHMM>_k1t2_c13/` bằng `qa-tools/bo_dan_chung.py`, kèm `tu_cham.md` 10 mục C13 (mỗi mục ghi mốc giây/khung).
+    5. Gửi thư `hop_thu/web-…-nop-<phien_ban>.md` kèm SHA, rồi đóng `EDU-20261024-09`.
+  - **Lệnh chạy lại:** ở gốc repo chạy `python3 -m http.server 8765 --bind 127.0.0.1 &`, rồi `node video-mo-phong/qa-tools/kiem_cat_vat.mjs`. Đo nhịp: `node video-mo-phong/qa-tools/chup_khung.mjs /tmp/f16 16x9 4 & node video-mo-phong/qa-tools/chup_khung.mjs /tmp/f9 9x16 4; wait; python3 video-mo-phong/qa-tools/nhip_nhanh.py /tmp/f16; python3 video-mo-phong/qa-tools/nhip_nhanh.py /tmp/f9`. Chi tiết trong `qa-tools/README-C13.md`.
 
 - **24/10/2026 23:20 — CẢNH BÁO hộp thư:** lệnh GĐ mới nhất (qua BaoMinh) nói hộp thư là **repo riêng tư** `baominhle77-glitch/studio-hop-thu` (nhánh main), khác với dòng EDU-20261024-08 bên dưới (nhánh `studio-hop-thu` trong repo này). Phiên cloud `session_01357…` thử: `git clone` repo riêng tư báo `could not read Username` (chưa cấp cho môi trường cloud), `add_repo` bị chặn quyền → đã báo `KHONG_VAO_DUOC_HOP_THU`. Khi vào được: đọc `README.md` + `hop_thu/gd-20261024-2320-mo-hop-thu.md`; C13 đủ 9 điều, màu K1 v2 #3F6A9E/#D1834F, vignette K1 22 %; nộp = push qa/ ở nhánh này rồi gửi `hop_thu/web-YYYYMMDD-HHMM-<chu-de>.md` kèm SHA; thư đầu kèm ý kiến về hộp thư; sắp hết limit gửi `web-...-drop.md`. **Có 2 phiên cloud cùng đẩy nhánh này** — luôn `git fetch` trước khi push.
 
