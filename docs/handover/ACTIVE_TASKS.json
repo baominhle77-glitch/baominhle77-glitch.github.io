@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-24T03:05:00+07:00",
+  "updated_at": "2026-10-24T16:15:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -39,6 +39,26 @@
       "started_at": "2026-07-25T13:35:00+07:00",
       "heartbeat_at": "2026-07-25T16:45:00+07:00",
       "summary": "Hotfix link ACCESSTRADE: chỉ sàn Việt Nam, tái tạo deeplink, chặn link lỗi, nhóm nhiều nơi bán thật, phân loại danh mục mạnh nhất, chống trùng toàn catalog và thanh lọc toàn bộ affiliate link cũ."
+    },
+    {
+      "id": "EDU-20261024-04",
+      "owner": "Claude Code",
+      "branch": "claude/pensive-lovelace-96zjk7",
+      "base_sha": "d854939f1c5899f1ad555ea148bd65d8d3ed71df",
+      "paths": [
+        ".claude/skills/**",
+        "CLAUDE.md",
+        "docs/hoc_tu_ma_nguon.md",
+        "video-mo-phong/**",
+        "qa/**",
+        "docs/handover/VIDEO_MO_PHONG.md",
+        "docs/handover/DIEM-DUNG.md",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-10-24T16:15:00+07:00",
+      "heartbeat_at": "2026-10-24T16:15:00+07:00",
+      "summary": "Lenh GD Studio gd-20261024-1220 (Chu tich duyet): skill chat luong, hoc ma nguon mo, kien truc timeline+scene graph+WebCodecs, bai thi 60s K1 hai kho + qa/."
     }
   ],
   "recently_completed": [

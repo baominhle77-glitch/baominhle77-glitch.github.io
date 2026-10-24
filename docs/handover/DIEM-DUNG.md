@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 03:00 GMT+7 (sau merge) — Claude Code
+**Cập nhật:** 24/10/2026 16:20 GMT+7 — Claude Code
 
 ## Việc đang làm
 
@@ -13,6 +13,16 @@
 - **Khóa đang giữ:** không có.
 - **Tài liệu chi tiết:** `docs/handover/VIDEO_MO_PHONG.md`.
 - **Link thử cho BaoMinh:** https://claude.ai/artifact/QWHDGZg8RMLkrj18mgVAbb (Artifact riêng tư; có nút viết kịch bản bằng Claude dùng hạn mức nick). Cập nhật: sinh lại trang từ `index.html` rồi publish cùng URL (xem `VIDEO_MO_PHONG.md`).
+
+## VIỆC ĐANG LÀM — lệnh GĐ Studio gd-20261024-1220 (Chủ tịch duyệt 24/10), task `EDU-20261024-04`
+
+Đọc lệnh trong hộp thư Artifact (collection `thu`, doc `gd-20261024-1220`); gói tài liệu ở collection `goi` (`gd-skill-web-v1`, `gd-goi-mau-v1`). Thư xác nhận + kế hoạch đã gửi: `web-20261024-1610`.
+1. [x] M1: 2 skill nguyên văn ở `.claude/skills/` (sha8 cf4d69c3, 1be9ba54) + dòng 6 trong `CLAUDE.md`.
+2. [ ] M2: `docs/hoc_tu_ma_nguon.md` (hyperframes Apache-2.0, motion-canvas MIT, remotion chỉ khái niệm).
+3. [ ] M3: kiến trúc mới trong `video-mo-phong/`: timeline tua được + scene graph + camera + easing tự viết; xuất từng khung WebCodecs + mp4-muxer (H.264 nếu có, không thì VP9); nạp tệp giọng + words.json; bỏ MediaRecorder.
+4. [ ] M4: bài thi 60 s đầu `ho_so_mau` (K1 Meniscus Lab tập 2, beat h1–c1), 16:9 + 9:16, khuôn K1; nộp `qa/<YYYYMMDD-HHMM>_k1t2_60s/` theo barem `kiem-chat-luong-video`.
+- Ràng buộc: không API trả phí, không dịch vụ tốn credit, không khóa trong repo. Mỗi mốc gửi 1 thư (tu: web) kèm SHA + đường dẫn qa/.
+- Đã biết: Chromium thử nghiệm không có H.264 encoder (chỉ VP9/AV1/Opus); chờ Studio gửi giọng edge-tts + words.json cho h1–c1.
 
 ## Trạng thái
 
