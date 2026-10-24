@@ -1,8 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-25T00:10:00+07:00",
+  "updated_at": "2026-10-25T00:20:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
+    {
+      "id": "CHOICE-20261025-01",
+      "owner": "Claude Code (session_01357)",
+      "branch": "agent/CHOICE-20261025-01-dong-khoa",
+      "base_sha": "fc0fb2bbeaa7dd511a730121831589610888f7e0",
+      "paths": [
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-25T00:22:00+07:00",
+      "heartbeat_at": "2026-10-25T00:25:00+07:00",
+      "completed_at": "2026-10-25T00:25:00+07:00",
+      "summary": "Ghi kết quả deploy của CHOICE-20261024-01 (#134) và đóng khoá; chỉ tài liệu bàn giao."
+    },
     {
       "id": "CHOICE-20261024-01",
       "owner": "Claude Code (session_01357)",
@@ -56,13 +72,12 @@
         "tools/submit-indexnow.mjs",
         "docs/handover/PRODUCTION_STATUS.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-10-24T23:58:00+07:00",
-      "heartbeat_at": "2026-10-25T00:10:00+07:00",
-      "summary": "Xoá hẳn Hội Chọn Đúng theo yêu cầu BaoMinh 24/10/2026: thư mục app, backend choice*, tools choice*, 4 workflow choice, bước build/deploy/hậu kiểm choice, cron 5 phút (crons = [] để gỡ trên Cloudflare), robots/sitemap, tài liệu bàn giao riêng."
-    }
-  ],
-  "recently_completed": [
+      "heartbeat_at": "2026-10-25T00:20:00+07:00",
+      "summary": "Xoá hẳn Hội Chọn Đúng theo yêu cầu BaoMinh 24/10/2026: thư mục app, backend choice*, tools choice*, 4 workflow choice, bước build/deploy/hậu kiểm choice, cron 5 phút (crons = [] để gỡ trên Cloudflare), robots/sitemap, tài liệu bàn giao riêng. | Đã gộp PR #134 (46d3029), deploy production SUCCESS run 40114714384: Worker không còn route/cron choice, Pages không còn /hoi-chon-dung/; Bói toán, cộng đồng, MEDORA, Vietnam Travel vẫn đạt hậu kiểm.",
+      "completed_at": "2026-10-25T00:20:00+07:00"
+    },
     {
       "id": "GROWTH-20260725-04",
       "owner": "ChatGPT GPT-5.6 Thinking",
