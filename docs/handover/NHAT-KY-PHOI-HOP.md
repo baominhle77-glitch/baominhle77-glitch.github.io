@@ -22,6 +22,14 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-25 00:25 GMT+7 — Claude Code — CHOICE-20261025-01 (đóng CHOICE-20261024-01) — đã deploy, đóng khoá
+- PR #134 gộp vào `main` bằng squash: `46d3029` (BaoMinh duyệt "gộp đi", yêu cầu không ảnh hưởng các web còn lại).
+- Deploy production run `40114714384`: SUCCESS. Worker `hiennhi89-gate` version `4d61ebf4-…`, dòng `triggers` không còn lịch: cron 5 phút đã gỡ. Pages deployment `0cccb836`. Hậu kiểm đạt lần 1: Bói toán, gate, cộng đồng admin health (`config_ok`, `crypto_ok`, `decrypt_key_configured`), xác minh Google/Bing; `/hoi-chon-dung/` không còn nội dung app; `/api/choice/health` trả `not_found`.
+- Workflow sau deploy trên `46d3029`: E2E Reader production, Xác minh Bói toán V11, Ghi kết quả deploy, Materialize Vietnam Travel V2, Coordination, Auto Handover, GitHub Pages: đều SUCCESS.
+- "Xác minh Admin V8 production" FAIL — **lỗi có sẵn, không do task này**: trượt liên tục từ 25/07/2026 (các run 30170731849 … 40094670095). Bộ xác minh còn chờ `auth_version` `2026-07-23-v8` trong khi production đã là `2026-07-24-v11`; health production vẫn đạt. Cần một task riêng để cập nhật `verify-admin-v8-production.yml` (chưa làm).
+- Khoá `CHOICE-20261024-01` chuyển `completed`.
+- Còn lại cho chủ (ngoài repo): xoá Worker secret `ACCESSTRADE_API_TOKEN`, `CHOICE_AUTOPILOT_TRIGGER`, `CHOICE_BOOTSTRAP_EXPECTED_SHA256`; khoá KV `choice:*`; GitHub secret `GOOGLE_SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON`; sitemap `/hoi-chon-dung/sitemap.xml` ở Google Search Console/Bing.
+
 ### 2026-10-25 00:10 GMT+7 — Claude Code — CHOICE-20261024-01 — xoá hẳn Hội Chọn Đúng (BaoMinh yêu cầu, cấp toàn quyền)
 - Nhánh `agent/CHOICE-20261024-01-xoa-hoi-chon-dung` (từ `main` 9e43a78); PR nháp chờ BaoMinh duyệt gộp.
 - Xoá: `hoi-chon-dung/**`, `backend/choice*.js|mjs` (12 tệp), `tools/*choice*` (15 tệp), `tools/submit-indexnow.mjs`, `tools/submit-google-sitemap.mjs`, 4 workflow `choice-*`/`record-choice-*`/`validate-choice-*`, tài liệu `CHOICE_AUTOPILOT_STATUS.md`, `CHOICE_GROWTH_AUTOPILOT.md`, `CHOICE_OWNER_SETUP.md`, `HOI_CHON_DUNG.md`.
