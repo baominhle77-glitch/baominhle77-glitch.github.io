@@ -131,7 +131,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   // Bộ C (h4 cuối) và c1. 16:9: hai vũng cạnh nhau, thước kẹp ở hai phía ngoài, nhiệt kế ở khe giữa.
   // 9:16: hai kệ xếp chồng (20 °C trên, 25 °C/SDS dưới) — dùng chiều dọc, vũng rộng; thước kẹp bên trái mỗi vũng
   const hmC = (mm) => mm * L.pxmC; const wc = L.wc;
-  const xL = doc ? xC : xC - 430; const xR = doc ? xC : xC + 400;
+  const xL = doc ? xC + 150 : xC - 430; const xR = doc ? xC : xC + 400;
   const yL = doc ? L.ban - 400 : L.ban; const yR = L.ban;
   const wSDS = (wc * hmC(VUNG.nuoc25)) / hmC(VUNG.sds25);
   const xkL = xL - wc / 2 - 36; const xkR0 = doc ? xR - wc / 2 - 36 : xR + wc / 2 + 36; const xkR1 = doc ? xR - wSDS / 2 - 36 : xR + wSDS / 2 + 36;
@@ -180,16 +180,16 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     [M.seven - 0.6, 1.0, { x: xCan, y: L.ban - 260, zoom: 1.2 }],
     [M.grams - 0.25, 0.8, { x: xCan - 150, y: L.ban - 60, zoom: 2.1 }],
     [M.all - 0.2, 0.9, { x: xCan + 60, y: L.ban - 300, zoom: 1.05 }],
-    [M.warming - 0.2, 1.2, { x: xC, y: L.ban - 230, zoom: 0.95 }],
+    [M.warming - 0.2, 1.2, { x: xC + 20, y: L.ban - 260, zoom: 0.92 }],
     [M.barely - 0.2, 0.8, { x: xkL + 200, y: yL - 40, zoom: 1.45 }],
     [M.becomes - 0.25, 0.9, { x: xkR0 + 200, y: yR - 120, zoom: 1.45 }],
     // c1
-    [tC - 0.2, 1.0, { x: xC, y: L.ban - 230, zoom: 0.95 }],
-    [M.twentyC - 0.2, 0.8, { x: xC + 200, y: yL - 40, zoom: 1.4 }],
+    [tC - 0.2, 1.0, { x: xC + 20, y: L.ban - 260, zoom: 0.92 }],
+    [M.twentyC - 0.2, 0.8, { x: xC - 20, y: L.ban - 200, zoom: 1.05 }],
     [M.plain - 0.2, 0.8, { x: xkL + 200, y: yL - 40, zoom: 1.45 }],
-    [M.sdsC - 0.25, 0.9, { x: xkR1 + 300, y: yR - 150, zoom: 1.3 }],
-    [M.lower - 0.2, 1.0, { x: xC, y: L.ban - 230, zoom: 0.95 }],
-    [M.inC - 0.2, 0.6, { x: xR + wSDS / 2 - 100, y: yR - 60, zoom: 2.1 }]
+    [M.sdsC - 0.25, 0.9, { x: xC - 190, y: yR - 100, zoom: 1.3 }],
+    [M.lower - 0.2, 1.0, { x: xC + 20, y: L.ban - 260, zoom: 0.92 }],
+    [M.inC - 0.2, 0.6, { x: xR + wSDS / 2 - 100, y: yR + 10, zoom: 2.1 }]
   ] : [
     // h1
     [0, 0, { x: xRot + 60, y: L.ban - 130, zoom: 1.9 }, "set"],
@@ -407,8 +407,8 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       const uM = layEase("power3.inOut")(kep((t - tC) / 0.6));
       const hL = lerp(hmC(VUNG.nuoc20), hmC(VUNG.nuoc25), uM); const hR = lerp(hmC(VUNG.nuoc25), hmC(VUNG.sds25), uM); const wR = (wc * hmC(VUNG.nuoc25)) / hR;
       if (doc) { // kệ trên
-        veBan(rc, xC - 430, xC + 430, yL, 70);
-        ctx.save(); ctx.fillStyle = rgba(K1.MUC, 0.22); ctx.fillRect(xC - 430, yL, 860, 12); ctx.restore();
+        veBan(rc, xC - 200, xC + 460, yL, 70);
+        ctx.save(); ctx.fillStyle = rgba(K1.MUC, 0.22); ctx.fillRect(xC - 200, yL, 660, 12); ctx.restore();
       }
       const cap = [[xL, yL, wc, hL, uM < 0.5 ? "20 °C" : "25 °C", lerp(VUNG.nuoc20, VUNG.nuoc25, uM), false], [xR, yR, wR, hR, "25 °C", lerp(VUNG.nuoc25, VUNG.sds25, uM), !doc]];
       const docSoK = []; // vị trí số đọc của từng thước (để đặt nhãn c1)
@@ -416,13 +416,17 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
         veVung(rc, { cx, y: yb, w: ww, h: hh });
         veChu(rc, nhan, cx, yb + (doc ? 50 : 60), { size: sz(rc, L.nhan), weight: 600, align: "center" });
         const xk = phai ? cx + ww / 2 + 36 : cx - ww / 2 - 36;
+        // 9:16: khi máy tập trung kệ dưới, số đọc kệ trên (đang ở mép trên khung, dưới dòng nguồn) tạm ẩn
+        const anTren = doc && i === 0 ? ra(t, M.becomes - 0.2, 0.3) + u(t, tC + 0.5, 0.4) * ra(t, M.sdsC - 0.2, 0.3) + u(t, M.lower + 0.6, 0.4) : 1;
         const uk = u(t, M.warming + 1.0 + i * 0.5, 0.5);
         veThuocKep(rc, { x: xk, y: yb, h: hh, cao: hmC(7.5), u: uk, phai });
         const xs = doc ? xk + 24 : xk; const ys = yb - hmC(7.5) - 18;
         docSoK.push([xs, ys]);
-        if (uk > 0) {
+        if (uk > 0 && anTren > 0.01) {
+          ctx.save(); ctx.globalAlpha *= Math.min(1, anTren);
           const dem = t < tC ? khoang(t, M.warming + 1.0 + i * 0.5, M.warming + 1.8 + i * 0.5, 0, mm, "expo.out") : mm;
           veChu(rc, so(dem) + " mm", xs, ys, { size: sz(rc, L.so * 0.9), weight: 600, align: doc ? "left" : "center" });
+          ctx.restore();
         }
       });
       const uW = u(t, M.warming + 0.9, 0.6) * ra(t, M.barely - 0.2, 0.3);
@@ -430,7 +434,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       // c1: nhiệt kế chung, nhãn đọc số, thước so chênh 1.57 mm
       if (t > tC + 0.3) {
         const pop = layEase("back.out(1.4)")(kep((t - M.twentyC + 0.1) / 0.5)) * ra(t, M.inC - 0.1, 0.3);
-        if (pop > 0) {
+        if (pop > 0 && !doc) { // 9:16: nhãn "25 °C" dưới mỗi vũng đã đủ, khung dọc không còn chỗ cho nhiệt kế
           const xm = doc ? xTh : xTh - 14; const ym = doc ? yL : L.ban;
           ctx.save(); ctx.translate(xm, ym); ctx.scale(pop, pop); ctx.translate(-xm, -ym);
           veNhietKe(rc, { x: xm, y: ym - 20, h: doc ? 200 : 220, gia: 25, size: L.nhan * 0.6 });
@@ -485,7 +489,7 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
     ["deeper, or shallower?", M.deeper, ti + 0.5, doc ? TD.y : 420],
     ["less pull, longer-lived film?", M.how, tX - 0.35, doc ? TD.y : 200],
     ["barely changes", M.barely, doc ? M.becomes - 0.3 : tC - 0.25, doc ? 575 : TD.y],
-    ["both at 25 °C", doc ? M.twentyC + 0.4 : M.bench, M.plain - 0.25, doc ? 575 : TD.y],
+    ["both at 25 °C", doc ? M.twentyC + 0.4 : M.bench, M.plain - 0.25, doc ? 1300 : TD.y],
     ["only the skin changes", M.only, THOI_LUONG, doc ? 1262 : 880]
   ];
   const man = new Nut({

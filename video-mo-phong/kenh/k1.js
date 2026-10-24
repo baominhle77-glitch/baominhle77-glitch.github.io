@@ -393,6 +393,13 @@ export function veNguon(rc, dong, { x, y, size = 20, u = 1, nhan = -1, maxW = 99
   if (u <= 0) return;
   ctx.save();
   ctx.globalAlpha *= layEase("power2.out")(kep(u));
+  // nền mờ mềm sau dòng nguồn (không viền, không góc): đọc được trên điện thoại kể cả khi vật thể đi qua phía sau
+  let soDong = 0; let rongMax = 0;
+  dong.forEach((s) => catDong(rc, s, size, maxW).forEach((d) => { soDong++; rongMax = Math.max(rongMax, doChu(rc, d, size)); }));
+  const cao = soDong * size * 1.28 + dong.length * size * 0.25;
+  const g = ctx.createLinearGradient(x - rongMax - 40, 0, x + 24, 0);
+  g.addColorStop(0, rgba(K1.NEN_TREN, 0)); g.addColorStop(0.18, rgba(K1.NEN_TREN, 0.78)); g.addColorStop(1, rgba(K1.NEN_TREN, 0.78));
+  ctx.fillStyle = g; ctx.fillRect(x - rongMax - 40, y - size * 1.1, rongMax + 64, cao + size * 0.6);
   let yy = y;
   dong.forEach((s, i) => {
     const sang = i === nhan;
