@@ -2,7 +2,7 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
-**Cập nhật:** 24/10/2026 19:05 GMT+7 — Claude Code
+**Cập nhật:** 24/10/2026 19:31 GMT+7 — Claude Code
 
 ## Việc đang làm
 
@@ -30,6 +30,8 @@
 - Đã biết: Chromium thử nghiệm không có H.264 encoder (chỉ VP9/AV1/Opus); chờ Studio gửi giọng edge-tts + words.json cho h1–c1.
 
 ## Trạng thái
+
+- **24/10 19:31 — task EDU-20261024-08:** GĐ Studio nhắn 3 việc qua BaoMinh. (1) Dừng khi sắp hết limit → `CLAUDE.md` mục 7. (2) Liên kết: **Chủ tịch chọn phương án A** → hộp thư `hop_thu/` trên nhánh `studio-hop-thu` (Web ghi `web-*.md`, GĐ ghi `gd-*.md`); đã gửi thư đầu `hop_thu/web-20261024-1931-lien-ket-va-c13.md`; chi tiết `docs/handover/LIEN_KET_STUDIO.md`. (3) Luật C13: đã đổi màu K1 v2 (xanh #3F6A9E, cam #D1834F) trong `video-mo-phong/kenh/k1.js`; **chưa có toàn văn 9 điều**, đã xin GĐ. Nhận đủ thì áp một lượt cho k1t2, xuất lại 2 khổ, nộp `qa/` mới. **Bước tiếp:** `git fetch origin studio-hop-thu`, đọc thư `gd-*.md` mới.
 
 - **24/10 tối:** trang soạn kịch bản rút còn 3 bước (EDU-20261024-07): ✨ Tạo video bằng Claude → bấm Copy trong Claude → quay lại tab là có video. Đang chờ BaoMinh quyết hướng "thư viện khối cảnh + kế hoạch cảnh JSON" cho Xưởng chất lượng cao.
 
