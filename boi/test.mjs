@@ -1,0 +1,200 @@
+// Chạy: node boi/test.mjs
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { buildMapping, commitHash, verifyLock, makeRng, shuffle, gmt7 } from "./js/core.js";
+import { parseDraw, parseCorrection, splitBySizes } from "./js/parser.js";
+import { createSession, addRound, applyCorrectionText, fixCell, errorsOf, reveal, exportJSON, importJSON, loadSessions, saveSessions } from "./js/state.js";
+import { spreadById, SPREADS } from "./js/spreads.js";
+import { moneyTable, periodEstimate, roundNice } from "./js/money.js";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+export const db = {
+  tarot: JSON.parse(readFileSync(join(HERE, "data/tarot.json"), "utf8")),
+  lenormand: JSON.parse(readFileSync(join(HERE, "data/lenormand.json"), "utf8")),
+};
+
+const tests = [];
+const test = (name, fn) => tests.push([name, fn]);
+const SEED = "0123456789abcdef".repeat(4);
+const T_IN = "T: 8 37 50 69/ 68 75 36 22/ 8 36 55 71";
+const L_IN = "Lenor: 22 25 27 29 / 10 20 25 21/ 11 23 26 34";
+
+test("dữ liệu đủ 78 + 36 lá, đủ trường", () => {
+  assert.equal(db.tarot.la.length, 78);
+  assert.equal(db.lenormand.la.length, 36);
+  assert.equal(db.lenormand.la[0].en, "Rider");
+  assert.equal(db.lenormand.la[35].en, "Cross");
+  for (const c of db.tarot.la) {
+    for (const k of ["en", "vi", "tu_khoa", "tien", "rui_ro", "loi_khuyen"]) assert.ok(c[k], `${c.en} thiếu ${k}`);
+    for (const k of ["tien_trinh", "hieu_qua", "ket_qua", "tin_hieu"]) assert.ok(c.vi_tri[k], `${c.en} thiếu vị trí ${k}`);
+    assert.ok(c.diem_tien >= -2 && c.diem_tien <= 2);
+  }
+  const names = new Set(db.lenormand.la.map((c) => c.en));
+  for (const k of Object.keys(db.lenormand.cap)) for (const p of k.split("+")) assert.ok(names.has(p), k);
+});
+
+test("xáo tất định theo seed, là hoán vị, hai bộ độc lập", async () => {
+  const a = await buildMapping(SEED, false);
+  const b = await buildMapping(SEED, false);
+  assert.deepEqual(a, b);
+  assert.deepEqual([...a.tarot].sort((x, y) => x - y), [...Array(78).keys()]);
+  assert.deepEqual([...a.lenormand].sort((x, y) => x - y), Array.from({ length: 36 }, (_, i) => i + 1));
+  const c = await buildMapping("f".repeat(64), false);
+  assert.notDeepEqual(a.tarot, c.tarot);
+  assert.equal(a.tarotRev, null);
+  const r = await buildMapping(SEED, true);
+  assert.deepEqual(r.tarot, a.tarot, "bật lá ngược không đổi thứ tự xáo");
+  assert.equal(r.tarotRev.length, 78);
+  // PRNG đều: 0..n-1, không lệch rõ
+  const rng = makeRng(SEED, "kiem-tra");
+  const counts = [0, 0, 0];
+  for (let i = 0; i < 3000; i++) counts[await rng.int(3)]++;
+  for (const x of counts) assert.ok(x > 850 && x < 1150, `phân bố lệch ${counts}`);
+  assert.equal((await shuffle(1, rng)).length, 1);
+});
+
+test("mã khoá khớp, đổi ánh xạ là lộ", async () => {
+  const m = await buildMapping(SEED, false);
+  const h = await commitHash(SEED, m);
+  assert.match(h, /^[0-9a-f]{64}$/);
+  const ok = await verifyLock({ seed: SEED, reversals: false, mapping: m, hash: h });
+  assert.ok(ok.hashOk && ok.mappingOk);
+  const tampered = { ...m, tarot: [...m.tarot] };
+  [tampered.tarot[0], tampered.tarot[1]] = [tampered.tarot[1], tampered.tarot[0]];
+  const bad = await verifyLock({ seed: SEED, reversals: false, mapping: tampered, hash: h });
+  assert.equal(bad.mappingOk, false);
+  const bad2 = await verifyLock({ seed: SEED, reversals: false, mapping: m, hash: "0".repeat(64) });
+  assert.equal(bad2.hashOk, false);
+  assert.match(gmt7(new Date("2026-10-24T23:00:00Z")), /^25\/10\/2026 06:00:00 \(GMT\+7\)$/);
+});
+
+test("parser: ví dụ của chủ nhân, nhãn, số 0 đầu, dấu phẩy, gạch ngang", () => {
+  const p = parseDraw(`${T_IN}\n${L_IN}`);
+  assert.deepEqual(p.tarot.tiers.map((t) => t.map((x) => x.n)), [[8, 37, 50, 69], [68, 75, 36, 22], [8, 36, 55, 71]]);
+  assert.deepEqual(p.lenormand.tiers.map((t) => t.map((x) => x.n)), [[22, 25, 27, 29], [10, 20, 25, 21], [11, 23, 26, 34]]);
+  assert.ok(p.tarot.slash && p.lenormand.slash);
+  const q = parseDraw("Tarot: 08, 07 – 3\nLenormand: 01–02, 03");
+  assert.deepEqual(q.tarot.tiers[0].map((x) => x.n), [8, 7, 3]);
+  assert.equal(q.tarot.tiers[0][0].raw, "08");
+  assert.deepEqual(q.lenormand.tiers[0].map((x) => x.n), [1, 2, 3]);
+  const r = parseDraw("L: 5 6 / 7 T: 9");
+  assert.deepEqual(r.lenormand.tiers.map((t) => t.map((x) => x.n)), [[5, 6], [7]]);
+  assert.deepEqual(r.tarot.tiers[0].map((x) => x.n), [9]);
+  // Không có "/" → chia theo mẫu trải
+  const s = parseDraw("T: 1 2 3 4 5 6 7 8 9 10 11 12", { tarot: [4, 4, 4], lenormand: [4, 4, 4] });
+  assert.deepEqual(s.tarot.tiers.map((t) => t.length), [4, 4, 4]);
+  assert.equal(s.tarot.slash, false);
+  assert.deepEqual(splitBySizes([1, 2, 3, 4, 5].map((n) => ({ n })), [2, 2]).map((t) => t.length), [2, 2, 1]);
+  // Không nhãn → bộ mặc định
+  assert.equal(parseDraw("3 4 5", {}, "lenormand").lenormand.tiers[0].length, 3);
+  assert.deepEqual(parseCorrection("Là số 04"), [4]);
+  assert.deepEqual(parseCorrection("là số 4 và 12"), [4, 12]);
+  assert.equal(parseCorrection("T: 4"), null);
+});
+
+async function demoSession(seed = SEED) {
+  const sp = spreadById("3thang");
+  return createSession({ cauHoi: "thu nhập 3 tháng tới", spreadId: sp.id, tiers: sp.tiers(), money: true, reversals: false, seed });
+}
+
+test("state: số 40 lỗi để trống đúng ô, 'Là số 04' chỉ thay ô đó; lá lặp", async () => {
+  const s = await demoSession();
+  const { round, errors } = addRound(s, `${T_IN}\n${L_IN.replace("34", "40")}`);
+  assert.equal(errors.length, 1);
+  assert.deepEqual([errors[0].deck, errors[0].tier, errors[0].idx, errors[0].n], ["lenormand", 2, 3, 40]);
+  const before = JSON.stringify(round.lenormand[2].slice(0, 3));
+  assert.equal(round.lenormand[2].filter((c) => c.ok).length, 3, "các số hợp lệ vẫn lật");
+  // số lặp: Tarot 8 ở tầng 1 và tầng 3, cùng một lá
+  assert.equal(round.tarot[2][0].card, round.tarot[0][0].card);
+  assert.deepEqual(round.tarot[2][0].repeatOf, { round: 1, tier: 1, pos: 1 });
+  assert.equal(round.lenormand[1][2].card, round.lenormand[0][1].card, "Lenormand 25 lặp");
+  const fix = applyCorrectionText(s, "Là số 04");
+  assert.equal(fix.filled.length, 1);
+  assert.equal(round.lenormand[2][3].n, 4);
+  assert.equal(round.lenormand[2][3].card, s.mapping.lenormand[3]);
+  assert.equal(round.lenormand[2][3].fixedFrom, "40");
+  assert.equal(JSON.stringify(round.lenormand[2].slice(0, 3)), before, "không đụng ô khác");
+  assert.equal(errorsOf(round).length, 0);
+  // số thay vẫn sai → giữ ô trống
+  addRound(s, "L: 99");
+  assert.equal(fixCell(s, 1, "lenormand", 0, 0, 37).ok, false);
+  assert.equal(errorsOf(s.rounds[1]).length, 1);
+  // rút thêm cùng state: số cũ → lá cũ
+  addRound(s, "T: 37");
+  assert.equal(s.rounds[2].tarot[0][0].card, round.tarot[0][1].card);
+  assert.ok(s.rounds[2].tarot[0][0].repeatOf);
+  const v = await reveal(s);
+  assert.ok(v.hashOk && v.mappingOk);
+});
+
+test("lưu/xuất/nhập JSON không mất ánh xạ, không ghi đè", async () => {
+  const s = await demoSession();
+  addRound(s, T_IN);
+  const mem = new Map();
+  const fake = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
+  assert.ok(saveSessions([s], fake));
+  const back = loadSessions(fake);
+  assert.deepEqual(back[0].mapping, s.mapping);
+  const list = [];
+  assert.equal(importJSON(exportJSON([s]), list), 1);
+  assert.equal(importJSON(exportJSON([s]), list), 0, "trùng id thì bỏ qua");
+  assert.equal((await verifyLock(list[0])).hashOk, true);
+});
+
+test("mẫu trải đúng số lá", () => {
+  const n = (id) => { const t = spreadById(id).tiers(2027); return [t.length, t.reduce((a, x) => a + x.t, 0), t.reduce((a, x) => a + x.l, 0)]; };
+  assert.deepEqual(n("3thang"), [3, 12, 12]);
+  assert.deepEqual(n("12thang"), [12, 36, 36]);
+  assert.deepEqual(n("canam"), [1, 12, 9]);
+  assert.deepEqual(n("cokhong"), [3, 9, 9]);
+  assert.deepEqual(n("vanhan"), [5, 15, 15]);
+  assert.ok(SPREADS.find((s) => s.id === "tudo"));
+});
+
+test("quy đổi tiền ra số hợp lệ", async () => {
+  const s = await demoSession();
+  addRound(s, `${T_IN}\n${L_IN}`);
+  const m = moneyTable(db, s, { thuNhap: 20, mucTieu: 30 });
+  assert.equal(m.rows.length, 3);
+  for (const r of m.rows) {
+    for (const k of ["low", "center", "high"]) assert.ok(Number.isFinite(r[k]) && r[k] >= 0, `${k}=${r[k]}`);
+    assert.ok(r.low <= r.center && r.center <= r.high);
+    assert.ok(r.margin >= 0.3 && r.margin <= 0.4);
+  }
+  assert.ok(Number.isFinite(m.total) && Number.isFinite(m.perMonth) && Number.isFinite(m.targetPct));
+  assert.equal(moneyTable(db, s, {}).missing, true);
+  // lá cản kéo xuống, lá tiền kéo lên
+  const card = (en) => db.tarot.la.find((c) => c.en === en) || db.lenormand.la.find((c) => c.en === en);
+  const it = (en) => ({ s: card(en).diem_tien, v: card(en).toc_do });
+  const down = periodEstimate([it("The Tower"), it("Five of Pentacles")], [it("Mountain"), it("Mice")], 20);
+  const up = periodEstimate([it("Ace of Pentacles"), it("The Sun")], [it("Fish"), it("Clover")], 20);
+  assert.ok(down.center < 20 && up.center > 20, `${down.center} / ${up.center}`);
+  // canam: 12 dòng + so năm trước
+  const sp = spreadById("canam");
+  const y = await createSession({ cauHoi: "cả năm", spreadId: "canam", tiers: sp.tiers(2027), money: true, seed: SEED });
+  addRound(y, "T: 1 2 3 4 5 6 7 8 9 10 11 12\nL: 1 2 3 4 5 6 7 8 9");
+  const ym = moneyTable(db, y, { thuNhap: 15, namTruoc: 150 });
+  assert.equal(ym.rows.length, 12);
+  assert.ok(Number.isFinite(ym.vsPrevPct));
+  assert.equal(roundNice(-3), 0);
+  assert.equal(roundNice(7.3), 7.5);
+});
+
+export async function run(extra = []) {
+  let fail = 0;
+  for (const [name, fn] of [...tests, ...extra]) {
+    try {
+      await fn();
+      console.log(`✔ ${name}`);
+    } catch (e) {
+      fail++;
+      console.log(`✘ ${name}\n  ${e.stack?.split("\n").slice(0, 3).join("\n  ")}`);
+    }
+  }
+  console.log(fail ? `\n${fail} test lỗi` : `\nTất cả ${tests.length + extra.length} test đạt`);
+  process.exitCode = fail ? 1 : 0;
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) await run();
