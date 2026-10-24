@@ -623,14 +623,15 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
         const y = mat - (doc ? 105 : 115);
         const x2 = x + dir * dai;
         for (const [mau, dayNet] of [[K1.MUC, 10], [K1.CANG, 6]]) {
-          ctx.strokeStyle = mau; ctx.fillStyle = mau; ctx.lineWidth = dayNet;
+          ctx.strokeStyle = mau; ctx.lineWidth = dayNet;
           ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x2, y); ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(x2, y);
-          ctx.lineTo(x2 - dir * 17, y - 12);
-          ctx.lineTo(x2 - dir * 17, y + 12);
-          ctx.closePath(); ctx.fill();
         }
+        ctx.fillStyle = K1.CANG; ctx.strokeStyle = K1.MUC; ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(x2, y);
+        ctx.lineTo(x2 - dir * 17, y - 12);
+        ctx.lineTo(x2 - dir * 17, y + 12);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
       };
       mui(xl + rong * 0.25, 1);
       mui(xr - rong * 0.25, -1);
@@ -644,8 +645,11 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
         g.addColorStop(0, rgba(K1.NEN_TREN, 0));
         g.addColorStop(0.5, rgba(K1.NEN_TREN, 0.72));
         g.addColorStop(1, rgba(K1.NEN_TREN, 0));
-        ctx.fillStyle = g;
-        ctx.fillRect(Math.max(xl, x - 245), mat + 30, Math.min(xr, x + 245) - Math.max(xl, x - 245), Math.max(0, day - mat - 60));
+        const trai = Math.max(xl, x - 245), phai = Math.min(xr, x + 245);
+        if (phai > trai) {
+          ctx.fillStyle = g;
+          ctx.fillRect(trai, mat + 30, phai - trai, Math.max(0, day - mat - 60));
+        }
       }
       ctx.restore();
     }
@@ -690,7 +694,11 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
   };
 
   // Các chuyển động camera/chuyển cảnh (để lấy 3 khung đầu–giữa–cuối mỗi cái trong bộ dẫn chứng)
-  const chuyenCanh = LICH.filter((c) => c[3] !== "set" && c[1] >= 0.6).map(([t0, dur]) => ["cú máy", t0, t0 + dur]);
+  const chuyenCanh = [
+    ...LICH.filter((c) => c[3] !== "set" && c[1] >= 0.6).map(([t0, dur]) => ["cú máy", t0, t0 + dur]),
+    ["match-cut B2 sang cận mặt nước", M.cuts, M.cuts + 0.4],
+    ["match-cut B2 trở lại bàn", M.puddle - 0.4, M.puddle]
+  ];
   return {
     F, tl, canh, cum, chuyenCanh, M, VUNG, VAT, cam, tu: tuTrongBai, THOI_LUONG, FPS, mocGiong: true, LOI,
     phuDe: {
