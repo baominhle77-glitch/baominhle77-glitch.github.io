@@ -166,6 +166,25 @@ def bat_mo_phong(layer):
         L=layer.vung_noi_dung()
         x0,x1=L[0]+.12,L[0]+.54*(L[1]-L[0])
         y0,y1=L[2]+.18,L[3]-.38
+    # C13: ROI vật chính KHÔNG được cắt vào PiP / khối nguồn.
+    # Lấy phần chữ nhật còn lại lớn nhất (ưu tiên vùng mặt nước), không
+    # bỏ qua kiểm nguồn hay giấu hình khỏi trình kiểm.
+    for forbidden in (layer.W.hop_ng, layer.W.bc.pip):
+        if forbidden is None:
+            continue
+        fx0,fx1,fy0,fy1=forbidden
+        if min(x1,fx1) <= max(x0,fx0) or min(y1,fy1) <= max(y0,fy0):
+            continue
+        le=.18
+        candidates=[(x0,min(x1,fx0-le),y0,y1),
+                    (max(x0,fx1+le),x1,y0,y1),
+                    (x0,x1,y0,min(y1,fy0-le)),
+                    (x0,x1,max(y0,fy1+le),y1)]
+        candidates=[r for r in candidates if r[1]-r[0]>=.75 and r[3]-r[2]>=.75]
+        if not candidates:
+            raise ValueError("C17_8_KHONG_CO_VUNG_KHONG_CHONG_NGUON "+layer.b["id"])
+        x0,x1,y0,y1=max(candidates,key=lambda r:(r[1]-r[0])*(r[3]-r[2]))
+        print("C17_8_CROP_FORBIDDEN",layer.b["id"],forbidden,(x0,x1,y0,y1),flush=True)
     w,h=x1-x0,y1-y0
     if w <= .5 or h <= .5:
         raise ValueError("C17_8_VUNG_HINH_QUA_HEP "+layer.b["id"])
