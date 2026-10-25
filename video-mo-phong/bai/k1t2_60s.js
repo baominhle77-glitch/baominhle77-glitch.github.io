@@ -591,6 +591,34 @@ export function taoBai(tenKho = "16x9", mocTu = null) {
       ctx.lineWidth = 3;
       ctx.stroke();
 
+      // B2 vòng 2, riêng 9:16: ba làn khúc xạ đi trọn mặt phân cách khi lời đọc
+      // "seventy" / "thirty" / "half". Từng lần lật trạng thái dài 0,55 s,
+      // quét trên 790×595 px (không nhấp nháy/rung), đủ nhịp pixel-diff 4 fps.
+      // Lực trước SDS → lực sau SDS → hai miền lực so sánh; 16:9 giữ nguyên.
+      if (doc) {
+        const latTrangThai = (t0, mau, dam, tuPhai = false) => {
+          const q = layEase("power3.inOut")(kep((t - t0) / 0.55));
+          if (q <= 0) return;
+          const dai = rong * q;
+          const xDau = tuPhai ? xr - dai : xl;
+          ctx.save();
+          ctx.beginPath(); ctx.rect(xl, 655, rong, day - 655); ctx.clip();
+          ctx.fillStyle = rgba(mau, dam);
+          ctx.fillRect(xDau, 655, dai, day - 655);
+          // Ranh giới khúc xạ gắn với luồng lực, tiến một chiều, không rung giả.
+          if (q < 1) {
+            const xSong = tuPhai ? xDau : xDau + dai;
+            ctx.strokeStyle = rgba(K1.NEN_TREN, 0.82);
+            ctx.lineWidth = 6;
+            ctx.beginPath(); ctx.moveTo(xSong, 655); ctx.lineTo(xSong, day); ctx.stroke();
+          }
+          ctx.restore();
+        };
+        latTrangThai(M.seventy, K1.MUC, 0.40);             // 14,220–14,770: màng đang kéo mạnh
+        latTrangThai(M.thirty, K1.NEN_TREN, 0.76, true);  // 16,145–16,695: SDS làm dịu lực
+        latTrangThai(M.half, K1.NUOC, 0.58);              // 19,370–19,920: chênh gần một nửa
+      }
+
       // Mặt sáng và lớp gần: hạt SDS minh hoạ, cam có viền mực 2 px.
       ctx.strokeStyle = rgba(K1.NEN_TREN, 0.78);
       ctx.lineWidth = 8;
