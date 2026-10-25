@@ -579,6 +579,23 @@
       "status": "completed",
       "completed_at": "2026-07-25T03:15:00+07:00",
       "summary": "Affiliate đa lĩnh vực và Growth Autopilot production hoàn tất."
+    },
+    {
+      "id": "BOI-20261025-09",
+      "owner": "GĐ Studio (Claude)",
+      "branch": "agent/BOI-20261025-02-cau-noi-khong-ma",
+      "paths": [
+        "boi/js/store.js",
+        "boi/js/views.js",
+        "docs/handover/NHAT-KY-PHOI-HOP.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "completed_at": "2026-10-25T18:30:00+07:00",
+      "summary": "Web bói: điện thoại dùng AI máy nhà không cần link ghép",
+      "base_sha": "1bb80f2",
+      "started_at": "2026-10-25T18:15:00+07:00",
+      "heartbeat_at": "2026-10-25T18:30:00+07:00"
     }
   ]
 }
