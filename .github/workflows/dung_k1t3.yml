@@ -1,0 +1,61 @@
+# A1+E (Chủ tịch chốt 25/10/2026): GitHub dựng bằng dây chuyền cũ nha_may + Manim + cổng 7b4. Mặt thật (PiP) làm ở máy nhà.
+name: dung-tap
+on:
+  push:
+    branches: [studio-dung]
+  pull_request:
+    branches: [studio-dung]
+concurrency:
+  group: dung-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  dung:
+    runs-on: windows-latest
+    timeout-minutes: 340
+    env:
+      PYTHONIOENCODING: utf-8
+      CLAUDE_OWNED_RUN_ROOT: D:/r
+      TAP: E:/Studio/tools/tap/ML_K1_t3.json
+      BUOC: ke_hoach,canh,render,noi,phu_de
+      BO_CUC: ca_hai
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: Studio
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.9"
+      - name: E:\Studio = mã lấy về; Python cổng ở đúng đường cũ
+        shell: pwsh
+        run: |
+          subst E: "$env:GITHUB_WORKSPACE"
+          New-Item -ItemType Directory -Force D:\r | Out-Null
+          New-Item -ItemType Directory -Force C:\Users\Admin\AppData\Local\Programs\Python | Out-Null
+          New-Item -ItemType Junction -Path C:\Users\Admin\AppData\Local\Programs\Python\Python311 -Target $env:pythonLocation | Out-Null
+          python -m pip install -q numpy==2.4.6 pillow==12.2.0
+          choco install ffmpeg -y --no-progress | Out-Null
+          ffmpeg -hide_banner -version | Select-Object -First 1
+      - name: venv_manim (đúng bản máy nhà)
+        shell: pwsh
+        run: |
+          $t = Get-Date
+          python -m venv E:\Studio\venv_manim
+          E:\Studio\venv_manim\Scripts\python.exe -m pip install -q -r E:\Studio\ci_requirements.txt
+          "venv: {0:N0} s" -f ((Get-Date) - $t).TotalSeconds
+      - name: Dựng
+        shell: pwsh
+        working-directory: E:\Studio
+        run: |
+          E:\Studio\venv_manim\Scripts\python.exe ci\chay_ci.py --tap $env:TAP --buoc $env:BUOC --bo-cuc $env:BO_CUC
+      - name: Gửi kết quả
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dung-${{ github.run_number }}
+          retention-days: 7
+          path: |
+            Studio/out/M1_MARANGONI_DUNG/
+            Studio/out/M1_MARANGONI/_build/
+            D:/r/kho/
+            !**/cache_canh/**
+            !**/partial_movie_files/**

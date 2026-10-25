@@ -1,0 +1,2927 @@
+{
+ "meta": {
+  "title": "Why Pepper Flees a Drop of Soap — and Why, With Steady Feeding, the Rush Stops at a Ring",
+  "alt_title": "Soap Doesn't Push the Pepper. Clean Water Pulls the Surface, and the Pepper Rides Along",
+  "tap": "Meniscus Lab tập 3 — hồ sơ chặng (i) theo lệnh 20261024-0150 (viết theo lô) và khuôn t2 ĐẠT (thư GĐ 2240): storyboard.json là kịch bản DUY NHẤT; mỗi beat = lớp cảnh + tham số (nhãn, thước kẹp, dòng nguồn góc trên phải) + lời EN + mã nguồn + canh_moi. Không bản VI",
+  "chu_de": "out/M1_MARANGONI/KE_HOACH_TAP.md hàng 3: vì sao một giọt xà phòng làm hạt tiêu nổi chạy ra mép rồi (khi bơm liên tục) dừng ở một vòng — dòng Marangoni do nước sạch kéo (Roché et al., PRL 2014). Câu hứa k2 tập 2: 'Next on Meniscus Lab: why one drop of soap makes floating pepper rush to the edge.'",
+  "ban_truoc": "không có bản trước của tập 3; tập 2 (out/M1_XAPHONG: storyboard.json, so_lieu.json sha256-8 70a73fd9) cấp γ 71.97 / 36.43 mN/m, cmc 8.23 mM, ℓc 2.73 mm và để chặn 5-gram (= 0, script kiểm)",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+0%",
+  "w": 1920,
+  "h": 1080,
+  "fps": 30,
+  "doc": {
+   "w": 1080,
+   "h": 1920,
+   "bo_cuc": "out/M2_UART/_doc/BO_CUC_DOC_9x16.md: vùng an toàn x 65..940 y 270..1248; phụ đề ASS do nha_may.py đốt — áp bằng khung.dat_doc của K1_canh; vùng cấm PiP dọc 62..438 × 266..508 (meta.vung_cam_pip)"
+  },
+  "kenh": "Meniscus Lab (@MeniscusLab, UChthQUFE1h7oITi1wLjpbnA; TikTok @meniscuslab; facebook.com/meniscuslab)",
+  "thu_tu_phat": [
+   "h1",
+   "h2",
+   "h3",
+   "h4",
+   "c1",
+   "p1",
+   "p2",
+   "p3",
+   "p4",
+   "p5",
+   "p6",
+   "c2",
+   "v1",
+   "v2",
+   "v3",
+   "v4",
+   "v5",
+   "v6",
+   "v7",
+   "c3",
+   "w1",
+   "w2",
+   "w3",
+   "w4",
+   "w5",
+   "w6",
+   "w7",
+   "b1",
+   "r1",
+   "r2",
+   "r3",
+   "r4",
+   "s8",
+   "k1",
+   "k2"
+  ],
+  "cau_truc": {
+   "mo": [
+    "h1",
+    "h2",
+    "h3",
+    "h4"
+   ],
+   "lop_1_ai_keo": [
+    "c1",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+    "p6"
+   ],
+   "lop_2_dong_trong_ra_sao": [
+    "c2",
+    "v1",
+    "v2",
+    "v3",
+    "v4",
+    "v5",
+    "v6",
+    "v7"
+   ],
+   "lop_3_vi_sao_dung_o_vong": [
+    "c3",
+    "w1",
+    "w2",
+    "w3",
+    "w4",
+    "w5",
+    "w6",
+    "w7"
+   ],
+   "ban_the": [
+    "b1",
+    "r1",
+    "r2",
+    "r3",
+    "r4"
+   ],
+   "ket": [
+    "s8",
+    "k1",
+    "k2"
+   ]
+  },
+  "ban_sac": {
+   "luat": "LUAT_BAN_SAC_KENH.md sha256 c25e049387bc8f459ba2695f9cd3a8fbcf0cbd4c74cca69016b689aaba2fd02a, cột K1",
+   "module": "ban_sac/K1_ban_quang_hoc.py sha256 67a8543ae87cd4b03f3cd33009c3922e9477e8e14d14f0bde07372a794427c6b (KHÔNG sửa)",
+   "the_gioi": "trục 1: bàn quang học trong studio chụp ảnh; khay nước nông, hạt tiêu nổi, kim bơm, giọt là khối có bóng đổ, nước trong suốt khúc xạ (trục 3); không lưới, bóng mờ mặt bàn (trục 4); VAT_THAT = []",
+   "mau": "nền #8E969D → #A7ADB3 (trung-sáng 140–175, chuyển sắc phông studio); mực #1C232B; xanh nước #1F6FD1 cho nước / dòng chảy; cam #E8772E cho sức căng mặt (mũi tên kéo, dấu chỉ ≤ 1 mỗi cảnh)",
+   "chu": "sans nhân văn chữ thường qua chu() (Segoe UI có sẵn; Source Sans 3 OFL là phương án thay theo LUAT); ký tự nhãn + nguồn nằm trong cmap segoeui.ttf (script đọc cmap thật); chữ hoa chỉ ở từ trong HOA_OK (viết tắt, tên riêng, ký hiệu chất)",
+   "nhan": "đường dẫn mảnh và chữ trần, không khung (nhan()); số đo hiện bằng thước kẹp vẽ (thuoc_kep, tham_so.thuoc)",
+   "nguon_tren_man": "chú thích nhỏ góc trên phải (chu_thich_nguon / Beat.nguon của K1_canh/loi.py: chu cỡ 14, op 0.75, xếp dòng canh phải, mép phải ở x 1538 px để chừa vùng cấm PiP); mỗi dòng có mã + vị trí; 'calculated' = số tự tính",
+   "chu_thich_ref": {
+    "N1": "NIST SRD 69 = NIST Chemistry WebBook SRD 69, Thermophysical Properties of Fluid Systems: water, saturation (fluid.cgi SatP)",
+    "T0": "episode 1 = Meniscus Lab tập 1 (out/MENISCUS_LAB/so_lieu.json, NIST hàng 34, 293.10 K)",
+    "T2": "episode 2 = Meniscus Lab tập 2 (out/M1_XAPHONG/so_lieu.json, sha256-8 70a73fd9)",
+    "L1": "Liu et al. = Liu et al., Advanced Science 2026, PMC13418275",
+    "C1": "Chenyakin & Chen = Chenyakin & Chen, Electrophoresis 2025, PMC12449752",
+    "R1": "Roché et al. = Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1",
+    "S0": "our sketch = hình minh hoạ của kênh, không phải số liệu",
+    "G0": "assumption = giả thiết của HỒ SƠ (meta.gia_thuyet)"
+   },
+   "chuyen_canh": "zoom_thang (chính, trục 9) ở đầu mỗi lớp / bàn thẻ / kết (c1 c2 c3 b1 s8) và trong cảnh ZoomThang; lay_net (phụ, trục 9) khi đổi lớp cảnh trong phần — module CHƯA có helper chuyển lấy nét (LUAT dòng 123); 'khong (cùng bàn)' khi cùng lớp; h1 khung 0",
+   "nhip": "6–9 s mỗi lần đổi hình (trục 11): khoảng giữa hai mốc ≤ 15 từ (≈ 5–6 s ở 2,5–2,9 từ/s)",
+   "am_thanh": "en-US-AndrewNeural (trục 12); tiếng nước tổng hợp — chưa có tệp âm hiệu, nha_may.py không chèn ở tập này"
+  },
+  "vat_that": "không có (VAT_THAT = []): mọi hình là khối vẽ trên bàn quang học; mũi tên kéo co, vòng tuần hoàn mặt-đáy ghi 'our sketch' trên màn",
+  "luat_canh": "mọi cảnh chuyển động từ khung đầu; MovingCameraScene (K1_canh/loi.Beat); mọi Create/Transform qua helper (hien / ve / doi / zoom_thang); số tự tính ghi 'calculated'; mỗi beat đổi hình theo moc, khoảng ≤ 15 từ; không chip bo tròn, không FadeIn/FadeOut toàn màn; beat có 'tranh_pip' giữ hình + chữ ngoài vùng cấm PiP",
+  "luat_loi_doc": [
+   "số đọc bằng chữ, nhãn ghi số kèm đơn vị; số tự tính làm tròn ROUND_HALF_UP như nhãn (2 chữ số thập phân)",
+   "mọi số tự tính: nhãn có '(calculated)' hoặc 'calculated' + dòng nguồn 'calculated: …'; lời nói 'calculated' ở beat đầu tiên đọc mỗi số",
+   "mọi γ kèm nhiệt độ (25 °C); mọi số của SDS kèm nồng độ + môi trường xét THEO BEAT (nhãn hoặc dòng nguồn cùng beat): γ SDS = Liu Fig. 5a, nước khử ion, 25 °C, 25.0 mM SUY ('inferred' ở lời + nhãn + nguồn h4, r3); cmc 8.23 mM = C1, trong nước, 25 °C",
+   "số của Roché không gán nhiệt độ (bài không nêu; r1 nói rõ); ≈ 0.5 m/s là số đo của bài, không gán cho hạt tiêu trong bát; 'dừng ở vòng' chỉ gắn với bơm liên tục",
+   "'dòng dừng khi chất hoạt động bề mặt đã rời mặt' nói là GIẢ ĐỊNH của mô hình Roché (w1), không phải phép đo",
+   "rào if / maximum / up to / about / typically: có trong lời thì có trên nhãn cùng beat và ngược lại (script kiểm ba chiều với rao); 'our sketch' và 'inferred' cũng kiểm ba chiều",
+   "chính tả Anh (metre, centimetre, micrometre, per cent, neighbours); trích nguyên văn giữ chính tả nguồn (towards); không 'always', 'prove(d)', 'detergent', 'shampoo', 'breaks surface tension'",
+   "không đọc lại 71.97 / 36.43 (chỉ nhãn h4); không dùng Δγ riêng của Roché; không đọc số trên hình (Fig. 2a/2b/3a chỉ dùng chữ và số bài viết trong text/caption)"
+  ],
+  "hook_kieu": "Hiện tượng thấy được (K1 trục 10): khay nước rắc tiêu, giọt xà phòng rơi quay chậm, hạt tiêu dạt ra mép; câu hỏi 'what pulls the pepper?' nói xong trong h1; chữ bìa 'what pulls pepper?' + '1 drop' rút từ h1",
+  "vao_de_30s": {
+   "cach_uoc": "ƯỚC LƯỢNG 2,5 từ/s (barem) và 2,9 từ/s, + 0,5 s nghỉ mỗi beat; mốc thật đo bằng words.json sau TTS (chặng ii)",
+   "nhip": {
+    "h1": [
+     0.0,
+     0.0
+    ],
+    "h2": [
+     9.3,
+     8.1
+    ],
+    "h3": [
+     22.6,
+     19.6
+    ],
+    "h4": [
+     28.7,
+     24.9
+    ],
+    "c1": [
+     48.4,
+     42.0
+    ]
+   },
+   "V1": "chuyển động từ khung 0: khay nước đã rắc tiêu, giọt xà phòng rơi quay chậm ở 'drop', hạt tiêu dạt ra mép ở 'races'",
+   "V2": "câu hỏi 'So what pulls the pepper?' NÓI xong cuối h1: ~8.8 s / ~7.6 s (≤ 10 s); chữ bìa 'what pulls pepper?' rút gọn câu này (C12 ≤ 5 từ)",
+   "V3": "trả lời 'Not the soap' ~9.7 / ~8.4 s (≤ 20 s); điều bất ngờ: nước sạch ở xa kéo, mặt nước thí nghiệm chạy up to 0.5 m/s (Roché text :156, Fig. 3a) xong ~22.1 / ~19.1 s (≤ 30 s)",
+   "V4": "vòng mở DUY NHẤT: 'the rush stops at a ring. Why there?' (h3, xong ~28.2 / ~24.4 s < 30 s); đóng ở w7 'So that is why the rush stops at a ring' (~442.2 / ~383.0 s) → > 60 s sau giây 30. 0 từ thủ tục, 0 câu N5 trong h1–h4"
+  },
+  "thumbnail": {
+   "file_en": "thumbnail.png",
+   "chu_en": [
+    "what pulls pepper?"
+   ],
+   "so": "1 drop",
+   "so_tu": "5 từ: '1 drop' + 'what pulls pepper?' (C12 ≤ 5 từ; K1 trục 13: 1 con số + hook ≤ 4 chữ). Số = 'One drop of soap' (h1) / 'one drop of dish soap' (k1): đúng cho chính cảnh trên bìa (khay tiêu + một giọt). Bỏ 0.5 m/s khỏi bìa: số đo của Roché cần cả 'up to' lẫn 'lab', không vừa 5 từ (phiếu 120 Lỗi 1, cách b)",
+   "hinh": "trục 13 K1: khay nước nông trên nền xám studio #8E969D → #A7ADB3, hạt tiêu dạt thành vòng ra mép, giọt xà phòng vừa chạm giữa khay; ĐÚNG 1 dấu chỉ cam #E8772E (mũi tên từ giọt xà phòng giữa khay trỏ vào số '1 drop'); bìa không có tốc độ nào; chữ thường mực #1C232B; 0 mặt người; 1280×720; góc trên phải chừa ô PiP",
+   "hua": "'1 drop' = h1 'One drop of soap' (giây 0); 'what pulls pepper?' = câu hỏi h1 rút gọn (nói xong ~8.8 s); trả ở h2 'Not the soap. Clean water … pulls harder' (~9.7 s)",
+   "dung": "câu hỏi (A4); trả lời theo Roché (dòng do hiệu sức căng); số trên bìa là số giọt của chính cảnh (h1)",
+   "ghi_chu_c10": "tiêu đề + chữ bìa đối chiếu ban_sac/Y_DA_DUNG.json; kiểm bằng kiem_bia (số đo ghi ở gói nộp)"
+  },
+  "nguon": {
+   "R1": "Roché M., Li Z., Griffiths I. M., Le Roux S., Cantat I., Saint-Jalmes A., Stone H. A., 'Marangoni flow of soluble amphiphiles', Phys. Rev. Lett. 112, 208302 (2014); bản đọc arXiv 1312.3964v1 (_lam/nguon/roche.md). Đoạn mở: giọt nước pha nước rửa chén trên nước rắc tiêu, 'pepper grains are transported rapidly to the edge of the bowl' (movie M1); 'The flow results from the difference in surface tension'. Set-up (Fig. 1a, text): syringe pump Harvard PHD2000, lưu lượng mol không đổi Qa, kim, lớp nước dày cỡ cm ('centimeter-thick water layers'), nước Millipore 18.2 MΩ·cm, giọt dầu ô liu 10 μm làm tracer. Chất: 8 chất CnTABr (n 10–14), CnTACl (n 12, 16), CnNaSO4 (n 8–12), Sigma-Aldrich purity 99 %, cmc trải hai bậc. Fig. 1b: nguồn r_s, vùng trong suốt, ngoài có 'vortex pairs'; 'Further from the source, the tracers move only slightly'; dòng dưới 'follows the bottom of the container back towards the source'. Fig. 2a + text: r_t đổi 'over almost two orders of magnitude when n increases two-fold'; đổi C12TAB → C12NaSO4 (chỉ khác đầu) làm r_t giảm. Fig. 3a (Qa 0.52×10⁻⁶ mol/s): u ≈ 10⁻² m/s gần nguồn, 'maximum velocity u≈0.5 m/s', chậm dần 'as they travel across the transparent area', rồi 'decelerate abruptly'. Fig. 3b (C10NaSO4): 'The injection flow rate has little effect on the velocity field'. Mô hình: giả định dòng dừng khi chất 'have all desorbed from the interface'; Eq. 1 ℓν ≈ √(νr*/u*); Eq. 2 Sc ≈ 10⁴ (D 10⁻¹⁰, ν 10⁻⁶ m²/s); Eq. 3 c* = cmc; Eq. 5 cân bằng ứng suất; Eq. 6 u*; Eq. 7 r* ∝ (Qa/c*)^(3/4) (khớp Fig. 4c,d); A ≈ 1 (Fig. 4b), B gần 1; ước lượng c* 10⁻² M, A = B = 1 → u* ≈ 0.5 m/s, r* ≈ 15 mm 'compare very well with our experimental findings'; Eq. 6 hỏng khi vùng cỡ meniscus mm; lớp nhớt hơn → r_t lớn hơn (Fig. S5); đoạn kết: ước cmc 'from a single measurement of the size of the spreading area'. Bài KHÔNG nêu nhiệt độ.",
+   "N1": "NIST Chemistry WebBook SRD 69, nước, bảng bão hoà (fluid.cgi SatP) 293.15–303.15 K; tệp out/M1_XAPHONG/_lam/nist_298.tsv (sha256-8 ef8e1443). Hàng 298.15 K: ρl 997.00 kg/m³, η 890.04 μPa·s, γ 0.071972 N/m.",
+   "T2": "Meniscus Lab tập 2: out/M1_XAPHONG/so_lieu.json (sha256-8 70a73fd9): γ SDS 0.03643 N/m (Liu Fig. 5a, R = 0, trong nước khử ion, 25 °C, 25.0 mM SUY), cmc 8.23 mM (C1), ℓc 20 °C 2.7261 mm (tập 1).",
+   "T0": "Meniscus Lab tập 1: ℓc 2.73 mm ở 20 °C (NIST hàng 34, 293.10 K), qua so_lieu.json tập 2.",
+   "L1": "Liu et al., Advanced Science 2026 (PMC13418275), Fig. 5a: γ cân bằng 36.43 mN/m của SDS một mình; §4.3 nước khử ion; 25 °C (§4.6); 25.0 mM SUY từ đoạn Fig. 4a (như tập 2).",
+   "C1": "Chenyakin & Chen, Electrophoresis 2025 (PMC12449752), Table 1: cmc SDS 8.23 mM trong nước ở 25 °C.",
+   "S0": "hình minh hoạ của kênh (kéo co trên mặt, mũi tên, vòng tuần hoàn mặt-đáy) — không phải số liệu, ghi 'our sketch' trên màn.",
+   "G0": "giả thiết của HỒ SƠ (gia_thuyet), ghi 'our assumptions' trên màn ở r3.",
+   "T1": {
+    "cap": "số học của HỒ SƠ: _lam/tinh_so.py → so_lieu.json (sha256-8 3297bff3), tính lại và assert trong _lam/tao_storyboard.py (24/10)",
+    "lam_tron": "ROUND_HALF_UP; 2 chữ số thập phân; hiệu tính trên số chưa làm tròn rồi mới làm tròn",
+    "muc": [
+     {
+      "so": "35.54 mN/m",
+      "tinh": "γ nước 0.071972 (NIST 298.15 K) − γ SDS 0.03643 (Liu Fig. 5a) = 0.035542 N/m"
+     },
+     {
+      "so": "0.46 m/s",
+      "tinh": "Roché Eq. 6, A = 1: ((0.035542)² / (890.04e-6 × 997.00 × 0.015))^(1/3) = 0.4561"
+     },
+     {
+      "so": "0.17 mm",
+      "tinh": "Roché Eq. 1: √(ν r*/u*), ν = 890.04e-6 / 997.00 = 8.9272e-7 m²/s → 1.713e-4 m"
+     },
+     {
+      "so": "100 ×",
+      "tinh": "Roché Eq. 2: √Sc, Sc = 10⁴ (số của bài; ν NIST / D 10⁻¹⁰ cho √Sc ≈ 94.5 — không dùng)"
+     },
+     {
+      "so": "1.68",
+      "tinh": "Roché Eq. 7: 2^(3/4) = 1.6818"
+     }
+    ]
+   },
+   "khong_doc_duoc": "Bản PRL có trả phí; dùng bản arXiv 1312.3964v1 của chính các tác giả. Supplementary Materials (Fig. S4, S5, movie M1) không tải → chỉ dùng câu trong bài chính nói về chúng. Không đọc số trên hình. Không Wikipedia, không nguồn cấp 2, không video / transcript / bìa đối thủ."
+  },
+  "gia_thuyet": [
+   "r* = 15 mm là ước lượng điển hình của Roché (:607: c* 10⁻² M, γw − γs = 33 mN/m, A = B = 1) — ghép với gap SDS 35.54 mN/m (25.0 mM inferred, nước, 25 °C) của tập 2 để tính u* và ℓν: GIẢ THIẾT, khai ở r3 ('a threshold of ten millimolar and a surface tension gap of its own'; số 33 không lên màn, không dùng tính)",
+   "A = B = 1 như bài (Fig. 4b: A ≈ 1; B gần 1)",
+   "γ SDS 36.43 mN/m: SDS một mình trong nước, 25 °C, 25.0 mM SUY (như tập 2); η, ρ của lớp = nước 25 °C (NIST 298.15 K)",
+   "Sc = 10⁴ lấy đúng số của Roché (không tính lại từ ν NIST)",
+   "'dòng dừng khi chất hoạt động bề mặt rời mặt' = giả định nền của mô hình Roché (khớp dữ liệu Fig. 4), nói rõ ở w1",
+   "SDS phòng thí nghiệm, KHÔNG phải nước rửa chén gia dụng (hỗn hợp); hạt tiêu ≠ tracer dầu; bát bếp một giọt ≠ bơm liên tục",
+   "kéo co trên mặt, mũi tên, vòng tuần hoàn mặt-đáy: minh hoạ của kênh ('our sketch')"
+  ],
+  "khong_dung": "không Δγ 33 mN/m của Roché; không đọc số trên hình (Fig. 2a/2b/3a/4); không Qa (0.52 μmol/s chỉ ở dòng nguồn), không ns 17.2 μmol; không gán 0.5 m/s cho hạt tiêu; không nhiệt độ cho số Roché; không 'xà phòng nói chung'; không đọc lại 71.97 / 36.43; không 5-gram tập 1, tập 2",
+  "C7": {
+   "the_y_tuong": "KE_HOACH_TAP hàng 3 (câu hứa k2 tập 2)",
+   "claim_phan_truc_giac": [
+    {
+     "c": "C7-1",
+     "claim": "Hạt tiêu không bị xà phòng đẩy: nước sạch ở xa kéo mạnh hơn (hiệu sức căng 35.54 mN/m, calculated)",
+     "beat": [
+      "h2",
+      "h4",
+      "p1",
+      "k1"
+     ],
+     "nguon": [
+      "R1",
+      "N1",
+      "L1",
+      "T1"
+     ]
+    },
+    {
+     "c": "C7-2",
+     "claim": "Sau đỉnh gần nguồn, tốc độ chậm dần qua vùng trong suốt rồi tụt đột ngột ở mép: dòng không tắt dần tới 0 mà dừng ở một vòng",
+     "beat": [
+      "v3"
+     ],
+     "nguon": [
+      "R1"
+     ]
+    },
+    {
+     "c": "C7-3",
+     "claim": "Bơm nhanh hơn không làm dòng nhanh hơn ('little effect on the velocity field'); chỉ vòng to hơn (× 1.68 khi gấp đôi, calculated)",
+     "beat": [
+      "v5",
+      "w5"
+     ],
+     "nguon": [
+      "R1",
+      "T1"
+     ]
+    },
+    {
+     "c": "C7-4",
+     "claim": "Đuôi dài gấp đôi → bán kính vùng đổi gần hai bậc độ lớn; đổi riêng đầu phân cực cũng đổi vòng",
+     "beat": [
+      "v6",
+      "v7"
+     ],
+     "nguon": [
+      "R1"
+     ]
+    },
+    {
+     "c": "C7-5",
+     "claim": "Một lớp nước chỉ cỡ 0.17 mm kéo mặt chạy ~0.46 m/s; lớp xà phòng mỏng hơn 100 lần (calculated)",
+     "beat": [
+      "w2",
+      "w3",
+      "w4"
+     ],
+     "nguon": [
+      "R1",
+      "N1",
+      "T1"
+     ]
+    },
+    {
+     "c": "C7-6",
+     "claim": "Vòng dừng thành dụng cụ đo cmc: một lần đo kích thước + một phép đo sức căng",
+     "beat": [
+      "w7"
+     ],
+     "nguon": [
+      "R1"
+     ]
+    }
+   ],
+   "khac_top10": [
+    "không dừng ở 'xà phòng phá sức căng' như video trò hạt tiêu phổ biến: đo tốc độ, vùng, vòng, định luật thang",
+    "mọi số có nguồn sơ cấp + vị trí trên màn; số tự tính ghi 'calculated'; giả định mô hình nói rõ",
+    "nối tập 1, 2 bằng chuỗi 2.73 mm → 35.54 mN/m → 0.46 m/s"
+   ],
+   "thiet_bi_hinh_moi_N5": "KhayTieu (khay nước nông rắc tiêu, giọt xà phòng; h1–h3, p6, w7, k1) và DongMarangoni (đĩa nhìn ngang: kim bơm, ba vùng, tracer, vòng tuần hoàn mặt-đáy; p2, c2, v1–v4, w1) — mới cho K1"
+  },
+  "thu_vien_canh": {
+   "thu_muc": "ban_sac/K1_canh/",
+   "lop": [
+    "BanQuang",
+    "BangKe",
+    "DongMarangoni",
+    "KhayTieu",
+    "MuiTenCang",
+    "PhanTu",
+    "PhepTinh",
+    "ThuocLc",
+    "ZoomThang"
+   ],
+   "canh_moi": "2 lớp mới ở tập này: KhayTieu, DongMarangoni (canh_moi = true ở beat ĐẦU TIÊN dùng mỗi lớp); 12 lớp t2 dùng lại (canh_moi = false)",
+   "dung_lai": "hinh.ban / dim_arrow / mui / bracket / b_mo; thiet_bi.a1_*; giot.drop_group; loi.Beat (MovingCameraScene) / The / nap_tap; khung.dat_ngang / dat_doc; 12 lớp t2 (lop.py)",
+   "giao_dien": "mỗi lớp: __init__(**tham_so); ve(scene) theo mốc; nen() + bong_ban() + Beat.nguon(*tham_so['nguon']) đúng một lần mỗi cảnh; nhãn qua nhan(), thước qua thuoc_kep(), hook qua so_hook(); sha cảnh = sha256(tên lớp + lõi + json(tham_so) + n); tham_so 'tranh_pip' không vẽ, là ràng buộc bố cục"
+  },
+  "c4_c5": {
+   "pip": "PiP mặt thật (C4) do nha_may.py ghép sau render: ngang ô 1564,48,308,174 (vùng cấm 1552..1884 × 36..246), dọc ô 74,278,308,174 (vùng cấm 62..438 × 266..508) theo tools/pip_spec.json#vung_cam_noi_dung_tu_t3 — dòng nguồn dừng ở x 1538 px",
+   "srt": ".en.srt sinh từ words.json (C5); dải phụ đề bản dọc (ASS) do nha_may.py đốt"
+  },
+  "vung_cam_pip": {
+   "khoa": "tools/pip_spec.json#vung_cam_noi_dung_tu_t3",
+   "sha8": "b3747a29",
+   "16x9": {
+    "o_pip": [
+     1564,
+     48,
+     308,
+     174
+    ],
+    "vung_cam_x0y0x1y1": [
+     1552,
+     36,
+     1884,
+     246
+    ],
+    "dong_nguon_x_max": 1538
+   },
+   "9x16": {
+    "o_pip": [
+     74,
+     278,
+     308,
+     174
+    ],
+    "vung_cam_x0y0x1y1": [
+     62,
+     266,
+     438,
+     508
+    ]
+   },
+   "beat_tranh_pip": [
+    "h1",
+    "h2",
+    "h3",
+    "p2",
+    "p6",
+    "c2",
+    "v1",
+    "v2",
+    "v3",
+    "v4",
+    "w1",
+    "w7",
+    "k1"
+   ]
+  },
+  "adslots": "sinh sau TTS (chặng ii) từ mốc thật: mid-roll ứng viên tại ranh giới c2, c3, b1 — chỉ khi tổng ≥ 480 s",
+  "dang": "thư mục dang/ sinh ở chặng (ii) từ storyboard đã ĐẠT theo CACH_VIET_CAPTION_THU_HUT.md (YouTube + Facebook + TikTok)",
+  "thoi_luong_uoc": {
+   "tu": 1441,
+   "beats": 35,
+   "s_2_5": 593.9,
+   "s_2_9": 514.4,
+   "nghi_moi_beat_s": 0.5,
+   "ghi_chu": "ước lượng; ffprobe ≥ 480 s kiểm sau khi nối (chặng ii)"
+  },
+  "be_rong_k1": {
+   "nguon": "_lam/do_be_rong.json (vao_sha256 = sha256 _lam/can_do.json = 1fce31bed18c38a06618ea4fa12c80d7d9c857c8d4af0fec7a0b2d97db90ae42); đo bằng K1.chu() của module",
+   "nguon_max": 7.07,
+   "nhan_max": 6.227,
+   "gioi_han": "nhóm nguồn ≤ 7.244 (= (1538 − 560)/1920 × frame_width, K1_canh/loi.py); nhãn cỡ 20 ≤ 6.5"
+  },
+  "kiem_5gram": {
+   "M1_MENISCUS_T1": {
+    "tep_sha256": "aef5d4580d81b4083b9ddc73c351bf997c40a53a87f3795002612905acf716bb",
+    "so_chuoi_n": 46,
+    "trung": 0
+   },
+   "M1_T2": {
+    "tep_sha256": "dfe351440a7ce12d23390220dc1715a1f892f48d386888d64b07ba1c7f609263",
+    "so_chuoi_n": 37,
+    "trung": 0
+   },
+   "K3_T1": {
+    "tep_sha256": "b9547e115f5c19f4e138b6af94e43d126bb74626295317af39568901d31fb169",
+    "so_chuoi_n": 36,
+    "trung": 0
+   },
+   "K4_T1": {
+    "tep_sha256": "baf2568f98fd69dabe5708a8815d32a7128159675d33d4a7871ec4c1e00b9bbe",
+    "so_chuoi_n": 39,
+    "trung": 0
+   },
+   "K5_T1": {
+    "tep_sha256": "7384e24ef1204428f817194dfcb08fddf219009995a827a411d7c2fe64b6b189",
+    "so_chuoi_n": 38,
+    "trung": 0
+   },
+   "M2_UART": {
+    "tep_sha256": "9417d8b44e18838fdc1af974b77bb9f207ed64bf077251e764221937b7e9afbf",
+    "so_chuoi_n": 37,
+    "trung": 0
+   }
+  },
+  "duyet": "HỒ SƠ tự soát bằng _lam/tao_storyboard.py (kiểm ghi ở đầu tệp). Nộp lần đầu chặng (i) tập 3 theo lệnh 20261024-0150 (lô t3 K1→K5); chủ đề = KE_HOACH_TAP hàng 3 (GĐ duyệt 07:42 19/10 cùng câu hứa k2 tập 2); chờ KĐ chấm."
+ },
+ "beats": [
+  {
+   "id": "h1",
+   "canh": "KhayTieu",
+   "chuyen": "khung 0: khay nước đã rắc hạt tiêu nổi trên bàn quang học; giọt xà phòng rơi quay chậm từ khung đầu",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "soap",
+      "chu": "one drop of soap"
+     },
+     {
+      "moc": "edge",
+      "chu": "pepper races to the edge"
+     },
+     {
+      "moc": "touched",
+      "chu": "nothing touched it"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "drop",
+      "kieu": "giọt xà phòng rơi quay chậm vào giữa khay"
+     },
+     {
+      "moc": "races",
+      "kieu": "hạt tiêu dạt nhanh ra mép khay"
+     }
+    ],
+    "danh_dau": {
+     "moc": "pulls",
+     "tro": "what pulls the pepper?"
+    },
+    "hook": {
+     "moc": "pulls",
+     "chu": "what pulls the pepper?"
+    },
+    "nguon": [
+     "Roché et al., PRL 2014, text (pepper demo)"
+    ]
+   },
+   "labels": [
+    "one drop of soap",
+    "pepper races to the edge",
+    "nothing touched it",
+    "what pulls the pepper?"
+   ],
+   "moc": [
+    "drop",
+    "soap",
+    "races",
+    "edge",
+    "touched",
+    "pulls"
+   ],
+   "n": "One drop of soap, and floating pepper races to the edge of the bowl. Nothing touched it. So what pulls the pepper?",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "V1–V2. Hook K1 trục 10: hiện tượng thấy được (quay chậm). Roché mở bài bằng chính trò này: 'drop of water mixed with dishwashing liquid' trên nước rắc tiêu, 'pepper grains are transported rapidly to the edge of the bowl' (movie M1). Câu hỏi 'what pulls the pepper?' nói xong cuối h1; chữ bìa rút gọn 'what pulls pepper?' + '1 drop' (C12 ≤ 5 từ, phiếu 120 Lỗi 1).",
+   "canh_moi": true,
+   "rao": [],
+   "so_tu": 22,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 0.0,
+    "bat_dau_s_2_9": 0.0,
+    "dai_s_2_5": 8.8,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "h2",
+   "canh": "KhayTieu",
+   "chuyen": "khong (cùng bàn)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "soap",
+      "chu": "not the soap"
+     },
+     {
+      "moc": "harder",
+      "chu": "clean water pulls harder"
+     },
+     {
+      "moc": "outward",
+      "chu": "surface dragged outward"
+     },
+     {
+      "moc": "second",
+      "chu": "up to 0.5 m/s (lab study)"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "drags",
+      "kieu": "mũi tên cam dài ở vùng nước sạch kéo mặt ra ngoài"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (difference in surface tension)",
+     "Roché et al., PRL 2014, text (Fig. 3a, Qa 0.52 μmol/s)"
+    ]
+   },
+   "labels": [
+    "not the soap",
+    "clean water pulls harder",
+    "surface dragged outward",
+    "up to 0.5 m/s (lab study)"
+   ],
+   "moc": [
+    "soap",
+    "harder",
+    "drags",
+    "outward",
+    "second"
+   ],
+   "n": "Not the soap. Clean water further out pulls harder than the soapy spot, and drags the surface outward. In one lab study, that surface reached up to half a metre per second.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "V3: trả lời ngay 'Not the soap' (≤ 20 s), điều bất ngờ (nước sạch ở xa kéo; mặt chạy tới cỡ 0.5 m/s) xong ≤ 30 s. Roché: 'The flow results from the difference in surface tension'; Fig. 3a 'maximum velocity u≈0.5 m/s' (dòng SDS và các chất khác ở Qa 0.52 μmol/s) — số của bài, không gán cho hạt tiêu trong bát.",
+   "canh_moi": false,
+   "rao": [
+    "up to"
+   ],
+   "so_tu": 32,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 9.3,
+    "bat_dau_s_2_9": 8.1,
+    "dai_s_2_5": 12.8,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "h3",
+   "canh": "KhayTieu",
+   "chuyen": "khong (cùng bàn)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "steadily",
+      "chu": "soap fed in steadily"
+     },
+     {
+      "moc": "ring",
+      "chu": "the rush stops at a ring"
+     }
+    ],
+    "danh_dau": {
+     "moc": "there",
+     "tro": "why there?"
+    },
+    "hook": {
+     "moc": "there",
+     "chu": "why there?"
+    },
+    "nguon": [
+     "Roché et al., PRL 2014, Fig. 1b (steady injection)"
+    ]
+   },
+   "labels": [
+    "soap fed in steadily",
+    "the rush stops at a ring",
+    "why there?"
+   ],
+   "moc": [
+    "steadily",
+    "ring",
+    "there"
+   ],
+   "n": "Yet with soap fed in steadily, the rush stops at a ring. Why there?",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "V4: vòng mở DUY NHẤT — đóng ở w7 ('ring'). Chỉ gắn với bơm liên tục (Roché Fig. 1b: vùng trong suốt có bán kính hữu hạn r_t); bát bếp một giọt không có vòng cố định (r4).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 14,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 22.6,
+    "bat_dau_s_2_9": 19.6,
+    "dai_s_2_5": 5.6,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "h4",
+   "canh": "PhepTinh",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "N1",
+    "T2",
+    "L1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "degrees",
+      "chu": "25 °C"
+     },
+     {
+      "moc": "harder",
+      "chu": "water, 25 °C: γ 71.97 mN/m"
+     },
+     {
+      "moc": "episode",
+      "chu": "SDS, 25 °C: γ 36.43 mN/m (episode 2)"
+     },
+     {
+      "moc": "millimolar",
+      "chu": "SDS 25.0 mM in water (inferred)"
+     },
+     {
+      "moc": "calculated",
+      "chu": "gap 35.54 mN/m (calculated)"
+     },
+     {
+      "moc": "pulling",
+      "chu": "the gap does the pulling"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "gap",
+      "kieu": "hai mũi tên cam dài / ngắn đặt cạnh nhau, khoảng chênh sáng lên"
+     }
+    ],
+    "nguon": [
+     "NIST SRD 69, saturation table, 298.15 K",
+     "γ SDS: Liu et al. 2026, Fig. 5a, in water (§4.3), 25 °C, 25.0 mM (inferred)",
+     "calculated: gap = γ water − γ SDS, 25 °C (episode 2 values)"
+    ]
+   },
+   "labels": [
+    "25 °C",
+    "water, 25 °C: γ 71.97 mN/m",
+    "SDS, 25 °C: γ 36.43 mN/m (episode 2)",
+    "SDS 25.0 mM in water (inferred)",
+    "gap 35.54 mN/m (calculated)",
+    "the gap does the pulling"
+   ],
+   "moc": [
+    "degrees",
+    "harder",
+    "episode",
+    "millimolar",
+    "gap",
+    "calculated",
+    "pulling"
+   ],
+   "n": "Here is the engine. At twenty five degrees, clean water pulls harder than our soap from episode two, SDS at an inferred twenty five millimolar in water: a gap of thirty five point five four millinewtons per metre, calculated. That gap, not the soap itself, does the pulling.",
+   "nguon": [
+    "N1",
+    "T2",
+    "L1",
+    "T1"
+   ],
+   "ma_chuan": [
+    "NIST Chemistry WebBook SRD 69, Thermophysical Properties of Fluid Systems: water, saturation (fluid.cgi SatP)",
+    "Meniscus Lab tập 2 (out/M1_XAPHONG/so_lieu.json, sha256-8 70a73fd9)",
+    "Liu et al., Advanced Science 2026, PMC13418275"
+   ],
+   "src": "Động cơ = hiệu sức căng (γ nước − γ SDS) ở 25 °C: 0.071972 − 0.03643 = 0.035542 N/m (T1). 71.97 và 36.43 chỉ trên nhãn (không đọc lại: đã đọc ở tập 2). 25.0 mM SUY như tập 2 → lời 'inferred' + nhãn + dòng nguồn.",
+   "canh_moi": false,
+   "rao": [
+    "inferred"
+   ],
+   "so_tu": 48,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 28.7,
+    "bat_dau_s_2_9": 24.9,
+    "dai_s_2_5": 19.2,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "c1",
+   "canh": "ZoomThang",
+   "chuyen": "zoom_thang",
+   "chu_thich": [
+    "R1",
+    "S0"
+   ],
+   "tham_so": {
+    "nhan": [
+     {
+      "moc": "surface#2",
+      "chu": "the surface"
+     },
+     {
+      "moc": "neighbours",
+      "chu": "each patch pulls its neighbours"
+     },
+     {
+      "moc": "strong",
+      "chu": "clean water: strong pull"
+     },
+     {
+      "moc": "weaker",
+      "chu": "soapy spot: weaker pull"
+     },
+     {
+      "moc": "sketch",
+      "chu": "our sketch"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "zoom",
+      "kieu": "zoom_thang liên tục từ khay xuống mặt nước"
+     }
+    ],
+    "nguon": [
+     "tug of war: our sketch",
+     "Roché et al., PRL 2014, text (difference in surface tension)"
+    ]
+   },
+   "labels": [
+    "the surface",
+    "each patch pulls its neighbours",
+    "clean water: strong pull",
+    "soapy spot: weaker pull",
+    "our sketch"
+   ],
+   "moc": [
+    "zoom",
+    "surface#2",
+    "neighbours",
+    "strong",
+    "weaker",
+    "sketch"
+   ],
+   "n": "Zoom from the bowl down to its surface. Every patch of that surface pulls on its neighbours. Over clean water the pull is strong; over the soapy spot it is weaker. In our sketch, that tug of war is drawn as arrows.",
+   "nguon": [
+    "R1",
+    "S0"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1",
+    "hình minh hoạ của kênh, không phải số liệu"
+   ],
+   "src": "Zoom qua thang độ lớn (LUAT trục 9). Kéo co trên mặt = minh hoạ (S0); hiệu sức căng sinh dòng = câu Roché ('difference in surface tension').",
+   "canh_moi": false,
+   "rao": [
+    "sketch"
+   ],
+   "so_tu": 42,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 48.4,
+    "bat_dau_s_2_9": 42.0,
+    "dai_s_2_5": 16.8,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "p1",
+   "canh": "MuiTenCang",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1",
+    "S0"
+   ],
+   "tham_so": {
+    "nhan": [
+     {
+      "moc": "long",
+      "chu": "long arrow: clean water"
+     },
+     {
+      "moc": "short",
+      "chu": "short arrow: soapy spot"
+     },
+     {
+      "moc": "outward",
+      "chu": "dragged outward"
+     },
+     {
+      "moc": "below",
+      "chu": "water below dragged along"
+     },
+     {
+      "moc": "marangoni",
+      "chu": "Marangoni flow"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "dragged",
+      "kieu": "mặt trượt về phía mũi tên dài"
+     },
+     {
+      "moc": "difference",
+      "kieu": "cặp mũi tên dài / ngắn chớp sáng cùng lúc"
+     }
+    ],
+    "nguon": [
+     "arrows: our sketch",
+     "Roché et al., PRL 2014, text (difference in surface tension)"
+    ]
+   },
+   "labels": [
+    "long arrow: clean water",
+    "short arrow: soapy spot",
+    "dragged outward",
+    "water below dragged along",
+    "Marangoni flow"
+   ],
+   "moc": [
+    "long",
+    "short",
+    "dragged",
+    "outward",
+    "below",
+    "difference",
+    "marangoni"
+   ],
+   "n": "Long orange arrows over clean water, short ones over the soap. Where long meets short, the surface is dragged toward the long arrows, outward, and the water just below is dragged along. A flow driven by a difference in pull like this is called a Marangoni flow.",
+   "nguon": [
+    "R1",
+    "S0"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1",
+    "hình minh hoạ của kênh, không phải số liệu"
+   ],
+   "src": "Mũi tên cam #E8772E = sức căng mặt (LUAT trục 5); độ dài tỉ lệ γ. Không đọc 'our sketch' ở đây (đã có ở c1) → nhãn không ghi 'our sketch', dòng nguồn ghi.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 47,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 65.7,
+    "bat_dau_s_2_9": 57.0,
+    "dai_s_2_5": 18.8,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "p2",
+   "canh": "DongMarangoni",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "needle",
+      "chu": "steady pump through a needle"
+     },
+     {
+      "moc": "layers",
+      "chu": "centimetre-thick water layer"
+     },
+     {
+      "moc": "rated",
+      "chu": "ultrapure water: 18.2 MΩ·cm"
+     },
+     {
+      "moc": "micrometres",
+      "chu": "olive oil tracers: 10 μm"
+     },
+     {
+      "moc": "motion",
+      "chu": "tracers show the motion"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "pumped",
+      "kieu": "bơm tiêm đẩy dung dịch qua kim chạm mặt nước"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, Fig. 1a, text (set-up)"
+    ]
+   },
+   "labels": [
+    "steady pump through a needle",
+    "centimetre-thick water layer",
+    "ultrapure water: 18.2 MΩ·cm",
+    "olive oil tracers: 10 μm",
+    "tracers show the motion"
+   ],
+   "moc": [
+    "pumped",
+    "needle",
+    "layers",
+    "rated",
+    "micrometres",
+    "motion"
+   ],
+   "n": "How do you measure such a flow? Roché and colleagues pumped soap solution steadily through a fine needle onto centimetre-thick layers of ultrapure water, rated eighteen point two megohm centimetres. Olive oil droplets ten micrometres across were added to scatter light and trace the motion.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché: syringe pump (Harvard Apparatus PHD2000) bơm ở lưu lượng mol không đổi; nước Millipore 18.2 MΩ·cm; giọt dầu ô liu 10 μm tán xạ ánh sáng làm tracer; 'centimeter-thick water layers'. Không nêu tên hãng trên màn.",
+   "canh_moi": true,
+   "rao": [],
+   "so_tu": 45,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 85.0,
+    "bat_dau_s_2_9": 73.7,
+    "dai_s_2_5": 18.0,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "p3",
+   "canh": "BangKe",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "C1",
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "eight",
+      "chu": "eight surfactants"
+     },
+     {
+      "moc": "pure",
+      "chu": "purity 99 %"
+     },
+     {
+      "moc": "heads",
+      "chu": "different tails and heads"
+     },
+     {
+      "moc": "magnitude",
+      "chu": "cmc spans two orders of magnitude"
+     },
+     {
+      "moc": "sds",
+      "chu": "SDS = C12NaSO4"
+     },
+     {
+      "moc": "study",
+      "chu": "cmc 8.23 mM (SDS in water, 25 °C)"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "salt",
+      "kieu": "cốc nước trong cạnh chai SDS"
+     },
+     {
+      "moc": "units",
+      "kieu": "vạch 8.23 sáng trên thang nồng độ"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (surfactants, purity)",
+     "Chenyakin & Chen, Electrophoresis 2025, Table 1"
+    ]
+   },
+   "labels": [
+    "eight surfactants",
+    "purity 99 %",
+    "different tails and heads",
+    "cmc spans two orders of magnitude",
+    "SDS = C12NaSO4",
+    "cmc 8.23 mM (SDS in water, 25 °C)"
+   ],
+   "moc": [
+    "eight",
+    "pure",
+    "heads",
+    "magnitude",
+    "sds",
+    "study",
+    "salt",
+    "units"
+   ],
+   "n": "They tested eight surfactants, bought ninety nine per cent pure, with different tails and heads. Their micelle thresholds span two orders of magnitude. One of them is SDS, our soap from episode two. Another study measured its threshold at twenty five degrees, with no salt added: eight point two three, in millimolar units.",
+   "nguon": [
+    "C1",
+    "R1"
+   ],
+   "ma_chuan": [
+    "Chenyakin & Chen, Electrophoresis 2025, PMC12449752",
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché: 8 chất (CnTABr n 10–14, CnTACl n 12 và 16, CnNaSO4 n 8–12), Sigma-Aldrich 'purity 99%', cmc 'varies over two orders of magnitude'. cmc 8.23 mM của SDS lấy từ C1 Table 1 (trong nước, 25 °C), không phải từ Roché.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 53,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 103.5,
+    "bat_dau_s_2_9": 89.7,
+    "dai_s_2_5": 21.2,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "p4",
+   "canh": "PhanTu",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "T2",
+    "R1"
+   ],
+   "tham_so": {
+    "nhan": [
+     {
+      "moc": "below",
+      "chu": "below cmc: molecules crowd the surface"
+     },
+     {
+      "moc": "above",
+      "chu": "above cmc: micelles in the water"
+     },
+     {
+      "moc": "concentration#2",
+      "chu": "c* = cmc at the needle"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "clump",
+      "kieu": "phân tử dư gom thành quả cầu nhỏ trong nước"
+     },
+     {
+      "moc": "model",
+      "kieu": "kim bơm hiện lại ở góc, nhãn nồng độ chỉ vào đầu kim"
+     }
+    ],
+    "nguon": [
+     "micelles: episode 2",
+     "Roché et al., PRL 2014, Eq. 3 (c* = cmc)"
+    ]
+   },
+   "labels": [
+    "below cmc: molecules crowd the surface",
+    "above cmc: micelles in the water",
+    "c* = cmc at the needle"
+   ],
+   "moc": [
+    "below",
+    "above",
+    "clump",
+    "model",
+    "concentration#2"
+   ],
+   "n": "Why does that threshold matter here? Below it, extra molecules crowd onto the surface. Above it, they clump into micelles in the water. Roché's model takes the threshold, the critical micelle concentration, as the soap concentration right at the needle.",
+   "nguon": [
+    "T2",
+    "R1"
+   ],
+   "ma_chuan": [
+    "Meniscus Lab tập 2 (out/M1_XAPHONG/so_lieu.json, sha256-8 70a73fd9)",
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Định nghĩa cmc đã có ở tập 2 (T2). Roché Eq. 3: 'with c* the critical micelle concentration' (nồng độ ở nguồn).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 40,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 125.2,
+    "bat_dau_s_2_9": 108.5,
+    "dai_s_2_5": 16.0,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "p5",
+   "canh": "PhepTinh",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "balance",
+      "chu": "stress balance"
+     },
+     {
+      "moc": "patch",
+      "chu": "pull gap / patch size"
+     },
+     {
+      "moc": "layer",
+      "chu": "friction in a thin moving layer"
+     },
+     {
+      "moc": "equals",
+      "chu": "η u* / ℓν ≈ (γw − γs) / r*"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, Eq. 5"
+    ]
+   },
+   "labels": [
+    "stress balance",
+    "pull gap / patch size",
+    "friction in a thin moving layer",
+    "η u* / ℓν ≈ (γw − γs) / r*"
+   ],
+   "moc": [
+    "balance",
+    "patch",
+    "layer",
+    "equals"
+   ],
+   "n": "Now the balance. The gap in pull, spread over the size of the soapy patch, must be matched by friction inside a thin moving layer of water. In Roché's model, viscosity times surface speed over that layer's thickness roughly equals the gap over the patch radius.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché Eq. 5: η u*/ℓν ≈ (γw − γs)/r* (cân bằng ứng suất Marangoni với ứng suất nhớt trong lớp biên động lượng ℓν).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 46,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 141.7,
+    "bat_dau_s_2_9": 122.8,
+    "dai_s_2_5": 18.4,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "p6",
+   "canh": "KhayTieu",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "float",
+      "chu": "pepper floats on the surface"
+     },
+     {
+      "moc": "outward",
+      "chu": "surface slides outward"
+     },
+     {
+      "moc": "trick",
+      "chu": "the paper's opening demo"
+     }
+    ],
+    "trich": [
+     {
+      "moc": "transported",
+      "chu": "“transported rapidly to the edge of the bowl”"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (pepper demo)"
+    ]
+   },
+   "labels": [
+    "pepper floats on the surface",
+    "surface slides outward",
+    "the paper's opening demo",
+    "“transported rapidly to the edge of the bowl”"
+   ],
+   "moc": [
+    "float",
+    "outward",
+    "trick",
+    "transported"
+   ],
+   "n": "Back to the bowl. Pepper grains float, so they ride on the surface. When the surface slides outward, the grains go with it. Roché's paper opens with this very trick: the grains, it says, are transported rapidly to the edge of the bowl.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché đoạn mở (movie M1): 'pepper grains are transported rapidly to the edge of the bowl' — trích 8 từ.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 43,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 160.6,
+    "bat_dau_s_2_9": 139.1,
+    "dai_s_2_5": 17.2,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "c2",
+   "canh": "DongMarangoni",
+   "chuyen": "zoom_thang",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "pumping",
+      "chu": "steady pumping"
+     },
+     {
+      "moc": "source",
+      "chu": "source"
+     },
+     {
+      "moc": "clear",
+      "chu": "clear zone: tracers swept away"
+     },
+     {
+      "moc": "swirls",
+      "chu": "outer zone: vortex pairs"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "zones",
+      "kieu": "ba vùng hiện dần từ kim ra ngoài"
+     },
+     {
+      "moc": "outer",
+      "kieu": "vùng ngoài hiện các cặp xoáy"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, Fig. 1b, text (flow zones)"
+    ]
+   },
+   "labels": [
+    "steady pumping",
+    "source",
+    "clear zone: tracers swept away",
+    "outer zone: vortex pairs"
+   ],
+   "moc": [
+    "pumping",
+    "zones",
+    "source",
+    "clear",
+    "outer",
+    "swirls"
+   ],
+   "n": "Zoom out to the whole dish under steady pumping. Roché saw three zones: the source at the needle, a clear zone around it where tracers are swept away, and an outer zone with pairs of swirls.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché Fig. 1b + text: nguồn r_s, 'transparent zone', ngoài vùng trong suốt 'vortex pairs'. 'clear zone' = transparent zone (tracer bị cuốn đi nên trong).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 36,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 178.3,
+    "bat_dau_s_2_9": 154.5,
+    "dai_s_2_5": 14.4,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "v1",
+   "canh": "DongMarangoni",
+   "chuyen": "khong (cùng bàn)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "barely",
+      "chu": "outer surface: barely moves"
+     },
+     {
+      "moc": "confined",
+      "chu": "fast flow confined"
+     },
+     {
+      "moc": "fills",
+      "chu": "fills the clear zone only"
+     }
+    ],
+    "trich": [
+     {
+      "moc": "slightly",
+      "chu": "“the tracers move only slightly”"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, Fig. 1b, text (flow zones)"
+    ]
+   },
+   "labels": [
+    "outer surface: barely moves",
+    "fast flow confined",
+    "fills the clear zone only",
+    "“the tracers move only slightly”"
+   ],
+   "moc": [
+    "barely",
+    "slightly",
+    "confined",
+    "fills"
+   ],
+   "n": "Outside the clear zone, the surface barely moves. The paper puts it plainly: further from the source, the tracers move only slightly. So the fast flow is confined. It fills the clear zone and no more.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché text: 'Further from the source, the tracers move only slightly' — nhãn trích 5 từ cuối.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 36,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 193.2,
+    "bat_dau_s_2_9": 167.4,
+    "dai_s_2_5": 14.4,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "v2",
+   "canh": "DongMarangoni",
+   "chuyen": "khong (cùng bàn)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "needle",
+      "chu": "near the needle: ≈ 1 cm/s"
+     },
+     {
+      "moc": "second#2",
+      "chu": "peak ≈ 0.5 m/s"
+     },
+     {
+      "moc": "gradually",
+      "chu": "then a gradual slowdown"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "speeds",
+      "kieu": "vệt tracer dài dần tới đỉnh"
+     },
+     {
+      "moc": "gradually",
+      "kieu": "vệt tracer ngắn dần qua phần còn lại của vùng trong suốt"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (Fig. 3a, Qa 0.52 μmol/s)"
+    ]
+   },
+   "labels": [
+    "near the needle: ≈ 1 cm/s",
+    "peak ≈ 0.5 m/s",
+    "then a gradual slowdown"
+   ],
+   "moc": [
+    "needle",
+    "speeds",
+    "second#2",
+    "gradually"
+   ],
+   "n": "Inside the clear zone the surface starts slowly, around one centimetre per second near the needle. It speeds up, reaching a peak near half a metre per second, then slows gradually as it crosses the rest of the zone.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché text :156 (Fig. 3a, Qa 0.52 μmol/s): u ≈ 10⁻² m/s gần nguồn, tăng tốc tới 'maximum velocity umax ≈ 0.5 m.s-1', 'before decelerating as they travel across the transparent area'; đỉnh ở (r − rs)/(rt,max − rs) ≈ 0.2 (:157, không lên màn). Đọc 'peak near' (không dùng 'maximum' để khỏi rào). Sửa phiếu 119 Lỗi 2.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 39,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 208.1,
+    "bat_dau_s_2_9": 180.3,
+    "dai_s_2_5": 15.6,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "v3",
+   "canh": "DongMarangoni",
+   "chuyen": "khong (cùng bàn)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "sudden",
+      "chu": "at the edge: gradual turns sudden"
+     },
+     {
+      "moc": "abruptly",
+      "chu": "abrupt slowdown at the edge"
+     },
+     {
+      "moc": "ring",
+      "chu": "edge = the ring"
+     }
+    ],
+    "danh_dau": {
+     "moc": "abruptly",
+     "tro": "abrupt slowdown at the edge"
+    },
+    "buoc": [
+     {
+      "moc": "surprise",
+      "kieu": "camera lướt tới mép vùng trong suốt"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (Fig. 3a, Qa 0.52 μmol/s)"
+    ]
+   },
+   "labels": [
+    "at the edge: gradual turns sudden",
+    "abrupt slowdown at the edge",
+    "edge = the ring"
+   ],
+   "moc": [
+    "surprise",
+    "sudden",
+    "abruptly",
+    "ring"
+   ],
+   "n": "Then comes the surprise. At the edge of the clear zone, the gradual slowdown turns sudden. The tracers decelerate abruptly, and the fast surface flow ends right there. That edge is the ring from the start.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "C7-2: Roché text :156 (Fig. 3a): 'before decelerating as they travel across the transparent area. Finally, tracers decelerate abruptly as they reach r = rt' — ba đoạn: tăng tới đỉnh, chậm dần, tụt đột ngột ở r_t (phiếu 119 Lỗi 2). 'the ring from the start' trỏ h3 (chưa đóng vòng mở: lời giải ở w7).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 36,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 224.2,
+    "bat_dau_s_2_9": 194.2,
+    "dai_s_2_5": 14.4,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "v4",
+   "canh": "DongMarangoni",
+   "chuyen": "khong (cùng bàn)",
+   "chu_thich": [
+    "R1",
+    "S0"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "pile",
+      "chu": "no pile-up at the edge"
+     },
+     {
+      "moc": "bottom#2",
+      "chu": "return flow along the bottom"
+     },
+     {
+      "moc": "loop",
+      "chu": "one loop"
+     },
+     {
+      "moc": "sketch",
+      "chu": "our sketch"
+     }
+    ],
+    "trich": [
+     {
+      "moc": "container",
+      "chu": "“back towards the source”"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "below",
+      "kieu": "mặt cắt ngang lộ lớp nước dưới vùng trong suốt"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, Fig. 1b, text (flow zones)",
+     "loop: our sketch"
+    ]
+   },
+   "labels": [
+    "no pile-up at the edge",
+    "return flow along the bottom",
+    "one loop",
+    "our sketch",
+    "“back towards the source”"
+   ],
+   "moc": [
+    "pile",
+    "below",
+    "container",
+    "sketch",
+    "bottom#2",
+    "loop"
+   ],
+   "n": "Where does the water go? It cannot pile up at the edge. Below the clear zone, the paper traces a flow that follows the bottom of the container back towards the source. In our sketch, surface out and bottom back make one loop.",
+   "nguon": [
+    "R1",
+    "S0"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1",
+    "hình minh hoạ của kênh, không phải số liệu"
+   ],
+   "src": "Roché text: dòng dưới vùng trong suốt đổi hướng ở r_t 'and then follows the bottom of the container back towards the source' — nhãn trích 4 từ cuối. Vòng tuần hoàn = minh hoạ (S0).",
+   "canh_moi": false,
+   "rao": [
+    "sketch"
+   ],
+   "so_tu": 43,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 239.1,
+    "bat_dau_s_2_9": 207.2,
+    "dai_s_2_5": 17.2,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "v5",
+   "canh": "BangKe",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "expect",
+      "chu": "pump faster → faster flow?"
+     },
+     {
+      "moc": "sulfate",
+      "chu": "C10NaSO4, several pump rates"
+     },
+     {
+      "moc": "zone",
+      "chu": "pump rate changes the zone size"
+     }
+    ],
+    "trich": [
+     {
+      "moc": "field",
+      "chu": "“little effect on the velocity field”"
+     }
+    ],
+    "danh_dau": {
+     "moc": "field",
+     "tro": "“little effect on the velocity field”"
+    },
+    "nguon": [
+     "Roché et al., PRL 2014, Fig. 3b, text",
+     "zone size vs pump rate: Roché et al., PRL 2014, Fig. 4c"
+    ]
+   },
+   "labels": [
+    "pump faster → faster flow?",
+    "C10NaSO4, several pump rates",
+    "pump rate changes the zone size",
+    "“little effect on the velocity field”"
+   ],
+   "moc": [
+    "expect",
+    "sulfate",
+    "field",
+    "zone"
+   ],
+   "n": "Pump faster, and you might expect a faster flow. Not here. For one shorter tailed sulfate, the paper reports that the injection flow rate has little effect on the velocity field. What pumping does change is the size of the clear zone.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "C7-3: Roché Fig. 3b (C10NaSO4 ở nhiều Qa): 'The injection flow rate has little effect on the velocity field' — trích 6 từ. Vòng lớn theo Qa: Eq. 7 so dữ liệu r_t,max theo Qa ở Fig. 4c (không đọc số trên hình).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 42,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 256.8,
+    "bat_dau_s_2_9": 222.5,
+    "dai_s_2_5": 16.8,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "v6",
+   "canh": "BangKe",
+   "chuyen": "khong (cùng bàn)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "double",
+      "chu": "tail carbon number × 2"
+     },
+     {
+      "moc": "magnitude",
+      "chu": "zone radius: almost two orders of magnitude"
+     },
+     {
+      "moc": "bigger",
+      "chu": "longer tail: lower cmc, bigger zone"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "radius",
+      "kieu": "vòng vùng trong suốt phồng dần theo độ dài đuôi"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, Fig. 2a, text",
+     "Roché et al., PRL 2014, Eq. 7 (r* vs c*)"
+    ]
+   },
+   "labels": [
+    "tail carbon number × 2",
+    "zone radius: almost two orders of magnitude",
+    "longer tail: lower cmc, bigger zone"
+   ],
+   "moc": [
+    "double",
+    "radius",
+    "magnitude",
+    "bigger"
+   ],
+   "n": "Tail length matters far more. Double the number of carbon atoms in the tail, and the radius of the clear zone changes over almost two orders of magnitude. Longer tails have lower micelle thresholds and make bigger zones.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "C7-4: Roché text (Fig. 2a): r_t 'varies over almost two orders of magnitude when n increases two-fold'. 'Đuôi dài → cmc thấp → vùng lớn' = Eq. 7 (r* tăng khi c* giảm) + họ chất cùng dãy; không nêu số trên hình.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 38,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 274.1,
+    "bat_dau_s_2_9": 237.5,
+    "dai_s_2_5": 15.2,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "v7",
+   "canh": "PhanTu",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "nhan": [
+     {
+      "moc": "twelve",
+      "chu": "same tail"
+     },
+     {
+      "moc": "sds",
+      "chu": "SDS head: smaller zone"
+     },
+     {
+      "moc": "bromide",
+      "chu": "C12TAB head: larger zone"
+     },
+     {
+      "moc": "ring",
+      "chu": "different head, different ring"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "swap",
+      "kieu": "đổi đầu phân cực, giữ nguyên đuôi"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (headgroup, Fig. 2a)"
+    ]
+   },
+   "labels": [
+    "same tail",
+    "SDS head: smaller zone",
+    "C12TAB head: larger zone",
+    "different head, different ring"
+   ],
+   "moc": [
+    "twelve",
+    "swap",
+    "sds",
+    "bromide",
+    "ring"
+   ],
+   "n": "The head matters too. Keep a twelve carbon tail and swap only the head: the sulfate head of SDS gives a smaller clear zone than a trimethylammonium bromide head. Same tail, different head, different ring.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché text: 'an increase of r_eff by using C12NaSO4 instead of C12TAB, which differ only by their polar headgroups, results in a decrease of r_t'.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 35,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 289.8,
+    "bat_dau_s_2_9": 251.1,
+    "dai_s_2_5": 14.0,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "c3",
+   "canh": "ZoomThang",
+   "chuyen": "zoom_thang",
+   "chu_thich": [
+    "R1",
+    "G0"
+   ],
+   "tham_so": {
+    "nhan": [
+     {
+      "moc": "question",
+      "chu": "why a ring?"
+     },
+     {
+      "moc": "molecules",
+      "chu": "molecules leave the needle"
+     },
+     {
+      "moc": "rides",
+      "chu": "ride the surface outward"
+     },
+     {
+      "moc": "dissolve",
+      "chu": "or dissolve into the water"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "zoom",
+      "kieu": "zoom_thang từ đĩa xuống lớp phân tử ở mặt"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (model assumption)"
+    ]
+   },
+   "labels": [
+    "why a ring?",
+    "molecules leave the needle",
+    "ride the surface outward",
+    "or dissolve into the water"
+   ],
+   "moc": [
+    "question",
+    "zoom",
+    "molecules",
+    "rides",
+    "dissolve"
+   ],
+   "n": "Now the open question: why does the flow stop at a ring? Zoom down to the molecules leaving the needle. Each one rides the surface outward, but it can also leave the surface and dissolve into the water below.",
+   "nguon": [
+    "R1",
+    "G0"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1",
+    "giả thiết của HỒ SƠ (meta.gia_thuyet)"
+   ],
+   "src": "Mở lớp 3 bằng cơ chế mà Roché đặt làm giả định nền: chất hoạt động bề mặt rời mặt (desorb) vào khối nước.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 39,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 304.3,
+    "bat_dau_s_2_9": 263.6,
+    "dai_s_2_5": 15.6,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "w1",
+   "canh": "DongMarangoni",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1",
+    "G0"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "assumption",
+      "chu": "the model's assumption"
+     },
+     {
+      "moc": "clean",
+      "chu": "surface clean again"
+     },
+     {
+      "moc": "drives",
+      "chu": "even pull: no drive"
+     },
+     {
+      "moc": "ring",
+      "chu": "ring = soap runs out"
+     }
+    ],
+    "trich": [
+     {
+      "moc": "desorbed",
+      "chu": "“have all desorbed from the interface”"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (model assumption)"
+    ]
+   },
+   "labels": [
+    "the model's assumption",
+    "surface clean again",
+    "even pull: no drive",
+    "ring = soap runs out",
+    "“have all desorbed from the interface”"
+   ],
+   "moc": [
+    "assumption",
+    "desorbed",
+    "clean",
+    "drives",
+    "ring"
+   ],
+   "n": "Roché's model rests on one assumption: the flow stops when the injected surfactants have all desorbed from the interface. Past that point the surface is clean again, the pull is even, and nothing drives the flow. The ring marks where soap runs out on the surface.",
+   "nguon": [
+    "R1",
+    "G0"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1",
+    "giả thiết của HỒ SƠ (meta.gia_thuyet)"
+   ],
+   "src": "Roché: 'Our rationale is based on the assumption that the Marangoni flow stops when surfactants … have all desorbed from the interface' — nói rõ là GIẢ ĐỊNH của mô hình (khớp dữ liệu ở Fig. 4), không phải phép đo trực tiếp. Trích 5 từ.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 46,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 320.4,
+    "bat_dau_s_2_9": 277.6,
+    "dai_s_2_5": 18.4,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "w2",
+   "canh": "PhepTinh",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "N1",
+    "L1",
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "law",
+      "chu": "u* = A ((γw − γs)² / (η ρ r*))^(1/3)"
+     },
+     {
+      "moc": "one",
+      "chu": "A = 1"
+     },
+     {
+      "moc": "four",
+      "chu": "gap 35.54 mN/m (calculated)"
+     },
+     {
+      "moc": "degrees",
+      "chu": "water, 25 °C: η, ρ"
+     },
+     {
+      "moc": "millimetres",
+      "chu": "r* 15 mm (Roché's estimate)"
+     },
+     {
+      "moc": "calculated",
+      "chu": "u* ≈ 0.46 m/s (calculated)"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "density",
+      "kieu": "bốn đại lượng đầu vào xếp hàng dưới công thức"
+     }
+    ],
+    "nguon": [
+     "calculated: Roché et al., PRL 2014, Eq. 6, A = 1 (Fig. 4b)",
+     "η, ρ water: NIST SRD 69, 298.15 K",
+     "r* 15 mm: Roché et al., PRL 2014, text (their estimate)",
+     "γ SDS: Liu et al. 2026, Fig. 5a, in water (§4.3), 25 °C, 25.0 mM (inferred)"
+    ]
+   },
+   "labels": [
+    "u* = A ((γw − γs)² / (η ρ r*))^(1/3)",
+    "A = 1",
+    "gap 35.54 mN/m (calculated)",
+    "water, 25 °C: η, ρ",
+    "r* 15 mm (Roché's estimate)",
+    "u* ≈ 0.46 m/s (calculated)"
+   ],
+   "moc": [
+    "law",
+    "one",
+    "density",
+    "four",
+    "degrees",
+    "millimetres",
+    "calculated"
+   ],
+   "n": "How fast should the surface go? Roché's speed law, with its constant set to one, uses the pull gap, viscosity, density and patch size. Take our gap of thirty five point five four, water's viscosity at twenty five degrees, and Roché's own patch estimate of fifteen millimetres: zero point four six metres per second, calculated.",
+   "nguon": [
+    "N1",
+    "L1",
+    "R1",
+    "T1"
+   ],
+   "ma_chuan": [
+    "NIST Chemistry WebBook SRD 69, Thermophysical Properties of Fluid Systems: water, saturation (fluid.cgi SatP)",
+    "Liu et al., Advanced Science 2026, PMC13418275",
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché Eq. 6, A ≈ 1 (Fig. 4b). Đầu vào: γw − γs = 0.035542 N/m (tập 2: NIST 298.15 K + Liu Fig. 5a, SDS 25.0 mM inferred trong nước, 25 °C); η 890.04 μPa·s, ρ 997.00 kg/m³ (NIST 298.15 K); r* 15 mm = ước lượng điển hình của Roché (:607: c* 10⁻² M, γw − γs = 33 mN/m, A = B = 1) — GIẢ THIẾT ghép (r3). u* = (0.035542² / (890.04e-6 × 997.00 × 0.015))^(1/3) = 0.4561 m/s.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 55,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 339.3,
+    "bat_dau_s_2_9": 293.9,
+    "dai_s_2_5": 22.0,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "w3",
+   "canh": "ThuocLc",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "N1",
+    "T2",
+    "R1"
+   ],
+   "tham_so": {
+    "nhan": [
+     {
+      "moc": "measured",
+      "chu": "measured: ≈ 0.5 m/s"
+     },
+     {
+      "moc": "thickness",
+      "chu": "moving layer ℓν"
+     },
+     {
+      "moc": "root",
+      "chu": "ℓν ≈ √(ν r* / u*)"
+     },
+     {
+      "moc": "calculated",
+      "chu": "ℓν ≈ 0.17 mm (calculated)"
+     },
+     {
+      "moc": "sheet",
+      "chu": "a thin sheet does the dragging"
+     }
+    ],
+    "thuoc": [
+     {
+      "moc": "seven",
+      "chu": "0.17 mm"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (Fig. 3a, Qa 0.52 μmol/s)",
+     "calculated: Roché et al., PRL 2014, Eq. 1",
+     "η, ρ water: NIST SRD 69, 298.15 K",
+     "u*: SDS 25.0 mM (inferred), in water, 25 °C (gap from episode 2; u* calculated above)"
+    ]
+   },
+   "labels": [
+    "measured: ≈ 0.5 m/s",
+    "moving layer ℓν",
+    "ℓν ≈ √(ν r* / u*)",
+    "ℓν ≈ 0.17 mm (calculated)",
+    "a thin sheet does the dragging",
+    "0.17 mm"
+   ],
+   "moc": [
+    "measured",
+    "thickness",
+    "root",
+    "seven",
+    "calculated",
+    "sheet"
+   ],
+   "n": "That lands close to the half a metre per second Roché measured. The same model gives the thickness of the moving layer: the square root of kinematic viscosity times patch size over speed. That is zero point one seven millimetres, calculated. A sheet that thin drags the surface across the dish.",
+   "nguon": [
+    "N1",
+    "T2",
+    "R1",
+    "T1"
+   ],
+   "ma_chuan": [
+    "NIST Chemistry WebBook SRD 69, Thermophysical Properties of Fluid Systems: water, saturation (fluid.cgi SatP)",
+    "Meniscus Lab tập 2 (out/M1_XAPHONG/so_lieu.json, sha256-8 70a73fd9)",
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché Eq. 1 ℓν ≈ √(ν r*/u*); ν = η/ρ = 8.9272e-7 m²/s (NIST 298.15 K); r* 0.015 m; u* 0.4561 (từ gap SDS 25.0 mM inferred, nước, 25 °C — dòng nguồn NG_W3U, phiếu 119 Lỗi 4) → 1.713e-4 m = 0.17 mm. So với ≈ 0.5 m/s (chữ Roché :156, Fig. 3a; số đo của bài).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 51,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 361.8,
+    "bat_dau_s_2_9": 313.4,
+    "dai_s_2_5": 20.4,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "w4",
+   "canh": "PhepTinh",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "still",
+      "chu": "soap layer: thinner still"
+     },
+     {
+      "moc": "slowly",
+      "chu": "D = 10⁻¹⁰ m²/s, ν = 10⁻⁶ m²/s"
+     },
+     {
+      "moc": "schmidt",
+      "chu": "Schmidt number Sc = ν / D"
+     },
+     {
+      "moc": "thousand",
+      "chu": "Sc ≈ 10 000"
+     },
+     {
+      "moc": "calculated",
+      "chu": "soap layer ≈ moving layer / 100 (calculated)"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "root",
+      "kieu": "√ bọc lấy 10 000, ra 100"
+     }
+    ],
+    "nguon": [
+     "calculated: Roché et al., PRL 2014, Eq. 2, Sc ≈ 10 000"
+    ]
+   },
+   "labels": [
+    "soap layer: thinner still",
+    "D = 10⁻¹⁰ m²/s, ν = 10⁻⁶ m²/s",
+    "Schmidt number Sc = ν / D",
+    "Sc ≈ 10 000",
+    "soap layer ≈ moving layer / 100 (calculated)"
+   ],
+   "moc": [
+    "still",
+    "slowly",
+    "schmidt",
+    "thousand",
+    "root",
+    "calculated"
+   ],
+   "n": "The soap layer is thinner still. Soap molecules spread through water far more slowly than motion does. The paper's ratio, the Schmidt number, is roughly ten thousand. Its square root sets the gap, so the soap layer is a hundred times thinner, calculated.",
+   "nguon": [
+    "R1",
+    "T1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché Eq. 2: ℓc ≈ Sc^(-1/2) ℓν với D = 10⁻¹⁰, ν = 10⁻⁶ m²/s, Sc ≈ 10⁴ (Sc ≫ 1). √10⁴ = 100 (T1). Không gọi là ℓc trên màn (kênh dùng ℓc cho chiều dài mao dẫn).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 43,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 382.7,
+    "bat_dau_s_2_9": 331.5,
+    "dai_s_2_5": 17.2,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "w5",
+   "canh": "BangKe",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "size",
+      "chu": "Eq. 7: r* grows as (Qa / c*)^(3/4)"
+     },
+     {
+      "moc": "rises",
+      "chu": "higher cmc: smaller ring"
+     },
+     {
+      "moc": "calculated",
+      "chu": "Qa × 2 → r* × 1.68 (calculated)"
+     },
+     {
+      "moc": "millimolar",
+      "chu": "c* = 10 mM (assumed by Roché)"
+     },
+     {
+      "moc": "millimetres",
+      "chu": "r* ≈ 15 mm (Roché's estimate)"
+     }
+    ],
+    "trich": [
+     {
+      "moc": "estimate",
+      "chu": "“compare very well with our experimental findings”"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "power",
+      "kieu": "đường cong r* theo Qa cong xuống (số mũ 3/4)"
+     }
+    ],
+    "nguon": [
+     "calculated: Roché et al., PRL 2014, Eq. 7, Fig. 4c",
+     "r* 15 mm: Roché et al., PRL 2014, text (their estimate)"
+    ]
+   },
+   "labels": [
+    "Eq. 7: r* grows as (Qa / c*)^(3/4)",
+    "higher cmc: smaller ring",
+    "Qa × 2 → r* × 1.68 (calculated)",
+    "c* = 10 mM (assumed by Roché)",
+    "r* ≈ 15 mm (Roché's estimate)",
+    "“compare very well with our experimental findings”"
+   ],
+   "moc": [
+    "size",
+    "power",
+    "rises",
+    "calculated",
+    "millimolar",
+    "estimate",
+    "millimetres"
+   ],
+   "n": "Now the ring size. Roché's second law says the zone radius grows with the pumping rate to the power three quarters, and shrinks as the micelle threshold rises. Double the pumping, and the ring grows one point six eight times, calculated. With a threshold of ten millimolar, the paper's estimate is fifteen millimetres.",
+   "nguon": [
+    "R1",
+    "T1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché Eq. 7: r* = B(ηρ/((γw−γs)² D³))^(1/8) (Qa/c*)^(3/4); số mũ 3/4 khớp Fig. 4c,d; B gần 1. 2^0.75 = 1.6818 (T1). Ước lượng của bài: c* = 10⁻² M, A = B = 1 → u* ≈ 0.5 m/s, r* ≈ 15×10⁻³ m, 'compare very well with our experimental findings' (6 từ).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 53,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 400.4,
+    "bat_dau_s_2_9": 346.8,
+    "dai_s_2_5": 21.2,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "w6",
+   "canh": "BangKe",
+   "chuyen": "khong (cùng bàn)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "viscous",
+      "chu": "more viscous layer → bigger zone (Fig. S5)"
+     },
+     {
+      "moc": "fails",
+      "chu": "speed law fails for tiny zones (Fig. 4b)"
+     },
+     {
+      "moc": "meniscus",
+      "chu": "zone ≈ needle meniscus"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text, Fig. S5, Fig. 4b"
+    ]
+   },
+   "labels": [
+    "more viscous layer → bigger zone (Fig. S5)",
+    "speed law fails for tiny zones (Fig. 4b)",
+    "zone ≈ needle meniscus"
+   ],
+   "moc": [
+    "viscous",
+    "fails",
+    "meniscus"
+   ],
+   "n": "Two more checks. Make the water layer more viscous and the zone grows, as the paper's supplement shows. And the speed law fails when the clear zone is as small as the millimetre long meniscus around the needle tip.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Roché: r_t tăng khi độ nhớt lớp tăng (Fig. S5); Eq. 6 'fails to capture the data for surfactants forming transparent zones comparable in size to the millimeter-long meniscus'.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 39,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 422.1,
+    "bat_dau_s_2_9": 365.6,
+    "dai_s_2_5": 15.6,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "w7",
+   "canh": "KhayTieu",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "model",
+      "chu": "in the model: soap has left the surface"
+     },
+     {
+      "moc": "useful",
+      "chu": "the ring as a measuring tool"
+     },
+     {
+      "moc": "independent",
+      "chu": "+ one surface tension measurement"
+     }
+    ],
+    "trich": [
+     {
+      "moc": "single",
+      "chu": "“a single measurement of the size”"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (closing paragraph)"
+    ]
+   },
+   "labels": [
+    "in the model: soap has left the surface",
+    "the ring as a measuring tool",
+    "+ one surface tension measurement",
+    "“a single measurement of the size”"
+   ],
+   "moc": [
+    "model",
+    "useful",
+    "single",
+    "independent"
+   ],
+   "n": "So that is why the rush stops at a ring: in Roché's model, past it the soap has left the surface. And the ring is useful. The authors suggest estimating the micelle threshold from a single measurement of the zone's size at a known pumping rate, plus one independent surface tension measurement.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Đóng vòng mở h3 ('ring'). Roché đoạn kết: 'an estimate of the cmc from a single measurement of the size of the spreading area at a given flow rate, accompanied by a single independent measure of the surface tension' — nhãn trích 6 từ liền mạch.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 52,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 438.2,
+    "bat_dau_s_2_9": 379.6,
+    "dai_s_2_5": 20.8,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "b1",
+   "canh": "BangKe",
+   "chuyen": "zoom_thang",
+   "chu_thich": [
+    "T2",
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "card",
+      "chu": "bench card: the pepper flow"
+     },
+     {
+      "moc": "measured",
+      "chu": "measured: Roché et al."
+     },
+     {
+      "moc": "episode",
+      "chu": "carried over: episode 2"
+     },
+     {
+      "moc": "calculated",
+      "chu": "calculated: speed, layers, ring"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, Fig. 3a, Eq. 6, Eq. 7",
+     "episode 2 values",
+     "calculated"
+    ]
+   },
+   "labels": [
+    "bench card: the pepper flow",
+    "measured: Roché et al.",
+    "carried over: episode 2",
+    "calculated: speed, layers, ring"
+   ],
+   "moc": [
+    "card",
+    "measured",
+    "episode",
+    "calculated"
+   ],
+   "n": "Time for the card on the bench. Three kinds of numbers appear on it: measured by Roché and colleagues, carried over from episode two, and calculated from both.",
+   "nguon": [
+    "T2",
+    "R1",
+    "T1"
+   ],
+   "ma_chuan": [
+    "Meniscus Lab tập 2 (out/M1_XAPHONG/so_lieu.json, sha256-8 70a73fd9)",
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Thẻ bàn (dàn ý §1). Điều kiện từng số nằm trên nhãn hoặc dòng nguồn của beat dùng số.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 28,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 459.5,
+    "bat_dau_s_2_9": 398.0,
+    "dai_s_2_5": 11.2,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "r1",
+   "canh": "BangKe",
+   "chuyen": "khong (cùng bàn)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "needle",
+      "chu": "about 1 cm/s near the needle"
+     },
+     {
+      "moc": "second#2",
+      "chu": "peak ≈ 0.5 m/s"
+     },
+     {
+      "moc": "hundredfold",
+      "chu": "zone radius: almost two orders of magnitude"
+     },
+     {
+      "moc": "temperature",
+      "chu": "temperature not stated (Roché)"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (Fig. 3a, Qa 0.52 μmol/s)",
+     "Roché et al., PRL 2014, Fig. 2a, text"
+    ]
+   },
+   "labels": [
+    "about 1 cm/s near the needle",
+    "peak ≈ 0.5 m/s",
+    "zone radius: almost two orders of magnitude",
+    "temperature not stated (Roché)"
+   ],
+   "moc": [
+    "needle",
+    "second#2",
+    "hundredfold",
+    "temperature"
+   ],
+   "n": "Measured: surface speeds from about one centimetre per second near the needle to a peak near half a metre per second, and a zone radius that changes almost a hundredfold as tails double. The paper does not state a temperature, so these numbers carry none.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Số đo của Roché; bài không nêu nhiệt độ (grep 'temperat' rỗng) → không gắn nhiệt độ.",
+   "canh_moi": false,
+   "rao": [
+    "about"
+   ],
+   "so_tu": 45,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 471.2,
+    "bat_dau_s_2_9": 408.1,
+    "dai_s_2_5": 18.0,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "r2",
+   "canh": "PhepTinh",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "N1",
+    "L1",
+    "R1"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "gap",
+      "chu": "gap 35.54 mN/m, 25 °C (calculated)"
+     },
+     {
+      "moc": "six",
+      "chu": "u* ≈ 0.46 m/s"
+     },
+     {
+      "moc": "seven",
+      "chu": "ℓν ≈ 0.17 mm"
+     },
+     {
+      "moc": "thinner",
+      "chu": "soap layer ≈ ℓν / 100"
+     },
+     {
+      "moc": "pumping",
+      "chu": "Qa × 2 → r* × 1.68"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "wider",
+      "kieu": "vòng nở rộng 1.68 lần"
+     }
+    ],
+    "nguon": [
+     "NIST SRD 69, saturation table, 298.15 K",
+     "γ SDS: Liu et al. 2026, Fig. 5a, in water (§4.3), 25 °C, 25.0 mM (inferred)",
+     "calculated: Roché et al., PRL 2014, Eq. 1, Eq. 2, Eq. 6, Eq. 7"
+    ]
+   },
+   "labels": [
+    "gap 35.54 mN/m, 25 °C (calculated)",
+    "u* ≈ 0.46 m/s",
+    "ℓν ≈ 0.17 mm",
+    "soap layer ≈ ℓν / 100",
+    "Qa × 2 → r* × 1.68"
+   ],
+   "moc": [
+    "gap",
+    "six",
+    "seven",
+    "thinner",
+    "wider",
+    "pumping"
+   ],
+   "n": "Calculated: a pull gap of thirty five point five four, a surface speed of zero point four six metres per second, a moving layer of zero point one seven millimetres, a soap layer a hundred times thinner, and a ring one point six eight times wider for double the pumping.",
+   "nguon": [
+    "N1",
+    "L1",
+    "R1",
+    "T1"
+   ],
+   "ma_chuan": [
+    "NIST Chemistry WebBook SRD 69, Thermophysical Properties of Fluid Systems: water, saturation (fluid.cgi SatP)",
+    "Liu et al., Advanced Science 2026, PMC13418275",
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Các số T1 (tinh_so.py). Gap: SDS 25.0 mM inferred trong nước, 25 °C (dòng nguồn NG_S).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 50,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 489.7,
+    "bat_dau_s_2_9": 424.2,
+    "dai_s_2_5": 20.0,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "r3",
+   "canh": "BangKe",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "L1",
+    "R1",
+    "G0"
+   ],
+   "tham_so": {
+    "dong": [
+     {
+      "moc": "constants",
+      "chu": "A = B = 1 (as in Roché)"
+     },
+     {
+      "moc": "measurement",
+      "chu": "r* 15 mm: Roché's estimate"
+     },
+     {
+      "moc": "millimolar",
+      "chu": "gap: SDS 25.0 mM (inferred), episode 2"
+     },
+     {
+      "moc": "millimolar#2",
+      "chu": "Roché's estimate: c* = 10 mM, its own gap"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "patch",
+      "kieu": "vòng 15 mm đánh dấu là ước lượng"
+     }
+    ],
+    "nguon": [
+     "our assumptions: constants, patch size, gap",
+     "r* 15 mm: Roché et al., PRL 2014, text (their estimate)",
+     "γ SDS: Liu et al. 2026, Fig. 5a, in water (§4.3), 25 °C, 25.0 mM (inferred)"
+    ]
+   },
+   "labels": [
+    "A = B = 1 (as in Roché)",
+    "r* 15 mm: Roché's estimate",
+    "gap: SDS 25.0 mM (inferred), episode 2",
+    "Roché's estimate: c* = 10 mM, its own gap"
+   ],
+   "moc": [
+    "constants",
+    "patch",
+    "measurement",
+    "millimolar",
+    "millimolar#2"
+   ],
+   "n": "Our assumptions. Roché's constants are set to one, as in the paper. The patch size is Roché's estimate, not our measurement. The gap uses episode two's SDS value at an inferred twenty five millimolar, while that estimate assumed a threshold of ten millimolar and a surface tension gap of its own.",
+   "nguon": [
+    "L1",
+    "R1",
+    "G0"
+   ],
+   "ma_chuan": [
+    "Liu et al., Advanced Science 2026, PMC13418275",
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1",
+    "giả thiết của HỒ SƠ (meta.gia_thuyet)"
+   ],
+   "src": "Khai giả thiết (gia_thuyet): A = B = 1; r* 15 mm của Roché ghép với gap SDS tập 2. Ước lượng r* của Roché (:607) giả định c* = 10⁻² M VÀ γw − γs = 33 mN/m (A = B = 1); r3 nói 'a surface tension gap of its own', không nêu số 33 và không dùng 33 để tính (dàn ý §7). 25.0 mM SUY. Sửa phiếu 119 Lỗi 3.",
+   "canh_moi": false,
+   "rao": [
+    "inferred"
+   ],
+   "so_tu": 51,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 510.2,
+    "bat_dau_s_2_9": 441.9,
+    "dai_s_2_5": 20.4,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "r4",
+   "canh": "BanQuang",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1"
+   ],
+   "tham_so": {
+    "nhan": [
+     {
+      "moc": "droplets",
+      "chu": "pepper ≠ oil tracers"
+     },
+     {
+      "moc": "pump",
+      "chu": "one drop ≠ steady pump"
+     },
+     {
+      "moc": "fixed",
+      "chu": "no fixed ring in a bowl"
+     },
+     {
+      "moc": "mixture",
+      "chu": "dishwashing liquid: a mixture"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "household",
+      "kieu": "chai nước rửa chén mờ đi"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (pepper demo)",
+     "Roché et al., PRL 2014, Fig. 1a, text (set-up)"
+    ]
+   },
+   "labels": [
+    "pepper ≠ oil tracers",
+    "one drop ≠ steady pump",
+    "no fixed ring in a bowl",
+    "dishwashing liquid: a mixture"
+   ],
+   "moc": [
+    "droplets",
+    "pump",
+    "fixed",
+    "household",
+    "mixture"
+   ],
+   "n": "What we leave out. Pepper grains are not the paper's oil droplets. A kitchen bowl gets one drop, not a steady pump, so its ring is not fixed. And household dishwashing liquid is a mixture; our numbers are for SDS.",
+   "nguon": [
+    "R1"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Giới hạn: hạt tiêu ≠ tracer dầu 10 μm; bát bếp một giọt (không bơm liên tục) → không có vòng cố định; nước rửa chén (Roché chỉ dùng ở đoạn mở) là hỗn hợp, không số.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 40,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 531.1,
+    "bat_dau_s_2_9": 460.0,
+    "dai_s_2_5": 16.0,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "s8",
+   "canh": "ZoomThang",
+   "chuyen": "zoom_thang",
+   "chu_thich": [
+    "N1",
+    "T0",
+    "L1",
+    "R1"
+   ],
+   "tham_so": {
+    "nhan": [
+     {
+      "moc": "millimetres",
+      "chu": "ℓc 2.73 mm (20 °C, episode 1)"
+     },
+     {
+      "moc": "four",
+      "chu": "gap 35.54 mN/m (episode 2, calculated)"
+     },
+     {
+      "moc": "calculated",
+      "chu": "u* ≈ 0.46 m/s (calculated)"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "back",
+      "kieu": "zoom_thang lùi: khay → vũng tập 2 → vũng tập 1"
+     },
+     {
+      "moc": "capillary",
+      "kieu": "vũng tập 1 hiện thước ℓc"
+     },
+     {
+      "moc": "drives",
+      "kieu": "mũi tên cam kéo mặt khay"
+     }
+    ],
+    "nguon": [
+     "episode 1: NIST SRD 69 row 34 (293.10 K)",
+     "NIST SRD 69, saturation table, 298.15 K",
+     "γ SDS: Liu et al. 2026, Fig. 5a, in water (§4.3), 25 °C, 25.0 mM (inferred)",
+     "calculated: Roché et al., PRL 2014, Eq. 6, A = 1 (Fig. 4b)"
+    ]
+   },
+   "labels": [
+    "ℓc 2.73 mm (20 °C, episode 1)",
+    "gap 35.54 mN/m (episode 2, calculated)",
+    "u* ≈ 0.46 m/s (calculated)"
+   ],
+   "moc": [
+    "back",
+    "capillary",
+    "millimetres",
+    "four",
+    "drives",
+    "calculated"
+   ],
+   "n": "Pull back through three episodes. Episode one: water's capillary length at twenty degrees came to two point seven three, in millimetres. Episode two: SDS opens a gap in pull of thirty five point five four. Episode three: that gap drives the surface at zero point four six metres per second, calculated.",
+   "nguon": [
+    "N1",
+    "T0",
+    "L1",
+    "R1",
+    "T1"
+   ],
+   "ma_chuan": [
+    "NIST Chemistry WebBook SRD 69, Thermophysical Properties of Fluid Systems: water, saturation (fluid.cgi SatP)",
+    "Meniscus Lab tập 1 (out/MENISCUS_LAB/so_lieu.json, NIST hàng 34, 293.10 K)",
+    "Liu et al., Advanced Science 2026, PMC13418275",
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1"
+   ],
+   "src": "Chuỗi nối: 2.73 mm (tập 1, 20 °C) → gap 35.54 mN/m (tập 2, 25 °C) → 0.46 m/s (T1). Không nói 'two point seven three millimetres' (cụm tập 1).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 51,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 547.6,
+    "bat_dau_s_2_9": 474.3,
+    "dai_s_2_5": 20.4,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "k1",
+   "canh": "KhayTieu",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [
+    "R1",
+    "G0"
+   ],
+   "tham_so": {
+    "tranh_pip": "hình rộng tới góc trên phải: mép khay / đĩa và mọi chữ dừng ngoài vùng cấm 1552..1884 × 36..246 (16x9) và 62..438 × 266..508 (9x16)",
+    "nhan": [
+     {
+      "moc": "pushed",
+      "chu": "not pushed by soap"
+     },
+     {
+      "moc": "spot",
+      "chu": "pulled by clean water"
+     },
+     {
+      "moc": "ends",
+      "chu": "flow ends where soap leaves"
+     },
+     {
+      "moc": "try",
+      "chu": "try it at the sink"
+     }
+    ],
+    "nguon": [
+     "Roché et al., PRL 2014, text (difference in surface tension)",
+     "Roché et al., PRL 2014, text (model assumption)"
+    ]
+   },
+   "labels": [
+    "not pushed by soap",
+    "pulled by clean water",
+    "flow ends where soap leaves",
+    "try it at the sink"
+   ],
+   "moc": [
+    "pushed",
+    "spot",
+    "ends",
+    "try"
+   ],
+   "n": "So the pepper is not pushed by the soap. Clean water pulls the surface away from the soapy spot, and under steady feeding the flow ends where the soap has left the surface. Try it with a bowl, some pepper and one drop of dish soap.",
+   "nguon": [
+    "R1",
+    "G0"
+   ],
+   "ma_chuan": [
+    "Roché, Li, Griffiths, Le Roux, Cantat, Saint-Jalmes, Stone, Phys. Rev. Lett. 112, 208302 (2014), arXiv 1312.3964v1",
+    "giả thiết của HỒ SƠ (meta.gia_thuyet)"
+   ],
+   "src": "Tóm hai ý: nước sạch kéo (hiệu sức căng); dòng dừng nơi chất hoạt động bề mặt đã rời mặt (giả định của mô hình Roché).",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 46,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 568.5,
+    "bat_dau_s_2_9": 492.4,
+    "dai_s_2_5": 18.4,
+    "pad_s": 0.5
+   }
+  },
+  {
+   "id": "k2",
+   "canh": "BanQuang",
+   "chuyen": "lay_net (phụ, LUAT trục 9; module chưa có helper — chặng ii: zoom_thang hệ số gần 1 nếu GĐ không thêm helper)",
+   "chu_thich": [],
+   "tham_so": {
+    "nhan": [
+     {
+      "moc": "coming",
+      "chu": "next: tears of wine"
+     }
+    ],
+    "buoc": [
+     {
+      "moc": "wine",
+      "kieu": "ly rượu vang, vệt chất lỏng leo thành ly"
+     }
+    ],
+    "nguon": []
+   },
+   "labels": [
+    "next: tears of wine"
+   ],
+   "moc": [
+    "coming",
+    "wine"
+   ],
+   "n": "Coming up on Meniscus Lab: why wine climbs the glass, then falls back as tears.",
+   "nguon": [],
+   "ma_chuan": [],
+   "src": "Lời hứa tập 4 = câu cột 3 hàng 4 out/M1_MARANGONI/KE_HOACH_TAP.md (nguyên văn). Không số.",
+   "canh_moi": false,
+   "rao": [],
+   "so_tu": 15,
+   "thoi_luong_uoc": {
+    "bat_dau_s_2_5": 587.4,
+    "bat_dau_s_2_9": 508.7,
+    "dai_s_2_5": 6.0,
+    "pad_s": 0.5
+   }
+  }
+ ]
+}
