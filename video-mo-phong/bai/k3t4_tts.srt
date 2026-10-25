@@ -3,390 +3,394 @@
 What does a lunar laser normal point actually record?
 
 2
-00:00:03,650 --> 00:00:07,250
-The named archive product is not a single pulse.
+00:00:03,650 --> 00:00:08,962
+ILRS normal points collect full-rate observations, not a single pulse.
 
 3
-00:00:07,250 --> 00:00:13,012
+00:00:08,962 --> 00:00:14,725
 A station times returning light many times, yet an archive may report one summary.
 
 4
-00:00:13,012 --> 00:00:15,050
+00:00:14,725 --> 00:00:16,762
 Why is that useful?
 
 5
-00:00:15,050 --> 00:00:20,587
+00:00:16,762 --> 00:00:22,300
 Our ledger keeps four columns: measured, dated, counted, assumed.
 
 6
-00:00:20,587 --> 00:00:23,875
+00:00:22,300 --> 00:00:25,587
 One reported row cannot replace them all.
 
 7
-00:00:23,875 --> 00:00:30,487
+00:00:25,587 --> 00:00:32,200
 Conditional calculation: a summary depends on accepted observations and stated processing rules.
 
 8
-00:00:30,487 --> 00:00:33,025
+00:00:32,200 --> 00:00:34,737
 We will not invent measurements.
 
 9
-00:00:33,025 --> 00:00:36,512
+00:00:34,737 --> 00:00:38,225
 Station one asks what arrives at the detector.
 
 10
-00:00:36,512 --> 00:00:42,262
+00:00:38,225 --> 00:00:43,975
 A ranging station transmits a laser pulse toward a reflector and seeks a returning signal.
 
 11
-00:00:42,262 --> 00:00:51,037
+00:00:43,975 --> 00:00:52,750
 Recorded arrival timing belongs to a physical experiment; that one return cannot, by itself, establish a secular orbital trend.
 
 12
-00:00:51,037 --> 00:00:57,375
-The International Laser Ranging Service distinguishes full-rate observations from normal-point products.
+00:00:52,750 --> 00:00:59,725
+ILRS distinguishes full-rate measurements and normal points, which summarize observations over an interval.
 
 13
-00:00:57,375 --> 00:01:00,675
-These names describe levels of data reporting.
+00:00:59,725 --> 00:01:03,450
+Its normal-point bin for lunar targets is variable.
 
 14
-00:01:00,675 --> 00:01:07,537
-A full-rate file can retain individual observation detail; a normal-point record condenses an interval.
+00:01:03,450 --> 00:01:08,400
+This is an ILRS product definition, not an actual dated measurement.
 
 15
-00:01:07,537 --> 00:01:12,162
-We do not assume every normal point contains a fixed number of events.
+00:01:08,400 --> 00:01:15,425
+No specific count, epoch, or uncertainty is assigned to this pictured Apollo fourteen laser reflector.
 
 16
-00:01:12,162 --> 00:01:15,737
+00:01:15,425 --> 00:01:19,000
 Every observation also belongs to an epoch.
 
 17
-00:01:15,737 --> 00:01:21,225
+00:01:19,000 --> 00:01:24,487
 As the Earth rotates and the Moon travels along its orbit, geometry changes.
 
 18
-00:01:21,225 --> 00:01:27,700
+00:01:24,487 --> 00:01:30,962
 Dates therefore cannot be removed just because several observations are collected into a more compact product.
 
 19
-00:01:27,700 --> 00:01:31,362
+00:01:30,962 --> 00:01:34,625
 Their provenance makes meaningful comparisons possible.
 
 20
-00:01:31,362 --> 00:01:36,937
+00:01:34,625 --> 00:01:40,200
 Imagine four hypothetical pulses shown as pencil marks on a blank notebook page.
 
 21
-00:01:36,937 --> 00:01:41,650
+00:01:40,200 --> 00:01:44,912
 Four is a deliberately assumed illustration, not a sample from NASA.
 
 22
-00:01:41,650 --> 00:01:47,812
+00:01:44,912 --> 00:01:51,075
 We assign no invented nanoseconds, station label, or lunar target to those marks.
 
 23
-00:01:47,812 --> 00:01:52,237
+00:01:51,075 --> 00:01:55,500
 They show repeated observations, not a historical dataset.
 
 24
-00:01:52,237 --> 00:01:58,512
+00:01:55,500 --> 00:02:01,775
 Some observations might fail a documented quality test; others might need a stated correction.
 
 25
-00:01:58,512 --> 00:02:02,700
+00:02:01,775 --> 00:02:05,962
 An honest diagram does not guess which ones were rejected.
 
 26
-00:02:02,700 --> 00:02:09,762
+00:02:05,962 --> 00:02:13,025
 It shows a separate selection step marked conditional and sends the viewer to the data specifications for the real rules.
 
 27
-00:02:09,762 --> 00:02:15,587
+00:02:13,025 --> 00:02:18,850
 The ILRS data pages document multiple formats and classes of available records.
 
 28
-00:02:15,587 --> 00:02:21,750
+00:02:18,850 --> 00:02:25,012
 A format explains how information is represented, not whether every supplied record is perfect.
 
 29
-00:02:21,750 --> 00:02:30,462
+00:02:25,012 --> 00:02:33,725
 Proper provenance links the station, reflector target, observation time and processing information, rather than displaying an orphan number.
 
 30
-00:02:30,462 --> 00:02:43,800
+00:02:33,725 --> 00:02:47,062
 At the first station's end, our ledger reads measured: returned-light timing; dated: observation epochs; counted: accepted records, when documented; assumed: reduction method and model.
 
 31
-00:02:43,800 --> 00:02:50,625
+00:02:47,062 --> 00:02:53,887
 None of these four columns should silently substitute for another merely because a video has limited screen space.
 
 32
-00:02:50,625 --> 00:02:54,862
+00:02:53,887 --> 00:02:58,125
 Station two asks what a summary keeps and what it leaves out.
 
 33
-00:02:54,862 --> 00:03:02,512
+00:02:58,125 --> 00:03:05,775
 A normal point is a processed record useful for subsequent analysis, not another physical photon arriving at the detector.
 
 34
-00:03:02,512 --> 00:03:08,012
+00:03:05,775 --> 00:03:11,275
 Calling it a single raw pulse would turn a database product into the wrong kind of evidence.
 
 35
-00:03:08,012 --> 00:03:14,012
+00:03:11,275 --> 00:03:17,275
 Our teaching page draws four empty event marks leading to a single outlined summary box.
 
 36
-00:03:14,012 --> 00:03:19,125
+00:03:17,275 --> 00:03:22,387
 That is an illustrative workflow only, not an official normal-point algorithm.
 
 37
-00:03:19,125 --> 00:03:27,137
+00:03:22,387 --> 00:03:30,400
 The diagram displays the conditional statement: if the selection and reduction rules are satisfied, a summary may be constructed.
 
 38
-00:03:27,137 --> 00:03:31,550
+00:03:30,400 --> 00:03:34,812
 Why is ordinary arithmetic averaging not necessarily enough?
 
 39
-00:03:31,550 --> 00:03:35,975
+00:03:34,812 --> 00:03:39,237
 The underlying observations can have different quality or corrections.
 
 40
-00:03:35,975 --> 00:03:40,975
+00:03:39,237 --> 00:03:44,237
 A simple average of made-up values would not certify an ILRS record.
 
 41
-00:03:40,975 --> 00:03:48,962
+00:03:44,237 --> 00:03:52,225
 For the actual procedure, the reduction convention and associated uncertainty definitions have to be checked in primary documentation.
 
 42
-00:03:48,962 --> 00:03:51,925
+00:03:52,225 --> 00:03:55,187
 One complication is the atmosphere.
 
 43
-00:03:51,925 --> 00:04:01,562
+00:03:55,187 --> 00:04:04,825
 A simple classroom model uses two-way light travel and the speed of light, but professional range reductions can include atmospheric effects and station calibration.
 
 44
-00:04:01,562 --> 00:04:08,712
+00:04:04,825 --> 00:04:11,975
 These corrections must be identified from documentation rather than assigned imaginary numerical sizes in the animation.
 
 45
-00:04:08,712 --> 00:04:12,150
+00:04:11,975 --> 00:04:15,412
 Suppose two records came from different epochs.
 
 46
-00:04:12,150 --> 00:04:16,725
+00:04:15,412 --> 00:04:19,987
 Their values would not directly give a rate at which the Moon is receding.
 
 47
-00:04:16,725 --> 00:04:22,087
+00:04:19,987 --> 00:04:25,350
 Ground-station position, lunar reflector geometry and orbital state change.
 
 48
-00:04:22,087 --> 00:04:29,112
+00:04:25,350 --> 00:04:32,375
 Fitting a long-term orbital parameter requires a model relating many dated observations to the evolving geometry.
 
 49
-00:04:29,284 --> 00:04:37,759
+00:04:32,524 --> 00:04:40,999
 This is why the previous episode's published thirty eight point three zero millimetres per year is not a value printed inside every normal point.
 
 50
-00:04:37,709 --> 00:04:41,971
+00:04:40,949 --> 00:04:45,211
 Williams and Boggs present it as a fitted lunar-orbit parameter.
 
 51
-00:04:41,971 --> 00:04:46,196
+00:04:45,211 --> 00:04:49,436
 We keep that rate in a different evidence box from pulse timings.
 
 52
-00:04:46,196 --> 00:04:54,071
+00:04:49,436 --> 00:04:57,311
 The published uncertainty on a fitted rate likewise does not automatically describe the error on one pulse or one normal-point product.
 
 53
-00:04:54,071 --> 00:04:58,084
+00:04:57,311 --> 00:05:01,324
 Different statistics can belong to the same research programme.
 
 54
-00:04:58,084 --> 00:05:03,921
+00:05:01,324 --> 00:05:07,161
 Putting their units and definitions beside the numbers prevents an attractive but false comparison.
 
 55
-00:05:03,921 --> 00:05:06,884
+00:05:07,161 --> 00:05:10,124
 Now we can close the original question.
 
 56
-00:05:06,884 --> 00:05:15,546
+00:05:10,124 --> 00:05:18,786
 A reduced data product helps observations enter a scientific workflow, but it is not proof that one pulse measures the changing Earth-Moon system.
 
 57
-00:05:15,546 --> 00:05:22,096
+00:05:18,786 --> 00:05:25,336
 We need the original timing, epoch, reduction assumptions and dynamical fit to follow the inference.
 
 58
-00:05:22,096 --> 00:05:27,121
+00:05:25,336 --> 00:05:30,361
 Station three puts two other sources outside our illustrative reduction.
 
 59
-00:05:27,121 --> 00:05:31,446
+00:05:30,361 --> 00:05:34,686
 NASA explains the retroreflector and laser's round trip.
 
 60
-00:05:31,446 --> 00:05:35,321
+00:05:34,686 --> 00:05:38,561
 A peer-reviewed orbital analysis reports a fitted rate.
 
 61
-00:05:35,321 --> 00:05:42,121
+00:05:38,561 --> 00:05:45,361
 Neither source can replace the original processing documentation for a specific ILRS normal-point record.
 
 62
-00:05:42,121 --> 00:05:48,809
+00:05:45,361 --> 00:05:52,049
 A photograph of equipment might show the reflector arrangement, but not the weighting applied to observational data.
 
 63
-00:05:48,809 --> 00:05:58,271
+00:05:52,049 --> 00:06:01,511
 Conversely, a journal abstract can report a statistically estimated orbit rate without listing which individual return events entered a particular processed record.
 
 64
-00:05:58,271 --> 00:06:01,971
+00:06:01,511 --> 00:06:05,211
 We separate these evidentiary roles explicitly.
 
 65
-00:06:01,971 --> 00:06:09,896
+00:06:05,211 --> 00:06:13,136
 A scientific archive is valuable because researchers can seek documented data products and compare the conventions used to create them.
 
 66
-00:06:09,896 --> 00:06:14,434
+00:06:13,136 --> 00:06:17,674
 This is stronger than pretending that every summary is beyond criticism.
 
 67
-00:06:14,434 --> 00:06:20,859
+00:06:17,674 --> 00:06:24,099
 Uncertainty assessment and data selection still deserve inspection when the scientific question changes.
 
 68
-00:06:20,859 --> 00:06:26,784
+00:06:24,099 --> 00:06:30,024
 The word normal is a technical label, not a promise that the value is ordinary or error-free.
 
 69
-00:06:26,784 --> 00:06:33,234
+00:06:30,024 --> 00:06:36,474
 Viewers might otherwise imagine one perfect return photon represented by one perfect distance.
 
 70
-00:06:33,234 --> 00:06:38,696
+00:06:36,474 --> 00:06:41,936
 On-screen labels instead identify the record as a processed observational product.
 
 71
-00:06:38,696 --> 00:06:42,909
+00:06:41,936 --> 00:06:46,149
 A compelling graph with invented points would remain an invention.
 
 72
-00:06:42,909 --> 00:06:49,184
+00:06:46,149 --> 00:06:52,424
 Our graphic deliberately uses empty data cells where no actual observation file has been opened.
 
 73
-00:06:49,184 --> 00:06:58,059
+00:06:52,424 --> 00:07:01,299
 A future numerical worked example must identify an archive record and its fields, not borrow a persuasive shape from an unrelated illustration.
 
 74
-00:06:58,059 --> 00:07:06,171
+00:07:01,299 --> 00:07:09,411
 Ancient coral counting and modern laser observations share a methodological question: what exactly is counted, and by which rule?
 
 75
-00:07:06,171 --> 00:07:15,934
+00:07:09,411 --> 00:07:19,174
 The objects and scientific uncertainties are entirely different, so we cannot turn a coral band into a laser return or treat their numerical counts as interchangeable.
 
 76
-00:07:15,934 --> 00:07:20,609
+00:07:19,174 --> 00:07:23,849
 At the third station's end, the unresolved item is written openly.
 
 77
-00:07:20,609 --> 00:07:27,496
+00:07:23,849 --> 00:07:30,736
 We have not verified a specific normal-point record's event count, time span or statistical uncertainty.
 
 78
-00:07:27,496 --> 00:07:34,571
+00:07:30,736 --> 00:07:37,811
 We can explain the data categories and the route to a reproducible example without manufacturing those missing fields.
 
 79
-00:07:34,571 --> 00:07:46,409
+00:07:37,811 --> 00:07:49,649
 At the ledger table, measured means timed observations; dated means their epochs; counted means accepted items if actually documented; assumed means reduction and dynamical conventions.
 
 80
-00:07:46,409 --> 00:07:52,859
+00:07:49,649 --> 00:07:56,099
 We retain those four headings throughout so that the final result can be traced backward instead of simply admired.
 
 81
-00:07:52,859 --> 00:07:59,284
+00:07:56,099 --> 00:08:02,524
 Entry one records ILRS documentation as the source for full-rate and normal-point categories.
 
 82
-00:07:59,284 --> 00:08:02,584
+00:08:02,524 --> 00:08:05,824
 No station-specific number is attached.
 
 83
-00:08:02,584 --> 00:08:10,546
+00:08:05,824 --> 00:08:13,786
 The source is a public archive description, and its value here is to define the types of scientific records used for laser ranging.
 
 84
-00:08:10,546 --> 00:08:16,196
+00:08:13,786 --> 00:08:19,436
 Entry two records NASA's explanation of retroreflection and round-trip light timing.
 
 85
-00:08:16,196 --> 00:08:21,084
+00:08:19,436 --> 00:08:24,324
 It supports the physical principle, not a fictional normal-point variance.
 
 86
-00:08:21,084 --> 00:08:29,934
+00:08:24,324 --> 00:08:33,174
 A named instrument photograph would require a separate image citation; we do not claim the generic drawing is an accurately scaled Apollo artefact.
 
 87
-00:08:30,100 --> 00:08:37,025
+00:08:33,340 --> 00:08:40,265
 Entry three records a separate model-derived result from Williams and Boggs, expressed in millimetres per year.
 
 88
-00:08:36,975 --> 00:08:41,250
+00:08:40,215 --> 00:08:44,490
 The units alone show that this result is not a pulse travel time.
 
 89
-00:08:41,250 --> 00:08:47,100
+00:08:44,490 --> 00:08:50,340
 A source marker and DOI remain visible beside the research claim on the notebook page.
 
 90
-00:08:47,100 --> 00:08:58,625
+00:08:50,340 --> 00:09:01,865
 Entry four lists work that a deeper archival replication would require: the actual observation file, reduction specification, number of input events, and uncertainty convention.
 
 91
-00:08:58,625 --> 00:09:01,775
+00:09:01,865 --> 00:09:05,015
 Its blank numerical cells are deliberate.
 
 92
-00:09:01,775 --> 00:09:05,600
+00:09:05,015 --> 00:09:08,840
 A blank with a method is preferable to invented precision.
 
 93
-00:09:05,600 --> 00:09:16,650
+00:09:08,840 --> 00:09:19,890
 Three choices can change a numerical demonstration: selecting a different documented time interval, applying a different documented correction, or analysing another published archive release.
 
 94
-00:09:16,650 --> 00:09:22,787
+00:09:19,890 --> 00:09:26,027
 Such changes do not mean the Moon itself suddenly changed speed when the notebook page was turned.
 
 95
-00:09:22,787 --> 00:09:26,137
-Return to the ILRS normal-point label.
+00:09:26,027 --> 00:09:29,252
+Return to the Apollo fourteen reflector.
 
 96
-00:09:26,137 --> 00:09:35,112
-What appeared to be one observation is part of a longer chain: returning light, timed events, processing choices and later orbit analysis.
+00:09:29,252 --> 00:09:34,340
+Its photograph is a real object, but it is not a single normal-point record.
 
 97
-00:09:35,112 --> 00:09:41,275
-We can read that chain without forging one sample measurement or equating unrelated uncertainties.
+00:09:34,340 --> 00:09:40,615
+ILRS normal points collect full-rate observations into intervals; lunar bins are variable.
 
 98
-00:09:41,275 --> 00:09:46,775
+00:09:40,615 --> 00:09:46,452
+An image alone cannot establish an epoch, measured return count, or uncertainty.
+
+99
+00:09:46,452 --> 00:09:51,952
 Next in Strata Notes: how lunar orbit models shape a fitted recession estimate.
 
