@@ -656,8 +656,9 @@ function settingsView() {
       el.querySelector("#forget").onclick = () => { setAiKey(f.elements.aiProvider.value, ""); toast("Đã xoá khoá khỏi máy."); ctx.rerender(); };
       el.querySelector("#testKey").onclick = async () => {
         const p = f.elements.aiProvider.value;
+        if (!f.elements.aiKey.value.trim() && p === "gemini" && await probeBridge()) { ctx.rerender(); return toast("✓ AI máy nhà đang chạy — không cần dán khoá."); }
         const k = f.elements.aiKey.value.trim() || aiKey(p);
-        if (!k) return toast("Chưa có khoá.");
+        if (!k) return toast("Chưa nối được AI máy nhà (máy nhà tắt?) và chưa có khoá.");
         if (f.elements.aiKey.value.trim()) setAiKey(p, k);
         try { storage?.removeItem("boi.v2.models"); } catch (_) { /* bỏ qua */ }
         const list = await discoverModels(p, k, { storage });
