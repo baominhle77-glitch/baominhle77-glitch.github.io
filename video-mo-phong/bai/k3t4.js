@@ -117,6 +117,35 @@ function trang(rc) {
    box(.13,.65,.74,.10,"rgba(123,63,152,.17)",false);
    dot(.82,.22,.042,SPINE);
  }
+ // C13-4: diễn tiến có nghĩa trong VẬT được beat nêu — đọc/đo/lần theo số liệu,
+ // không rung ngẫu nhiên. Mỗi nhịp lấy từ mốc HS đã nội suy theo cue giọng GĐ.
+ const beatNo=Math.max(0,active-1), step=b.movements[beatNo]||{t0:b.t0,t1:b.t1};
+ const uStep=clamp((t-step.t0)/Math.max(.01,step.t1-step.t0),0,1);
+ ctx.save();ctx.beginPath();ctx.rect(x+2,y+2,w-4,h-4);ctx.clip();
+ if(!photo&&(C==="SoCai"||C==="TheTram"||C==="CotDiaTang")){
+   // Bút chì rà cột dữ liệu theo thứ tự đo -> mốc -> đếm -> giả thiết.
+   const col=beatNo%4;
+   const cx0=X(.09+col*.205);
+   ctx.fillStyle="rgba(158,60,119,.10)";ctx.fillRect(cx0,Y(.11),w*.205,h*.76);
+   ctx.strokeStyle=SPINE;ctx.lineWidth=3;
+   strokeLine(ctx,cx0,Y(.12+uStep*.68),cx0+w*.205,Y(.12+uStep*.68));
+ }else if(!photo&&(C==="HaiOSo"||C==="HaiHop")){
+   // Vệt rà đọc chuyển giữa hai tờ sổ, mốc đổi theo lời đang nói.
+   const col=beatNo%2, bx=col?X(.55):X(.06);
+   ctx.fillStyle="rgba(158,60,119,.09)";
+   ctx.fillRect(bx,Y(.14+uStep*.61),w*.39,h*.12);
+   ctx.strokeStyle=PURPLE;ctx.lineWidth=3;
+   strokeLine(ctx,bx,Y(.14+uStep*.61),bx+w*.39,Y(.14+uStep*.61));
+ }else if(!photo&&(C==="PhepChia"||C==="DoNhay")){
+   // Con trỏ đo lướt dọc trục, không gán đơn vị/số đo giả.
+   const ix=.12+.75*uStep;
+   line(.12,.52,ix,.52,SPINE,5);dot(ix,.52,.020,PURPLE);
+ }else if(!photo&&(C==="SoDoLaser"||C==="TrangVatChung")){
+   // Xung laser đi-về tách hai đường (chỉ sơ đồ giáo dục, không phải số đo NP).
+   const reverse=beatNo%2, ix=reverse?.70-.40*uStep:.30+.40*uStep;
+   dot(ix,reverse?.58:.48,.025,reverse?SPINE:PURPLE);
+ }
+ ctx.restore();
  // Sửa cục bộ C13-3, vòng SX-CI PR #142: hai khoảng không đạt nhịp 4 fps.
  // Lớp giấy chú giải/trầm tích luân phiên phủ vật chứng đúng vùng bbox đã duyệt;
  // không sinh chữ, không dời hộp, không sửa SRT hoặc chuyển cảnh các beat khác.
