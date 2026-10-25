@@ -830,6 +830,7 @@ class _C13:
         if con:
             raise NotImplementedError("beat %s: bước hình chưa dựng: %s" %
                                       (self.b["id"], con))
+        self._bat_song()
         sc.chuyen_dau(self.b)
         self.chay_su_kien()
         seen = set()
@@ -957,6 +958,7 @@ class _C13:
         con = [x["kieu"] for x in self.ts.get("buoc", []) if x["kieu"] not in self.buoc_xong]
         if con:
             raise NotImplementedError("beat %s: bước hình chưa dựng: %s" % (self.b["id"], con))
+        self._bat_song()
         sc.chuyen_dau(self.b)
         self.chay_su_kien()
         # Mỗi vật hình và gạch chân được đo theo hộp BAO RIÊNG: không
@@ -1022,69 +1024,113 @@ from manim import ValueTracker, ParametricFunction, always_redraw, smooth
 
 class _SongC17:
     def _bat_song(self):
+        """Hiện tượng chính luôn vận động từ khung đầu; bbox ROI xuất từ đối tượng THẬT.
+
+        Hai nửa vòng đối lưu: trên mặt ra ngoài theo dσ/dr; gần đáy hồi
+        vào kim. Riêng Q, r*=Q^(3/4), r*=15 mm và giọt rượu chọn quy luật
+        tương ứng trong storyboard, không dùng camera/đốm để qua pixel test.
+        """
         F = self.F
         x0, x1, y0, y1 = F
         if x1 - x0 < 0.5 or y1 - y0 < 0.5:
-            # Beat chỉ có chữ: dự trữ nửa TRÁI của vùng nội dung cho mô hình;
-            # các bảng số liệu sau D16 sẽ phải bố cục lại trên video đầy đủ.
+            # Các beat nhiều số liệu có một mô hình vật lý riêng cạnh bảng.
             L = self.vung_noi_dung()
             x0, x1 = L[0] + 0.12, L[0] + 0.55 * (L[1] - L[0])
             y0, y1 = L[2] + 0.12, L[3] - 0.30
         w, h = x1 - x0, y1 - y0
-        if w < 0.5 or h < 0.5:
+        if w <= 0.5 or h <= 0.5:
             raise ValueError("C17_VUNG_DONG_QUA_HEP %s" % self.b["id"])
         xc, yc = (x0 + x1) / 2, (y0 + y1) / 2
-        self._c17_v = ValueTracker(1.0)
+        spec = self.b.get("chuyen_dong_chinh")
+        if not spec or not spec.get("vat_chuyen_dong") or not spec.get("luat_chuyen_dong") or not spec.get("chay_lien_tuc"):
+            raise ValueError("C17G_THIEU_VAT_LUAT %s" % self.b["id"])
+        mode = spec["co_che"]
+        beat_dur = float(spec["t_ra_s"])
         self._c17_t = ValueTracker(0.0)
+        self._c17_v = ValueTracker(1.0)
         self._c17_t.add_updater(lambda m, dt: m.increment_value(dt))
         self.sc.add(self._c17_t, self._c17_v)
+
+        def ring_frac():
+            if mode == "ring_15mm":
+                return 15.0 / 35.0  # quy ước tỉ lệ đĩa 35 mm, bám giả định beat
+            if mode == "radius_q":
+                u = min(1.0, max(0.0, self._c17_t.get_value() / max(beat_dur, 1)))
+                q = 0.70 + 0.60 * (3 * u * u - 2 * u * u * u)
+                return 0.38 * (q / 0.70) ** 0.75
+            return 0.47
+
         rng = np.random.default_rng(314159 + sum(map(ord, self.b["id"])))
+        phase = rng.uniform(0, 2 * PI, 240)
+        sides = np.where(np.arange(240) % 2 == 0, 1, -1)
         dots = []
         for i in range(240):
-            x, y = rng.uniform(x0 + 0.09 * w, x1 - 0.09 * w), rng.uniform(y0 + 0.12 * h, y1 - 0.12 * h)
-            d = Dot([x, y, 0], radius=min(0.028, h * 0.018), color=NUOC if i % 3 else CANG)
-            d.set_opacity(0.60 if i % 3 else 0.78)
-            # Nước trên mặt đi ra ngoài theo hiệu sức căng; phần đáy hồi lưu.
-            # Không đảo vị trí camera/đường đi để tăng pixel diff giả.
+            d = Dot([xc, yc, 0], radius=min(0.028, h * 0.018),
+                    color=NUOC if i % 3 else CANG)
+            d.set_opacity(0.62 if i % 3 else 0.80)
+
             def move(m, dt, i=i):
-                p = m.get_center()
-                xx = (p[0] - xc) / max(w / 2, 0.1)
-                yy = (p[1] - y0) / max(h, 0.1)
-                s = min(dt, 0.05) * self._c17_v.get_value()
-                if yy > 0.38:
-                    vx = np.sign(xx if abs(xx) > 0.03 else (-1 if i % 2 else 1)) * (0.11 + 0.10 * (1 - abs(xx)))
-                    vy = -0.030
+                t = self._c17_t.get_value()
+                qfac = max(0.6, self._c17_v.get_value())
+                if mode == "molecule":
+                    # Khuếch tán phân tử: quỹ đạo ngắn, không phải ảnh tĩnh.
+                    dx = .34 * np.sin(phase[i] + .42 * t * qfac)
+                    dy = .24 * np.sin(2.1 * phase[i] + .31 * t * qfac)
+                    m.move_to([xc + w * dx, yc + h * dy, 0])
+                elif mode == "wine_tears":
+                    # Màng leo rồi giọt rơi xuống theo chu kỳ bám-thả.
+                    u = (phase[i] / (2 * PI) + t * (.06 + .008 * (i % 5))) % 1
+                    z = 2 * u if u < .5 else 2 * (1 - u) ** 2
+                    m.move_to([xc + w * (.38 * np.sin(phase[i])),
+                               y0 + h * (.12 + .75 * z), 0])
                 else:
-                    vx = -np.sign(xx if abs(xx) > 0.03 else (-1 if i % 2 else 1)) * 0.075
-                    vy = 0.065
-                p[0] += vx * s * w / 3
-                p[1] += vy * s * h
-                p[0] = min(x1 - 0.05 * w, max(x0 + 0.05 * w, p[0]))
-                p[1] = min(y1 - 0.09 * h, max(y0 + 0.09 * h, p[1]))
-                m.move_to(p)
+                    # Hai vòng dòng mặt đi ra và đáy quay lại; gần vòng
+                    # dừng v giảm, độ nhớt lớn thì chuyển động chậm hơn.
+                    slow = .65 if mode == "viscosity" and i % 2 else 1.0
+                    theta = phase[i] + (.35 + .08 * (i % 7)) * slow * t * qfac
+                    r = min(.84, max(.19, ring_frac()))
+                    reach = .13 + r * (.48 + .52 * np.sin(theta))
+                    x = xc + sides[i] * (w * .39 * reach / .6)
+                    y = yc + h * (.23 * np.cos(theta))
+                    m.move_to([x, y, 0])
             d.add_updater(move)
             dots.append(d)
         self._c17_hats = VGroup(*dots)
         self._c17_song = always_redraw(lambda: ParametricFunction(
-            lambda u: np.array([xc + 0.45 * w * u,
-                                yc + 0.22 * h + 0.028 * h * np.sin(5.0 * u - 2.0 * self._c17_t.get_value()), 0]),
-            t_range=[-1, 1, 0.05], color=NUOC, stroke_width=3))
+            lambda u: np.array([xc + .45 * w * u,
+                                yc + .21 * h + .025 * h * np.sin(6 * u - 1.6 * self._c17_t.get_value()), 0]),
+            t_range=[-1, 1, .06], color=NUOC, stroke_width=3))
         self.sc.add(self._c17_hats, self._c17_song)
-        self.hinh_ds += [self._c17_hats, self._c17_song]
+        self.hinh_ds.extend([self._c17_hats, self._c17_song])
+        if mode in ("radius_q", "ring_15mm", "stop_ring", "pump"):
+            self._c17_ring = always_redraw(
+                lambda: Ellipse(width=w * .68 * ring_frac(),
+                                height=h * .68 * ring_frac())
+                .move_to([xc, yc, 0]).set_stroke(CANG, 2.5))
+            self.sc.add(self._c17_ring)
+            self.hinh_ds.append(self._c17_ring)
         self.sc._co_chuyen_dong_song = True
 
-        # Cues từ storyboard: mỗi biến thiên tốc độ gắn trực tiếp từ TTS.
-        # Dòng hạt, lớp nước vẫn sống giữa các cues; không tăng/giảm đều 3s.
+        # ROIs đo bằng F của vật mô phỏng khi vật được thêm vào scene.
+        # Ghi [x,y,w,h] theo tỷ lệ 0..1, gốc trên trái ảnh 540p.
+        fw, fh = trang.config.frame_width, trang.config.frame_height
+        roi = ((x0 + fw / 2) / fw, (fh / 2 - y1) / fh, w / fw, h / fh)
+        if min(roi) < 0 or roi[0] + roi[2] > 1 or roi[1] + roi[3] > 1:
+            raise ValueError("C17_ROI_NGOAI_KHUNG %s %r" % (self.b["id"], roi))
+        print("C17_ROI %s %s %.6f %.6f %.6f %.6f" %
+              (self.b["id"], self.W.bc.ten, *roi), flush=True)
+
         for j, cue in enumerate(self.b.get("doi_hinh") or []):
             moc = cue.get("moc_tts")
             if not moc:
                 raise ValueError("C17_DOI_HINH_THIEU_MOC %s" % self.b["id"])
             t = self.t(moc)
-            speed = 1.15 if j % 2 == 0 else 0.85
+            speed = 1.15 if j % 2 == 0 else .85
             self.su(t, lambda speed=speed: [self._c17_v.animate.set_value(speed)], uu=20)
 
     def chay_su_kien(self):
-        self._bat_song()
+        if not hasattr(self, "_c17_hats"):
+            raise ValueError("C17_CHUA_BAT_CHUYEN_DONG %s" % self.b["id"])
         return super().chay_su_kien()
 
 
