@@ -3,6 +3,12 @@
 import { cardName, tarotCard, lenCard } from "./reading.js";
 import { spreadById, posLabel, posKey } from "./spreads.js";
 
+// Cầu nối máy nhà: tiến trình ở 127.0.0.1 tự gắn khoá Gemini từ tệp .env trên máy, trang không giữ khoá.
+export const LOCAL_KEY = "@may-nha";
+export const LOCAL_BASE = "http://127.0.0.1:8787/gemini";
+const gBase = (key) => (key === LOCAL_KEY ? LOCAL_BASE : "https://generativelanguage.googleapis.com");
+const gHead = (key) => (key === LOCAL_KEY ? {} : { "x-goog-api-key": key });
+
 export const PROVIDERS = {
   gemini: { ten: "Google Gemini", fallback: ["gemini-3-pro-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"] },
   openai: { ten: "OpenAI", fallback: ["gpt-5", "gpt-4.1", "gpt-4o", "gpt-4o-mini"] },
@@ -172,8 +178,8 @@ async function streamOnce({ provider, model, key, system, messages, json, onText
       contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.text }] })),
       generationConfig: json ? { responseMimeType: "application/json", responseSchema: SCHEMA, temperature: 0.9 } : { temperature: 0.9 },
     };
-    const res = await fetchImpl(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
-      method: "POST", signal, headers: { "content-type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body),
+    const res = await fetchImpl(`${gBase(key)}/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
+      method: "POST", signal, headers: { "content-type": "application/json", ...gHead(key) }, body: JSON.stringify(body),
     });
     if (!res.ok) throw await failOf(res);
     for await (const d of sse(res)) {
@@ -252,7 +258,7 @@ export async function discoverModels(provider, key, { fetchImpl = globalThis.fet
   let list = [];
   try {
     if (provider === "gemini") {
-      const r = await fetchImpl("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200", { headers: { "x-goog-api-key": key } });
+      const r = await fetchImpl(`${gBase(key)}/v1beta/models?pageSize=200`, { headers: gHead(key) });
       if (r.ok) list = rankGemini(((await r.json()).models || []).filter((m) => (m.supportedGenerationMethods || []).includes("generateContent")).map((m) => m.name.replace(/^models\//, "")));
     } else if (provider === "anthropic") {
       const r = await fetchImpl("https://api.anthropic.com/v1/models?limit=100", { headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" } });

@@ -1,5 +1,6 @@
 // Kho dữ liệu dùng chung cho các màn: phiên câu hỏi, cài đặt, khoá AI (chỉ localStorage máy người dùng).
 import { loadSessions, saveSessions, createSession } from "./state.js";
+import { LOCAL_KEY, LOCAL_BASE } from "./ai.js";
 
 const SETTINGS_KEY = "boi.v1.settings";
 const AIKEY_KEY = "boi.v1.aikey";
@@ -19,7 +20,19 @@ export function saveSettings(next) {
   try { storage?.setItem(SETTINGS_KEY, JSON.stringify(store.settings)); return true; } catch (_) { return false; }
 }
 export function aiKey(provider = store.settings.aiProvider || "gemini") {
-  try { return storage?.getItem(`${AIKEY_KEY}.${provider}`) || ""; } catch (_) { return ""; }
+  let k = "";
+  try { k = storage?.getItem(`${AIKEY_KEY}.${provider}`) || ""; } catch (_) { /* bỏ qua */ }
+  return k || (provider === "gemini" && bridge.ok ? LOCAL_KEY : "");
+}
+// Dò cầu nối máy nhà (chỉ có trên máy chủ nhân); không có thì im lặng dùng khoá hoặc động cơ luật.
+export const bridge = { ok: false };
+export async function probeBridge(fetchImpl = globalThis.fetch) {
+  try {
+    const c = new AbortController(); const t = setTimeout(() => c.abort(), 1200);
+    const r = await fetchImpl(`${LOCAL_BASE}/ping`, { signal: c.signal }); clearTimeout(t);
+    bridge.ok = r.ok;
+  } catch (_) { bridge.ok = false; }
+  return bridge.ok;
 }
 export function setAiKey(provider, key) {
   try { if (key) storage?.setItem(`${AIKEY_KEY}.${provider}`, key); else storage?.removeItem(`${AIKEY_KEY}.${provider}`); return true; } catch (_) { return false; }

@@ -6,7 +6,7 @@ import { analyze, ruleFollowUp } from "./insight.js";
 import { suggestSpread } from "./topic.js";
 import { tarotSVG, lenormandSVG, backSVG } from "./cards.js";
 import { readingToMarkdown } from "./markdown.js";
-import { PROVIDERS, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, discoverModels } from "./ai.js";
+import { LOCAL_KEY, PROVIDERS, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, discoverModels } from "./ai.js";
 import { store, persist, saveSettings, aiKey, setAiKey, aiReady, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
 import { gmt7 } from "./core.js";
 
@@ -461,7 +461,7 @@ function readView(id, query) {
     <section class="card glow" id="aiCard">
       <div class="row wrap"><h2 class="grow" style="margin:0">${viewing === "ai" ? "Giải sâu bằng AI" : "Giải theo luật"}</h2>
         <span class="src">${s.ai ? `<a class="btn small ${viewing === "ai" ? "primary" : ""}" href="#/giai/${id}">Bản AI</a><a class="btn small ${viewing === "luat" ? "primary" : ""}" href="#/giai/${id}?ban=luat">Bản luật</a>` : ""}</span></div>
-      <p class="note" id="aiStatus">${viewing === "ai" ? `Giải bởi ${esc(s.ai.model)} · ${esc(gmt7(new Date(s.ai.at)))}${aiStale ? " · <span class='warn'>có lượt rút mới sau bản này — bấm Giải lại</span>" : ""}` : hasKey ? "Có khoá — đang chuẩn bị giải bằng AI." : "Chưa có khoá AI: đang dùng động cơ luật. Thêm khoá Gemini ở Cài đặt để AI đọc sâu hơn."}</p>
+      <p class="note" id="aiStatus">${viewing === "ai" ? `Giải bởi ${esc(s.ai.model)} · ${esc(gmt7(new Date(s.ai.at)))}${aiStale ? " · <span class='warn'>có lượt rút mới sau bản này — bấm Giải lại</span>" : ""}` : hasKey ? (aiKey() === LOCAL_KEY ? "Cầu nối AI máy nhà sẵn sàng — đang chuẩn bị giải bằng AI." : "Có khoá — đang chuẩn bị giải bằng AI.") : "Chưa có khoá AI: đang dùng động cơ luật. Thêm khoá Gemini ở Cài đặt để AI đọc sâu hơn."}</p>
       <div id="aiOut"></div>
       ${readingHTML(shown)}
     </section>

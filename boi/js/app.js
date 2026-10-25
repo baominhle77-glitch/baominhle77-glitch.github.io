@@ -1,6 +1,6 @@
 // Khởi động SPA: tải dữ liệu lá, hash router, hiệu ứng chuyển trang, nút Back.
 import { ROUTES, NEEDS_DB, toast, esc } from "./views.js";
-import { store } from "./store.js";
+import { store, probeBridge } from "./store.js";
 import { mergeKnowledge } from "./data.js";
 
 const view = document.getElementById("view");
@@ -77,6 +77,7 @@ async function init() {
   });
   syncIdx(true);
   render();
+  probeBridge().then((ok) => { if (ok) ctx.rerender(); });
   if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }
