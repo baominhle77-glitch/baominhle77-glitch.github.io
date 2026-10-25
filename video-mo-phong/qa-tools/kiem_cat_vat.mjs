@@ -12,7 +12,7 @@ for (const kho of process.argv.slice(2).length ? process.argv.slice(2) : ['16x9'
     const loi = []; const lon = [];
     for (let i = 0; i <= a.THOI_LUONG * 10; i++) {
       const t = i / 10;
-      if (t > a.M.more + 0.1 && t < a.LOI[3].bd + 0.7) continue; // zoom xuyên màng bóng (chuyển cảnh)
+      if (a.M && a.LOI && a.LOI[3] && t > a.M.more + 0.1 && t < a.LOI[3].bd + 0.7) continue; // zoom xuyên màng bóng (chuyển cảnh)
       for (const v of a.VAT) {
         const bx = v.hop(t); if (!bx) continue;
         const s = man(bx, t);

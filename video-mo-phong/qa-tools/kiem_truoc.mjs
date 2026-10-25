@@ -3,9 +3,9 @@
 // Dùng: node kiem_truoc.mjs [16x9,9x16] [ra.json]
 // Kiểm: (3) nhịp đổi hình 4 fps > 6 % · (2) vật bị mép khung cắt khi máy đứng · chữ tràn vùng an toàn / vào PiP / chồng chữ
 //       · (7) cụm phụ đề 2–5 từ · (8) chữ nguồn ≥ 22 px · hộp phụ đề so với nền quanh ≥ 4,5:1 · (1) vật chính đủ to
-import { chromium } from "/opt/node22/lib/node_modules/playwright/index.mjs";
+const { chromium } = await import(process.env.PW_MODULE || "/opt/node22/lib/node_modules/playwright/index.mjs"); // CI: PW_MODULE, VMP_ROOT
 import http from "node:http"; import fs from "node:fs"; import path from "node:path";
-const root = "/home/user/baominhle77-glitch.github.io/video-mo-phong";
+const root = process.env.VMP_ROOT || "/home/user/baominhle77-glitch.github.io/video-mo-phong";
 const types = { ".js": "text/javascript", ".html": "text/html", ".css": "text/css", ".woff2": "font/woff2", ".json": "application/json", ".mp3": "audio/mpeg" };
 const srv = http.createServer((q, r) => { const f = path.join(root, decodeURIComponent(q.url.split("?")[0])); try { const b = fs.readFileSync(f); r.writeHead(200, { "content-type": types[path.extname(f)] || "application/octet-stream" }); r.end(b); } catch { r.writeHead(404); r.end(); } }).listen(8796);
 const b = await chromium.launch(); const p = await b.newPage();

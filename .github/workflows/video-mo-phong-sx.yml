@@ -1,0 +1,203 @@
+name: SX video mô phỏng — tự kiểm + render
+
+# Phòng SX-WEB (GPT) không chạy được trình duyệt trong chat, nên máy GitHub làm thay:
+# - PR đụng video-mo-phong/**: kiem_truoc + kiem_cat_vat (2 khổ), chụp khung 540p mỗi 2 s,
+#   đẩy tờ ghép lên nhánh qa-khung/pr-<số> và bình luận kết quả vào PR để KĐ chấm C13.
+# - Commit có "[render-day-du]" trên nhánh gpt/** (hoặc chạy tay): render đủ tập 16:9 + 9:16 có giọng,
+#   ffprobe ≥ 480 s, tải lên artifact và bình luận vào PR.
+
+on:
+  pull_request:
+    paths: ["video-mo-phong/**"]
+  push:
+    branches: ["gpt/**"]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Nhánh cần render đủ tập"
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: vmp-sx-${{ github.event_name }}-${{ github.event.pull_request.number || inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PW_VER: "1.48.2"
+
+jobs:
+  kiem:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Cài Playwright Chromium + ffmpeg
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw" qa_ci
+          npm install --prefix "$RUNNER_TEMP/pw" --no-save --no-package-lock "playwright@$PW_VER"
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+          sudo apt-get install -y -qq ffmpeg >/dev/null
+          echo "PW_MODULE=$RUNNER_TEMP/pw/node_modules/playwright/index.mjs" >> "$GITHUB_ENV"
+          echo "NODE_PATH=$RUNNER_TEMP/pw/node_modules" >> "$GITHUB_ENV"
+          echo "VMP_ROOT=$GITHUB_WORKSPACE/video-mo-phong" >> "$GITHUB_ENV"
+      - name: Máy chủ tĩnh 8765 (cho kiem_cat_vat)
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 &
+          sleep 1
+      - name: kiem_truoc (C13 tiền kỳ, 2 khổ)
+        id: truoc
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node video-mo-phong/qa-tools/kiem_truoc.mjs 16x9,9x16 qa_ci/kiem_truoc.json 2>&1 | tee qa_ci/kiem_truoc.txt
+      - name: kiem_cat_vat (C13 mục 1–2, 2 khổ)
+        id: catvat
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node video-mo-phong/qa-tools/kiem_cat_vat.mjs 16x9 9x16 2>&1 | tee qa_ci/kiem_cat_vat.txt
+          ! grep -E "^== .*: [1-9][0-9]* lỗi" qa_ci/kiem_cat_vat.txt
+      - name: Chụp khung 540p mỗi 2 s + tờ ghép
+        id: khung
+        continue-on-error: true
+        run: |
+          set -e
+          for k in 16x9 9x16; do
+            node video-mo-phong/qa-tools/ci_render.mjs khung "qa_ci/khung_$k" "$k" 2
+            if [ "$k" = 16x9 ]; then o=4x4; else o=8x2; fi
+            ffmpeg -loglevel error -pattern_type glob -i "qa_ci/khung_$k/t_*.jpg" \
+              -vf "drawtext=text='%{eif\:n*2\:d} s':x=8:y=8:fontsize=28:fontcolor=yellow:box=1:boxcolor=black@0.6,scale=480:-2,tile=$o:padding=4" \
+              -q:v 4 "qa_ci/to_ghep_${k}_%02d.jpg"
+          done
+          ls qa_ci
+      - name: Đẩy tờ ghép lên nhánh qa-khung/pr-${{ github.event.pull_request.number }}
+        id: day
+        if: steps.khung.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -e
+          N=${{ github.event.pull_request.number }}
+          d="$RUNNER_TEMP/qa"; mkdir -p "$d"; cp qa_ci/to_ghep_*.jpg qa_ci/kiem_truoc.txt qa_ci/kiem_cat_vat.txt "$d"/
+          cd "$d"; git init -q; git checkout -q -b "qa-khung/pr-$N"
+          git config user.name "sx-ci"; git config user.email "sx-ci@users.noreply.github.com"
+          git add .; git commit -q -m "QA khung PR #$N @ ${{ github.event.pull_request.head.sha }}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "qa-khung/pr-$N"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-pr${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+          path: qa_ci
+          retention-days: 7
+      - name: Bình luận kết quả vào PR
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          TRUOC: ${{ steps.truoc.outcome }}
+          CATVAT: ${{ steps.catvat.outcome }}
+          KHUNG: ${{ steps.khung.outcome }}
+          QA_SHA: ${{ steps.day.outputs.sha }}
+        with:
+          script: |
+            const fs = require("fs");
+            const doc = (f) => { try { return fs.readFileSync(f, "utf8"); } catch { return "(không có)"; } };
+            const truoc = doc("qa_ci/kiem_truoc.txt").split("\n").filter((l) => /ĐẠT|TRƯỢT|===|>>>|LỖI|^\s{8}/.test(l)).slice(0, 60).join("\n");
+            const catvat = doc("qa_ci/kiem_cat_vat.txt").split("\n").slice(0, 40).join("\n");
+            const N = context.payload.pull_request.number; const sha = context.payload.pull_request.head.sha;
+            let anh = "";
+            if (process.env.QA_SHA) {
+              const ds = fs.readdirSync("qa_ci").filter((f) => /^to_ghep_.*\.jpg$/.test(f)).sort();
+              const raw = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${process.env.QA_SHA}/`;
+              anh = ds.map((f) => `- [${f}](${raw}${f})`).join("\n");
+            }
+            const ok = (o) => o === "success" ? "ĐẠT" : "TRƯỢT";
+            const tong = [process.env.TRUOC, process.env.CATVAT, process.env.KHUNG].every((o) => o === "success");
+            const body = [
+              `## SX-CI · PR #${N} · sha ${sha.slice(0, 8)} · ${tong ? "ĐẠT máy" : "CHƯA ĐẠT máy"}`,
+              `- kiem_truoc: **${ok(process.env.TRUOC)}** · kiem_cat_vat: **${ok(process.env.CATVAT)}** · chụp khung 540p: **${ok(process.env.KHUNG)}**`,
+              `- Lần chạy: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId} (artifact đủ khung 540p mỗi 2 s)`,
+              "", "### Tờ ghép 540p (mỗi ô 2 s, góc trái ghi giây) — KĐ chấm C13 trên các tờ này", anh || "(chưa đẩy được tờ ghép)",
+              "", "### kiem_truoc", "```", truoc, "```", "### kiem_cat_vat", "```", catvat, "```",
+              tong ? "Bước tiếp: KĐ chấm C13 trên tờ ghép. ĐẠT thì SX commit có `[render-day-du]` để render đủ tập." : "Bước tiếp: SX sửa đúng mục TRƯỢT rồi đẩy lại; máy tự chạy lại."
+            ].join("\n");
+            await github.rest.issues.createComment({ ...context.repo, issue_number: N, body });
+      - name: Kết luận
+        run: |
+          [ "${{ steps.truoc.outcome }}" = success ] && [ "${{ steps.catvat.outcome }}" = success ] && [ "${{ steps.khung.outcome }}" = success ]
+
+  render:
+    if: (github.event_name == 'push' && contains(github.event.head_commit.message, '[render-day-du]')) || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Cài Playwright Chromium + ffmpeg
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw" qa_ci
+          npm install --prefix "$RUNNER_TEMP/pw" --no-save --no-package-lock "playwright@$PW_VER"
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+          sudo apt-get install -y -qq ffmpeg >/dev/null
+          echo "PW_MODULE=$RUNNER_TEMP/pw/node_modules/playwright/index.mjs" >> "$GITHUB_ENV"
+      - name: Tìm bài + giọng (bai/<mã>_giong.mp3, <mã> = tên tệp bài trước dấu _)
+        id: bai
+        run: |
+          ma=$(grep -oP 'from "\./bai/\K[^"_.]+' video-mo-phong/xuong.js | head -1)
+          echo "ma=$ma" >> "$GITHUB_OUTPUT"
+          echo "giong=video-mo-phong/bai/${ma}_giong.mp3" >> "$GITHUB_OUTPUT"
+          ls -l "video-mo-phong/bai/${ma}_giong.mp3" || echo "THIẾU GIỌNG"
+      - name: Render đủ tập 2 khổ + ffprobe
+        id: render
+        continue-on-error: true
+        run: |
+          set -e
+          : > qa_ci/ffprobe.txt
+          for k in 16x9 9x16; do
+            f="qa_ci/${{ steps.bai.outputs.ma }}_$k.mp4"
+            node video-mo-phong/qa-tools/ci_render.mjs video "$f" "$k" "${{ steps.bai.outputs.giong }}"
+            d=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f")
+            a=$(ffprobe -v error -select_streams a -show_entries stream=codec_name -of csv=p=0 "$f")
+            v=$(ffprobe -v error -select_streams v -show_entries stream=width,height -of csv=p=0 "$f")
+            echo "$k: ${d} s · hình ${v} · tiếng ${a:-KHÔNG} · $(du -h "$f" | cut -f1)" | tee -a qa_ci/ffprobe.txt
+            awk -v d="$d" 'BEGIN{exit !(d>=480)}' || { echo "$k DƯỚI 480 s" | tee -a qa_ci/ffprobe.txt; exit 1; }
+            [ -n "$a" ] || { echo "$k THIẾU TIẾNG" | tee -a qa_ci/ffprobe.txt; exit 1; }
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: video-${{ steps.bai.outputs.ma }}-${{ github.sha }}
+          path: qa_ci
+          retention-days: 14
+      - name: Bình luận vào PR của nhánh
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          RENDER: ${{ steps.render.outcome }}
+          NHANH: ${{ inputs.ref || github.ref_name }}
+        with:
+          script: |
+            const fs = require("fs");
+            let fp = "(không có)"; try { fp = fs.readFileSync("qa_ci/ffprobe.txt", "utf8"); } catch {}
+            const prs = await github.rest.pulls.list({ ...context.repo, state: "open", head: `${context.repo.owner}:${process.env.NHANH}` });
+            const body = [
+              `## SX-CI render đủ tập · ${process.env.RENDER === "success" ? "ĐẠT (≥ 480 s, có tiếng)" : "TRƯỢT"}`,
+              "```", fp, "```",
+              `Video tải ở artifact của lần chạy: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            ].join("\n");
+            if (prs.data.length) await github.rest.issues.createComment({ ...context.repo, issue_number: prs.data[0].number, body });
+            else core.info(body);
+      - name: Kết luận
+        run: '[ "${{ steps.render.outcome }}" = success ]'
