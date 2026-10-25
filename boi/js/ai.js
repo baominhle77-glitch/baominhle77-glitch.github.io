@@ -10,7 +10,7 @@ const gBase = (key) => (key === LOCAL_KEY ? LOCAL_BASE : "https://generativelang
 const gHead = (key) => (key === LOCAL_KEY ? {} : { "x-goog-api-key": key });
 
 export const PROVIDERS = {
-  gemini: { ten: "Google Gemini", fallback: ["gemini-3-pro-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"] },
+  gemini: { ten: "Google Gemini", fallback: ["gemini-pro-latest", "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash"] },
   openai: { ten: "OpenAI", fallback: ["gpt-5", "gpt-4.1", "gpt-4o", "gpt-4o-mini"] },
   anthropic: { ten: "Anthropic Claude", fallback: ["claude-opus-5-5", "claude-sonnet-5-5", "claude-opus-4-1", "claude-sonnet-4-5"] },
 };
@@ -224,12 +224,12 @@ async function streamOnce({ provider, model, key, system, messages, json, onText
 }
 
 // ---------- Dò model mạnh nhất ----------
-const MODEL_CACHE = "boi.v1.models";
+const MODEL_CACHE = "boi.v2.models";
 function rankGemini(ids) {
   const score = (id) => {
-    const m = id.match(/^gemini-(\d+(?:\.\d+)?)-(pro|flash)(-preview)?(?:-[\d-]+)?$/);
+    const m = id.match(/^gemini-(\d+(?:\.\d+)?)-(pro|flash)(-lite)?(-preview)?(?:-[\d-]+)?$/);
     if (!m) return -1;
-    return parseFloat(m[1]) * 100 + (m[2] === "pro" ? 20 : 0) + (m[3] ? -1 : 0);
+    return parseFloat(m[1]) * 100 + (m[2] === "pro" ? 20 : 0) + (m[3] ? -50 : 0) + (m[4] ? -1 : 0);
   };
   return ids.filter((id) => score(id) >= 0).sort((a, b) => score(b) - score(a));
 }
@@ -268,7 +268,7 @@ export async function discoverModels(provider, key, { fetchImpl = globalThis.fet
       if (r.ok) list = rankOpenAI(((await r.json()).data || []).map((m) => m.id));
     }
   } catch (_) { /* mạng lỗi → dùng danh sách tĩnh */ }
-  const merged = [...new Set([...list.slice(0, 3), ...fb])];
+  const merged = [...new Set([...list.slice(0, 8), ...fb])];
   try {
     const all = JSON.parse(storage?.getItem(MODEL_CACHE) || "{}");
     all[provider] = { at: Date.now(), list: merged };

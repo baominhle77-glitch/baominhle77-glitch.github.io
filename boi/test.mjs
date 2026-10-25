@@ -285,7 +285,7 @@ test("AI: dò model, 429 → model dự phòng, streaming SSE ghép JSON, JSON d
   const r = normalizeReading(partialJSON(out.text), rule);
   assert.equal(r.tang[0].diem, 7);
   assert.ok(partialJSON(seen[1]), "JSON dở dang vẫn dựng được");
-  assert.ok(!JSON.stringify(mem.get("boi.v1.models")).includes("KHOA"), "không lưu khoá vào bộ nhớ model");
+  assert.ok(!JSON.stringify(mem.get("boi.v2.models")).includes("KHOA"), "không lưu khoá vào bộ nhớ model");
 });
 
 export async function run(extra = []) {
