@@ -1,5 +1,7 @@
 // Giải bài theo luật: Tarot đọc theo vị trí, Lenormand đọc theo cặp (trước = chủ thể, sau = tính chất) rồi cả chuỗi.
 import { posLabel, posKey, spreadById } from "./spreads.js";
+import { mainTopic } from "./topic.js";
+import { tarotMeaning, capMeaning } from "./data.js";
 
 export const tarotCard = (db, id) => db.tarot.la[id];
 export const lenCard = (db, id) => db.lenormand.la[id - 1];
@@ -49,8 +51,11 @@ export function lenPairs(cells) {
   return pairs;
 }
 
-export function pairText(db, a, b, money) {
+export function pairText(db, a, b, money, topic) {
   const known = db.lenormand.cap[`${a.en}+${b.en}`];
+  if (known && money) return { text: known, known: true };
+  const day = capMeaning(db, a, b, topic, money);
+  if (day) return { text: day, known: true };
   if (known) return { text: known, known: true };
   const sa = money ? a.diem_tien : a.diem_chung;
   const sb = money ? b.diem_tien : b.diem_chung;
@@ -74,6 +79,7 @@ function chainText(cards) {
 
 export function readTier(db, session, ti, tarotCells = [], lenCells = [], opts = {}) {
   const money = session.money;
+  const topic = opts.topic || (mainTopic(session.cauHoi) === "chung" && money ? "tien" : mainTopic(session.cauHoi));
   const tierCfg = session.tiers[ti] || { ten: `Tầng ${ti + 1}`, pos: null };
   const ten = opts.extra ? `${tierCfg.ten || `Tầng ${ti + 1}`} (rút thêm)` : tierCfg.ten || `Tầng ${ti + 1}`;
   const scored = [];
@@ -89,9 +95,10 @@ export function readTier(db, session, ti, tarotCells = [], lenCells = [], opts =
     if (cell.repeatOf) repeats.push({ deck: "tarot", cell, card: c });
     const key = posKey(pos);
     const posMean = key ? c.vi_tri[key] : cap(c.tu_khoa);
+    const tri = tarotMeaning(c, cell.rev, topic, pos);
     const body = cell.rev
-      ? `ngược — năng lượng bị chặn: ${c.rui_ro}`
-      : money ? c.tien : `${cap(c.tu_khoa)}.`;
+      ? `ngược — năng lượng bị chặn: ${tri || c.rui_ro}`
+      : money ? c.tien : tri || `${cap(c.tu_khoa)}.`;
     return { pos, cell, card: c, score: s, text: `${pos} — ${c.vi}${cell.rev ? " (ngược)" : ""}: ${posMean}. ${body}` };
   });
 
@@ -105,7 +112,7 @@ export function readTier(db, session, ti, tarotCells = [], lenCells = [], opts =
   });
   const pairs = lenPairs(lenCells).map(([x, y]) => {
     const a = lenCard(db, x.card), b = lenCard(db, y.card);
-    return { a, b, ...pairText(db, a, b, money) };
+    return { a, b, ...pairText(db, a, b, money, topic) };
   });
 
   const T = avg(scored.filter((x) => x.deck === "tarot").map((x) => x.s));

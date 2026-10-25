@@ -3,6 +3,7 @@
 import { readTier, tarotCard, lenCard, SCAM, band, yesNo } from "./reading.js";
 import { spreadById, posKey } from "./spreads.js";
 import { mainTopic } from "./topic.js";
+import { tarotMeaning, lenMeaning } from "./data.js";
 import { moneyTable } from "./money.js";
 
 const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
@@ -49,6 +50,8 @@ class Writer {
 const NOUN = {
   tien: { vat: "dòng tiền", ket: "thu nhập", hoi: "chuyện tiền" },
   tinh: { vat: "mối quan hệ", ket: "chuyện tình cảm", hoi: "chuyện tình" },
+  viec: { vat: "công việc", ket: "kết quả công việc", hoi: "chuyện công việc" },
+  suckhoe: { vat: "sức khoẻ", ket: "xu hướng sức khoẻ", hoi: "chuyện sức khoẻ" },
   cokhong: { vat: "việc đang hỏi", ket: "câu trả lời", hoi: "câu hỏi" },
   vanhan: { vat: "vận", ket: "vận hạn", hoi: "vận hạn" },
   chung: { vat: "việc này", ket: "kết quả", hoi: "câu hỏi" },
@@ -167,7 +170,12 @@ function tarotLine(w, t, x, topic, idx, ti) {
   ];
   const body = [];
   if (x.cell.repeatOf) body.push(`Lá này lặp lại từ tầng ${x.cell.repeatOf.tier} — nhấn mạnh “${c.tu_khoa.split(",")[0]}”, không phải xác nhận độc lập.`);
-  if (x.cell.rev) body.push(`Ngược: ${low(c.rui_ro)}`);
+  const tri = tarotMeaning(c, x.cell.rev, topic, x.pos);
+  const cokhong = c.tri?.co_khong;
+  if (x.cell.rev) body.push(tri ? `Ngược: ${low(tri)}` : `Ngược: ${low(c.rui_ro)}`);
+  else if (topic === "cokhong" && cokhong) body.push(`Xét câu Có/Không, lá này nghiêng “${cokhong.xuoi}” — ${low(cokhong.ly_do)}`);
+  else if (topic === "tinh" && c.tri) body.push(tri, c.tri.loi_khuyen_tinh ? `${tri} ${c.tri.loi_khuyen_tinh}` : tri);
+  else if (tri) body.push(tri, `${tri} Điều cần để ý: ${low(c.rui_ro)}`);
   else if (topic === "tien") body.push(c.tien, `Về tiền: ${low(c.tien)}`, `Cảnh báo kèm: ${low(c.rui_ro)}`);
   else if (topic === "tinh") body.push(`Trong chuyện tình cảm, lá này mang năng lượng ${c.tu_khoa}.`, `Năng lượng cảm xúc: ${c.tu_khoa}.`);
   else body.push(`Năng lượng chính: ${c.tu_khoa}.`, `Điều cần để ý: ${low(c.rui_ro)}`);
@@ -222,9 +230,14 @@ function chainLine(w, db, cells, td, topic, ti) {
   const pos = ok.filter((x) => s(x) >= 0.5).length, neg = ok.filter((x) => s(x) <= -0.5).length;
   const tone = pos > neg ? "nghiêng thuận" : neg > pos ? "nghiêng cản" : "giằng co";
   const known = td.pairs.filter((p) => p.known);
+  const last = ok[ok.length - 1];
+  const lastTri = lenMeaning(last, topic);
+  const nguoi = ok.filter((x) => x.tri?.nguoi && (x.en === "Man" || x.en === "Woman" || x.en === "Child"));
   return w.join(`chain${ti}`, [
     [`${td.chain} Tổng thể ${tone} (${pos} lá thuận, ${neg} lá cản).`, `Chuỗi Lenormand ${tone}: ${pos} thuận, ${neg} cản. ${td.chain}`],
     known.length ? [`Cặp đáng chú ý nhất: ${known[0].a.vi} + ${known[0].b.vi} — ${low(known[0].text)}`] : [],
+    lastTri ? [`Lá khép chuỗi là ${last.vi}: ${low(lastTri)}`, `Chuỗi kết ở ${last.vi} — ${low(lastTri)}`] : [],
+    nguoi.length ? [`${nguoi[0].vi} trong chuỗi chỉ người: ${low(nguoi[0].tri.nguoi)}`] : [],
   ]);
 }
 
@@ -438,6 +451,12 @@ export function analyze(db, session, settings = {}, roundIndex = 0) {
     canh_bao: canh_bao.filter(Boolean),
     diem_tb: mean,
     _money: money,
+    _cards: tds.flatMap((td) => td.scored.map((x) => ({
+      deck: x.deck, vi: x.card.vi, en: x.card.en, rev: !!x.cell?.rev, tang: td.ten,
+      nghia: x.deck === "tarot" ? tarotMeaning(x.card, !!x.cell?.rev, topic) : lenMeaning(x.card, topic),
+      khuyen: x.cell?.rev ? x.card.tri?.nguoc?.loi_khuyen || x.card.loi_khuyen
+        : topic === "tinh" && x.card.tri?.loi_khuyen_tinh ? x.card.tri.loi_khuyen_tinh : x.card.loi_khuyen || null,
+    }))),
   };
 }
 
@@ -462,6 +481,16 @@ export function ruleFollowUp(reading, question) {
     if (t.dong_chay) out.push(t.dong_chay);
     out.push(`Điểm nghẽn: ${t.diem_nghen}`);
     out.push(`Lời khuyên: ${t.loi_khuyen}`);
+  }
+  const fold = (x) => String(x || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d");
+  const qf = fold(q);
+  const seen = new Set();
+  for (const c of reading._cards || []) {
+    const ten = fold(c.vi);
+    if (seen.has(c.deck + c.vi) || !c.nghia || ten.length < 3) continue;
+    if (!qf.includes(ten) && !(c.en && q.split(/[^a-z]+/).includes(c.en.toLowerCase()))) continue;
+    seen.add(c.deck + c.vi);
+    out.push(`**${c.vi}${c.rev ? " (ngược)" : ""}** — ${c.tang}: ${c.nghia}${c.khuyen ? ` Lời khuyên: ${c.khuyen}` : ""}`);
   }
   if (/tiền|bao nhiêu|thu nhập|triệu/.test(q) && reading.tien) out.push(reading.tien);
   if (/rủi ro|lừa|cẩn thận|cảnh báo|nguy/.test(q)) out.push(...(reading.canh_bao.length ? reading.canh_bao : ["Không có lá cảnh báo gian dối rõ trong trải này."]), ...reading.mau_thuan);

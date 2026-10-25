@@ -6,8 +6,8 @@ import { analyze, ruleFollowUp } from "./insight.js";
 import { suggestSpread } from "./topic.js";
 import { tarotSVG, lenormandSVG, backSVG } from "./cards.js";
 import { readingToMarkdown } from "./markdown.js";
-import { PROVIDERS, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, discoverModels } from "./ai.js";
-import { store, persist, saveSettings, aiKey, setAiKey, aiReady, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
+import { LOCAL_KEY, PROVIDERS, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, discoverModels } from "./ai.js";
+import { store, persist, saveSettings, aiKey, setAiKey, aiReady, bridge, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
 import { gmt7 } from "./core.js";
 
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -461,7 +461,7 @@ function readView(id, query) {
     <section class="card glow" id="aiCard">
       <div class="row wrap"><h2 class="grow" style="margin:0">${viewing === "ai" ? "Giải sâu bằng AI" : "Giải theo luật"}</h2>
         <span class="src">${s.ai ? `<a class="btn small ${viewing === "ai" ? "primary" : ""}" href="#/giai/${id}">Bản AI</a><a class="btn small ${viewing === "luat" ? "primary" : ""}" href="#/giai/${id}?ban=luat">Bản luật</a>` : ""}</span></div>
-      <p class="note" id="aiStatus">${viewing === "ai" ? `Giải bởi ${esc(s.ai.model)} · ${esc(gmt7(new Date(s.ai.at)))}${aiStale ? " · <span class='warn'>có lượt rút mới sau bản này — bấm Giải lại</span>" : ""}` : hasKey ? "Có khoá — đang chuẩn bị giải bằng AI." : "Chưa có khoá AI: đang dùng động cơ luật. Thêm khoá Gemini ở Cài đặt để AI đọc sâu hơn."}</p>
+      <p class="note" id="aiStatus">${viewing === "ai" ? `Giải bởi ${esc(s.ai.model)} · ${esc(gmt7(new Date(s.ai.at)))}${aiStale ? " · <span class='warn'>có lượt rút mới sau bản này — bấm Giải lại</span>" : ""}` : hasKey ? (aiKey() === LOCAL_KEY ? "Cầu nối AI máy nhà sẵn sàng — đang chuẩn bị giải bằng AI." : "Có khoá — đang chuẩn bị giải bằng AI.") : "Chưa có khoá AI: đang dùng động cơ luật. Thêm khoá Gemini ở Cài đặt để AI đọc sâu hơn."}</p>
       <div id="aiOut"></div>
       ${readingHTML(shown)}
     </section>
@@ -623,8 +623,9 @@ function settingsView() {
       </fieldset>
       <fieldset class="card"><legend>Giải sâu bằng AI</legend>
         <p class="note">Có khoá thì AI là phần giải chính. Khoá chỉ lưu trong trình duyệt của máy này và được gửi thẳng tới nhà cung cấp bạn chọn — không qua máy chủ nào khác. Đừng lưu khoá trên máy dùng chung.</p>
+        ${bridge.ok ? `<p class="note">✓ Cầu nối AI máy nhà đang chạy — không cần dán khoá: khoá nằm trên máy, trang web không giữ.</p>` : ""}
         <label>Nhà cung cấp<select name="aiProvider">${Object.entries(PROVIDERS).map(([k, p]) => `<option value="${k}" ${k === prov ? "selected" : ""}>${esc(p.ten)}${k === "gemini" ? " (mặc định)" : ""}</option>`).join("")}</select></label>
-        <label>Khoá API của bạn<input name="aiKey" type="password" autocomplete="off" placeholder="${aiKey(prov) ? "Đã lưu khoá (gõ để thay)" : "Dán khoá vào đây"}"></label>
+        <label>Khoá API của bạn<input name="aiKey" type="password" autocomplete="off" placeholder="${aiKey(prov) === LOCAL_KEY ? "Đang dùng cầu nối máy nhà (dán khoá để thay)" : aiKey(prov) ? "Đã lưu khoá (gõ để thay)" : "Dán khoá vào đây"}"></label>
         <label>Model<input name="aiModel" list="models" value="${esc(st.aiModel || "")}" placeholder="Để trống = tự chọn model mạnh nhất"><datalist id="models">${PROVIDERS[prov].fallback.map((m) => `<option value="${m}">`).join("")}</datalist></label>
         <p class="note" id="mlist">Dự phòng khi lỗi 429/404: ${PROVIDERS[prov].fallback.map(esc).join(" → ")}</p>
         <div class="btns"><button type="button" class="btn small" id="testKey">Kiểm tra khoá &amp; dò model</button><button type="button" class="btn small ghost" id="forget">Xoá khoá khỏi máy</button></div>
@@ -649,7 +650,7 @@ function settingsView() {
         const k = f.elements.aiKey.value.trim() || aiKey(p);
         if (!k) return toast("Chưa có khoá.");
         if (f.elements.aiKey.value.trim()) setAiKey(p, k);
-        try { storage?.removeItem("boi.v1.models"); } catch (_) { /* bỏ qua */ }
+        try { storage?.removeItem("boi.v2.models"); } catch (_) { /* bỏ qua */ }
         const list = await discoverModels(p, k, { storage });
         el.querySelector("#mlist").textContent = `Thứ tự sẽ thử: ${list.join(" → ")}`;
         toast("Đã dò model.");

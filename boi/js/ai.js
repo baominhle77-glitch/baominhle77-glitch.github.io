@@ -3,8 +3,14 @@
 import { cardName, tarotCard, lenCard } from "./reading.js";
 import { spreadById, posLabel, posKey } from "./spreads.js";
 
+// Cầu nối máy nhà: tiến trình ở 127.0.0.1 tự gắn khoá Gemini từ tệp .env trên máy, trang không giữ khoá.
+export const LOCAL_KEY = "@may-nha";
+export const LOCAL_BASE = "http://127.0.0.1:8787/gemini";
+const gBase = (key) => (key === LOCAL_KEY ? LOCAL_BASE : "https://generativelanguage.googleapis.com");
+const gHead = (key) => (key === LOCAL_KEY ? {} : { "x-goog-api-key": key });
+
 export const PROVIDERS = {
-  gemini: { ten: "Google Gemini", fallback: ["gemini-3-pro-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"] },
+  gemini: { ten: "Google Gemini", fallback: ["gemini-pro-latest", "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash"] },
   openai: { ten: "OpenAI", fallback: ["gpt-5", "gpt-4.1", "gpt-4o", "gpt-4o-mini"] },
   anthropic: { ten: "Anthropic Claude", fallback: ["claude-opus-5-5", "claude-sonnet-5-5", "claude-opus-4-1", "claude-sonnet-4-5"] },
 };
@@ -172,8 +178,8 @@ async function streamOnce({ provider, model, key, system, messages, json, onText
       contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.text }] })),
       generationConfig: json ? { responseMimeType: "application/json", responseSchema: SCHEMA, temperature: 0.9 } : { temperature: 0.9 },
     };
-    const res = await fetchImpl(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
-      method: "POST", signal, headers: { "content-type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body),
+    const res = await fetchImpl(`${gBase(key)}/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
+      method: "POST", signal, headers: { "content-type": "application/json", ...gHead(key) }, body: JSON.stringify(body),
     });
     if (!res.ok) throw await failOf(res);
     for await (const d of sse(res)) {
@@ -218,12 +224,12 @@ async function streamOnce({ provider, model, key, system, messages, json, onText
 }
 
 // ---------- Dò model mạnh nhất ----------
-const MODEL_CACHE = "boi.v1.models";
+const MODEL_CACHE = "boi.v2.models";
 function rankGemini(ids) {
   const score = (id) => {
-    const m = id.match(/^gemini-(\d+(?:\.\d+)?)-(pro|flash)(-preview)?(?:-[\d-]+)?$/);
+    const m = id.match(/^gemini-(\d+(?:\.\d+)?)-(pro|flash)(-lite)?(-preview)?(?:-[\d-]+)?$/);
     if (!m) return -1;
-    return parseFloat(m[1]) * 100 + (m[2] === "pro" ? 20 : 0) + (m[3] ? -1 : 0);
+    return parseFloat(m[1]) * 100 + (m[2] === "pro" ? 20 : 0) + (m[3] ? -50 : 0) + (m[4] ? -1 : 0);
   };
   return ids.filter((id) => score(id) >= 0).sort((a, b) => score(b) - score(a));
 }
@@ -252,7 +258,7 @@ export async function discoverModels(provider, key, { fetchImpl = globalThis.fet
   let list = [];
   try {
     if (provider === "gemini") {
-      const r = await fetchImpl("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200", { headers: { "x-goog-api-key": key } });
+      const r = await fetchImpl(`${gBase(key)}/v1beta/models?pageSize=200`, { headers: gHead(key) });
       if (r.ok) list = rankGemini(((await r.json()).models || []).filter((m) => (m.supportedGenerationMethods || []).includes("generateContent")).map((m) => m.name.replace(/^models\//, "")));
     } else if (provider === "anthropic") {
       const r = await fetchImpl("https://api.anthropic.com/v1/models?limit=100", { headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" } });
@@ -262,7 +268,7 @@ export async function discoverModels(provider, key, { fetchImpl = globalThis.fet
       if (r.ok) list = rankOpenAI(((await r.json()).data || []).map((m) => m.id));
     }
   } catch (_) { /* mạng lỗi → dùng danh sách tĩnh */ }
-  const merged = [...new Set([...list.slice(0, 3), ...fb])];
+  const merged = [...new Set([...list.slice(0, 8), ...fb])];
   try {
     const all = JSON.parse(storage?.getItem(MODEL_CACHE) || "{}");
     all[provider] = { at: Date.now(), list: merged };

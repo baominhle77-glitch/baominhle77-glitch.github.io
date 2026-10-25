@@ -22,6 +22,10 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-25 09:30 GMT+7 — Claude Code — đóng CHOICE-20261024-01 (trong PR #139)
+- Xoá Hội Chọn Đúng (#134, `46d3029`) đã deploy SUCCESS (run 40114714384): Worker không còn route/cron choice, Pages không còn `/hoi-chon-dung/`; hậu kiểm Bói toán, cộng đồng, xác minh search đạt. "Xác minh Admin V8 production" fail là lỗi có sẵn từ 25/07 (bộ xác minh chờ v8, production v11), không do #134.
+- Khoá `CHOICE-20261024-01` → `completed`. PR #135 (cùng nội dung) đóng vì xung đột.
+
 ### 2026-10-25 07:30 GMT+7 — Claude Code — BOI-20261025-01 — web Bói Tarot + Lenormand (`boi/`)
 - Nhánh `claude/boi-web` (từ `main` fc0fb2b), BaoMinh cho phép tự gộp. Chỉ thêm thư mục mới `boi/**`; không sửa Worker, workflow, gate, sw gốc hay thư mục khác.
 - Phục vụ bằng GitHub Pages: https://baominhle77-glitch.github.io/boi/ (không nằm trong bản gộp `_site` của Cloudflare).

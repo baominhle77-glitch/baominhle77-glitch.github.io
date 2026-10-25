@@ -1,6 +1,7 @@
 // Khởi động SPA: tải dữ liệu lá, hash router, hiệu ứng chuyển trang, nút Back.
 import { ROUTES, NEEDS_DB, toast, esc } from "./views.js";
-import { store } from "./store.js";
+import { store, probeBridge } from "./store.js";
+import { mergeKnowledge } from "./data.js";
 
 const view = document.getElementById("view");
 const back = document.getElementById("btnBack");
@@ -62,7 +63,12 @@ window.addEventListener("hashchange", () => { syncIdx(false); transition(render)
 back.onclick = () => { if (idx > 0) history.back(); else location.hash = "#/"; };
 
 const dbReady = Promise.all(["data/tarot.json", "data/lenormand.json"].map((u) => fetch(u).then((r) => { if (!r.ok) throw new Error(u); return r.json(); })))
-  .then(([tarot, lenormand]) => { store.db = { tarot, lenormand }; });
+  .then(async ([tarot, lenormand]) => {
+    // Kho tri thức giải offline: thiếu tệp thì vẫn giải bằng dữ liệu gốc
+    const opt = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    const [tThem, lThem] = await Promise.all([opt("data/tarot_them.json"), opt("data/lenormand_them.json")]);
+    store.db = mergeKnowledge({ tarot, lenormand }, tThem, lThem);
+  });
 
 async function init() {
   dbReady.catch((err) => {
@@ -71,6 +77,7 @@ async function init() {
   });
   syncIdx(true);
   render();
+  probeBridge().then((ok) => { if (ok) ctx.rerender(); });
   if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }

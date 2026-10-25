@@ -19,5 +19,9 @@ Spec gốc + bản bổ sung (SPA nhiều màn, thiết kế cao cấp, PWA, AI 
 | 12. PWA (manifest.webmanifest, sw.js, icons/) | xong |
 | 13. Kiểm trình duyệt + Lighthouse | xong: e2e Pixel 7 không lỗi; offline chạy; Lighthouse mobile (local, chưa nén) Perf 94–95, A11y 100, BP 100 |
 | 14. Sổ khoá (BOI-20261025-01) + PR + merge + kiểm link | PR https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/pull/138 — CI xanh (coordination-guard, validate, handover), tự merge; link Pages kiểm 200 sau merge |
+| 15. Kho tri thức giải offline (data/tarot_them.json, data/lenormand_them.json; app.js nạp tuỳ chọn qua mergeKnowledge): Tarot 78 lá theo chủ đề tiền/tình/công việc/sức khoẻ/lời khuyên, Lenormand 36 lá + 1260 cặp | xong (sinh bằng Gemini/Gemma, chưa đối chiếu tra mạng — sẽ chạy lượt đối chiếu riêng) |
+| 16. Cầu nối AI máy nhà (E:/Studio/tools/boi_cau_noi_ai.mjs, 127.0.0.1:8787, task Windows "BOI Cau Noi AI" chạy lúc đăng nhập): web tự dò, có cầu thì dùng khoá trên máy, không cần dán khoá | xong, đã thử thật: bản giải AI chạy qua cầu |
+| 17. Danh sách model Gemini mới (bỏ model đã ngừng; dò 8 model mạnh nhất + bí danh -latest) | xong |
+| 18. Gộp kho tri thức đủ: Tarot 78/78, Lenormand 36/36, cặp 1260/1260, lỗi 0; test 14/14 | xong |
 
-Đã xong hết 14 phần. Việc còn mở: thử lớp AI với khoá Gemini thật của chủ nhân (mới thử bằng fetch giả). Chạy test: `node boi/test.mjs`.
+Đã xong 18 phần. Lớp AI đã thử với khoá Gemini thật qua cầu nối máy nhà. Chạy test: `node boi/test.mjs`.
