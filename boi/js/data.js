@@ -38,3 +38,20 @@ export function capMeaning(db, a, b, topic, money) {
   if (!x) return null;
   return (money || topic === "tien" || topic === "viec" ? x.v : topic === "tinh" ? x.t : x.c) || x.c || null;
 }
+
+// Có/Không của một lá theo ngữ cảnh câu hỏi: lá có bảng ngu_canh (vd 4 lá Tiền) thì chọn nhóm khớp đầu tiên
+// (khớp nguyên từ), không khớp thì dùng câu trả lời chung. Trả { tra_loi, ly_do, nhom } hoặc null.
+const ynCache = new Map();
+const ynRe = (khi) => {
+  if (!ynCache.has(khi)) ynCache.set(khi, new RegExp(`(?<!\\p{L})(?:${khi})(?!\\p{L})`, "u"));
+  return ynCache.get(khi);
+};
+export function cardYesNo(card, rev, question = "") {
+  const ck = card?.tri?.co_khong;
+  if (!ck || typeof ck !== "object") return null;
+  const q = String(question || "").toLowerCase().normalize("NFC");
+  const hit = (ck.ngu_canh || []).find((x) => x.khi && ynRe(x.khi).test(q));
+  const src = hit || ck;
+  const tra_loi = rev ? src.nguoc : src.xuoi;
+  return tra_loi ? { tra_loi, ly_do: src.ly_do || ck.ly_do || "", nhom: hit?.nhom || "chung" } : null;
+}

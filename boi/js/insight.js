@@ -3,7 +3,7 @@
 import { readTier, tarotCard, lenCard, SCAM, band, yesNo } from "./reading.js";
 import { spreadById, posKey } from "./spreads.js";
 import { mainTopic } from "./topic.js";
-import { tarotMeaning, lenMeaning } from "./data.js";
+import { tarotMeaning, lenMeaning, cardYesNo } from "./data.js";
 import { moneyTable } from "./money.js";
 
 const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
@@ -157,7 +157,7 @@ function themeLines(w, db, comp, topic, session) {
 }
 
 // ---------- Từng tầng ----------
-function tarotLine(w, t, x, topic, idx, ti) {
+function tarotLine(w, t, x, topic, idx, ti, mode = "", question = "") {
   const c = x.card;
   const name = `${c.vi}${x.cell.rev ? " (ngược)" : ""}`;
   const key = posKey(x.pos);
@@ -171,14 +171,18 @@ function tarotLine(w, t, x, topic, idx, ti) {
   const body = [];
   if (x.cell.repeatOf) body.push(`Lá này lặp lại từ tầng ${x.cell.repeatOf.tier} — nhấn mạnh “${c.tu_khoa.split(",")[0]}”, không phải xác nhận độc lập.`);
   const tri = tarotMeaning(c, x.cell.rev, topic, x.pos);
-  const cokhong = c.tri?.co_khong;
+  // Có/Không đọc theo ngữ cảnh câu hỏi (cả lá ngược), không gán một câu trả lời cố định cho lá
+  const yn = topic === "cokhong" || mode === "yesno" ? cardYesNo(c, x.cell.rev, question) : null;
   if (x.cell.rev) body.push(tri ? `Ngược: ${low(tri)}` : `Ngược: ${low(c.rui_ro)}`);
-  else if (topic === "cokhong" && cokhong) body.push(`Xét câu Có/Không, lá này nghiêng “${cokhong.xuoi}” — ${low(cokhong.ly_do)}`);
   else if (topic === "tinh" && c.tri) body.push(tri, c.tri.loi_khuyen_tinh ? `${tri} ${c.tri.loi_khuyen_tinh}` : tri);
   else if (tri) body.push(tri, `${tri} Điều cần để ý: ${low(c.rui_ro)}`);
   else if (topic === "tien") body.push(c.tien, `Về tiền: ${low(c.tien)}`, `Cảnh báo kèm: ${low(c.rui_ro)}`);
   else if (topic === "tinh") body.push(`Trong chuyện tình cảm, lá này mang năng lượng ${c.tu_khoa}.`, `Năng lượng cảm xúc: ${c.tu_khoa}.`);
   else body.push(`Năng lượng chính: ${c.tu_khoa}.`, `Điều cần để ý: ${low(c.rui_ro)}`);
+  if (yn) {
+    const ynText = `Xét câu Có/Không${x.cell.rev ? " (lá ngược)" : ""}, lá này nghiêng “${yn.tra_loi}”: ${low(yn.ly_do)}`;
+    return w.join(`t${ti}-${idx}`, [intro, body.map((b) => `${b} ${ynText}`)]);
+  }
   return w.join(`t${ti}-${idx}`, [intro, body]);
 }
 
@@ -303,7 +307,7 @@ export function analyze(db, session, settings = {}, roundIndex = 0) {
       ten: td.ten,
       diem: td.diem,
       tra_loi: mode === "yesno" && td.diem != null ? yesNo(td.diem) : null,
-      tarot_doc: td.tarot.map((x, i) => (x.card ? tarotLine(w, td, x, topic, i, ti) : x.text)).filter(Boolean),
+      tarot_doc: td.tarot.map((x, i) => (x.card ? tarotLine(w, td, x, topic, i, ti, mode, session.cauHoi) : x.text)).filter(Boolean),
       dong_chay: flowLine(w, td, topic, ti),
       lenormand_cap: td.pairs.map((p, i) => w.pick(`cap${ti}-${i}`, [
         `${p.a.vi} + ${p.b.vi}: ${p.text}`,

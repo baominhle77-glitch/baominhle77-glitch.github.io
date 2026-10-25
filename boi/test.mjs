@@ -10,7 +10,8 @@ import { spreadById, SPREADS } from "./js/spreads.js";
 import { moneyTable, periodEstimate, roundNice } from "./js/money.js";
 import { analyze, allSentences, ruleFollowUp } from "./js/insight.js";
 import { suggestSpread, mainTopic } from "./js/topic.js";
-import { mergeKnowledge, tarotMeaning, capMeaning } from "./js/data.js";
+import { mergeKnowledge, tarotMeaning, capMeaning, cardYesNo } from "./js/data.js";
+import { friendlyError, LOCAL_KEY } from "./js/ai.js";
 import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING } from "./js/ai.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -246,6 +247,47 @@ test("kho tri thức offline: đủ lá, đúng chủ đề, nghĩa cặp, hỏi
   assert.ok(c0?.nghia && x.toLowerCase().includes(c0.nghia.slice(1, 40).toLowerCase()), "tầng 1 chưa dùng nghĩa công việc");
   const fu = ruleFollowUp(r, `lá ${c0.vi} nghĩa là gì?`);
   assert.ok(fu.includes(c0.vi) && fu.includes(c0.nghia.slice(0, 20)), "hỏi tiếp theo tên lá chưa trả lời");
+});
+
+test("Có/Không theo ngữ cảnh: 4 lá Tiền không còn Có tuyệt đối", async () => {
+  const T = (en) => db.tarot.la.find((c) => c.en === en);
+  const yn = (en, q, rev = false) => cardYesNo(T(en), rev, q)?.tra_loi;
+  // không lá nào trả Có ở cả hai chiều xuôi/ngược với cùng lý do tuyệt đối
+  for (const en of ["Ace of Pentacles", "Four of Pentacles", "Knight of Pentacles", "King of Pentacles"]) {
+    const ck = T(en).tri.co_khong;
+    assert.ok(ck.ngu_canh?.length >= 2, `${en} thiếu ngữ cảnh`);
+    assert.notEqual(ck.xuoi, "Có", `${en} còn Có tuyệt đối`);
+    assert.doesNotMatch(ck.ly_do, /luôn|chắc chắn đạt|tối đa/u, en);
+  }
+  assert.equal(yn("Four of Pentacles", "Tháng này có tiết kiệm được không?"), "Có");
+  assert.equal(yn("Four of Pentacles", "Có nên đầu tư vào quán cà phê không?"), "Nghiêng Không");
+  assert.equal(yn("Four of Pentacles", "Có nên đầu tư vào quán cà phê không?", true), "Có, có điều kiện");
+  assert.equal(yn("Four of Pentacles", "Tình hình tài chính có ổn không?"), "Có, có điều kiện", "“chi” không được khớp nhầm trong “chính”");
+  assert.equal(yn("Ace of Pentacles", "Có nên mở cửa hàng online không?"), "Có");
+  assert.equal(yn("Ace of Pentacles", "Có nên nghỉ việc không?"), "Nghiêng Không");
+  assert.equal(yn("Knight of Pentacles", "Tuần này có nhận được tiền không?"), "Nghiêng Không");
+  assert.equal(yn("Knight of Pentacles", "Có nên tất tay vào coin không?"), "Không");
+  assert.equal(yn("King of Pentacles", "Có nên ký hợp đồng thuê mặt bằng không?"), "Có");
+  assert.equal(yn("King of Pentacles", "Có nên đánh bạc gỡ lại không?"), "Nghiêng Không");
+  assert.equal(yn("The Sun", "Có thành không?", true), "Có, có điều kiện");
+  // bản giải luật và prompt AI đều dùng câu trả lời theo ngữ cảnh
+  const sp = spreadById("cokhong");
+  const s = await createSession({ cauHoi: "Có nên đầu tư thêm vào cửa hàng không?", spreadId: sp.id, tiers: sp.tiers(2027), money: false, reversals: false, seed: "d".repeat(64) });
+  const n4 = s.mapping.tarot.indexOf(67) + 1; // số nào ra 4 Tiền trong bộ đã khoá
+  const rest = Array.from({ length: 78 }, (_, i) => i + 1).filter((n) => n !== n4).slice(0, 8);
+  addRound(s, [`T: ${n4} ${rest[0]} ${rest[1]} / ${rest.slice(2, 5).join(" ")} / ${rest.slice(5, 8).join(" ")}`, "L: 1 2 3 / 4 5 6 / 7 8 9"].join(String.fromCharCode(10)));
+  const four = s.rounds[0].tarot[0][0];
+  assert.equal(db.tarot.la[four.card].en, "Four of Pentacles");
+  const r = analyze(db, s, { xungHo: "Queen Linh" });
+  assert.match(r.tang[0].tarot_doc[0], /nghiêng “Nghiêng Không”/u);
+  assert.match(readingRequest(db, s, { reading: r, settings: {} }), /Có\/Không theo đúng câu hỏi này: Nghiêng Không/u);
+});
+
+test("lỗi cầu nối/AI ra câu dễ hiểu", () => {
+  assert.match(friendlyError(new TypeError("Failed to fetch"), LOCAL_KEY), /Cầu nối AI trên máy/u);
+  assert.match(friendlyError(new TypeError("Failed to fetch"), "k"), /Không kết nối được/u);
+  assert.match(friendlyError({ timeout: true }), /quá lâu/u);
+  assert.match(friendlyError({ status: 429, message: "x" }), /quá tải/u);
 });
 
 test("gợi ý mẫu trải theo câu hỏi", () => {

@@ -58,10 +58,17 @@ button, input, select, textarea { font: inherit; }
 main { max-width: 760px; margin: 0 auto; padding: 14px 16px 28px; outline: none; }
 .view-enter { animation: enter .32s cubic-bezier(.2, .7, .2, 1); }
 @keyframes enter { from { opacity: 0; transform: translateY(10px); } }
-::view-transition-old(root) { animation: vt-out .18s ease both; }
-::view-transition-new(root) { animation: vt-in .3s cubic-bezier(.2, .7, .2, 1) both; }
-@keyframes vt-out { to { opacity: 0; transform: translateY(-6px); } }
-@keyframes vt-in { from { opacity: 0; transform: translateY(10px); } }
+/* Chỉ phần nội dung trượt; thanh trên và thanh tab đứng yên. Đi tới trượt từ phải, quay lại trượt từ trái. */
+#view { view-transition-name: page; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+::view-transition-old(page) { animation: vt-out .16s ease both; }
+::view-transition-new(page) { animation: vt-in .28s cubic-bezier(.2, .7, .2, 1) both; }
+:root[data-nav="back"]::view-transition-old(page) { animation-name: vt-out-back; }
+:root[data-nav="back"]::view-transition-new(page) { animation-name: vt-in-back; }
+@keyframes vt-out { to { opacity: 0; transform: translateX(-14px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateX(18px); } }
+@keyframes vt-out-back { to { opacity: 0; transform: translateX(14px); } }
+@keyframes vt-in-back { from { opacity: 0; transform: translateX(-18px); } }
 
 h1, h2, h3 { font-family: var(--serif); font-weight: 700; letter-spacing: .01em; line-height: 1.2; }
 h1 { font-size: 1.9rem; margin: .3rem 0 .6rem; color: var(--gold); }
@@ -216,7 +223,7 @@ details summary { cursor: pointer; color: var(--gold); min-height: 36px; display
   .sky::before, .sky::after { animation: none; }
   .flip-inner, .btn, .num { transition: none; }
   .view-enter { animation: none; }
-  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  ::view-transition-old(page), ::view-transition-new(page) { animation: none; }
   .streaming::after { animation: none; }
 }
 h1[tabindex]:focus { outline: none; }
