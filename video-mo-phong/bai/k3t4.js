@@ -85,6 +85,11 @@ function trang(rc) {
    // Crop vùng ảnh thật, khoanh LR3 đã kiểm định trong bìa HS; bỏ toàn bộ chữ ở bìa.
    ctx.drawImage(ARCHIVE,857,127,363,383,x+8,y+8,w-16,h-16);
    ctx.strokeStyle=SPINE;ctx.lineWidth=4;ctx.strokeRect(x+8,y+8,w-16,h-16);
+   // Vòng nhấn LR3 theo tọa độ crop HS; không vẽ mẫu dữ liệu normal point.
+   const highlight=.92+.07*Math.sin((t-b.t0)*2.1);
+   ctx.beginPath();ctx.ellipse(x+8+(w-16)*.521,y+8+(h-16)*.684,
+     (w-16)*.204*highlight,(h-16)*.13*highlight,0,0,Math.PI*2);
+   ctx.strokeStyle=SPINE;ctx.lineWidth=3;ctx.stroke();
  } else if(C==="SoCai"||C==="TheTram"||C==="CotDiaTang") {
    box(.09,.11,.82,.76,"#F7F0E2");
    for(let j=1;j<4;j++)line(.09+j*.205,.11,.09+j*.205,.87,PURPLE,2);
@@ -130,6 +135,36 @@ function trang(rc) {
  ctx.fillStyle=phase%2?SPINE:PURPLE;
  ctx.fillRect(x+5,y+h*.91,(w-10)*(active-1+sweep)/count,h*.055);
  ctx.restore();
+ // D16 K3 chuyển cảnh đúng ngữ pháp: lật trang cho TheTram, phủ trầm tích
+ // cho các trang tài liệu khác; chỉ phủ trang vật, không tác động chữ/nguồn/PiP.
+ if(b.id!=="h1"){
+   const u=clamp((t-b.t0)/1.15,0,1);
+   if(u<1){
+     ctx.save();ctx.beginPath();ctx.rect(sx+2,sy+2,sw-4,sh-4);ctx.clip();
+     const cover=1-u;
+     if(b.transition.includes("turn")||b.transition.includes("page")||b.scene==="TheTram"){
+       const fold=sw*cover;
+       ctx.fillStyle="#E4D7C5";
+       ctx.fillRect(sx+sw-fold,sy,fold,sh);
+       ctx.fillStyle="#FBF8F0";
+       ctx.beginPath();ctx.moveTo(sx+sw-fold,sy);
+       ctx.lineTo(sx+sw,sy+sh*.16*cover);
+       ctx.lineTo(sx+sw,sy+sh);
+       ctx.lineTo(sx+sw-fold,sy+sh);
+       ctx.closePath();ctx.fill();
+       ctx.strokeStyle="rgba(46,42,38,.58)";ctx.lineWidth=3;
+       strokeLine(ctx,sx+sw-fold,sy,sx+sw-fold,sy+sh);
+     }else{
+       // Lớp trầm tích dày phủ từ mép dưới rồi rút lên, để lộ vật chứng.
+       const dy=sy+sh*u;
+       ctx.fillStyle="rgba(123,63,152,.37)";
+       ctx.fillRect(sx,dy,sw,sh*cover);
+       ctx.strokeStyle="rgba(46,42,38,.6)";ctx.lineWidth=4;
+       strokeLine(ctx,sx,dy,sx+sw,dy);
+     }
+     ctx.restore();
+   }
+ }
  // Mép giấy và bóng đổ giữa lớp xa/trước.
  ctx.fillStyle="rgba(46,42,38,.12)";ctx.fillRect(sx,sy+sh-5,sw,5);
  ctx.restore();
