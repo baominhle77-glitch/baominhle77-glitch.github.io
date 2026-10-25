@@ -2,6 +2,7 @@
 // Gemini mặc định; tự dò model mạnh nhất, lỗi 429/404/503 thì chuyển model dự phòng. JSON có cấu trúc + streaming.
 import { cardName, tarotCard, lenCard } from "./reading.js";
 import { spreadById, posLabel, posKey } from "./spreads.js";
+import { cardYesNo } from "./data.js";
 
 // Cầu nối máy nhà: tiến trình ở 127.0.0.1 tự gắn khoá Gemini từ tệp .env trên máy, trang không giữ khoá.
 export const LOCAL_KEY = "@may-nha";
@@ -27,7 +28,7 @@ NGUYÊN TẮC BẤT DI BẤT DỊCH
 - Chỉ dùng đúng các lá đã lật được cung cấp. Không thêm, bớt, đổi lá, không đổi chiều xuôi/ngược. Ô trống (số không hợp lệ chưa thay) thì không bịa lá.
 - Lá lặp (cùng số rút lại trong cùng câu hỏi) = nhấn mạnh chủ đề, KHÔNG phải xác nhận độc lập; nói rõ điều đó.
 - Mọi con số tiền lấy đúng từ bảng quy đổi được cung cấp; nói rõ là quy đổi huyền học, không phải dự báo tài chính.
-- Không hứa chắc chắn; nêu điều kiện. Có lá báo gian dối/hao hụt (Mặt Trăng, 7 Kiếm, Ác Quỷ, 5 Kiếm, Con Cáo, Con Rắn, Con Chuột, Mây Đen…) mà câu hỏi liên quan tiền thì cảnh báo lừa đảo cụ thể, thực tế.
+- Không hứa chắc chắn; nêu điều kiện. Câu Có/Không của một lá phụ thuộc câu hỏi (ví dụ 4 Tiền: hỏi "giữ/tiết kiệm" thì nghiêng Có, hỏi "chi/đầu tư/thay đổi" thì nghiêng Không) — không gán một câu trả lời cố định cho lá. Có lá báo gian dối/hao hụt (Mặt Trăng, 7 Kiếm, Ác Quỷ, 5 Kiếm, Con Cáo, Con Rắn, Con Chuột, Mây Đen…) mà câu hỏi liên quan tiền thì cảnh báo lừa đảo cụ thể, thực tế.
 
 CÁCH ĐỌC
 1. Tarot đọc theo VỊ TRÍ: mỗi lá nói gì ĐÚNG ở vị trí đó (tiến trình / hiệu quả / kết quả / tín hiệu…), không đọc nghĩa chung chung. Sau đó đọc DÒNG CHẢY giữa các vị trí: lá nào chuyển hướng, đầu–cuối khác nhau ra sao, kết quả và tín hiệu có khớp không.
@@ -63,7 +64,8 @@ export function buildContext(db, session, { reading = null, money = null, settin
         if (!c.ok) return L.push(`  Tarot [${pos}]: ô trống (số ${c.raw} ngoài khoảng, chưa thay)`);
         const card = tarotCard(db, c.card);
         const k = posKey(pos);
-        L.push(`  Tarot [${pos}]: ${cardName(db, "tarot", c)} — từ khoá: ${card.tu_khoa}${k ? `; ở vị trí này: ${card.vi_tri[k]}` : ""}${c.repeatOf ? ` · LÁ LẶP (đã ra ở lượt ${c.repeatOf.round} tầng ${c.repeatOf.tier})` : ""}`);
+        const yn = sp.mode === "yesno" ? cardYesNo(card, c.rev, session.cauHoi) : null;
+        L.push(`  Tarot [${pos}]: ${cardName(db, "tarot", c)} — từ khoá: ${card.tu_khoa}${k ? `; ở vị trí này: ${card.vi_tri[k]}` : ""}${yn ? `; Có/Không theo đúng câu hỏi này: ${yn.tra_loi} (${yn.ly_do})` : ""}${c.repeatOf ? ` · LÁ LẶP (đã ra ở lượt ${c.repeatOf.round} tầng ${c.repeatOf.tier})` : ""}`);
       });
       (round.lenormand[ti] || []).forEach((c, i) => {
         if (!c.ok) return L.push(`  Lenormand ô ${i + 1}: ô trống (số ${c.raw} ngoài khoảng, chưa thay)`);
@@ -278,6 +280,17 @@ export async function discoverModels(provider, key, { fetchImpl = globalThis.fet
 }
 
 const RETRY = new Set([404, 429, 500, 503, 529]);
+
+// Lỗi gọi AI → câu dễ hiểu cho người dùng (không lộ chi tiết kỹ thuật); bản giải offline vẫn hiển thị bên dưới.
+export function friendlyError(e, key) {
+  if (e?.timeout) return "AI phản hồi quá lâu nên đã dừng chờ.";
+  const net = e instanceof TypeError || /failed to fetch|networkerror|load failed|network/i.test(String(e?.message || ""));
+  if (net) return key === LOCAL_KEY ? "Cầu nối AI trên máy đang tắt hoặc không kết nối được." : "Không kết nối được tới AI (mất mạng hoặc bị chặn).";
+  if (e?.status === 401 || e?.status === 403) return "Khoá AI không hợp lệ hoặc chưa được cấp quyền.";
+  if (e?.status === 429) return "AI đang quá tải hoặc hết hạn mức — thử lại sau ít phút.";
+  if (e?.status >= 500) return "Máy chủ AI đang lỗi tạm thời — thử lại sau.";
+  return String(e?.message || "Lỗi không rõ.").slice(0, 160);
+}
 // Gọi lần lượt model (ưu tiên model người dùng chọn), chuyển dự phòng khi 429/404/quá tải
 export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, signal, fetchImpl = globalThis.fetch, storage }) {
   if (!key) throw new Error("Chưa có khoá.");

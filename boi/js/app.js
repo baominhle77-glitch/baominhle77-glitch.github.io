@@ -6,10 +6,14 @@ import { mergeKnowledge } from "./data.js";
 const view = document.getElementById("view");
 const back = document.getElementById("btnBack");
 let idx = 0;
+// Nhớ vị trí cuộn theo từng bước lịch sử: quay lại thì về đúng chỗ đang đọc, đi tới thì lên đầu trang
+const scrollAt = new Map();
 function syncIdx(fresh) {
   const st = history.state;
+  const prev = idx;
   if (st && Number.isInteger(st.idx)) idx = st.idx;
   else { idx = fresh ? 0 : idx + 1; history.replaceState({ idx }, "", location.href); }
+  return idx < prev ? "back" : "fwd";
 }
 
 function parse() {
@@ -40,14 +44,15 @@ function render() {
   if (h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
 }
 
-function transition(fn, { scroll = true } = {}) {
+function transition(fn, { scroll = true, dir = "fwd", y = 0 } = {}) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const run = () => { fn(); if (scroll) window.scrollTo(0, 0); };
-  if (document.startViewTransition && !reduced) document.startViewTransition(run);
-  else {
-    run();
-    if (!reduced) { view.classList.remove("view-enter"); void view.offsetWidth; view.classList.add("view-enter"); }
+  document.documentElement.dataset.nav = dir;
+  const run = () => { fn(); if (scroll) window.scrollTo(0, y); };
+  if (document.startViewTransition && !reduced) {
+    try { document.startViewTransition(run); return; } catch (_) { /* trình duyệt từ chối → chuyển thường */ }
   }
+  run();
+  if (!reduced) { view.classList.remove("view-enter"); void view.offsetWidth; view.classList.add("view-enter"); }
 }
 
 const ctx = {
@@ -59,7 +64,14 @@ const ctx = {
   rerender() { const y = window.scrollY; render(); window.scrollTo(0, y); },
 };
 
-window.addEventListener("hashchange", () => { syncIdx(false); transition(render); });
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+window.addEventListener("hashchange", () => {
+  const from = idx;
+  scrollAt.set(from, window.scrollY);
+  const dir = syncIdx(false);
+  const y = dir === "back" ? scrollAt.get(idx) || 0 : 0;
+  transition(render, { dir, y });
+});
 back.onclick = () => { if (idx > 0) history.back(); else location.hash = "#/"; };
 
 const dbReady = Promise.all(["data/tarot.json", "data/lenormand.json"].map((u) => fetch(u).then((r) => { if (!r.ok) throw new Error(u); return r.json(); })))
@@ -77,7 +89,12 @@ async function init() {
   });
   syncIdx(true);
   render();
-  probeBridge().then((ok) => { if (ok) ctx.rerender(); });
+  // Dò cầu nối lúc mở trang và mỗi khi quay lại tab / có mạng lại; trạng thái đổi thì vẽ lại màn hiện tại
+  let last = null;
+  const reprobe = () => probeBridge().then((ok) => { if (ok !== last) { const was = last; last = ok; if (ok || was) ctx.rerender(); } });
+  reprobe();
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reprobe(); });
+  window.addEventListener("online", reprobe);
   if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }

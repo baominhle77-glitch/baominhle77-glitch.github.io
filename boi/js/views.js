@@ -6,8 +6,8 @@ import { analyze, ruleFollowUp } from "./insight.js";
 import { suggestSpread } from "./topic.js";
 import { tarotSVG, lenormandSVG, backSVG } from "./cards.js";
 import { readingToMarkdown } from "./markdown.js";
-import { LOCAL_KEY, PROVIDERS, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, discoverModels } from "./ai.js";
-import { store, persist, saveSettings, aiKey, setAiKey, aiReady, bridge, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
+import { LOCAL_KEY, PROVIDERS, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, discoverModels, friendlyError } from "./ai.js";
+import { store, persist, saveSettings, aiKey, setAiKey, aiReady, bridge, probeBridge, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
 import { gmt7 } from "./core.js";
 
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -415,6 +415,10 @@ async function runAI(s, el, ctx, rule) {
     if (out) out.innerHTML = obj ? readingHTML(normalizeReading(obj, rule), { streaming: true }) : `<p class="note streaming">Đang đọc bài…</p>`;
   };
   if (status) status.textContent = "Đang kết nối…";
+  // Quá 60 giây không nhận thêm chữ nào thì dừng chờ, giữ bản giải offline
+  let idle = 0;
+  const kick = () => { clearTimeout(idle); idle = setTimeout(() => { st.timeout = true; st.ctrl.abort(); }, 60000); };
+  kick();
   try {
     const money = rule._money;
     const { text, model } = await streamWithFallback({
@@ -422,9 +426,10 @@ async function runAI(s, el, ctx, rule) {
       system: SYSTEM_READING, json: true,
       messages: [{ role: "user", text: readingRequest(store.db, s, { reading: rule, money, settings: store.settings }) }],
       signal: st.ctrl.signal,
-      onModel: (m) => { st.model = m; if (status) status.textContent = `Đang giải bằng ${m}…`; },
-      onText: (full) => { st.text = full; if (!raf) raf = requestAnimationFrame(paint); },
+      onModel: (m) => { kick(); st.model = m; if (status) status.textContent = `Đang giải bằng ${m}…`; },
+      onText: (full) => { kick(); st.text = full; if (!raf) raf = requestAnimationFrame(paint); },
     });
+    clearTimeout(idle);
     const obj = partialJSON(text);
     const reading = normalizeReading(obj, rule);
     if (!reading || !reading.tang.length) throw new Error("AI trả về sai khuôn — thử lại hoặc dùng bản luật.");
@@ -433,10 +438,13 @@ async function runAI(s, el, ctx, rule) {
     live.delete(s.id);
     ctx.rerender();
   } catch (e) {
-    if (e.name === "AbortError") return;
+    clearTimeout(idle);
+    if (e.name === "AbortError" && !st.timeout) return;
     live.delete(s.id);
-    if (status) status.innerHTML = `<span class="err">Không gọi được AI: ${esc(e.message)}</span>`;
-    if (out) out.innerHTML = `<p class="note">Đang hiển thị bản giải bằng động cơ luật bên dưới. Có thể bấm “Chép prompt cho ChatGPT”.</p>`;
+    if (st.timeout) e.timeout = true;
+    if (key === LOCAL_KEY) probeBridge();
+    if (status) status.innerHTML = `<span class="err">Chưa giải được bằng AI: ${esc(friendlyError(e, key))}</span>`;
+    if (out) out.innerHTML = `<p class="note">Đang hiển thị bản giải offline ngay bên dưới — đọc được đầy đủ, không cần mạng. Có thể thử AI lại sau, hoặc bấm “Chép prompt cho ChatGPT”.</p>`;
   }
 }
 
@@ -461,7 +469,7 @@ function readView(id, query) {
     <section class="card glow" id="aiCard">
       <div class="row wrap"><h2 class="grow" style="margin:0">${viewing === "ai" ? "Giải sâu bằng AI" : "Giải theo luật"}</h2>
         <span class="src">${s.ai ? `<a class="btn small ${viewing === "ai" ? "primary" : ""}" href="#/giai/${id}">Bản AI</a><a class="btn small ${viewing === "luat" ? "primary" : ""}" href="#/giai/${id}?ban=luat">Bản luật</a>` : ""}</span></div>
-      <p class="note" id="aiStatus">${viewing === "ai" ? `Giải bởi ${esc(s.ai.model)} · ${esc(gmt7(new Date(s.ai.at)))}${aiStale ? " · <span class='warn'>có lượt rút mới sau bản này — bấm Giải lại</span>" : ""}` : hasKey ? (aiKey() === LOCAL_KEY ? "Cầu nối AI máy nhà sẵn sàng — đang chuẩn bị giải bằng AI." : "Có khoá — đang chuẩn bị giải bằng AI.") : "Chưa có khoá AI: đang dùng động cơ luật. Thêm khoá Gemini ở Cài đặt để AI đọc sâu hơn."}</p>
+      <p class="note" id="aiStatus">${viewing === "ai" ? `Giải bởi ${esc(s.ai.model)} · ${esc(gmt7(new Date(s.ai.at)))}${aiStale ? " · <span class='warn'>có lượt rút mới sau bản này — bấm Giải lại</span>" : ""}` : hasKey ? (aiKey() === LOCAL_KEY ? "Cầu nối AI máy nhà sẵn sàng — đang chuẩn bị giải bằng AI." : "Có khoá — đang chuẩn bị giải bằng AI.") : "Đang dùng bộ giải offline (chạy ngay trên máy, không cần mạng). Thêm khoá Gemini ở Cài đặt để AI đọc sâu hơn."}</p>
       <div id="aiOut"></div>
       ${readingHTML(shown)}
     </section>
@@ -547,7 +555,8 @@ function followView(id) {
           });
           s.chat.push({ role: "assistant", text, model, at: new Date().toISOString() });
         } catch (err) {
-          s.chat.push({ role: "assistant", text: `Không gọi được AI (${err.message}). Trả lời theo luật:\n\n${ruleFollowUp(rule, q)}`, at: new Date().toISOString() });
+          if (aiKey(provider) === LOCAL_KEY) probeBridge();
+          s.chat.push({ role: "assistant", text: `Chưa hỏi được AI (${friendlyError(err, aiKey(provider))}). Trả lời theo bộ giải offline:\n\n${ruleFollowUp(rule, q)}`, at: new Date().toISOString() });
         }
         save();
         ctx.rerender();
