@@ -1,8 +1,23 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-25T07:45:00+07:00",
+  "updated_at": "2026-10-25T09:00:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
+    {
+      "id": "BOI-20261025-03",
+      "owner": "Claude Code (phiên riêng web Bói, nick baominh)",
+      "branch": "agent/BOI-20261025-03",
+      "base_sha": "3bd8cf55d91f3af1aefd46e8a002533098dbc725",
+      "paths": [
+        "boi/**"
+      ],
+      "status": "in_progress",
+      "started_at": "2026-10-25T08:43:00+07:00",
+      "heartbeat_at": "2026-10-25T09:00:00+07:00",
+      "summary": "PR #140: bỏ Có cố định 4 lá Tiền (chọn theo ngữ cảnh), hoàn tất đối chiếu phần 15, chuyển trang/cầu nối AI/offline. GĐ đăng ký khoá thay phiên bói vì phiên bị cấm sửa docs/handover."
+    }
+  ],
+  "recently_completed": [
     {
       "id": "BOI-20261025-02",
       "owner": "Claude Code (GĐ Studio, máy ngoài)",
@@ -14,13 +29,12 @@
         "docs/handover/ACTIVE_TASKS.json",
         "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-10-25T07:00:00+07:00",
-      "heartbeat_at": "2026-10-25T07:45:00+07:00",
-      "summary": "Kho tri thức giải offline cho boi/: nghĩa Tarot 78 lá theo chủ đề (tình, đối phương, việc, sức khoẻ, vận hạn, ngược, Có/Không), Lenormand 36 lá + 1260 cặp; động cơ luật dùng kho này, không cần AI."
-    }
-  ],
-  "recently_completed": [
+      "heartbeat_at": "2026-10-25T09:00:00+07:00",
+      "summary": "Kho tri thức giải offline cho boi/: nghĩa Tarot 78 lá theo chủ đề (tình, đối phương, việc, sức khoẻ, vận hạn, ngược, Có/Không), Lenormand 36 lá + 1260 cặp; động cơ luật dùng kho này, không cần AI.",
+      "completed_at": "2026-10-25T09:00:00+07:00"
+    },
     {
       "id": "CHOICE-20261024-01",
       "owner": "Claude Code (session_01357)",
