@@ -1,0 +1,154 @@
+# -*- coding: utf-8 -*-
+"""C17(8): gate trên TOÀN KHUNG 540p, từng beat, không đo ROI nhỏ.
+
+ffmpeg fps=4,scale=240:135,format=gray; pixel động iff abs(I_t-I_t-1)>6.
+Loại pixel lặp động trong >=60% CẶP KHUNG toàn video trước khi thống kê.
+Mỗi beat: >=60% cặp có >=3% khung động, trung bình >=5%, hợp >=15%,
+không có chuỗi >2s mà mỗi cặp có <0.3% diện tích động.
+"""
+import argparse
+import json
+import subprocess
+from pathlib import Path
+
+import numpy as np
+
+FPS = 4
+WIDTH, HEIGHT = 240, 135
+DIFF = 6
+REPEAT_PCT = .60
+PAIR_PCT = 3.
+BEAT_PAIRS_GE_3_MIN = 60.
+BEAT_MEAN_MIN = 5.
+BEAT_UNION_MIN = 15.
+LOW_PAIR_PCT = .3
+MAX_LOW_STREAK_S = 2.
+FIRST = ("h1", "h2", "h3", "h4", "c1", "p1")
+
+
+def extract(video, fmt):
+    if not video.is_file():
+        raise FileNotFoundError(video)
+    probe = subprocess.run([
+        "ffprobe", "-v", "error", "-select_streams", "v:0",
+        "-show_entries", "stream=width,height,duration",
+        "-of", "json", str(video)], capture_output=True, text=True)
+    if probe.returncode:
+        raise RuntimeError("FFPROBE: " + probe.stderr[-1500:])
+    meta = json.loads(probe.stdout)["streams"][0]
+    expect = (960, 540) if fmt == "16x9" else (540, 960)
+    if (int(meta["width"]), int(meta["height"])) != expect:
+        raise ValueError("NOT_540P %s %r" % (fmt, meta))
+    cmd = ["ffmpeg", "-nostdin", "-hide_banner", "-v", "error",
+           "-i", str(video), "-t", "60", "-vf",
+           "fps=4,scale=240:135,format=gray",
+           "-an", "-f", "rawvideo", "-pix_fmt", "gray", "pipe:1"]
+    p = subprocess.run(cmd, capture_output=True)
+    if p.returncode:
+        raise RuntimeError("FFMPEG: " + p.stderr.decode("utf-8","replace")[-1500:])
+    size = WIDTH * HEIGHT
+    if len(p.stdout) % size:
+        raise RuntimeError("RAW_VIDEO_SIZE bytes=%d frame=%d"%(len(p.stdout),size))
+    n = len(p.stdout)//size
+    if n < 235 or n > 242:
+        raise ValueError("60S_4FPS_EXPECTED_240_FRAMES got=%s" % n)
+    return np.frombuffer(p.stdout,dtype=np.uint8).reshape(n,HEIGHT,WIDTH)
+
+
+def measure(frames, plan, fmt):
+    changed = (np.abs(np.diff(frames.astype(np.int16),axis=0)) > DIFF)
+    total_pairs = len(changed)
+    # Mặt nạ toàn video phải tính TRƯỚC khi cắt từng beat. Loại chuyển
+    # động lặp cố định (ticker, vòng quay bé, shimmer giả chạy mọi lúc).
+    repeated = (np.count_nonzero(changed,axis=0)/total_pairs) >= REPEAT_PCT
+    effective = changed & (~repeated)[None,:,:]
+    pixel_base = float(WIDTH*HEIGHT)
+    area = 100*np.count_nonzero(effective,axis=(1,2))/pixel_base
+    beat_rows=[]
+    for bid in FIRST:
+        b=plan["beats"][bid]
+        t0=float(b["t0"])
+        t1=t0+int(b["so_khung"])/30.
+        t1_seen=min(60.,t1)
+        # diff[j-1] chính là cặp có khung cuối tại t=j/FPS.
+        idx=[j-1 for j in range(1,len(frames))
+             if t0 <= j/FPS < t1_seen]
+        if not idx:
+            raise RuntimeError("BEAT_EMPTY %s [%f,%f)"%(bid,t0,t1_seen))
+        beat = effective[idx]
+        ar = area[idx]
+        above = 100.*np.count_nonzero(ar>=PAIR_PCT)/len(ar)
+        mean = float(ar.mean())
+        union = 100.*np.count_nonzero(beat.any(axis=0))/pixel_base
+        low = ar<LOW_PAIR_PCT
+        streak=longest=0
+        for is_low in low:
+            streak = streak+1 if is_low else 0
+            longest=max(longest,streak)
+        longest_s=longest/FPS
+        passed=(above>=BEAT_PAIRS_GE_3_MIN and mean>=BEAT_MEAN_MIN
+                and union>=BEAT_UNION_MIN and longest_s<=MAX_LOW_STREAK_S)
+        row={
+            "beat":bid,"bo_cuc":fmt,
+            "t_vao_s":round(t0,4),"t_ra_do_s":round(t1_seen,4),
+            "t_ra_beat_s":round(t1,4),
+            "beat_bi_cat_o_60s": t1>60.01,
+            "so_cap":len(idx),
+            "dien_tich_trung_binh_pct":round(mean,3),
+            "vung_dong_gop_pct":round(union,3),
+            "cap_ge_3pct_pct":round(above,3),
+            "chuoi_duoi_0_3pct_dai_nhat_s":round(longest_s,3),
+            "ket_qua":"DAT" if passed else "TRUOT"}
+        beat_rows.append(row)
+        print("C17_8 %s/%s avg=%.2f%% union=%.2f%% >=3%%=%.2f%% "
+              "low_streak=%.2fs => %s"%
+              (fmt,bid,mean,union,above,longest_s,row["ket_qua"]),flush=True)
+    return {
+        "bo_cuc":fmt,"so_khung_4fps":len(frames),"so_cap":total_pairs,
+        "pixel_bo_lap":int(repeated.sum()),
+        "bo_lap_pct":round(100.*repeated.mean(),3),
+        "dien_tich_dong_trung_binh_toan_mau_pct":round(float(area.mean()),3),
+        "cap_co_chuyen_dong_pct":round(100.*np.count_nonzero(area>0)/len(area),3),
+        "beats":beat_rows}
+
+
+def main():
+    p=argparse.ArgumentParser()
+    p.add_argument("--root",type=Path,default=Path("."))
+    a=p.parse_args()
+    root=a.root
+    try:
+        plan=json.loads(next(root.rglob("ke_hoach.json")).read_text(encoding="utf-8"))
+        if plan["tong_khung"]!=16601:
+            raise ValueError("TTS_KHONG_KHOA_16601")
+        reports=[]
+        for fmt in ("16x9","9x16"):
+            video=next(root.rglob("mau_00_60_"+fmt+"_540p.mp4"))
+            reports.append(measure(extract(video,fmt),plan,fmt))
+        failures=[r["bo_cuc"]+"/"+b["beat"] for r in reports for b in r["beats"]
+                  if b["ket_qua"]=="TRUOT"]
+        report={
+            "chuan":"C17(8) full-frame v1",
+            "video":"K1 t3 mẫu 00:00–01:00, không suy rộng sang full 553s",
+            "lay_mau":"ffmpeg fps=4,scale=240:135,format=gray",
+            "nguong_pixel_tuyet_doi_lon_hon":6,
+            "bo_pixel_dong_lap_neu_ty_le_cap_toan_video_ge_pct":60,
+            "nguong_tung_beat":{
+                "cap_co_dien_tich_ge_3pct_toi_thieu_pct":60,
+                "dien_tich_trung_binh_pct":5,
+                "vung_gop_pct":15,
+                "chuoi_cap_duoi_0_3pct_toi_da_s":2},
+            "ket_qua":"TRUOT" if failures else "DAT",
+            "loi":failures,"bao_cao":reports}
+    except Exception as e:
+        report={"chuan":"C17(8) full-frame v1","ket_qua":"TRUOT",
+                "loi":[repr(e)]}
+    output=root/"chuyen_dong_vung.json"
+    output.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+    print("C17_8_REPORT",output,"=>",report["ket_qua"],flush=True)
+    if report["ket_qua"]!="DAT":
+        raise SystemExit("CHUYEN_DONG_VUNG_TRUOT "+str(report["loi"]))
+
+
+if __name__=="__main__":
+    main()
