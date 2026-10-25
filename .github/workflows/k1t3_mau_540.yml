@@ -7,6 +7,8 @@ on:
       - "out/M1_MARANGONI/storyboard.json"
       - "tools/tap/ML_K1_t3.json"
       - "ci/chay_mau_k1t3.py"
+      - "ci/chuyen_dong_vung.py"
+      - "ci/kiem_chuyen_dong_beat.py"
       - ".github/workflows/k1t3_mau_540.yml"
 jobs:
   mau-540:
@@ -53,3 +55,34 @@ jobs:
             Studio/out/M1_MARANGONI_DUNG/_build/mau_540/contact_sheet_*.jpg
             Studio/out/M1_MARANGONI_DUNG/_build/mau_540/mau_00_60_*_540p.mp4
             Studio/out/M1_MARANGONI_DUNG/_build/ke_hoach.json
+
+  chuyen-dong-vung:
+    name: chuyen-dong-vung (C17-8)
+    needs: mau-540
+    if: ${{ always() && github.head_ref == 'gpt/k1t3-c16-c17-01' }}
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.9"
+      - name: Dependencies for full-frame measurement
+        shell: pwsh
+        run: |
+          python -m pip install -q numpy==2.4.6
+          choco install ffmpeg -y --no-progress | Out-Null
+      - uses: actions/download-artifact@v4
+        with:
+          name: k1t3-mau-540
+          path: motion-input
+      - name: chuyen-dong-vung — all beats, both 540p formats
+        shell: pwsh
+        run: python ci/chuyen_dong_vung.py --root motion-input
+      - name: Upload chuyen_dong_vung.json even when gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k1t3-chuyen-dong-vung
+          retention-days: 14
+          path: motion-input/chuyen_dong_vung.json
