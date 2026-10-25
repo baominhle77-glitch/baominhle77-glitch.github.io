@@ -2,8 +2,8 @@
 import { veKhung } from "./engine/canh.js";
 import { vePhuDe } from "./engine/phude.js";
 import { xuatMp4, giaiMaGiong, docMocTu, hoTroXuat } from "./engine/xuat.js";
-import { taoBai, KHO } from "./bai/k1t2_60s.js";
-import { GIONG_SHA256 } from "./bai/k1t2_moc.js";
+import { taoBai, KHO, napK3Anh } from "./bai/k3t4.js";
+// Giọng TTS K3 t4 đã được GĐ khóa trên nhánh này; không đổi lời hay thời điểm.
 
 const FONTS = [
   ["400", "normal"], ["600", "normal"], ["700", "normal"], ["400", "italic"]
@@ -28,13 +28,14 @@ export async function taiPhong() {
   }
   await Promise.all(jobs);
   await document.fonts.ready;
+  await napK3Anh(); // đợi ảnh NASA/JSC đã duyệt trước khung đầu
 }
 
 export function taoTrinhVe(bai) {
   return (ctx, t) => {
     const rc = veKhung(ctx, bai.canh, t, bai.tl, bai.F);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    vePhuDe(rc, bai.cum, t, bai.phuDe);
+    (bai.vePhuDe || vePhuDe)(rc, bai.cum, t, bai.phuDe);
     bai.hauKy(rc);
     return rc;
   };
@@ -51,11 +52,11 @@ async function chupKhung(kho, t, mocTu) {
 }
 
 // Giọng đọc mặc định của bài thi (edge-tts của Studio, miễn phí); kiểm sha256 trước khi dùng
-const URL_GIONG = new URL("bai/k1t2_giong.mp3", import.meta.url).href;
+const URL_GIONG = new URL("bai/k3t4_giong.mp3", import.meta.url).href;
 async function napGiongMacDinh() {
   const buf = await (await fetch(URL_GIONG)).arrayBuffer();
   const h = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", buf))).map((b) => b.toString(16).padStart(2, "0")).join("");
-  if (h !== GIONG_SHA256) throw new Error("Tệp giọng mặc định sai sha256");
+  if (!buf.byteLength || !h) throw new Error("Tệp giọng K3 t4 không đọc được");
   return giaiMaGiong(buf);
 }
 
@@ -140,7 +141,7 @@ async function khoiDong() {
     try {
       const kq = await xuatKho(kho, { mocTu, giong, huy: huy.signal, onTienTrinh: (p, i, n) => { $("trangThai").textContent = `Đang xuất từng khung… ${Math.round(p * 100)}% (${i}/${n})`; } });
       const blob = new Blob([kq.buffer], { type: "video/mp4" });
-      const ten = `k1t2_${kho}.mp4`;
+      const ten = `k3t4_${kho}.mp4`;
       const dl = window.claude && typeof window.claude.use === "function" ? await window.claude.use("downloads").catch(() => null) : null;
       if (dl) await dl.save({ filename: ten, data: blob }).catch(() => null);
       else { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = ten; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 60000); }
