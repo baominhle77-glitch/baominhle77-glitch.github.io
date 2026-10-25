@@ -1,0 +1,54 @@
+name: k1t3-mau-540
+on:
+  pull_request:
+    branches: [studio-dung]
+    paths:
+      - "ban_sac/K1_canh/**"
+      - "out/M1_MARANGONI/storyboard.json"
+      - "tools/tap/ML_K1_t3.json"
+      - "ci/chay_mau_k1t3.py"
+      - ".github/workflows/k1t3_mau_540.yml"
+jobs:
+  mau-540:
+    if: github.head_ref == 'gpt/k1t3-c16-c17-01'
+    runs-on: windows-latest
+    timeout-minutes: 200
+    env:
+      PYTHONIOENCODING: utf-8
+      CLAUDE_OWNED_RUN_ROOT: D:/r
+      K1_MAU_540: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: Studio
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.9"
+      - name: Prepare Manim and ffmpeg
+        shell: pwsh
+        run: |
+          subst E: "$env:GITHUB_WORKSPACE"
+          New-Item -ItemType Directory -Force D:\r | Out-Null
+          New-Item -ItemType Directory -Force C:\Users\Admin\AppData\Local\Programs\Python | Out-Null
+          New-Item -ItemType Junction -Path C:\Users\Admin\AppData\Local\Programs\Python\Python311 -Target $env:pythonLocation | Out-Null
+          python -m pip install -q numpy==2.4.6 pillow==12.2.0
+          choco install ffmpeg -y --no-progress | Out-Null
+          python -m venv E:\Studio\venv_manim
+          E:\Studio\venv_manim\Scripts\python.exe -m pip install -q -r E:\Studio\ci_requirements.txt
+      - name: Build 60s sample 540p, 35 stills per format, freeze gate
+        shell: pwsh
+        working-directory: E:\Studio
+        run: |
+          E:\Studio\venv_manim\Scripts\python.exe ci\chay_mau_k1t3.py
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k1t3-mau-540
+          retention-days: 14
+          path: |
+            D:/r/k1t3_mau_540/canh_thuc.json
+            D:/r/k1t3_mau_540/freeze_*.json
+            D:/r/k1t3_mau_540/contact_sheet_*.jpg
+            D:/r/k1t3_mau_540/mau_00_60_*_540p.mp4
+            Studio/out/M1_MARANGONI_DUNG/_build/ke_hoach.json
