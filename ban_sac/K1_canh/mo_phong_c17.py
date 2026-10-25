@@ -158,12 +158,21 @@ def bat_mo_phong(layer):
     if not all(law.get(k) for k in ("vat_chuyen_dong","luat_chuyen_dong","chay_lien_tuc")):
         raise ValueError("C17_8_THIEU_LUAT "+layer.b["id"])
     sim=MatNuocSong(law["co_che"],layer.b["id"],law["t_ra_s"],(w,h))
+    # Gỡ hình phác gốc ra khỏi cảnh, không đặt lớp chuyển động lên ảnh đứng.
+    # Đối tượng cũ nằm trong self.hinh_ds; không đụng nguồn / cột chữ.
+    for old in list(layer.hinh_ds):
+        layer.sc.remove(old)
+    layer.hinh_ds.clear()
+    for text_group in layer.man.values():
+        text_group.set_z_index(20)
+    if layer.W.nguon is not None:
+        layer.W.nguon.set_z_index(20)
     layer._c17_t=ValueTracker(0)
     layer._c17_t.add_updater(lambda mob,dt: mob.increment_value(dt))
     layer.sc.add(layer._c17_t)
     live=always_redraw(lambda: ImageMobject(sim.render(layer._c17_t.get_value()))
                        .stretch_to_fit_width(w).stretch_to_fit_height(h)
-                       .move_to([xc,yc,0]))
+                       .move_to([xc,yc,0]).set_z_index(5))
     layer._c17_hats=live
     layer.sc.add(live)
     layer.hinh_ds.append(live)
