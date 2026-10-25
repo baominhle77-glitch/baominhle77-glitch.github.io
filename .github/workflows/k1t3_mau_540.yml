@@ -49,6 +49,7 @@ jobs:
           path: |
             Studio/out/M1_MARANGONI_DUNG/_build/mau_540/canh_thuc.json
             Studio/out/M1_MARANGONI_DUNG/_build/mau_540/freeze_*.json
+            Studio/out/M1_MARANGONI_DUNG/_build/mau_540/chuyen_dong_beat.json
             Studio/out/M1_MARANGONI_DUNG/_build/mau_540/contact_sheet_*.jpg
             Studio/out/M1_MARANGONI_DUNG/_build/mau_540/mau_00_60_*_540p.mp4
             Studio/out/M1_MARANGONI_DUNG/_build/ke_hoach.json
