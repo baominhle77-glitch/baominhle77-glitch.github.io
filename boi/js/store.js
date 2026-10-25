@@ -41,7 +41,7 @@ export async function probeBridge(fetchImpl = globalThis.fetch) {
   } catch (_) { /* không ở máy nhà */ }
   const token = ghepToken();
   let ok = false;
-  if (token) {
+  {  // không có mã ghép vẫn dò: cầu nối nhận trang web bói theo Origin (25/10)
     try {
       const r = await fetchImpl(CAU_NOI_JSON, { headers: { accept: "application/vnd.github.raw+json" }, cache: "no-store" });
       const url = r.ok ? String((await r.json()).url || "") : "";

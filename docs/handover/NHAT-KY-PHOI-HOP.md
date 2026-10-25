@@ -728,3 +728,5 @@ trạng. **Quy tắc rút ra: trước khi sửa một file public, kiểm tra x
 
 - Tạo PWA `/vietnam-travel/`, có tìm kiếm, lọc, yêu thích, bản đồ, chia sẻ và offline shell.
 - Validation `30004367095`; production `30004367100`: success.
+
+- 25/10/2026 18:2x GMT+7 · BOI-20261025-02 · GĐ Studio (Claude) · boi/js/store.js, boi/js/views.js: điện thoại không cần link ghép — web luôn dò cầu nối máy nhà qua đường hầm; nút "Kiểm tra khoá" báo AI máy nhà thay vì "Chưa có khoá". Test boi 16/16 đạt; giả lập máy khác dò được cầu nối, Gemini flash-lite trả 200 (pro/flash hết hạn mức ngày → web tự chuyển). Không thêm secret.
