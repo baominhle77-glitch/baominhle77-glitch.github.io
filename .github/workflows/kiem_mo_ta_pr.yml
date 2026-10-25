@@ -20,7 +20,7 @@ jobs:
           import re
           import sys
 
-          body = os.environ.get("PR_BODY") or ""
+          body = (os.environ.get("PR_BODY") or "").replace("\r\n", "\n").replace("\r", "\n")
           rules = {
               "Trạng thái @<sha7>": r"^Trạng thái @[0-9a-f]{7}[ \t]*$",
               "Luật áp:": r"^Luật áp:.*$",
