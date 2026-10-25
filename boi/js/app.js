@@ -1,6 +1,6 @@
 // Khởi động SPA: tải dữ liệu lá, hash router, hiệu ứng chuyển trang, nút Back.
 import { ROUTES, NEEDS_DB, toast, esc } from "./views.js";
-import { store, probeBridge } from "./store.js";
+import { store, probeBridge, setGhep } from "./store.js";
 import { mergeKnowledge } from "./data.js";
 
 const view = document.getElementById("view");
@@ -87,6 +87,9 @@ async function init() {
     view.innerHTML = `<h1>Không tải được dữ liệu lá</h1><p class="err">${esc(err.message)}</p><p><button class="btn primary" type="button" id="rl">Tải lại</button></p>`;
     document.getElementById("rl").onclick = () => location.reload();
   });
+  // Link ghép một lần (?ghep=<mã>): lưu mã cầu nối máy nhà rồi xoá khỏi thanh địa chỉ
+  const ghep = new URLSearchParams(location.search).get("ghep");
+  if (ghep && /^[\w-]{20,}$/.test(ghep)) { setGhep(ghep); history.replaceState(null, "", location.pathname + location.hash); toast("Đã ghép cầu nối AI máy nhà."); }
   syncIdx(true);
   render();
   // Dò cầu nối lúc mở trang và mỗi khi quay lại tab / có mạng lại; trạng thái đổi thì vẽ lại màn hiện tại
