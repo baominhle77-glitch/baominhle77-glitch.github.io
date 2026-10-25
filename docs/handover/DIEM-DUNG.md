@@ -2,6 +2,13 @@
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
 
+## GPT 25/10: B2 vòng 2 — chỉ 9:16, chưa được kiểm máy thật
+
+- GĐ báo vòng 1 PR #137 (SHA `5b7906e`): `kiem_truoc.mjs` 16:9 ĐẠT đủ 7; 9:16 chỉ TRƯỢT C13-3 do 13,32–20,07 s đứng yên 6,75 s; `kiem_cat_vat.mjs` 0 lỗi cả 2. GĐ chưa merge.
+- **Vòng 2 sửa duy nhất `canhB2` 9:16, 13–20 s:** thêm ba mặt sóng khúc xạ một chiều phủ vùng vật (không phủ nguồn/PiP/phụ đề), vào theo TTS `M.seventy` 14,220–14,770 s: kéo mạnh; `M.thirty` 16,145–16,695 s: lực yếu sau SDS; `M.half` 19,370–19,920 s: so sánh gần một nửa. Không vẽ chữ mới, không đổi mốc TTS, không đổi 16:9.
+- **Kiểm tại phiên Chat:** cú pháp JS PASS; mô phỏng độc lập vùng hình 270×480, 4 fps, lệch pha 0, 2/30, 4/30, 6/30 s có nhịp >6 %, khoảng dài nhất 3,0 s (chỉ phép thử gần đúng, KHÔNG phải `kiem_truoc.mjs`). Hai lệnh QA gốc đã thử gọi trong sandbox nhưng trả `MODULE_NOT_FOUND` do không có checkout repo và Playwright Node ở đường dẫn cố định. **Không được ghi B2 ĐẠT khi GĐ chưa chạy kiểm máy thật.**
+- **Lệnh GĐ kiểm:** `node video-mo-phong/qa-tools/kiem_truoc.mjs` và `node video-mo-phong/qa-tools/kiem_cat_vat.mjs`, cả 16:9 + 9:16; khi đạt dán nguyên văn log vào PR #137.
+
 ## GPT 25/10: bài WEB B2 — hướng dẫn D16 trước khi sửa mã
 
 - Nhánh `gpt/k1t2-b2-01` cắt đúng SHA A1 ĐẠT `7773c443f569a76c47a7c2d28ff3cf4f237b2ac2`. GĐ đã xác nhận `kiem_truoc` + `kiem_cat_vat` A1 ĐẠT cả hai khổ.
