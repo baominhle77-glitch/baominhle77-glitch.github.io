@@ -2,7 +2,8 @@
   "schema_version": 1,
   "updated_at": "2026-10-25T09:00:00+07:00",
   "lock_timeout_hours": 24,
-  "active_tasks": [
+  "active_tasks": [],
+  "recently_completed": [
     {
       "id": "BOI-20261025-03",
       "owner": "Claude Code (phiên riêng web Bói, nick baominh)",
@@ -11,13 +12,13 @@
       "paths": [
         "boi/**"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "started_at": "2026-10-25T08:43:00+07:00",
       "heartbeat_at": "2026-10-25T09:00:00+07:00",
-      "summary": "PR #140: bỏ Có cố định 4 lá Tiền (chọn theo ngữ cảnh), hoàn tất đối chiếu phần 15, chuyển trang/cầu nối AI/offline. GĐ đăng ký khoá thay phiên bói vì phiên bị cấm sửa docs/handover."
-    }
-  ],
-  "recently_completed": [
+      "summary": "PR #140: bỏ Có cố định 4 lá Tiền (chọn theo ngữ cảnh), hoàn tất đối chiếu phần 15, chuyển trang/cầu nối AI/offline. GĐ đăng ký khoá thay phiên bói vì phiên bị cấm sửa docs/handover.",
+      "completed_at": "2026-10-25T08:57:52+07:00",
+      "merge_sha": "7bcc5f13bfddb8736e449c447300a8edf11defdd"
+    },
     {
       "id": "BOI-20261025-02",
       "owner": "Claude Code (GĐ Studio, máy ngoài)",
