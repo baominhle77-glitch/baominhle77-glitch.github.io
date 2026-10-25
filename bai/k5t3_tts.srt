@@ -1,0 +1,436 @@
+1
+00:00:00,100 --> 00:00:04,087
+On this map, one division symbol becomes a corps symbol.
+
+2
+00:00:04,037 --> 00:00:06,562
+What exactly has been added?
+
+3
+00:00:06,562 --> 00:00:09,650
+The answer is not a fixed new head count.
+
+4
+00:00:09,650 --> 00:00:13,950
+The manual defines formations by roles and subordinate units.
+
+5
+00:00:13,950 --> 00:00:19,237
+Above the division, headquarters organise other headquarters and tailored formations.
+
+6
+00:00:19,237 --> 00:00:23,000
+A neat four-at-every-step model stops matching doctrine.
+
+7
+00:00:23,000 --> 00:00:28,062
+If the next symbol is a corps, what sits above it, and what does 'army' mean here?
+
+8
+00:00:28,062 --> 00:00:30,450
+Keep that distinction open.
+
+9
+00:00:30,450 --> 00:00:33,837
+First overlay: the rule we should not extend.
+
+10
+00:00:33,837 --> 00:00:39,750
+In our original diagram, one hypothetical leader grouped four at each step until a division.
+
+11
+00:00:39,750 --> 00:00:48,250
+That was a mathematical illustration, not a statement that real United States Army organizations always have four subordinate units at every echelon.
+
+12
+00:00:48,250 --> 00:00:54,037
+FM three dash zero describes corps headquarters and divisions in the Army's command structure.
+
+13
+00:00:54,037 --> 00:00:58,525
+This source does not set a permanent number of divisions for every corps.
+
+14
+00:00:58,525 --> 00:01:03,662
+We use its role descriptions rather than multiplying a hypothetical branch count.
+
+15
+00:01:03,662 --> 00:01:08,712
+A corps marker alone does not determine exact personnel or subordinate totals.
+
+16
+00:01:08,712 --> 00:01:14,662
+The Army's FM three dash zero describes relationships and responsibilities that vary with mission.
+
+17
+00:01:14,662 --> 00:01:19,725
+Our branches are illustrations, not actual staff counts or an order of battle.
+
+18
+00:01:19,725 --> 00:01:27,950
+FM three dash zero describes the division as a principal tactical formation that commands brigade combat teams and supporting organizations.
+
+19
+00:01:27,950 --> 00:01:30,987
+Its subordinate composition can vary.
+
+20
+00:01:30,987 --> 00:01:36,987
+This example names only the functions supported by the cited doctrine, not a prescribed headcount.
+
+21
+00:01:36,987 --> 00:01:42,437
+Here a corps headquarters connects to illustrative divisions and other attached formations.
+
+22
+00:01:42,437 --> 00:01:50,275
+FM three dash zero describes how command echelons employ different subordinate organizations, but these links remain a teaching diagram.
+
+23
+00:01:50,275 --> 00:01:54,125
+No depicted box identifies a real deployed unit.
+
+24
+00:01:54,125 --> 00:01:58,350
+Imagine reusing our four-way branching model above the division.
+
+25
+00:01:58,350 --> 00:02:04,112
+Four divisions under one box would be a hypothetical instance, not a doctrine requirement.
+
+26
+00:02:04,112 --> 00:02:07,075
+We leave every force-strength cell blank.
+
+27
+00:02:07,075 --> 00:02:12,925
+A beautiful multiplication cannot turn an illustrative branch into documented troop figures.
+
+28
+00:02:12,925 --> 00:02:20,412
+Compare two columns: a mathematics column labelled if four branches, and a doctrine column labelled assigned or attached formations.
+
+29
+00:02:20,412 --> 00:02:27,925
+The first specifies a numerical rule because we invented one; the second reports that actual composition is task-organised.
+
+30
+00:02:27,925 --> 00:02:31,962
+We must not carry the invented rule into the official column.
+
+31
+00:02:31,962 --> 00:02:38,725
+The marks on this overlay are episode labels, not verified reproductions from FM one dash zero two point two.
+
+32
+00:02:38,725 --> 00:02:42,587
+They help our teaching diagram separate boxes and levels.
+
+33
+00:02:42,587 --> 00:02:47,700
+Do not read them as authenticated military symbols or a personnel inventory.
+
+34
+00:02:47,700 --> 00:02:52,575
+Our second map overlay distinguishes a corps from a field army headquarters.
+
+35
+00:02:52,575 --> 00:03:01,150
+FM three dash zero describes a field army that may command multiple corps when required, while a corps has its own tactical and operational roles.
+
+36
+00:03:01,150 --> 00:03:05,475
+We do not infer an automatic extra level in every command chain.
+
+37
+00:03:05,475 --> 00:03:13,400
+FM three dash zero identifies corps as a versatile echelon above brigade, able to operate at tactical and operational levels.
+
+38
+00:03:13,400 --> 00:03:17,125
+A field army may command several corps when required.
+
+39
+00:03:17,125 --> 00:03:21,512
+This slide does not claim any specific theater army organization.
+
+40
+00:03:21,512 --> 00:03:26,212
+A field army is not automatically present in every command diagram.
+
+41
+00:03:26,212 --> 00:03:33,737
+FM three dash zero presents it as an operational headquarters used when required, with a variable number of attached corps.
+
+42
+00:03:33,737 --> 00:03:38,950
+The drawn boxes illustrate possible functions, not actual named formations.
+
+43
+00:03:38,950 --> 00:03:45,987
+FM three dash zero describes a field army as an operational headquarters that may direct several corps when required.
+
+44
+00:03:45,987 --> 00:03:53,525
+The listed corps and supporting organizations are variable attachments, not a fixed organizational template or a mandated number.
+
+45
+00:03:53,525 --> 00:03:59,175
+The comparison now shows different command purposes rather than a fixed multiplication ladder.
+
+46
+00:03:59,175 --> 00:04:06,612
+A corps headquarters may function tactically under a land component, and a field army may coordinate multiple corps when required.
+
+47
+00:04:06,612 --> 00:04:11,287
+Those roles are documented in FM three dash zero, twenty twenty two.
+
+48
+00:04:11,452 --> 00:04:18,877
+The word army can refer to different contexts, so one label alone is not enough to identify the actual command relationship.
+
+49
+00:04:18,827 --> 00:04:25,289
+FM three dash zero specifies roles for corps, divisions, and a conditional field army headquarters.
+
+50
+00:04:25,289 --> 00:04:28,814
+We do not infer detailed theater-wide arrangements.
+
+51
+00:04:28,814 --> 00:04:32,902
+No real-world order of battle is being built on this page.
+
+52
+00:04:32,902 --> 00:04:37,252
+Boxes stand for command echelons and doctrinal relationships.
+
+53
+00:04:37,252 --> 00:04:43,214
+We omit unit identifiers, deployment positions, combat tasks and operational routes.
+
+54
+00:04:43,214 --> 00:04:49,214
+The lesson is about published organizational language, not about arranging forces for an operation.
+
+55
+00:04:49,214 --> 00:04:52,527
+Third overlay: the price of the simple sum.
+
+56
+00:04:52,527 --> 00:04:58,177
+The earlier four-to-one model was chosen because powers of four make an intuitive demonstration.
+
+57
+00:04:58,177 --> 00:05:04,264
+Its usefulness ends where actual published definitions stop describing fixed multiplicative growth.
+
+58
+00:05:04,264 --> 00:05:09,189
+The corps-to-army level is exactly where that distinction becomes unavoidable.
+
+59
+00:05:09,189 --> 00:05:12,539
+Our teaching labels are local to this episode.
+
+60
+00:05:12,539 --> 00:05:21,439
+Without a verified quotation and table number from the military-symbol publication, these marks cannot be presented as authoritative echelon amplifiers.
+
+61
+00:05:21,439 --> 00:05:25,427
+The lesson concerns the limits of interpreting a diagram.
+
+62
+00:05:25,427 --> 00:05:30,389
+FM three dash zero distinguishes the functional roles of corps and divisions.
+
+63
+00:05:30,389 --> 00:05:35,564
+A division normally commands brigade combat teams and other enabling formations.
+
+64
+00:05:35,564 --> 00:05:41,364
+This explains why a label does not yield an exact number of subordinate people or organizations.
+
+65
+00:05:41,364 --> 00:05:48,139
+When required, FM three dash zero describes a field army providing command and control for multiple corps.
+
+66
+00:05:48,139 --> 00:05:52,727
+Its composition can include several kinds of attached organizations.
+
+67
+00:05:52,727 --> 00:05:58,139
+This is not a universal number of corps under every headquarters or a fixed hierarchy.
+
+68
+00:05:58,139 --> 00:06:06,439
+FM three dash zero describes different roles for corps and divisions, including tactical headquarters functions in large-scale combat operations.
+
+69
+00:06:06,439 --> 00:06:12,764
+This overlay distinguishes those documented roles from broader unspecified theater responsibilities.
+
+70
+00:06:12,764 --> 00:06:15,939
+It is not a verified theater army chart.
+
+71
+00:06:15,939 --> 00:06:22,814
+The map can show corps and field army as different types of Army headquarters, but one symbol is not a personnel total.
+
+72
+00:06:22,814 --> 00:06:28,377
+FM three dash zero documents possible command roles, not permanent unit counts.
+
+73
+00:06:28,377 --> 00:06:31,964
+The exact organization needs additional evidence.
+
+74
+00:06:31,964 --> 00:06:35,389
+We now run a sensitivity thought experiment.
+
+75
+00:06:35,389 --> 00:06:42,114
+If the illustrative branch factor were three or five instead of four, the mathematical counts would change dramatically.
+
+76
+00:06:42,114 --> 00:06:47,564
+However, changing the invented factor would not revise a single doctrinal definition.
+
+77
+00:06:47,564 --> 00:06:52,777
+This contrast is a test of our model, not evidence that the Army reorganised.
+
+78
+00:06:52,777 --> 00:06:58,839
+A map needs a compact legend, but the marks used on this teaching overlay are episode labels only.
+
+79
+00:06:58,839 --> 00:07:04,689
+We have not verified their detailed symbolism against the original military-symbol manual.
+
+80
+00:07:04,689 --> 00:07:08,539
+No real operational unit or strength is identified.
+
+81
+00:07:08,539 --> 00:07:14,177
+Finally, the 'corps' and 'army' terms do not justify assigning a soldier count in this episode.
+
+82
+00:07:14,177 --> 00:07:19,977
+We have consulted the doctrinal definitions, not a dated strength table for a named real unit.
+
+83
+00:07:19,977 --> 00:07:24,214
+One evidence column remains intentionally blank: personnel.
+
+84
+00:07:24,214 --> 00:07:28,564
+That restraint is an accuracy feature, not a missing decoration.
+
+85
+00:07:28,564 --> 00:07:31,064
+Return to the legend ledger.
+
+86
+00:07:31,064 --> 00:07:34,814
+Our columns read item, value, type and source.
+
+87
+00:07:34,814 --> 00:07:39,464
+The first item is symbol definition from the military symbol manual.
+
+88
+00:07:39,464 --> 00:07:44,552
+The second is the role of an army headquarters from FM three dash ninety four.
+
+89
+00:07:44,552 --> 00:07:48,502
+The third is the illustrative mathematical branch factor.
+
+90
+00:07:48,502 --> 00:07:56,714
+The first ledger row names corps and division functions using FM three dash zero, twenty twenty two, sections two eighty seven through two eighty nine.
+
+91
+00:07:56,714 --> 00:08:01,702
+This row is a doctrinal description, not a calculated number of troops.
+
+92
+00:08:01,702 --> 00:08:08,764
+The field army ledger row comes from FM three dash zero, twenty twenty two, sections two eighty four and two eighty five.
+
+93
+00:08:08,764 --> 00:08:13,539
+It may direct multiple corps when required and has variable attachments.
+
+94
+00:08:13,539 --> 00:08:17,702
+This row records the role without claiming a permanent template.
+
+95
+00:08:17,860 --> 00:08:24,847
+The next ledger row records the corps as a headquarters with tactical and operational functions under FM three dash zero.
+
+96
+00:08:24,797 --> 00:08:30,935
+It does not claim that one specified theater army always commands a fixed number of corps or divisions.
+
+97
+00:08:30,935 --> 00:08:37,985
+Item four: if four hypothetical branches are repeated, the simple mathematical model generates a power of four.
+
+98
+00:08:37,985 --> 00:08:41,835
+That statement is calculated within an invented model.
+
+99
+00:08:41,835 --> 00:08:46,372
+It does not establish numbers of divisions in a corps or corps in an army.
+
+100
+00:08:46,372 --> 00:08:49,147
+No derived head count is displayed.
+
+101
+00:08:49,147 --> 00:08:58,172
+Three things could change a real command diagram without changing the mathematical rule we drew: the mission, the assigned or attached formations, and the headquarters role.
+
+102
+00:08:58,172 --> 00:09:02,610
+These are exactly why doctrinal descriptions use functional language.
+
+103
+00:09:02,610 --> 00:09:06,297
+A fixed branching factor cannot substitute for them.
+
+104
+00:09:06,297 --> 00:09:12,922
+The map returns to its original division symbol, now beside a corps and two distinct Army headquarters roles.
+
+105
+00:09:12,922 --> 00:09:18,247
+We can read the published hierarchy while keeping its conditional relationships intact.
+
+106
+00:09:18,247 --> 00:09:23,222
+Nothing on the page pretends to know the actual strength of an unnamed formation.
+
+107
+00:09:23,222 --> 00:09:29,310
+A corps is defined by the formations and roles it commands, not by multiplying a division's head count.
+
+108
+00:09:29,310 --> 00:09:33,535
+Above it, Army headquarters have distinct responsibilities.
+
+109
+00:09:33,535 --> 00:09:38,247
+Read the echelon and function first; never invent the personnel total.
+
