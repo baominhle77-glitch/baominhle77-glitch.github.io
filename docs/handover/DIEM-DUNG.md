@@ -1,3 +1,12 @@
+# BÀN GIAO SX-WEB · K3_t4 · PR #142 (25/10/2026)
+
+- D16 được GĐ xác nhận ĐẠT: `studio-hop-thu` PR #7, issuecomment-6396267495, HS `gpt/hs-K3-t4-01` sha `5403b29c`.
+- Tiếp tục đúng nhánh GĐ đã cấp `gpt/k3t4-01` từ web `c279b010`, **không tạo nhánh mới**. PR: https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/pull/142 vào `claude/pensive-lovelace-96zjk7`.
+- Commit code `97d791c71758adeeb3d690ef69dc1d5c42184f36`: `video-mo-phong/bai/k3t4.js`, 34 beat, ảnh NASA/JSC AS14-67-9386 khoanh LR3 lấy từ thumbnail HS; nguồn NP từ ILRS riêng biệt; chú thích nguồn ở hộp đã duyệt; phụ đề 1385/1385 token khớp SRT, 2–5 từ/cụm.
+- Commit đăng ký `4ea967e2b0df5116c49d52c47067411ec524dc34`: `video-mo-phong/xuong.js`, bài K3_t4 và TTS đã khoá `k3t4_giong.mp3` / `k3t4_tts.srt` từ GĐ, không sửa dữ liệu âm thanh.
+- SX-CI GitHub Actions đang kiểm ở run `40183822892`; **chưa tuyên bố ĐẠT máy, chưa có tờ ghép hoặc C13 ĐẠT**. Đọc bình luận CI PR #142, sửa beat/mục trượt cục bộ trong 60 phút/vòng. Tuyệt đối KHÔNG `[render-day-du]` trước phiếu KĐ C13 ĐẠT.
+- Hai bộ kiểm theo CI: `node video-mo-phong/qa-tools/kiem_truoc.mjs 16x9,9x16` và `node video-mo-phong/qa-tools/kiem_cat_vat.mjs 16x9 9x16`; không ghi 0 lỗi khi chưa có CI xác nhận.
+
 # ĐIỂM DỪNG HIỆN TẠI — đọc đầu tiên khi mở phiên mới
 
 > Cập nhật sau **mỗi lượt trả lời có thay đổi**. Ghi ngắn, đủ để một phiên/nick khác làm tiếp ngay. Không ghi mật khẩu, token, khóa.
