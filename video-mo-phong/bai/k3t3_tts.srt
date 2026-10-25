@@ -1,0 +1,452 @@
+1
+00:00:00,100 --> 00:00:04,037
+Can this Apollo fifteen reflector track lunar recession?
+
+2
+00:00:03,987 --> 00:00:06,487
+A beam returns from the Moon.
+
+3
+00:00:06,487 --> 00:00:11,250
+How does that return yield thirty eight point three zero millimetres per year?
+
+4
+00:00:11,250 --> 00:00:16,275
+Four ledger columns: measured, dated, counted, assumed.
+
+5
+00:00:16,275 --> 00:00:20,537
+Laser timing is observed; the recession rate is inferred.
+
+6
+00:00:20,537 --> 00:00:26,087
+Calculated: zero point zero eight divided by thirty eight point three zero.
+
+7
+00:00:26,087 --> 00:00:28,600
+What controls that uncertainty?
+
+8
+00:00:28,600 --> 00:00:31,212
+Station one: the count.
+
+9
+00:00:31,212 --> 00:00:36,100
+Lunar laser ranging begins with emitted pulses and returned photons.
+
+10
+00:00:36,100 --> 00:00:41,775
+A station records timing, not a ruler stretching from Earth to a fixed mark on the Moon.
+
+11
+00:00:41,775 --> 00:00:47,775
+The Moon moves throughout the experiment, so even the idea of a static distance would mislead us.
+
+12
+00:00:47,775 --> 00:00:53,637
+The International Laser Ranging Service describes full-rate observations and normal points.
+
+13
+00:00:53,637 --> 00:00:58,475
+A normal point condenses observations collected over seconds or minutes.
+
+14
+00:00:58,475 --> 00:01:07,962
+These are different records: one retains more of the observation detail, while the other is a compact product for scientific analysis and further comparison.
+
+15
+00:01:07,962 --> 00:01:13,975
+Apollo missions and the Soviet Lunokhod missions placed retroreflectors on the lunar surface.
+
+16
+00:01:13,975 --> 00:01:18,500
+A retroreflector sends an incoming signal back toward its source.
+
+17
+00:01:18,500 --> 00:01:26,887
+The route is out and back, and the observing station must identify the small useful return amid all other signals arriving at its detector.
+
+18
+00:01:26,887 --> 00:01:34,062
+In our simplified diagram, distance equals light speed multiplied by round-trip time, divided by two.
+
+19
+00:01:34,062 --> 00:01:38,475
+This is our teaching sketch, not the full lunar-ranging solution.
+
+20
+00:01:38,475 --> 00:01:48,112
+Atmospheric corrections, station location, reflector geometry and orbital motion complicate the path from one observed pulse to a useful parameter.
+
+21
+00:01:48,112 --> 00:01:55,700
+The service says stations apply corrections for atmospheric conditions and ground calibration before releasing laser ranges.
+
+22
+00:01:55,700 --> 00:02:01,512
+This matters because a published range must not be confused with an untouched stopwatch reading.
+
+23
+00:02:01,512 --> 00:02:09,925
+The archive holds prepared scientific observations, with documented formats, not simply a list of uncorrected travel times.
+
+24
+00:02:09,925 --> 00:02:16,825
+Notice what has not appeared in this notebook: no millimetres-per-year trend has been measured directly by one pulse.
+
+25
+00:02:16,825 --> 00:02:19,925
+A pulse contributes one observation.
+
+26
+00:02:19,925 --> 00:02:25,012
+Many observations across changing geometry constrain a dynamical model.
+
+27
+00:02:25,012 --> 00:02:29,725
+Confusing the two would exaggerate what the apparatus actually records.
+
+28
+00:02:29,725 --> 00:02:35,325
+At the first station, our ledger reads measured: timing and calibrated ranges.
+
+29
+00:02:35,325 --> 00:02:38,125
+Dated: the observing epochs.
+
+30
+00:02:38,125 --> 00:02:43,025
+Counted: observation records, but without an invented total here.
+
+31
+00:02:43,025 --> 00:02:47,112
+Assumed: a model of motion and fitted parameters.
+
+32
+00:02:47,112 --> 00:02:52,237
+The columns answer different questions, and none can silently replace another.
+
+33
+00:02:52,237 --> 00:02:54,937
+Station two: the sum.
+
+34
+00:02:54,937 --> 00:03:02,587
+Williams and Boggs published an analysis of secular tidal changes in lunar orbit and Earth rotation in twenty sixteen.
+
+35
+00:03:02,587 --> 00:03:11,900
+The abstract reports a lunar semimajor-axis rate of thirty eight point three zero, plus or minus zero point zero eight, millimetres per year.
+
+36
+00:03:11,900 --> 00:03:15,787
+The semimajor axis describes the scale of an orbit.
+
+37
+00:03:15,787 --> 00:03:22,262
+It is not identical to the range between a particular ground station and a particular reflector on one night.
+
+38
+00:03:22,262 --> 00:03:30,262
+The measured geometric range changes with Earth's rotation, orbital phase and the positions of the observing and reflecting sites.
+
+39
+00:03:30,262 --> 00:03:36,500
+A teaching ledger might write observed range equals modelled geometry plus corrections and residual.
+
+40
+00:03:36,500 --> 00:03:41,350
+That is our bookkeeping illustration, not a quoted equation from the paper.
+
+41
+00:03:41,350 --> 00:03:49,887
+Fitting parameters across observations helps explain a pattern of residuals; it does not turn each residual into a separate measurement of recession.
+
+42
+00:03:49,887 --> 00:03:57,462
+The authors analyse lunar laser ranging data together with parameters related to terrestrial and lunar tidal dissipation.
+
+43
+00:03:57,462 --> 00:04:02,012
+Converting estimated dissipation parameters gives secular rates.
+
+44
+00:04:02,012 --> 00:04:09,000
+This is the essential missing bridge between timing photons and putting millimetres per year beside an orbital quantity.
+
+45
+00:04:09,000 --> 00:04:16,462
+Write thirty eight point three zero on the sum sheet, with zero point zero eight beside it as the reported uncertainty.
+
+46
+00:04:16,462 --> 00:04:24,800
+Dividing zero point zero eight by thirty eight point three zero gives approximately zero point two one per cent, calculated.
+
+47
+00:04:24,800 --> 00:04:29,950
+That ratio is descriptive, not the uncertainty of an individual pulse.
+
+48
+00:04:30,100 --> 00:04:33,100
+Sensitivity is visible on paper.
+
+49
+00:04:33,050 --> 00:04:40,825
+Thirty eight point two two and thirty eight point three eight lie one quoted uncertainty unit on either side of the central estimate.
+
+50
+00:04:40,825 --> 00:04:43,762
+They illustrate that numerical interval.
+
+51
+00:04:43,762 --> 00:04:48,662
+They do not guarantee that every unmodelled systematic effect lies within it.
+
+52
+00:04:48,662 --> 00:05:00,687
+Here we can close the opening question carefully: the plus-or-minus value belongs to a reported parameter estimate under its analysis, not to a laser's single-shot resolution or a photographed beam width.
+
+53
+00:05:00,687 --> 00:05:06,887
+Observations, corrections and modelling assumptions are what link the measured ranges to that result.
+
+54
+00:05:06,887 --> 00:05:19,212
+Williams, Turyshev and Boggs reported thirty eight point zero eight, plus or minus zero point one nine, millimetres per year in twenty fourteen, using forty three years of lunar ranging.
+
+55
+00:05:19,212 --> 00:05:21,450
+That was a different study.
+
+56
+00:05:21,450 --> 00:05:26,850
+We must not blend its number with the later estimate or claim a direct instrument comparison.
+
+57
+00:05:26,850 --> 00:05:29,987
+Station three: outside the sum.
+
+58
+00:05:29,987 --> 00:05:34,925
+A picture of a reflector verifies the apparatus to which signals return.
+
+59
+00:05:34,925 --> 00:05:38,600
+It does not itself supply the published recession rate.
+
+60
+00:05:38,600 --> 00:05:41,700
+Neither does a single dated observation.
+
+61
+00:05:41,700 --> 00:05:46,750
+Both can be valid evidence without being the fitted result of the full analysis.
+
+62
+00:05:46,750 --> 00:05:52,700
+NASA describes newer lunar retroreflectors as targets for Earth-based laser pulses.
+
+63
+00:05:52,700 --> 00:05:56,900
+Measuring the round-trip transit time helps determine distance.
+
+64
+00:05:56,900 --> 00:06:01,475
+This institutional instrument description establishes the physical method.
+
+65
+00:06:01,475 --> 00:06:08,500
+It cannot independently validate the exact uncertainty stated in a distinct twenty sixteen orbital analysis.
+
+66
+00:06:08,500 --> 00:06:13,112
+The laser archive contains records researchers can reanalyse.
+
+67
+00:06:13,112 --> 00:06:22,737
+The International Laser Ranging Service lists older and newer observation formats and reflector targets including Apollo eleven, fourteen and fifteen.
+
+68
+00:06:22,737 --> 00:06:30,612
+These records are evidence of observed ranges, not automatic proof that any particular fitted tidal model is uniquely correct.
+
+69
+00:06:30,612 --> 00:06:35,550
+Williams and Boggs also report a rate of change for the Moon's mean motion.
+
+70
+00:06:35,550 --> 00:06:40,662
+That is another dynamical-fit output, not a second ruler buried in the Moon.
+
+71
+00:06:40,662 --> 00:06:47,550
+We keep it outside our central sum, because related model outputs are not automatically independent confirmation.
+
+72
+00:06:47,550 --> 00:06:51,750
+In another notebook, ancient coral growth markings are counted.
+
+73
+00:06:51,750 --> 00:06:55,175
+In this notebook, returning light is timed.
+
+74
+00:06:55,175 --> 00:06:58,987
+The two records occupy different evidential columns.
+
+75
+00:06:58,987 --> 00:07:06,512
+The coral count does not become an input to the laser model just because both subjects appear in accounts of Earth's evolving rotation.
+
+76
+00:07:06,512 --> 00:07:10,462
+There is a limit to what we can claim from the published abstract.
+
+77
+00:07:10,462 --> 00:07:21,075
+It does not provide the full covariance matrix or a detailed numerical breakdown assigning parts of zero point zero eight to particular instruments, observations or corrections.
+
+78
+00:07:21,075 --> 00:07:24,775
+Giving such a breakdown here would be invented precision.
+
+79
+00:07:24,775 --> 00:07:31,962
+And a present-day fitted rate cannot simply be multiplied by millions of years to reconstruct past lunar distances.
+
+80
+00:07:31,962 --> 00:07:36,562
+The cited research discusses the evolution of tidal dissipation.
+
+81
+00:07:36,562 --> 00:07:43,975
+A constant-rate extrapolation would add an unverified assumption and hide changes that the physical model is intended to consider.
+
+82
+00:07:43,975 --> 00:07:46,387
+Return to four columns.
+
+83
+00:07:46,387 --> 00:07:50,175
+Measured means ranges obtained from timed pulses.
+
+84
+00:07:50,175 --> 00:07:53,037
+Dated means observation epochs.
+
+85
+00:07:53,037 --> 00:07:58,062
+Counted means records and their grouping, without a fabricated sample count.
+
+86
+00:07:58,062 --> 00:08:02,325
+Assumed means fitted dynamical models and their conditions.
+
+87
+00:08:02,325 --> 00:08:05,725
+Each column must retain its name on the page.
+
+88
+00:08:05,725 --> 00:08:08,525
+Entry one: the apparatus.
+
+89
+00:08:08,525 --> 00:08:12,675
+A retroreflector permits a round-trip timing experiment.
+
+90
+00:08:12,675 --> 00:08:15,075
+Record type: measured.
+
+91
+00:08:15,075 --> 00:08:20,250
+Sources: the international ranging archive and NASA's instrument account.
+
+92
+00:08:20,250 --> 00:08:27,587
+No rate of recession belongs in this row, because a physical timing observation and a fitted trend are different things.
+
+93
+00:08:27,587 --> 00:08:36,725
+Entry two: the twenty sixteen published result, thirty eight point three zero plus or minus zero point zero eight millimetres per year.
+
+94
+00:08:36,725 --> 00:08:39,862
+Record type: derived parameter.
+
+95
+00:08:39,862 --> 00:08:48,362
+This precision is a claim of Williams and Boggs' analysis, not a property shared by every reflector, station or laser pulse.
+
+96
+00:08:48,532 --> 00:08:55,282
+Entry three: our ratio, about zero point two one per cent. Record type: calculated.
+
+97
+00:08:55,232 --> 00:09:00,119
+The numerator and denominator stay visible so the arithmetic can be checked.
+
+98
+00:09:00,119 --> 00:09:06,407
+If a future analysis revises either published value, this derived ratio changes as well.
+
+99
+00:09:06,407 --> 00:09:09,469
+It is not new observational evidence.
+
+100
+00:09:09,469 --> 00:09:13,069
+Entry four: what remains unknown here.
+
+101
+00:09:13,069 --> 00:09:19,994
+An abstract can authenticate a reported number; it does not reveal every data-selection or covariance decision.
+
+102
+00:09:19,994 --> 00:09:24,444
+We leave the detailed uncertainty budget empty rather than making it up.
+
+103
+00:09:24,444 --> 00:09:28,169
+That blank is part of the scientific record's honesty.
+
+104
+00:09:28,169 --> 00:09:37,694
+Three things could change the inferred result: an extended span of observations, revised range corrections, or altered dynamical assumptions.
+
+105
+00:09:37,694 --> 00:09:41,057
+This does not predict the direction of any change.
+
+106
+00:09:41,057 --> 00:09:47,069
+It tells us what sorts of evidence and decisions must be checked before comparing two fitted answers.
+
+107
+00:09:47,069 --> 00:09:49,307
+Return to the reflector.
+
+108
+00:09:49,307 --> 00:09:53,757
+We started with returning light and ended with an estimated orbital rate.
+
+109
+00:09:53,757 --> 00:09:59,019
+Between them sit dated observations, a model, and reported uncertainty.
+
+110
+00:09:59,019 --> 00:10:05,594
+A careful illustration keeps those separate even when a graphic compresses the story into one striking figure.
+
+111
+00:10:05,594 --> 00:10:10,057
+A laser pulse gives us a timed return, not a recession rate.
+
+112
+00:10:10,057 --> 00:10:16,832
+That rate comes from fitting many dated observations to an orbital model, with uncertainty attached to the estimate.
+
+113
+00:10:16,832 --> 00:10:20,057
+The evidence ledger makes that difference visible.
+
