@@ -39,19 +39,35 @@ def evaluate(video, beat, fmt, start_s, end_s, roi, full_end_s):
     video = Path(video)
     if not video.is_file():
         raise FileNotFoundError(video)
-    height, width = ((540, 960) if fmt == "16x9" else (960, 540))
+    # ffprobe đọc kích thước thật, không phỏng đoán từ tên khổ hoặc CLI.
+    meta = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "v:0",
+         "-show_entries", "stream=width,height", "-of", "csv=p=0", str(video)],
+        capture_output=True, text=True)
+    if meta.returncode:
+        raise RuntimeError("C17G_FFPROBE_LOI %s/%s %s" %
+                           (fmt, beat, meta.stderr[-600:]))
+    size = meta.stdout.strip().split(",")
+    if len(size) != 2:
+        raise ValueError("C17G_FFPROBE_KICH_THUOC %r" % meta.stdout)
+    width, height = [int(v) for v in size]
+    expected = (960, 540) if fmt == "16x9" else (540, 960)
+    if (width, height) != expected:
+        raise ValueError("C17G_KHONG_PHAI_540P %s/%s %dx%d (can %r)" %
+                         (fmt, beat, width, height, expected))
     x, y, w, h = roi
-    px = max(0, round(x * width))
-    py = max(0, round(y * height))
-    pw = min(width - px, max(1, round(w * width)))
-    ph = min(height - py, max(1, round(h * height)))
+    # YUV420 mặc định crop chia hết cho 2; exact=1 đo đúng hộp gốc.
+    px = max(0, int(round(x * width)))
+    py = max(0, int(round(y * height)))
+    pw = min(width - px, max(1, int(round(w * width))))
+    ph = min(height - py, max(1, int(round(h * height))))
     if pw < 24 or ph < 24:
         raise ValueError("C17G_ROI_PIXELS_NHO %s/%s" % (fmt, beat))
     sec = end_s - start_s
     if sec <= 0:
         raise ValueError("C17G_KHOANG_MAU_SAI %s" % beat)
 
-    filter_ = "fps=%d,crop=%d:%d:%d:%d,format=gray" % (
+    filter_ = "fps=%d,crop=%d:%d:%d:%d:exact=1,format=gray" % (
         SAMPLE_FPS, pw, ph, px, py)
     cmd = ["ffmpeg", "-nostdin", "-hide_banner", "-v", "error",
            "-i", str(video), "-t", "%.6f" % sec, "-vf", filter_,
@@ -62,7 +78,8 @@ def evaluate(video, beat, fmt, start_s, end_s, roi, full_end_s):
                            (fmt, beat, result.stderr.decode("utf-8", "replace")[-1200:]))
     frame_bytes = pw * ph
     if len(result.stdout) % frame_bytes:
-        raise RuntimeError("C17G_FRAME_BYTES %s/%s" % (fmt, beat))
+        raise RuntimeError("C17G_FRAME_BYTES %s/%s bytes=%d frame=%d dim=%dx%d crop=%s" %
+                           (fmt, beat, len(result.stdout), frame_bytes, width, height, filter_))
     n = len(result.stdout) // frame_bytes
     if n < 2:
         raise RuntimeError("C17G_IT_HON_2_FRAME %s/%s %d" % (fmt, beat, n))
