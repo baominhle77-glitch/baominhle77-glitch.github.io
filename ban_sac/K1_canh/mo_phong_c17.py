@@ -42,6 +42,8 @@ class MatNuocSong:
         self.npep = 440
         self.p0 = np.sqrt(rng.uniform(.03, .76, self.npep))
         self.pa = rng.uniform(-np.pi, np.pi, self.npep)
+        self.pepper_r = self.p0.copy()
+        self.last_frame_s = 0.0
         # Tracer mô phỏng giọt chất đánh dấu hòa vào dòng; khác hạt tiêu hữu hạn.
         self.ntr = 340
         self.t0 = rng.uniform(.035, .90, self.ntr)
@@ -100,10 +102,24 @@ class MatNuocSong:
         out = np.ascontiguousarray(np.uint8(np.clip(rgb,0,255)))
         # Hạt tiêu hữu hạn chạy từ trong ra mép bởi trường tốc độ Marangoni.
         # dr/dt = v(r,t) xấp xỉ, giảm dần khi hết gradient; KHÔNG hồi sinh hạt.
-        displacement = .51 * (1. - np.exp(-t/3.4))
-        pep_r = np.clip(self.p0 + displacement*(.92-self.p0),.025,.945)
-        pep_a = self.pa + .019 * np.sin(t*.37+self.pa*3)*(1-np.exp(-t/2))
-        self._dots(out, pep_r, pep_a, self.ink.astype(np.uint8), 2)
+        # Euler substeps của dr/dt = mu * d(gamma)/dr. Trong mô hình
+        # gamma=gamma_clean-Delta_gamma*c, c logistic quanh bán kính mặt sóng.
+        # Không dùng phép nội suy vị trí/hàm lắc hạt độc lập với trường gamma.
+        if t < self.last_frame_s:
+            self.pepper_r = self.p0.copy()
+            self.last_frame_s = 0.
+        dt = max(0.,t-self.last_frame_s)
+        nstep = max(1,int(np.ceil(dt/.035)))
+        for j in range(nstep):
+            ts = self.last_frame_s + (j+.5)*dt/nstep
+            fr = .16 + (.63 if continuous else .73)*(1.-np.exp(-ts/(4.5 if continuous else 3.4)))
+            cp = 1./(1.+np.exp(np.clip((self.pepper_r-fr)/.058,-45,45)))
+            grad_norm = 4.*cp*(1.-cp)  # tỷ lệ d(gamma)/dr >= 0
+            vr = .32*grad_norm*np.clip((.955-self.pepper_r)/.3,0.,1.)
+            self.pepper_r = np.minimum(.945,self.pepper_r + vr*dt/nstep)
+        self.last_frame_s=t
+        pep_a = self.pa
+        self._dots(out,self.pepper_r,pep_a,self.ink.astype(np.uint8),2)
         # Hạt tracer đi theo trường vận tốc ngoài/trong. Điều kiện biên tuần hoàn
         # biểu diễn đánh dấu liên tục của bơm, KHÔNG gán là tiêu mới sinh.
         if continuous or self.mode in ("marangoni", "tension"):
