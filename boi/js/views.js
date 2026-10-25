@@ -7,7 +7,7 @@ import { suggestSpread } from "./topic.js";
 import { tarotSVG, lenormandSVG, backSVG } from "./cards.js";
 import { readingToMarkdown } from "./markdown.js";
 import { LOCAL_KEY, PROVIDERS, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, discoverModels, friendlyError } from "./ai.js";
-import { store, persist, saveSettings, aiKey, setAiKey, aiReady, bridge, probeBridge, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
+import { store, persist, saveSettings, aiKey, setAiKey, aiReady, bridge, probeBridge, ghepToken, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
 import { gmt7 } from "./core.js";
 
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -632,7 +632,7 @@ function settingsView() {
       </fieldset>
       <fieldset class="card"><legend>Giải sâu bằng AI</legend>
         <p class="note">Có khoá thì AI là phần giải chính. Khoá chỉ lưu trong trình duyệt của máy này và được gửi thẳng tới nhà cung cấp bạn chọn — không qua máy chủ nào khác. Đừng lưu khoá trên máy dùng chung.</p>
-        ${bridge.ok ? `<p class="note">✓ Cầu nối AI máy nhà đang chạy — không cần dán khoá: khoá nằm trên máy, trang web không giữ.</p>` : ""}
+        ${bridge.ok ? `<p class="note">✓ Cầu nối AI máy nhà đang chạy${bridge.xa ? " (qua đường hầm)" : ""} — không cần dán khoá: khoá nằm trên máy nhà, trang web không giữ.</p>` : ghepToken() ? `<p class="note warn">Đã ghép cầu nối máy nhà nhưng chưa nối được (máy nhà tắt hoặc mất mạng) — đang dùng động cơ luật.</p>` : ""}
         <label>Nhà cung cấp<select name="aiProvider">${Object.entries(PROVIDERS).map(([k, p]) => `<option value="${k}" ${k === prov ? "selected" : ""}>${esc(p.ten)}${k === "gemini" ? " (mặc định)" : ""}</option>`).join("")}</select></label>
         <label>Khoá API của bạn<input name="aiKey" type="password" autocomplete="off" placeholder="${aiKey(prov) === LOCAL_KEY ? "Đang dùng cầu nối máy nhà (dán khoá để thay)" : aiKey(prov) ? "Đã lưu khoá (gõ để thay)" : "Dán khoá vào đây"}"></label>
         <label>Model<input name="aiModel" list="models" value="${esc(st.aiModel || "")}" placeholder="Để trống = tự chọn model mạnh nhất"><datalist id="models">${PROVIDERS[prov].fallback.map((m) => `<option value="${m}">`).join("")}</datalist></label>

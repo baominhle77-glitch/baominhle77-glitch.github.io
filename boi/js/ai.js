@@ -7,8 +7,10 @@ import { cardYesNo } from "./data.js";
 // Cầu nối máy nhà: tiến trình ở 127.0.0.1 tự gắn khoá Gemini từ tệp .env trên máy, trang không giữ khoá.
 export const LOCAL_KEY = "@may-nha";
 export const LOCAL_BASE = "http://127.0.0.1:8787/gemini";
-const gBase = (key) => (key === LOCAL_KEY ? LOCAL_BASE : "https://generativelanguage.googleapis.com");
-const gHead = (key) => (key === LOCAL_KEY ? {} : { "x-goog-api-key": key });
+// Cầu nối máy nhà: trên máy chủ nhân gọi thẳng 127.0.0.1; ở máy khác (điện thoại) đi qua đường hầm kèm mã ghép
+export const via = { base: LOCAL_BASE, token: "" };
+const gBase = (key) => (key === LOCAL_KEY ? via.base : "https://generativelanguage.googleapis.com");
+const gHead = (key) => (key === LOCAL_KEY ? (via.token ? { "x-boi-token": via.token } : {}) : { "x-goog-api-key": key });
 
 export const PROVIDERS = {
   gemini: { ten: "Google Gemini", fallback: ["gemini-pro-latest", "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash"] },

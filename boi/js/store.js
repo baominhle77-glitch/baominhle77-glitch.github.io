@@ -1,6 +1,6 @@
 // Kho dữ liệu dùng chung cho các màn: phiên câu hỏi, cài đặt, khoá AI (chỉ localStorage máy người dùng).
 import { loadSessions, saveSessions, createSession } from "./state.js";
-import { LOCAL_KEY, LOCAL_BASE } from "./ai.js";
+import { LOCAL_KEY, LOCAL_BASE, via } from "./ai.js";
 
 const SETTINGS_KEY = "boi.v1.settings";
 const AIKEY_KEY = "boi.v1.aikey";
@@ -24,15 +24,32 @@ export function aiKey(provider = store.settings.aiProvider || "gemini") {
   try { k = storage?.getItem(`${AIKEY_KEY}.${provider}`) || ""; } catch (_) { /* bỏ qua */ }
   return k || (provider === "gemini" && bridge.ok ? LOCAL_KEY : "");
 }
-// Dò cầu nối máy nhà (chỉ có trên máy chủ nhân); không có thì im lặng dùng khoá hoặc động cơ luật.
-export const bridge = { ok: false };
+// Dò cầu nối máy nhà: trên máy chủ nhân gọi 127.0.0.1; máy khác đã ghép (mã trong localStorage) thì lấy địa chỉ
+// đường hầm mới nhất từ boi/cau_noi.json trên GitHub rồi gọi kèm mã. Không có thì im lặng dùng khoá hoặc động cơ luật.
+const GHEP_KEY = "boi.v1.ghep";
+const CAU_NOI_JSON = "https://api.github.com/repos/baominhle77-glitch/baominhle77-glitch.github.io/contents/boi/cau_noi.json?ref=main";
+export const bridge = { ok: false, xa: false };
+export const ghepToken = () => { try { return storage?.getItem(GHEP_KEY) || ""; } catch (_) { return ""; } };
+export function setGhep(t) { try { if (t) storage?.setItem(GHEP_KEY, t); else storage?.removeItem(GHEP_KEY); return true; } catch (_) { return false; } }
+async function ping(fetchImpl, base, token, ms) {
+  const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
+  try { const r = await fetchImpl(`${base}/ping`, { signal: c.signal, headers: token ? { "x-boi-token": token } : {} }); return r.ok; } finally { clearTimeout(t); }
+}
 export async function probeBridge(fetchImpl = globalThis.fetch) {
   try {
-    const c = new AbortController(); const t = setTimeout(() => c.abort(), 1200);
-    const r = await fetchImpl(`${LOCAL_BASE}/ping`, { signal: c.signal }); clearTimeout(t);
-    bridge.ok = r.ok;
-  } catch (_) { bridge.ok = false; }
-  return bridge.ok;
+    if (await ping(fetchImpl, LOCAL_BASE, "", 1200)) { via.base = LOCAL_BASE; via.token = ""; bridge.ok = true; bridge.xa = false; return true; }
+  } catch (_) { /* không ở máy nhà */ }
+  const token = ghepToken();
+  let ok = false;
+  if (token) {
+    try {
+      const r = await fetchImpl(CAU_NOI_JSON, { headers: { accept: "application/vnd.github.raw+json" }, cache: "no-store" });
+      const url = r.ok ? String((await r.json()).url || "") : "";
+      if (/^https:\/\/[\w.-]+$/.test(url) && await ping(fetchImpl, url + "/gemini", token, 6000)) { via.base = url + "/gemini"; via.token = token; ok = true; }
+    } catch (_) { ok = false; }
+  }
+  bridge.ok = ok; bridge.xa = ok;
+  return ok;
 }
 export function setAiKey(provider, key) {
   try { if (key) storage?.setItem(`${AIKEY_KEY}.${provider}`, key); else storage?.removeItem(`${AIKEY_KEY}.${provider}`); return true; } catch (_) { return false; }
