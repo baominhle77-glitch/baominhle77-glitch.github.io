@@ -250,12 +250,107 @@ function veAnhThat(rc,o,s,p,img){
   circle(c,cx(o,.55),cy(o,.43),o.h*.06,GOLD);
  }
 }
+// Một shot có hai trạng thái vật CHỨNG MINH cùng một câu:
+// nửa đầu cho thấy vật/nguồn đầu vào, nửa sau chuyển thành hành động hoặc kết quả.
+// Khác hình là khác vật cụ thể, không phải thay màu nền / tô bóng / nét quét.
+function veBuocDau(rc,o,s,p,img) {
+ const c=rc.ctx,h=s.hinh.toLowerCase();
+ const color=s.loai==="mo_hinh_3d"||s.loai==="quy_dao_chuyen_dong"||s.loai==="mat_cat_lop"||s.loai==="phong_to_chi_tiet"?NAVY:"#F0E5D7";
+ bar(c,o.x,o.y,o.w,o.h,color);
+ // Phác vật thể trước khi nó tham gia phép biến đổi; mọi biểu tượng lấy từ danh từ
+ // trong mô tả HS, hoàn toàn không hiển thị số liệu không có nguồn.
+ if(s.loai==="mo_hinh_3d"||s.loai==="quy_dao_chuyen_dong"){
+    if(/khí quyển|atmosphere/.test(h)){
+      ball(c,cx(o,.49),cy(o,.44),o.h*.27,["#A9DEC8","#4387B0","#263F64"]);
+      c.strokeStyle=TEAL;c.lineWidth=15;c.beginPath();c.arc(cx(o,.49),cy(o,.44),o.h*.33,.2,Math.PI*1.8);c.stroke();
+    }else if(/photon|cảm biến|sensor/.test(h)){
+      rr(c,cx(o,.35),cy(o,.2),o.w*.30,o.h*.51,12,STONE);
+      circle(c,cx(o,.5),cy(o,.45),o.h*.15,INK);
+      circle(c,cx(o,.5),cy(o,.45),o.h*.07,GOLD);
+    }else{
+      ball(c,cx(o,.5),cy(o,.45),o.h*.32,["#A5E7D4","#4387A9","#2C466A"]);
+      rr(c,cx(o,.18),cy(o,.69),o.w*.25,o.h*.08,10,STONE);
+      line(c,cx(o,.30),cy(o,.69),cx(o,.40),cy(o,.55),TEAL,8);
+    }
+ }else if(s.loai==="anh_that"){
+   if(/apollo|lr3|nasa|phản xạ/.test(h)&&img.complete&&img.naturalWidth){
+     c.drawImage(img,857,127,363,383,cx(o,.10),cy(o,.06),o.w*.8,o.h*.80);
+   }else if(/Williams|doi|nghiên cứu|boggs|mô hình/.test(h)){
+     // Trang nghiên cứu: hình tờ giấy/chân dung tư liệu chỉ là infographic,
+     // không giả dữ liệu cụ thể hay bịa bản scan chính thức.
+     rr(c,cx(o,.16),cy(o,.10),o.w*.65,o.h*.71,8,BONE);
+     bar(c,cx(o,.21),cy(o,.16),o.w*.54,o.h*.075,INK);
+     for(let i=0;i<7;i++)bar(c,cx(o,.21),cy(o,.29+i*.057),o.w*(i%3===0?.31:.47),o.h*.014,STONE);
+     circle(c,cx(o,.72),cy(o,.63),o.h*.11,PURPLE);
+   }else{
+     // Danh mục nguồn, các mục chọn trông như các thẻ tra cứu, không phải screenshot.
+     for(let i=0;i<4;i++){rr(c,cx(o,.12+i*.19),cy(o,.16+(i%2)*.08),o.w*.15,o.h*.42,5,i%2?PURPLE:INK);
+       bar(c,cx(o,.14+i*.19),cy(o,.25+(i%2)*.08),o.w*.11,o.h*.035,BONE);}
+   }
+ }else if(s.loai==="so_sanh_doi_chieu"){
+   const left=/xung|photon|laser|thời gian|timing|Earth/.test(h)?NAVY:"#DED1BE";
+   rr(c,cx(o,.15),cy(o,.13),o.w*.68,o.h*.60,12,left);
+   if(/bốn|cột|ledger|four/.test(h)){
+     for(let i=0;i<4;i++)bar(c,cx(o,.20+i*.155),cy(o,.24),o.w*.12,o.h*.39,i%2?PURPLE:TEAL);
+   }else if(/thẻ|dữ liệu|hồ sơ|tài liệu|record/.test(h)){
+     for(let i=0;i<3;i++){rr(c,cx(o,.24+i*.12),cy(o,.25+i*.045),o.w*.25,o.h*.30,5,i%2?STONE:BONE);}
+   }else{
+     for(let i=0;i<14;i++)circle(c,cx(o,.23+i%7*.082),cy(o,.27+Math.floor(i/7)*.19),8,i%2?TEAL:PURPLE);
+   }
+ }else if(s.loai==="so_do_dong"){
+   if(/xung|chấm|pulse|point/.test(h)){
+     for(let i=0;i<40;i++)circle(c,cx(o,.1+(i%10)*.08),cy(o,.22+Math.floor(i/10)*.13),7,i%4?PURPLE:TEAL);
+   }else if(/phễu|lọc/.test(h)){
+     c.beginPath();c.moveTo(cx(o,.15),cy(o,.14));c.lineTo(cx(o,.85),cy(o,.14));c.lineTo(cx(o,.55),cy(o,.68));c.lineTo(cx(o,.45),cy(o,.68));c.closePath();c.fillStyle=PURPLE;c.fill();
+     for(let i=0;i<16;i++)circle(c,cx(o,.2+(i%8)*.076),cy(o,.14+(i%2)*.07),5,GOLD);
+   }else{
+     for(let i=0;i<4;i++)rr(c,cx(o,.12+i*.20),cy(o,.23),o.w*.15,o.h*.38,9,i%2?PURPLE:NAVY);
+   }
+ }else if(s.loai==="vat_the_minh_hoa"){
+   if(/sổ|ledger|column/.test(h)){
+     rr(c,cx(o,.29),cy(o,.12),o.w*.43,o.h*.63,12,INK);
+     rr(c,cx(o,.34),cy(o,.17),o.w*.34,o.h*.53,9,STONE);
+     line(c,cx(o,.51),cy(o,.18),cx(o,.51),cy(o,.68),PURPLE,5);
+   }else if(/thẻ|hồ sơ|phiếu|sổ/.test(h)){
+     rr(c,cx(o,.2),cy(o,.22),o.w*.50,o.h*.50,10,PURPLE);
+     rr(c,cx(o,.29),cy(o,.16),o.w*.46,o.h*.52,10,INK);
+     rr(c,cx(o,.36),cy(o,.13),o.w*.42,o.h*.53,10,BONE);
+   }else{
+     rr(c,cx(o,.23),cy(o,.23),o.w*.55,o.h*.42,13,INK);
+     for(let i=0;i<6;i++)circle(c,cx(o,.3+i*.085),cy(o,.42),9,TEAL);
+   }
+ }else if(s.loai==="con_so_lon"){
+   rr(c,cx(o,.24),cy(o,.14),o.w*.54,o.h*.55,15,NAVY);
+   c.save();c.fillStyle=GOLD;c.font="700 "+Math.round(o.h*.26)+"px Georgia,serif";
+   c.textAlign="center";c.textBaseline="middle";c.fillText("?",cx(o,.5),cy(o,.42));c.restore();
+ }else if(s.loai==="bieu_do"){
+   tickAxis(c,o);
+   for(let i=0;i<7;i++){const t=i/7;circle(c,cx(o,.18+t*.66),cy(o,.25+((i*7)%5)*.095),o.h*.024,SPINE);}
+ }else if(s.loai==="truc_thoi_gian"){
+   rr(c,cx(o,.20),cy(o,.13),o.w*.61,o.h*.48,10,BONE);
+   for(let i=0;i<5;i++)circle(c,cx(o,.27+i*.11),cy(o,.43),o.h*.035,i%2?PURPLE:TEAL);
+ }else if(s.loai==="mat_cat_lop"){
+   rr(c,cx(o,.15),cy(o,.18),o.w*.72,o.h*.44,13,STONE);
+   for(let i=0;i<4;i++)bar(c,cx(o,.22+i*.14),cy(o,.27),o.w*.1,o.h*.19,i%2?INK:PURPLE);
+ }else if(s.loai==="phong_to_chi_tiet"){
+   rr(c,cx(o,.20),cy(o,.12),o.w*.6,o.h*.62,12,STONE);
+   circle(c,cx(o,.5),cy(o,.43),o.h*.25,INK);
+   circle(c,cx(o,.5),cy(o,.43),o.h*.14,GOLD);
+ }else if(s.loai==="ban_do"){
+   for(let i=0;i<5;i++)rr(c,cx(o,.15+i*.13),cy(o,.24+Math.sin(i)*.10),o.w*.12,o.h*.3,8,TEAL);
+ }
+ // Mỗi chuyển pha là mở rộng nguồn -> phép xử lý/kết quả MÔ TẢ TRONG SHOT,
+ // không sinh nhãn giả, không chèn flash hay rung nền.
+}
+
 export function khungVatShot(t,F){
  const s=findShot(t),doc=F.ten==="9x16";
  const pct=cl(s.vat_chinh_pct/100,.30,.78);
- const w=F.W*min(doc?.84:.73,max(doc?.75:.61,pct+.14));
+ // N: cạnh phải < 79% W = 1516px, cách PiP bắt đầu x=1552px.
+ // D: khung vật bắt đầu y=30%, hoàn toàn dưới PiP kết thúc 26,5% H.
+ const w=F.W*(doc?min(.84,max(.75,pct+.14)):.665);
  const h=F.H*(doc?.365:.49);
- const x=(F.W-w)/2,y=F.H*(doc?.30:.195);
+ const x=doc?(F.W-w)/2:F.W*.118,y=F.H*(doc?.30:.195);
  return [x,y,x+w,y+h];
 }
 export function veCanhShot(rc,img){
@@ -267,7 +362,8 @@ export function veCanhShot(rc,img){
  ctx.shadowColor="rgba(0,0,0,.27)";ctx.shadowBlur=20;ctx.shadowOffsetY=14;
  bar(ctx,x,y,o.w,o.h,INK);ctx.restore();
  ctx.save();ctx.beginPath();ctx.rect(x,y,o.w,o.h);ctx.clip();
- PAINTERS[s.loai](rc,o,s,p,img);
+ if(p<.48) veBuocDau(rc,o,s,p/.48,img);
+ else PAINTERS[s.loai](rc,o,s,(p-.48)/.52,img);
  ctx.restore();
  ctx.strokeStyle=INK;ctx.lineWidth=2;ctx.strokeRect(x,y,o.w,o.h);
  label(rc,o,s);
