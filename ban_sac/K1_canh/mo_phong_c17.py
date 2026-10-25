@@ -9,6 +9,7 @@ Thông số hình là chuẩn hóa để dễ thấy, KHÔNG phải dự đoán 
 import math
 
 import numpy as np
+from PIL import Image, ImageDraw, ImageFont
 from manim import ImageMobject, VGroup, ValueTracker, always_redraw
 from K1_ban_quang_hoc import CANG, NUOC, MUC, NEN_TREN
 from K1_canh import trang
@@ -37,6 +38,7 @@ class MatNuocSong:
         self.soap = _rgb(CANG)
         self.ink = _rgb(MUC)
         self.back = _rgb(NEN_TREN)
+        self.font = ImageFont.load_default(size=14)
         self.npep = 440
         self.p0 = np.sqrt(rng.uniform(.03, .76, self.npep))
         self.pa = rng.uniform(-np.pi, np.pi, self.npep)
@@ -121,7 +123,18 @@ class MatNuocSong:
             out[z0+j,:, :] = np.uint8(np.clip(
                 self.water*(.55+.20*fade) + self.soap*(.45-.20*fade) +
                 (stripes if j < band//3 else -stripes)[:,None],0,255))
-        return out
+        # Đồng hồ và 2 đại lượng sống từ CHÍNH trạng thái mô hình,
+        # không dùng ticker vô nghĩa. Giá trị bán kính/γ là mô hình định tính.
+        panel=Image.fromarray(out, "RGB")
+        draw=ImageDraw.Draw(panel)
+        draw.rounded_rectangle((7,7,self.NX-7,46),radius=7,
+                               fill=tuple(map(int,self.back)),
+                               outline=tuple(map(int,self.ink)),width=1)
+        draw.text((13,10),f"MODEL  t={t:04.1f}s   r={self.radial_cm(t):.2f}cm",
+                  font=self.font,fill=tuple(map(int,self.ink)))
+        draw.text((13,26),f"gamma(model)={self.gamma(t):.1f} mN/m",
+                  font=self.font,fill=tuple(map(int,self.ink)))
+        return np.asarray(panel)
 
     def radial_cm(self,t):
         return 3.5*(.16+.73*(1-np.exp(-max(0,t)/3.4)))
