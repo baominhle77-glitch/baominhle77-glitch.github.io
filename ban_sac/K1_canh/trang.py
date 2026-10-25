@@ -286,7 +286,7 @@ class TrangK1(MovingCameraScene):
         if k > 0:
             if self._o_pip is not None:
                 self._soat_pip(0)
-            self.wait((k + 0.5) / FPS, frozen_frame=True)
+            self.wait((k + 0.5) / FPS, frozen_frame=not getattr(self, '_co_chuyen_dong_song', False))
             self._khung += so_khung_cho((k + 0.5) / FPS)
 
     def toi(self, t, bid=""):

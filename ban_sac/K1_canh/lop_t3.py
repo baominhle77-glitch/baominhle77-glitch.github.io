@@ -632,21 +632,19 @@ LOP.update(KhayTieu=KhayTieu, DongMarangoni=DongMarangoni, PhepTinh=PhepTinhT3, 
            ZoomThang=ZoomThangT3, MuiTenCang=MuiTenCangT3, BanQuang=BanQuangT3, ThuocLc=ThuocLcT3)
 
 
-# ------------------------------------------------------------------ v3 (Phiếu 122 + C13, SX 25/10/2026): bàn nền, hình giữa, đốm nhịp, viền mực cam
-# H1/H6: cảnh 'cot' có bàn nền (thẻ NEN_TREN viền mực + bóng đổ, z −10) phủ vùng hình: lớp gần trên phông xa; hình phóng tới
-#   V3_TRAN lần (cũ 1,6) vừa bàn. 16:9 bàn lùi V3_LUI_TRAI khỏi mép trái: tâm khối nội dung lớn nhất (viền bàn) ≈ 0,32 bề ngang.
-# H3: đốm mực mờ (MUC 0,17, z −5: Δ ≈ 23 > 16 trên bàn, < 24 so trung vị hàng nên không thành "nội dung") đổi giữa hai đầu bàn
-#   (không chồng nhau, hiệu ≈ 2 diện tích đốm ≥ 8 % khung) mỗi ≤ V3_GIAN s, đầu/cuối beat ≤ V3_DAU_CUOI s; đi cùng nhóm sự kiện
-#   khi kịp (H4: đổi gắn mốc lời).
-# H10: mọi nét / mảng cam (CANG) có viền mực nền (background stroke rộng hơn nét V3_VIEN đơn vị = 1,5 mỗi bên ≈ 2 px).
+# ------------------------------------------------------------------ C13 vòng 2 (phiếu KĐ PR #144, 25/10)
+# Chỉ sửa lớp t3: không thay trang, nhà máy, nhạc, chữ khoá, vùng PiP hay cổng.
+# C13: chữ, nguồn và từng vật có hộp bao riêng; không đặt đốm/zoom theo chu kỳ.
 import K1_ban_quang_hoc as K1
 from K1_canh import trang
+from K1_canh.lop import CO_CHU, dat_trai_tren, tach, khoi_chu
+from manim import FadeIn, FadeOut
 
-V3_TRAN = 3.0
-V3_LUI_TRAI = 1.1
-V3_DOM_OP = 0.17
-V3_GIAN, V3_DAU_CUOI, V3_TRUOT = 2.8, 1.2, 0.6
-V3_VIEN = 3.0
+C13_LE_HINH = 0.10
+C13_PHONG = 3.6
+C13_VIEN = 3.0
+C13_CO_CHU_MIN = min(CO_CHU)  # 16, mức chữ thân đã định nghĩa của K1
+C13_CO_NGUON = 22             # px ở khung đích 1080p, không thu nhỏ
 _CANG_HEX = str(CANG).lower()[:7]
 
 
@@ -658,7 +656,7 @@ def _la_cang(c):
 
 
 def vien_cang(m):
-    """Viền mực nền cho mọi lá cam trong m (giữ nguyên nét / mảng cam ở trên)."""
+    """Viền mực phía sau nét cam; vật chính không đổi mã bảng màu v2."""
     for x in m.get_family():
         if not isinstance(x, VMobject) or not len(x.points):
             continue
@@ -666,7 +664,7 @@ def vien_cang(m):
         s = w > 0 and x.get_stroke_opacity() > 0 and _la_cang(x.get_stroke_color())
         f = x.get_fill_opacity() > 0 and _la_cang(x.get_fill_color())
         if s or f:
-            x.set_stroke(MUC, (w if s else 0) + V3_VIEN, 1, background=True, family=False)
+            x.set_stroke(MUC, (w if s else 0) + C13_VIEN, 1, background=True, family=False)
 
 
 def _vien_anim(a):
@@ -677,82 +675,282 @@ def _vien_anim(a):
         _vien_anim(b)
 
 
-class _V3:
+class _C13:
     def _ban(self, B):
         b = RoundedRectangle(width=B[1] - B[0], height=B[3] - B[2], corner_radius=0.14)
-        b.set_fill(NEN_TREN, 0.95).set_stroke(MUC, 2.4, 0.85).move_to([(B[0] + B[1]) / 2, (B[2] + B[3]) / 2, 0])
-        b.set_z_index(-10)
+        b.set_fill(NEN_TREN, 0.95).set_stroke(MUC, 2.4, 0.85)
+        b.move_to([(B[0] + B[1]) / 2, (B[2] + B[3]) / 2, 0]).set_z_index(-10)
         return K1.khoi(b)
 
-    def _dat_dom(self, B):
-        w, h = B[1] - B[0], B[3] - B[2]
-        rx, ry = min(2.4, (w - 0.3) / 4), min(1.8, (h - 0.3) / 2)
-        self._dom_x = (B[0] + 0.15 + rx, B[1] - 0.15 - rx)
-        self._dom = Ellipse(width=2 * rx, height=2 * ry).set_stroke(width=0).set_fill(MUC, V3_DOM_OP)
-        self._dom.move_to([self._dom_x[0], (B[2] + B[3]) / 2, 0]).set_z_index(-5)
-        self.sc.add(self._dom)
+    def _nguon_22(self):
+        """Thay CHỈ nguồn của scene hiện tại, giữ nguyên 100% chuỗi trích dẫn.
 
-    def _truot(self):
-        lo, hi = self._dom_x
-        x = lo if abs(self._dom.get_x() - hi) < abs(self._dom.get_x() - lo) else hi
-        return self._dom.animate.set_x(x)
+        Không vá trang.khoi_nguon. Nguồn của lõi đã thêm trước lop.ve();
+        gỡ đúng instance đó rồi tạo nguồn cỡ 22, ngắt dòng (không cắt chữ).
+        """
+        W, sc = self.W, self.sc
+        dong = W.ts.get("nguon") or []
+        if not dong:
+            return
+        sc.remove(W.nguon)
+        bc = W.bc
+        # Khổ dọc: nguồn ở cột PHẢI của PiP (vị trí lấy từ vung_cam).
+        # Tận dụng hàng phía trên hình; không ép ảnh vào dải mỏng.
+        le = 0.17
+        trai = max(bc.ng_trai, bc.pip[1] + le) if bc.doc else bc.ng_trai
+        phai = bc.ng_phai
+        tren = bc.an_toan[3] - 0.10 if bc.doc else bc.ng_tren
+        rong = phai - trai
+        if rong <= 0:
+            raise ValueError("C13_NGUON_KHONG_CO_COT %s" % self.b["id"])
+        # Gộp dòng, KHÔNG lược bỏ một ký tự nguồn/tác giả/năm/hình/bảng.
+        ds = []
+        for line in tach("; ".join(dong), C13_CO_NGUON, rong):
+            chu_ = K1.chu(line, C13_CO_NGUON, MUC, 0.75)
+            if chu_.width > rong + 1e-4:
+                raise ValueError("C13_NGUON_TRAN %s %r" % (self.b["id"], line))
+            ds.append(chu_)
+        if not ds:
+            return
+        g = VGroup(*ds).arrange(K1.DOWN, aligned_edge=K1.RIGHT, buff=0.015)
+        g.move_to([phai - g.width / 2, tren - g.height / 2, 0])
+        if g.get_left()[0] < trai - 1e-4 or g.get_bottom()[1] < bc.an_toan[2]:
+            raise ValueError("C13_NGUON_NGOAI_VUNG %s" % self.b["id"])
+        # Trong khung đầu zoom/lấy nét, ghim theo camera giống trang.chay().
+        W.nguon = trang.ghim(sc, trang.man_sang_the_gioi(sc, g))
+        # Source is now in world coordinates for the opening camera zoom;
+        # geometry constraints must stay in SCREEN coordinates at k=1.
+        W.hop_ng = trang.hop_man(sc, W.nguon)
+        sc.add(W.nguon)
+        for m in g.get_family():
+            if isinstance(m, K1.Text):
+                co = K1.chu(m.text, C13_CO_NGUON)
+                if m.height + 1e-5 < co.height:
+                    raise ValueError("C13_NGUON_DUOI_22PX %s" % self.b["id"])
+
+    def _nguon_theo_trang(self):
+        """Nguồn 22 px chỉ cho w2/w3 dọc; giữ nguyên cả bốn chuỗi trong 2 nhóm.
+
+        Các nhóm chia theo đại lượng liên quan, không dùng hàm/trích dẫn đã rút
+        gọn và không vá K1_canh.trang. Lớp PiP là giới hạn lấy từ BoCuc.
+        """
+        W, sc = self.W, self.sc
+        dong, bc = W.ts.get("nguon") or [], W.bc
+        if len(dong) != 4:
+            raise ValueError("C13_NGUON_BON_DONG %s" % self.b["id"])
+        # w2: (Roché phương trình, Liu sức căng) / (NIST, Roché r*)
+        # w3: (Roché đo, Roché Eq.1) / (NIST, tốc độ SDS).
+        chi_so = ([0, 3], [1, 2]) if self.b["id"] == "w2" else ([0, 1], [2, 3])
+        sc.remove(W.nguon)
+        trai = max(bc.ng_trai, bc.pip[1] + 0.17)
+        phai, tren = bc.ng_phai, bc.an_toan[3] - 0.10
+        rong = phai - trai
+        if rong <= 0:
+            raise ValueError("C13_NGUON_KHONG_CO_COT %s" % self.b["id"])
+        nhom = []
+        for ii in chi_so:
+            ds = []
+            for k in ii:
+                # Ngắt ở khoảng trắng, giữ nguyên văn từng nguồn.
+                for line in tach(dong[k], C13_CO_NGUON, rong):
+                    m = K1.chu(line, C13_CO_NGUON, MUC, 0.75)
+                    if m.width > rong + 1e-4:
+                        raise ValueError("C13_NGUON_TRAN %s" % self.b["id"])
+                    ds.append(m)
+            g = VGroup(*ds).arrange(K1.DOWN, aligned_edge=K1.RIGHT, buff=0.015)
+            g.move_to([phai - g.width / 2, tren - g.height / 2, 0])
+            if g.get_left()[0] < trai - 1e-4 or g.get_bottom()[1] < bc.an_toan[2]:
+                raise ValueError("C13_NGUON_NGOAI_VUNG %s" % self.b["id"])
+            for m in g.get_family():
+                if isinstance(m, K1.Text):
+                    # Cỡ 22 đã khoá từ lúc tạo, không thu tỷ lệ.
+                    if m.height + 1e-5 < K1.chu(m.text, C13_CO_NGUON).height:
+                        raise ValueError("C13_NGUON_DUOI_22PX %s" % self.b["id"])
+            nhom.append(g)
+        # Cả hai nhóm đúng một khuôn nguồn; nhóm 2 ban đầu ẩn.
+        nguon = VGroup(*nhom)
+        nguon[1].set_opacity(0)
+        W.nguon = trang.ghim(sc, trang.man_sang_the_gioi(sc, nguon))
+        W.hop_ng = trang.hop_man(sc, W.nguon)
+        sc.add(W.nguon)
+        self._nhom_nguon = W.nguon
+
+    def _doi_trang_chu(self, trang_cu):
+        """Chuyển đúng mốc chữ đầu của trang 2, không giữ hộp ảo chồng trang."""
+        for o in trang_cu:
+            self.man.pop(o["key"], None)
+        # FadeIn giữ trạng thái ĐÍCH của đối tượng: trả opacity của nhóm 2
+        # về 1 ngay trước khi chạy; animation tự tạo bản đầu opacity 0.
+        self._nhom_nguon[1].set_opacity(1)
+        return ([FadeOut(o["khoi"]) for o in trang_cu] +
+                [FadeOut(self._nhom_nguon[0]), FadeIn(self._nhom_nguon[1])])
+
+    def _ve_phan_trang(self, sc, W):
+        """C13/D16: duy nhất w2,w3 khổ dọc, hai trang theo thời gian.
+
+        Mỗi trang xếp độc lập đủ cỡ chữ (không đổi CO_CHU); lời, TTS,
+        cổng C13_CHU_DUOI_CO và mọi beat khác giữ nguyên.
+        """
+        self.sc, self.W, self.b = sc, W, W.b
+        self.ev, self.man, self.hinh_ds, self.buoc_xong = [], {}, [], set()
+        self.ty_le = 1.0
+        self._nguon_theo_trang()
+        L = self.vung_noi_dung()
+        os_ = self.muc_chu()
+        if len(os_) != 6:
+            raise ValueError("C13_TRANG_SAI_SO_DONG %s" % self.b["id"])
+        trang_1, trang_2 = os_[:3], os_[3:]
+        tren = self._tran(L[0], L[1], L[3]) - 0.07
+        cao_hinh = 0.25 * (W.bc.an_toan[3] - W.bc.an_toan[2])
+        max_chu = tren - cao_hinh - 0.30 - (L[2] + 0.14)
+        Z = (L[0] + 0.06, L[1] - 0.06, L[2] + 0.14, L[2] + 0.14 + max_chu)
+        # Bảng hộp chữ: trang 1 & 2 cùng Z, không đồng thời hiển thị;
+        # nguồn ở cột phải PiP; hình ở B, cách chữ 0,24.
+        h1 = self.xep_cot(Z, trang_1, can_duoi=True)
+        h2 = self.xep_cot(Z, trang_2, can_duoi=True)
+        hc = max(h1, h2)
+        B = (L[0] + 0.10, L[1] - 0.10, Z[2] + hc + 0.24, tren)
+        if B[3] <= B[2] + 0.50:
+            raise ValueError("C13_VUNG_HINH_QUA_HEP %s %r" % (self.b["id"], B))
+        le = C13_LE_HINH
+        self.F = (B[0] + le, B[1] - le, B[2] + le, B[3] - le)
+        co_dinh = [self._ban(B)] + (self.hinh() or [])
+        for m in co_dinh:
+            sc.add(m)
+            self.hinh_ds.append(m)
+        for m in sc.mobjects:
+            vien_cang(m)
+        self.dang_chu(os_)
+        # Đăng sự kiện trước mục chữ đầu của trang 2, FadeOut/FadeIn <= 0,5 s.
+        self._moc_doi_trang = trang_2[0]["t"]
+        self.su(self._moc_doi_trang,
+                lambda: self._doi_trang_chu(trang_1), uu=-1)
+        con = [x["kieu"] for x in self.ts.get("buoc", [])
+               if x["kieu"] not in self.buoc_xong]
+        if con:
+            raise NotImplementedError("beat %s: bước hình chưa dựng: %s" %
+                                      (self.b["id"], con))
+        sc.chuyen_dau(self.b)
+        self.chay_su_kien()
+        seen = set()
+        for m in self.hinh_ds:
+            if id(m) in seen:
+                continue
+            seen.add(id(m))
+            if len(m.get_all_points()) or len(m.submobjects):
+                self.man["hinh_%03d" % len(seen)] = m
+        return self.man
+
+    def dung_khoi(self, o, co, w):
+        """Hook dài xuống dòng thay vì so_hook co bé hơn cỡ chữ 16."""
+        if o["kieu"] == "hook":
+            return khoi_chu(o["s"], max(co, C13_CO_CHU_MIN), w, CANG)
+        return super().dung_khoi(o, co, w)
+
+    def xep_cot(self, Z, os_, can_duoi=False):
+        """Không dùng k=h/tong của lớp cũ (đẩy chữ dưới 16 px)."""
+        if not os_:
+            return 0.0
+        w, h = Z[1] - Z[0], Z[3] - Z[2]
+        if h <= 0 or w <= 0:
+            raise ValueError("C13_HOP_CHU_RONG %s %r" % (self.b["id"], Z))
+        for co in CO_CHU:
+            bl = [self.dung_khoi(o, co, w) for o in os_]
+            khe = 0.10 if self.W.bc.doc else 0.17
+            tong = sum(x.height for x in bl) + khe * (len(bl) - 1)
+            if tong <= h + 1e-5:
+                break
+        if tong > h + 1e-5:
+            raise ValueError("C13_CHU_DUOI_CO %s: %.2f>%.2f" % (self.b["id"], tong, h))
+        y = Z[2] + tong if can_duoi else Z[3]
+        for o, b in zip(os_, bl):
+            dat_trai_tren(b, Z[0], y)
+            o["khoi"] = b
+            y -= b.height + khe
+            self.W.da_ve.append(o["s"])
+            for m in b.get_family():
+                if isinstance(m, K1.Text):
+                    co_m = K1.chu(m.text, C13_CO_CHU_MIN)
+                    if m.height + 1e-5 < co_m.height:
+                        raise ValueError("C13_CHU_NHO %s %r" % (self.b["id"], m.text))
+        return tong
 
     def dat_hinh(self, hien, an=()):
+        """Vừa vật THẬT vào vùng F dưới trần nguồn/PiP, kể cả trạng thái đích."""
         tat = VGroup(*hien, *an)
         if not len(tat.get_all_points()):
             return
         F = self.F
         w, h = F[1] - F[0], F[3] - F[2]
-        s = min(V3_TRAN, w / max(tat.width, 1e-6), h / max(tat.height, 1e-6))
+        if w <= 0 or h <= 0:
+            raise ValueError("C13_VUNG_HINH_QUA_HEP %s %r" % (self.b["id"], F))
+        s = min(C13_PHONG, 0.96 * w / max(tat.width, 1e-6),
+                0.93 * h / max(tat.height, 1e-6))
         c = tat.get_center()
         dich = np.array([(F[0] + F[1]) / 2, (F[2] + F[3]) / 2, 0]) - s * c
         for m in list(hien) + list(an):
             m.scale(s, about_point=np.zeros(3)).shift(dich)
         self.ty_le = s
 
+    def _gioi_han_card(self, the, os_, L, tran):
+        """Tịnh tiến thẻ + chữ như MỘT khối; tuyệt đối không co font."""
+        g = VGroup(the, *[o["khoi"] for o in os_])
+        an = (L[0] + 0.11, L[1] - 0.11, L[2] + 0.13, tran - 0.11)
+        if g.width > an[1] - an[0] or g.height > an[3] - an[2]:
+            raise ValueError("C13_CARD_TRAN %s" % self.b["id"])
+        g.move_to([(an[0] + an[1]) / 2, (an[2] + an[3]) / 2, 0])
+
     def ve(self, sc, W):
+        if W.bc.doc and W.b["id"] in ("w2", "w3"):
+            return self._ve_phan_trang(sc, W)
         self.sc, self.W, self.b = sc, W, W.b
         self.ev, self.man, self.hinh_ds, self.buoc_xong = [], {}, [], set()
         self.ty_le = 1.0
+        # Nguồn cỡ ≥22 px; cập nhật hop_ng trước khi xác định vùng trần.
+        self._nguon_22()
         L = self.vung_noi_dung()
         os_ = self.muc_chu()
         if self.CHIA == "chu":
-            Z = (L[0] + 0.25, L[1] - 0.25, L[2] + 0.25, self._tran(L[0], L[1], L[3]) - 0.25)
-            if not W.bc.doc:
-                Z = (L[0] + 1.6, L[1] - 1.6, Z[2], Z[3])
+            tren = self._tran(L[0], L[1], L[3])
+            Z = (L[0] + 0.42, L[1] - 0.42, L[2] + 0.39, tren - 0.39)
             hc = self.xep_cot(Z, os_)
-            yt = Z[3]
             xs = [o["khoi"].get_right()[0] for o in os_]
-            the = RoundedRectangle(width=(max(xs) - Z[0]) + 0.5, height=hc + 0.5, corner_radius=0.12)
+            the = RoundedRectangle(width=max(xs) - Z[0] + 0.40,
+                                   height=hc + 0.40, corner_radius=0.12)
             the.set_fill(NEN_TREN, 0.95).set_stroke(MUC, 1.6, 0.6).set_z_index(-10)
-            the.move_to([Z[0] - 0.25 + the.width / 2, yt + 0.25 - the.height / 2, 0])
+            the.move_to([Z[0] - 0.20 + the.width / 2,
+                         Z[3] + 0.20 - the.height / 2, 0])
             the = K1.khoi(the)
-            dich = np.array([(L[0] + L[1]) / 2, (Z[2] + Z[3] + 0.5) / 2, 0]) - the.get_center()
-            dich[1] = min(dich[1], 0.0)
-            the.shift(dich)
-            for o in os_:
-                o["khoi"].shift(dich)
+            self._gioi_han_card(the, os_, L, tren)
             self.F = (Z[0], Z[0], Z[2], Z[2])
-            r = the[1]
-            B = (r.get_left()[0], r.get_right()[0], r.get_bottom()[1], r.get_top()[1])
             co_dinh = [the]
         else:
             if W.bc.doc:
-                Z = (L[0], L[1], L[2] + 0.15, L[2] + 0.42 * (L[3] - L[2]))  # 9:16: ban >= 0,55 dai
+                tren = self._tran(L[0], L[1], L[3]) - 0.07
+                # Giữ 25% chiều cao vùng an toàn cho vật; chữ tối thiểu 16.
+                cao_hinh = 0.25 * (W.bc.an_toan[3] - W.bc.an_toan[2])
+                max_chu = tren - cao_hinh - 0.30 - (L[2] + 0.14)
+                Z = (L[0] + 0.06, L[1] - 0.06,
+                     L[2] + 0.14, L[2] + 0.14 + max_chu)
                 hc = self.xep_cot(Z, os_, can_duoi=True)
-                B = (L[0] + 0.1, L[1] - 0.1, L[2] + hc + 0.35, self._tran(L[0], L[1], L[3]))
+                B = (L[0] + 0.10, L[1] - 0.10,
+                     Z[2] + hc + 0.24, tren)
             else:
-                xc = L[0] + (L[1] - L[0]) * (1 - self.TI_LE_CHU)
-                self.xep_cot((xc, L[1], L[2], self._tran(xc, L[1], L[3])), os_)
-                x0 = L[0] + V3_LUI_TRAI
-                B = (x0, xc - 0.35, L[2] + 0.1, self._tran(x0, L[1], L[3]))  # trần cả dải: nhóm hình gồm cột chữ
-            le = 0.3
+                # 68% dải ngang để hình lớn; trần được trừ PiP + nguồn THẬT.
+                xc = L[0] + 0.68 * (L[1] - L[0])
+                Z = (xc + 0.12, L[1], L[2] + 0.16,
+                     self._tran(xc, L[1], L[3]) - 0.08)
+                self.xep_cot(Z, os_)
+                B = (L[0] + 0.12, xc - 0.12, L[2] + 0.13,
+                     self._tran(L[0], xc - 0.12, L[3]) - 0.10)
+            if B[3] <= B[2] + 0.50:
+                raise ValueError("C13_VUNG_HINH_QUA_HEP %s %r" % (self.b["id"], B))
+            le = C13_LE_HINH
             self.F = (B[0] + le, B[1] - le, B[2] + le, B[3] - le)
             co_dinh = [self._ban(B)] + (self.hinh() or [])
         for m in co_dinh:
             sc.add(m)
             self.hinh_ds.append(m)
-        self._dat_dom(B)
         for m in sc.mobjects:
             vien_cang(m)
         self.dang_chu(os_)
@@ -761,27 +959,27 @@ class _V3:
             raise NotImplementedError("beat %s: bước hình chưa dựng: %s" % (self.b["id"], con))
         sc.chuyen_dau(self.b)
         self.chay_su_kien()
-        self.man["hinh"] = VGroup(*[m for m in self.hinh_ds if len(m.get_all_points()) or len(m.submobjects)])
+        # Mỗi vật hình và gạch chân được đo theo hộp BAO RIÊNG: không
+        # gom đường gạch dưới cột phải với bình nước trái thành một hộp
+        # ảo phủ cả PiP. Không bỏ bất kỳ vật nào khỏi kiểm vùng.
+        seen = set()
+        for m in self.hinh_ds:
+            if id(m) in seen:
+                continue
+            seen.add(id(m))
+            if len(m.get_all_points()) or len(m.submobjects):
+                self.man["hinh_%03d" % len(seen)] = m
         return self.man
 
     def chay_su_kien(self):
+        """Chỉ chuyển hình ở từ khóa/mốc thật đã đăng trong self.ev.
+
+        Không có camera zoom cố định, đốm thay pixel hay nhịp thở 3,1s.
+        Vẽ dần đại lượng, dòng chảy và vòng dừng bằng K1.ve/hien/doi
+        đúng mốc từ của từng beat. Dành 2 khung cuối để giữ số khung TTS.
+        """
         sc, N, FPS = self.sc, trang.so_khung(self.b), trang.FPS
-        G, D, T = round(V3_GIAN * FPS), round(V3_DAU_CUOI * FPS), round(V3_TRUOT * FPS)
-        dong = str(self.b.get("chuyen") or "").startswith(("zoom", "lay"))
-        lan = [sc._khung - (round(0.5 * FPS) if dong else G - D)]
-
-        def truot(s):
-            sc.cho(s - sc._khung)
-            sc.choi(self._truot(), t=V3_TRUOT)
-            lan[0] = sc._khung
-
-        def bu(den):
-            while den - lan[0] > G:
-                s = max(sc._khung, lan[0] + G - T)
-                if s + T > min(den, N - 2):
-                    break
-                truot(s)
-
+        cuoi = N - 2
         ev = sorted(self.ev, key=lambda e: (e[0], e[1], e[2]))
         nhom = []
         for e in ev:
@@ -790,7 +988,6 @@ class _V3:
             else:
                 nhom.append([e])
         for i, g in enumerate(nhom):
-            bu(round(g[0][0] * FPS))
             sc.toi(g[0][0], self.b["id"])
             an = []
             for e in g:
@@ -800,21 +997,97 @@ class _V3:
             for a in an:
                 _vien_anim(a)
             tiep = nhom[i + 1][0][0] if i + 1 < len(nhom) else 1e9
-            d = max(1.0 / FPS, min(0.6, max(0.2, tiep - sc._khung / FPS - 0.03), (N - 2 - sc._khung) / FPS))
-            k = max(1, round(d * FPS))
-            kem = k >= 6 and sc._khung + k - lan[0] > G // 2
-            if kem:
-                an.append(self._truot())
-            sc.choi(*an, t=d)
-            if kem:
-                lan[0] = sc._khung
-        while N - 2 - lan[0] > D:
-            s = max(sc._khung, min(lan[0] + G - T, N - 2 - T))
-            if s + T > N - 2:
-                break
-            truot(s)
+            con = cuoi - sc._khung
+            if con <= 0:
+                raise ValueError("C13_QUA_KHUNG %s %d/%d" % (self.b["id"], sc._khung, N))
+            d = min(0.60, max(0.20, tiep - sc._khung / FPS - 0.03), con / FPS)
+            # Chỉ nhịp đổi trang w2/w3: cả chữ và nguồn đều fade <= 0,5 s.
+            if getattr(self, "_moc_doi_trang", None) is not None and abs(g[0][0] - self._moc_doi_trang) < 0.01:
+                d = min(d, 0.50)
+            sc.choi(*an, t=max(1.0 / FPS, d))
+        if sc._khung > cuoi:
+            raise ValueError("C13_QUA_KHUNG %s %d/%d" % (self.b["id"], sc._khung, N))
 
 
 for _k, _C in list(LOP.items()):
-    if not issubclass(_C, _V3):
-        LOP[_k] = type(_C.__name__, (_V3, _C), {})
+    if not issubclass(_C, _C13):
+        LOP[_k] = type(_C.__name__, (_C13, _C), {})
+
+
+# ------------------------------------------------------------------ C17: chỉ tập K1 t3 (không vá hàm dùng chung)
+# Mọi beat có trường vận tốc đang chạy, hạt và mặt nước sống dưới vị trí clip.
+# Không dùng đốm đổi pixel hoặc camera thở giả theo đồng hồ.
+from manim import ValueTracker, ParametricFunction, always_redraw, smooth
+
+
+class _SongC17:
+    def _bat_song(self):
+        F = self.F
+        x0, x1, y0, y1 = F
+        if x1 - x0 < 0.5 or y1 - y0 < 0.5:
+            # Beat chỉ có chữ: dự trữ nửa TRÁI của vùng nội dung cho mô hình;
+            # các bảng số liệu sau D16 sẽ phải bố cục lại trên video đầy đủ.
+            L = self.vung_noi_dung()
+            x0, x1 = L[0] + 0.12, L[0] + 0.55 * (L[1] - L[0])
+            y0, y1 = L[2] + 0.12, L[3] - 0.30
+        w, h = x1 - x0, y1 - y0
+        if w < 0.5 or h < 0.5:
+            raise ValueError("C17_VUNG_DONG_QUA_HEP %s" % self.b["id"])
+        xc, yc = (x0 + x1) / 2, (y0 + y1) / 2
+        self._c17_v = ValueTracker(1.0)
+        self._c17_t = ValueTracker(0.0)
+        self._c17_t.add_updater(lambda m, dt: m.increment_value(dt))
+        self.sc.add(self._c17_t, self._c17_v)
+        rng = np.random.default_rng(314159 + sum(map(ord, self.b["id"])))
+        dots = []
+        for i in range(240):
+            x, y = rng.uniform(x0 + 0.09 * w, x1 - 0.09 * w), rng.uniform(y0 + 0.12 * h, y1 - 0.12 * h)
+            d = Dot([x, y, 0], radius=min(0.028, h * 0.018), color=NUOC if i % 3 else CANG)
+            d.set_opacity(0.60 if i % 3 else 0.78)
+            # Nước trên mặt đi ra ngoài theo hiệu sức căng; phần đáy hồi lưu.
+            # Không đảo vị trí camera/đường đi để tăng pixel diff giả.
+            def move(m, dt, i=i):
+                p = m.get_center()
+                xx = (p[0] - xc) / max(w / 2, 0.1)
+                yy = (p[1] - y0) / max(h, 0.1)
+                s = min(dt, 0.05) * self._c17_v.get_value()
+                if yy > 0.38:
+                    vx = np.sign(xx if abs(xx) > 0.03 else (-1 if i % 2 else 1)) * (0.11 + 0.10 * (1 - abs(xx)))
+                    vy = -0.030
+                else:
+                    vx = -np.sign(xx if abs(xx) > 0.03 else (-1 if i % 2 else 1)) * 0.075
+                    vy = 0.065
+                p[0] += vx * s * w / 3
+                p[1] += vy * s * h
+                p[0] = min(x1 - 0.05 * w, max(x0 + 0.05 * w, p[0]))
+                p[1] = min(y1 - 0.09 * h, max(y0 + 0.09 * h, p[1]))
+                m.move_to(p)
+            d.add_updater(move)
+            dots.append(d)
+        self._c17_hats = VGroup(*dots)
+        self._c17_song = always_redraw(lambda: ParametricFunction(
+            lambda u: np.array([xc + 0.45 * w * u,
+                                yc + 0.22 * h + 0.028 * h * np.sin(5.0 * u - 2.0 * self._c17_t.get_value()), 0]),
+            t_range=[-1, 1, 0.05], color=NUOC, stroke_width=3))
+        self.sc.add(self._c17_hats, self._c17_song)
+        self.hinh_ds += [self._c17_hats, self._c17_song]
+        self.sc._co_chuyen_dong_song = True
+
+        # Cues từ storyboard: mỗi biến thiên tốc độ gắn trực tiếp từ TTS.
+        # Dòng hạt, lớp nước vẫn sống giữa các cues; không tăng/giảm đều 3s.
+        for j, cue in enumerate(self.b.get("doi_hinh") or []):
+            moc = cue.get("moc_tts")
+            if not moc:
+                raise ValueError("C17_DOI_HINH_THIEU_MOC %s" % self.b["id"])
+            t = self.t(moc)
+            speed = 1.15 if j % 2 == 0 else 0.85
+            self.su(t, lambda speed=speed: [self._c17_v.animate.set_value(speed)], uu=20)
+
+    def chay_su_kien(self):
+        self._bat_song()
+        return super().chay_su_kien()
+
+
+for _k, _Old in list(LOP.items()):
+    if not issubclass(_Old, _SongC17):
+        LOP[_k] = type(_Old.__name__, (_SongC17, _Old), {})
