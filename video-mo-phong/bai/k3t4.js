@@ -112,6 +112,18 @@ function trang(rc) {
    box(.13,.65,.74,.10,"rgba(123,63,152,.17)",false);
    dot(.82,.22,.042,SPINE);
  }
+ // Sửa cục bộ C13-3, vòng SX-CI PR #142: hai khoảng không đạt nhịp 4 fps.
+ // Lớp giấy chú giải/trầm tích luân phiên phủ vật chứng đúng vùng bbox đã duyệt;
+ // không sinh chữ, không dời hộp, không sửa SRT hoặc chuyển cảnh các beat khác.
+ const suaNhipA=t>=30&&t<36.4, suaNhipB=t>=206&&t<210.8;
+ if(suaNhipA||suaNhipB){
+   const batDau=suaNhipA?30:206;
+   const soLop=Math.floor((t-batDau)/2.2);
+   ctx.fillStyle=soLop%2?"rgba(239,230,211,.92)":"rgba(123,63,152,.65)";
+   ctx.fillRect(x+w*.04,y+h*.06,w*.92,h*.86);
+   ctx.strokeStyle=INK;ctx.lineWidth=2;
+   for(let i=0;i<8;i++)strokeLine(ctx,x+w*.10,y+h*(.15+i*.09),x+w*.86,y+h*(.15+i*.09));
+ }
  // Dấu nhịp màu tím trên chính tài liệu, nối trực tiếp từ khóa/mốc HS.
  const count=Math.max(1,b.movements.length);
  const sweep=clamp((t-(b.movements[Math.max(0,active-1)]||{t0:b.t0}).t0)/.65,0,1);
