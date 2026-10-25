@@ -3,6 +3,8 @@ name: SX video mô phỏng — tự kiểm + render
 # Phòng SX-WEB (GPT) không chạy được trình duyệt trong chat, nên máy GitHub làm thay:
 # - PR đụng video-mo-phong/**: kiem_truoc + kiem_cat_vat (2 khổ), chụp khung 540p mỗi 2 s,
 #   đẩy tờ ghép lên nhánh qa-khung/pr-<số> và bình luận kết quả vào PR để KĐ chấm C13.
+# - Cả hai job chạy kiem_nhip_canh.py (GĐ 25/10, lệnh Chủ tịch "hình diễn giải lời"): nhịp đổi hình phải ngang
+#   7 video cùng chủ đề đã đo (đổi mạnh ≥ 7,5/phút, cụm hình ≥ 3,5/phút, ≥ 95 % cửa sổ 20 s có đổi, đứng yên ≤ 30 s).
 # - Commit có "[render-day-du]" trên nhánh gpt/** (hoặc chạy tay): render đủ tập 16:9 + 9:16 có giọng,
 #   ffprobe ≥ 480 s, tải lên artifact và bình luận vào PR.
 
@@ -40,6 +42,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Máy đo nhịp cảnh lấy từ nhánh gốc (PR không tự sửa được máy đo)
+        uses: actions/checkout@v4
+        with:
+          ref: claude/pensive-lovelace-96zjk7
+          path: _may
+          sparse-checkout: video-mo-phong/qa-tools
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -q pillow numpy
       - name: Cài Playwright Chromium + ffmpeg
         run: |
           mkdir -p "$RUNNER_TEMP/pw" qa_ci
@@ -79,6 +91,17 @@ jobs:
               -q:v 4 "qa_ci/to_ghep_${k}_%02d.jpg"
           done
           ls qa_ci
+      - name: Nhịp cảnh 2 khổ (hình diễn giải lời — so 7 video cùng chủ đề)
+        id: nhip
+        if: steps.khung.outcome == 'success'
+        continue-on-error: true
+        run: |
+          rc=0
+          for k in 16x9 9x16; do
+            python3 _may/video-mo-phong/qa-tools/kiem_nhip_canh.py "qa_ci/khung_$k" "qa_ci/nhip_$k.json" > "qa_ci/nhip_$k.txt" 2>&1 || rc=1
+            echo "$k: $(cat qa_ci/nhip_$k.txt)" | tee -a qa_ci/nhip_canh.txt
+          done
+          exit $rc
       - name: Đẩy tờ ghép lên nhánh qa-khung/pr-${{ github.event.pull_request.number }}
         id: day
         if: steps.khung.outcome == 'success'
@@ -86,7 +109,7 @@ jobs:
         run: |
           set -e
           N=${{ github.event.pull_request.number }}
-          d="$RUNNER_TEMP/qa"; mkdir -p "$d"; cp qa_ci/to_ghep_*.jpg qa_ci/kiem_truoc.txt qa_ci/kiem_cat_vat.txt "$d"/
+          d="$RUNNER_TEMP/qa"; mkdir -p "$d"; cp qa_ci/to_ghep_*.jpg qa_ci/kiem_truoc.txt qa_ci/kiem_cat_vat.txt "$d"/; cp qa_ci/nhip_canh.txt "$d"/ 2>/dev/null || true
           cd "$d"; git init -q; git checkout -q -b "qa-khung/pr-$N"
           git config user.name "sx-ci"; git config user.email "sx-ci@users.noreply.github.com"
           git add .; git commit -q -m "QA khung PR #$N @ ${{ github.event.pull_request.head.sha }}"
@@ -105,6 +128,7 @@ jobs:
           TRUOC: ${{ steps.truoc.outcome }}
           CATVAT: ${{ steps.catvat.outcome }}
           KHUNG: ${{ steps.khung.outcome }}
+          NHIP: ${{ steps.nhip.outcome }}
           QA_SHA: ${{ steps.day.outputs.sha }}
         with:
           script: |
@@ -112,6 +136,7 @@ jobs:
             const doc = (f) => { try { return fs.readFileSync(f, "utf8"); } catch { return "(không có)"; } };
             const truoc = doc("qa_ci/kiem_truoc.txt").split("\n").filter((l) => /ĐẠT|TRƯỢT|===|>>>|LỖI|^\s{8}/.test(l)).slice(0, 60).join("\n");
             const catvat = doc("qa_ci/kiem_cat_vat.txt").split("\n").slice(0, 40).join("\n");
+            const nhip = doc("qa_ci/nhip_canh.txt");
             const N = context.payload.pull_request.number; const sha = context.payload.pull_request.head.sha;
             let anh = "";
             if (process.env.QA_SHA) {
@@ -120,19 +145,20 @@ jobs:
               anh = ds.map((f) => `- [${f}](${raw}${f})`).join("\n");
             }
             const ok = (o) => o === "success" ? "ĐẠT" : "TRƯỢT";
-            const tong = [process.env.TRUOC, process.env.CATVAT, process.env.KHUNG].every((o) => o === "success");
+            const tong = [process.env.TRUOC, process.env.CATVAT, process.env.KHUNG, process.env.NHIP].every((o) => o === "success");
             const body = [
               `## SX-CI · PR #${N} · sha ${sha.slice(0, 8)} · ${tong ? "ĐẠT máy" : "CHƯA ĐẠT máy"}`,
-              `- kiem_truoc: **${ok(process.env.TRUOC)}** · kiem_cat_vat: **${ok(process.env.CATVAT)}** · chụp khung 540p: **${ok(process.env.KHUNG)}**`,
+              `- kiem_truoc: **${ok(process.env.TRUOC)}** · kiem_cat_vat: **${ok(process.env.CATVAT)}** · chụp khung 540p: **${ok(process.env.KHUNG)}** · nhịp cảnh: **${ok(process.env.NHIP)}**`,
               `- Lần chạy: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId} (artifact đủ khung 540p mỗi 2 s)`,
               "", "### Tờ ghép 540p (mỗi ô 2 s, góc trái ghi giây) — KĐ chấm C13 trên các tờ này", anh || "(chưa đẩy được tờ ghép)",
               "", "### kiem_truoc", "```", truoc, "```", "### kiem_cat_vat", "```", catvat, "```",
+              "### Nhịp cảnh (hình phải diễn giải lời: lời tới đâu hình đổi tới đó — đọc dao_tao_gpt/bai_hoc_hinh_dien_giai_loi.md ở studio-hop-thu)", "```", nhip, "```",
               tong ? "Bước tiếp: KĐ chấm C13 trên tờ ghép. ĐẠT thì SX commit có `[render-day-du]` để render đủ tập." : "Bước tiếp: SX sửa đúng mục TRƯỢT rồi đẩy lại; máy tự chạy lại."
             ].join("\n");
             await github.rest.issues.createComment({ ...context.repo, issue_number: N, body });
       - name: Kết luận
         run: |
-          [ "${{ steps.truoc.outcome }}" = success ] && [ "${{ steps.catvat.outcome }}" = success ] && [ "${{ steps.khung.outcome }}" = success ]
+          [ "${{ steps.truoc.outcome }}" = success ] && [ "${{ steps.catvat.outcome }}" = success ] && [ "${{ steps.khung.outcome }}" = success ] && [ "${{ steps.nhip.outcome }}" = success ]
 
   render:
     if: (github.event_name == 'push' && contains(github.event.head_commit.message, '[render-day-du]')) || github.event_name == 'workflow_dispatch'
@@ -145,6 +171,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Máy đo nhịp cảnh lấy từ nhánh gốc (PR không tự sửa được máy đo)
+        uses: actions/checkout@v4
+        with:
+          ref: claude/pensive-lovelace-96zjk7
+          path: _may
+          sparse-checkout: video-mo-phong/qa-tools
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -q pillow numpy
       - name: Cài Playwright Chromium + ffmpeg
         run: |
           mkdir -p "$RUNNER_TEMP/pw" qa_ci
@@ -175,6 +211,11 @@ jobs:
             awk -v d="$d" 'BEGIN{exit !(d>=480)}' || { echo "$k DƯỚI 480 s" | tee -a qa_ci/ffprobe.txt; exit 1; }
             [ -n "$a" ] || { echo "$k THIẾU TIẾNG" | tee -a qa_ci/ffprobe.txt; exit 1; }
           done
+      - name: Nhịp cảnh trên video đủ tập 16:9
+        id: nhip
+        if: steps.render.outcome == 'success'
+        continue-on-error: true
+        run: python3 _may/video-mo-phong/qa-tools/kiem_nhip_canh.py "qa_ci/${{ steps.bai.outputs.ma }}_16x9.mp4" qa_ci/nhip_16x9.json 2>&1 | tee -a qa_ci/ffprobe.txt; exit ${PIPESTATUS[0]}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -186,6 +227,7 @@ jobs:
         uses: actions/github-script@v7
         env:
           RENDER: ${{ steps.render.outcome }}
+          NHIP: ${{ steps.nhip.outcome }}
           NHANH: ${{ inputs.ref || github.ref_name }}
         with:
           script: |
@@ -193,11 +235,11 @@ jobs:
             let fp = "(không có)"; try { fp = fs.readFileSync("qa_ci/ffprobe.txt", "utf8"); } catch {}
             const prs = await github.rest.pulls.list({ ...context.repo, state: "open", head: `${context.repo.owner}:${process.env.NHANH}` });
             const body = [
-              `## SX-CI render đủ tập · ${process.env.RENDER === "success" ? "ĐẠT (≥ 480 s, có tiếng)" : "TRƯỢT"}`,
+              `## SX-CI render đủ tập · ${process.env.RENDER === "success" && process.env.NHIP === "success" ? "ĐẠT (≥ 480 s, có tiếng, nhịp cảnh đạt)" : "TRƯỢT"}`,
               "```", fp, "```",
               `Video tải ở artifact của lần chạy: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             ].join("\n");
             if (prs.data.length) await github.rest.issues.createComment({ ...context.repo, issue_number: prs.data[0].number, body });
             else core.info(body);
       - name: Kết luận
-        run: '[ "${{ steps.render.outcome }}" = success ]'
+        run: '[ "${{ steps.render.outcome }}" = success ] && [ "${{ steps.nhip.outcome }}" = success ]'
