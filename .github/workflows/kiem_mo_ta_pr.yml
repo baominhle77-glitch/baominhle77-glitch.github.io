@@ -1,0 +1,35 @@
+name: Cong kiem mo ta PR
+on:
+  pull_request:
+    branches: [studio-dung]
+    types: [opened, edited, synchronize]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  kiem-mo-ta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kiem hai dong bat buoc
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          import sys
+
+          body = os.environ.get("PR_BODY") or ""
+          rules = {
+              "Trạng thái @<sha7>": r"^Trạng thái @[0-9a-f]{7}[ \t]*$",
+              "Luật áp:": r"^Luật áp:.*$",
+          }
+          failed = [name for name, pattern in rules.items()
+                    if re.search(pattern, body, re.MULTILINE) is None]
+          if failed:
+              for item in failed:
+                  print(f"TRƯỢT mô tả PR: thiếu dòng {item}", file=sys.stderr)
+              sys.exit(1)
+          print("ĐẠT mô tả PR: có Trạng thái @sha7 và Luật áp:")
+          PY
