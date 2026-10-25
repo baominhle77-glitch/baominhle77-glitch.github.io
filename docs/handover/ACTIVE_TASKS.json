@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-25T01:02:00+07:00",
+  "updated_at": "2026-10-25T00:50:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [
     {
@@ -42,6 +42,22 @@
     }
   ],
   "recently_completed": [
+    {
+      "id": "EDU-20261025-02",
+      "owner": "ChatGPT (Trò chuyện) — GĐ Studio kiểm",
+      "branch": "gpt/k1t2-b2-01",
+      "base_sha": "7773c443f569a76c47a7c2d28ff3cf4f237b2ac2",
+      "paths": [
+        "video-mo-phong/**",
+        "docs/handover/DIEM-DUNG.md",
+        "docs/handover/ACTIVE_TASKS.json"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-25T00:00:00+07:00",
+      "heartbeat_at": "2026-10-25T00:50:00+07:00",
+      "completed_at": "2026-10-25T00:50:00+07:00",
+      "summary": "K1T2 B2: match-cut bàn sang cận cảnh mặt nước 13–20 s; vòng 2 GĐ kiểm máy ĐẠT cả 16:9 và 9:16 (kiem_truoc + kiem_cat_vat)."
+    },
     {
       "id": "EDU-20261024-09",
       "owner": "Claude Code (session_0129, \"web hiennhi\" — nhận lại theo thư GĐ gd-20261024-2348)",
