@@ -1,10 +1,10 @@
 // Service worker của boi/: chạy offline phần luật (trang, mã, dữ liệu lá). Gọi AI luôn đi thẳng mạng, không cache.
-const CACHE = "boi-v1";
+const CACHE = "boi-v2";
 const CORE = [
   "./", "index.html", "manifest.webmanifest", "css/app.css",
   "js/app.js", "js/views.js", "js/store.js", "js/state.js", "js/core.js", "js/parser.js", "js/spreads.js", "js/topic.js",
-  "js/reading.js", "js/insight.js", "js/money.js", "js/cards.js", "js/markdown.js", "js/ai.js",
-  "data/tarot.json", "data/lenormand.json",
+  "js/reading.js", "js/insight.js", "js/money.js", "js/cards.js", "js/markdown.js", "js/ai.js", "js/data.js",
+  "data/tarot.json", "data/lenormand.json", "data/tarot_them.json", "data/lenormand_them.json",
   "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png",
 ];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];

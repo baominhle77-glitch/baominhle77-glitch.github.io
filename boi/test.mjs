@@ -9,14 +9,16 @@ import { createSession, addRound, applyCorrectionText, fixCell, errorsOf, reveal
 import { spreadById, SPREADS } from "./js/spreads.js";
 import { moneyTable, periodEstimate, roundNice } from "./js/money.js";
 import { analyze, allSentences, ruleFollowUp } from "./js/insight.js";
-import { suggestSpread } from "./js/topic.js";
+import { suggestSpread, mainTopic } from "./js/topic.js";
+import { mergeKnowledge, tarotMeaning, capMeaning } from "./js/data.js";
 import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING } from "./js/ai.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-export const db = {
-  tarot: JSON.parse(readFileSync(join(HERE, "data/tarot.json"), "utf8")),
-  lenormand: JSON.parse(readFileSync(join(HERE, "data/lenormand.json"), "utf8")),
-};
+const readJSON = (f) => JSON.parse(readFileSync(join(HERE, f), "utf8"));
+export const db = mergeKnowledge(
+  { tarot: readJSON("data/tarot.json"), lenormand: readJSON("data/lenormand.json") },
+  readJSON("data/tarot_them.json"), readJSON("data/lenormand_them.json"),
+);
 
 const tests = [];
 const test = (name, fn) => tests.push([name, fn]);
@@ -218,6 +220,33 @@ for (const c of CASES) {
     assert.ok(fu.includes(r.tang[1].ten) && fu.length > 80);
   });
 }
+
+test("kho tri thức offline: đủ lá, đúng chủ đề, nghĩa cặp, hỏi tiếp theo tên lá", async () => {
+  assert.equal(db.tarot.la.filter((c) => c.tri).length, 78, "thiếu tri thức Tarot");
+  assert.equal(db.lenormand.la.filter((c) => c.tri).length, 36, "thiếu tri thức Lenormand");
+  for (const c of db.tarot.la) for (const k of ["chung", "tinh", "viec", "suc_khoe", "van_han"]) assert.ok(c.tri[k]?.length > 20, `${c.en}.${k}`);
+  assert.equal(mainTopic("Tháng sau đi phỏng vấn có đỗ không?"), "viec");
+  assert.equal(mainTopic("Sức khoẻ mẹ tôi sau phẫu thuật"), "suckhoe");
+  assert.equal(mainTopic("Người ấy nghĩ gì về tôi?"), "tinh");
+  const sun = db.tarot.la.find((c) => c.en === "The Sun");
+  assert.equal(tarotMeaning(sun, false, "viec"), sun.tri.viec);
+  assert.equal(tarotMeaning(sun, true, "tinh"), sun.tri.nguoc.tinh);
+  assert.equal(tarotMeaning(sun, false, "tinh", "Người kia nghĩ gì"), sun.tri.doi_phuong);
+  const [k, v] = Object.entries(db.lenormand.capDay)[0];
+  const [ea, eb] = k.split("+"), A = db.lenormand.la.find((c) => c.en === ea), B = db.lenormand.la.find((c) => c.en === eb);
+  assert.equal(capMeaning(db, A, B, "tinh", false), v.t);
+  assert.equal(capMeaning(db, A, B, "viec", false), v.v);
+  // một ca công việc: lá Tarot được đọc bằng nghĩa công việc, hỏi tiếp theo tên lá trả lời được
+  const sp = spreadById("cokhong");
+  const s = await createSession({ cauHoi: "Đi phỏng vấn công ty mới có đỗ không?", spreadId: sp.id, tiers: sp.tiers(2027), money: false, reversals: false, seed: "c".repeat(64) });
+  addRound(s, ["T: 20 34 56 / 11 2 41 / 7 66 18", "L: 1 25 33 / 9 16 31 / 2 3 4"].join(String.fromCharCode(10)));
+  const r = analyze(db, s, { xungHo: "Queen Linh" });
+  const x = r.tang[0].tarot_doc.join(" ");
+  const c0 = r._cards.find((c) => c.deck === "tarot");
+  assert.ok(c0?.nghia && x.toLowerCase().includes(c0.nghia.slice(1, 40).toLowerCase()), "tầng 1 chưa dùng nghĩa công việc");
+  const fu = ruleFollowUp(r, `lá ${c0.vi} nghĩa là gì?`);
+  assert.ok(fu.includes(c0.vi) && fu.includes(c0.nghia.slice(0, 20)), "hỏi tiếp theo tên lá chưa trả lời");
+});
 
 test("gợi ý mẫu trải theo câu hỏi", () => {
   assert.equal(suggestSpread("thu nhập 3 tháng tới").id, "3thang");

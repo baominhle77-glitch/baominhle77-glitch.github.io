@@ -5,6 +5,8 @@ const RULES = {
   tien: /tiền|thu nhập|lương|doanh (thu|số)|kinh doanh|tài chính|lãi|lỗ|nợ|đầu tư|buôn|bán hàng|kiếm|khách hàng|giàu|tài lộc|hoa hồng|thưởng|chứng khoán|coin|vốn/u,
   tinh: /tình|yêu|người ấy|crush|người yêu|vợ|chồng|hôn nhân|cưới|chia tay|quay lại|nhắn tin|anh ấy|cô ấy|đối phương|ngoại tình|duyên/u,
   cokhong: /có nên|nên không|được không|có .{1,40} không\??$|liệu|hay không|đúng không|thật không|có phải/u,
+  viec: /công việc|việc làm|xin việc|nghỉ việc|chuyển việc|đổi việc|sếp|đồng nghiệp|phỏng vấn|thi cử|kỳ thi|đi thi|thi đỗ|đỗ đại học|thi đại học|trượt|thăng chức|thăng tiến|sự nghiệp|dự án|công ty|học hành|học tập|học bổng|du học/u,
+  suckhoe: /sức khoẻ|sức khỏe|bệnh|ốm|đau|khám|phẫu thuật|mổ|mang thai|có bầu|sinh con|điều trị/u,
   vanhan: /vận hạn|hạn|xui|giải hạn|sao chiếu|tai ương|kiếp nạn|đen đủi/u,
   nam: /cả năm|năm (19|20)\d\d|năm tới|năm nay|năm sau|12 tháng|từng tháng|mười hai tháng/u,
   ba_thang: /(3|ba) tháng|quý (này|tới|sau)|mấy tháng|tháng tới|tháng sau/u,
@@ -18,12 +20,14 @@ export function detectTopics(question) {
   return { ...hit, year: yearMatch ? Number(yearMatch[1]) : null };
 }
 
-// Chủ đề chính dùng cho giọng văn: tien | tinh | cokhong | vanhan | chung
+// Chủ đề chính dùng cho giọng văn: tien | tinh | viec | suckhoe | cokhong | vanhan | chung
 export function mainTopic(question) {
   const t = detectTopics(question);
   if (t.vanhan) return "vanhan";
   if (t.tien || t.nam) return "tien";
   if (t.tinh) return "tinh";
+  if (t.viec) return "viec";
+  if (t.suckhoe) return "suckhoe";
   if (t.cokhong) return "cokhong";
   return "chung";
 }
