@@ -18,6 +18,6 @@ Spec gốc + bản bổ sung (SPA nhiều màn, thiết kế cao cấp, PWA, AI 
 | 11. AI: Gemini mặc định, dò model mạnh nhất + dự phòng 429/404, JSON có cấu trúc, streaming, hỏi tiếp (js/ai.js) | xong (chưa thử với khoá thật — không có khoá trong phiên này) |
 | 12. PWA (manifest.webmanifest, sw.js, icons/) | xong |
 | 13. Kiểm trình duyệt + Lighthouse | xong: e2e Pixel 7 không lỗi; offline chạy; Lighthouse mobile (local, chưa nén) Perf 94–95, A11y 100, BP 100 |
-| 14. Sổ khoá (BOI-20261025-01) + PR + merge + kiểm link | PR https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/pull/138 — chờ CI rồi merge |
+| 14. Sổ khoá (BOI-20261025-01) + PR + merge + kiểm link | PR https://github.com/baominhle77-glitch/baominhle77-glitch.github.io/pull/138 — CI xanh (coordination-guard, validate, handover), tự merge; link Pages kiểm 200 sau merge |
 
-Bước tiếp theo: dòng "chưa" đầu tiên. Chạy test: `node boi/test.mjs`.
+Đã xong hết 14 phần. Việc còn mở: thử lớp AI với khoá Gemini thật của chủ nhân (mới thử bằng fetch giả). Chạy test: `node boi/test.mjs`.
