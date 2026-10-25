@@ -7,7 +7,7 @@ R = Path("E:/Studio")
 B = R / "out/M1_MARANGONI_DUNG/_build"
 SB = R / "out/M1_MARANGONI/storyboard.json"
 P = str(R / "venv_manim/Scripts/python.exe")
-OUT = Path("D:/r/k1t3_mau_540")
+OUT = B / "mau_540"
 OUT.mkdir(parents=True, exist_ok=True)
 ENV = dict(os.environ, K1_MAU_540="1", PYTHONPATH=str(R / "ban_sac"), PYTHONIOENCODING="utf-8")
 FIRST = ("h1", "h2", "h3", "h4", "c1", "p1")
@@ -54,11 +54,13 @@ for bc in ("16x9","9x16"):
         still = folder / ("khung_" + bid + ".png")
         if not still.exists():
             work = folder / ("still_" + bid)
-            run([P, "-m", "manim", "render", "-s", "--disable_caching",
+            debug = run([P, "-m", "manim", "render", "-s", "--disable_caching",
                  "--progress_bar", "none", "-v", "ERROR",
                  "--media_dir", work, R / "out/M1_MARANGONI_DUNG/canh.py", bid], env)
-            images = list(work.rglob(bid+".png"))
+            images = list(work.rglob("*.png"))
             if not images:
+                print("MANIM_STATIC_DEBUG", bc, bid, debug[-1800:],
+                      sorted(str(x) for x in work.rglob("*"))[-40:], flush=True)
                 raise ValueError("THIEU_KHUNG %s/%s" % (bc,bid))
             shutil.copyfile(images[-1],still)
         thumbs.append(Image.open(still).convert("RGB"))
