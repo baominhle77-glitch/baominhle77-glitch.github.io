@@ -1,3 +1,4 @@
+import { veTranhRieng } from "./k3t4_shot_rieng.js";
 // K3t4 Quyết 016. Mỗi HS.shots = một cảnh giải nghĩa bằng vật/hành động riêng.
 // HS latest @f9c2ade2: 8 beats refined per KĐ 016; 126 shots/34 beats.
 // t0/t1: chiếu tuyến tính *trong từng beat* sang timestamp giọng GĐ đã khóa 592.008 s;
@@ -371,8 +372,10 @@ export function veCanhShot(rc,img){
    ctx.fillStyle="#514B47";ctx.fillRect(0,rc.H*.08,rc.W,rc.H*.64);
  }
  ctx.save();ctx.beginPath();ctx.rect(x,y,o.w,o.h);ctx.clip();
- if(p<.48) veBuocDau(rc,o,s,p/.48,img);
- else PAINTERS[s.loai](rc,o,s,(p-.48)/.52,img);
+ if(!veTranhRieng(rc,o,s,p,img)){
+   if(p<.48) veBuocDau(rc,o,s,p/.48,img);
+   else PAINTERS[s.loai](rc,o,s,(p-.48)/.52,img);
+ }
  ctx.restore();
  // Không vẽ khung thẻ bao quanh shot; các vật/biểu đồ có bóng, viền riêng.
  label(rc,o,s);
