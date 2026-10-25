@@ -1,37 +1,37 @@
 {
- "ghi_chu": "Tệp tập K1 Meniscus Lab t3 (Marangoni, Roché et al. PRL 2014) cho khuôn tools/nha_may_kenh.py. Storyboard 4a8ffa1d = bản 523fb0b9 + sửa NX121-1 (nguồn w3 bỏ mã beat nội bộ). Hai lớp mới KhayTieu, DongMarangoni ở ban_sac/K1_canh/lop_t3.py. SX lập 24/10/2026 (local_35f672dd).",
- "kenh": "K1",
- "tap": 3,
- "ten": "ML_K1_t3",
- "nguon": "E:/Studio/out/M1_MARANGONI",
- "dung": "E:/Studio/out/M1_MARANGONI_DUNG",
- "khoa": {
-  "storyboard.json": [
-   "4a8ffa1d7510f197f32b219d599c36156494deb14b107ecbfa004cec99cd24a7",
-   93137
+  "ghi_chu": "Tệp tập K1 Meniscus Lab t3 (Marangoni, Roché et al. PRL 2014) cho khuôn tools/nha_may_kenh.py. Storyboard 4a8ffa1d = bản 523fb0b9 + sửa NX121-1 (nguồn w3 bỏ mã beat nội bộ). Hai lớp mới KhayTieu, DongMarangoni ở ban_sac/K1_canh/lop_t3.py. SX lập 24/10/2026 (local_35f672dd). C16/C17 (26/10): 16 clip metadata, chuyển hình từng beat; giữ nguyên lời & khóa TTS.",
+  "kenh": "K1",
+  "tap": 3,
+  "ten": "ML_K1_t3",
+  "nguon": "E:/Studio/out/M1_MARANGONI",
+  "dung": "E:/Studio/out/M1_MARANGONI_DUNG",
+  "khoa": {
+    "storyboard.json": [
+      "05364fef876f51d505e7d7b65444b54b77c3031758b2e001b00ed1f9a945e287",
+      127255
+    ],
+    "description.md": [
+      "b02b6ede3fe8b08868bed338d86f807297e5922c0ffbdcb27837dc313dadc567",
+      4253
+    ],
+    "thumbnail.png": [
+      "07a1cd59c554766992cfc20864186c4769261ec61c5638caed173501afe4938f",
+      103401
+    ]
+  },
+  "hang": {
+    "CAU_PIP": "The small picture in the top-right corner is a silent recording of the person behind this channel; the voice you hear is synthetic, not theirs.",
+    "CAU_AI": "Narration is an AI text-to-speech voice. The diagrams are drawn in code for this video with AI-assisted tools.",
+    "CAU_PIP_CAPTION": " The person in the corner is real and silent.",
+    "TRAN_MO_TA_CRLF": 4800
+  },
+  "cau_nguoi_goc_vi": "ô nhỏ ở góc là mặt thật, im lặng.",
+  "accent": "209,131,79",
+  "va_nha_may": [
+    "nha_may_k1_v2"
   ],
-  "description.md": [
-   "b02b6ede3fe8b08868bed338d86f807297e5922c0ffbdcb27837dc313dadc567",
-   4253
+  "lop_tap": [
+    "K1_canh/lop_t3.py"
   ],
-  "thumbnail.png": [
-   "07a1cd59c554766992cfc20864186c4769261ec61c5638caed173501afe4938f",
-   103401
-  ]
- },
- "hang": {
-  "CAU_PIP": "The small picture in the top-right corner is a silent recording of the person behind this channel; the voice you hear is synthetic, not theirs.",
-  "CAU_AI": "Narration is an AI text-to-speech voice. The diagrams are drawn in code for this video with AI-assisted tools.",
-  "CAU_PIP_CAPTION": " The person in the corner is real and silent.",
-  "TRAN_MO_TA_CRLF": 4800
- },
- "cau_nguoi_goc_vi": "ô nhỏ ở góc là mặt thật, im lặng.",
- "accent": "209,131,79",
- "va_nha_may": [
-  "nha_may_k1_v2"
- ],
- "lop_tap": [
-  "K1_canh/lop_t3.py"
- ],
- "vung_cam_pip": "b3747a29"
+  "vung_cam_pip": "b3747a29"
 }

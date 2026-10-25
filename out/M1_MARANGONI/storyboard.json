@@ -141,8 +141,8 @@
    "cach_uoc": "ƯỚC LƯỢNG 2,5 từ/s (barem) và 2,9 từ/s, + 0,5 s nghỉ mỗi beat; mốc thật đo bằng words.json sau TTS (chặng ii)",
    "nhip": {
     "h1": [
-     0.0,
-     0.0
+     0,
+     0
     ],
     "h2": [
      9.3,
@@ -158,7 +158,7 @@
     ],
     "c1": [
      48.4,
-     42.0
+     42
     ]
    },
    "V1": "chuyển động từ khung 0: khay nước đã rắc tiêu, giọt xà phòng rơi quay chậm ở 'drop', hạt tiêu dạt ra mép ở 'races'",
@@ -426,7 +426,16 @@
     "trung": 0
    }
   },
-  "duyet": "HỒ SƠ tự soát bằng _lam/tao_storyboard.py (kiểm ghi ở đầu tệp). Nộp lần đầu chặng (i) tập 3 theo lệnh 20261024-0150 (lô t3 K1→K5); chủ đề = KE_HOACH_TAP hàng 3 (GĐ duyệt 07:42 19/10 cùng câu hứa k2 tập 2); chờ KĐ chấm."
+  "duyet": "HỒ SƠ tự soát bằng _lam/tao_storyboard.py (kiểm ghi ở đầu tệp). Nộp lần đầu chặng (i) tập 3 theo lệnh 20261024-0150 (lô t3 K1→K5); chủ đề = KE_HOACH_TAP hàng 3 (GĐ duyệt 07:42 19/10 cùng câu hứa k2 tập 2); chờ KĐ chấm.",
+  "C16_C17": {
+   "ap_dung": "26/10/2026",
+   "so_clip": 16,
+   "tong_clip_s": 87,
+   "bat_buoc": "clip tả thực chồng lên mô phỏng đang chuyển động, Gemini do GĐ tạo sau; không phụ thuộc clip trong CI",
+   "thoi_luong_khoa_s": 553.367,
+   "mau_vong_1": "540p 00:00-01:00 hai khổ + 35 khung/khổ; không render đủ",
+   "kiem": "ffmpeg freezedetect=n=0.001:d=2; tổng <=10%, đoạn <=4s"
+  }
  },
  "beats": [
   {
@@ -500,11 +509,47 @@
    "rao": [],
    "so_tu": 22,
    "thoi_luong_uoc": {
-    "bat_dau_s_2_5": 0.0,
-    "bat_dau_s_2_9": 0.0,
+    "bat_dau_s_2_5": 0,
+    "bat_dau_s_2_9": 0,
     "dai_s_2_5": 8.8,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 3.52,
+     "moc_tts": "edge",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T01",
+     "t_vao": 0,
+     "t_ra": 5.5,
+     "vai": "hook",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "An overhead real-life kitchen close-up of floating black pepper in a shallow bowl. A single soap drop lands centrally; pepper grains visibly race outward to the rim within the first 2 seconds. Daylight, macro focus, realistic ripples. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "h2",
@@ -575,7 +620,50 @@
     "bat_dau_s_2_9": 8.1,
     "dai_s_2_5": 12.8,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 3.82,
+     "moc_tts": "harder",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 7.64,
+     "moc_tts": "outward",
+     "kieu": "doi_vat",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T02",
+     "t_vao": 8,
+     "t_ra": 13.5,
+     "vai": "hook",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Macro overhead close-up of pepper on water drifting radially outward from a tiny soap drop, natural water reflections and distinct moving particles, slow sideways camera glide in a bright kitchen. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "h3",
@@ -634,7 +722,43 @@
     "bat_dau_s_2_9": 19.6,
     "dai_s_2_5": 5.6,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 2.48,
+     "moc_tts": "ring",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T03",
+     "t_vao": 18.5,
+     "t_ra": 23,
+     "vai": "hook",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead laboratory petri dish with constant slow surfactant feed through a thin stationary needle. A particle-free circular zone forms near the source, real liquid reflections and moving tracers. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "h4",
@@ -724,6 +848,36 @@
     "bat_dau_s_2_9": 24.9,
     "dai_s_2_5": 19.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.78,
+     "moc_tts": "episode",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.55,
+     "moc_tts": "millimolar",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 14.33,
+     "moc_tts": "calculated",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -800,9 +954,32 @@
    "so_tu": 42,
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 48.4,
-    "bat_dau_s_2_9": 42.0,
+    "bat_dau_s_2_9": 42,
     "dai_s_2_5": 16.8,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.28,
+     "moc_tts": "neighbours",
+     "kieu": "doi_goc",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.56,
+     "moc_tts": "strong",
+     "kieu": "doi_vat",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -882,9 +1059,39 @@
    "so_tu": 47,
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 65.7,
-    "bat_dau_s_2_9": 57.0,
+    "bat_dau_s_2_9": 57,
     "dai_s_2_5": 18.8,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.58,
+     "moc_tts": "dragged",
+     "kieu": "doi_goc",
+     "vat_chinh": "MuiTenCang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.15,
+     "moc_tts": "outward",
+     "kieu": "doi_vat",
+     "vat_chinh": "MuiTenCang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.73,
+     "moc_tts": "difference",
+     "kieu": "doi_khung",
+     "vat_chinh": "MuiTenCang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -955,11 +1162,61 @@
    "rao": [],
    "so_tu": 45,
    "thoi_luong_uoc": {
-    "bat_dau_s_2_5": 85.0,
+    "bat_dau_s_2_5": 85,
     "bat_dau_s_2_9": 73.7,
-    "dai_s_2_5": 18.0,
+    "dai_s_2_5": 18,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.7,
+     "moc_tts": "needle",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.4,
+     "moc_tts": "rated",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 14.1,
+     "moc_tts": "micrometres",
+     "kieu": "doi_khung",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T04",
+     "t_vao": 80,
+     "t_ra": 85.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "A laboratory syringe pump connects to a fine needle over a clear shallow dish of water. Small illuminated tracer particles visibly drift outward. Three-quarter macro view, soft white lab lighting. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "p3",
@@ -1047,6 +1304,36 @@
     "bat_dau_s_2_9": 89.7,
     "dai_s_2_5": 21.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.66,
+     "moc_tts": "heads",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 11.32,
+     "moc_tts": "sds",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 16.98,
+     "moc_tts": "study",
+     "kieu": "doi_khung",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -1115,8 +1402,38 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 125.2,
     "bat_dau_s_2_9": 108.5,
-    "dai_s_2_5": 16.0,
+    "dai_s_2_5": 16,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.21,
+     "moc_tts": "above",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.42,
+     "moc_tts": "clump",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 12.63,
+     "moc_tts": "model",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -1177,6 +1494,36 @@
     "bat_dau_s_2_9": 122.8,
     "dai_s_2_5": 18.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.57,
+     "moc_tts": "patch",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.13,
+     "moc_tts": "layer",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.7,
+     "moc_tts": "equals",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -1240,7 +1587,57 @@
     "bat_dau_s_2_9": 139.1,
     "dai_s_2_5": 17.2,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.17,
+     "moc_tts": "outward",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.35,
+     "moc_tts": "trick",
+     "kieu": "doi_vat",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 12.52,
+     "moc_tts": "transported",
+     "kieu": "doi_khung",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T05",
+     "t_vao": 156,
+     "t_ra": 161.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead shallow ceramic kitchen bowl, pepper sprinkled on still water. After a soap droplet touches the center, pepper glides outward with convincing meniscus and reflections, natural light. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "c2",
@@ -1313,7 +1710,50 @@
     "bat_dau_s_2_9": 154.5,
     "dai_s_2_5": 14.4,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.53,
+     "moc_tts": "source",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.07,
+     "moc_tts": "clear",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T06",
+     "t_vao": 172,
+     "t_ra": 177.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Directly overhead shallow laboratory water dish. Continuous fine-needle soap injection creates a visible circular clear patch between floating tracers. Outer tracer swirls keep moving, neutral studio light. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "v1",
@@ -1376,6 +1816,29 @@
     "bat_dau_s_2_9": 167.4,
     "dai_s_2_5": 14.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.56,
+     "moc_tts": "slightly",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.11,
+     "moc_tts": "confined",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -1442,6 +1905,29 @@
     "bat_dau_s_2_9": 180.3,
     "dai_s_2_5": 15.6,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.66,
+     "moc_tts": "speeds",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.31,
+     "moc_tts": "second#2",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -1508,7 +1994,50 @@
     "bat_dau_s_2_9": 194.2,
     "dai_s_2_5": 14.4,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.57,
+     "moc_tts": "sudden",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.13,
+     "moc_tts": "abruptly",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T07",
+     "t_vao": 214,
+     "t_ra": 219.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead macro laboratory dish, steady surfactant feed. Tracers move rapidly inside the clear circular region, then abruptly slow at its boundary. Subtle light reflections, smooth focus pull. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "v4",
@@ -1590,6 +2119,29 @@
     "bat_dau_s_2_9": 207.2,
     "dai_s_2_5": 17.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.69,
+     "moc_tts": "container",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.38,
+     "moc_tts": "sketch",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -1657,7 +2209,50 @@
     "bat_dau_s_2_9": 222.5,
     "dai_s_2_5": 16.8,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.24,
+     "moc_tts": "sulfate",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.49,
+     "moc_tts": "field",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T08",
+     "t_vao": 244,
+     "t_ra": 249.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Two shallow petri dishes viewed from above under separate continuous soap-feed needles. Clear-zone sizes differ under two pumping rates; tracer motion is visible. Laboratory lighting, no quantitative annotations. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "v6",
@@ -1719,6 +2314,29 @@
     "bat_dau_s_2_9": 237.5,
     "dai_s_2_5": 15.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.57,
+     "moc_tts": "radius",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.13,
+     "moc_tts": "magnitude",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -1784,8 +2402,31 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 289.8,
     "bat_dau_s_2_9": 251.1,
-    "dai_s_2_5": 14.0,
+    "dai_s_2_5": 14,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.83,
+     "moc_tts": "swap",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.67,
+     "moc_tts": "bromide",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -1856,6 +2497,29 @@
     "bat_dau_s_2_9": 263.6,
     "dai_s_2_5": 15.6,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.69,
+     "moc_tts": "zoom",
+     "kieu": "doi_goc",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.38,
+     "moc_tts": "rides",
+     "kieu": "doi_vat",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -1928,7 +2592,57 @@
     "bat_dau_s_2_9": 277.6,
     "dai_s_2_5": 18.4,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.41,
+     "moc_tts": "desorbed",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.82,
+     "moc_tts": "clean",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.22,
+     "moc_tts": "drives",
+     "kieu": "doi_khung",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T09",
+     "t_vao": 302,
+     "t_ra": 307.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Stationary fine-needle soap feed in a shallow laboratory dish viewed overhead. Tiny tracers move outward within a circular region and slow strongly outside its boundary, realistic highlights. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "w2",
@@ -2015,8 +2729,45 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 339.3,
     "bat_dau_s_2_9": 293.9,
-    "dai_s_2_5": 22.0,
+    "dai_s_2_5": 22,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.88,
+     "moc_tts": "density",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 11.77,
+     "moc_tts": "four",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 17.65,
+     "moc_tts": "millimetres",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
    }
   },
   {
@@ -2101,7 +2852,57 @@
     "bat_dau_s_2_9": 313.4,
     "dai_s_2_5": 20.4,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.88,
+     "moc_tts": "thickness",
+     "kieu": "doi_goc",
+     "vat_chinh": "ThuocLc",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.75,
+     "moc_tts": "seven",
+     "kieu": "doi_vat",
+     "vat_chinh": "ThuocLc",
+     "canh_tts": true
+    },
+    {
+     "t_s": 14.63,
+     "moc_tts": "calculated",
+     "kieu": "doi_khung",
+     "vat_chinh": "ThuocLc",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T10",
+     "t_vao": 345,
+     "t_ra": 350.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Extreme macro side view just below water surface. Microscopic tracer beads move in the thin surface-adjacent layer, realistic liquid reflection and smooth camera drift. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "w4",
@@ -2175,6 +2976,36 @@
     "bat_dau_s_2_9": 331.5,
     "dai_s_2_5": 17.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.32,
+     "moc_tts": "slowly",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.63,
+     "moc_tts": "thousand",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 12.95,
+     "moc_tts": "root",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -2258,7 +3089,57 @@
     "bat_dau_s_2_9": 346.8,
     "dai_s_2_5": 21.2,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.25,
+     "moc_tts": "rises",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.5,
+     "moc_tts": "calculated",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 15.75,
+     "moc_tts": "estimate",
+     "kieu": "doi_khung",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T11",
+     "t_vao": 384,
+     "t_ra": 389.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead lab petri dish. Adjusted continuous flow through a micro-needle causes the clear tracer-free circle to grow gradually. Realistic water reflections, neutral lighting. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "w6",
@@ -2312,7 +3193,50 @@
     "bat_dau_s_2_9": 365.6,
     "dai_s_2_5": 15.6,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.49,
+     "moc_tts": "fails",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.98,
+     "moc_tts": "meniscus",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T12",
+     "t_vao": 399,
+     "t_ra": 404.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Side-by-side shallow dishes with different liquid viscosities. A narrow capillary adds a drop to each, producing visibly differing tracer flows and clear zones. Stable scientific lighting. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "w7",
@@ -2375,7 +3299,57 @@
     "bat_dau_s_2_9": 379.6,
     "dai_s_2_5": 20.8,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.64,
+     "moc_tts": "useful",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.28,
+     "moc_tts": "single",
+     "kieu": "doi_vat",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.93,
+     "moc_tts": "independent",
+     "kieu": "doi_khung",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T13",
+     "t_vao": 416,
+     "t_ra": 421.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead laboratory dish under continuous surfactant feed, circular clear zone stable while tracer particles move. A transparent unmarked measuring guide is positioned at the edge, no hands in frame. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "b1",
@@ -2438,9 +3412,39 @@
    "so_tu": 28,
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 459.5,
-    "bat_dau_s_2_9": 398.0,
+    "bat_dau_s_2_9": 398,
     "dai_s_2_5": 11.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 3.92,
+     "moc_tts": "measured",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 7.84,
+     "moc_tts": "episode",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
    }
   },
   {
@@ -2502,8 +3506,38 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 471.2,
     "bat_dau_s_2_9": 408.1,
-    "dai_s_2_5": 18.0,
+    "dai_s_2_5": 18,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.13,
+     "moc_tts": "second#2",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.27,
+     "moc_tts": "hundredfold",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
    }
   },
   {
@@ -2584,8 +3618,45 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 489.7,
     "bat_dau_s_2_9": 424.2,
-    "dai_s_2_5": 20.0,
+    "dai_s_2_5": 20,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.35,
+     "moc_tts": "six",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.7,
+     "moc_tts": "thinner",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.05,
+     "moc_tts": "wider",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
    }
   },
   {
@@ -2663,6 +3734,43 @@
     "bat_dau_s_2_9": 441.9,
     "dai_s_2_5": 20.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.03,
+     "moc_tts": "patch",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.05,
+     "moc_tts": "measurement",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 15.08,
+     "moc_tts": "millimolar",
+     "kieu": "doi_khung",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
    }
   },
   {
@@ -2728,10 +3836,53 @@
    "so_tu": 40,
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 531.1,
-    "bat_dau_s_2_9": 460.0,
-    "dai_s_2_5": 16.0,
+    "bat_dau_s_2_9": 460,
+    "dai_s_2_5": 16,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.88,
+     "moc_tts": "pump",
+     "kieu": "doi_goc",
+     "vat_chinh": "BanQuang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.76,
+     "moc_tts": "household",
+     "kieu": "doi_vat",
+     "vat_chinh": "BanQuang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T14",
+     "t_vao": 496,
+     "t_ra": 501.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Side-by-side comparison: a kitchen bowl with pepper and one soap droplet; a lab dish with a continuous surfactant needle. Different living surface patterns, overhead close-up. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "s8",
@@ -2815,6 +3966,36 @@
     "bat_dau_s_2_9": 474.3,
     "dai_s_2_5": 20.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.84,
+     "moc_tts": "capillary",
+     "kieu": "doi_goc",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 11.68,
+     "moc_tts": "four",
+     "kieu": "doi_vat",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 17.52,
+     "moc_tts": "drives",
+     "kieu": "doi_khung",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
    }
   },
   {
@@ -2880,7 +4061,50 @@
     "bat_dau_s_2_9": 492.4,
     "dai_s_2_5": 18.4,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.96,
+     "moc_tts": "spot",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.91,
+     "moc_tts": "ends",
+     "kieu": "doi_vat",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T15",
+     "t_vao": 534,
+     "t_ra": 539.5,
+     "vai": "ket",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Kitchen bowl with black pepper floating on water. One small soap drop triggers a quick outward rush of pepper. Photorealistic overhead view in natural daylight, match opening experiment. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   },
   {
    "id": "k2",
@@ -2919,9 +4143,45 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 587.4,
     "bat_dau_s_2_9": 508.7,
-    "dai_s_2_5": 6.0,
+    "dai_s_2_5": 6,
     "pad_s": 0.5
-   }
+   },
+   "doi_hinh": [
+    {
+     "t_s": 3.97,
+     "moc_tts": "wine",
+     "kieu": "doi_goc",
+     "vat_chinh": "BanQuang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T16",
+     "t_vao": 547,
+     "t_ra": 552.5,
+     "vai": "ket",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Close-up of wine in a clear stemmed glass. Thin liquid film climbs the inner glass wall, forms tears and slides down again. Warm tabletop light, graceful macro camera move. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ]
   }
  ]
 }
