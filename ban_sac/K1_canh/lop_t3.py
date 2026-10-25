@@ -820,6 +820,7 @@ class _C13:
             self.hinh_ds.append(m)
         for m in sc.mobjects:
             vien_cang(m)
+        self._c17_event_frontier = len(self.ev)  # bỏ sự kiện biến hình phác tĩnh
         self.dang_chu(os_)
         # Đăng sự kiện trước mục chữ đầu của trang 2, FadeOut/FadeIn <= 0,5 s.
         self._moc_doi_trang = trang_2[0]["t"]
@@ -954,6 +955,7 @@ class _C13:
             self.hinh_ds.append(m)
         for m in sc.mobjects:
             vien_cang(m)
+        self._c17_event_frontier = len(self.ev)  # bỏ sự kiện biến hình phác tĩnh
         self.dang_chu(os_)
         con = [x["kieu"] for x in self.ts.get("buoc", []) if x["kieu"] not in self.buoc_xong]
         if con:
@@ -1023,9 +1025,19 @@ from manim import ValueTracker, ParametricFunction, always_redraw, smooth
 
 
 class _SongC17:
+    def su_chu(self, o):
+        # Nhãn và từ khoá hiện từ lịch TTS; thao tác hình phác cũ không còn
+        # ý nghĩa khi vật chính đã thành một mô phỏng sống duy nhất.
+        return None
+
+    def hien(self, m, key=None):
+        if key:
+            m.set_z_index(20)  # chữ trước hình sống (đặc biệt bố cục dọc)
+        return super().hien(m, key)
+
     def _bat_song(self):
-        # Mặt nước CHÍNH phủ vùng F, trường c/gamma/v và hạt chuyển động
-        # trong toàn beat. Không phủ 240 chấm nhỏ lên hình đứng cũ.
+        # Chỉ giữ sự kiện chữ đã khoá; bỏ mọi animation hình phác.
+        self.ev = self.ev[getattr(self, "_c17_event_frontier", 0):]
         from K1_canh.mo_phong_c17 import bat_mo_phong
         bat_mo_phong(self)
 
