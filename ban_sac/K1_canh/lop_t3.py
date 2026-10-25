@@ -638,6 +638,7 @@ LOP.update(KhayTieu=KhayTieu, DongMarangoni=DongMarangoni, PhepTinh=PhepTinhT3, 
 import K1_ban_quang_hoc as K1
 from K1_canh import trang
 from K1_canh.lop import CO_CHU, dat_trai_tren, tach, khoi_chu
+from manim import FadeIn, FadeOut
 
 C13_LE_HINH = 0.10
 C13_PHONG = 3.6
@@ -727,6 +728,119 @@ class _C13:
                 if m.height + 1e-5 < co.height:
                     raise ValueError("C13_NGUON_DUOI_22PX %s" % self.b["id"])
 
+    def _nguon_theo_trang(self):
+        """Nguồn 22 px chỉ cho w2/w3 dọc; giữ nguyên cả bốn chuỗi trong 2 nhóm.
+
+        Các nhóm chia theo đại lượng liên quan, không dùng hàm/trích dẫn đã rút
+        gọn và không vá K1_canh.trang. Lớp PiP là giới hạn lấy từ BoCuc.
+        """
+        W, sc = self.W, self.sc
+        dong, bc = W.ts.get("nguon") or [], W.bc
+        if len(dong) != 4:
+            raise ValueError("C13_NGUON_BON_DONG %s" % self.b["id"])
+        # w2: (Roché phương trình, Liu sức căng) / (NIST, Roché r*)
+        # w3: (Roché đo, Roché Eq.1) / (NIST, tốc độ SDS).
+        chi_so = ([0, 3], [1, 2]) if self.b["id"] == "w2" else ([0, 1], [2, 3])
+        sc.remove(W.nguon)
+        trai = max(bc.ng_trai, bc.pip[1] + 0.17)
+        phai, tren = bc.ng_phai, bc.an_toan[3] - 0.10
+        rong = phai - trai
+        if rong <= 0:
+            raise ValueError("C13_NGUON_KHONG_CO_COT %s" % self.b["id"])
+        nhom = []
+        for ii in chi_so:
+            ds = []
+            for k in ii:
+                # Ngắt ở khoảng trắng, giữ nguyên văn từng nguồn.
+                for line in tach(dong[k], C13_CO_NGUON, rong):
+                    m = K1.chu(line, C13_CO_NGUON, MUC, 0.75)
+                    if m.width > rong + 1e-4:
+                        raise ValueError("C13_NGUON_TRAN %s" % self.b["id"])
+                    ds.append(m)
+            g = VGroup(*ds).arrange(K1.DOWN, aligned_edge=K1.RIGHT, buff=0.015)
+            g.move_to([phai - g.width / 2, tren - g.height / 2, 0])
+            if g.get_left()[0] < trai - 1e-4 or g.get_bottom()[1] < bc.an_toan[2]:
+                raise ValueError("C13_NGUON_NGOAI_VUNG %s" % self.b["id"])
+            for m in g.get_family():
+                if isinstance(m, K1.Text):
+                    # Cỡ 22 đã khoá từ lúc tạo, không thu tỷ lệ.
+                    if m.height + 1e-5 < K1.chu(m.text, C13_CO_NGUON).height:
+                        raise ValueError("C13_NGUON_DUOI_22PX %s" % self.b["id"])
+            nhom.append(g)
+        # Cả hai nhóm đúng một khuôn nguồn; nhóm 2 ban đầu ẩn.
+        nguon = VGroup(*nhom)
+        nguon[1].set_opacity(0)
+        W.nguon = trang.ghim(sc, trang.man_sang_the_gioi(sc, nguon))
+        W.hop_ng = trang.hop_man(sc, W.nguon)
+        sc.add(W.nguon)
+        self._nhom_nguon = W.nguon
+
+    def _doi_trang_chu(self, trang_cu):
+        """Chuyển đúng mốc chữ đầu của trang 2, không giữ hộp ảo chồng trang."""
+        for o in trang_cu:
+            self.man.pop(o["key"], None)
+        # FadeIn giữ trạng thái ĐÍCH của đối tượng: trả opacity của nhóm 2
+        # về 1 ngay trước khi chạy; animation tự tạo bản đầu opacity 0.
+        self._nhom_nguon[1].set_opacity(1)
+        return ([FadeOut(o["khoi"]) for o in trang_cu] +
+                [FadeOut(self._nhom_nguon[0]), FadeIn(self._nhom_nguon[1])])
+
+    def _ve_phan_trang(self, sc, W):
+        """C13/D16: duy nhất w2,w3 khổ dọc, hai trang theo thời gian.
+
+        Mỗi trang xếp độc lập đủ cỡ chữ (không đổi CO_CHU); lời, TTS,
+        cổng C13_CHU_DUOI_CO và mọi beat khác giữ nguyên.
+        """
+        self.sc, self.W, self.b = sc, W, W.b
+        self.ev, self.man, self.hinh_ds, self.buoc_xong = [], {}, [], set()
+        self.ty_le = 1.0
+        self._nguon_theo_trang()
+        L = self.vung_noi_dung()
+        os_ = self.muc_chu()
+        if len(os_) != 6:
+            raise ValueError("C13_TRANG_SAI_SO_DONG %s" % self.b["id"])
+        trang_1, trang_2 = os_[:3], os_[3:]
+        tren = self._tran(L[0], L[1], L[3]) - 0.07
+        cao_hinh = 0.25 * (W.bc.an_toan[3] - W.bc.an_toan[2])
+        max_chu = tren - cao_hinh - 0.30 - (L[2] + 0.14)
+        Z = (L[0] + 0.06, L[1] - 0.06, L[2] + 0.14, L[2] + 0.14 + max_chu)
+        # Bảng hộp chữ: trang 1 & 2 cùng Z, không đồng thời hiển thị;
+        # nguồn ở cột phải PiP; hình ở B, cách chữ 0,24.
+        h1 = self.xep_cot(Z, trang_1, can_duoi=True)
+        h2 = self.xep_cot(Z, trang_2, can_duoi=True)
+        hc = max(h1, h2)
+        B = (L[0] + 0.10, L[1] - 0.10, Z[2] + hc + 0.24, tren)
+        if B[3] <= B[2] + 0.50:
+            raise ValueError("C13_VUNG_HINH_QUA_HEP %s %r" % (self.b["id"], B))
+        le = C13_LE_HINH
+        self.F = (B[0] + le, B[1] - le, B[2] + le, B[3] - le)
+        co_dinh = [self._ban(B)] + (self.hinh() or [])
+        for m in co_dinh:
+            sc.add(m)
+            self.hinh_ds.append(m)
+        for m in sc.mobjects:
+            vien_cang(m)
+        self.dang_chu(os_)
+        # Đăng sự kiện trước mục chữ đầu của trang 2, FadeOut/FadeIn <= 0,5 s.
+        self._moc_doi_trang = trang_2[0]["t"]
+        self.su(self._moc_doi_trang,
+                lambda: self._doi_trang_chu(trang_1), uu=-1)
+        con = [x["kieu"] for x in self.ts.get("buoc", [])
+               if x["kieu"] not in self.buoc_xong]
+        if con:
+            raise NotImplementedError("beat %s: bước hình chưa dựng: %s" %
+                                      (self.b["id"], con))
+        sc.chuyen_dau(self.b)
+        self.chay_su_kien()
+        seen = set()
+        for m in self.hinh_ds:
+            if id(m) in seen:
+                continue
+            seen.add(id(m))
+            if len(m.get_all_points()) or len(m.submobjects):
+                self.man["hinh_%03d" % len(seen)] = m
+        return self.man
+
     def dung_khoi(self, o, co, w):
         """Hook dài xuống dòng thay vì so_hook co bé hơn cỡ chữ 16."""
         if o["kieu"] == "hook":
@@ -787,6 +901,8 @@ class _C13:
         g.move_to([(an[0] + an[1]) / 2, (an[2] + an[3]) / 2, 0])
 
     def ve(self, sc, W):
+        if W.bc.doc and W.b["id"] in ("w2", "w3"):
+            return self._ve_phan_trang(sc, W)
         self.sc, self.W, self.b = sc, W, W.b
         self.ev, self.man, self.hinh_ds, self.buoc_xong = [], {}, [], set()
         self.ty_le = 1.0
@@ -885,6 +1001,9 @@ class _C13:
             if con <= 0:
                 raise ValueError("C13_QUA_KHUNG %s %d/%d" % (self.b["id"], sc._khung, N))
             d = min(0.60, max(0.20, tiep - sc._khung / FPS - 0.03), con / FPS)
+            # Chỉ nhịp đổi trang w2/w3: cả chữ và nguồn đều fade <= 0,5 s.
+            if getattr(self, "_moc_doi_trang", None) is not None and abs(g[0][0] - self._moc_doi_trang) < 0.01:
+                d = min(d, 0.50)
             sc.choi(*an, t=max(1.0 / FPS, d))
         if sc._khung > cuoi:
             raise ValueError("C13_QUA_KHUNG %s %d/%d" % (self.b["id"], sc._khung, N))
