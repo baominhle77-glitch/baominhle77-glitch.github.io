@@ -1,0 +1,400 @@
+1
+00:00:00,100 --> 00:00:03,737
+Two diagrams carry the same local episode label.
+
+2
+00:00:03,687 --> 00:00:08,237
+Does that label alone tell us how many real subordinate units they command?
+
+3
+00:00:08,237 --> 00:00:12,725
+These are teaching drawings, not authenticated official symbol meanings.
+
+4
+00:00:12,725 --> 00:00:17,200
+The same local label can remain above two different EXAMPLE charts.
+
+5
+00:00:17,200 --> 00:00:24,462
+It is an episode label only, not a verified FM military-symbol category or a direct inventory of real units.
+
+6
+00:00:24,462 --> 00:00:30,937
+Three transparent film layers separate what the sign shows, what the legend claims, and what remains unknown.
+
+7
+00:00:30,937 --> 00:00:35,475
+One-line test: symbol identity does not equal force strength.
+
+8
+00:00:35,475 --> 00:00:38,925
+What extra evidence makes two maps comparable?
+
+9
+00:00:38,925 --> 00:00:42,350
+Overlay one examines the symbol itself.
+
+10
+00:00:42,350 --> 00:00:48,712
+The Army's military-symbol publication describes conventions for representing units and their echelons.
+
+11
+00:00:48,712 --> 00:00:52,650
+It is a visual language compressing information for a map.
+
+12
+00:00:52,650 --> 00:00:57,200
+Compression is useful, but it has specific and documented limits.
+
+13
+00:00:57,200 --> 00:01:03,550
+Start with an abstract corps emblem drawn as a source-traced symbol category, not a named active formation.
+
+14
+00:01:03,550 --> 00:01:08,287
+We omit all current deployments, real coordinates and tactical tasks.
+
+15
+00:01:08,287 --> 00:01:12,750
+This page studies the information capacity of a published notation.
+
+16
+00:01:12,750 --> 00:01:19,987
+One mark can identify an echelon, while another annotation may communicate category under the chosen symbol convention.
+
+17
+00:01:19,987 --> 00:01:27,050
+Neither silently supplies a personnel roster, vehicle inventory or permanent number of subordinate formations.
+
+18
+00:01:27,050 --> 00:01:30,712
+Those facts require documents of a different kind.
+
+19
+00:01:30,712 --> 00:01:35,262
+Place the same abstract corps mark on two separate illustrative maps.
+
+20
+00:01:35,262 --> 00:01:38,487
+The stamps are deliberately identical.
+
+21
+00:01:38,487 --> 00:01:42,625
+We are not asserting that either map depicts a real organization.
+
+22
+00:01:42,625 --> 00:01:47,175
+The illustration tests what a symbol alone could logically certify.
+
+23
+00:01:47,175 --> 00:01:53,612
+First counterintuitive result: an unchanged icon need not imply an unchanged subordinate organization.
+
+24
+00:01:53,612 --> 00:02:02,425
+An echelon mark can retain its classification meaning even if the actual set of subordinate or supporting formations differs under a documented arrangement.
+
+25
+00:02:02,425 --> 00:02:04,737
+Open the boxed legend.
+
+26
+00:02:04,737 --> 00:02:09,050
+Row one names the emblem as a classification, not a number.
+
+27
+00:02:09,050 --> 00:02:12,925
+Row two records its reference document and convention.
+
+28
+00:02:12,925 --> 00:02:18,212
+Row three identifies facts the image cannot reveal without a separate primary source.
+
+29
+00:02:18,212 --> 00:02:22,462
+Military symbols also employ conventions for affiliation.
+
+30
+00:02:22,462 --> 00:02:30,025
+We retain only the friendly affiliation colour supported by our symbol reference and avoid drawing adversary units as decoration.
+
+31
+00:02:30,025 --> 00:02:35,225
+The focus is classification rather than battlefield planning or implied force strength.
+
+32
+00:02:35,225 --> 00:02:40,637
+At the end of this first overlay, the label is only a label invented for this episode.
+
+33
+00:02:40,637 --> 00:02:47,175
+Without the original symbol-table quotation, we do not give the marks a verified military echelon meaning.
+
+34
+00:02:47,175 --> 00:02:52,037
+The second overlay compares two teaching diagrams with the same episode label.
+
+35
+00:02:52,037 --> 00:02:58,587
+FM three dash zero describes corps and division headquarters functions in sections two eighty seven through eighty nine.
+
+36
+00:02:58,587 --> 00:03:02,400
+It does not give a fixed personnel total for every unit.
+
+37
+00:03:02,400 --> 00:03:10,425
+FM three dash zero identifies a corps as a versatile echelon above brigade, able to operate at tactical and operational levels.
+
+38
+00:03:10,425 --> 00:03:14,375
+Its headquarters may direct divisions and other formations.
+
+39
+00:03:14,375 --> 00:03:18,875
+No exact real-world subordinate count follows from that description.
+
+40
+00:03:18,875 --> 00:03:22,950
+These two overlays are EXAMPLES, not real organizations.
+
+41
+00:03:22,950 --> 00:03:27,112
+One shows three illustrative boxes; the other shows five.
+
+42
+00:03:27,112 --> 00:03:36,650
+FM three dash zero describes the division as a tactical formation that typically commands between two and five brigade combat teams, not an invariant personnel total.
+
+43
+00:03:36,650 --> 00:03:40,725
+The same episode label sits above the two EXAMPLE charts.
+
+44
+00:03:40,725 --> 00:03:46,950
+The examples illustrate that an unchanged teaching mark does not fix how many blank boxes appear beneath it.
+
+45
+00:03:46,950 --> 00:03:52,075
+They are not official organization charts or reports of actual subordinate units.
+
+46
+00:03:52,075 --> 00:03:56,925
+An organization chart needs a date and a sourced organizational context.
+
+47
+00:03:56,925 --> 00:04:04,025
+FM three dash zero describes functions for corps and divisions, not the identities of units in our EXAMPLE diagrams.
+
+48
+00:04:04,025 --> 00:04:08,337
+Neither illustration may be mistaken for current deployed strength.
+
+49
+00:04:08,500 --> 00:04:14,212
+More boxes make an EXAMPLE drawing visually larger but tell us nothing measured about personnel.
+
+50
+00:04:14,162 --> 00:04:20,300
+FM three dash zero names several types of attached formations and changing division responsibilities.
+
+51
+00:04:20,300 --> 00:04:24,737
+A verified number of real soldiers would require separate evidence.
+
+52
+00:04:24,737 --> 00:04:30,637
+Nothing here permits multiplying the number of corps signs by one division's estimated headcount.
+
+53
+00:04:30,637 --> 00:04:34,825
+The earlier multiplication was a conditional teaching model.
+
+54
+00:04:34,825 --> 00:04:40,412
+We cannot transform a categorical echelon mark into a table of fixed subordinate strengths.
+
+55
+00:04:40,412 --> 00:04:44,175
+Overlay three examines headquarters relationships.
+
+56
+00:04:44,175 --> 00:04:49,112
+Doctrine describes responsibilities and coordination among Army headquarters.
+
+57
+00:04:49,112 --> 00:04:56,037
+Those organizational functions cannot be inferred solely by counting the echelon labels visible on our folded paper map.
+
+58
+00:04:56,037 --> 00:05:00,662
+A line between two teaching labels is not an official command relationship.
+
+59
+00:05:00,662 --> 00:05:08,862
+The marks and connectors shown here are labels for this episode only until their definitions can be verified against original military documents.
+
+60
+00:05:08,862 --> 00:05:14,350
+Imagine a headquarters having additional supporting formations for a hypothetical task.
+
+61
+00:05:14,350 --> 00:05:19,262
+A transparent layer can add blank units to demonstrate a changed depiction.
+
+62
+00:05:19,262 --> 00:05:25,562
+We do not infer exact personnel totals or claim such a particular arrangement was operationally used.
+
+63
+00:05:25,562 --> 00:05:31,262
+An EXAMPLE relationship line can move between boxes without identifying a real formation.
+
+64
+00:05:31,262 --> 00:05:40,912
+FM three dash zero describes corps and division command functions, but it does not certify that our particular teaching connectors represent a real historical chain of command.
+
+65
+00:05:40,912 --> 00:05:45,587
+The third comparison shows why quantity and echelon are different questions.
+
+66
+00:05:45,587 --> 00:05:52,737
+FM three dash zero says divisions typically direct between two and five brigade combat teams, with other formations.
+
+67
+00:05:52,737 --> 00:05:57,425
+The number of EXAMPLE boxes does not establish actual force strength.
+
+68
+00:05:57,425 --> 00:06:02,112
+An accurate legend separates verified doctrine from teaching devices.
+
+69
+00:06:02,112 --> 00:06:09,600
+Here FM three dash zero supports general corps and division functions, and the extra connecting lines remain labelled EXAMPLE.
+
+70
+00:06:09,600 --> 00:06:13,812
+They are not source-traced operational orders or real unit strengths.
+
+71
+00:06:13,812 --> 00:06:17,375
+Read the source legend before interpreting the arrow.
+
+72
+00:06:17,375 --> 00:06:22,512
+A publication defines a mark; an accompanying text explains how it is employed.
+
+73
+00:06:22,512 --> 00:06:28,800
+Source labels appear next to their respective claims, not in unconnected decorative corners of the paper.
+
+74
+00:06:28,800 --> 00:06:33,587
+The labels on this map do not prove a real unit's echelon or total strength.
+
+75
+00:06:33,587 --> 00:06:36,825
+They are teaching marks made for this episode.
+
+76
+00:06:36,825 --> 00:06:43,050
+Never read them as authoritative military symbols without checking their original published definitions.
+
+77
+00:06:43,050 --> 00:06:51,162
+The final overlay removes all hypothetical subordinate units and leaves a single original echelon marker beside a checklist of unknown fields.
+
+78
+00:06:51,162 --> 00:06:57,625
+That removal prevents anyone from mistaking our three-versus-five illustration for a measured Army organization.
+
+79
+00:06:57,625 --> 00:07:01,200
+Legend item one is the symbol classification.
+
+80
+00:07:01,200 --> 00:07:05,200
+Its source is the original military-symbol publication.
+
+81
+00:07:05,200 --> 00:07:07,387
+Type: definition.
+
+82
+00:07:07,387 --> 00:07:14,012
+Its value is not a troop count, and the field for personnel remains empty instead of receiving an attractive number.
+
+83
+00:07:14,012 --> 00:07:21,162
+Item two describes the functional role of a headquarters and the kinds of formations identified in the relevant Army manual.
+
+84
+00:07:21,162 --> 00:07:24,100
+Type: organizational context.
+
+85
+00:07:24,100 --> 00:07:29,375
+It does not claim a universal branching factor or a single fixed organization.
+
+86
+00:07:29,375 --> 00:07:34,275
+Item three records the teaching diagrams: three boxes and five boxes.
+
+87
+00:07:34,275 --> 00:07:39,000
+Those values are assumed illustration counts, not observed force strengths.
+
+88
+00:07:39,000 --> 00:07:44,287
+Every such row is marked EXAMPLE; neither count is attributed to an actual corps.
+
+89
+00:07:44,287 --> 00:07:51,287
+Item four is a list of unknowns: subordinate composition, applicable date, real identity and total personnel.
+
+90
+00:07:51,287 --> 00:07:54,562
+Without published evidence, each stays blank.
+
+91
+00:07:54,562 --> 00:07:59,337
+An empty evidence field is not zero and must not be filled by intuition.
+
+92
+00:07:59,337 --> 00:08:09,450
+Three changes could alter a detailed command diagram without altering its echelon symbol: the represented date, the set of formations considered, and the documented relationships.
+
+93
+00:08:09,450 --> 00:08:14,350
+This is an interpretation rule, not a prediction about a current formation.
+
+94
+00:08:14,500 --> 00:08:18,225
+Return to the two identical stamps from the opening.
+
+95
+00:08:18,175 --> 00:08:22,912
+Both can be correctly classified yet insufficient for direct comparison.
+
+96
+00:08:22,912 --> 00:08:29,125
+Sources establish what the icon means, while separate records establish the structure it cannot show.
+
+97
+00:08:29,125 --> 00:08:33,800
+No real positions, tactical orders or live unit lists are shown.
+
+98
+00:08:33,800 --> 00:08:37,612
+The map teaches the limits of institutional notation.
+
+99
+00:08:37,612 --> 00:08:45,712
+Keeping source-defined, hypothetical and unknown information separate is the only way to prevent polished imagery from producing false certainty.
+
+100
+00:08:45,712 --> 00:08:50,862
+Next in Grid Square Brief: why command relationship lines need their own sources.
+
