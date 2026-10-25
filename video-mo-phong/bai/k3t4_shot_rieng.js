@@ -1,7 +1,7 @@
 // Quyết 016 · cảnh riêng cho những vật/hành động HS mô tả cụ thể.
 // Không phải bộ hiệu ứng đo điểm. Mỗi phác họa diễn tiến INPUT -> HÀNH ĐỘNG
 // chính là thứ người nghe cần thấy; không có rung chữ, đổi màu nền hay nét quét.
-const INK="#2E2A26",P="#EFE6D3",W="#FFF5E7",V="#7B3F98",RED="#9E3C77",NAVY="#172638",SEA="#67B8AA",GOLD="#E3B65D";
+const INK="#2E2A26",P="#EFE6D3",W="#FFF5E7",V="#7B3F98",RED="#9E3C77",NAVY="#172638",SEA="#67B8AA",GOLD="#E3B65D",STONE="#D1C1AE";
 const U=(o,v)=>o.x+v*o.w,Y=(o,v)=>o.y+v*o.h;
 function bar(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(x,y,w,h)}
 function rr(c,x,y,w,h,col,r=12){c.beginPath();c.roundRect(x,y,w,h,r);c.fillStyle=col;c.fill();}
