@@ -1,0 +1,2 @@
+16x9: nhịp cảnh TRƯỢT: {"giay": 594.0, "so_o": 99, "doi_manh_moi_phut": 8.7, "cum_moi_phut": 1.6, "cua_so_20s_co_doi_pct": 100, "dung_yen_lau_nhat_s": 15.0, "loi": ["cụm hình khác nhau 1.6/phút < 3.5 (mẫu 3,8-7,1) — cảnh lặp lại"], "ket_luan": "TRƯỢT"}
+9x16: nhịp cảnh TRƯỢT: {"giay": 594.0, "so_o": 99, "doi_manh_moi_phut": 8.5, "cum_moi_phut": 1.7, "cua_so_20s_co_doi_pct": 100, "dung_yen_lau_nhat_s": 20.0, "loi": ["cụm hình khác nhau 1.7/phút < 3.5 (mẫu 3,8-7,1) — cảnh lặp lại"], "ket_luan": "TRƯỢT"}

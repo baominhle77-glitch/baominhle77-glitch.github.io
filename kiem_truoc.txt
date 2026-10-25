@@ -1,0 +1,47 @@
+
+=== 16x9 — nhịp dài nhất 6.50 s
+TRƯỢT  C13-3 nhịp (khoảng > 3,5 s ở cả 4 pha lấy mẫu)
+        4.25→9 (4.75 s)
+        38.25→43 (4.75 s)
+        70.5→75.5 (5 s)
+        100→105 (5 s)
+        105→110.75 (5.75 s)
+        115.5→119.25 (3.75 s)
+        232.25→236.5 (4.25 s)
+        272.75→277 (4.25 s)
+        281→286 (5 s)
+        302.25→307.25 (5 s)
+        325.5→331.5 (6 s)
+        384.25→389.5 (5.25 s)
+ĐẠT   C13-2 vật bị cắt mép khi máy đứng
+ĐẠT   Chữ: tràn / PiP / chồng
+ĐẠT   Hộp phụ đề ≥ 4,5:1 với nền quanh
+ĐẠT   C13-7 cụm phụ đề 2–5 từ
+ĐẠT   C13-8 chữ nguồn ≥ 22 px
+ĐẠT   C13-1 không có khung đứng yên gần trống (một vật ≥ 2,5 % khung hoặc nhóm vật ≥ 55 % bề ngang, ở giữa; soát mắt trên contact sheet)
+
+=== 9x16 — nhịp dài nhất 6.50 s
+TRƯỢT  C13-3 nhịp (khoảng > 3,5 s ở cả 4 pha lấy mẫu)
+        38.25→43 (4.75 s)
+        70.5→75.5 (5 s)
+        100→105 (5 s)
+        105→110.75 (5.75 s)
+        115.5→119.25 (3.75 s)
+        232.25→236.5 (4.25 s)
+        272.75→277 (4.25 s)
+        281→286 (5 s)
+        302.25→307.25 (5 s)
+        325.5→331.5 (6 s)
+        402→407 (5 s)
+        434.5→439.25 (4.75 s)
+ĐẠT   C13-2 vật bị cắt mép khi máy đứng
+TRƯỢT  Chữ: tràn / PiP / chồng
+        tràn vùng an toàn · NOT VERIFIED @ 32.5–444.25 s (20)
+        tràn vùng an toàn · NOT NASA DATA @ 102.25–104.75 s (11)
+        tràn vùng an toàn · NORMAL POINT @ 386.75–389.25 s (11)
+ĐẠT   Hộp phụ đề ≥ 4,5:1 với nền quanh
+ĐẠT   C13-7 cụm phụ đề 2–5 từ
+ĐẠT   C13-8 chữ nguồn ≥ 22 px
+ĐẠT   C13-1 không có khung đứng yên gần trống (một vật ≥ 2,5 % khung hoặc nhóm vật ≥ 55 % bề ngang, ở giữa; soát mắt trên contact sheet)
+
+>>> CHƯA ĐẠT: sửa các mục TRƯỢT rồi chạy lại một lần; CHƯA xuất video.
