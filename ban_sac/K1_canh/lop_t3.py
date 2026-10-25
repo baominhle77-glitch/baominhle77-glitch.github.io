@@ -632,69 +632,19 @@ LOP.update(KhayTieu=KhayTieu, DongMarangoni=DongMarangoni, PhepTinh=PhepTinhT3, 
            ZoomThang=ZoomThangT3, MuiTenCang=MuiTenCangT3, BanQuang=BanQuangT3, ThuocLc=ThuocLcT3)
 
 
-# ------------------------------------------------------------------ C13 t3 (25/10): bố cục vật chính và camera theo chủ thể thật
-# H1/H6: nới vùng hình cả hai khổ; mặt bàn có bóng, nước/phép đo ở lớp trước.
-# H3/H4: KHÔNG có elip/đốm đánh tráo pixel. Trong khoảng không có bước hình,
-# camera lấy nét vào chính thí nghiệm/phép tính đang nói; mốc lời và thời gian giữ nguyên.
-# H8: nguồn hiển thị dạng trích dẫn ngắn (nguyên văn vẫn trong storyboard khoá).
-# H10: viền mực dưới nét cam, palette v2 của K1; vignette ở nha_may_k1_v2.
-import re
-
+# ------------------------------------------------------------------ C13 vòng 2 (phiếu KĐ PR #144, 25/10)
+# Chỉ sửa lớp t3: không thay trang, nhà máy, nhạc, chữ khoá, vùng PiP hay cổng.
+# C13: chữ, nguồn và từng vật có hộp bao riêng; không đặt đốm/zoom theo chu kỳ.
 import K1_ban_quang_hoc as K1
 from K1_canh import trang
+from K1_canh.lop import CO_CHU, dat_trai_tren, tach, khoi_chu
 
-C13_PHONG = 3.6
 C13_LE_HINH = 0.10
-C13_NHIP = 3.10          # trần khoảng cách lấy nét khi lời không có bước vẽ
-C13_LAY_NET = 0.80      # thời gian camera đi vào đối tượng được thuyết minh
-C13_HE_CAM = 0.96       # khung lấy nét gần hơn 4%, không làm vật khuất mép
-C13_VIEN = 3.0          # Manim ~2 px viền mực, nằm SAU lớp màu cam
+C13_PHONG = 3.6
+C13_VIEN = 3.0
+C13_CO_CHU_MIN = min(CO_CHU)  # 16, mức chữ thân đã định nghĩa của K1
+C13_CO_NGUON = 22             # px ở khung đích 1080p, không thu nhỏ
 _CANG_HEX = str(CANG).lower()[:7]
-
-
-def _rut_nguon(s):
-    """Rút gọn hình thức trích dẫn, không sửa số trong lời hay dữ liệu khoá.
-
-    Khi một beat có 3–4 nguồn, dùng tên công trình/năm/hình/phương trình
-    thay vì lặp nhiều lần mô tả điều kiện; hồ sơ đầy đủ giữ ở storyboard.
-    """
-    if "Liu et al." in s:
-        return "Liu et al. (2026), Fig. 5a"
-    if "NIST SRD 69" in s:
-        return "NIST SRD 69" + (" (293.10 K)" if "293.10" in s else " (298.15 K)")
-    if "Roché" in s:
-        chu_dan = "Roché et al., PRL 2014"
-        so = re.findall(r"(?:Fig\.?|Eq\.?)\s*[0-9]+[a-zA-Z]?", s)
-        if so:
-            chu_dan += " (" + ", ".join(so) + ")"
-        if "calculated" in s:
-            chu_dan = "Calc.: " + chu_dan
-        return chu_dan
-    if "calculated" in s:
-        return "Calculated (see storyboard)"
-    if "sketch" in s:
-        return "Illustration: our sketch"
-    if "episode 2" in s:
-        return "Episode 2 values"
-    return s
-
-
-_nguon_nguyen = trang.khoi_nguon
-
-
-def _nguon_gon(bc, dong):
-    if not bc.doc or len(dong) <= 2:
-        return _nguon_nguyen(bc, dong)
-    # Bố cục 9:16: tối đa hai hàng trích dẫn; không giảm cỡ chữ nguồn.
-    ngan = list(dict.fromkeys(_rut_nguon(s) for s in dong))
-    giua = (len(ngan) + 1) // 2
-    mot = "; ".join(ngan[:giua])
-    hai = "; ".join(ngan[giua:])
-    # Nguồn quá dài vẫn được trình bày đủ hàng bởi lõi, thay vì ép chữ.
-    return _nguon_nguyen(bc, [mot, hai] if hai else [mot])
-
-
-trang.khoi_nguon = _nguon_gon
 
 
 def _la_cang(c):
@@ -705,7 +655,7 @@ def _la_cang(c):
 
 
 def vien_cang(m):
-    """Đặt viền mực phía sau nét/tô cam, không biến cam thành mực."""
+    """Viền mực phía sau nét cam; vật chính không đổi mã bảng màu v2."""
     for x in m.get_family():
         if not isinstance(x, VMobject) or not len(x.points):
             continue
@@ -731,13 +681,95 @@ class _C13:
         b.move_to([(B[0] + B[1]) / 2, (B[2] + B[3]) / 2, 0]).set_z_index(-10)
         return K1.khoi(b)
 
+    def _nguon_22(self):
+        """Thay CHỈ nguồn của scene hiện tại, giữ nguyên 100% chuỗi trích dẫn.
+
+        Không vá trang.khoi_nguon. Nguồn của lõi đã thêm trước lop.ve();
+        gỡ đúng instance đó rồi tạo nguồn cỡ 22, ngắt dòng (không cắt chữ).
+        """
+        W, sc = self.W, self.sc
+        dong = W.ts.get("nguon") or []
+        if not dong:
+            return
+        sc.remove(W.nguon)
+        bc = W.bc
+        # Khổ dọc: nguồn ở cột PHẢI của PiP (vị trí lấy từ vung_cam).
+        # Tận dụng hàng phía trên hình; không ép ảnh vào dải mỏng.
+        le = 0.17
+        trai = max(bc.ng_trai, bc.pip[1] + le) if bc.doc else bc.ng_trai
+        phai = bc.ng_phai
+        tren = bc.an_toan[3] - 0.10 if bc.doc else bc.ng_tren
+        rong = phai - trai
+        if rong <= 0:
+            raise ValueError("C13_NGUON_KHONG_CO_COT %s" % self.b["id"])
+        # Gộp dòng, KHÔNG lược bỏ một ký tự nguồn/tác giả/năm/hình/bảng.
+        ds = []
+        for line in tach("; ".join(dong), C13_CO_NGUON, rong):
+            chu_ = K1.chu(line, C13_CO_NGUON, MUC, 0.75)
+            if chu_.width > rong + 1e-4:
+                raise ValueError("C13_NGUON_TRAN %s %r" % (self.b["id"], line))
+            ds.append(chu_)
+        if not ds:
+            return
+        g = VGroup(*ds).arrange(K1.DOWN, aligned_edge=K1.RIGHT, buff=0.015)
+        g.move_to([phai - g.width / 2, tren - g.height / 2, 0])
+        if g.get_left()[0] < trai - 1e-4 or g.get_bottom()[1] < bc.an_toan[2]:
+            raise ValueError("C13_NGUON_NGOAI_VUNG %s" % self.b["id"])
+        # Trong khung đầu zoom/lấy nét, ghim theo camera giống trang.chay().
+        W.nguon = trang.ghim(sc, trang.man_sang_the_gioi(sc, g))
+        # Source is now in world coordinates for the opening camera zoom;
+        # geometry constraints must stay in SCREEN coordinates at k=1.
+        W.hop_ng = trang.hop_man(sc, W.nguon)
+        sc.add(W.nguon)
+        for m in g.get_family():
+            if isinstance(m, K1.Text):
+                co = K1.chu(m.text, C13_CO_NGUON)
+                if m.height + 1e-5 < co.height:
+                    raise ValueError("C13_NGUON_DUOI_22PX %s" % self.b["id"])
+
+    def dung_khoi(self, o, co, w):
+        """Hook dài xuống dòng thay vì so_hook co bé hơn cỡ chữ 16."""
+        if o["kieu"] == "hook":
+            return khoi_chu(o["s"], max(co, C13_CO_CHU_MIN), w, CANG)
+        return super().dung_khoi(o, co, w)
+
+    def xep_cot(self, Z, os_, can_duoi=False):
+        """Không dùng k=h/tong của lớp cũ (đẩy chữ dưới 16 px)."""
+        if not os_:
+            return 0.0
+        w, h = Z[1] - Z[0], Z[3] - Z[2]
+        if h <= 0 or w <= 0:
+            raise ValueError("C13_HOP_CHU_RONG %s %r" % (self.b["id"], Z))
+        for co in CO_CHU:
+            bl = [self.dung_khoi(o, co, w) for o in os_]
+            khe = 0.10 if self.W.bc.doc else 0.17
+            tong = sum(x.height for x in bl) + khe * (len(bl) - 1)
+            if tong <= h + 1e-5:
+                break
+        if tong > h + 1e-5:
+            raise ValueError("C13_CHU_DUOI_CO %s: %.2f>%.2f" % (self.b["id"], tong, h))
+        y = Z[2] + tong if can_duoi else Z[3]
+        for o, b in zip(os_, bl):
+            dat_trai_tren(b, Z[0], y)
+            o["khoi"] = b
+            y -= b.height + khe
+            self.W.da_ve.append(o["s"])
+            for m in b.get_family():
+                if isinstance(m, K1.Text):
+                    co_m = K1.chu(m.text, C13_CO_CHU_MIN)
+                    if m.height + 1e-5 < co_m.height:
+                        raise ValueError("C13_CHU_NHO %s %r" % (self.b["id"], m.text))
+        return tong
+
     def dat_hinh(self, hien, an=()):
-        """Lấy khung bao CẢ trạng thái đầu/đích; chừa khoảng thở lúc camera lấy nét."""
+        """Vừa vật THẬT vào vùng F dưới trần nguồn/PiP, kể cả trạng thái đích."""
         tat = VGroup(*hien, *an)
         if not len(tat.get_all_points()):
             return
         F = self.F
         w, h = F[1] - F[0], F[3] - F[2]
+        if w <= 0 or h <= 0:
+            raise ValueError("C13_VUNG_HINH_QUA_HEP %s %r" % (self.b["id"], F))
         s = min(C13_PHONG, 0.96 * w / max(tat.width, 1e-6),
                 0.93 * h / max(tat.height, 1e-6))
         c = tat.get_center()
@@ -746,59 +778,56 @@ class _C13:
             m.scale(s, about_point=np.zeros(3)).shift(dich)
         self.ty_le = s
 
+    def _gioi_han_card(self, the, os_, L, tran):
+        """Tịnh tiến thẻ + chữ như MỘT khối; tuyệt đối không co font."""
+        g = VGroup(the, *[o["khoi"] for o in os_])
+        an = (L[0] + 0.11, L[1] - 0.11, L[2] + 0.13, tran - 0.11)
+        if g.width > an[1] - an[0] or g.height > an[3] - an[2]:
+            raise ValueError("C13_CARD_TRAN %s" % self.b["id"])
+        g.move_to([(an[0] + an[1]) / 2, (an[2] + an[3]) / 2, 0])
+
     def ve(self, sc, W):
         self.sc, self.W, self.b = sc, W, W.b
         self.ev, self.man, self.hinh_ds, self.buoc_xong = [], {}, [], set()
         self.ty_le = 1.0
+        # Nguồn cỡ ≥22 px; cập nhật hop_ng trước khi xác định vùng trần.
+        self._nguon_22()
         L = self.vung_noi_dung()
         os_ = self.muc_chu()
         if self.CHIA == "chu":
-            # Thẻ công thức/đại lượng là chính: card rộng, không ép thành cột hẹp.
-            Z = (L[0] + 0.22, L[1] - 0.22, L[2] + 0.25,
-                 self._tran(L[0], L[1], L[3]) - 0.25)
-            if not W.bc.doc:
-                Z = (L[0] + 0.65, L[1] - 0.65, Z[2], Z[3])
+            tren = self._tran(L[0], L[1], L[3])
+            Z = (L[0] + 0.42, L[1] - 0.42, L[2] + 0.39, tren - 0.39)
             hc = self.xep_cot(Z, os_)
             xs = [o["khoi"].get_right()[0] for o in os_]
-            the = RoundedRectangle(width=(max(xs) - Z[0]) + 0.5,
-                                   height=hc + 0.5, corner_radius=0.12)
+            the = RoundedRectangle(width=max(xs) - Z[0] + 0.40,
+                                   height=hc + 0.40, corner_radius=0.12)
             the.set_fill(NEN_TREN, 0.95).set_stroke(MUC, 1.6, 0.6).set_z_index(-10)
-            the.move_to([Z[0] - 0.25 + the.width / 2,
-                        Z[3] + 0.25 - the.height / 2, 0])
+            the.move_to([Z[0] - 0.20 + the.width / 2,
+                         Z[3] + 0.20 - the.height / 2, 0])
             the = K1.khoi(the)
-            dich = np.array([(L[0] + L[1]) / 2,
-                             (Z[2] + Z[3] + 0.5) / 2, 0]) - the.get_center()
-            dich[1] = min(dich[1], 0.0)
-            the.shift(dich)
-            for o in os_:
-                o["khoi"].shift(dich)
+            self._gioi_han_card(the, os_, L, tren)
             self.F = (Z[0], Z[0], Z[2], Z[2])
             co_dinh = [the]
         else:
             if W.bc.doc:
-                # Hộp chữ: x=L0..L1; y=L2+0.12..L2+hc+0.12,
-                # hình trên chữ cách ≥0.20; nguồn ở trên hình, ngoài PiP.
-                Z = (L[0] + 0.06, L[1] - 0.06, L[2] + 0.12,
-                     L[2] + 0.38 * (L[3] - L[2]))
+                tren = self._tran(L[0], L[1], L[3]) - 0.07
+                # Giữ 25% chiều cao vùng an toàn cho vật; chữ tối thiểu 16.
+                cao_hinh = 0.25 * (W.bc.an_toan[3] - W.bc.an_toan[2])
+                max_chu = tren - cao_hinh - 0.30 - (L[2] + 0.14)
+                Z = (L[0] + 0.06, L[1] - 0.06,
+                     L[2] + 0.14, L[2] + 0.14 + max_chu)
                 hc = self.xep_cot(Z, os_, can_duoi=True)
-                if hc > 1.85:
-                    k = 1.85 / hc
-                    anchor = np.array([Z[0], Z[2], 0])
-                    for o in os_:
-                        o["khoi"].scale(k, about_point=anchor)
-                    hc = 1.85
                 B = (L[0] + 0.10, L[1] - 0.10,
-                     Z[2] + hc + 0.20,
-                     self._tran(L[0], L[1], L[3]) - 0.08)
+                     Z[2] + hc + 0.24, tren)
             else:
-                # Hình ngang có 68% dải an toàn thay vì 40%; chữ ở bên phải.
+                # 68% dải ngang để hình lớn; trần được trừ PiP + nguồn THẬT.
                 xc = L[0] + 0.68 * (L[1] - L[0])
-                self.xep_cot((xc + 0.08, L[1], L[2] + 0.18,
-                              self._tran(xc, L[1], L[3])), os_)
-                B = (L[0] + 0.08, xc - 0.12,
-                     L[2] + 0.10,
-                     self._tran(L[0], xc - 0.12, L[3]) - 0.06)
-            if B[3] <= B[2] + 0.5:
+                Z = (xc + 0.12, L[1], L[2] + 0.16,
+                     self._tran(xc, L[1], L[3]) - 0.08)
+                self.xep_cot(Z, os_)
+                B = (L[0] + 0.12, xc - 0.12, L[2] + 0.13,
+                     self._tran(L[0], xc - 0.12, L[3]) - 0.10)
+            if B[3] <= B[2] + 0.50:
                 raise ValueError("C13_VUNG_HINH_QUA_HEP %s %r" % (self.b["id"], B))
             le = C13_LE_HINH
             self.F = (B[0] + le, B[1] - le, B[2] + le, B[3] - le)
@@ -814,42 +843,27 @@ class _C13:
             raise NotImplementedError("beat %s: bước hình chưa dựng: %s" % (self.b["id"], con))
         sc.chuyen_dau(self.b)
         self.chay_su_kien()
-        self.man["hinh"] = VGroup(*[m for m in self.hinh_ds
-                                   if len(m.get_all_points()) or len(m.submobjects)])
+        # Mỗi vật hình và gạch chân được đo theo hộp BAO RIÊNG: không
+        # gom đường gạch dưới cột phải với bình nước trái thành một hộp
+        # ảo phủ cả PiP. Không bỏ bất kỳ vật nào khỏi kiểm vùng.
+        seen = set()
+        for m in self.hinh_ds:
+            if id(m) in seen:
+                continue
+            seen.add(id(m))
+            if len(m.get_all_points()) or len(m.submobjects):
+                self.man["hinh_%03d" % len(seen)] = m
         return self.man
 
     def chay_su_kien(self):
-        """Giữ đúng khung & mốc TTS; nhịp phụ là camera quan sát VẬT CHÍNH.
+        """Chỉ chuyển hình ở từ khóa/mốc thật đã đăng trong self.ev.
 
-        Không thêm chi tiết tô/xoá để đánh lừa H3. Khi lời ít thay hình,
-        camera thu vào thí nghiệm, rồi mở ra toàn cảnh để đối chiếu thông số.
+        Không có camera zoom cố định, đốm thay pixel hay nhịp thở 3,1s.
+        Vẽ dần đại lượng, dòng chảy và vòng dừng bằng K1.ve/hien/doi
+        đúng mốc từ của từng beat. Dành 2 khung cuối để giữ số khung TTS.
         """
         sc, N, FPS = self.sc, trang.so_khung(self.b), trang.FPS
-        gap, t_cam = round(C13_NHIP * FPS), round(C13_LAY_NET * FPS)
-        gioi_han = N - 2
-        thu_vao = [False]
-        cuoi_nhip = [sc._khung]
-        vi_tri = np.array([0.0, 0.0, 0.0])
-        if self.CHIA != "chu":
-            # Di chuyển nhẹ TỚI vùng hình; số đo chữ và PiP vẫn trong vùng an toàn.
-            vi_tri[0] = np.clip((self.F[0] + self.F[1]) / 2 * 0.012, -0.035, 0.035)
-
-        def focus():
-            thu_vao[0] = not thu_vao[0]
-            w = trang.config.frame_width * (C13_HE_CAM if thu_vao[0] else 1.0)
-            den = vi_tri if thu_vao[0] else np.zeros(3)
-            sc.choi(sc.camera.frame.animate.move_to(den).set(width=w),
-                    t=C13_LAY_NET)
-            cuoi_nhip[0] = sc._khung
-
-        def nghi_tu_nhien(den):
-            while den - cuoi_nhip[0] >= gap and sc._khung + t_cam < den:
-                s = max(sc._khung, cuoi_nhip[0] + gap - t_cam)
-                if s + t_cam > min(den, gioi_han):
-                    break
-                sc.cho(s - sc._khung)
-                focus()
-
+        cuoi = N - 2
         ev = sorted(self.ev, key=lambda e: (e[0], e[1], e[2]))
         nhom = []
         for e in ev:
@@ -858,8 +872,6 @@ class _C13:
             else:
                 nhom.append([e])
         for i, g in enumerate(nhom):
-            den = round(g[0][0] * FPS)
-            nghi_tu_nhien(den)
             sc.toi(g[0][0], self.b["id"])
             an = []
             for e in g:
@@ -869,17 +881,12 @@ class _C13:
             for a in an:
                 _vien_anim(a)
             tiep = nhom[i + 1][0][0] if i + 1 < len(nhom) else 1e9
-            d = max(1.0 / FPS, min(0.6, max(0.2, tiep - sc._khung / FPS - 0.03),
-                                  (gioi_han - sc._khung) / FPS))
-            sc.choi(*an, t=d)
-            cuoi_nhip[0] = sc._khung
-        # Dành cuối beat cho camera về k=1; tuyệt đối không làm dài thêm lời.
-        dong = gioi_han - t_cam if thu_vao[0] else gioi_han
-        nghi_tu_nhien(dong)
-        if thu_vao[0] and sc._khung + t_cam <= gioi_han:
-            sc.cho(dong - sc._khung)
-            focus()
-        if sc._khung > gioi_han:
+            con = cuoi - sc._khung
+            if con <= 0:
+                raise ValueError("C13_QUA_KHUNG %s %d/%d" % (self.b["id"], sc._khung, N))
+            d = min(0.60, max(0.20, tiep - sc._khung / FPS - 0.03), con / FPS)
+            sc.choi(*an, t=max(1.0 / FPS, d))
+        if sc._khung > cuoi:
             raise ValueError("C13_QUA_KHUNG %s %d/%d" % (self.b["id"], sc._khung, N))
 
 
