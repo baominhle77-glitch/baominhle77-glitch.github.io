@@ -22,6 +22,12 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-25 07:30 GMT+7 — Claude Code — BOI-20261025-01 — web Bói Tarot + Lenormand (`boi/`)
+- Nhánh `claude/boi-web` (từ `main` fc0fb2b), BaoMinh cho phép tự gộp. Chỉ thêm thư mục mới `boi/**`; không sửa Worker, workflow, gate, sw gốc hay thư mục khác.
+- Phục vụ bằng GitHub Pages: https://baominhle77-glitch.github.io/boi/ (không nằm trong bản gộp `_site` của Cloudflare).
+- Test: `node boi/test.mjs` (13/13), `node tools/check-public-content.mjs boi`, `node tools/validate-coordination.mjs`; e2e Playwright (Pixel 7), offline, Lighthouse mobile local Perf 94–95 / A11y 100.
+- Khoá AI do người dùng tự dán, chỉ lưu localStorage; repo không chứa khoá. Tiến độ chi tiết: `boi/TIEN_DO.md`.
+
 ### 2026-10-25 00:10 GMT+7 — Claude Code — CHOICE-20261024-01 — xoá hẳn Hội Chọn Đúng (BaoMinh yêu cầu, cấp toàn quyền)
 - Nhánh `agent/CHOICE-20261024-01-xoa-hoi-chon-dung` (từ `main` 9e43a78); PR nháp chờ BaoMinh duyệt gộp.
 - Xoá: `hoi-chon-dung/**`, `backend/choice*.js|mjs` (12 tệp), `tools/*choice*` (15 tệp), `tools/submit-indexnow.mjs`, `tools/submit-google-sitemap.mjs`, 4 workflow `choice-*`/`record-choice-*`/`validate-choice-*`, tài liệu `CHOICE_AUTOPILOT_STATUS.md`, `CHOICE_GROWTH_AUTOPILOT.md`, `CHOICE_OWNER_SETUP.md`, `HOI_CHON_DUNG.md`.
