@@ -143,11 +143,19 @@ def main():
         if plan["tong_khung"]!=16601:
             raise ValueError("TTS_KHONG_KHOA_16601")
         reports=[]
+        missing=[]
+        file_paths={}
         for fmt in ("16x9","9x16"):
-            video=next(root.rglob("mau_00_60_"+fmt+"_540p.mp4"))
-            reports.append(measure(extract(video,fmt),plan,fmt))
+            matches=list(root.rglob("mau_00_60_"+fmt+"_540p.mp4"))
+            if len(matches)!=1:
+                missing.append({"bo_cuc":fmt,"so_tep":len(matches),
+                                "ten_tep":"mau_00_60_"+fmt+"_540p.mp4"})
+                continue
+            file_paths[fmt]=str(matches[0])
+            reports.append(measure(extract(matches[0],fmt),plan,fmt))
         failures=[r["bo_cuc"]+"/"+b["beat"] for r in reports for b in r["beats"]
                   if b["ket_qua"]=="TRUOT"]
+        failures += ["THIEU_VIDEO_"+x["bo_cuc"] for x in missing]
         report={
             "chuan":"C17(8) full-frame v2 + khac_canh",
             "video":"K1 t3 mẫu 00:00–01:00, không suy rộng sang full 553s",
@@ -161,7 +169,8 @@ def main():
                 "chuoi_cap_duoi_0_3pct_toi_da_s":2,
                 "khac_canh_trung_binh_abs_gray_toi_thieu":8},
             "ket_qua":"TRUOT" if failures else "DAT",
-            "loi":failures,"bao_cao":reports}
+            "loi":failures,"thieu_video":missing,
+            "tep_video":file_paths,"bao_cao":reports}
     except Exception as e:
         report={"chuan":"C17(8) full-frame v2 + khac_canh","ket_qua":"TRUOT",
                 "loi":[repr(e)]}
