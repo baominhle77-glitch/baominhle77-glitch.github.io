@@ -149,7 +149,7 @@ class LiveScene:
             yscale=.70 if oblique else 1.
             point=Dot([self.cx+xscale*rad*r0*np.cos(a),
                        self.cy+rad*yscale*r0*np.sin(a),0],
-                      radius=.028 if self.W.bc.doc else .021,color=MUC)
+                      radius=.045 if self.W.bc.doc else .034,color=MUC)
             point.set_z_index(9)
             def drift(m,dt,a=a,r0=r0,yscale=yscale):
                 t=self.clock_t()
@@ -498,7 +498,7 @@ def _fit_source(sc,W,doc):
     source=chu(txt,46,MUC,.90)
     # Native vector text, lề đáy cố định. Không thu font khi dài.
     bx=(W.bc.an_toan[0]+W.bc.an_toan[1])/2
-    by=-6.20 if doc else -3.49
+    by=-6.20 if doc else -3.39
     source.move_to([bx,by,0])
     W.nguon=trang.ghim(sc,trang.man_sang_the_gioi(sc,source))
     W.hop_ng=trang.hop_man(sc,W.nguon)
