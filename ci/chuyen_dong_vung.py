@@ -65,6 +65,8 @@ def measure(frames, plan, fmt):
     pixel_base = float(WIDTH*HEIGHT)
     area = 100*np.count_nonzero(effective,axis=(1,2))/pixel_base
     beat_rows=[]
+    prior_frame=None
+    prior_id=None
     for bid in FIRST:
         b=plan["beats"][bid]
         t0=float(b["t0"])
@@ -77,6 +79,18 @@ def measure(frames, plan, fmt):
             raise RuntimeError("BEAT_EMPTY %s [%f,%f)"%(bid,t0,t1_seen))
         beat = effective[idx]
         ar = area[idx]
+        # Khác cảnh = trung bình độ khác biệt grayscale khung giữa beat.
+        # Đo trên khung GỐC trước khi bỏ lớp lặp, vì đây là phép so bối
+        # cảnh/khung máy của toàn hình, không phải phép đo diện tích động.
+        center_t=(t0+t1_seen)*.5
+        center_idx=min(len(frames)-1,max(0,int(round(center_t*FPS))))
+        center_frame=frames[center_idx].astype(np.int16)
+        khac_canh = (None if prior_frame is None else
+                     float(np.abs(center_frame-prior_frame).mean()))
+        khac_dat = (prior_frame is None or khac_canh>=8.)
+        prior_frame=center_frame
+        prev_id=prior_id
+        prior_id=bid
         above = 100.*np.count_nonzero(ar>=PAIR_PCT)/len(ar)
         mean = float(ar.mean())
         union = 100.*np.count_nonzero(beat.any(axis=0))/pixel_base
@@ -87,7 +101,8 @@ def measure(frames, plan, fmt):
             longest=max(longest,streak)
         longest_s=longest/FPS
         passed=(above>=BEAT_PAIRS_GE_3_MIN and mean>=BEAT_MEAN_MIN
-                and union>=BEAT_UNION_MIN and longest_s<=MAX_LOW_STREAK_S)
+                and union>=BEAT_UNION_MIN and longest_s<=MAX_LOW_STREAK_S
+                and khac_dat)
         row={
             "beat":bid,"bo_cuc":fmt,
             "t_vao_s":round(t0,4),"t_ra_do_s":round(t1_seen,4),
@@ -98,11 +113,17 @@ def measure(frames, plan, fmt):
             "vung_dong_gop_pct":round(union,3),
             "cap_ge_3pct_pct":round(above,3),
             "chuoi_duoi_0_3pct_dai_nhat_s":round(longest_s,3),
+            "khac_canh":(None if khac_canh is None else round(khac_canh,3)),
+            "khac_canh_so_voi":prev_id,
+            "khac_canh_dat":khac_dat,
+            "loi_lap_canh":(not khac_dat),
             "ket_qua":"DAT" if passed else "TRUOT"}
         beat_rows.append(row)
         print("C17_8 %s/%s avg=%.2f%% union=%.2f%% >=3%%=%.2f%% "
-              "low_streak=%.2fs => %s"%
-              (fmt,bid,mean,union,above,longest_s,row["ket_qua"]),flush=True)
+              "low_streak=%.2fs khac_canh=%s => %s"%
+              (fmt,bid,mean,union,above,longest_s,
+               "first" if khac_canh is None else "%.2f"%khac_canh,
+               row["ket_qua"]),flush=True)
     return {
         "bo_cuc":fmt,"so_khung_4fps":len(frames),"so_cap":total_pairs,
         "pixel_bo_lap":int(repeated.sum()),
@@ -128,7 +149,7 @@ def main():
         failures=[r["bo_cuc"]+"/"+b["beat"] for r in reports for b in r["beats"]
                   if b["ket_qua"]=="TRUOT"]
         report={
-            "chuan":"C17(8) full-frame v1",
+            "chuan":"C17(8) full-frame v2 + khac_canh",
             "video":"K1 t3 mẫu 00:00–01:00, không suy rộng sang full 553s",
             "lay_mau":"ffmpeg fps=4,scale=240:135,format=gray",
             "nguong_pixel_tuyet_doi_lon_hon":6,
@@ -137,11 +158,12 @@ def main():
                 "cap_co_dien_tich_ge_3pct_toi_thieu_pct":60,
                 "dien_tich_trung_binh_pct":5,
                 "vung_gop_pct":15,
-                "chuoi_cap_duoi_0_3pct_toi_da_s":2},
+                "chuoi_cap_duoi_0_3pct_toi_da_s":2,
+                "khac_canh_trung_binh_abs_gray_toi_thieu":8},
             "ket_qua":"TRUOT" if failures else "DAT",
             "loi":failures,"bao_cao":reports}
     except Exception as e:
-        report={"chuan":"C17(8) full-frame v1","ket_qua":"TRUOT",
+        report={"chuan":"C17(8) full-frame v2 + khac_canh","ket_qua":"TRUOT",
                 "loi":[repr(e)]}
     output=root/"chuyen_dong_vung.json"
     output.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
