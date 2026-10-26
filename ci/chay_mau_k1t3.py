@@ -16,8 +16,12 @@ def run(args, env=ENV):
     p = subprocess.run(list(map(str, args)), cwd=R, env=env,
                        capture_output=True, text=True, encoding="utf-8", errors="replace")
     log = p.stdout + "\n" + p.stderr
-    if p.returncode or any(x in log for x in ("NGOAI_VUNG", "CHU_TRONG_PIP")):
-        raise RuntimeError("RENDER_MAU_LOI rc=%s\n%s" % (p.returncode, log[-3000:]))
+    if p.returncode:
+        raise RuntimeError("RENDER_LENH_LOI rc=%s\\n%s" % (p.returncode, log[-3000:]))
+    bad=[line for line in log.splitlines()
+         if line.startswith(("NGOAI_VUNG", "CHU_TRONG_PIP"))]
+    if bad:
+        raise RuntimeError("C13_VUOT_VUNG_RC_0: "+ " | ".join(bad[-12:]))
     return log
 
 run([P, "ci/chay_ci.py", "--tap", R / "tools/tap/ML_K1_t3.json",
@@ -57,8 +61,7 @@ for bc in ("16x9","9x16"):
     folder.mkdir(exist_ok=True)
     videos = []
     from PIL import Image, ImageDraw
-    thumbs=[]
-    for bid in plan["thu_tu"]:
+    for bid in FIRST:
         still = folder / ("khung_" + bid + ".png")
         if not still.exists():
             work = folder / ("still_" + bid)
@@ -71,26 +74,15 @@ for bc in ("16x9","9x16"):
                       sorted(str(x) for x in work.rglob("*"))[-40:], flush=True)
                 raise ValueError("THIEU_KHUNG %s/%s" % (bc,bid))
             shutil.copyfile(images[-1],still)
-        thumbs.append(Image.open(still).convert("RGB"))
-        if bid in FIRST:
-            work=folder/("video_"+bid)
-            manim_log=run([P, "-m", "manim", "render", "--frame_rate", "30", "--disable_caching",
-                 "--progress_bar", "none", "-v", "ERROR", "--media_dir",work,
-                 R / "out/M1_MARANGONI_DUNG/canh.py",bid],env)
-            files=list(work.rglob(bid+".mp4"))
-            if not files: raise ValueError("THIEU_CLIP_MAU %s/%s"%(bc,bid))
-            videos.append(files[-1])
-            # C17(8): kiểm chuyển động vùng chạy SAU trên video full-frame
-            # tại job chuyen-dong-vung; ROI cũ đã bị GĐ bác (đo vật nhỏ).
-    tw,th=(180,105) if bc=="16x9" else (100,180)
-    sheet=Image.new("RGB",(tw*5,(th+25)*7),(237,239,241))
-    draw=ImageDraw.Draw(sheet)
-    for i,(bid,im) in enumerate(zip(plan["thu_tu"],thumbs)):
-        im.thumbnail((tw-6,th-3))
-        x,y=(i%5)*tw,(i//5)*(th+25)
-        sheet.paste(im,(x+(tw-im.width)//2,y))
-        draw.text((x+5,y+th+2),bid,fill=(20,24,29))
-    sheet.save(OUT/("contact_sheet_"+bc+".jpg"),quality=90)
+        work=folder/("video_"+bid)
+        manim_log=run([P, "-m", "manim", "render", "--frame_rate", "30", "--disable_caching",
+             "--progress_bar", "none", "-v", "ERROR", "--media_dir",work,
+             R / "out/M1_MARANGONI_DUNG/canh.py",bid],env)
+        files=list(work.rglob(bid+".mp4"))
+        if not files: raise ValueError("THIEU_CLIP_MAU %s/%s"%(bc,bid))
+        videos.append(files[-1])
+        # C17(8): kiểm chuyển động vùng chạy SAU trên video full-frame
+        # tại job chuyen-dong-vung; ROI cũ đã bị GĐ bác (đo vật nhỏ).
     playlist=folder/"sample.ffconcat"
     playlist.write_text("ffconcat version 1.0\n"+
          "".join("file '%s'\n"%str(p).replace("\\","/") for p in videos),
@@ -111,6 +103,9 @@ for bc in ("16x9","9x16"):
     run(["ffmpeg","-nostdin","-y","-loglevel","error","-i",silent,*inputs,
          "-filter_complex",";".join(filters),"-map","0:v:0","-map","[a]",
          "-c:v","copy","-c:a","aac","-b:a","160k","-t","60",movie],env)
+    if not movie.is_file() or movie.stat().st_size < 100000:
+        raise RuntimeError("MAU_540_THIEU_HOAC_HONG %s %s" % (bc,movie))
+    print("MAU_540_VIDEO_XONG",bc,movie.stat().st_size,flush=True)
     report=run(["ffmpeg","-nostdin","-i",movie,"-vf",
                 "freezedetect=n=0.001:d=2","-an","-f","null","-"],env)
     starts=[float(x) for x in re.findall(r"freeze_start:\s*([0-9.]+)",report)]
@@ -125,6 +120,37 @@ for bc in ("16x9","9x16"):
           (bc,frozen,frozen/60*100,longest,"DAT" if ok else "TRUOT"),flush=True)
     if not ok:
         ci_failures.append("C17_FREEZE_VUOT_NGUONG "+bc)
+# Ưu tiên dựng ĐỦ HAI VIDEO 60s trước, rồi mới dựng 35 hình tĩnh mỗi
+# khổ: lỗi tại khung thứ 29 không được khiến job đo mất luôn video dọc.
+for bc in ("16x9","9x16"):
+    env = dict(ENV, K3_BO_CUC=bc, K3_KE_HOACH=str(B / "ke_hoach.json"))
+    folder = OUT / bc
+    from PIL import Image, ImageDraw
+    thumbs={}
+    for bid in plan["thu_tu"]:
+        still=folder / ("khung_"+bid+".png")
+        if not still.exists():
+            work=folder / ("still_"+bid)
+            debug=run([P,"-m","manim","render","-s","--disable_caching",
+                       "--progress_bar","none","-v","ERROR",
+                       "--media_dir",work,R/"out/M1_MARANGONI_DUNG/canh.py",bid],env)
+            images=list(work.rglob("*.png"))
+            if not images:
+                raise ValueError("THIEU_KHUNG %s/%s %s" %
+                                 (bc,bid,debug[-1000:]))
+            shutil.copyfile(images[-1],still)
+        thumbs[bid]=Image.open(still).convert("RGB")
+    tw,th=(180,105) if bc=="16x9" else (100,180)
+    sheet=Image.new("RGB",(tw*5,(th+25)*7),(237,239,241))
+    draw=ImageDraw.Draw(sheet)
+    for i,bid in enumerate(plan["thu_tu"]):
+        im=thumbs[bid]
+        im.thumbnail((tw-6,th-3))
+        x,y=(i%5)*tw,(i//5)*(th+25)
+        sheet.paste(im,(x+(tw-im.width)//2,y))
+        draw.text((x+5,y+th+2),bid,fill=(20,24,29))
+    sheet.save(OUT/("contact_sheet_"+bc+".jpg"),quality=90)
+    print("MAU_540_CONTACT_SHEET_XONG",bc,len(thumbs),flush=True)
 (OUT/"chuyen_dong_beat.json").write_text(
     json.dumps({"trang_thai":"BO_CONG_ROI_CU",
                 "ly_do":"GĐ bác phép đo 0,3% ROI; C17(8) full-frame ở chuyen_dong_vung.json",
