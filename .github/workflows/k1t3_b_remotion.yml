@@ -1,0 +1,66 @@
+name: k1t3-B-remotion-60s
+on:
+  pull_request:
+    branches: [studio-dung]
+  workflow_dispatch:
+concurrency:
+  group: k1t3-B-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  B-60s:
+    if: github.head_ref == 'gpt/k1t3-B-remotion' || github.ref_name == 'gpt/k1t3-B-remotion'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+    env:
+      PYTHONIOENCODING: utf-8
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      B_CODEX_MINUTES: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: ci/remotion_b/package-lock.json
+      - name: Manim and ffmpeg dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg libcairo2-dev libpango1.0-dev pkg-config fonts-noto-core
+          python -m pip install -q -r ci_requirements.txt
+          npm ci --prefix ci/remotion_b --no-audit --no-fund
+          npx --prefix ci/remotion_b remotion browser ensure
+      - name: Original audio and beat-local Manim assets, then Remotion composition
+        run: |
+          cp ban_sac/fonts/NotoSans-Regular.ttf ci/remotion_b/public/NotoSans-Regular.ttf
+          python ci/remotion_b/pipeline.py
+      - name: Measured warm rebuild of one beat
+        if: success()
+        run: |
+          python ci/remotion_b/benchmark.py
+      - name: Unmodified motion thresholds and A-B report (failures remain red)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python ci/remotion_b/measure.py
+      - name: Upload both videos, 12-frame sheets, measurements and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B-60s-540p
+          retention-days: 14
+          path: |
+            work/B/B_60s_16x9.mp4
+            work/B/B_60s_9x16.mp4
+            work/B/contact_sheet_*.jpg
+            work/B/*.json
+            ci/so_sanh_AB.json
+            ci/remotion_b/evidence/

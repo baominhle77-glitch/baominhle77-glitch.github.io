@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   dung:
-    if: github.event_name != 'pull_request' || github.head_ref != 'gpt/k1t3-c16-c17-01'
+    if: github.event_name != 'pull_request' || (github.head_ref != 'gpt/k1t3-c16-c17-01' && github.head_ref != 'gpt/k1t3-B-remotion')
     runs-on: windows-latest
     timeout-minutes: 340
     env:
