@@ -6140,50 +6140,1390 @@
     "metric_provenance": "GitHub Actions API jobs + artifact 12646270291; no invented CPU/edit measurements"
   },
   "B": {
-    "status": "ROUND_2_PREFLIGHT_36_REVIEWED; awaiting final MP4 CI",
-    "codex_minutes": 13,
-    "ci_minutes": null,
-    "cpu_seconds_per_video_second": null,
-    "gates": {
-      "geometry": "DAT",
-      "C13": "PENDING_FINAL_DOM_AND_EDITORIAL",
-      "C16": "TRUOT_MISSING_ORIGINAL_GEMINI",
-      "C17": "PENDING",
-      "MIN_RES": "PENDING",
-      "exposed_grid": 0
-    },
-    "gemini_sources": [
+    "sha": "c0baf264bc513158440729534f7ccc93b6579505",
+    "run": "40382935623",
+    "codex_minutes": 60.311544850000004,
+    "codex_time_scope": "elapsed round 4 from its first persisted commit 13d8ecc at 2026-10-26T18:12:53Z, including local verification and CI; active editing time was not separately instrumented",
+    "active_edit_minutes": null,
+    "ci_minutes": 10.933333333333334,
+    "pipeline_minutes": 9.101324840383333,
+    "cpu_seconds": 428.128937,
+    "cold_models_plus_current_remotion_cpu_s": 839.272473,
+    "cold_models_plus_current_remotion_minutes": 9.602106486966667,
+    "cpu_seconds_per_video_second": 3.5677411416666667,
+    "cpu_denominator": "120 output seconds: 60s x 2 formats",
+    "stages": [
       {
-        "id": "h1",
-        "path": "assets/k1t3/broll_gemini/h1_16x9.mp4",
-        "start": 0,
-        "frames": 105,
-        "label": "AI minh hoạ (Gemini)",
-        "source": "GĐ supplied attachment 26/10/2026; Gemini illustration",
-        "in": 3.0,
-        "sha256": "165342a15d74d31953b372888eeeeaf4673666c30691083283e87fd563f1476e"
+        "stage": "manim/h1",
+        "wall_s": 0.035192373000001,
+        "cpu_s": 0.014248999999999998,
+        "cold_render_wall_s": 45.13363875199998,
+        "cold_render_cpu_s": 53.836899,
+        "cache_reused": true
       },
       {
-        "id": "c2",
-        "path": "assets/k1t3/broll_gemini/c2_16x9.mp4",
-        "start": 285,
-        "frames": 120,
-        "label": "AI minh hoạ (Gemini)",
-        "source": "GĐ supplied attachment; radial surface flow during h2",
-        "in": 0,
-        "sha256": "468a0b6940f4064f84ea02af544ae2ec9dd6eca387b6f8385c5d83ef1b2872f8"
+        "stage": "manim/h2",
+        "wall_s": 0.07632623499999625,
+        "cpu_s": 0.017862,
+        "cold_render_wall_s": 89.36895250700002,
+        "cold_render_cpu_s": 106.973136,
+        "cache_reused": true
       },
       {
-        "id": "p2",
-        "path": "assets/k1t3/broll_gemini/p2_16x9.mp4",
-        "start": 555,
-        "frames": 120,
-        "label": "AI minh hoạ (Gemini)",
-        "source": "GĐ supplied attachment; steady feeding during h3",
-        "in": 0,
-        "sha256": "e4e0206b82fa03d7ca6355207bb4712d8bdec51a825f53de9bd48c24b9f29546"
+        "stage": "manim/h3",
+        "wall_s": 0.06226183500001525,
+        "cpu_s": 0.018341,
+        "cold_render_wall_s": 34.733773293999946,
+        "cold_render_cpu_s": 41.545134,
+        "cache_reused": true
+      },
+      {
+        "stage": "manim/h4",
+        "wall_s": 0.07015709699999917,
+        "cpu_s": 0.020146999999999998,
+        "cold_render_wall_s": 161.61137056999996,
+        "cold_render_cpu_s": 202.666906,
+        "cache_reused": true
+      },
+      {
+        "stage": "manim/c1",
+        "wall_s": 131.564471775,
+        "cpu_s": 164.366663,
+        "cold_render_wall_s": 131.52383493499997,
+        "cold_render_cpu_s": 164.366663,
+        "cache_reused": false
+      },
+      {
+        "stage": "manim/p1",
+        "wall_s": 0.07019299200000262,
+        "cpu_s": 0.017175999999999997,
+        "cold_render_wall_s": 5.002920141999994,
+        "cold_render_cpu_s": 6.209236,
+        "cache_reused": true
+      },
+      {
+        "stage": "remotion",
+        "wall_s": 414.51501864799997,
+        "cpu_s": 263.674499,
+        "exit_code": 0
       }
     ],
-    "revision_scope": "GĐ phiếu lượt 1 + concurrency=1, 120000ms timeout, Chrome system libraries"
-  }
+    "repair_one_beat": {
+      "beat": "h3",
+      "formats": 2,
+      "edit_minutes": null,
+      "rebuild_wall_s": 34.733773293999946,
+      "cpu_s": 41.545134,
+      "source_run": 40381985390,
+      "current_run_cache_reused": true,
+      "method": "Measured original round4 curved-capillary correction; retained cold per-format records. Current final run reuses this unchanged beat. Editing time was not separately instrumented. Final Remotion recomposition is reported separately."
+    },
+    "bytes": {
+      "B_60s_9x16.mp4": 14863383,
+      "B_60s_16x9.mp4": 15527330
+    },
+    "gates": {
+      "C13": {
+        "ket_qua": "DAT",
+        "layout_pass": true,
+        "geometry_pass": true,
+        "manual_errors": [],
+        "semantic_captions_pass": true,
+        "scope": "Every rendered frame runs DOM safe-margin/overlap/font assertions; manual native geometry review plus semantic TTS alignment. Full C13 cannot pass while motion/rhythm fails."
+      },
+      "C16": {
+        "ket_qua": "DAT",
+        "available_clips": [
+          "h1",
+          "c2",
+          "p2"
+        ],
+        "sources": [
+          {
+            "id": "h1",
+            "path": "assets/k1t3/broll_gemini/h1_16x9.mp4",
+            "start": 0,
+            "frames": 180,
+            "label": "AI minh hoạ (Gemini)",
+            "source": "GĐ supplied attachment 26/10/2026; Gemini illustration",
+            "in": 3.0,
+            "focus_x": 50,
+            "focus_y": 50,
+            "available": true,
+            "sha256": "165342a15d74d31953b372888eeeeaf4673666c30691083283e87fd563f1476e",
+            "src": "gemini_h1.mp4"
+          },
+          {
+            "id": "c2",
+            "path": "assets/k1t3/broll_gemini/c2_16x9.mp4",
+            "start": 285,
+            "frames": 120,
+            "label": "AI minh hoạ (Gemini)",
+            "source": "GĐ supplied attachment; radial surface flow during h2",
+            "in": 0,
+            "focus_x": 38,
+            "focus_y": 50,
+            "available": true,
+            "sha256": "468a0b6940f4064f84ea02af544ae2ec9dd6eca387b6f8385c5d83ef1b2872f8",
+            "src": "gemini_c2.mp4"
+          },
+          {
+            "id": "p2",
+            "path": "assets/k1t3/broll_gemini/p2_16x9.mp4",
+            "start": 555,
+            "frames": 120,
+            "label": "AI minh hoạ (Gemini)",
+            "source": "GĐ supplied attachment; steady feeding during h3",
+            "in": 0,
+            "focus_x": 63,
+            "focus_y": 50,
+            "available": true,
+            "sha256": "e4e0206b82fa03d7ca6355207bb4712d8bdec51a825f53de9bd48c24b9f29546",
+            "src": "gemini_p2.mp4"
+          }
+        ],
+        "reason": "Three original Gemini attachments supplied by GĐ; latest round 4 instruction uses a focal portrait crop covering the whole frame, without letterbox."
+      },
+      "C17": {
+        "ket_qua": "DAT",
+        "loi": [],
+        "bao_cao": [
+          {
+            "bo_cuc": "16x9",
+            "so_khung_4fps": 240,
+            "so_cap": 239,
+            "pixel_bo_lap": 71,
+            "bo_lap_pct": 0.219,
+            "dien_tich_dong_trung_binh_toan_mau_pct": 21.905,
+            "cap_co_chuyen_dong_pct": 100.0,
+            "beats": [
+              {
+                "beat": "h1",
+                "bo_cuc": "16x9",
+                "t_vao_s": 0.0,
+                "t_ra_do_s": 7.0333,
+                "t_ra_beat_s": 7.0333,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 28,
+                "dien_tich_trung_binh_pct": 38.056,
+                "vung_dong_gop_pct": 97.525,
+                "cap_ge_3pct_pct": 92.857,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [],
+                "khac_canh": null,
+                "khac_canh_so_voi": null,
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "h2",
+                "bo_cuc": "16x9",
+                "t_vao_s": 7.0333,
+                "t_ra_do_s": 18.5,
+                "t_ra_beat_s": 18.5,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 45,
+                "dien_tich_trung_binh_pct": 17.99,
+                "vung_dong_gop_pct": 95.466,
+                "cap_ge_3pct_pct": 100.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 58.855
+                  }
+                ],
+                "khac_canh": 58.855,
+                "khac_canh_so_voi": "h1",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "h3",
+                "bo_cuc": "16x9",
+                "t_vao_s": 18.5,
+                "t_ra_do_s": 23.4667,
+                "t_ra_beat_s": 23.4667,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 20,
+                "dien_tich_trung_binh_pct": 27.041,
+                "vung_dong_gop_pct": 97.269,
+                "cap_ge_3pct_pct": 100.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 59.808
+                  },
+                  {
+                    "beat": "h2",
+                    "hieu_gray": 14.595
+                  }
+                ],
+                "khac_canh": 14.595,
+                "khac_canh_so_voi": "h2",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "h4",
+                "bo_cuc": "16x9",
+                "t_vao_s": 23.4667,
+                "t_ra_do_s": 42.5667,
+                "t_ra_beat_s": 42.5667,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 77,
+                "dien_tich_trung_binh_pct": 18.597,
+                "vung_dong_gop_pct": 98.463,
+                "cap_ge_3pct_pct": 100.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 49.545
+                  },
+                  {
+                    "beat": "h2",
+                    "hieu_gray": 62.627
+                  },
+                  {
+                    "beat": "h3",
+                    "hieu_gray": 65.393
+                  }
+                ],
+                "khac_canh": 49.545,
+                "khac_canh_so_voi": "h1",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "c1",
+                "bo_cuc": "16x9",
+                "t_vao_s": 42.5667,
+                "t_ra_do_s": 58.4,
+                "t_ra_beat_s": 58.4,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 63,
+                "dien_tich_trung_binh_pct": 18.566,
+                "vung_dong_gop_pct": 93.531,
+                "cap_ge_3pct_pct": 100.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 50.955
+                  },
+                  {
+                    "beat": "h2",
+                    "hieu_gray": 60.667
+                  },
+                  {
+                    "beat": "h3",
+                    "hieu_gray": 62.708
+                  },
+                  {
+                    "beat": "h4",
+                    "hieu_gray": 20.182
+                  }
+                ],
+                "khac_canh": 20.182,
+                "khac_canh_so_voi": "h4",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "p1",
+                "bo_cuc": "16x9",
+                "t_vao_s": 58.4,
+                "t_ra_do_s": 60.0,
+                "t_ra_beat_s": 76.7,
+                "beat_bi_cat_o_60s": true,
+                "so_cap": 6,
+                "dien_tich_trung_binh_pct": 36.303,
+                "vung_dong_gop_pct": 97.093,
+                "cap_ge_3pct_pct": 100.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 48.846
+                  },
+                  {
+                    "beat": "h2",
+                    "hieu_gray": 55.026
+                  },
+                  {
+                    "beat": "h3",
+                    "hieu_gray": 56.819
+                  },
+                  {
+                    "beat": "h4",
+                    "hieu_gray": 22.61
+                  },
+                  {
+                    "beat": "c1",
+                    "hieu_gray": 20.726
+                  }
+                ],
+                "khac_canh": 20.726,
+                "khac_canh_so_voi": "c1",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              }
+            ],
+            "so_doan_2s_dat": 29,
+            "so_doan_2s": 30,
+            "cua_so_2s": [
+              {
+                "giay_vao": 0.0,
+                "tb_pct": 36.041,
+                "gop_pct": 66.475,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 2.0,
+                "tb_pct": 40.666,
+                "gop_pct": 73.327,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 4.0,
+                "tb_pct": 37.125,
+                "gop_pct": 86.91,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 6.0,
+                "tb_pct": 37.633,
+                "gop_pct": 97.519,
+                "cap_ge_3pct_pct": 75.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 8.0,
+                "tb_pct": 26.606,
+                "gop_pct": 91.935,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 10.0,
+                "tb_pct": 13.746,
+                "gop_pct": 39.38,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 12.0,
+                "tb_pct": 34.823,
+                "gop_pct": 94.867,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 14.0,
+                "tb_pct": 6.498,
+                "gop_pct": 20.855,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 16.0,
+                "tb_pct": 4.553,
+                "gop_pct": 18.059,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "TRUOT"
+              },
+              {
+                "giay_vao": 18.0,
+                "tb_pct": 24.618,
+                "gop_pct": 96.617,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 20.0,
+                "tb_pct": 20.037,
+                "gop_pct": 51.957,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 22.0,
+                "tb_pct": 46.577,
+                "gop_pct": 98.127,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 24.0,
+                "tb_pct": 14.466,
+                "gop_pct": 38.012,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 26.0,
+                "tb_pct": 9.49,
+                "gop_pct": 26.148,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 28.0,
+                "tb_pct": 19.725,
+                "gop_pct": 57.877,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 30.0,
+                "tb_pct": 15.96,
+                "gop_pct": 45.512,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 32.0,
+                "tb_pct": 16.438,
+                "gop_pct": 46.065,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 34.0,
+                "tb_pct": 11.079,
+                "gop_pct": 29.506,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 36.0,
+                "tb_pct": 18.743,
+                "gop_pct": 48.951,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 38.0,
+                "tb_pct": 22.988,
+                "gop_pct": 58.657,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 40.0,
+                "tb_pct": 12.998,
+                "gop_pct": 32.423,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 42.0,
+                "tb_pct": 33.81,
+                "gop_pct": 96.966,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 44.0,
+                "tb_pct": 15.121,
+                "gop_pct": 38.491,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 46.0,
+                "tb_pct": 12.761,
+                "gop_pct": 33.981,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 48.0,
+                "tb_pct": 17.327,
+                "gop_pct": 43.451,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 50.0,
+                "tb_pct": 22.046,
+                "gop_pct": 55.096,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 52.0,
+                "tb_pct": 15.096,
+                "gop_pct": 38.552,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 54.0,
+                "tb_pct": 24.724,
+                "gop_pct": 56.617,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 56.0,
+                "tb_pct": 14.865,
+                "gop_pct": 35.426,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 58.0,
+                "tb_pct": 32.363,
+                "gop_pct": 97.167,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              }
+            ],
+            "cong_2s_dat": true
+          },
+          {
+            "bo_cuc": "9x16",
+            "so_khung_4fps": 240,
+            "so_cap": 239,
+            "pixel_bo_lap": 186,
+            "bo_lap_pct": 0.574,
+            "dien_tich_dong_trung_binh_toan_mau_pct": 21.68,
+            "cap_co_chuyen_dong_pct": 100.0,
+            "beats": [
+              {
+                "beat": "h1",
+                "bo_cuc": "9x16",
+                "t_vao_s": 0.0,
+                "t_ra_do_s": 7.0333,
+                "t_ra_beat_s": 7.0333,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 28,
+                "dien_tich_trung_binh_pct": 39.536,
+                "vung_dong_gop_pct": 97.593,
+                "cap_ge_3pct_pct": 92.857,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [],
+                "khac_canh": null,
+                "khac_canh_so_voi": null,
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "h2",
+                "bo_cuc": "9x16",
+                "t_vao_s": 7.0333,
+                "t_ra_do_s": 18.5,
+                "t_ra_beat_s": 18.5,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 45,
+                "dien_tich_trung_binh_pct": 17.291,
+                "vung_dong_gop_pct": 95.519,
+                "cap_ge_3pct_pct": 100.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 72.211
+                  }
+                ],
+                "khac_canh": 72.211,
+                "khac_canh_so_voi": "h1",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "h3",
+                "bo_cuc": "9x16",
+                "t_vao_s": 18.5,
+                "t_ra_do_s": 23.4667,
+                "t_ra_beat_s": 23.4667,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 20,
+                "dien_tich_trung_binh_pct": 24.842,
+                "vung_dong_gop_pct": 97.407,
+                "cap_ge_3pct_pct": 95.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 70.384
+                  },
+                  {
+                    "beat": "h2",
+                    "hieu_gray": 16.923
+                  }
+                ],
+                "khac_canh": 16.923,
+                "khac_canh_so_voi": "h2",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "h4",
+                "bo_cuc": "9x16",
+                "t_vao_s": 23.4667,
+                "t_ra_do_s": 42.5667,
+                "t_ra_beat_s": 42.5667,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 77,
+                "dien_tich_trung_binh_pct": 18.918,
+                "vung_dong_gop_pct": 98.682,
+                "cap_ge_3pct_pct": 100.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 46.091
+                  },
+                  {
+                    "beat": "h2",
+                    "hieu_gray": 63.401
+                  },
+                  {
+                    "beat": "h3",
+                    "hieu_gray": 61.491
+                  }
+                ],
+                "khac_canh": 46.091,
+                "khac_canh_so_voi": "h1",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "c1",
+                "bo_cuc": "9x16",
+                "t_vao_s": 42.5667,
+                "t_ra_do_s": 58.4,
+                "t_ra_beat_s": 58.4,
+                "beat_bi_cat_o_60s": false,
+                "so_cap": 63,
+                "dien_tich_trung_binh_pct": 17.73,
+                "vung_dong_gop_pct": 93.682,
+                "cap_ge_3pct_pct": 100.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 47.08
+                  },
+                  {
+                    "beat": "h2",
+                    "hieu_gray": 64.57
+                  },
+                  {
+                    "beat": "h3",
+                    "hieu_gray": 62.686
+                  },
+                  {
+                    "beat": "h4",
+                    "hieu_gray": 18.814
+                  }
+                ],
+                "khac_canh": 18.814,
+                "khac_canh_so_voi": "h4",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              },
+              {
+                "beat": "p1",
+                "bo_cuc": "9x16",
+                "t_vao_s": 58.4,
+                "t_ra_do_s": 60.0,
+                "t_ra_beat_s": 76.7,
+                "beat_bi_cat_o_60s": true,
+                "so_cap": 6,
+                "dien_tich_trung_binh_pct": 37.638,
+                "vung_dong_gop_pct": 97.142,
+                "cap_ge_3pct_pct": 100.0,
+                "chuoi_duoi_0_3pct_dai_nhat_s": 0.0,
+                "loai_khuon": "all_prior_beats",
+                "khac_canh_nguong": 12.0,
+                "khac_canh_voi_tat_ca_cung_khuon": [
+                  {
+                    "beat": "h1",
+                    "hieu_gray": 49.252
+                  },
+                  {
+                    "beat": "h2",
+                    "hieu_gray": 57.489
+                  },
+                  {
+                    "beat": "h3",
+                    "hieu_gray": 55.333
+                  },
+                  {
+                    "beat": "h4",
+                    "hieu_gray": 16.856
+                  },
+                  {
+                    "beat": "c1",
+                    "hieu_gray": 19.113
+                  }
+                ],
+                "khac_canh": 16.856,
+                "khac_canh_so_voi": "h4",
+                "khac_canh_dat": true,
+                "loi_lap_canh": false,
+                "ket_qua": "DAT"
+              }
+            ],
+            "so_doan_2s_dat": 29,
+            "so_doan_2s": 30,
+            "cua_so_2s": [
+              {
+                "giay_vao": 0.0,
+                "tb_pct": 43.628,
+                "gop_pct": 78.046,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 2.0,
+                "tb_pct": 41.205,
+                "gop_pct": 79.228,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 4.0,
+                "tb_pct": 35.215,
+                "gop_pct": 84.827,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 6.0,
+                "tb_pct": 37.718,
+                "gop_pct": 97.608,
+                "cap_ge_3pct_pct": 75.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 8.0,
+                "tb_pct": 26.944,
+                "gop_pct": 92.015,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 10.0,
+                "tb_pct": 12.726,
+                "gop_pct": 40.213,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 12.0,
+                "tb_pct": 32.74,
+                "gop_pct": 94.645,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 14.0,
+                "tb_pct": 5.783,
+                "gop_pct": 20.028,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 16.0,
+                "tb_pct": 4.002,
+                "gop_pct": 17.46,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "TRUOT"
+              },
+              {
+                "giay_vao": 18.0,
+                "tb_pct": 22.889,
+                "gop_pct": 96.556,
+                "cap_ge_3pct_pct": 87.5,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 20.0,
+                "tb_pct": 16.095,
+                "gop_pct": 46.938,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 22.0,
+                "tb_pct": 47.413,
+                "gop_pct": 98.247,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 24.0,
+                "tb_pct": 15.384,
+                "gop_pct": 49.537,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 26.0,
+                "tb_pct": 14.199,
+                "gop_pct": 41.694,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 28.0,
+                "tb_pct": 17.598,
+                "gop_pct": 50.571,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 30.0,
+                "tb_pct": 9.633,
+                "gop_pct": 25.191,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 32.0,
+                "tb_pct": 17.258,
+                "gop_pct": 45.457,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 34.0,
+                "tb_pct": 16.432,
+                "gop_pct": 46.466,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 36.0,
+                "tb_pct": 16.527,
+                "gop_pct": 48.043,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 38.0,
+                "tb_pct": 19.127,
+                "gop_pct": 53.481,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 40.0,
+                "tb_pct": 17.367,
+                "gop_pct": 48.79,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 42.0,
+                "tb_pct": 32.806,
+                "gop_pct": 97.219,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 44.0,
+                "tb_pct": 17.202,
+                "gop_pct": 45.164,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 46.0,
+                "tb_pct": 17.378,
+                "gop_pct": 49.824,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 48.0,
+                "tb_pct": 16.137,
+                "gop_pct": 45.707,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 50.0,
+                "tb_pct": 19.097,
+                "gop_pct": 52.034,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 52.0,
+                "tb_pct": 16.782,
+                "gop_pct": 46.67,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 54.0,
+                "tb_pct": 19.882,
+                "gop_pct": 44.901,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 56.0,
+                "tb_pct": 11.699,
+                "gop_pct": 27.096,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              },
+              {
+                "giay_vao": 58.0,
+                "tb_pct": 32.26,
+                "gop_pct": 97.29,
+                "cap_ge_3pct_pct": 100.0,
+                "ket_qua": "DAT"
+              }
+            ],
+            "cong_2s_dat": true
+          }
+        ],
+        "gate_implementation": "ci/chuyen_dong_vung.py unchanged from aca6c94",
+        "scope": "h1 to 60s, 6 beats; no full-episode claim"
+      },
+      "MIN_RES": [
+        {
+          "format": "16x9",
+          "meta": {
+            "width": 960,
+            "height": 540,
+            "duration": "60.000000",
+            "nb_frames": "1800",
+            "side_data_list": [
+              {}
+            ]
+          },
+          "pass_MIN_RES": true
+        },
+        {
+          "format": "9x16",
+          "meta": {
+            "width": 540,
+            "height": 960,
+            "duration": "60.000000",
+            "nb_frames": "1800",
+            "side_data_list": [
+              {}
+            ]
+          },
+          "pass_MIN_RES": true
+        }
+      ],
+      "exposed_grid": {
+        "visible_exposed_mesh_edges": 0,
+        "method": "manual review of 36 native 540p images + analytic geometry construction",
+        "pass_grid": true
+      },
+      "freeze": [
+        {
+          "format": "16x9",
+          "total_s": 0,
+          "max_s": 0,
+          "intervals": [],
+          "pass_freeze": true,
+          "command_ok": true
+        },
+        {
+          "format": "9x16",
+          "total_s": 0,
+          "max_s": 0,
+          "intervals": [],
+          "pass_freeze": true,
+          "command_ok": true
+        }
+      ],
+      "ffmpeg": {
+        "binary": "/home/runner/work/baominhle77-glitch.github.io/baominhle77-glitch.github.io/work/ffmpeg_runtime/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2",
+        "version": "ffmpeg version 7.0.2-static https://johnvansickle.com/ffmpeg/  Copyright (c) 2000-2024 the FFmpeg developers",
+        "required_filters": [
+          "format",
+          "fps",
+          "freezedetect",
+          "scale"
+        ],
+        "filters_verified": true,
+        "gate_code": "ci/chuyen_dong_vung.py unchanged"
+      }
+    },
+    "ci_jobs": [
+      {
+        "id": 121784246410,
+        "name": "Manim 540p / c1",
+        "conclusion": "success",
+        "started_at": "2026-10-26T19:02:22Z",
+        "completed_at": "2026-10-26T19:05:36Z",
+        "duration_s": 194.0
+      },
+      {
+        "id": 121784246694,
+        "name": "Manim 540p / h2",
+        "conclusion": "success",
+        "started_at": "2026-10-26T19:02:22Z",
+        "completed_at": "2026-10-26T19:03:05Z",
+        "duration_s": 43.0
+      },
+      {
+        "id": 121784246701,
+        "name": "Manim 540p / h3",
+        "conclusion": "success",
+        "started_at": "2026-10-26T19:02:22Z",
+        "completed_at": "2026-10-26T19:02:42Z",
+        "duration_s": 20.0
+      },
+      {
+        "id": 121784246928,
+        "name": "Manim 540p / p1",
+        "conclusion": "success",
+        "started_at": "2026-10-26T19:02:22Z",
+        "completed_at": "2026-10-26T19:03:01Z",
+        "duration_s": 39.0
+      },
+      {
+        "id": 121784246961,
+        "name": "Manim 540p / h1",
+        "conclusion": "success",
+        "started_at": "2026-10-26T19:02:21Z",
+        "completed_at": "2026-10-26T19:02:46Z",
+        "duration_s": 25.0
+      },
+      {
+        "id": 121784247016,
+        "name": "Manim 540p / h4",
+        "conclusion": "success",
+        "started_at": "2026-10-26T19:02:22Z",
+        "completed_at": "2026-10-26T19:03:55Z",
+        "duration_s": 93.0
+      },
+      {
+        "id": 121785909271,
+        "name": "Remotion 540p + unchanged gates",
+        "conclusion": "success",
+        "started_at": "2026-10-26T19:05:38Z",
+        "completed_at": "2026-10-26T19:13:17Z",
+        "duration_s": 459.0
+      },
+      {
+        "id": 121790021565,
+        "name": "Native 1080p after green 540p gates",
+        "conclusion": "skipped",
+        "started_at": "2026-10-26T19:13:17Z",
+        "completed_at": "2026-10-26T19:13:17Z",
+        "duration_s": 0.0
+      }
+    ],
+    "ci_time_scope": "earliest job start to last non-skipped job completion, including upload/teardown, excluding initial queue",
+    "round4_ci_runs": [
+      {
+        "run": 40381985390,
+        "sha": "770052e6455cb8e5bc5669b29458e112c2a8d52b",
+        "conclusion": "failure",
+        "created_at": "2026-10-26T18:54:58Z",
+        "completed_at": "2026-10-26T19:02:20Z",
+        "jobs_elapsed_minutes": 7.316666666666666,
+        "including_queue_minutes": 7.366666666666666,
+        "jobs": [
+          {
+            "id": 121780347363,
+            "name": "Manim 540p / h3",
+            "conclusion": "success",
+            "started_at": "2026-10-26T18:55:00Z",
+            "completed_at": "2026-10-26T18:56:23Z",
+            "duration_s": 83.0
+          },
+          {
+            "id": 121780347826,
+            "name": "Manim 540p / c1",
+            "conclusion": "failure",
+            "started_at": "2026-10-26T18:55:01Z",
+            "completed_at": "2026-10-26T18:59:32Z",
+            "duration_s": 271.0
+          },
+          {
+            "id": 121780347833,
+            "name": "Manim 540p / h2",
+            "conclusion": "success",
+            "started_at": "2026-10-26T18:55:01Z",
+            "completed_at": "2026-10-26T18:57:31Z",
+            "duration_s": 150.0
+          },
+          {
+            "id": 121780347877,
+            "name": "Manim 540p / h1",
+            "conclusion": "success",
+            "started_at": "2026-10-26T18:55:00Z",
+            "completed_at": "2026-10-26T18:55:33Z",
+            "duration_s": 33.0
+          },
+          {
+            "id": 121780347982,
+            "name": "Manim 540p / p1",
+            "conclusion": "success",
+            "started_at": "2026-10-26T18:55:01Z",
+            "completed_at": "2026-10-26T18:58:57Z",
+            "duration_s": 236.0
+          },
+          {
+            "id": 121780348143,
+            "name": "Manim 540p / h4",
+            "conclusion": "success",
+            "started_at": "2026-10-26T18:55:01Z",
+            "completed_at": "2026-10-26T19:02:19Z",
+            "duration_s": 438.0
+          },
+          {
+            "id": 121784244725,
+            "name": "Remotion 540p + unchanged gates",
+            "conclusion": "skipped",
+            "started_at": "2026-10-26T19:02:19Z",
+            "completed_at": "2026-10-26T19:02:19Z",
+            "duration_s": 0.0
+          },
+          {
+            "id": 121784245613,
+            "name": "Native 1080p after green 540p gates",
+            "conclusion": "skipped",
+            "started_at": "2026-10-26T19:02:20Z",
+            "completed_at": "2026-10-26T19:02:19Z",
+            "duration_s": -1.0
+          }
+        ]
+      },
+      {
+        "run": 40382935623,
+        "sha": "c0baf264bc513158440729534f7ccc93b6579505",
+        "conclusion": "success",
+        "created_at": "2026-10-26T19:01:12Z",
+        "completed_at": "2026-10-26T19:13:18Z",
+        "jobs_elapsed_minutes": 10.933333333333334,
+        "including_queue_minutes": 12.1,
+        "jobs": [
+          {
+            "id": 121784246410,
+            "name": "Manim 540p / c1",
+            "conclusion": "success",
+            "started_at": "2026-10-26T19:02:22Z",
+            "completed_at": "2026-10-26T19:05:36Z",
+            "duration_s": 194.0
+          },
+          {
+            "id": 121784246694,
+            "name": "Manim 540p / h2",
+            "conclusion": "success",
+            "started_at": "2026-10-26T19:02:22Z",
+            "completed_at": "2026-10-26T19:03:05Z",
+            "duration_s": 43.0
+          },
+          {
+            "id": 121784246701,
+            "name": "Manim 540p / h3",
+            "conclusion": "success",
+            "started_at": "2026-10-26T19:02:22Z",
+            "completed_at": "2026-10-26T19:02:42Z",
+            "duration_s": 20.0
+          },
+          {
+            "id": 121784246928,
+            "name": "Manim 540p / p1",
+            "conclusion": "success",
+            "started_at": "2026-10-26T19:02:22Z",
+            "completed_at": "2026-10-26T19:03:01Z",
+            "duration_s": 39.0
+          },
+          {
+            "id": 121784246961,
+            "name": "Manim 540p / h1",
+            "conclusion": "success",
+            "started_at": "2026-10-26T19:02:21Z",
+            "completed_at": "2026-10-26T19:02:46Z",
+            "duration_s": 25.0
+          },
+          {
+            "id": 121784247016,
+            "name": "Manim 540p / h4",
+            "conclusion": "success",
+            "started_at": "2026-10-26T19:02:22Z",
+            "completed_at": "2026-10-26T19:03:55Z",
+            "duration_s": 93.0
+          },
+          {
+            "id": 121785909271,
+            "name": "Remotion 540p + unchanged gates",
+            "conclusion": "success",
+            "started_at": "2026-10-26T19:05:38Z",
+            "completed_at": "2026-10-26T19:13:17Z",
+            "duration_s": 459.0
+          },
+          {
+            "id": 121790021565,
+            "name": "Native 1080p after green 540p gates",
+            "conclusion": "skipped",
+            "started_at": "2026-10-26T19:13:17Z",
+            "completed_at": "2026-10-26T19:13:17Z",
+            "duration_s": 0.0
+          }
+        ]
+      }
+    ],
+    "round4_ci_run_minutes_sum": 18.25,
+    "cold_cpu_seconds_per_video_second": 6.9939372749999995,
+    "video_verification": [
+      {
+        "file": "B_60s_16x9.mp4",
+        "bytes": 15527330,
+        "sha256": "ea9b52cc82c4a8c2174bc46a32d9afb2168d928ad75727c36b99345054c79055",
+        "ffprobe": {
+          "width": 960,
+          "height": 540,
+          "r_frame_rate": "30/1",
+          "duration": "60.000000",
+          "nb_frames": "1800",
+          "side_data_list": [
+            {}
+          ]
+        }
+      },
+      {
+        "file": "B_60s_9x16.mp4",
+        "bytes": 14863383,
+        "sha256": "cfbde3fe3a835164411d0265cf5b9cf7d1a34ae9885bebc9363d8bed9b452c89",
+        "ffprobe": {
+          "width": 540,
+          "height": 960,
+          "r_frame_rate": "30/1",
+          "duration": "60.000000",
+          "nb_frames": "1800",
+          "side_data_list": [
+            {}
+          ]
+        }
+      }
+    ],
+    "final_manual_review": {
+      "render_sha": "c0baf264bc513158440729534f7ccc93b6579505",
+      "run": 40382935623,
+      "reviewed_at": "2026-10-26T19:15:38.869964+00:00",
+      "actual_ci_mp4_frames_reviewed": 36,
+      "samples_per_beat_per_format": 3,
+      "resolution": "native 540p",
+      "C13_errors": [],
+      "freeze_intervals": [
+        {
+          "format": "16x9",
+          "total_s": 0,
+          "max_s": 0,
+          "intervals": [],
+          "pass_freeze": true,
+          "command_ok": true
+        },
+        {
+          "format": "9x16",
+          "total_s": 0,
+          "max_s": 0,
+          "intervals": [],
+          "pass_freeze": true,
+          "command_ok": true
+        }
+      ],
+      "exposed_mesh_edges": 0,
+      "semantic_caption_alignment": "all immutable TTS words matched; phrases2–5 display words",
+      "portrait_Gemini": "focal crop covers the canvas, no letterbox",
+      "videos": [
+        {
+          "file": "B_60s_16x9.mp4",
+          "bytes": 15527330,
+          "sha256": "ea9b52cc82c4a8c2174bc46a32d9afb2168d928ad75727c36b99345054c79055",
+          "ffprobe": {
+            "width": 960,
+            "height": 540,
+            "r_frame_rate": "30/1",
+            "duration": "60.000000",
+            "nb_frames": "1800",
+            "side_data_list": [
+              {}
+            ]
+          }
+        },
+        {
+          "file": "B_60s_9x16.mp4",
+          "bytes": 14863383,
+          "sha256": "cfbde3fe3a835164411d0265cf5b9cf7d1a34ae9885bebc9363d8bed9b452c89",
+          "ffprobe": {
+            "width": 540,
+            "height": 960,
+            "r_frame_rate": "30/1",
+            "duration": "60.000000",
+            "nb_frames": "1800",
+            "side_data_list": [
+              {}
+            ]
+          }
+        }
+      ],
+      "findings": [
+        "Viewed all36 actual CI frames, plus both12-frame CI contact sheets.",
+        "Protected title/legend/caption panels, no molecules cutting text; portrait model fills the lower field.",
+        "Closed dish and water; no missing wedge, exposed grid or physically overlapping spheres.",
+        "Soap coverage evolves, flow is continuous, optical camera changes every3.6s; orange arrows match59s narration."
+      ]
+    }
+  },
+  "extrapolate_8_minutes_x_2_formats": {
+    "output_seconds": 960,
+    "method": "linear 8x paired-60s measured render; setup/authoring not linearly scalable",
+    "B_cpu_seconds": 6714.179784,
+    "B_pipeline_minutes": 76.81685189573334,
+    "B_bytes": 243125704,
+    "A_ci_minutes": 472.6666666666667,
+    "A_cpu_seconds": null
+  },
+  "limitations": [
+    "A CPU-seconds, Codex editing time and repair timing were not instrumented; kept null.",
+    "B analytic 2.5D model has continuous curves, not a physically based 3D ray-traced surface.",
+    "All original Gemini inputs are included. No gate threshold was lowered."
+  ]
 }
