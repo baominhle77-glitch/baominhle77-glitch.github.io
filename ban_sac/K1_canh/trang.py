@@ -364,3 +364,12 @@ class TrangK1(MovingCameraScene):
             raise AssertionError("beat %s: %d khung có chữ chạm ô PiP" % (b["id"], len(fs)))
         if self._khung != N:
             raise AssertionError("beat %s: %d khung != %d" % (b["id"], self._khung, N))
+        # Chỉ khi Manim render -s để tạo 1 khung đại diện, đặt vật lý đúng
+        # điểm GIỮA beat: không sinh video toàn tập, không đổi mốc TTS.
+        if os.environ.get("K1_MID_STILL") == "1":
+            tracker=getattr(self,"_c17_snapshot_clock",None)
+            if tracker is not None:
+                tracker.clear_updaters()
+                tracker.set_value(N/(2*FPS))
+                self.update_mobjects(0)
+                print("C17_MID_STILL",b["id"],bc.ten,N/(2*FPS),flush=True)
