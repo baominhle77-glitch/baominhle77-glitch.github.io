@@ -4,7 +4,7 @@ No episode identifiers or subject-specific object names are allowed here.
 import re
 CONTEXT_WORDS={'lab','laboratory','study','studies','research','researcher','report','reported','calculated','calculation','episode','chapter','example'}
 TIME_WORDS={'second','seconds','minute','minutes','hour','hours','day','days','month','months','year','years','century','centuries'}
-SI_BASES={'metre','meter','newton','joule','watt','pascal','kelvin','ampere','volt','ohm','hertz','tesla','gram','mole','molar','litre','liter','coulomb','farad','henry','siemens','weber','radian','steradian','becquerel','gray','sievert','katal'}
+SI_BASES={'metre','meter','newton','joule','watt','pascal','kelvin','ampere','volt','ohm','hertz','tesla','gram','mole','molar','litre','liter','coulomb','farad','henry','siemens','weber','radian','steradian','becquerel','gray','sievert','katal','degree','percent','percentage'}
 PREFIXES=('deca','hecto','kilo','mega','giga','tera','peta','deci','centi','milli','micro','nano','pico','femto','atto')
 FUNCTIONS={'point','points'}
 def unit(word):

@@ -1,7 +1,9 @@
 """Curated meaning units, aligned to immutable TTS words; no narration edits."""
-import json,re,math
+import json,re,math,sys
 from pathlib import Path
 H=Path(__file__).resolve().parent;R=H.parents[1]
+sys.path.insert(0,str(R))
+from gate_chung.captions import nonoverlapping
 def tokens(text):
  text=text.lower().replace('35.54','thirty five point five four').replace('25mm','twenty five millimolar').replace('0.5m/s','half a metre per second')
  return re.findall(r"[a-z]+(?:'[a-z]+)?",text)
@@ -18,7 +20,7 @@ def apply(data):
    alignment.append(dict(beat=bid,text=phrase,word_start=i,word_end=i+len(expected)-1,tts_start=offset+chunk[0]['t0'],tts_end=offset+chunk[-1]['t1']))
    i+=len(expected)
   assert i==len(words),(bid,i,len(words))
- data['captions']=caps;(H/'public/data.json').write_text(json.dumps(data,ensure_ascii=False,indent=2));out=R/'work/B';out.mkdir(parents=True,exist_ok=True);(out/'caption_alignment.json').write_text(json.dumps(alignment,ensure_ascii=False,indent=2));return data
+ data['captions']=nonoverlapping(caps);(H/'public/data.json').write_text(json.dumps(data,ensure_ascii=False,indent=2));out=R/'work/B';out.mkdir(parents=True,exist_ok=True);(out/'caption_alignment.json').write_text(json.dumps(alignment,ensure_ascii=False,indent=2));return data
 if __name__=='__main__':
  from prepare import source_data
  data=apply(source_data());print('SEMANTIC_CAPTIONS_PASS',len(data['captions']))

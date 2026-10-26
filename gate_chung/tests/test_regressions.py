@@ -56,6 +56,10 @@ class Regressions(unittest.TestCase):
   for word in ('lab','study','research','chapter'):self.assertEqual(role(word),'context',word)
   nouns=visual_nouns('Pepper races to the edge. An army marches across the map.');self.assertFalse(any(n['word'] in ('races','marches') for n in nouns))
   self.assertIn('millimolar',screen_data('25mM'));self.assertIn('second',screen_data('0.5m/s'))
+ def test_caption_padding_cannot_create_two_simultaneous_boxes(self):
+  from gate_chung.captions import nonoverlapping
+  rows=nonoverlapping([dict(start=0,end=32,text='Over clean water'),dict(start=30,end=60,text='the pull is strong')]);self.assertEqual(rows[0]['end'],rows[1]['start'])
+  with self.assertRaises(ValueError):nonoverlapping([dict(start=0,end=60),dict(start=30,end=90)])
  def test_core_has_no_episode_import(self):
   root=Path(__file__).resolve().parents[1]
   for p in root.glob('*.py'):
