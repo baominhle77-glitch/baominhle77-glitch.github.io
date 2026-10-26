@@ -7,16 +7,16 @@ import K1_ban_quang_hoc  # noqa: F401  bản sắc kênh Meniscus Lab (BS-4(a))
 
 
 def dat_doc():
-    config.pixel_width = 540 if os.environ.get("K1_MAU_540") == "1" else 1080
-    config.pixel_height = 960 if os.environ.get("K1_MAU_540") == "1" else 1920
+    config.pixel_width = int(os.environ.get("K1_PREVIEW_HEIGHT", "540")) if os.environ.get("K1_MAU_540") == "1" else 1080
+    config.pixel_height = round(int(os.environ.get("K1_PREVIEW_HEIGHT", "540"))*16/9) if os.environ.get("K1_MAU_540") == "1" else 1920
     config.frame_width = 8.0
     config.frame_height = 8.0 * 1920 / 1080
     return config.frame_width, config.frame_height
 
 
 def dat_ngang():
-    config.pixel_width = 960 if os.environ.get("K1_MAU_540") == "1" else 1920
-    config.pixel_height = 540 if os.environ.get("K1_MAU_540") == "1" else 1080
+    config.pixel_width = round(int(os.environ.get("K1_PREVIEW_HEIGHT", "540"))*16/9) if os.environ.get("K1_MAU_540") == "1" else 1920
+    config.pixel_height = int(os.environ.get("K1_PREVIEW_HEIGHT", "540")) if os.environ.get("K1_MAU_540") == "1" else 1080
     config.frame_height = 8.0
     config.frame_width = 8.0 * 1920 / 1080
     return config.frame_width, config.frame_height

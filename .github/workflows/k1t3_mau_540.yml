@@ -1,9 +1,26 @@
 name: k1t3-mau-540
 on:
+  workflow_dispatch:
+    inputs:
+      beat:
+        description: "Beat ID (h1…k2) or all"
+        default: h1
+        required: true
+      format:
+        description: "Aspect ratio"
+        type: choice
+        options: [16x9, 9x16]
+        default: 16x9
   pull_request:
     branches: [studio-dung]
     paths:
       - "ban_sac/K1_canh/**"
+      - "ban_sac/fonts/**"
+      - "ci/review_k1t3.py"
+      - "ci/job_summary.py"
+      - "ci/publish_review_images.py"
+      - "ci/test_review_k1t3.py"
+      - "tools/nha_may_kenh.py"
       - "out/M1_MARANGONI/storyboard.json"
       - "tools/tap/ML_K1_t3.json"
       - "ci/chay_mau_k1t3.py"
@@ -15,7 +32,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   mau-540:
-    if: github.head_ref == 'gpt/k1t3-c16-c17-01'
+    permissions:
+      contents: write
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'gpt/k1t3-c16-c17-01'
     runs-on: windows-latest
     timeout-minutes: 200
     env:
@@ -40,11 +59,39 @@ jobs:
           choco install ffmpeg -y --no-progress | Out-Null
           python -m venv E:\Studio\venv_manim
           E:\Studio\venv_manim\Scripts\python.exe -m pip install -q -r E:\Studio\ci_requirements.txt
-      - name: Build 60s sample 540p, 35 stills per format, freeze gate
+      - name: Regression checks for gates and exact frame clock
+        shell: pwsh
+        working-directory: E:\Studio
+        run: E:\Studio\venv_manim\Scripts\python.exe -m unittest discover -s ci -p "test_*.py" -v
+      - name: Dispatch one beat with native 3D render and gates
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        working-directory: E:\Studio
+        env:
+          REVIEW_BEAT: ${{ inputs.beat }}
+          REVIEW_FORMAT: ${{ inputs.format }}
+        run: |
+          E:\Studio\venv_manim\Scripts\python.exe ci\chay_ci.py --tap E:/Studio/tools/tap/ML_K1_t3.json --buoc ke_hoach,canh --bo-cuc ca_hai
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          E:\Studio\venv_manim\Scripts\python.exe ci\review_k1t3.py --beats $env:REVIEW_BEAT --formats $env:REVIEW_FORMAT
+      - name: Build 60s sample plus 35 native 3D middle stills and gates
+        if: github.event_name != 'workflow_dispatch'
         shell: pwsh
         working-directory: E:\Studio
         run: |
           E:\Studio\venv_manim\Scripts\python.exe ci\chay_mau_k1t3.py
+      - name: Host actual run sheets for inline Summary images
+        if: always()
+        shell: pwsh
+        working-directory: E:\Studio
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python ci/publish_review_images.py --root out/M1_MARANGONI_DUNG/_build
+      - name: Actual per-beat Job Summary
+        if: always()
+        shell: pwsh
+        working-directory: E:\Studio
+        run: python ci/job_summary.py --root out/M1_MARANGONI_DUNG/_build
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -52,18 +99,16 @@ jobs:
           name: k1t3-mau-540
           retention-days: 14
           path: |
-            Studio/out/M1_MARANGONI_DUNG/_build/mau_540/canh_thuc.json
-            Studio/out/M1_MARANGONI_DUNG/_build/mau_540/freeze_*.json
-            Studio/out/M1_MARANGONI_DUNG/_build/mau_540/chuyen_dong_beat.json
-            Studio/out/M1_MARANGONI_DUNG/_build/mau_540/khac_canh_35_*.json
-            Studio/out/M1_MARANGONI_DUNG/_build/mau_540/contact_sheet_*.jpg
-            Studio/out/M1_MARANGONI_DUNG/_build/mau_540/mau_00_60_*_540p.mp4
+            Studio/out/M1_MARANGONI_DUNG/_build/mau_540/
+            Studio/out/M1_MARANGONI_DUNG/_build/review_3d/
             Studio/out/M1_MARANGONI_DUNG/_build/ke_hoach.json
+            Studio/out/M1_MARANGONI_DUNG/_build/published_images.json
+
 
   chuyen-dong-vung:
     name: chuyen-dong-vung (C17-8)
     needs: mau-540
-    if: ${{ always() && github.head_ref == 'gpt/k1t3-c16-c17-01' }}
+    if: ${{ always() && github.event_name != 'workflow_dispatch' && github.head_ref == 'gpt/k1t3-c16-c17-01' }}
     runs-on: windows-latest
     timeout-minutes: 35
     steps:
@@ -83,6 +128,10 @@ jobs:
       - name: chuyen-dong-vung — all beats, both 540p formats
         shell: pwsh
         run: python ci/chuyen_dong_vung.py --root motion-input
+      - name: Full-frame Job Summary
+        if: always()
+        shell: pwsh
+        run: python ci/job_summary.py --root motion-input
       - name: Upload chuyen_dong_vung.json even when gate fails
         if: always()
         uses: actions/upload-artifact@v4

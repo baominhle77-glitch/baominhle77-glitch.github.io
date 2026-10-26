@@ -294,6 +294,10 @@ def lap(t, dung_thu=None):
                  "vung_cam.ap(_vc_bo_cuc, %r)" % t["vung_cam_pip"]]
     tiem += ["import %s  # noqa: E402,F401 — lớp cảnh của tập" % x[:-3].replace("/", ".")
              for x in t.get("lop_tap", []) if x not in k.get("khong_tiem", ())]
+    if t["kenh"] == "K1" and t["tap"] == 3:
+        tiem.append("from K1_canh.mo_phong_c17_v2 import SceneK1T3 as TrangK1")
+        for relative in ("K1_canh/mo_phong_c17_v2.py", "K1_canh/vat_the_3d.py", "fonts/NotoSans-Regular.ttf"):
+            tv.append(NM.BAN_SAC + "/" + relative)
     MG = sys.modules[Lop.canh.__module__]                      # mô-đun nơi canh() được viết -> vá ghi_moi ở đó
     canh_goc, ghi_goc = Lop.canh, MG.ghi_moi
 

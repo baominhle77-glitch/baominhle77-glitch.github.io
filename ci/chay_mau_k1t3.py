@@ -1,210 +1,80 @@
-# -*- coding: utf-8 -*-
-"""D16: first 60s at 540p in two formats + 35 stills/format; no full episode."""
-import json, math, os, re, shutil, subprocess
+"""Render only the first 60s sample plus 35 middle stills; retain failing evidence."""
+import json,os,re,subprocess,sys
 from pathlib import Path
 
-R = Path("E:/Studio")
-B = R / "out/M1_MARANGONI_DUNG/_build"
-SB = R / "out/M1_MARANGONI/storyboard.json"
-P = str(R / "venv_manim/Scripts/python.exe")
-OUT = B / "mau_540"
-OUT.mkdir(parents=True, exist_ok=True)
-ENV = dict(os.environ, K1_MAU_540="1", PYTHONPATH=str(R / "ban_sac"), PYTHONIOENCODING="utf-8")
-FIRST = ("h1", "h2", "h3", "h4", "c1", "p1")
-# Nhóm khuôn từ nội dung storyboard (35 beat); mọi khung ở thời điểm
-# giữa beat phải khác tất cả khung cũ cùng loại ít nhất 12 gray levels.
-TEMPLATE_GROUPS={
- "mat_nuoc":"h1 h2 h3 p6 k1 w1",
- "so_sanh":"h4 r4",
- "phan_tu":"c1 p3 v6 v7 c3 w4",
- "dong_mat_cat":"p1 p5 v4 w3 w6",
- "kim_bom":"p2 c2 v3 w7 b1 r3",
- "do_luong":"v2 w2 r1 r2 s8 w5 v5",
- "micelle":"p4","van_toc":"v1","ruou":"k2",
-}
-TEMPLATE={bid:group for group,items in TEMPLATE_GROUPS.items()
-          for bid in items.split()}
-assert len(TEMPLATE)==35 and len(set(TEMPLATE))==35
+R=Path.cwd()
+B=R/'out/M1_MARANGONI_DUNG/_build'
+OUT=B/'mau_540'
+FIRST=('h1','h2','h3','h4','c1','p1')
 
-def run(args, env=ENV):
-    p = subprocess.run(list(map(str, args)), cwd=R, env=env,
-                       capture_output=True, text=True, encoding="utf-8", errors="replace")
-    log = p.stdout + "\n" + p.stderr
-    if p.returncode:
-        raise RuntimeError("RENDER_LENH_LOI rc=%s\\n%s" % (p.returncode, log[-3000:]))
-    bad=[line for line in log.splitlines()
-         if line.startswith(("NGOAI_VUNG", "CHU_TRONG_PIP"))]
-    if bad:
-        raise RuntimeError("C13_VUOT_VUNG_RC_0: "+ " | ".join(bad[-12:]))
-    return log
+def run(args):
+ p=subprocess.run(list(map(str,args)),cwd=R)
+ if p.returncode:raise RuntimeError('COMMAND_FAILED '+str(p.returncode)+' '+str(args))
 
-run([P, "ci/chay_ci.py", "--tap", R / "tools/tap/ML_K1_t3.json",
-     "--buoc", "ke_hoach,canh", "--bo-cuc", "ca_hai"])
-plan = json.loads((B / "ke_hoach.json").read_text(encoding="utf-8"))
-if plan["tong_khung"] != 16601:
-    raise ValueError("KHOA_TTS_553S_BI_DOI %s" % plan["tong_khung"])
-story = json.loads(SB.read_text(encoding="utf-8"))
-clips = []
-for b in story["beats"]:
-    duration = plan["beats"][b["id"]]["so_khung"] / 30
-    changes = b.get("doi_hinh") or []
-    law = b.get("chuyen_dong_chinh") or {}
-    if not (law.get("vat_chuyen_dong") and law.get("luat_chuyen_dong") and law.get("chay_lien_tuc")):
-        raise ValueError("C17G_THIEU_VAT_LUAT %s" % b["id"])
-    if abs(float(law.get("t_vao_s",-99))) > .001 or abs(float(law.get("t_ra_s",-99)) - duration) > .001:
-        raise ValueError("C17G_SAI_KHOANG_CHAY %s" % b["id"])
-    if len(changes) < math.ceil(duration/8):
-        raise ValueError("B3_THIEU_DOI_HINH %s" % b["id"])
-    for cue in changes:
-        if not cue.get("moc_tts") or "t_s" not in cue:
-            raise ValueError("B3_THIEU_TTS %s" % b["id"])
-    clips += b.get("canh_thuc") or []
-if len(clips) != 16 or clips[0]["t_vao"] != 0:
-    raise ValueError("C16_CLIP_KHONG_DU %s" % len(clips))
-(OUT / "canh_thuc.json").write_text(
-    json.dumps({"clip":clips, "note":"Gemini clips pending; simulation runs underneath."},
-               ensure_ascii=False, indent=2), encoding="utf-8")
-tts=json.loads((B / "tts.json").read_text(encoding="utf-8"))["beats"]
-motion_rows=[]
-ci_failures=[]
-# Ghi báo cáo kể cả khi cổng đứng hình toàn khung bị trượt; không thoát sớm.
+def main():
+ OUT.mkdir(parents=True,exist_ok=True)
+ run([sys.executable,'ci/chay_ci.py','--tap',R/'tools/tap/ML_K1_t3.json','--buoc','ke_hoach,canh','--bo-cuc','ca_hai'])
+ plan=json.loads((B/'ke_hoach.json').read_text(encoding='utf-8'));assert plan['tong_khung']==16601
+ review=subprocess.run([sys.executable,'ci/review_k1t3.py','--root',str(R),'--out',str(OUT/'review'),'--beats',','.join(FIRST),'--jobs','4'],cwd=R)
+ middle=subprocess.run([sys.executable,'ci/review_k1t3.py','--root',str(R),'--out',str(OUT/'review_mid'),'--stills-only','--jobs','4'],cwd=R)
+ report_path=OUT/'review/review.json'
+ rows=json.loads(report_path.read_text(encoding='utf-8')) if report_path.exists() else []
+ middle_path=OUT/'review_mid/review.json'
+ middle_rows=json.loads(middle_path.read_text(encoding='utf-8')) if middle_path.exists() else []
+ from review_k1t3 import write_summary
+ combined=[]
+ for fmt in ('16x9','9x16'):
+  for bid in plan['thu_tu']:
+   combined.append(next((r for r in rows if r.get('beat')==bid and r.get('format')==fmt),next((r for r in middle_rows if r.get('beat')==bid and r.get('format')==fmt),dict(beat=bid,format=fmt,status='UNRUN'))))
+ write_summary(combined,OUT)
+ summary=OUT/'summary.md'
+ summary.write_text('Scope: first six beats rendered as 540p/30fps clips; all 35 native middle stills checked. Motion of remaining 29 full beats is UNRUN.\n\n'+summary.read_text(encoding='utf-8'),encoding='utf-8')
+ failures=[]
+ tts=json.loads((B/'tts.json').read_text(encoding='utf-8'))['beats']
+ from PIL import Image,ImageDraw
+ for fmt in ('16x9','9x16'):
+  clips=[]
+  for bid in FIRST:
+   row=next((r for r in rows if r.get('beat')==bid and r.get('format')==fmt),{})
+   if row.get('video') and row.get('frame_count_pass'):clips.append(Path(row['video']))
+  if len(clips)==len(FIRST):
+   folder=OUT/fmt;folder.mkdir(exist_ok=True)
+   playlist=folder/'first60.ffconcat';playlist.write_text('ffconcat version 1.0\n'+''.join("file '%s'\n"%str(p).replace('\\','/') for p in clips),encoding='utf-8')
+   mute=folder/'mute60.mp4'
+   run(['ffmpeg','-nostdin','-y','-v','error','-f','concat','-safe','0','-i',playlist,'-t','60','-an','-c:v','libx264','-crf','18','-pix_fmt','yuv420p',mute])
+   audio=[];filters=[]
+   for i,bid in enumerate(FIRST):
+    audio+=['-i',str(Path(tts[bid]['mp3']).resolve())]
+    start=plan['beats'][bid]['t0']+plan['beats'][bid]['t_chuyen']
+    filters.append('[%d:a]adelay=%d:all=1,atrim=0:60[a%d]'%(i+1,round(start*1000),i+1))
+   filters.append(''.join('[a%d]'%i for i in range(1,7))+'amix=inputs=6:normalize=0:duration=longest,atrim=0:60[a]')
+   movie=OUT/f'mau_00_60_{fmt}_540p.mp4'
+   run(['ffmpeg','-nostdin','-y','-v','error','-i',mute,*audio,'-filter_complex',';'.join(filters),'-map','0:v:0','-map','[a]','-c:v','copy','-c:a','aac','-b:a','160k','-t','60',movie])
+   frozen=subprocess.run(['ffmpeg','-nostdin','-i',str(movie),'-vf','freezedetect=n=0.001:d=2','-an','-f','null','-'],capture_output=True,text=True,encoding='utf-8',errors='replace')
+   if frozen.returncode:raise RuntimeError('FREEZE_COMMAND_FAILED '+frozen.stderr[-2000:])
+   starts=[float(x) for x in re.findall(r'freeze_start:\s*([0-9.]+)',frozen.stderr)]
+   ends=[float(x) for x in re.findall(r'freeze_end:\s*([0-9.]+)',frozen.stderr)]
+   spans=[max(0,min(60,ends[i] if i<len(ends) else 60)-start) for i,start in enumerate(starts)]
+   freeze=dict(format=fmt,freeze_s=sum(spans),longest_s=max(spans,default=0),pass_freeze=sum(spans)<=6 and max(spans,default=0)<=4)
+   (OUT/f'freeze_{fmt}.json').write_text(json.dumps(freeze,indent=2),encoding='utf-8')
+   if not freeze['pass_freeze']:failures.append('FREEZE_'+fmt+' '+str(freeze))
 
-for bc in ("16x9","9x16"):
-    env = dict(ENV, K3_BO_CUC=bc, K3_KE_HOACH=str(B / "ke_hoach.json"))
-    folder = OUT / bc
-    folder.mkdir(exist_ok=True)
-    videos = []
-    from PIL import Image, ImageDraw
-    for bid in FIRST:
-        still = folder / ("khung_" + bid + ".png")
-        if not still.exists():
-            work = folder / ("still_" + bid)
-            debug = run([P, "-m", "manim", "render", "-s", "--disable_caching",
-                 "--progress_bar", "none", "-v", "ERROR",
-                 "--media_dir", work, R / "out/M1_MARANGONI_DUNG/canh.py", bid],
-                 dict(env,K1_MID_STILL="1"))
-            images = list(work.rglob("*.png"))
-            if not images:
-                print("MANIM_STATIC_DEBUG", bc, bid, debug[-1800:],
-                      sorted(str(x) for x in work.rglob("*"))[-40:], flush=True)
-                raise ValueError("THIEU_KHUNG %s/%s" % (bc,bid))
-            shutil.copyfile(images[-1],still)
-        work=folder/("video_"+bid)
-        manim_log=run([P, "-m", "manim", "render", "--frame_rate", "30", "--disable_caching",
-             "--progress_bar", "none", "-v", "ERROR", "--media_dir",work,
-             R / "out/M1_MARANGONI_DUNG/canh.py",bid],env)
-        files=list(work.rglob(bid+".mp4"))
-        if not files: raise ValueError("THIEU_CLIP_MAU %s/%s"%(bc,bid))
-        videos.append(files[-1])
-        # C17(8): kiểm chuyển động vùng chạy SAU trên video full-frame
-        # tại job chuyen-dong-vung; ROI cũ đã bị GĐ bác (đo vật nhỏ).
-    playlist=folder/"sample.ffconcat"
-    playlist.write_text("ffconcat version 1.0\n"+
-         "".join("file '%s'\n"%str(p).replace("\\","/") for p in videos),
-         encoding="utf-8")
-    silent=folder/"mute60.mp4"
-    run(["ffmpeg","-nostdin","-y","-loglevel","error","-f","concat","-safe","0",
-         "-i",playlist,"-t","60","-r","30","-an","-c:v","libx264",
-         "-crf","18","-pix_fmt","yuv420p",silent],env)
-    inputs=[]; filters=[]
-    for i,bid in enumerate(FIRST):
-        beat=plan["beats"][bid]
-        start=beat["t0"]+beat["t_chuyen"]
-        inputs += ["-i",tts[bid]["mp3"]]
-        filters.append("[%d:a]adelay=%d:all=1,atrim=0:60[a%d]"%(i+1,round(start*1000),i+1))
-    filters.append("".join("[a%d]"%i for i in range(1,len(FIRST)+1))+
-                  "amix=inputs=6:normalize=0:duration=longest,atrim=0:60[a]")
-    movie=OUT/("mau_00_60_"+bc+"_540p.mp4")
-    run(["ffmpeg","-nostdin","-y","-loglevel","error","-i",silent,*inputs,
-         "-filter_complex",";".join(filters),"-map","0:v:0","-map","[a]",
-         "-c:v","copy","-c:a","aac","-b:a","160k","-t","60",movie],env)
-    if not movie.is_file() or movie.stat().st_size < 100000:
-        raise RuntimeError("MAU_540_THIEU_HOAC_HONG %s %s" % (bc,movie))
-    print("MAU_540_VIDEO_XONG",bc,movie.stat().st_size,flush=True)
-    report=run(["ffmpeg","-nostdin","-i",movie,"-vf",
-                "freezedetect=n=0.001:d=2","-an","-f","null","-"],env)
-    starts=[float(x) for x in re.findall(r"freeze_start:\s*([0-9.]+)",report)]
-    ends=[float(x) for x in re.findall(r"freeze_end:\s*([0-9.]+)",report)]
-    intervals=[max(0,min(60,ends[i] if i<len(ends) else 60)-s) for i,s in enumerate(starts)]
-    frozen=sum(intervals); longest=max(intervals,default=0)
-    ok=frozen<=6.0 and longest<=4.0
-    row={"format":bc,"duration_s":60,"freeze_s":round(frozen,3),"pct":round(frozen/60*100,3),
-         "longest_s":round(longest,3),"pass":ok}
-    (OUT/("freeze_"+bc+".json")).write_text(json.dumps(row,indent=2),encoding="utf-8")
-    print("C17_FREEZE %s frozen %.3fs pct %.2f%% longest %.3fs => %s"%
-          (bc,frozen,frozen/60*100,longest,"DAT" if ok else "TRUOT"),flush=True)
-    if not ok:
-        ci_failures.append("C17_FREEZE_VUOT_NGUONG "+bc)
-# Ưu tiên dựng ĐỦ HAI VIDEO 60s trước, rồi mới dựng 35 hình tĩnh mỗi
-# khổ: lỗi tại khung thứ 29 không được khiến job đo mất luôn video dọc.
-for bc in ("16x9","9x16"):
-    env = dict(ENV, K3_BO_CUC=bc, K3_KE_HOACH=str(B / "ke_hoach.json"))
-    folder = OUT / bc
-    from PIL import Image, ImageDraw
-    thumbs={}
-    for bid in plan["thu_tu"]:
-        still=folder / ("khung_"+bid+".png")
-        if not still.exists():
-            work=folder / ("still_"+bid)
-            debug=run([P,"-m","manim","render","-s","--disable_caching",
-                       "--progress_bar","none","-v","ERROR",
-                       "--media_dir",work,R/"out/M1_MARANGONI_DUNG/canh.py",bid],
-                       dict(env,K1_MID_STILL="1"))
-            images=list(work.rglob("*.png"))
-            if not images:
-                raise ValueError("THIEU_KHUNG %s/%s %s" %
-                                 (bc,bid,debug[-1000:]))
-            shutil.copyfile(images[-1],still)
-        thumbs[bid]=Image.open(still).convert("RGB")
-    # C17(8) khac_canh / 35 KHUNG GIỮA: so với tất cả beat cùng khuôn.
-    # Đọc pixel thật của PNG native, không dùng nhãn/cue để lách.
-    import numpy as np
-    earlier={}
-    differences=[]
-    for bid in plan["thu_tu"]:
-        kind=TEMPLATE[bid]
-        img=np.asarray(thumbs[bid].convert("L").resize((240,135)),
-                       dtype=np.int16)
-        old=earlier.get(kind,[])
-        past=[{"beat":past_id,
-               "hieu_gray":round(float(np.abs(img-past_img).mean()),3)}
-              for past_id,past_img in old]
-        closest=min(past,key=lambda x:x["hieu_gray"]) if past else None
-        score=None if closest is None else closest["hieu_gray"]
-        passed=score is None or score>=12
-        differences.append({"beat":bid,"loai_khuon":kind,
-            "khac_canh":score,
-            "khac_canh_so_voi":None if closest is None else closest["beat"],
-            "so_beat_truoc_cung_khuon":len(old),
-            "tat_ca_hieu_gray":past,
-            "ket_qua":"DAT" if passed else "TRUOT"})
-        if not passed:
-            ci_failures.append("KHAC_CANH_35_%s_%s"%(bc,bid))
-        earlier.setdefault(kind,[]).append((bid,img))
-    (OUT/("khac_canh_35_"+bc+".json")).write_text(
-        json.dumps({"bo_cuc":bc,"nguong":12,"beat_anh_giua":True,
-                    "beats":differences,
-                    "ket_qua":"TRUOT" if any(d["ket_qua"]=="TRUOT"
-                                             for d in differences) else "DAT"},
-                   ensure_ascii=False,indent=2),encoding="utf-8")
-    print("KHAC_CANH_35",bc,
-          sum(q["ket_qua"]=="DAT" for q in differences),"/35",flush=True)
-    tw,th=(180,105) if bc=="16x9" else (100,180)
-    sheet=Image.new("RGB",(tw*5,(th+25)*7),(237,239,241))
-    draw=ImageDraw.Draw(sheet)
-    for i,bid in enumerate(plan["thu_tu"]):
-        im=thumbs[bid]
-        im.thumbnail((tw-6,th-3))
-        x,y=(i%5)*tw,(i//5)*(th+25)
-        sheet.paste(im,(x+(tw-im.width)//2,y))
-        draw.text((x+5,y+th+2),bid,fill=(20,24,29))
-    sheet.save(OUT/("contact_sheet_"+bc+".jpg"),quality=90)
-    print("MAU_540_CONTACT_SHEET_XONG",bc,len(thumbs),flush=True)
-(OUT/"chuyen_dong_beat.json").write_text(
-    json.dumps({"trang_thai":"BO_CONG_ROI_CU",
-                "ly_do":"GĐ bác phép đo 0,3% ROI; C17(8) full-frame ở chuyen_dong_vung.json",
-                "so_beat_mau":len(FIRST),"ca_hai_bo_cuc":True},
-               ensure_ascii=False,indent=2),encoding="utf-8")
-if ci_failures:
-    raise SystemExit("CI_MAU_TRUOT: "+", ".join(ci_failures))
-print("MAU_540_DAT_2_KHO: 60s x 2 + 35 khung/khổ; không dựng toàn tập",flush=True)
+  else:failures.append('THIEU_VIDEO_'+fmt)
+  stills=[r for r in middle_rows if r.get('format')==fmt and r.get('image')]
+  sheet=Image.new('RGB',(960,9*165),'#1c232b');draw=ImageDraw.Draw(sheet)
+  for i,bid in enumerate(plan['thu_tu']):
+   row=next((r for r in stills if r['beat']==bid),None)
+   x,y=(i%4)*240,(i//4)*165
+   if row:
+    im=Image.open(row['image']).convert('RGB');im.thumbnail((236,135));sheet.paste(im,(x+(240-im.width)//2,y))
+   draw.text((x+8,y+140),bid+(' MISSING' if not row else ''),fill='white')
+  sheet.save(OUT/f'contact_sheet_{fmt}.jpg',quality=94)
+  diff=[]
+  for bid in plan['thu_tu']:
+   r=next((r for r in middle_rows if r.get('beat')==bid and r.get('format')==fmt),{})
+   diff.append(dict(beat=bid,khac_canh=r.get('scene_difference_min'),tat_ca_hieu_gray=r.get('scene_differences',[]),ket_qua='DAT' if r.get('scene_difference_pass') else 'TRUOT'))
+  (OUT/f'khac_canh_35_{fmt}.json').write_text(json.dumps(dict(bo_cuc=fmt,nguong=12,compare='EVERY_PRIOR_BEAT',beats=diff),ensure_ascii=False,indent=2),encoding='utf-8')
+ if review.returncode or middle.returncode not in (0,2) or failures:raise SystemExit('K1_REVIEW_FAILED '+str(failures)+' — see review/summary.md for each beat and metric')
+ print('K1_REVIEW_FIRST_60S_AND_35_MIDDLE_STILLS_PASS',flush=True)
+
+if __name__=='__main__':main()

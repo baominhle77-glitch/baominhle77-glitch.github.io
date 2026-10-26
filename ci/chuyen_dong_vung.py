@@ -24,10 +24,7 @@ BEAT_UNION_MIN = 15.
 LOW_PAIR_PCT = .3
 MAX_LOW_STREAK_S = 2.
 FIRST = ("h1", "h2", "h3", "h4", "c1", "p1")
-# Nhóm khuôn chỉ dùng để so cùng BẢN CHẤT HÌNH; so toàn bộ các beat
-# trước cùng nhóm, không chỉ beat liền trước (GĐ 26/10 lần 3).
-TEMPLATE={"h1":"mat_nuoc","h2":"mat_nuoc","h3":"mat_nuoc",
-          "h4":"hai_khay","c1":"mat_cat","p1":"mat_cat"}
+# Compare every prior beat, without template-group exemptions.
 SCENE_DIFF_MIN=12.
 MIN_PASS_2S=28
 
@@ -90,7 +87,7 @@ def measure(frames, plan, fmt):
         center_t=(t0+t1_seen)*.5
         center_idx=min(len(frames)-1,max(0,int(round(center_t*FPS))))
         center_frame=frames[center_idx].astype(np.int16)
-        kind=TEMPLATE[bid]
+        kind="all_prior_beats"
         prev=earlier.get(kind,[])
         differences=[(prior_id,float(np.abs(center_frame-prior_img).mean()))
                      for prior_id,prior_img in prev]
@@ -216,7 +213,7 @@ def main():
                 "dien_tich_trung_binh_pct":5,
                 "vung_gop_pct":15,
                 "chuoi_cap_duoi_0_3pct_toi_da_s":2,
-                "khac_canh_toi_thieu_so_voi_moi_beat_truoc_cung_khuon":12,
+                "khac_canh_toi_thieu_so_voi_moi_beat_truoc":12,
                 "so_doan_2s_dat_toi_thieu_trong_30":28},
             "ket_qua":"TRUOT" if failures else "DAT",
             "loi":failures,"thieu_video":missing,
