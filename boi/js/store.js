@@ -40,18 +40,23 @@ async function ping(fetchImpl, base, token, ms) {
   const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
   try { const r = await fetchImpl(`${base}/ping`, { signal: c.signal, headers: token ? { "x-boi-token": token } : {} }); return r.ok; } finally { clearTimeout(t); }
 }
-export async function probeBridge(fetchImpl = globalThis.fetch) {
-  if (!cauNoiAn()) { bridge.ok = false; bridge.xa = false; return false; }
+// Mọi bước dò đều có hạn chờ: cầu nối tắt/treo hay GitHub chậm thì trả false, trang dùng trạm AI ngay.
+export async function probeBridge(fetchImpl = globalThis.fetch, { on = cauNoiAn(), localMs = 1200, listMs = 5000, xaMs = 6000 } = {}) {
+  if (!on) { bridge.ok = false; bridge.xa = false; return false; }
   try {
-    if (await ping(fetchImpl, LOCAL_BASE, "", 1200)) { via.base = LOCAL_BASE; via.token = ""; bridge.ok = true; bridge.xa = false; return true; }
+    if (await ping(fetchImpl, LOCAL_BASE, "", localMs)) { via.base = LOCAL_BASE; via.token = ""; bridge.ok = true; bridge.xa = false; return true; }
   } catch (_) { /* không ở máy nhà */ }
   const token = ghepToken();
   let ok = false;
   {  // không có mã ghép vẫn dò: cầu nối nhận trang web bói theo Origin (25/10)
     try {
-      const r = await fetchImpl(CAU_NOI_JSON, { headers: { accept: "application/vnd.github.raw+json" }, cache: "no-store" });
-      const url = r.ok ? String((await r.json()).url || "") : "";
-      if (/^https:\/\/[\w.-]+$/.test(url) && await ping(fetchImpl, url + "/gemini", token, 6000)) { via.base = url + "/gemini"; via.token = token; ok = true; }
+      const c = new AbortController(); const t = setTimeout(() => c.abort(), listMs);
+      let url = "";
+      try {
+        const r = await fetchImpl(CAU_NOI_JSON, { headers: { accept: "application/vnd.github.raw+json" }, cache: "no-store", signal: c.signal });
+        url = r.ok ? String((await r.json()).url || "") : "";
+      } finally { clearTimeout(t); }
+      if (/^https:\/\/[\w.-]+$/.test(url) && await ping(fetchImpl, url + "/gemini", token, xaMs)) { via.base = url + "/gemini"; via.token = token; ok = true; }
     } catch (_) { ok = false; }
   }
   bridge.ok = ok; bridge.xa = ok;

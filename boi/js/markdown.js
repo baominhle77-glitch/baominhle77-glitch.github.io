@@ -11,7 +11,7 @@ export function readingToMarkdown(db, session, reading, roundIndex = 0) {
   L.push(`- Mã khoá SHA-256: \`${session.hash}\` — khoá lúc ${session.lockedAtText}`);
   L.push(`- Nguồn giải: ${reading.nguon === "ai" ? `AI (${reading.model || ""})` : "động cơ luật"}`);
   L.push("");
-  L.push("| Tầng | Tarot (số → tên lá) | Lenormand (số → tên lá) |");
+  L.push(round.chon ? "| Tầng | Tarot | Lenormand |" : "| Tầng | Tarot (số → tên lá) | Lenormand (số → tên lá) |");
   L.push("|---|---|---|");
   reading.tang.forEach((t, ti) => {
     const tc = (round.tarot[ti] || []).map((c) => cardName(db, "tarot", c)).join("<br>") || "—";

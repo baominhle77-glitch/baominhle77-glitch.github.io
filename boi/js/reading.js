@@ -39,7 +39,9 @@ export function yesNo(x) {
 export function cardName(db, deck, cell) {
   if (!cell || !cell.ok) return `${cell?.raw ?? "?"} → (ô trống, chờ số thay)`;
   const c = deck === "tarot" ? tarotCard(db, cell.card) : lenCard(db, cell.card);
-  return `${String(cell.n).padStart(2, "0")} → ${c.vi} (${c.en})${cell.rev ? " — ngược" : ""}`;
+  // Lá bấm từ lưới úp: vị trí trong lưới không có nghĩa với người rút → chỉ ghi tên lá
+  const num = cell.chon ? "" : `${String(cell.n).padStart(2, "0")} → `;
+  return `${num}${c.vi} (${c.en})${cell.rev ? " — ngược" : ""}`;
 }
 
 export function lenPairs(cells) {
@@ -146,11 +148,18 @@ export function readTier(db, session, ti, tarotCells = [], lenCells = [], opts =
     ten, ti, tarot, pairs, chain: chainText(lenCardsOk), diem, band: b?.key, S, chot, nghen, khuyen,
     yesno: mode === "yesno" && diem != null ? yesNo(diem) : null,
     repeats: repeats.map(({ deck, cell, card }) => ({
-      text: `${deck === "tarot" ? "Tarot" : "Lenormand"} số ${String(cell.n).padStart(2, "0")} (${card.vi}) lặp lại từ lượt ${cell.repeatOf.round}, tầng ${cell.repeatOf.tier}, ô ${cell.repeatOf.pos} — lá lặp = nhấn mạnh, không phải xác nhận độc lập.`,
+      doclap: !!cell.repeatOf.doclap,
+      text: cell.repeatOf.doclap
+        ? `${deck === "tarot" ? "Tarot" : "Lenormand"} ${card.vi} ra lại (đã ra ở ${cell.repeatOf.round > 1 ? `lượt ${cell.repeatOf.round}, ` : ""}${repeatTierName(session, cell.repeatOf.tier)}) dù bộ bài đã xáo lại đủ lá — chủ đề lặp lại xuyên các ${tierWord(session)}, đáng để ý.`
+        : `${deck === "tarot" ? "Tarot" : "Lenormand"} số ${String(cell.n).padStart(2, "0")} (${card.vi}) lặp lại từ lượt ${cell.repeatOf.round}, tầng ${cell.repeatOf.tier}, ô ${cell.repeatOf.pos} — cùng số trên cùng bộ nên chỉ là nhấn mạnh, không phải xác nhận độc lập.`,
     })),
     empty, scored,
   };
 }
+
+// "tháng" khi các tầng là tháng, ngược lại "tầng"
+export const tierWord = (session) => (session.tiers.length > 1 && session.tiers.every((t) => /^tháng/i.test(t.ten || "")) ? "tháng" : "tầng");
+export const repeatTierName = (session, tier1) => session.tiers[tier1 - 1]?.ten || `tầng ${tier1}`;
 
 export function readRound(db, session, ri) {
   const round = session.rounds[ri];
@@ -188,7 +197,9 @@ export function summarize(db, session, rounds, settings = {}) {
     lines.push(`Các lượt rút thêm trung bình ${Math.round(em * 10) / 10}/10 — chỉ làm rõ thêm, không thay kết luận của trải chính.`);
   }
   const reps = tiers.flatMap((t) => t.repeats);
-  if (reps.length) lines.push(`Có ${reps.length} lá lặp: lá lặp là nhấn mạnh, không phải xác nhận độc lập.`);
+  if (reps.length) lines.push(reps.some((r) => r.doclap)
+    ? `Có ${reps.length} lá ra lại ở tầng khác dù mỗi tầng xáo lại đủ bộ: đó là chủ đề lặp lại xuyên các ${tierWord(session)}.`
+    : `Có ${reps.length} lá lặp: lá lặp là nhấn mạnh, không phải xác nhận độc lập.`);
   if (spreadById(session.spreadId).mode === "yesno") lines.push(`Kết luận Có/Không từng tầng: ${main.map((t) => `${t.ten} → ${t.yesno}`).join("; ")}.`);
 
   const all = tiers.flatMap((t) => t.scored);

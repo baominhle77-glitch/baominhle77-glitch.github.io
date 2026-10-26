@@ -1,141 +1,154 @@
 <!-- Sinh tự động bởi boi/tools/mau-giai.mjs — không sửa tay -->
-> **Bản mẫu động cơ luật (không dùng AI).** Seed cố định để ai chạy lại cũng ra đúng bản này; khi bói thật, seed ngẫu nhiên nên cùng dãy số sẽ ra lá khác.
+> **Bản mẫu động cơ luật (không dùng AI).** Seed cố định để ai chạy lại cũng ra đúng bản này. Khi bói thật: mỗi câu hỏi một seed mới (crypto.getRandomValues), mỗi tầng xáo lại đủ 78 Tarot + 36 Lenormand, người dùng bấm lá úp (không số) cho từng tầng rồi “Lưu”; lá ra lại ở nhiều tầng là chủ đề lặp lại xuyên các tháng.
 > Seed mẫu: `4d41552d4749414922626f692d7461726f742d6c656e6f726d616e642d3031` · Giả định bối cảnh tiền: thu nhập hiện tại 20 tr/tháng, mục tiêu 30 tr/tháng.
 
 # thu nhập 3 tháng tới
 
 - Mẫu trải: 3 tháng tới
-- Mã khoá SHA-256: `a9ac572d04f2b7fe87e7892fda3881a5186a57ca2fda5699845df1b66b4df804` — khoá lúc 25/10/2026 07:00:00 (GMT+7)
+- Mã khoá SHA-256: `b345d66329d42bedda7f52d41e5a825b474d4d4a7fe0af5b215415b7f9895840` — khoá lúc 25/10/2026 07:00:00 (GMT+7)
 - Nguồn giải: động cơ luật
 
-| Tầng | Tarot (số → tên lá) | Lenormand (số → tên lá) |
+| Tầng | Tarot | Lenormand |
 |---|---|---|
-| Tháng 11/2026 | 08 → Tiểu đồng Cốc (Page of Cups)<br>37 → 7 Gậy (Seven of Wands)<br>50 → Vua Gậy (King of Wands)<br>69 → Hoàng hậu Gậy (Queen of Wands) | 22 → Người Phụ Nữ (Woman)<br>25 → Con Chó (Dog)<br>27 → Thập Giá (Cross)<br>29 → Các Vì Sao (Stars) |
-| Tháng 12/2026 | 68 → 9 Kiếm (Nine of Swords)<br>75 → Vua Cốc (King of Cups)<br>36 → Hoàng hậu Kiếm (Queen of Swords)<br>22 → Át Gậy (Ace of Wands) | 10 → Mỏ Neo (Anchor)<br>20 → Toà Tháp (Tower)<br>25 → Con Chó (Dog)<br>21 → Cỏ Bốn Lá (Clover) |
-| Tháng 1/2027 | 08 → Tiểu đồng Cốc (Page of Cups)<br>36 → Hoàng hậu Kiếm (Queen of Swords)<br>55 → 9 Cốc (Nine of Cups)<br>71 → Mặt Trăng (The Moon) | 11 → Ngôi Nhà (House)<br>23 → Con Rắn (Snake)<br>26 → Con Cá (Fish)<br>34 → Kỵ Sĩ (Rider) |
+| Tháng 11/2026 | Cỗ Xe (The Chariot)<br>Hoàng Đế (The Emperor)<br>8 Tiền (Eight of Pentacles)<br>Bánh Xe Số Phận (Wheel of Fortune) | Con Chó (Dog)<br>Hoa Huệ (Lily)<br>Kỵ Sĩ (Rider)<br>Lá Thư (Letter) |
+| Tháng 12/2026 | 8 Kiếm (Eight of Swords)<br>Hoàng Đế (The Emperor)<br>6 Kiếm (Six of Swords)<br>7 Kiếm (Seven of Swords) | Đôi Chim (Birds)<br>Cỏ Bốn Lá (Clover)<br>Toà Tháp (Tower)<br>Ngôi Nhà (House) |
+| Tháng 1/2027 | Át Tiền (Ace of Pentacles)<br>Vua Kiếm (King of Swords)<br>4 Tiền (Four of Pentacles)<br>Thần Chết (Death) | Mỏ Neo (Anchor)<br>Con Cò (Stork)<br>Lá Thư (Letter)<br>Toà Tháp (Tower) |
 
 Trải 3 tháng tới cho câu hỏi “thu nhập 3 tháng tới”: 12 Tarot + 12 Lenormand.
 
 ## Chủ đề trội
-- Không có lá Tiền (Pentacles) nào: tiền không phải trục chính của giai đoạn này, nó đến gián tiếp qua việc khác — đừng kỳ vọng một khoản rơi thẳng vào tay.
-- Chỉ 1 lá Ẩn chính: thu nhập phụ thuộc chủ yếu vào cách làm của chính mình.
-- Nhiều lá người (7 lá hoàng gia): kết quả gắn với người khác nhiều hơn là với may rủi.
-- 3 lá Hoàng hậu: chủ đề “khéo léo, nuôi dưỡng” lặp lại, không phải ngẫu nhiên.
-- Lá số 9 xuất hiện 2 lần — nhịp “gần đích, gồng chặng cuối” là nền của trải này.
-- Lá tiền mạnh: Vua Gậy, 9 Cốc, Con Cá.
-- Những lá ghìm tiền xuống: 9 Kiếm, Mặt Trăng, Thập Giá, Con Rắn.
-- Lá người (Người Phụ Nữ) xuất hiện: có một nhân vật cụ thể đứng trong câu chuyện, xem lá kề bên để biết vai trò.
+- Chất Khí chiếm ưu thế với 4 lá — nhiều suy tính, căng thẳng và va chạm — đầu óc mệt hơn tay chân.
+- 5 trên 12 lá là Ẩn chính — dòng tiền đang chịu tác động của những thay đổi lớn hơn việc hằng ngày.
+- 2 lá số 8: chủ đề “chuyển động, kỷ luật” lặp lại, không phải ngẫu nhiên.
+- Lá tiền mạnh: Cỗ Xe, Át Tiền.
+- Những lá ghìm tiền xuống: 8 Kiếm, 7 Kiếm, Thần Chết.
 
-## Tháng 11/2026 — 6.5/10
+## Tháng 11/2026 — 7.5/10
 **Tarot theo vị trí**
-- Tiến trình — Tiểu đồng Cốc: có tin vui. Cảnh báo kèm: ngây thơ, dễ tin.
-- 7 Gậy đứng ở hiệu quả: hiệu quả tốn sức. Phải giữ chỗ đứng trước cạnh tranh; làm nhiều để giữ thu nhập.
-- Ở vị trí kết quả tài chính, Vua Gậy cho thấy kết quả lớn do mình cầm lái. Dẫn dắt dự án lớn, làm chủ; tiền từ tầm nhìn và quyết đoán.
-- Hoàng hậu Gậy đứng ở tín hiệu mức tiền: tiền tăng khá. Tự tin bán hàng, thu hút khách; quản việc khéo.
+- Cỗ Xe đứng ở tiến trình: tiến nhanh, có đà. Về tiền: đẩy mạnh doanh số, thắng nhờ quyết tâm; di chuyển, mở rộng.
+- Ở vị trí hiệu quả, Hoàng Đế cho thấy hiệu quả nhờ kỷ luật. Cảnh báo kèm: cứng nhắc, áp đặt, xung đột với cấp trên/quyền lực.
+- Kết quả tài chính — 8 Tiền: kết quả chắc. Cảnh báo kèm: làm nhiều mà không nâng giá.
+- Tín hiệu mức tiền — Bánh Xe Số Phận: tiền dao động, có nhịp bật. Về tiền: thời vận xoay chuyển; có cơ hội bất ngờ, thu nhập lên xuống theo chu kỳ.
 
-**Dòng chảy:** Các vị trí giữ cùng một mặt bằng — nhịp đều, ít bất ngờ. Kết quả và tín hiệu mức tiền cùng một hướng (Vua Gậy – Hoàng hậu Gậy).
+**Dòng chảy:** Các vị trí giữ cùng một mặt bằng — nhịp đều, ít bất ngờ. Kết quả và tín hiệu mức tiền cùng một hướng (8 Tiền – Bánh Xe Số Phận).
 
 **Lenormand theo cặp**
-- Cặp Người Phụ Nữ → Con Chó (ghép theo luật): người phụ nữ mang tính trung thành, đáng tin — trung tính, phải nhìn lá xung quanh.
-- Thập Giá + Các Vì Sao: Gánh nặng mang tính rõ ràng, tỏa sáng — vấn đề có lối ra, xấu chuyển dần sang được.
+- Cặp Con Chó → Hoa Huệ (ghép theo luật): người bạn/người tin cậy mang tính lâu dài, êm — hai lá cùng thuận → củng cố nhau, việc trôi.
+- Kỵ Sĩ + Lá Thư: Tin nhắn/giấy tờ đến nhanh.
 
 **Bộ ba**
-- Người Phụ Nữ – Con Chó – Thập Giá: người phụ nữ (trung thành) dẫn tới gánh nặng — chiều xấu đi.
-- Bộ ba Con Chó/Thập Giá/Các Vì Sao: khởi là người bạn/người tin cậy, qua bước nặng, kết ở định hướng — giữ nguyên nhịp.
+- Con Chó – Hoa Huệ – Kỵ Sĩ: người bạn/người tin cậy (lâu dài) dẫn tới tin tức — giữ nguyên nhịp.
+- Bộ ba Hoa Huệ/Kỵ Sĩ/Lá Thư: khởi là sự bình yên, qua bước nhanh, kết ở giấy tờ — giữ nguyên nhịp.
 
-**Cả chuỗi:** Khởi từ người phụ nữ, diễn biến trung thành → nặng, kết theo hướng rõ ràng, tỏa sáng, có hướng. Tổng thể nghiêng thuận (2 lá thuận, 1 lá cản).
+**Cả chuỗi:** Khởi từ người bạn/người tin cậy, diễn biến lâu dài → nhanh, kết theo hướng bằng văn bản, thông báo. Tổng thể nghiêng thuận (4 lá thuận, 0 lá cản). Cặp đáng chú ý nhất: Kỵ Sĩ + Lá Thư — tin nhắn/giấy tờ đến nhanh.
 
-> **Chốt tầng:** Tháng 11/2026 là tầng sáng (6.5/10): dòng tiền có lực đẩy thật, chủ yếu nhờ Vua Gậy.
+> **Chốt tầng:** Tháng 11/2026 là tầng sáng (7.5/10): dòng tiền có lực đẩy thật, chủ yếu nhờ Cỗ Xe.
 >
-> **Điểm nghẽn:** Nút thắt là Thập Giá — áp lực kéo dài, mệt mỏi.
+> **Điểm nghẽn:** Không có lá cản rõ; điểm mỏng nhất là Hoa Huệ (chậm, an phận).
 >
-> **Lời khuyên:** Chia nhỏ gánh nặng, ưu tiên trả nợ, xin hỗ trợ khi cần. Quyết đoán nhưng giao chi tiết cho người kỹ tính.
+> **Lời khuyên:** Tận dụng Cỗ Xe: chọn một hướng và dồn lực; đừng bắt cá hai tay.
 
-## Tháng 12/2026 — 7/10
+## Tháng 12/2026 — 5.5/10
 **Tarot theo vị trí**
-- Ở vị trí tiến trình, 9 Kiếm cho thấy lo âu. Cảnh báo kèm: quyết sai vì hoảng.
-- Vua Cốc đứng ở hiệu quả: hiệu quả ổn định. Về tiền: quản lý bình tĩnh, giữ quan hệ làm ăn lâu dài.
-- Kết quả tài chính — Hoàng hậu Kiếm: kết quả rõ ràng. Về tiền: phân tích tỉnh táo, đàm phán thẳng, tự chủ tài chính.
-- Át Gậy đứng ở tín hiệu mức tiền: tiền có tín hiệu tăng từ việc mới. Về tiền: cơ hội việc/dự án mới, nguồn thu mới vừa nhen lên.
+- Tiến trình — 8 Kiếm: bị kẹt. Về tiền: thấy mình kẹt trong việc/thu nhập; thực ra lối ra có.
+- Hoàng Đế đứng ở hiệu quả: hiệu quả nhờ kỷ luật. Về tiền: tiền đến từ hệ thống, quản trị, vị trí ổn định; kế hoạch rõ thì thắng. Lá này đã ra ở tầng 1 và giờ ra lại dù bộ bài xáo lại đủ lá — “kiểm soát” là chủ đề lặp lại, không phải ngẫu nhiên.
+- Ở vị trí kết quả tài chính, 6 Kiếm cho thấy qua được khó khăn. Cảnh báo kèm: mang theo vấn đề cũ sang chỗ mới.
+- 7 Kiếm đứng ở tín hiệu mức tiền: tiền có thể bị hụt/lấy mất. Về tiền: có người gian lận, ăn cắp ý tưởng/tiền; hoặc mình phải khéo.
 
-**Dòng chảy:** Dòng chảy đi lên: mở bằng 9 Kiếm, khép bằng Át Gậy — càng về cuối dòng tiền càng sáng. Kết quả và tín hiệu mức tiền cùng một hướng (Hoàng hậu Kiếm – Át Gậy).
+**Dòng chảy:** Đỉnh nằm ở giữa (Hoàng Đế tại hiệu quả): cao điểm đến sớm rồi chùng xuống, nên chốt lời đúng lúc. Kết quả (6 Kiếm) tốt hơn tín hiệu mức tiền (7 Kiếm): việc thành nhưng con số không cao như mong.
 
 **Lenormand theo cặp**
-- Mỏ Neo + Toà Tháp: Sự ổn định mang tính chính thức, lâu dài — hai lá cùng thuận → củng cố nhau, việc trôi.
-- Cặp Con Chó → Cỏ Bốn Lá (ghép theo luật): người bạn/người tin cậy mang tính may mắn, nhẹ nhàng — hai lá cùng thuận → củng cố nhau, việc trôi.
+- Đôi Chim + Cỏ Bốn Lá: Cuộc trao đổi mang tính may mắn, nhẹ nhàng — trung tính, phải nhìn lá xung quanh.
+- Cặp Toà Tháp → Ngôi Nhà (ghép theo luật): tổ chức mang tính ổn định, an toàn — hai lá cùng thuận → củng cố nhau, việc trôi.
 
 **Bộ ba**
-- Bộ ba Mỏ Neo/Toà Tháp/Con Chó: khởi là sự ổn định, qua bước chính thức, kết ở người bạn/người tin cậy — giữ nguyên nhịp.
-- Toà Tháp – Con Chó – Cỏ Bốn Lá: tổ chức (trung thành) dẫn tới cơ hội nhỏ — giữ nguyên nhịp.
+- Bộ ba Đôi Chim/Cỏ Bốn Lá/Toà Tháp: khởi là cuộc trao đổi, qua bước may mắn, kết ở tổ chức — giữ nguyên nhịp.
+- Cỏ Bốn Lá – Toà Tháp – Ngôi Nhà: cơ hội nhỏ (chính thức) dẫn tới gia đình — giữ nguyên nhịp.
 
-**Cả chuỗi:** Chuỗi Lenormand nghiêng thuận: 4 thuận, 0 cản. Khởi từ sự ổn định, diễn biến chính thức → trung thành, kết theo hướng may mắn, nhẹ nhàng, ngắn hạn.
+**Cả chuỗi:** Chuỗi Lenormand nghiêng thuận: 3 thuận, 0 cản. Khởi từ cuộc trao đổi, diễn biến may mắn → chính thức, kết theo hướng ổn định, an toàn, trong nhà.
 
-> **Chốt tầng:** Chốt: thuận — Vua Cốc kéo cả tầng lên, chỉ cần canh 9 Kiếm (7/10).
+> **Chốt tầng:** Tháng 12/2026 ở mức giữa (5.5/10): có Hoàng Đế đỡ nhưng 7 Kiếm ghìm lại.
 >
-> **Điểm nghẽn:** 9 Kiếm: quyết sai vì hoảng.
+> **Điểm nghẽn:** 7 Kiếm: lừa đảo, mất trộm, thông tin bị lấy.
 >
-> **Lời khuyên:** Với 9 Kiếm: viết con số thật ra giấy; nỗi lo thường lớn hơn thực tế. Tận dụng Cỏ Bốn Lá: chớp cơ hội nhỏ ngay, đừng chờ.
+> **Lời khuyên:** Với 7 Kiếm: kiểm tra sổ sách, bảo mật tài khoản, không giao tiền khi chưa rõ. Tận dụng Cỏ Bốn Lá: chớp cơ hội nhỏ ngay, đừng chờ.
 
-↻ Lenormand số 25 (Con Chó) lặp lại từ lượt 1, tầng 1, ô 2 — lá lặp = nhấn mạnh, không phải xác nhận độc lập.
+↻ Tarot Hoàng Đế ra lại (đã ra ở Tháng 11/2026) dù bộ bài đã xáo lại đủ lá — chủ đề lặp lại xuyên các tháng, đáng để ý.
 
-## Tháng 1/2027 — 6.5/10
+## Tháng 1/2027 — 7/10
 **Tarot theo vị trí**
-- Ở vị trí tiến trình, Tiểu đồng Cốc cho thấy có tin vui. Tin vui nhỏ, lời mời, ý tưởng sáng tạo kiếm tiền.
-- Ở vị trí hiệu quả, Hoàng hậu Kiếm cho thấy hiệu quả nhờ lý trí. Cảnh báo kèm: lạnh lùng, đa nghi quá mức.
-- Kết quả tài chính — 9 Cốc: toại nguyện. Cảnh báo kèm: tự mãn, hưởng thụ quá đà.
-- Mặt Trăng đứng ở tín hiệu mức tiền: tiền bấp bênh, có nguy cơ hụt. Tiền mập mờ, thông tin không rõ; dễ bị lừa hoặc tự lừa mình.
+- Tiến trình — Át Tiền: có hạt giống tiền. Cảnh báo kèm: bỏ lỡ vì chần chừ.
+- Vua Kiếm đứng ở hiệu quả: hiệu quả nhờ đầu óc. Quyết định dựa trên chuyên môn, pháp lý, chiến lược.
+- 4 Tiền đứng ở kết quả tài chính: giữ được, không tăng. Về tiền: giữ chặt tiền, tích luỹ; ổn nhưng không tăng.
+- Ở vị trí tín hiệu mức tiền, Thần Chết cho thấy tiền giảm trước khi đổi chiều. Cảnh báo kèm: bám víu cái đã hết, mất thu nhập đột ngột.
 
-**Dòng chảy:** 9 Cốc ở kết quả tài chính là đỉnh của tầng; sau đó lực giảm dần. Kết quả (9 Cốc) tốt hơn tín hiệu mức tiền (Mặt Trăng): việc thành nhưng con số không cao như mong.
+**Dòng chảy:** Mở tốt (Át Tiền) mà kết yếu (Thần Chết): phần đầu dễ làm mình chủ quan. Kết quả (4 Tiền) tốt hơn tín hiệu mức tiền (Thần Chết): việc thành nhưng con số không cao như mong.
 
 **Lenormand theo cặp**
-- Cặp Ngôi Nhà → Con Rắn (ghép theo luật): gia đình mang tính vòng vèo, phức tạp — việc tốt nhưng vướng ở khâu sau: người xảo quyệt, ghen ghét, lừa đảo tinh vi.
-- Con Cá + Kỵ Sĩ: Dòng tiền mang tính nhanh, sắp đến — hai lá cùng thuận → củng cố nhau, việc trôi.
+- Cặp Mỏ Neo → Con Cò (ghép theo luật): sự ổn định mang tính đổi mới, tốt lên — hai lá cùng thuận → củng cố nhau, việc trôi.
+- Lá Thư + Toà Tháp: Giấy tờ mang tính chính thức, lâu dài — hai lá cùng thuận → củng cố nhau, việc trôi.
 
 **Bộ ba**
-- Ngôi Nhà – Con Rắn – Con Cá: gia đình (vòng vèo) dẫn tới dòng tiền — chiều tốt lên.
-- Bộ ba Con Rắn/Con Cá/Kỵ Sĩ: khởi là người khéo/xảo, qua bước sinh lời, kết ở tin tức — chiều tốt lên.
+- Mỏ Neo – Con Cò – Lá Thư: sự ổn định (đổi mới) dẫn tới giấy tờ — giữ nguyên nhịp.
+- Bộ ba Con Cò/Lá Thư/Toà Tháp: khởi là sự thay đổi, qua bước bằng văn bản, kết ở tổ chức — giữ nguyên nhịp.
 
-**Cả chuỗi:** Khởi từ gia đình, diễn biến vòng vèo → sinh lời, kết theo hướng nhanh, sắp đến. Tổng thể nghiêng thuận (3 lá thuận, 1 lá cản).
+**Cả chuỗi:** Chuỗi Lenormand nghiêng thuận: 4 thuận, 0 cản. Khởi từ sự ổn định, diễn biến đổi mới → bằng văn bản, kết theo hướng chính thức, lâu dài, cứng.
 
-> **Chốt tầng:** Tháng 1/2027 là tầng sáng (6.5/10): dòng tiền có lực đẩy thật, chủ yếu nhờ Con Cá.
+> **Chốt tầng:** Tháng 1/2027 là tầng sáng (7/10): dòng tiền có lực đẩy thật, chủ yếu nhờ Át Tiền.
 >
-> **Điểm nghẽn:** Nút thắt là Mặt Trăng — lừa đảo, giấy tờ mờ, người hứa hẹn không thật, lo âu quyết sai.
+> **Điểm nghẽn:** Nút thắt là Thần Chết — bám víu cái đã hết, mất thu nhập đột ngột.
 >
-> **Lời khuyên:** Kiểm chứng mọi lời hứa tiền, không chuyển khoản khi chưa rõ. Quản lý dòng tiền, tách tiền kinh doanh và cá nhân.
+> **Lời khuyên:** Chấp nhận cắt bỏ cái không còn sinh lời, chuẩn bị phương án mới. Nắm lấy cơ hội, gieo đều đặn.
 
-↻ Tarot số 08 (Tiểu đồng Cốc) lặp lại từ lượt 1, tầng 1, ô 1 — lá lặp = nhấn mạnh, không phải xác nhận độc lập.
+↻ Lenormand Lá Thư ra lại (đã ra ở Tháng 11/2026) dù bộ bài đã xáo lại đủ lá — chủ đề lặp lại xuyên các tháng, đáng để ý.
 
-↻ Tarot số 36 (Hoàng hậu Kiếm) lặp lại từ lượt 1, tầng 2, ô 3 — lá lặp = nhấn mạnh, không phải xác nhận độc lập.
+↻ Lenormand Toà Tháp ra lại (đã ra ở Tháng 12/2026) dù bộ bài đã xáo lại đủ lá — chủ đề lặp lại xuyên các tháng, đáng để ý.
 
 ## Nối các tầng
-- Tháng 12/2026 dẫn đầu với 7/10; Tháng 1/2027 đáy với 6.5/10.
+- Tháng 11/2026 dẫn đầu với 7.5/10; Tháng 12/2026 đáy với 5.5/10.
+- Cú rơi lớn nhất: từ Tháng 11/2026 sang Tháng 12/2026 giảm 2 điểm — chuẩn bị trước cho khúc này.
 - Cả trải đi ngang: không có tầng nào bứt hẳn — ổn định nhưng không đột phá.
-- Tiểu đồng Cốc có mặt ở tầng 1 và 3: sợi chỉ xuyên suốt là “tin vui” — nhấn mạnh, không phải bằng chứng thêm.
-- Con Chó có mặt ở tầng 1 và 2: sợi chỉ xuyên suốt là “bạn trung thành” — nhấn mạnh, không phải bằng chứng thêm.
-- Hoàng hậu Kiếm có mặt ở tầng 2 và 3: sợi chỉ xuyên suốt là “sắc sảo” — nhấn mạnh, không phải bằng chứng thêm.
-- Năng lượng dịch từ Lửa ở tầng đầu sang Nước ở tầng cuối: cảm xúc và các mối quan hệ chi phối; quyết định dễ bị cảm tính kéo đi.
+- Hoàng Đế ra ở cả Tháng 11/2026 và Tháng 12/2026 dù mỗi tháng xáo lại đủ bộ: “kiểm soát” là chủ đề lặp lại xuyên các tháng — việc này chưa xong, nó còn quay lại.
+- Lá Thư ra ở cả Tháng 11/2026 và Tháng 1/2027 dù mỗi tháng xáo lại đủ bộ: “giấy tờ” là chủ đề lặp lại xuyên các tháng — việc này chưa xong, nó còn quay lại.
+- Toà Tháp ra ở cả Tháng 12/2026 và Tháng 1/2027 dù mỗi tháng xáo lại đủ bộ: “tổ chức” là chủ đề lặp lại xuyên các tháng — việc này chưa xong, nó còn quay lại.
 
 ## Mâu thuẫn
-- Tháng 1/2027 điểm khá (6.5/10) nhưng có Mặt Trăng, Con Rắn: bề ngoài thuận, bên trong có chỗ không thật — kiểm tra người và giấy tờ.
+- Không có mâu thuẫn lớn: Tarot và Lenormand nói cùng một hướng ở các tầng.
 
 ## Quy đổi tiền (triệu đồng)
 
 | Tháng | Tarot | Lenormand | Khoảng thực tế | Con số trung tâm |
 |---|---|---|---|---|
-| Tháng 11/2026 | 08 Tiểu đồng Cốc, 37 7 Gậy, 50 Vua Gậy, 69 Hoàng hậu Gậy | 22 Người Phụ Nữ, 25 Con Chó, 27 Thập Giá, 29 Các Vì Sao | 15 – 30 | **23** |
-| Tháng 12/2026 | 68 9 Kiếm, 75 Vua Cốc, 36 Hoàng hậu Kiếm, 22 Át Gậy | 10 Mỏ Neo, 20 Toà Tháp, 25 Con Chó, 21 Cỏ Bốn Lá | 15 – 30 | **22** |
-| Tháng 1/2027 | 08 Tiểu đồng Cốc, 36 Hoàng hậu Kiếm, 55 9 Cốc, 71 Mặt Trăng | 11 Ngôi Nhà, 23 Con Rắn, 26 Con Cá, 34 Kỵ Sĩ | 14 – 30 | **22** |
+| Tháng 11/2026 | 08 Cỗ Xe, 37 Hoàng Đế, 50 8 Tiền, 69 Bánh Xe Số Phận | 22 Con Chó, 25 Hoa Huệ, 27 Kỵ Sĩ, 29 Lá Thư | 17 – 32 | **25** |
+| Tháng 12/2026 | 68 8 Kiếm, 75 Hoàng Đế, 36 6 Kiếm, 22 7 Kiếm | 10 Đôi Chim, 20 Cỏ Bốn Lá, 25 Toà Tháp, 21 Ngôi Nhà | 13 – 27 | **20** |
+| Tháng 1/2027 | 08 Át Tiền, 36 Vua Kiếm, 55 4 Tiền, 71 Thần Chết | 11 Mỏ Neo, 23 Con Cò, 26 Lá Thư, 34 Toà Tháp | 15 – 30 | **22** |
 
-Quy đổi (mốc 20 tr/tháng): tổng 67 tr cho 3 kỳ, bình quân 22.3 tr/tháng; mạnh nhất Tháng 11/2026 (~23 tr), yếu nhất Tháng 12/2026 (~22 tr). So với mục tiêu 30 tr/tháng: mới khoảng 74 % — nói thẳng là chưa tới, 0/3 kỳ chạm mục tiêu. Đây là quy đổi huyền học, không phải dự báo tài chính.
+Quy đổi (mốc 20 tr/tháng): tổng 67 tr cho 3 kỳ, bình quân 22.3 tr/tháng; mạnh nhất Tháng 11/2026 (~25 tr), yếu nhất Tháng 12/2026 (~20 tr). So với mục tiêu 30 tr/tháng: mới khoảng 74 % — nói thẳng là chưa tới, 0/3 kỳ chạm mục tiêu. Đây là quy đổi huyền học, không phải dự báo tài chính.
 
 ## Tổng kết
 
-Queen Linh, nói thẳng: thu nhập trung bình 6.7/10 — khá, nghiêng tốt. Muốn chạm 30 tr/tháng thì cần một nguồn thu thêm ngoài nhịp hiện tại — bài không cho thấy nó tự đến. Điểm phải canh nhất là Mặt Trăng, Con Rắn — dấu hiệu gian dối hoặc hao hụt.
+Queen Linh, nói thẳng: thu nhập trung bình 6.7/10 — khá, nghiêng tốt. Muốn chạm 30 tr/tháng thì cần một nguồn thu thêm ngoài nhịp hiện tại — bài không cho thấy nó tự đến. Điểm phải canh nhất là 7 Kiếm — dấu hiệu gian dối hoặc hao hụt.
 
 **Lời khuyên thực tế**
 - Giai đoạn thuận: chủ động chốt việc, tăng giá hoặc doanh số, nhưng trích ngay 20–30 % phần dư để tích luỹ.
-- Cho Tháng 11/2026: chia nhỏ gánh nặng, ưu tiên trả nợ, xin hỗ trợ khi cần.
-- Dồn lực vào Tháng 12/2026 — tầng có lực đẩy tốt nhất.
+- Cho Tháng 12/2026: với 7 Kiếm: kiểm tra sổ sách, bảo mật tài khoản, không giao tiền khi chưa rõ.
+- Dồn lực vào Tháng 11/2026 — tầng có lực đẩy tốt nhất.
 
 **Cảnh báo**
 - Cảnh giác lừa đảo: không chuyển tiền, đặt cọc hay “nạp để rút” cho lời mời lãi cao; gọi lại số chính thức để xác minh.
+
+
+---
+
+## Bản AI giải theo văn phong nào
+
+Khi trạm AI trả lời được, bản giải AI dùng cùng khuôn mục như trên nhưng viết theo văn phong reader thật (tóm tắt và nguồn ở `VAN_PHONG_READER.md`; prompt ở `js/ai.js`):
+
+- Mở bài gọi người hỏi theo xưng hô, nhắc lại câu hỏi bằng lời đời thường, nói ngay cảm giác chung và kết luận sơ bộ.
+- Mỗi tầng là một chương: từng lá Tarot có tên lá + một chi tiết hình ảnh thật trên lá + nghĩa đúng ở vị trí; các lá nối thành một mạch chuyện; Lenormand đọc thành câu.
+- Nối các tầng, gọi rõ lá ra lại ở nhiều tầng là chủ đề lặp lại; rồi kết luận chung + một việc cụ thể nên làm đầu tiên.
+- Luôn tiếng Việt; giọng ấm, thẳng; không câu sáo rỗng kiểu AI.
+
+Ví dụ giọng văn (viết tay để minh hoạ, không phải đầu ra AI thật):
+
+> Queen Linh, bạn hỏi ba tháng tới tiền vào ra sao. Nói gọn trước: không có tháng nào sập, nhưng tiền tháng này đến từ việc bạn tự cầm lái và làm cho có quy củ, không tự rơi xuống. Tháng 11 mở bằng Cỗ Xe — người đứng thẳng trên cỗ xe đá, hai con nhân sư một đen một trắng kéo hai hướng: bạn đang muốn chạy nhanh trong khi việc còn hai đầu kéo nhau. Hoàng Đế ngay sau đó, ông vua ngồi trên ngai đá khắc đầu cừu đực, nói rằng chỉ có kỷ luật mới giữ được cỗ xe ấy. Rồi 8 Tiền: người thợ cặm cụi khắc từng đồng tiền, mấy đồng làm xong đã treo lên — tiền tháng này là tiền của tay nghề, làm đến đâu chắc đến đó. Hoàng Đế còn ra lại ở tháng 12 dù bộ bài đã xáo lại đủ 78 lá, nên chuyện kiểm soát chưa xong, nó theo bạn sang tháng sau. Việc nên làm ngay tuần này: viết ra một bảng thu–chi theo tuần và giữ đúng nó tới hết tháng 12.

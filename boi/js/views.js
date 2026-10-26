@@ -1,6 +1,6 @@
 // Các màn của SPA. Mỗi màn trả {title, step, html, mount(el, ctx)}.
-import { SPREADS, spreadById, defaultYear } from "./spreads.js";
-import { addRound, fixCell, applyCorrectionText, errorsOf, reveal, MAX, sizesOf, exportJSON, importJSON } from "./state.js";
+import { SPREADS, spreadById, defaultYear, posLabel } from "./spreads.js";
+import { addRound, addPickedRound, fixCell, applyCorrectionText, errorsOf, reveal, MAX, exportJSON, importJSON, pendingDraw, newDraw, ensureMapping, drawsOf, isFresh } from "./state.js";
 import { tarotCard, lenCard, cardName } from "./reading.js";
 import { analyze, ruleFollowUp } from "./insight.js";
 import { suggestSpread } from "./topic.js";
@@ -9,6 +9,7 @@ import { readingToMarkdown } from "./markdown.js";
 import { LOCAL_KEY, TRAM_KEY, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, friendlyError, aiFailNotice } from "./ai.js";
 import { store, persist, saveSettings, aiKey, aiReady, bridge, cauNoiAn, probeBridge, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
 import { gmt7 } from "./core.js";
+import { startPick, needOf, pickReady, savedCount, togglePick, saveTier, editTier } from "./pick.js";
 
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pad = (n) => String(n).padStart(2, "0");
@@ -62,8 +63,9 @@ function steps(n) {
 function notFound() {
   return { title: "Không tìm thấy", html: `<h1>Không tìm thấy câu hỏi</h1><p class="lead">Câu hỏi này không có trên máy này. Link chỉ mở được trên đúng máy/trình duyệt đã tạo, hoặc sau khi Nhập JSON.</p><div class="btns"><a class="btn primary" href="#/hoi-moi">Hỏi câu mới</a><a class="btn" href="#/lich-su">Lịch sử &amp; nhập JSON</a></div>` };
 }
-function lockBox(s, extra = "") {
-  return `<div class="lock"><div>🔒 <b>Mã khoá SHA-256</b> — chụp lại trước khi chọn số</div><div class="mono">${s.hash}</div><div class="note">Khoá lúc <b>${esc(s.lockedAtText)}</b>. Bộ Tarot 78 lá và Lenormand 36 lá đã xáo độc lập; câu hỏi này luôn dùng đúng bộ đã khoá.</div>${extra}</div>`;
+function lockBox(s, d = drawsOf(s)[0]) {
+  const fresh = d?.kieu === 2;
+  return `<div class="lock"><div>🔒 <b>Mã khoá SHA-256</b> — chụp lại trước khi chọn bài</div><div class="mono">${esc(d?.hash || s.hash)}</div><div class="note">Khoá lúc <b>${esc(d?.atText || s.lockedAtText)}</b>. ${fresh ? `Bộ bài vừa được xáo mới cho lượt này (không dùng lại bộ cũ)${s.tiers.length > 1 ? `; mỗi tầng xáo lại riêng từ đủ 78 Tarot + 36 Lenormand` : ""}. Mã này khoá trước toàn bộ thứ tự xáo.` : "Bộ Tarot 78 lá và Lenormand 36 lá đã xáo độc lập (phiên bản cũ: một bộ cho cả câu hỏi)."}</div></div>`;
 }
 
 // ================= Trang chủ =================
@@ -76,13 +78,13 @@ function home() {
     <section class="hero">
       <div class="fan" aria-hidden="true">${fan}</div>
       <h1>Hỏi một câu.<br>Bài trả lời thẳng.</h1>
-      <p class="lead">Tarot 78 lá + Lenormand 36 lá, xáo và khoá công bằng trước khi bạn chọn số. Giải theo tầng, quy đổi tiền minh bạch, hỏi tiếp như trò chuyện.</p>
+      <p class="lead">Tarot 78 lá + Lenormand 36 lá, xáo và khoá công bằng trước khi bạn chọn bài. Giải theo tầng, quy đổi tiền minh bạch, hỏi tiếp như trò chuyện.</p>
       <div class="btns" style="justify-content:center"><a class="btn primary" href="#/hoi-moi">✦ Đặt câu hỏi</a>${recent[0] ? `<a class="btn" href="${routeFor(recent[0])}">Tiếp tục câu gần nhất</a>` : ""}</div>
     </section>
     ${recent.length ? `<section class="card"><h2>Gần đây</h2><ul class="list">${recent.map(itemHTML).join("")}</ul><p><a href="#/lich-su">Xem tất cả →</a></p></section>` : ""}
     <section class="card features">
-      <div class="feature"><span class="fi" aria-hidden="true">🔒</span><div><b>Khoá công bằng</b><p class="note">Seed ngẫu nhiên 32 byte → xáo Fisher–Yates; mã SHA-256 hiện trước khi chọn số. Trải xong bấm “Kiểm chứng” để tự tính lại.</p></div></div>
-      <div class="feature"><span class="fi" aria-hidden="true">↻</span><div><b>Mỗi câu hỏi một bộ bài</b><p class="note">Rút thêm dùng lại đúng bộ cũ; số trùng ra đúng lá cũ — lá lặp là nhấn mạnh, không phải xác nhận độc lập.</p></div></div>
+      <div class="feature"><span class="fi" aria-hidden="true">🔒</span><div><b>Khoá công bằng</b><p class="note">Mỗi câu hỏi một seed ngẫu nhiên 32 byte mới → xáo Fisher–Yates; mã SHA-256 hiện trước khi chọn bài. Trải xong bấm “Kiểm chứng” để tự tính lại.</p></div></div>
+      <div class="feature"><span class="fi" aria-hidden="true">↻</span><div><b>Chọn bài từng tầng</b><p class="note">Lá úp giống hệt nhau, không đánh số. Chọn xong một tầng bấm Lưu, bộ bài xáo lại đủ lá cho tầng sau — lá nào ra lại ở nhiều tầng là chủ đề lặp lại.</p></div></div>
       <div class="feature"><span class="fi" aria-hidden="true">✧</span><div><b>Giải sâu</b><p class="note">AI (Gemini) đọc như người có nghề — không phải cài hay nhập gì. Khi máy giải bận hoặc mất mạng: bản giải theo luật vẫn đọc vị trí, cặp, bộ ba, nối tầng và mâu thuẫn.</p></div></div>
     </section>
     <p class="foot">Mang tính chiêm nghiệm. Mọi con số tiền là quy đổi huyền học, không phải dự báo tài chính.</p>`,
@@ -197,66 +199,120 @@ function spreadView(id) {
   };
 }
 
-// ================= Chọn số =================
-const picksBy = new Map();
-function pickView(id) {
+// ================= Chọn bài theo tầng =================
+// Mọi lá úp dùng MỘT mặt sau giống hệt nhau, không số, không dấu thứ tự. Mỗi tầng: chọn → "Lưu" → bộ bài xáo lại
+// đủ 78 + 36 lá (bảng riêng của tầng đã khoá sẵn trong mã khoá) → tầng sau. Lưu đủ các tầng mới hiện "Giải bài".
+function pickView(id, query) {
   const s = getSession(id);
   if (!s) return notFound();
   if (s.draft) return { redirect: `#/trai/${id}` };
-  const sizes = sizesOf(s);
+  let di = pendingDraw(s);
+  if (di < 0) {
+    if (query.get("them") !== "1") return { redirect: `#/giai/${id}` };
+    return {
+      title: "Rút thêm", step: 3,
+      html: `${steps(3)}<h1>Rút thêm</h1><p class="note shuffling-note" aria-live="polite">Đang xáo một bộ bài hoàn toàn mới…</p>`,
+      async mount(el, ctx) {
+        try { await newDraw(s); save(); ctx.go(`#/chon-so/${id}`, { replace: true }); } catch (e) { toast(e.message); }
+      },
+    };
+  }
   const extra = s.rounds.length > 0;
-  const st = picksBy.get(id) || { tarot: [], lenormand: [], deck: sizes.tarot.some(Boolean) ? "tarot" : "lenormand" };
-  picksBy.set(id, st);
-  const used = (deck) => new Set(s.rounds.flatMap((r) => (r[deck] || []).flat()).filter((c) => c.ok).map((c) => c.n));
-  const needT = sizes.tarot.reduce((a, b) => a + b, 0), needL = sizes.lenormand.reduce((a, b) => a + b, 0);
+  const p = startPick(s, di, extra);
+  const n = s.tiers.length;
+  const draw = drawsOf(s)[di];
+  const allSaved = pickReady(p);
+  const cur = Math.min(p.cur, n - 1);
+  const nd = needOf(s, cur, extra);
+  if (!nd[p.deck]) p.deck = p.deck === "tarot" ? "lenormand" : "tarot";
+  const unit = n > 1 && s.tiers.every((t) => /^tháng/i.test(t.ten || "")) ? "Tháng" : "Tầng";
+  const nSaved = savedCount(p);
+  const chips = s.tiers.map((t, i) => {
+    const st = p.saved[i] ? "saved" : i === p.cur ? "now" : "";
+    const lab = `${unit === "Tháng" ? `Tháng ${i + 1}` : `Tầng ${i + 1}`}${p.saved[i] ? " ✓" : ""}`;
+    return p.saved[i] ? `<button type="button" class="tier-chip ${st}" data-edit="${i}" aria-label="${esc(t.ten)} đã lưu — bấm để xem lại/sửa">${esc(lab)}</button>` : `<span class="tier-chip ${st}"${i === p.cur ? ' aria-current="step"' : ""}>${esc(lab)}</span>`;
+  }).join("");
+  const count = (d) => `Tarot ${d.tarot.length}${extra ? "" : `/${nd.tarot}`} · Lenormand ${d.lenormand.length}${extra ? "" : `/${nd.lenormand}`}`;
   const grid = () => {
-    const u = used(st.deck);
+    const sel = new Set(p.draft[p.deck]);
     let h = "";
-    for (let n = 1; n <= MAX[st.deck]; n++) {
-      const k = st[st.deck].indexOf(n);
-      h += `<button type="button" class="num${u.has(n) ? " used" : ""}${k >= 0 ? " picked" : ""}" data-num="${n}" aria-pressed="${k >= 0}" aria-label="Số ${pad(n)}${u.has(n) ? ", đã rút trước" : ""}">${pad(n)}${k >= 0 ? `<span class="ord">${k + 1}</span>` : ""}</button>`;
-    }
+    for (let k = 1; k <= MAX[p.deck]; k++) h += `<button type="button" class="pick${sel.has(k) ? " picked" : ""}" data-k="${k}" aria-pressed="${sel.has(k)}" aria-label="Lá úp${sel.has(k) ? ", đã chọn" : ""}"></button>`;
     return h;
   };
-  const line = () => {
-    const t = st.tarot.map(pad).join(" "), l = st.lenormand.map(pad).join(" ");
-    return [t && `T: ${t} (${st.tarot.length}${extra ? "" : `/${needT}`})`, l && `L: ${l} (${st.lenormand.length}${extra ? "" : `/${needL}`})`].filter(Boolean).join(" · ") || "Bấm số theo thứ tự muốn lật, hoặc gõ bên dưới.";
-  };
+  const summary = `<section class="card glow"><h2>Đã lưu đủ ${n}/${n} ${unit === "Tháng" ? "tháng" : "tầng"}</h2>
+      <ul class="list saved-list">${s.tiers.map((t, i) => `<li class="row wrap"><span class="grow"><b>${esc(t.ten)}</b><span class="note" style="display:block">${p.saved[i].tarot.length} Tarot · ${p.saved[i].lenormand.length} Lenormand · úp, chưa lật</span></span><button type="button" class="btn small" data-edit="${i}">Xem lại / sửa</button></li>`).join("")}</ul>
+      <button type="button" class="btn primary block" id="solve">✦ Giải bài</button>
+      <p class="note">Bấm Giải bài thì các lá mới được lật. Trước đó có thể sửa bất kỳ ${unit === "Tháng" ? "tháng" : "tầng"} nào.</p></section>`;
+  const tierName = s.tiers[cur]?.ten || `Tầng ${cur + 1}`;
   return {
-    title: "Chọn số", step: 3,
-    html: `${steps(3)}<h1>${extra ? "Rút thêm" : "Chọn số"}</h1>
+    title: extra ? "Rút thêm" : "Chọn bài", step: 3,
+    html: `${steps(3)}<h1>${extra ? "Rút thêm" : "Chọn bài"}</h1>
     <p class="lead">“${esc(s.cauHoi)}” · ${esc(spreadById(s.spreadId).ten)}</p>
-    ${lockBox(s)}
-    ${extra ? `<p class="note">Rút thêm dùng lại đúng bộ đã khoá. Số có chấm tím là số đã rút — chọn lại sẽ ra đúng lá cũ (lá lặp = nhấn mạnh, không phải xác nhận độc lập).</p>` : `<div class="need"><span class="chip">Tarot ${sizes.tarot.join(" / ")}</span><span class="chip">Lenormand ${sizes.lenormand.join(" / ")}</span></div>`}
-    <div class="tabs" role="tablist">
-      <button type="button" role="tab" class="btn small" data-deck="tarot" aria-selected="${st.deck === "tarot"}">Tarot 01–78</button>
-      <button type="button" role="tab" class="btn small" data-deck="lenormand" aria-selected="${st.deck === "lenormand"}">Lenormand 01–36</button>
-    </div>
-    <div class="grid-nums" id="grid" role="group" aria-label="Lưới số úp">${grid()}</div>
-    <p class="picked-line" id="line" aria-live="polite">${esc(line())}</p>
-    <label for="typed">Hoặc gõ số (dấu “/” tách tầng)</label>
-    <textarea id="typed" rows="3" placeholder="T: 8 37 50 69/ 68 75 36 22/ 8 36 55 71&#10;Lenor: 22 25 27 29 / 10 20 25 21/ 11 23 26 34"></textarea>
-    <div class="btns"><button type="button" class="btn primary" id="go">Lật bài →</button><button type="button" class="btn ghost" id="clr">Xoá chọn</button></div>`,
+    ${lockBox(s, draw)}
+    ${n > 1 ? `<div class="tier-progress" aria-label="Tiến độ"><p class="note" aria-live="polite"><b>${nSaved}/${n}</b> ${unit === "Tháng" ? "tháng" : "tầng"} đã lưu</p><div class="tier-chips">${chips}</div></div>` : ""}
+    ${allSaved ? summary : `
+    <section class="card" id="pickCard">
+      <h2>${n > 1 ? `${unit} ${cur + 1}/${n}: ` : ""}${esc(tierName)}</h2>
+      <p class="note">${extra ? "Rút thêm: chọn bao nhiêu lá tuỳ ý cho tầng này (có thể bỏ trống)." : `Chọn <b>${nd.tarot}</b> lá Tarot${nd.lenormand ? ` và <b>${nd.lenormand}</b> lá Lenormand` : ""} theo cảm nhận.`} Mọi lá úp giống hệt nhau; vị trí của từng lá chỉ hiện sau khi lật.</p>
+      <div class="tabs" role="tablist">
+        ${nd.tarot ? `<button type="button" role="tab" class="btn small" data-deck="tarot" aria-selected="${p.deck === "tarot"}">Tarot · 78 lá</button>` : ""}
+        ${nd.lenormand ? `<button type="button" role="tab" class="btn small" data-deck="lenormand" aria-selected="${p.deck === "lenormand"}">Lenormand · 36 lá</button>` : ""}
+      </div>
+      <div class="grid-backs" id="grid" role="group" aria-label="Bộ bài úp">${grid()}</div>
+      <p class="picked-line" id="line" aria-live="polite">${esc(count(p.draft))}</p>
+      <div class="btns"><button type="button" class="btn primary" id="saveTier">Lưu ${n > 1 ? `${unit.toLowerCase()} ${cur + 1}` : ""}</button><button type="button" class="btn ghost" id="clr">Bỏ chọn</button></div>
+    </section>`}
+    ${!extra ? `<details class="card"><summary>Nhập nhanh bằng dãy số (cho người đã quen)</summary>
+      <p class="note">Số 01–78 / 01–36 ứng với vị trí lá trong bộ đã xáo của từng tầng; dấu “/” tách tầng.</p>
+      <label for="typed" class="sr-only">Dãy số</label><textarea id="typed" rows="3" placeholder="T: 8 37 50 69/ 68 75 36 22/ 8 36 55 71&#10;Lenor: 22 25 27 29 / 10 20 25 21/ 11 23 26 34"></textarea>
+      <button type="button" class="btn small" id="go">Lật theo dãy số →</button></details>` : ""}`,
     mount(el, ctx) {
       const g = el.querySelector("#grid"), ln = el.querySelector("#line");
-      el.querySelectorAll("[data-deck]").forEach((b) => (b.onclick = () => { st.deck = b.dataset.deck; el.querySelectorAll("[data-deck]").forEach((x) => x.setAttribute("aria-selected", x === b)); g.innerHTML = grid(); }));
-      g.onclick = (e) => {
-        const b = e.target.closest("[data-num]"); if (!b) return;
-        const n = +b.dataset.num, list = st[st.deck], k = list.indexOf(n);
-        if (k >= 0) list.splice(k, 1); else list.push(n);
-        g.innerHTML = grid(); ln.textContent = line();
-        navigator.vibrate?.(8);
+      const redraw = () => { if (g) g.innerHTML = grid(); if (ln) ln.textContent = count(p.draft); };
+      el.querySelectorAll("[data-deck]").forEach((b) => (b.onclick = () => { p.deck = b.dataset.deck; el.querySelectorAll("[data-deck]").forEach((x) => x.setAttribute("aria-selected", x === b)); redraw(); }));
+      if (g) g.onclick = (e) => {
+        const b = e.target.closest("[data-k]"); if (!b) return;
+        const r = togglePick(s, p, p.deck, +b.dataset.k);
+        if (!r.ok) return toast(`Đã đủ ${r.need} lá ${p.deck === "tarot" ? "Tarot" : "Lenormand"} — bỏ chọn một lá nếu muốn đổi.`);
+        if (r.switched) { el.querySelectorAll("[data-deck]").forEach((x) => x.setAttribute("aria-selected", x.dataset.deck === "lenormand")); toast("Đủ Tarot — giờ chọn Lenormand."); }
+        save(); redraw(); navigator.vibrate?.(8);
       };
-      el.querySelector("#clr").onclick = () => { st.tarot = []; st.lenormand = []; g.innerHTML = grid(); ln.textContent = line(); };
-      el.querySelector("#go").onclick = () => {
-        let text = el.querySelector("#typed").value.trim();
-        if (!text) {
-          if (!st.tarot.length && !st.lenormand.length) return toast("Chưa chọn hoặc gõ số nào.");
-          text = [st.tarot.length && `T: ${st.tarot.join(" ")}`, st.lenormand.length && `L: ${st.lenormand.join(" ")}`].filter(Boolean).join("\n");
-        }
+      const clr = el.querySelector("#clr");
+      if (clr) clr.onclick = () => { p.draft = { tarot: [], lenormand: [] }; save(); redraw(); };
+      const st = el.querySelector("#saveTier");
+      if (st) st.onclick = () => {
+        const { ok, next } = saveTier(s, p);
+        if (!ok) return toast(`Chưa đủ lá: cần ${nd.tarot} Tarot + ${nd.lenormand} Lenormand.`);
+        save();
+        if (next < 0) { toast(`Đã lưu đủ ${n} ${unit === "Tháng" ? "tháng" : "tầng"}.`); ctx.rerender(); return; }
+        // xáo lại đủ bộ cho tầng sau (bảng của tầng sau đã khoá trong mã khoá; ở đây là hiệu ứng trộn)
+        toast(`Đã lưu ${tierName}. Đang xáo lại đủ 78 Tarot + 36 Lenormand…`);
+        const card = el.querySelector("#pickCard");
+        if (reduced() || !card) { ctx.rerender(); return; }
+        card.classList.add("shuffling");
+        setTimeout(() => ctx.rerender(), 900);
+      };
+      el.querySelectorAll("[data-edit]").forEach((b) => (b.onclick = () => { if (editTier(s, p, +b.dataset.edit)) { save(); ctx.rerender(); } }));
+      const solve = el.querySelector("#solve");
+      if (solve) solve.onclick = async () => {
+        solve.disabled = true;
         try {
-          const { errors } = addRound(s, text, st.deck);
-          picksBy.delete(id);
+          await ensureMapping(s, di);
+          addPickedRound(s, p.saved);
+          delete s.pick;
+          delete s.ai;
+          save();
+          ctx.go(`#/lat/${id}`);
+        } catch (err) { solve.disabled = false; toast(err.message); }
+      };
+      const go = el.querySelector("#go");
+      if (go) go.onclick = async () => {
+        const text = el.querySelector("#typed").value.trim();
+        if (!text) return toast("Chưa gõ số nào.");
+        try {
+          await ensureMapping(s, di);
+          const { errors } = addRound(s, text, "tarot");
+          delete s.pick;
           save();
           if (errors.length) toast(`Có ${errors.length} số ngoài khoảng — các số hợp lệ đã lật, nhập số thay ở ô trống.`);
           ctx.go(`#/lat/${id}`);
@@ -269,13 +325,20 @@ function pickView(id) {
 // ================= Lật bài =================
 const flipped = new Set();
 function cardFace(deck, cell) {
-  if (deck === "tarot") return tarotSVG(tarotCard(store.db, cell.card), { n: cell.n, rev: cell.rev });
-  return lenormandSVG(lenCard(store.db, cell.card), { n: cell.n });
+  const n = cell.chon ? null : cell.n;
+  if (deck === "tarot") return tarotSVG(tarotCard(store.db, cell.card), { n, rev: cell.rev });
+  return lenormandSVG(lenCard(store.db, cell.card), { n });
 }
-function cardTile(deck, cell, key, shown) {
-  if (!cell.ok) return `<div class="cardcell"><div class="flip errslot" role="img" aria-label="Ô trống, số ${esc(cell.raw)} ngoài khoảng"><div class="flip-inner"><div class="back">?<br>${esc(cell.raw)}</div></div></div><span class="cap err">Số ${esc(cell.raw)} không có</span></div>`;
+// Chú thích sau khi lật: vị trí (chỉ hiện lúc này) + tên lá
+function capText(deck, cell, tier, i) {
   const c = deck === "tarot" ? tarotCard(store.db, cell.card) : lenCard(store.db, cell.card);
-  return `<div class="cardcell"><button type="button" class="flip${shown ? " shown" : ""}${cell.repeatOf ? " repeat" : ""}" data-key="${key}" aria-label="Lá số ${pad(cell.n)}${shown ? `: ${esc(c.vi)}` : ", bấm để lật"}"><span class="flip-inner"><span class="back">${backSVG(pad(cell.n))}</span><span class="face">${cardFace(deck, cell)}</span></span></button><span class="cap">${shown ? esc(c.vi) + (cell.rev ? " (ngược)" : "") : "&nbsp;"}${cell.repeatOf ? " ↻" : ""}</span></div>`;
+  const pos = deck === "tarot" ? posLabel(tier, i) : `Ô ${i + 1}`;
+  return `${pos} · ${c.vi}${cell.rev ? " (ngược)" : ""}${cell.repeatOf ? " ↻" : ""}`;
+}
+// Mặt sau giống hệt nhau cho mọi lá úp: không số, không dấu vị trí
+function cardTile(deck, cell, key, shown, tier, i) {
+  if (!cell.ok) return `<div class="cardcell"><div class="flip errslot" role="img" aria-label="Ô trống, số ${esc(cell.raw)} ngoài khoảng"><div class="flip-inner"><div class="back">?<br>${esc(cell.raw)}</div></div></div><span class="cap err">Số ${esc(cell.raw)} không có</span></div>`;
+  return `<div class="cardcell"><button type="button" class="flip${shown ? " shown" : ""}${cell.repeatOf ? " repeat" : ""}" data-key="${key}" aria-label="${shown ? esc(capText(deck, cell, tier, i)) : "Lá úp, bấm để lật"}"><span class="flip-inner"><span class="back">${backSVG()}</span><span class="face">${cardFace(deck, cell)}</span></span></button><span class="cap">${shown ? esc(capText(deck, cell, tier, i)) : "&nbsp;"}</span></div>`;
 }
 function fixBox(s, ri) {
   const errs = errorsOf(s.rounds[ri]);
@@ -300,15 +363,15 @@ function flipView(id, query) {
   for (let ti = 0; ti < n; ti++) {
     const tier = s.tiers[ti] || { ten: `Tầng ${ti + 1}` };
     rows.push(`<section class="card"><h2>${esc(tier.ten)}${ri ? " · rút thêm" : ""}</h2>
-      ${(round.tarot[ti] || []).length ? `<p class="lbl">Tarot</p><div class="spread-row">${round.tarot[ti].map((c, i) => cardTile("tarot", c, `${ti}-t-${i}-${k++}`, done) + "").join("")}</div>` : ""}
-      ${(round.lenormand[ti] || []).length ? `<p class="lbl">Lenormand</p><div class="spread-row">${round.lenormand[ti].map((c, i) => cardTile("lenormand", c, `${ti}-l-${i}-${k++}`, done)).join("")}</div>` : ""}
+      ${(round.tarot[ti] || []).length ? `<p class="lbl">Tarot</p><div class="spread-row">${round.tarot[ti].map((c, i) => cardTile("tarot", c, `${ti}-t-${i}-${k++}`, done, tier, i)).join("")}</div>` : ""}
+      ${(round.lenormand[ti] || []).length ? `<p class="lbl">Lenormand</p><div class="spread-row">${round.lenormand[ti].map((c, i) => cardTile("lenormand", c, `${ti}-l-${i}-${k++}`, done, tier, i)).join("")}</div>` : ""}
     </section>`);
   }
   return {
     title: "Lật bài", step: 4,
     html: `${steps(4)}<h1>${ri ? `Lượt rút thêm #${ri}` : "Lật bài"}</h1>
     <p class="lead">“${esc(s.cauHoi)}”</p>
-    <p class="note mono" style="word-break:normal;white-space:pre-wrap">Đã chọn: ${esc(round.input)}</p>
+    ${round.input ? `<p class="note mono" style="word-break:normal;white-space:pre-wrap">Đã gõ: ${esc(round.input)}</p>` : `<p class="note">Lá đã chọn ở từng tầng — vị trí của mỗi lá hiện ra khi lật.</p>`}
     ${fixBox(s, ri)}
     <div class="btns"><button type="button" class="btn" id="all">Lật tất cả</button><a class="btn primary" href="#/giai/${id}">Xem giải →</a></div>
     ${rows.join("")}
@@ -319,10 +382,11 @@ function flipView(id, query) {
         b.classList.add("shown");
         const cap = b.parentElement.querySelector(".cap");
         const [ti, deck, i] = b.dataset.key.split("-");
-        const cell = round[deck === "t" ? "tarot" : "lenormand"][+ti][+i];
-        const c = deck === "t" ? tarotCard(store.db, cell.card) : lenCard(store.db, cell.card);
-        cap.textContent = c.vi + (cell.rev ? " (ngược)" : "") + (cell.repeatOf ? " ↻" : "");
-        b.setAttribute("aria-label", `Lá số ${pad(cell.n)}: ${c.vi}`);
+        const dk = deck === "t" ? "tarot" : "lenormand";
+        const cell = round[dk][+ti][+i];
+        const txt = capText(dk, cell, s.tiers[+ti] || { ten: "" }, +i);
+        cap.textContent = txt;
+        b.setAttribute("aria-label", txt);
       };
       const all = () => {
         const list = [...el.querySelectorAll(".flip[data-key]:not(.shown)")];
@@ -333,6 +397,7 @@ function flipView(id, query) {
       el.querySelectorAll(".flip[data-key]").forEach((b) => (b.onclick = () => flipOne(b)));
       el.querySelector("#all").onclick = all;
       if (!done) setTimeout(all, reduced() ? 0 : 450);
+      if (errorsOf(round).length) ensureMapping(s, round.draw ?? 0).catch(() => {});
       el.querySelectorAll("[data-fix]").forEach((inp) => (inp.onchange = () => {
         const [deck, tier, idx] = inp.dataset.fix.split("|");
         const r = fixCell(s, ri, deck, +tier, +idx, parseInt(inp.value, 10));
@@ -385,7 +450,7 @@ function tableHTML(s, ri = 0) {
   const n = Math.max(round.tarot.length, round.lenormand.length);
   let rows = "";
   for (let ti = 0; ti < n; ti++) rows += `<tr><td>${esc(s.tiers[ti]?.ten || `Tầng ${ti + 1}`)}</td><td>${(round.tarot[ti] || []).map((c) => esc(cardName(store.db, "tarot", c))).join("<br>") || "—"}</td><td>${(round.lenormand[ti] || []).map((c) => esc(cardName(store.db, "lenormand", c))).join("<br>") || "—"}</td></tr>`;
-  return `<div class="table-wrap"><table><caption class="sr-only">Bảng lá theo tầng</caption><thead><tr><th scope="col">Tầng</th><th scope="col">Tarot (số → tên lá)</th><th scope="col">Lenormand (số → tên lá)</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  return `<div class="table-wrap"><table><caption class="sr-only">Bảng lá theo tầng</caption><thead><tr><th scope="col">Tầng</th><th scope="col">Tarot</th><th scope="col">Lenormand</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function moneyHTML(m) {
   if (!m) return "";
@@ -427,6 +492,7 @@ async function runAI(s, el, ctx, rule) {
       signal: st.ctrl.signal,
       onModel: (m) => { kick(); st.model = m; if (status) status.textContent = `Đang giải bằng ${m}…`; },
       onText: (full) => { kick(); st.text = full; if (!raf) raf = requestAnimationFrame(paint); },
+      onFallback: () => { kick(); st.viaTram = true; st.text = ""; probeBridge(); if (status) status.textContent = "Cầu nối máy nhà không phản hồi — chuyển sang máy giải AI…"; },
     });
     clearTimeout(idle);
     const obj = partialJSON(text);
@@ -442,7 +508,7 @@ async function runAI(s, el, ctx, rule) {
     live.delete(s.id);
     if (st.timeout) e.timeout = true;
     if (key === LOCAL_KEY) probeBridge();
-    const fail = aiFailNotice(e, key);
+    const fail = aiFailNotice(e, st.viaTram ? TRAM_KEY : key);
     if (status) status.innerHTML = `<span class="err">${esc(fail.status)}</span>`;
     if (out) out.innerHTML = `<p class="note">${esc(fail.note)}</p>`;
   }
@@ -479,7 +545,7 @@ function readView(id, query) {
     <section class="card">
       <div class="btns">
         <a class="btn primary" href="#/hoi-tiep/${id}">💬 Hỏi tiếp</a>
-        <a class="btn" href="#/chon-so/${id}">＋ Rút thêm</a>
+        <a class="btn" href="#/chon-so/${id}?them=1">＋ Rút thêm</a>
         ${hasKey ? `<button type="button" class="btn" id="reAI">${s.ai ? "Giải lại bằng AI" : "Giải bằng AI"}</button>` : ""}
         <button type="button" class="btn" id="cp">Chép prompt cho ChatGPT</button>
         <button type="button" class="btn ghost" id="md">Tải bản giải (.md)</button>
@@ -509,11 +575,11 @@ function followView(id) {
   return {
     title: "Hỏi tiếp",
     html: `<h1>Hỏi tiếp</h1>
-    <p class="lead">“${esc(s.cauHoi)}” — cùng bộ bài đã khoá, ${s.rounds.length} lượt lật.</p>
+    <p class="lead">“${esc(s.cauHoi)}” — ${s.rounds.length} lượt lật.</p>
     <p class="note">${hasKey ? "AI nhớ đủ các lá đã lật, bản giải trước và các câu hỏi trước." : "Chưa có khoá AI: động cơ luật trả lời theo tầng/chủ đề bạn nhắc (vd “tháng 12 thế nào?”, “rủi ro gì?”). Có thể chép prompt sang ChatGPT."}</p>
     <div class="chat" id="chat">${msgs || `<p class="note">Ví dụ: “Tầng 2 có rủi ro gì?”, “Tháng nào nên chốt việc lớn?”, “Lá Mặt Trăng ở đây ý là sao?”</p>`}</div>
     <form class="composer" id="fChat"><label class="sr-only" for="ask2">Câu hỏi tiếp</label><textarea id="ask2" rows="1" placeholder="Hỏi tiếp…" required></textarea><button class="btn primary" type="submit" aria-label="Gửi">➤</button></form>
-    <div class="btns"><a class="btn small" href="#/giai/${id}">← Bản giải</a><a class="btn small" href="#/chon-so/${id}">＋ Rút thêm lá</a><button type="button" class="btn small" id="cp2">Chép prompt cho ChatGPT</button>${s.chat.length ? `<button type="button" class="btn small ghost" id="clearChat">Xoá hội thoại</button>` : ""}</div>`,
+    <div class="btns"><a class="btn small" href="#/giai/${id}">← Bản giải</a><a class="btn small" href="#/chon-so/${id}?them=1">＋ Rút thêm lá</a><button type="button" class="btn small" id="cp2">Chép prompt cho ChatGPT</button>${s.chat.length ? `<button type="button" class="btn small ghost" id="clearChat">Xoá hội thoại</button>` : ""}</div>`,
     mount(el, ctx) {
       const ta = el.querySelector("#ask2"), chat = el.querySelector("#chat");
       ta.addEventListener("input", () => { ta.style.height = "auto"; ta.style.height = Math.min(160, ta.scrollHeight) + "px"; });
@@ -552,6 +618,7 @@ function followView(id) {
           const { text, model } = await streamWithFallback({
             provider, key: aiKey(), model: "", storage, system: SYSTEM_CHAT, json: false, messages,
             onModel: (m) => { box.querySelector(".who").textContent = `AI · ${m}`; },
+            onFallback: () => probeBridge(),
             onText: (full) => { cur = full; if (!raf) raf = requestAnimationFrame(() => { raf = 0; box.innerHTML = `<div class="who">${esc(box.querySelector(".who")?.textContent || "AI")}</div><div class="streaming">${mdLite(cur)}</div>`; }); },
           });
           s.chat.push({ role: "assistant", text, model, at: new Date().toISOString() });
@@ -589,30 +656,43 @@ function historyView() {
 }
 
 // ================= Kiểm chứng =================
+function mapText(t, rev) {
+  const T = t.tarot.map((c, i) => `${pad(i + 1)} → ${tarotCard(store.db, c).vi}${t.tarotRev?.[i] ? " (ngược)" : ""}`).join("\n");
+  const L = t.lenormand.map((c, i) => `${pad(i + 1)} → ${lenCard(store.db, c).vi}`).join("\n");
+  return `<details><summary>Tarot (vị trí → lá)</summary><pre class="mono">${esc(T)}</pre></details><details><summary>Lenormand (vị trí → lá)</summary><pre class="mono">${esc(L)}</pre></details>`;
+}
 function verifyView(id) {
   const s = getSession(id);
   if (!s) return notFound();
   if (s.draft) return { redirect: `#/trai/${id}` };
   const v = s.verify;
-  const mapT = s.mapping.tarot.map((c, i) => `${pad(i + 1)} → ${tarotCard(store.db, c).vi}${s.mapping.tarotRev?.[i] ? " (ngược)" : ""}`).join("\n");
-  const mapL = s.mapping.lenormand.map((c, i) => `${pad(i + 1)} → ${lenCard(store.db, c).vi}`).join("\n");
+  const ok = v && v.hashOk && v.mappingOk;
   return {
     title: "Kiểm chứng",
     html: `<h1>Kiểm chứng khoá</h1><p class="lead">“${esc(s.cauHoi)}”</p>
     ${lockBox(s)}
-    ${s.revealed && v ? `<section class="card"><h2>Kết quả</h2><p>Seed: <span class="mono">${s.seed}</span></p><p>Mã tính lại: <span class="mono">${v.recomputed}</span></p>
-      <p>${v.hashOk && v.mappingOk ? `<span class="ok-badge">✔ Khớp — bài không bị đổi sau khi khoá.</span>` : `<span class="bad-badge">✘ Không khớp!</span>`}</p>
-      <details><summary>Bảng ánh xạ Tarot (số → lá)</summary><pre class="mono">${esc(mapT)}</pre></details>
-      <details><summary>Bảng ánh xạ Lenormand (số → lá)</summary><pre class="mono">${esc(mapL)}</pre></details></section>`
-    : `<section class="card"><p>${s.rounds.length ? "Đã trải xong — có thể công khai seed để tự kiểm tra." : "<span class='warn'>Bạn chưa chọn số. Công khai seed bây giờ sẽ làm mất tác dụng khoá (biết trước lá).</span>"}</p><button type="button" class="btn primary" id="rv">Công khai seed &amp; kiểm tra</button></section>`}
-    <section class="card"><h2>Cách tự kiểm</h2><p class="note">Mã khoá = SHA-256( seed_hex + "|" + JSON{v:1, tarot, tarotRev, lenormand} ). Thứ tự xáo: Fisher–Yates với số ngẫu nhiên lấy từ SHA-256(seed ‖ nhãn ‖ bộ đếm 32 bit), nhãn “tarot”, “lenormand”, “tarot-nguoc”; rút số đều bằng loại bỏ phần dư. Mã nguồn công khai trong thư mục <code>boi/js/core.js</code>.</p></section>
+    ${s.revealed && v ? `<section class="card"><h2>Kết quả</h2>
+      <p>${ok ? `<span class="ok-badge">✔ Khớp — bài không bị đổi sau khi khoá.</span>` : `<span class="bad-badge">✘ Không khớp!</span>`}</p>
+      ${(v.draws || [{ di: 0, seed: s.seed, recomputed: v.recomputed, hashOk: v.hashOk, cellsOk: v.mappingOk }]).map((d) => `<div class="draw-check"><h3>${d.di ? `Lượt rút thêm #${d.di}` : "Trải chính"}</h3>
+        <p>Seed: <span class="mono">${esc(d.seed)}</span></p><p>Mã tính lại: <span class="mono">${esc(d.recomputed)}</span> ${d.hashOk ? "✔" : "✘"} · lá đã lật khớp bảng: ${d.cellsOk ? "✔" : "✘"}</p>
+        <div class="maps" data-di="${d.di}"><p class="note">Đang tính lại bảng ánh xạ từ seed…</p></div></div>`).join("")}</section>`
+    : `<section class="card"><p>${s.rounds.length ? "Đã trải xong — có thể công khai seed để tự kiểm tra." : "<span class='warn'>Bạn chưa chọn bài. Công khai seed bây giờ sẽ làm mất tác dụng khoá (biết trước lá).</span>"}</p><button type="button" class="btn primary" id="rv">Công khai seed &amp; kiểm tra</button></section>`}
+    <section class="card"><h2>Cách tự kiểm</h2><p class="note">${isFresh(s)
+      ? `Mỗi lượt rút có seed 32 byte riêng (crypto.getRandomValues). Mã khoá = SHA-256( seed_hex + "|" + JSON{v:2, tang:[{tarot, tarotRev, lenormand}, …]} ), mỗi tầng một bảng. Thứ tự xáo: Fisher–Yates với số ngẫu nhiên lấy từ SHA-256(seed ‖ nhãn ‖ bộ đếm 32 bit), nhãn “tarot#k”, “lenormand#k”, “tarot-nguoc#k” cho tầng k; rút số đều bằng loại bỏ phần dư. Bảng ánh xạ không lưu trên máy — luôn tính lại từ seed.`
+      : `Mã khoá = SHA-256( seed_hex + "|" + JSON{v:1, tarot, tarotRev, lenormand} ). Thứ tự xáo: Fisher–Yates với số ngẫu nhiên lấy từ SHA-256(seed ‖ nhãn ‖ bộ đếm 32 bit), nhãn “tarot”, “lenormand”, “tarot-nguoc”; rút số đều bằng loại bỏ phần dư.`} Mã nguồn công khai trong thư mục <code>boi/js/core.js</code>.</p></section>
     <div class="btns"><a class="btn" href="${routeFor(s)}">← Quay lại câu hỏi</a></div>`,
-    mount(el, ctx) {
+    async mount(el, ctx) {
       const b = el.querySelector("#rv");
       if (b) b.onclick = async () => {
-        if (!s.rounds.length && !confirm("Công khai seed trước khi chọn số sẽ làm mất ý nghĩa khoá. Vẫn công khai?")) return;
+        if (!s.rounds.length && !confirm("Công khai seed trước khi chọn bài sẽ làm mất ý nghĩa khoá. Vẫn công khai?")) return;
         const r = await reveal(s); save(); toast(r.hashOk && r.mappingOk ? "Khớp: bài không bị đổi." : "KHÔNG khớp!"); ctx.rerender();
       };
+      for (const box of el.querySelectorAll(".maps[data-di]")) {
+        try {
+          const m = await ensureMapping(s, +box.dataset.di);
+          box.innerHTML = m.v === 2 ? m.tang.map((t, i) => `<p class="lbl">${esc(s.tiers[i]?.ten || `Tầng ${i + 1}`)}</p>${mapText(t)}`).join("") : mapText(m);
+        } catch (_) { box.innerHTML = `<p class="err">Không tính lại được bảng.</p>`; }
+      }
     },
   };
 }
@@ -655,7 +735,7 @@ export const ROUTES = [
   [/^\/?$/, () => home(), "home"],
   [/^\/hoi-moi$/, () => ask(), "ask"],
   [/^\/trai\/([\w-]+)$/, (m) => spreadView(m[1]), "ask"],
-  [/^\/chon-so\/([\w-]+)$/, (m) => pickView(m[1]), "ask"],
+  [/^\/chon-so\/([\w-]+)$/, (m, q) => pickView(m[1], q), "ask"],
   [/^\/lat\/([\w-]+)$/, (m, q) => flipView(m[1], q), "ask"],
   [/^\/giai\/([\w-]+)$/, (m, q) => readView(m[1], q), "ask"],
   [/^\/hoi-tiep\/([\w-]+)$/, (m) => followView(m[1]), "ask"],
