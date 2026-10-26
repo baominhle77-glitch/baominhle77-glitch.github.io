@@ -104,6 +104,18 @@ class LiveScene:
         # Hiện tượng bắt đầu SAU khi giọt đầu tiên chạm mặt, không cho
         # hạt chạy trước giây 0.45 của cảnh impact.
         return max(0.0,self.clock_t()-(.45 if self.shot=="impact" else 0.0))
+    def model_radius_cm(self):
+        t=self.physical_t()
+        return 3.5*(.19+.74*(1-math.exp(-t/3.4)))
+
+    def model_gamma(self):
+        # Chỉ là trường biểu diễn định tính c(r,t), KHÔNG phải máy đo.
+        t=self.physical_t()
+        return 71.97-35.54*(1-math.exp(-t/3.4))
+
+    def hud(self):
+        return chu("MODEL r=%.1fcm  γ=%.0fmN/m" %
+                   (self.model_radius_cm(),self.model_gamma()),48,MUC)
 
     def wave_radius(self,t,birth,speed=.44):
         # Sau va chạm, sóng mao dẫn lan dọc mặt, phản xạ ở thành đĩa:
@@ -413,10 +425,9 @@ class LiveScene:
             self.build_gamma()
         # Số đo sống là thước minh hoạ, không giành vùng chủ thể.
         # Manim DecimalNumber bản địa: không bitmap upscale.
-        pos=[self.x0+1.75,self.y1-.50,0]
+        pos=[-.10 if self.W.bc.doc else -2.10,self.y1-.57,0]
         counter=always_redraw(lambda:
-            chu("t = %.1f s" % self.clock_t(),46,MUC)
-                .move_to(pos).set_z_index(15))
+            self.hud().move_to(pos).set_z_index(15))
         self.add(counter,animated=True)
 
 
@@ -780,8 +791,8 @@ class LiveScenePerBeat(LiveScene):
         if self.shot in ("tension_flow","micelle","velocity_profile","viscosity","surfactants","velocity_field") or self.bid in ("p2","c2","v3","w7","b1","r3","p3","v6","v7","c3","w4","v2","w2","r1","r2","s8","w5","v5","p5","v4","w3","w6"):
             # Counter native Text cho những cảnh dùng builder riêng.
             clock=always_redraw(lambda:
-                 chu("t = %.1f s" % self.clock_t(),46,MUC)
-                 .move_to([self.x0+1.75,self.y1-.50,0]).set_z_index(15))
+                 self.hud().move_to([-.10 if self.W.bc.doc else -2.10,
+                                     self.y1-.57,0]).set_z_index(15))
             self.add(clock,animated=True)
 
 
