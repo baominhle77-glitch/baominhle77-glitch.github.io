@@ -391,9 +391,9 @@ class LiveScene:
             self.build_gamma()
         # Số đo sống là thước minh hoạ, không giành vùng chủ thể.
         # Manim DecimalNumber bản địa: không bitmap upscale.
-        pos=[self.x0+.35,self.y1-.35,0]
+        pos=[self.x0+1.75,self.y1-.50,0]
         counter=always_redraw(lambda:
-            chu("t = %.1f s" % self.clock_t(),28,MUC)
+            chu("t = %.1f s" % self.clock_t(),46,MUC)
                 .move_to(pos).set_z_index(15))
         self.add(counter,animated=True)
 
@@ -489,8 +489,8 @@ class LiveScenePerBeat(LiveScene):
         if self.shot in ("micelle","velocity_profile","viscosity","surfactants","velocity_field"):
             # Counter native Text cho những cảnh dùng builder riêng.
             clock=always_redraw(lambda:
-                 chu("t = %.1f s" % self.clock_t(),28,MUC)
-                 .move_to([self.x0+.35,self.y1-.35,0]).set_z_index(15))
+                 chu("t = %.1f s" % self.clock_t(),46,MUC)
+                 .move_to([self.x0+1.75,self.y1-.50,0]).set_z_index(15))
             self.add(clock,animated=True)
 
 
