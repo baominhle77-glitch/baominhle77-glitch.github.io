@@ -11,7 +11,7 @@ import { moneyTable, periodEstimate, roundNice } from "./js/money.js";
 import { analyze, allSentences, ruleFollowUp } from "./js/insight.js";
 import { suggestSpread, mainTopic } from "./js/topic.js";
 import { mergeKnowledge, tarotMeaning, capMeaning, cardYesNo } from "./js/data.js";
-import { friendlyError, LOCAL_KEY } from "./js/ai.js";
+import { friendlyError, LOCAL_KEY, TRAM_KEY, TRAM_URL, aiFailNotice } from "./js/ai.js";
 import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING } from "./js/ai.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -328,6 +328,57 @@ test("AI: dò model, 429 → model dự phòng, streaming SSE ghép JSON, JSON d
   assert.equal(r.tang[0].diem, 7);
   assert.ok(partialJSON(seen[1]), "JSON dở dang vẫn dựng được");
   assert.ok(!JSON.stringify(mem.get("boi.v2.models")).includes("KHOA"), "không lưu khoá vào bộ nhớ model");
+});
+
+test("trạm AI: ok → hiện chữ + model; 429 → câu báo + bản giải theo luật; mạng hỏng; quá 60 s", async () => {
+  const s = await demoSession();
+  addRound(s, `${T_IN}\n${L_IN}`);
+  const rule = analyze(db, s, { thuNhap: 20 });
+  const answer = JSON.stringify({ tong_quan: "Tổng quan từ trạm.", chu_de_troi: ["a"], tang: [{ ten: "T1", diem: 8, tarot_doc: ["x"], dong_chay: "d", lenormand_cap: ["c"], chot: "c", diem_nghen: "n", loi_khuyen: "k" }], noi_tang: ["n"], mau_thuan: ["m"], tong_ket: "Kết.", loi_khuyen: ["l"] });
+  const messages = [{ role: "user", text: readingRequest(db, s, { reading: rule, money: rule._money }) }];
+  const calls = [];
+  const okFetch = async (url, opts = {}) => {
+    calls.push({ url, opts });
+    return new Response(JSON.stringify({ ok: true, model: "gemini-2.5-flash", data: { candidates: [{ content: { parts: [{ text: "suy nghĩ", thought: true }, { text: answer.slice(0, 50) }, { text: answer.slice(50) }] } }] } }), { status: 200 });
+  };
+  const seen = [], models = [];
+  const out = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: SYSTEM_READING, json: true, fetchImpl: okFetch, messages, onText: (full) => seen.push(full), onModel: (m) => models.push(m) });
+  assert.equal(calls.length, 1, "trạm chỉ gọi một lần, không dò model");
+  assert.equal(calls[0].url, TRAM_URL);
+  assert.equal(calls[0].opts.method, "POST");
+  assert.equal(calls[0].opts.redirect, "follow");
+  assert.equal(calls[0].opts.headers["content-type"], "text/plain;charset=utf-8", "text/plain để khỏi preflight CORS");
+  assert.ok(!Object.keys(calls[0].opts.headers).some((h) => /key|token|authorization/i.test(h)), "web không gửi khoá nào");
+  const sent = JSON.parse(calls[0].opts.body);
+  assert.equal(sent.model, "gemini-flash-latest");
+  assert.equal(sent.body.generationConfig.responseMimeType, "application/json");
+  assert.ok(sent.body.systemInstruction.parts[0].text.includes("lão luyện"));
+  assert.equal(sent.body.contents[0].role, "user");
+  assert.equal(out.model, "gemini-2.5-flash", "model thật lấy từ trạm");
+  assert.equal(out.text, answer, "bỏ phần thought, ghép đủ chữ");
+  assert.deepEqual(seen, [answer]);
+  assert.deepEqual(models, ["gemini-flash-latest"]);
+  assert.equal(normalizeReading(partialJSON(out.text), rule).tong_quan, "Tổng quan từ trạm.");
+
+  // 429 → câu báo tiếng Việt + lời dẫn tới bản giải theo luật; động cơ luật vẫn cho bản đầy đủ
+  const busy = async () => new Response(JSON.stringify({ ok: false, status: 429, error: "quota" }), { status: 200 });
+  const e429 = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: SYSTEM_READING, json: true, fetchImpl: busy, messages }).then(() => null, (e) => e);
+  assert.equal(e429?.status, 429);
+  const n = aiFailNotice(e429, TRAM_KEY);
+  assert.match(n.status, /Đang đông người hỏi, thử lại sau ít phút/u);
+  assert.match(n.note, /bản giải theo luật/u);
+  assert.ok(rule.tang.length && rule.tong_ket, "bản giải theo luật vẫn có đủ để hiện");
+
+  // Mạng hỏng / lỗi khác / quá thời hạn
+  const down = async () => { throw new TypeError("Failed to fetch"); };
+  const eNet = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages, fetchImpl: down }).then(() => null, (e) => e);
+  assert.equal(friendlyError(eNet, TRAM_KEY), "Không kết nối được máy giải, kiểm tra mạng.");
+  const e500 = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages, fetchImpl: async () => new Response("<html>lỗi</html>", { status: 500 }) }).then(() => null, (e) => e);
+  assert.equal(friendlyError(e500, TRAM_KEY), "Máy giải đang bận.");
+  const hang = (url, opts) => new Promise((_, rej) => opts.signal.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError"))));
+  const eSlow = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages, fetchImpl: hang, tramTimeoutMs: 30 }).then(() => null, (e) => e);
+  assert.ok(eSlow?.timeout, "quá thời hạn phải có cờ timeout");
+  assert.equal(friendlyError(eSlow, TRAM_KEY), "Máy giải đang bận.");
 });
 
 export async function run(extra = []) {

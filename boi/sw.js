@@ -1,5 +1,5 @@
 // Service worker của boi/: chạy offline phần luật (trang, mã, dữ liệu lá). Gọi AI luôn đi thẳng mạng, không cache.
-const CACHE = "boi-v5";
+const CACHE = "boi-v6";
 const CORE = [
   "./", "index.html", "manifest.webmanifest", "css/app.css",
   "js/app.js", "js/views.js", "js/store.js", "js/state.js", "js/core.js", "js/parser.js", "js/spreads.js", "js/topic.js",
@@ -8,6 +8,8 @@ const CORE = [
   "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png",
 ];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
+// Trạm AI (Apps Script) và nơi nó chuyển hướng tới: không bao giờ cache
+const NO_CACHE_HOSTS = ["script.google.com", "script.googleusercontent.com"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
@@ -17,8 +19,9 @@ self.addEventListener("activate", (e) => {
 });
 self.addEventListener("fetch", (e) => {
   const req = e.request;
-  if (req.method !== "GET") return;
+  if (req.method !== "GET") return; // POST tới trạm AI đi thẳng mạng
   const url = new URL(req.url);
+  if (NO_CACHE_HOSTS.includes(url.hostname)) return;
   const same = url.origin === self.location.origin && url.pathname.startsWith(new URL(self.registration.scope).pathname);
   const font = FONT_HOSTS.includes(url.hostname);
   if (!same && !font) return;

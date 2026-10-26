@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-25T09:00:00+07:00",
+  "updated_at": "2026-10-26T23:40:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
@@ -596,6 +596,22 @@
       "base_sha": "1bb80f2",
       "started_at": "2026-10-25T18:15:00+07:00",
       "heartbeat_at": "2026-10-25T18:30:00+07:00"
+    },
+    {
+      "id": "BOI-20261026-01",
+      "owner": "Claude Code",
+      "branch": "claude/determined-brown-r799sm",
+      "base_sha": "70d099ea22aa6e9f7cb3dea4b1b041128e2a91f3",
+      "paths": [
+        "boi/**",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-26T22:00:00+07:00",
+      "heartbeat_at": "2026-10-26T23:40:00+07:00",
+      "summary": "Web bói gọi trạm AI (Apps Script) làm mặc định, bỏ ô nhập khoá; PR #150",
+      "completed_at": "2026-10-26T23:40:00+07:00"
     }
   ]
 }
