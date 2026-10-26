@@ -843,6 +843,7 @@ def ve_live(owner,sc,W):
         maxw=2.55
     _fit_source(sc,W,doc)
     model=LiveScenePerBeat(owner,sc,W,rect,upper)
+    sc._c17_snapshot_clock=model.clock
     owner._c17_hats=model.dynamic
     owner._c17_t=model.clock
     owner.hinh_ds.extend([model.static,model.dynamic,model.extra])
