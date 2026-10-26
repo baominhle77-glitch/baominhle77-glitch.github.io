@@ -21,7 +21,18 @@ def _make_mob(m, layer=1):
 
 def _addlabel(text, size, maxwidth, maxlines=3):
     """Vector Text ≥22 source pixels at 1080p; no scaling down bitmap/font."""
-    words=text.split()
+    words=[]
+    for word in text.split():
+        if chu(word,size).width <= maxwidth:
+            words.append(word)
+            continue
+        # Từ khoa học dài ngắt ở khổ chữ THẬT, không co chữ xuống <22px.
+        while word:
+            cut=len(word)
+            while cut>1 and chu(word[:cut]+("-" if cut<len(word) else ""),size).width>maxwidth:
+                cut-=1
+            words.append(word[:cut]+("-" if cut<len(word) else ""))
+            word=word[cut:]
     lines=[]
     current=""
     for word in words:
@@ -293,6 +304,7 @@ class LiveScene:
                 xp=x-w*.40+k*w*.80/23
                 phase=k*.17
                 head=Circle(radius=.07).set_fill(CANG,.94).set_stroke(MUC,2)
+                head.move_to([xp,y+h*.23,0])  # đầu ưa nước bám mặt nước
                 tail=Line([xp,y+h*.23,0],[xp,y+h*.39,0]).set_stroke(MUC,2.5)
                 entity=VGroup(head,tail).set_z_index(9)
                 def adsorb(m,dt,xp=xp,phase=phase):
