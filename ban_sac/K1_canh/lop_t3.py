@@ -1025,6 +1025,10 @@ from manim import ValueTracker, ParametricFunction, always_redraw, smooth
 
 
 class _SongC17:
+    def ve(self, sc, W):
+        from K1_canh.mo_phong_c17_v2 import ve_live
+        return ve_live(self, sc, W)
+
     def su_chu(self, o):
         # Nhãn và từ khoá hiện từ lịch TTS; thao tác hình phác cũ không còn
         # ý nghĩa khi vật chính đã thành một mô phỏng sống duy nhất.
