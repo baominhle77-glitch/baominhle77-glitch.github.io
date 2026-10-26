@@ -735,7 +735,18 @@ class LiveScenePerBeat(LiveScene):
         self.add(profile,animated=True)
 
     def build(self):
-        if self.shot=="tension_flow":
+        # Mỗi beat khai triển VẬT/ĐẠI LƯỢNG lời đang giải thích, không ghép
+        # 35 nhãn lên 4 đĩa lặp. Các nhóm có chung phương trình nhưng khác
+        # thiết bị, góc nhìn và trường vật chất được đo.
+        if self.bid in ("p2","c2","v3","w7","b1","r3"):
+            self.build_pump_bench()
+        elif self.bid in ("p3","v6","v7","c3","w4"):
+            self.build_molecular_bench()
+        elif self.bid in ("v2","w2","r1","r2","s8","w5","v5"):
+            self.build_velocity_chart()
+        elif self.bid in ("p5","v4","w3","w6"):
+            self.build_stratified_flow()
+        elif self.shot=="tension_flow":
             self.build_flow_loop()
         elif self.shot=="micelle":
             self.build_micelle()
@@ -763,7 +774,7 @@ class LiveScenePerBeat(LiveScene):
                 self.add(arc,animated=True)
         else:
             super().build()
-        if self.shot in ("tension_flow","micelle","velocity_profile","viscosity","surfactants","velocity_field"):
+        if self.shot in ("tension_flow","micelle","velocity_profile","viscosity","surfactants","velocity_field") or self.bid in ("p2","c2","v3","w7","b1","r3","p3","v6","v7","c3","w4","v2","w2","r1","r2","s8","w5","v5","p5","v4","w3","w6"):
             # Counter native Text cho những cảnh dùng builder riêng.
             clock=always_redraw(lambda:
                  chu("t = %.1f s" % self.clock_t(),46,MUC)
