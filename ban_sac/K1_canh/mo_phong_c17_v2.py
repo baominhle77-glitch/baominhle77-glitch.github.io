@@ -691,7 +691,7 @@ class LiveScenePerBeat(LiveScene):
         if self.bid=="h1":
             drop=always_redraw(lambda:
                 Circle(radius=.18).set_fill(CANG,.95).set_stroke(MUC,2)
-                .move_to([x,y+h*(.38+.40*max(0,1-self.clock_t()/1.3)),0])
+                .move_to([x,y+h*(.38+.10*max(0,1-self.clock_t()/1.3)),0])
                 .set_z_index(12))
             self.add(drop,animated=True)
 
