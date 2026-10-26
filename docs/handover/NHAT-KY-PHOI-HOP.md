@@ -22,6 +22,14 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-26 23:30 GMT+7 — Claude Code — BOI-20261026-01 — web bói gọi trạm AI (PR #150)
+- Lệnh GĐ, Chủ tịch duyệt: người dùng không cài gì, không nhập khoá; mặc định giải bằng Gemini qua trạm Google Apps Script (khoá nằm ở Script Properties của trạm, không có trong web).
+- Nhánh `claude/determined-brown-r799sm` (base `70d099e`). Sửa `boi/js/ai.js`, `store.js`, `views.js`, `app.js`, `boi/sw.js` (`boi-v6`, không cache trạm), `boi/test.mjs`, `boi/TIEN_DO.md` (mục 22).
+- Lỗi trạm → câu báo tiếng Việt + bản giải theo luật; cầu nối 127.0.0.1 chỉ còn là lựa chọn ẩn (`?cau-noi=1`).
+- Test: `node boi/test.mjs` 17/17; `check-public-content` đạt; e2e Playwright Pixel 7 (trạm giả ok/429/mất mạng) đạt.
+- Đã biết (phía trạm): với `gemini-flash-latest` trạm trả 404 vì chuỗi dự phòng dừng ở `gemini-2.5-flash` (đã ngừng) → web rơi về bản luật; cần sửa chuỗi model trong trạm.
+- Không thêm secret. Không đụng Worker/workflow.
+
 ### 2026-10-25 09:30 GMT+7 — Claude Code — đóng CHOICE-20261024-01 (trong PR #139)
 - Xoá Hội Chọn Đúng (#134, `46d3029`) đã deploy SUCCESS (run 40114714384): Worker không còn route/cron choice, Pages không còn `/hoi-chon-dung/`; hậu kiểm Bói toán, cộng đồng, xác minh search đạt. "Xác minh Admin V8 production" fail là lỗi có sẵn từ 25/07 (bộ xác minh chờ v8, production v11), không do #134.
 - Khoá `CHOICE-20261024-01` → `completed`. PR #135 (cùng nội dung) đóng vì xung đột.
