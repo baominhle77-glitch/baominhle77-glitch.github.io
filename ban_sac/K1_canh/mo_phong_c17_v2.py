@@ -864,6 +864,9 @@ def ve_live(owner,sc,W):
         raise ValueError("NHAN_28PX_QUA_DAI %s %.2f>%.2f" %
                          (W.b["id"],label.width,allowed))
     label.move_to(center).set_z_index(25)
+    # C13: caption là chữ màn hình, không phóng gấp nhiều lần khi
+    # camera đến góc cận cảnh của h3/c2. Ghim như nguồn gốc.
+    label=trang.ghim(sc,trang.man_sang_the_gioi(sc,label))
     owner._live_current_label=label
     # Nhãn caption bắt đầu cùng từ có nghĩa đầu tiên, giữ cue TTS nguyên vẹn.
     cues=list(os_)
