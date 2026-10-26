@@ -642,6 +642,46 @@ class LiveScenePerBeat(LiveScene):
         self.add(film,animated=True)
         if self.upper is not None:self.upper_detail(needle=False)
 
+    def build_side_physics(self):
+        """Cận cảnh vật lý bên PHẢI, DƯỚI PiP 16:9. Kết hợp khay lớn
+        với mặt cắt vật thật đưa tổng vùng hiện tượng vượt 70% khung.
+        Không dùng ô xám, chữ hay mũi tên trên hình tĩnh.
+        """
+        if self.W.bc.doc:return
+        x,y=5.32,-.76
+        w,h=2.34,4.56  # x4.15..6.49, y-3.04..1.52: TRÁNH PiP x>4.3 y>2
+        liquid=RoundedRectangle(width=w,height=h,corner_radius=.15)
+        liquid.set_fill(NUOC,.78).set_stroke(MUC,2.6).move_to([x,y,0])
+        liquid.set_z_index(1);self.add(liquid)
+        # Khuôn là ảnh cắt ngang cùng trường gamma, tracer được bình lưu
+        # qua lớp mặt, hồi lưu đáy (không phải ticker).
+        for i in range(170):
+            xp=float(self.rng.uniform(-.45,.45))
+            zp=float(self.rng.uniform(-.44,.44))
+            speed=.22 if zp<=0 else .71
+            direction=-1 if zp<-.01 else 1
+            bead=Dot(radius=.036,color=CANG if zp>.08 else MUC)
+            bead.set_z_index(8)
+            def drift(m,dt,xp=xp,zp=zp,speed=speed,direction=direction,i=i):
+                t=self.clock_t()
+                xx=((xp+.46+direction*speed*t)% .92)-.46
+                yy=zp+.012*math.sin(.7*t+i*.23)
+                m.move_to([x+w*xx,y+h*yy,0])
+            bead.add_updater(drift);self.add(bead,animated=True)
+        surf=always_redraw(lambda:
+            VMobject().set_points_smoothly([
+                np.array([x-w*.45+w*.9*j/40,
+                         y+h*.37+.045*math.sin(j*.4-1.5*self.clock_t()),0])
+                for j in range(41)])
+            .set_stroke(CANG,8,opacity=.95).set_z_index(10))
+        self.add(surf,animated=True)
+        if self.bid=="h1":
+            drop=always_redraw(lambda:
+                Circle(radius=.18).set_fill(CANG,.95).set_stroke(MUC,2)
+                .move_to([x,y+h*(.38+.40*max(0,1-self.clock_t()/1.3)),0])
+                .set_z_index(12))
+            self.add(drop,animated=True)
+
     def build_flow_loop(self):
         """p1: mặt cắt bể thật, hàng trăm tracer khép một dòng hồi lưu.
         Vệt trên chạy từ vùng giảm gamma ra vùng tăng gamma; lớp đáy về nguồn.
@@ -788,6 +828,7 @@ class LiveScenePerBeat(LiveScene):
                 self.add(arc,animated=True)
         else:
             super().build()
+        self.build_side_physics()
         if self.shot in ("tension_flow","micelle","velocity_profile","viscosity","surfactants","velocity_field") or self.bid in ("p2","c2","v3","w7","b1","r3","p3","v6","v7","c3","w4","v2","w2","r1","r2","s8","w5","v5","p5","v4","w3","w6"):
             # Counter native Text cho những cảnh dùng builder riêng.
             clock=always_redraw(lambda:
