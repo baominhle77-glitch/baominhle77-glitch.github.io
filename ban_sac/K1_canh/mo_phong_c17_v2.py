@@ -62,6 +62,9 @@ class LiveScene:
         self.mode=(self.b.get("chuyen_dong_chinh") or {}).get("co_che","marangoni")
         self.x0,self.x1,self.y0,self.y1=rect
         self.cx=(self.x0+self.x1)/2
+        # Bát ngang nằm TRÁI ô PiP thực (góc trên phải); phần dưới
+        # bên phải dành cho dụng cụ, không đặt một bbox dài qua PiP.
+        if not W.bc.doc:self.cx-=.31
         self.cy=(self.y0+self.y1)/2
         self.w=self.x1-self.x0
         self.h=self.y1-self.y0
@@ -116,8 +119,8 @@ class LiveScene:
         return m
 
     def surface_base(self, oblique=False):
-        rx=self.w*.475
-        ry=self.h*(.405 if oblique else .465)
+        rx=(self.w*.475 if self.W.bc.doc else min(self.w*.475,4.13-self.cx))
+        ry=self.h*(.405 if oblique else .452)
         rim=Ellipse(width=2*rx,height=2*ry).set_fill(MUC,.20).set_stroke(MUC,3.3)
         rim.move_to([self.cx,self.cy,0])
         water=Ellipse(width=2*rx*.96,height=2*ry*.96).set_fill(NUOC,.88).set_stroke(NUOC,2.3)
@@ -131,8 +134,8 @@ class LiveScene:
 
     def flowing_front(self, oblique=False):
         rad=self.radius
-        xscale=self.w*.475/self.radius
-        ry=(self.h*.405 if oblique else self.h*.465)/self.radius
+        xscale=(self.w*.475 if self.W.bc.doc else min(self.w*.475,4.13-self.cx))/self.radius
+        ry=(self.h*.405 if oblique else self.h*.452)/self.radius
         # Bán kính vùng xà phòng c(r,t) mở rộng do dòng Marangoni.
         # Mặt tô CANG đi kèm nước vùng ngoài; không có màn overlay giả.
         front=always_redraw(lambda:
@@ -154,8 +157,8 @@ class LiveScene:
 
     def pepper_flow(self, n=390, oblique=False):
         rad=self.radius
-        xscale=self.w*.475/self.radius
-        yscale_outer=(self.h*.405 if oblique else self.h*.465)/self.radius
+        xscale=(self.w*.475 if self.W.bc.doc else min(self.w*.475,4.13-self.cx))/self.radius
+        yscale_outer=(self.h*.405 if oblique else self.h*.452)/self.radius
         rng=self.rng
         ang=rng.uniform(0,2*np.pi,n)
         rr=np.sqrt(rng.uniform(.05,.84,n))
@@ -377,13 +380,13 @@ class LiveScene:
         # Mặt bàn vật lý, bóng và lớp phản xạ gắn theo bể, không chỉ nền xám.
         # Bề mặt bàn quang học nhiều lớp, KHÔNG vẽ khung xám quanh mô phỏng.
         # Bóng bát, highlight studio và đường vân theo phối cảnh có độ sâu.
-        shadow=Ellipse(width=self.w*.94,height=self.h*.84).set_fill(MUC,.19).set_stroke(width=0)
-        shadow.move_to([self.cx+.16,self.cy-.19,0]).set_z_index(-9)
+        shadow=Ellipse(width=self.w*.89,height=self.h*.57).set_fill(MUC,.19).set_stroke(width=0)
+        shadow.move_to([self.cx,self.cy-.65,0]).set_z_index(-9)
         self.add(shadow)
         for k in range(6):
-            yy=self.y0+.24+k*self.h/6
+            yy=self.y0+.50+k*.39
             grain=VMobject().set_points_smoothly([
-                np.array([self.x0+.08+self.w*j/24,
+                np.array([self.x0+.16+(min(self.x1,4.13)-self.x0-.25)*j/24,
                           yy+.045*math.sin(.44*j+k*.85),0]) for j in range(25)])
             grain.set_stroke(NEN_DUOI,1.6,opacity=.30).set_z_index(-10)
             self.add(grain)
@@ -798,7 +801,7 @@ def _fit_source(sc,W,doc):
     source=chu(txt,46,MUC,.90)
     # Native vector text, lề đáy cố định. Không thu font khi dài.
     bx=(W.bc.an_toan[0]+W.bc.an_toan[1])/2
-    by=-6.20 if doc else -3.39
+    by=-6.20 if doc else -3.48
     source.move_to([bx,by,0])
     W.nguon=trang.ghim(sc,trang.man_sang_the_gioi(sc,source))
     W.hop_ng=trang.hop_man(sc,W.nguon)
@@ -823,7 +826,7 @@ def ve_live(owner,sc,W):
         maxw=6.80
     else:
         bc.san=-3.72  # nguồn một dòng ở mép dưới, không kéo vào vật chính
-        rect=(-6.72,5.04,-3.35,3.50)
+        rect=(-6.62,5.02,-3.10,3.38)
         upper=None
         txt_y=-2.99
         maxw=2.55
@@ -843,7 +846,7 @@ def ve_live(owner,sc,W):
         center=[-.10,-5.02,0]
         allowed=7.0
     else:
-        center=[-.05,-2.99,0]
+        center=[-.45,-2.57,0]
         allowed=12.9
     if label.width>allowed:
         raise ValueError("NHAN_28PX_QUA_DAI %s %.2f>%.2f" %
