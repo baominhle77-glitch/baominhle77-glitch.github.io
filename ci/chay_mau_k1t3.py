@@ -2,7 +2,6 @@
 """D16: first 60s at 540p in two formats + 35 stills/format; no full episode."""
 import json, math, os, re, shutil, subprocess
 from pathlib import Path
-from kiem_chuyen_dong_beat import evaluate, parse_roi, SAMPLE_FPS, PIXEL_DELTA, MIN_CHANGED_PIXEL_RATIO, MIN_MOVING_PAIR_PCT, MAX_STILL_S
 
 R = Path("E:/Studio")
 B = R / "out/M1_MARANGONI_DUNG/_build"
@@ -81,19 +80,8 @@ for bc in ("16x9","9x16"):
             files=list(work.rglob(bid+".mp4"))
             if not files: raise ValueError("THIEU_CLIP_MAU %s/%s"%(bc,bid))
             videos.append(files[-1])
-            beat_spec=plan["beats"][bid]
-            beg=float(beat_spec["t0"])
-            full_end=beg+beat_spec["so_khung"]/30
-            checked_until=min(60.0,full_end)
-            if checked_until>beg:
-                roi=parse_roi(manim_log,bid,bc)
-                row=evaluate(files[-1],bid,bc,beg,checked_until,roi,full_end)
-                motion_rows.append(row)
-                print("C17G_BEAT %s/%s t=%.2f..%.2f cap_dong=%.2f%% dung_dai_nhat=%.2fs => %s" %
-                      (bc,bid,beg,checked_until,row["ty_le_cap_dong_pct"],
-                       row["giay_dung_dai_nhat"],row["ket_qua"]),flush=True)
-                if row["ket_qua"]!="DAT":
-                    ci_failures.append("C17G_BEAT_TRUOT "+bc+"/"+bid)
+            # C17(8): kiểm chuyển động vùng chạy SAU trên video full-frame
+            # tại job chuyen-dong-vung; ROI cũ đã bị GĐ bác (đo vật nhỏ).
     tw,th=(180,105) if bc=="16x9" else (100,180)
     sheet=Image.new("RGB",(tw*5,(th+25)*7),(237,239,241))
     draw=ImageDraw.Draw(sheet)
@@ -137,17 +125,11 @@ for bc in ("16x9","9x16"):
           (bc,frozen,frozen/60*100,longest,"DAT" if ok else "TRUOT"),flush=True)
     if not ok:
         ci_failures.append("C17_FREEZE_VUOT_NGUONG "+bc)
-report_motion={"thoi_diem":"mau 00:00–01:00, không tuyên bố đã kiểm full",
-    "mau_hz":SAMPLE_FPS,"delta_nguong_gray_255":PIXEL_DELTA,
-    "ty_le_pixel_roi_doi_toi_thieu":MIN_CHANGED_PIXEL_RATIO,
-    "cap_dong_toi_thieu_pct":MIN_MOVING_PAIR_PCT,
-    "dung_lien_tiep_toi_da_s":MAX_STILL_S,
-    "ket_qua":motion_rows,"so_beat_duoc_do":len(motion_rows),
-    "loi":[x for x in ci_failures if x.startswith("C17G_")]}
 (OUT/"chuyen_dong_beat.json").write_text(
-    json.dumps(report_motion,ensure_ascii=False,indent=2),encoding="utf-8")
-if len(motion_rows)!=12:
-    ci_failures.append("C17G_THIEU_12_DONG_MAU %d" % len(motion_rows))
+    json.dumps({"trang_thai":"BO_CONG_ROI_CU",
+                "ly_do":"GĐ bác phép đo 0,3% ROI; C17(8) full-frame ở chuyen_dong_vung.json",
+                "so_beat_mau":len(FIRST),"ca_hai_bo_cuc":True},
+               ensure_ascii=False,indent=2),encoding="utf-8")
 if ci_failures:
     raise SystemExit("CI_MAU_TRUOT: "+", ".join(ci_failures))
 print("MAU_540_DAT_2_KHO: 60s x 2 + 35 khung/khổ; không dựng toàn tập",flush=True)
