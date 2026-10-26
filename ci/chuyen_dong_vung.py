@@ -194,6 +194,17 @@ def main():
         failures += ["THIEU_VIDEO_"+x["bo_cuc"] for x in missing]
         failures += ["DOAN_2S_"+r["bo_cuc"]+"_"+str(r["so_doan_2s_dat"])+"/30"
                      for r in reports if not r["cong_2s_dat"]]
+        mid35={}
+        for fmt in ("16x9","9x16"):
+            found=list(root.rglob("khac_canh_35_"+fmt+".json"))
+            if len(found)!=1:
+                failures.append("THIEU_KHAC_CANH_35_"+fmt)
+                continue
+            check=json.loads(found[0].read_text(encoding="utf-8"))
+            mid35[fmt]=check
+            failures += ["LAP_KHUON_35_"+fmt+"/"+b["beat"]
+                        for b in check.get("beats",[])
+                        if b.get("ket_qua")=="TRUOT"]
         report={
             "chuan":"C17(8) full-frame v2 + khac_canh",
             "video":"K1 t3 mẫu 00:00–01:00, không suy rộng sang full 553s",
@@ -209,7 +220,8 @@ def main():
                 "so_doan_2s_dat_toi_thieu_trong_30":28},
             "ket_qua":"TRUOT" if failures else "DAT",
             "loi":failures,"thieu_video":missing,
-            "tep_video":file_paths,"bao_cao":reports}
+            "tep_video":file_paths,"bao_cao":reports,
+            "khac_canh_35_beat":mid35}
     except Exception as e:
         report={"chuan":"C17(8) full-frame v2 + khac_canh","ket_qua":"TRUOT",
                 "loi":[repr(e)]}
