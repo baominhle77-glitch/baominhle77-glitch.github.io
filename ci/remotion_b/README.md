@@ -1,77 +1,42 @@
-# B · first 60 seconds · Manim + Remotion
+# B: the approved production method, first 60-second sample
 
-Branch starts at `aca6c94`; the A/round-2 branch is untouched. Do not merge.
+Follow [AGENTS.md](../../AGENTS.md). Work remains on `gpt/k1t3-B-remotion`,
+PR149; do not merge. The Chairman must approve this sample before any full
+>=480-second episode is rendered. The previous A method is retired.
 
-Manim renders text-free, separately authored 960×540 and 540×960 beat clips.
-Remotion handles word-timed 2–5-word bold white captions (30px), titles, dark
-transitions, audio and optional labelled Gemini inserts. The model uses analytic
-2.5D surfaces rather than faceted 3D meshes: a closed, 128-component Bezier plate,
-flattened pepper, and isolated molecular magnification. No scene rotation or
-landscape-to-portrait crop. The narration and cached TTS bytes match A.
+Manim renders six text-free simulations with separately authored960×540 and
+540×960 layouts, at30fps. Six matrix jobs run independently (`fail-fast:false`,
+40min each). AST fingerprints invalidate only affected beats. Pip, Node and
+native media are cached; a validated media hit skips the native toolchain.
+Remotion assembles the original TTS, semantic2–5-word captions aligned to word
+clocks, titles, transitions and the three original GĐ-supplied Gemini clips.
+Portrait Gemini uses a focal crop covering the frame, per the latest instruction.
+The hook uses h1 source3–9s at timeline0–6s; c2 appears9.5–13.5s and p2
+18.5–22.5s, all labelled `AI minh hoạ (Gemini)`. Hashes and sources are recorded.
 
-Run `python ci/remotion_b/prepare.py --stills --jobs 4` for three images per beat.
-Run `python ci/remotion_b/pipeline.py`, then `python ci/remotion_b/measure.py`.
-Install JS with `npm ci --prefix ci/remotion_b`. Set `B_CHROME=/usr/bin/chromium`
-when using a system browser. CI installs the Remotion browser normally.
+Each beat has its own scale/view. Molecular soap adsorption, weakening bonds and
+surface/return flow evolve throughout the shot; its eased optical camera changes
+azimuth/elevation every3.6s. Closed surfaces have no cutaway wedges or mesh edges.
+Actual3D sphere separation is asserted every frame; physical particles<=400.
+The final cross-section shows the long orange arrow mentioned at59s.
 
-`tools/do_chuyen_dong_vung.py` calls A's unchanged `extract` / `measure` functions.
-It retains every six-beat motion/scene-difference and two-second threshold; the
-remaining 29 episode beats are outside the explicitly requested first-60s scope.
-A red gate stays red, and artifacts upload even on failure.
+Run `python ci/remotion_b/prepare.py --beat h4 --jobs 1` to rebuild one beat.
+Use `--stills` for three native540p frames per beat/format. Run
+`python ci/remotion_b/compose.py` for Remotion only; install Node packages using
+`npm ci --prefix ci/remotion_b`, and use `B_CHROME=/usr/bin/chromium` locally.
+CI runs `remotion browser ensure`, uses swangle and120000ms timeouts. It requests
+concurrency2; a genuinely one-core runner is logged and retried at1 without
+spoofing its CPU count. The actual value is included in render metrics.
 
-The original three Gemini clips are missing from the base commit and workspace.
-`gemini.json` records this explicitly. It never fabricates replacement footage.
-The original p2/c2 storyboard placements are 80s/172s, outside this scope; the
-first-60s placement from A must also be supplied. C16 therefore remains red.
-No face/PiP footage is uploaded.
+Before measurement, `gate_ffmpeg.py` verifies the rawvideo muxer and original
+fps/freezedetect/scale/format filters. It chooses a full system FFmpeg or pinned
+imageio-ffmpeg0.6.0. `tools/do_chuyen_dong_vung.py` uses A's unchanged extract and
+measure functions; every beat, scene-difference and2-second threshold is retained.
+The log and `c17_windows.md` print all30 windows per format. FREEZE detection logs
+exact intervals and requires none. No red gate is relabelled green. CI always
+uploads the two MP4s, contact sheets, timing and gate reports, including failures.
+Native1080p is a separate explicit opt-in sample job after all540p gates pass.
 
-A CI job timings are observed; A CPU/editorial timing was not instrumented and
-is null. B measures child CPU seconds, render wall time, bytes and a warm h3-only
-rebuild. An unchanged warm rebuild is not labelled a measured editorial repair.
-The 8-minute, two-format estimate is explicitly a linear extrapolation.
-
-## Round 2 — GĐ supplied inputs and requested revision
-
-All three original Gemini clips now live in `assets/k1t3/broll_gemini/`.
-The hook uses source h1 3.0–6.5s at timeline 0–3.5s so impact is visible early;
-c2 appears in h2 at 9.5–13.5s; p2 in h3 at 18.5–22.5s. The portrait foreground
-is contained in full, over a blurred copy of the same video. No replacement
-footage or portrait centre crop is used. The earlier missing-input note describes
-round 1 only. Source hashes/placements are stored in `ci/so_sanh_AB.json`.
-
-Round 2 removes static orange arrows, gives the basin a visible exterior depth,
-uses live velocity filaments and separate molecular/recirculation scales. Surface
-adsorption has water-loving heads, water-repelling tails, water bonds and a
-weaker-cohesion region. The numeric comparison is the exact narrated calculated
-gap Δγ=35.54mN/m at 25°C for inferred 25mM SDS, not invented 72/25 values.
-Remotion uses the downloaded headless shell, swangle, 120000ms timeout and
-concurrency=1, with the Ubuntu browser runtime libraries installed explicitly.
-
-## Round 3 — independent cached beat jobs
-
-CI runs six Manim matrix jobs (`fail-fast: false`, 40min each). Every invocation
-specifies 960×540 or540×960 and30fps. The scene enforces <=400 physical particles.
-Every completed beat prints render wall time/CPU seconds and uploads its two
-MP4s plus six native proof frames. Failed beats can be rerun independently.
-
-The AST fingerprint includes only code reachable by the selected beat. A needle
-change invalidates h3 only; shared renderer changes invalidate affected beats.
-`actions/cache` retains pip wheels, node_modules and native beat media. Clips are
-revalidated against dimensions, frame count and source fingerprint before reuse.
-
-A separate60min Remotion job downloads the six artifacts, uses the bundled
-Remotion FFmpeg/ffprobe and installs only missing Chrome runtime libraries. Apt
-mirror waits are bounded and optional third-party apt sources are excluded from
-index refresh. The requested Remotion concurrency is2; if its CPU check exposes
-only1 core, the job logs that fact and retries1 rather than repeating the earlier
-fatal error. No quality threshold changes. Native1080p is a separate opt-in job,
-strictly conditional on every540p gate passing; it does not upscale Manim clips.
-
-The minimal Remotion FFmpeg is used for native encoding only. Before measurement,
-`gate_ffmpeg.py` verifies a full binary has fps/freezedetect/scale/format, selects
-the system binary or a pinned imageio-ffmpeg0.6.0 wheel, and records its version.
-The original gate implementation is unchanged. A complete media cache hit skips
-the Manim native headers and Python installation. Current warm CPU cost and the
-recorded cold model cost are reported separately, so8-minute projections do not
-mistake cached frames for free new rendering. Gemini inserts now fade softly and
-molecular text is shorter; every other model asset keeps the same fingerprint.
+A CPU/editorial timing was not instrumented and stays null. B records child CPU,
+wall time, bytes, current warm cost and historical cold-model cost separately.
+The8-minute×2-format estimate is arithmetic only; it does not render the episode.

@@ -1,0 +1,68 @@
+{
+  "h1": [
+    "One drop of soap,",
+    "and floating pepper",
+    "races to the edge",
+    "of the bowl.",
+    "Nothing touched it.",
+    "So what pulls the pepper?"
+  ],
+  "h2": [
+    "Not the soap.",
+    "Clean water further out",
+    "pulls harder",
+    "than the soapy spot,",
+    "and drags the surface outward.",
+    "In one lab study,",
+    "that surface reached",
+    "up to 0.5m/s."
+  ],
+  "h3": [
+    "Yet with soap",
+    "fed in steadily,",
+    "the rush stops",
+    "at a ring.",
+    "Why there?"
+  ],
+  "h4": [
+    "Here is the engine.",
+    "At twenty five degrees,",
+    "clean water pulls harder",
+    "than our soap",
+    "from episode two,",
+    "SDS at an inferred 25mM",
+    "in water:",
+    "a gap of 35.54",
+    "millinewtons per metre, calculated.",
+    "That gap,",
+    "not the soap itself,",
+    "does the pulling."
+  ],
+  "c1": [
+    "Zoom from the bowl",
+    "down to its surface.",
+    "Every patch of that surface",
+    "pulls on its neighbours.",
+    "Over clean water",
+    "the pull is strong;",
+    "over the soapy spot",
+    "it is weaker.",
+    "In our sketch,",
+    "that tug of war",
+    "is drawn as arrows."
+  ],
+  "p1": [
+    "Long orange arrows",
+    "over clean water,",
+    "short ones over the soap.",
+    "Where long meets short,",
+    "the surface is dragged",
+    "toward the long arrows, outward,",
+    "and the water just below",
+    "is dragged along.",
+    "A flow driven",
+    "by a difference in pull",
+    "like this is called",
+    "a Marangoni flow."
+  ]
+}

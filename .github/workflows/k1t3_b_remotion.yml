@@ -148,6 +148,7 @@ jobs:
             work/B/B_60s_9x16.mp4
             work/B/contact_sheet_*.jpg
             work/B/*.json
+            work/B/*.md
             ci/so_sanh_AB.json
             ci/remotion_b/evidence/
   native-1080:

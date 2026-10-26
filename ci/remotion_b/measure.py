@@ -19,7 +19,9 @@ def main():
   p=subprocess.run(['ffmpeg','-nostdin','-i',str(movie),'-vf','freezedetect=n=0.001:d=2','-an','-f','null','-'],capture_output=True,text=True)
   starts=list(map(float,re.findall(r'freeze_start:\s*([\d.]+)',p.stderr)));ends=list(map(float,re.findall(r'freeze_end:\s*([\d.]+)',p.stderr)))
   spans=[max(0,min(60,ends[i] if i<len(ends) else 60)-s) for i,s in enumerate(starts)]
-  freeze.append(dict(format=fmt,total_s=sum(spans),max_s=max(spans,default=0),pass_freeze=p.returncode==0 and sum(spans)<=6 and max(spans,default=0)<=4))
+  intervals=[dict(start_s=s,end_s=min(60,ends[i] if i<len(ends) else 60),duration_s=spans[i]) for i,s in enumerate(starts)]
+  freeze.append(dict(format=fmt,total_s=sum(spans),max_s=max(spans,default=0),intervals=intervals,pass_freeze=p.returncode==0 and not intervals,command_ok=p.returncode==0))
+  print('FREEZE '+fmt+' '+(json.dumps(intervals) if intervals else 'NONE'),flush=True)
   cw,ch=(480,294) if fmt=='16x9' else (270,504)
   sheet=Image.new('RGB',(cw*4,ch*3),'#1C232B');d=ImageDraw.Draw(sheet)
   for i,t in enumerate([.5,5,9,14,19,22,27,33,39,45,53,59.4]):
@@ -30,14 +32,18 @@ def main():
  available=[c['id'] for c in data.get('clips',[]) if c['available'] and c['start'] is not None]
  visual=read(H/'evidence/visual_review.json',{'pass_geometry':False})
  dom={fmt:read(O/f'dom_{fmt}.json',[]) for fmt in ('16x9','9x16')}
- layout_pass=all(dom.values()) and visual.get('pass_geometry',False)
+ alignment=read(O/'caption_alignment.json',[])
+ semantic_pass=bool(alignment) and all(2<=len(c['text'].split())<=5 for c in data.get('captions',[]))
+ layout_pass=all(dom.values()) and visual.get('pass_geometry',False) and visual.get('round')==4 and visual.get('c13_errors')==[] and semantic_pass
  c13=layout_pass and motion.get('ket_qua')=='DAT'
  # Count mesh/wireframe edges from their actual construction: B uses no mesh
  # object and no parallel-grid primitives. Visual inspection records any
  # exposed edge in all 36 preflight images. Never equate this with image CV.
  grid=dict(visible_exposed_mesh_edges=visual.get('exposed_mesh_edges'),method='manual review of 36 native 540p images + analytic geometry construction',pass_grid=visual.get('exposed_mesh_edges')==0)
  baseline=read(H/'A_baseline.json')
- B=dict(sha=os.environ.get('GITHUB_SHA'),run=os.environ.get('GITHUB_RUN_ID'),codex_minutes=(datetime.now(timezone.utc)-datetime.fromisoformat('2026-10-26T17:14:48+00:00')).total_seconds()/60,codex_time_scope='elapsed current revision from 2026-10-26T17:14:48Z through measurement, including CI; not active assistant CPU time',ci_minutes=None,pipeline_minutes=(max((x['wall_s'] for x in metrics if x['stage'].startswith('manim/')),default=0)+sum(x['wall_s'] for x in metrics if x['stage']=='remotion'))/60,cpu_seconds=cpu,cold_models_plus_current_remotion_cpu_s=cold_cpu,cold_models_plus_current_remotion_minutes=cold_critical/60,cpu_seconds_per_video_second=cpu/120 if metrics else None,cpu_denominator='120 output seconds: 60s x 2 formats',stages=metrics,repair_one_beat=read(O/'repair_one_beat.json'),bytes={f.name:f.stat().st_size for f in O.glob('B_60s_*.mp4')},gates=dict(C13={'ket_qua':'DAT' if c13 else 'TRUOT','layout_pass':layout_pass,'geometry_pass':visual.get('pass_geometry',False),'scope':'DOM safe/PiP/caption-source and manual geometry; full C13 cannot pass while motion/rhythm fails.'},C16={'ket_qua':'DAT' if len(available)==3 else 'TRUOT','available_clips':available,'sources':data.get('clips',[]),'reason':'Three original Gemini attachments supplied by GĐ; uncut foreground, blurred self-background in portrait.'},C17=motion,MIN_RES=minres,exposed_grid=grid,freeze=freeze,ffmpeg=read(O/'gate_ffmpeg.json')))
+ h3_stage=next((s for s in metrics if s['stage']=='manim/h3'),{})
+ repair=dict(beat='h3',formats=2,edit_minutes=None,rebuild_wall_s=h3_stage.get('wall_s'),cpu_s=h3_stage.get('cpu_s'),cache_reused=h3_stage.get('cache_reused'),method='Actual round 4 curved-capillary correction, both native 540p formats; measured beat stage only. Editing time was not separately instrumented; final Remotion assembly is a separate stage.')
+ B=dict(sha=os.environ.get('GITHUB_SHA'),run=os.environ.get('GITHUB_RUN_ID'),codex_minutes=(datetime.now(timezone.utc)-datetime.fromisoformat('2026-10-26T18:12:53+00:00')).total_seconds()/60,codex_time_scope='elapsed round 4 from its first persisted commit 13d8ecc at 2026-10-26T18:12:53Z, including local verification and CI; active editing time was not separately instrumented',active_edit_minutes=None,ci_minutes=None,pipeline_minutes=(max((x['wall_s'] for x in metrics if x['stage'].startswith('manim/')),default=0)+sum(x['wall_s'] for x in metrics if x['stage']=='remotion'))/60,cpu_seconds=cpu,cold_models_plus_current_remotion_cpu_s=cold_cpu,cold_models_plus_current_remotion_minutes=cold_critical/60,cpu_seconds_per_video_second=cpu/120 if metrics else None,cpu_denominator='120 output seconds: 60s x 2 formats',stages=metrics,repair_one_beat=read(O/'repair_one_beat.json',repair),bytes={f.name:f.stat().st_size for f in O.glob('B_60s_*.mp4')},gates=dict(C13={'ket_qua':'DAT' if c13 else 'TRUOT','layout_pass':layout_pass,'geometry_pass':visual.get('pass_geometry',False),'manual_errors':visual.get('c13_errors'),'semantic_captions_pass':semantic_pass,'scope':'Every rendered frame runs DOM safe-margin/overlap/font assertions; manual native geometry review plus semantic TTS alignment. Full C13 cannot pass while motion/rhythm fails.'},C16={'ket_qua':'DAT' if len(available)==3 else 'TRUOT','available_clips':available,'sources':data.get('clips',[]),'reason':'Three original Gemini attachments supplied by GĐ; latest round 4 instruction uses a focal portrait crop covering the whole frame, without letterbox.'},C17=motion,MIN_RES=minres,exposed_grid=grid,freeze=freeze,ffmpeg=read(O/'gate_ffmpeg.json')))
  if os.environ.get('GITHUB_RUN_ID'):
   import urllib.request
   req=urllib.request.Request(f'https://api.github.com/repos/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["GITHUB_RUN_ID"]}/jobs',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
@@ -54,6 +60,7 @@ def main():
  if not all(x['pass_MIN_RES'] for x in minres) or len(minres)!=2:failures.append('MIN_RES')
  if not grid['pass_grid']:failures.append('EXPOSED_GRID')
  if not all(x['pass_freeze'] for x in freeze) or len(freeze)!=2:failures.append('FREEZE')
+ (O/'freeze_report.json').write_text(json.dumps(freeze,indent=2))
  (O/'gate_status.json').write_text(json.dumps(dict(result='TRUOT' if failures else 'DAT',failures=failures),indent=2))
  print('B_GATES '+str(failures),flush=True)
  return bool(failures)

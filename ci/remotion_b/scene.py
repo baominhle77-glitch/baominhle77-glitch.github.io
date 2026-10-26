@@ -72,16 +72,17 @@ class BScene(MovingCameraScene):
    shadows.add(oval(.11,.045,INK,.20).rotate(a));self.pepper.add(oval(.085,.038,INK).rotate(a))
   self.add_world(shadows,self.pepper)
   # Advected dye/tracer filaments make the velocity field visible, not arrows.
-  paths=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=2.6,stroke_opacity=.42) for _ in range(110)]) if BID=='h2' else VGroup()
+  paths=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=5.5,stroke_opacity=.65) for _ in range(110)]) if BID=='h2' else VGroup()
   self.add_world(paths)
   self.particle_count=n+len(paths)
   drop=sphere(.20,c+[0,h*.22,0]);self.add_world(drop)
   rings=VGroup(*[oval(.05,.05,LIGHT,0).set_stroke(LIGHT,1.8,.35) for _ in range(4)]);self.add_world(rings)
   if BID=='h3':
    # A tall needle at the right of the portrait PiP; the basin stays intact.
-   x=1.50 if DOC else -.45;bottom=c+[x,h*.15,0]
-   tip=Line(bottom,bottom+[0,3.2 if DOC else 2.1,0],color=LIGHT,stroke_width=7)
-   collar=Rectangle(width=.40,height=.65,fill_color=INK,fill_opacity=1,stroke_width=0).move_to(tip.get_end()+[0,.25,0]);self.add_world(tip,collar)
+   bottom=c.copy();anchor=c+np.array([1.50,4.7,0]) if DOC else c+np.array([2.7,2.9,0])
+   tip=VMobject(stroke_color=LIGHT,stroke_width=7).set_points_smoothly([bottom,bottom+[.15,.45,0],anchor+[0,-1.1,0],anchor])
+   collar=Rectangle(width=.40,height=.65,fill_color=INK,fill_opacity=1,stroke_width=0).move_to(anchor+[0,.25,0]);self.add_world(tip,collar)
+
   def pos(i,t):
    q=max(0,t-(.45 if BID=='h1' else 0));a=angles[i]+.018*math.sin(t*.7+rad[i]*8)
    if BID=='h3':
@@ -93,8 +94,8 @@ class BScene(MovingCameraScene):
     p=pos(i,t);m.move_to(p);shadows[i].move_to(p+[.027,-.036,0])
    for i,path in enumerate(paths):
     # A continuous inflow of liquid tracers, radial speed falls as 1/(r+eps).
-    a=angles[i];phase=(i*.618+t*.18)%1;rr=.06+.87*math.sqrt(phase)
-    pts=[c+np.array([w*.475*max(.01,rr-d)*math.cos(a+.05*math.sin(t*.5)),h*.475*max(.01,rr-d)*math.sin(a+.05*math.sin(t*.5)),0]) for d in np.linspace(.075,0,5)]
+    a=angles[i];phase=(i*.618+t*(.23 if BID=='h2' else .18))%1;rr=.06+.87*math.sqrt(phase)
+    pts=[c+np.array([w*.475*max(.01,rr-d)*math.cos(a+.05*math.sin(t*.5)),h*.475*max(.01,rr-d)*math.sin(a+.05*math.sin(t*.5)),0]) for d in np.linspace(.22 if BID=='h2' else .075,0,5)]
     path.set_points_smoothly(pts)
    for j,m in enumerate(rings):
     q=max(0,t-.45-j*.18);p=min(.99,.07+q*.38);m.stretch_to_fit_width(max(.04,w*p));m.stretch_to_fit_height(max(.04,h*p));m.move_to(c).set_stroke(LIGHT,1.6,max(0,.45*(1-p))*math.exp(-q/4))
@@ -109,47 +110,116 @@ class BScene(MovingCameraScene):
   self.updates.append(update)
 
  def molecular_scene(self,two_zones=False):
-  # A distinct low-angle surface view; the entire water stays filled and closed.
-  left,right=(-3.6,3.6) if DOC else (-6.2,6.2)
-  y=2.25 if DOC else 1.35;bottom=-6.40 if DOC else -3.55
-  water=Rectangle(width=right-left,height=y-bottom,fill_color=WATER,fill_opacity=.86,stroke_width=0).move_to([(left+right)/2,(y+bottom)/2,0]);self.add_world(water)
-  front=Rectangle(width=right-left,height=.20,fill_color=INK,fill_opacity=.22,stroke_width=0).move_to([(left+right)/2,bottom-.08,0]);self.add_world(front)
-  surface=VMobject(stroke_color=LIGHT,stroke_width=3);self.add_world(surface)
-  n=(9 if DOC else 17) if two_zones else (7 if DOC else 11);radius=.13 if two_zones else .21;spacing=(right-left-.6)/(n-1);xs=np.linspace(left+.3,right-.3,n)
-  waters=VGroup();bonds=VGroup();base=[]
-  for row in range(3):
-   for i,x in enumerate(xs):
-    p=np.array([x,y-.9-row*.85,0]);base.append(p);waters.add(sphere(radius,p,WATER))
-  for row in range(3):
-   for i in range(n-1):bonds.add(Line(base[row*n+i],base[row*n+i+1],color=LIGHT,stroke_width=2.4,stroke_opacity=.75))
-  self.add_world(bonds,waters)
-  soap=VGroup();sx=np.linspace(.25 if two_zones else left+.7,right-.7,(3 if DOC else 4) if two_zones else (4 if DOC else 6))
-  for x in sx:
-   head=sphere(.15,[x,y-.30,0]);tail=VMobject(stroke_color=INK,stroke_width=4).set_points_as_corners([[x,y-.30,0],[x,y-.03,0],[x+.09,y+.19,0],[x-.04,y+.39,0],[x+.10,y+.61,0],[x+.04,y+.80,0]])
-   soap.add(VGroup(head,tail))
-  self.add_world(soap)
-  tracers=VGroup(*[oval(.14,.055,LIGHT,.65) for _ in range(260)]);self.add_world(tracers)
-  self.particle_count=len(waters)+len(soap)+len(tracers)
-  rng=np.random.default_rng(773);phase=rng.random(260);depth=rng.uniform(.15,2.7,260)
+  """A finite 3D water volume viewed by an eased moving optical camera.
+  Analytic billboard spheres have smooth shading; no polygon sphere facets.
+  The camera changes azimuth/elevation every3.6s, never rolls the final frame.
+  """
+  wx,wy=(2.6,4.5) if DOC else (4.8,2.8)
+  if not two_zones:wx*=.8;wy*=.8
+  depth=2.0 if two_zones else 1.65
+  # Native portrait and landscape have separately authored display frustums.
+  view=(-3.55,3.55,-6.45,3.25) if DOC else (-6.55,6.55,-3.35,1.93)
+  nx,ny=(7,4) if two_zones else (5,4)
+  radius=.13 if two_zones else .18
+  base=[]
+  for layer in (0,1):
+   for row in range(ny):
+    for col in range(nx):
+     x=np.linspace(-.82*wx,.82*wx,nx)[col]+(.10 if row%2 else -.10)
+     y=np.linspace(-.78*wy,.78*wy,ny)[row]
+     base.append(np.array([x,y,-.80-layer*(.70 if two_zones else .55)]))
+  soap_base=[np.array([x,y,-.32]) for y in np.linspace(-.65*wy,.65*wy,3) for x in np.linspace(-.70*wx,.70*wx,4)]
+  waters=VGroup(*[sphere(radius,[0,0,0],WATER) for _ in base])
+  soaps=VGroup(*[VGroup(sphere(.14,[0,0,0]),VMobject(stroke_color=INK,stroke_width=3.5)) for _ in soap_base])
+  bonds=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=2.0,stroke_opacity=.6) for _ in range(ny*(nx-1))])
+  shadow=VMobject(fill_color=INK,fill_opacity=.18,stroke_width=0)
+  back=VMobject(fill_color=INK,fill_opacity=.8,stroke_width=0)
+  side=VMobject(fill_color=WATER,fill_opacity=1,stroke_width=0)
+  top=VMobject(fill_color=WATER,fill_opacity=.94,stroke_color=LIGHT,stroke_width=1.4)
+  front=VMobject(fill_color=interpolate_color(ManimColor(WATER),ManimColor(INK),.40),fill_opacity=.85,stroke_width=0)
+  left_face=VMobject(fill_color=WATER,fill_opacity=.85,stroke_width=0)
+  faces=[front,side,back,left_face]
+  film=VGroup(*[VMobject(stroke_color=ORANGE,stroke_width=5,stroke_opacity=.24) for _ in range(16)])
+  rng=np.random.default_rng(773);nflow=180;phase=rng.random(nflow);angle=rng.uniform(0,TAU,nflow)
+  flow=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=5.8,stroke_opacity=.67) for _ in range(nflow)])
+  self.add_world(shadow,back,side,front,left_face,top,film,flow,bonds,waters,soaps)
+  force=VGroup(*[Arrow(LEFT,RIGHT,buff=0,color=ORANGE,stroke_width=6) for _ in range(2)]) if not two_zones else VGroup()
+  self.add_world(force)
+  self.particle_count=len(base)+len(soap_base)+nflow
+  keys_theta=([-112,-88,-58,-83,-110,-76,-48] if DOC else [-65,-35,4,38,5,-35,-58]) if two_zones else ([-58,-82,-110,-78,-43,-70] if DOC else [12,42,78,112,74,30])
+  keys_phi=[48,65,39,61,35,55,42] if two_zones else [20,38,26,45,23,42]
+  print('B_CAMERA_KEYS '+json.dumps(dict(beat=BID,interval_s=3.6,theta=keys_theta,phi=keys_phi,roll=0)),flush=True)
+  def close(m,points):m.set_points_as_corners([*points,points[0]])
   def update(t):
-   insertion=.18+.82*smooth(min(1,max(0,(t-.8)/4)))
-   wave=lambda x:.04*math.sin(1.8*x-1.1*t)+.018*math.cos(3*x-.8*t)
-   surface.set_points_smoothly([[x,y+wave(x),0] for x in np.linspace(left,right,80)])
-   positions=[]
+   k=min(len(keys_theta)-2,int(t/3.6));a=smooth(min(1,max(0,(t-k*3.6)/3.6)))
+   theta=math.radians((1-a)*keys_theta[k]+a*keys_theta[k+1])
+   j=min(len(keys_phi)-2,k);phi=math.radians((1-a)*keys_phi[j]+a*keys_phi[j+1])
+   normal=np.array([math.cos(theta)*math.cos(phi),math.sin(theta)*math.cos(phi),math.sin(phi)])
+   right=np.array([-math.sin(theta),math.cos(theta),0.]);up=np.cross(normal,right)
+   coverage=.10+.88*smooth(min(1,t/max(1,self.duration-.15)))
+   if not two_zones:coverage=.32+.66*smooth(min(1,t/max(1,self.duration-.15)))
+   def eta(x,y):return .055*math.sin(2.2*math.hypot(x,y)-1.65*t)*math.exp(-.12*math.hypot(x,y))
+   corner=[np.array([x,y,z]) for x in (-wx,wx) for y in (-wy,wy) for z in (-depth,.05)]
+   tails=[p+np.array([0,0,1.07]) for p in soap_base]
+   bounds=np.array([[p@right,p@up] for p in corner+tails]);lo=bounds.min(axis=0);hi=bounds.max(axis=0)
+   sx=(view[1]-view[0])/(hi[0]-lo[0]);sy=(view[3]-view[2])/(hi[1]-lo[1]);bead_scale=math.sqrt(sx*sy)
+   def project(p):
+    p=np.asarray(p);return np.array([view[0]+(p@right-lo[0])*sx,view[2]+(p@up-lo[1])*sy,0.])
+   corners=[np.array([-wx,-wy,0.]),np.array([wx,-wy,0.]),np.array([wx,wy,0.]),np.array([-wx,wy,0.])]
+   cap=[]
+   for i in range(4):
+    for u in np.linspace(0,1,25,endpoint=False):
+     p=(1-u)*corners[i]+u*corners[(i+1)%4];p[2]=eta(p[0],p[1]);cap.append(project(p))
+   close(top,cap)
+   # Closed exterior faces; there is no wedge or opening into a dish.
+   bottom=[p-np.array([0,0,depth]) for p in corners]
+   close(shadow,[project(p)+[.12,-.13,0] for p in bottom])
+   normals=[np.array([0.,-1.,0]),np.array([1.,0,0]),np.array([0,1.,0]),np.array([-1.,0,0])]
+   for i,face in enumerate(faces):
+    edge=[]
+    for u in np.linspace(0,1,26):
+     p=(1-u)*corners[i]+u*corners[(i+1)%4];p[2]=eta(p[0],p[1]);edge.append(project(p))
+    close(face,[project(bottom[i]),project(bottom[(i+1)%4]),*reversed(edge)])
+    light=.35+.25*(normals[i]@np.array([-.4,-.6,0]))
+    face.set_fill(interpolate_color(ManimColor(INK),ManimColor(WATER),light+.45),opacity=.9 if normals[i]@normal>0 else 0)
+   # Soap spreads from a local source. Each individual molecule joins the film
+   # as its concentration front reaches that position, through the whole beat.
+   centres=[];radii=[];water_positions=[]
    for i,p in enumerate(base):
-    xx=p[0]+.06*math.sin(t*.5+i)+.09*insertion*math.sin(p[0]);yy=p[1]+.035*math.cos(t*.6+i);positions.append(np.array([xx,yy,0]));waters[i].move_to(positions[-1])
-   for row in range(3):
-    for i in range(n-1):
-     bond=bonds[row*(n-1)+i];bond.put_start_and_end_on(positions[row*n+i],positions[row*n+i+1]);bond.set_opacity(.75-.52*insertion*(.5+.5*math.sin(xs[i])))
-   for i,m in enumerate(soap):
-    # Heads appear wholly inside liquid; spheres never straddle the interface.
-    m.set_opacity(insertion);m.shift(np.array([sx[i]+.07*math.sin(t*.6+i),y-.30,0])-m[0].get_center())
-   all_centres=np.array(positions+[m[0].get_center() for m in soap]);radii=np.array([radius]*len(positions)+[.15]*len(soap));dist=np.linalg.norm(all_centres[:,None]-all_centres[None,:],axis=2);np.fill_diagonal(dist,np.inf)
-   assert np.all(dist>=radii[:,None]+radii[None,:]-1e-6),('MOLECULAR_OVERLAP',t)
+    q=p+np.array([.09*math.sin(t*.75+i),.07*math.cos(t*.61+i),.035*math.sin(t+i)])
+    water_positions.append(q);centres.append(q);radii.append(radius)
+    waters[i].set(width=2*radius*bead_scale).move_to(project(q))
+   for i,p in enumerate(soap_base):
+    q=p+np.array([.065*math.sin(t*.7+i),.06*math.cos(t*.5+i),0])
+    r=math.hypot(q[0]/wx,q[1]/wy);arrival=np.clip((coverage*1.8-r+.2)*3,0,1)
+    head=q.copy();head[2]=-.32+eta(q[0],q[1])*.10
+    centres.append(head);radii.append(.14)
+    soaps[i][0].set(width=.28*bead_scale).move_to(project(head));soaps[i].set_opacity(.14+.86*arrival)
+    tail=[head,[q[0],q[1],.01],[q[0]+.06,q[1],.23],[q[0]-.04,q[1],.43],[q[0]+.08,q[1],.64],[q[0]+.02,q[1],.75]]
+    soaps[i][1].set_points_as_corners([project(x) for x in tail])
+   pts=np.array(centres);rs=np.array(radii);dist=np.linalg.norm(pts[:,None]-pts[None,:],axis=2);np.fill_diagonal(dist,np.inf)
+   assert np.all(dist>=rs[:,None]+rs[None,:]-1e-6),('MOLECULAR_OVERLAP',t)
    self.min_sphere_distance=min(self.min_sphere_distance,float(dist.min()))
-   for i,m in enumerate(tracers):
-    x=left+((phase[i]+t*.055/(.3+depth[i]))%1)*(right-left);m.move_to([x,y-.30-depth[i]+.04*math.sin(x+t),0])
-   ease=smooth(min(1,t/max(1,self.duration)));self.camera.frame.set(width=config.frame_width*(1-(.005 if DOC else .012)*ease)).move_to([0,-.04*ease,0])
+   for row in range(ny):
+    for col in range(nx-1):
+     i=row*nx+col;bond=bonds[row*(nx-1)+col];p,q=water_positions[i],water_positions[i+1]
+     local=np.clip(coverage*1.8-math.hypot(p[0]/wx,p[1]/wy)+.2,0,1)
+     bond.set_points_as_corners([project(p),project(q)]).set_stroke(opacity=.70-.53*local)
+   for i,m in enumerate(force):
+    direction=-1 if i else 1;xx=direction*wx*.36;ll=(1.1 if i==0 else .50)*(1+.12*coverage);start=np.array([xx,0,.28]);end=start+[direction*ll,0,0];m.put_start_and_end_on(project(start),project(end));m.set_opacity(smooth(min(1,max(0,(t-10.0)/.6))))
+   for i,m in enumerate(film):
+    aa=TAU*i/len(film);r=min(.95,.15+coverage*.86)
+    m.set_points_smoothly([project([wx*(r-d)*math.cos(aa),wy*(r-d)*math.sin(aa),.07+eta(wx*r*math.cos(aa),wy*r*math.sin(aa))]) for d in np.linspace(.18,0,5)])
+   def flow_point(i,at):
+    duration=max(1,self.duration-.15);u=np.clip(at/duration,0,1);cc=.10 if two_zones else .32;dd=.88 if two_zones else .66;integral=cc*at+dd*duration*(u**3-.5*u**4);s=(phase[i]+.16*at+.14*integral)%1
+    if s<.62:
+     rr=.08+.82*math.sqrt(s/.62);z=-.12
+    else:
+     u=(s-.62)/.38;rr=.90-.82*u;z=-.18-(depth-.40)*math.sin(math.pi*u)
+    aa=angle[i]+.10*math.sin(at*.65+rr)
+    return np.array([wx*rr*math.cos(aa),wy*rr*math.sin(aa),z])
+   for i,m in enumerate(flow):
+    m.set_points_smoothly([project(flow_point(i,t-lag)) for lag in np.linspace(.32,0,6)])
   self.updates.append(update)
 
  def section_scene(self):
@@ -160,9 +230,13 @@ class BScene(MovingCameraScene):
   parts=VGroup(*[oval(.16,.065,LIGHT,.78) for _ in phases]);self.add_world(parts)
   paths=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=2,stroke_opacity=.22) for _ in range(44)]);self.add_world(paths)
   surface=VMobject(stroke_color=LIGHT,stroke_width=3);self.add_world(surface)
+  # Surface-tension arrows are secondary to360 moving liquid tracers.
+  arrows=VGroup(Arrow(LEFT,RIGHT,color=ORANGE,stroke_width=7,buff=0),Arrow(LEFT,RIGHT,color=ORANGE,stroke_width=7,buff=0));self.add_world(arrows)
   def point(i,t):
    a=phases[i]+t*(.6+.2*layers[i]);return [(left+right)/2+(right-left)*.46*layers[i]*math.cos(a),(top+bottom)/2+(top-bottom)*.43*layers[i]*math.sin(a),0]
   def update(t):
+   for j,m in enumerate(arrows):
+    x=(left+right)/2+(-1 if j==0 else 1)*(right-left)*.19;length=(1.70 if j==0 else .75)*(1+.10*math.sin(t*1.2));start=np.array([x-length/2,top+.20,0]);m.put_start_and_end_on(start,start+[length,0,0])
    for i,m in enumerate(parts):m.move_to(point(i,t))
    for i,m in enumerate(paths):m.set_points_smoothly([point(i,t-d) for d in np.linspace(.35,0,6)])
    surface.set_points_smoothly([[x,top+.05*math.sin(x*2-t*1.1),0] for x in np.linspace(left,right,100)])

@@ -2,8 +2,9 @@
 import json,os,resource,shutil,subprocess,sys,time
 from pathlib import Path
 from prepare import source_data,read_probe
+from semantic_captions import apply as semantic_captions
 R=Path(__file__).resolve().parents[2];SHORT=int(os.environ.get('B_SHORT_SIDE','540'));O=R/('work/B' if SHORT==540 else 'work/B1080');O.mkdir(parents=True,exist_ok=True)
-data=source_data();stages=[];missing=[]
+data=semantic_captions(source_data());stages=[];missing=[]
 for b in data['beats']:
  bid=b['id'];folder=R/'work/B_cache'/str(SHORT)/bid
  metric=folder/'metrics.json'

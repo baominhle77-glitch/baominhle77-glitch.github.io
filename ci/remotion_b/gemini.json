@@ -3,10 +3,12 @@
     "id": "h1",
     "path": "assets/k1t3/broll_gemini/h1_16x9.mp4",
     "start": 0,
-    "frames": 105,
+    "frames": 180,
     "label": "AI minh hoạ (Gemini)",
     "source": "GĐ supplied attachment 26/10/2026; Gemini illustration",
-    "in": 3.0
+    "in": 3.0,
+    "focus_x": 50,
+    "focus_y": 50
   },
   {
     "id": "c2",
@@ -15,7 +17,9 @@
     "frames": 120,
     "label": "AI minh hoạ (Gemini)",
     "source": "GĐ supplied attachment; radial surface flow during h2",
-    "in": 0
+    "in": 0,
+    "focus_x": 38,
+    "focus_y": 50
   },
   {
     "id": "p2",
@@ -24,6 +28,8 @@
     "frames": 120,
     "label": "AI minh hoạ (Gemini)",
     "source": "GĐ supplied attachment; steady feeding during h3",
-    "in": 0
+    "in": 0,
+    "focus_x": 63,
+    "focus_y": 50
   }
 ]
