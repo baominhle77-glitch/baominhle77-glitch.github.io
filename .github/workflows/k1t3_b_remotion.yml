@@ -1,7 +1,7 @@
 name: k1t3-B-remotion-60s
 on:
-  pull_request:
-    branches: [studio-dung]
+  push:
+    branches: [gpt/k1t3-B-remotion]
   workflow_dispatch:
 concurrency:
   group: k1t3-B-${{ github.event.pull_request.number || github.ref }}
