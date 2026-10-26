@@ -11,6 +11,20 @@ OUT = B / "mau_540"
 OUT.mkdir(parents=True, exist_ok=True)
 ENV = dict(os.environ, K1_MAU_540="1", PYTHONPATH=str(R / "ban_sac"), PYTHONIOENCODING="utf-8")
 FIRST = ("h1", "h2", "h3", "h4", "c1", "p1")
+# Nhóm khuôn từ nội dung storyboard (35 beat); mọi khung ở thời điểm
+# giữa beat phải khác tất cả khung cũ cùng loại ít nhất 12 gray levels.
+TEMPLATE_GROUPS={
+ "mat_nuoc":"h1 h2 h3 p6 k1 w1",
+ "so_sanh":"h4 r4",
+ "phan_tu":"c1 p3 v6 v7 c3 w4",
+ "dong_mat_cat":"p1 p5 v4 w3 w6",
+ "kim_bom":"p2 c2 v3 w7 b1 r3",
+ "do_luong":"v2 w2 r1 r2 s8 w5 v5",
+ "micelle":"p4","van_toc":"v1","ruou":"k2",
+}
+TEMPLATE={bid:group for group,items in TEMPLATE_GROUPS.items()
+          for bid in items.split()}
+assert len(TEMPLATE)==35 and len(set(TEMPLATE))==35
 
 def run(args, env=ENV):
     p = subprocess.run(list(map(str, args)), cwd=R, env=env,
@@ -67,7 +81,8 @@ for bc in ("16x9","9x16"):
             work = folder / ("still_" + bid)
             debug = run([P, "-m", "manim", "render", "-s", "--disable_caching",
                  "--progress_bar", "none", "-v", "ERROR",
-                 "--media_dir", work, R / "out/M1_MARANGONI_DUNG/canh.py", bid], env)
+                 "--media_dir", work, R / "out/M1_MARANGONI_DUNG/canh.py", bid],
+                 dict(env,K1_MID_STILL="1"))
             images = list(work.rglob("*.png"))
             if not images:
                 print("MANIM_STATIC_DEBUG", bc, bid, debug[-1800:],
@@ -133,13 +148,47 @@ for bc in ("16x9","9x16"):
             work=folder / ("still_"+bid)
             debug=run([P,"-m","manim","render","-s","--disable_caching",
                        "--progress_bar","none","-v","ERROR",
-                       "--media_dir",work,R/"out/M1_MARANGONI_DUNG/canh.py",bid],env)
+                       "--media_dir",work,R/"out/M1_MARANGONI_DUNG/canh.py",bid],
+                       dict(env,K1_MID_STILL="1"))
             images=list(work.rglob("*.png"))
             if not images:
                 raise ValueError("THIEU_KHUNG %s/%s %s" %
                                  (bc,bid,debug[-1000:]))
             shutil.copyfile(images[-1],still)
         thumbs[bid]=Image.open(still).convert("RGB")
+    # C17(8) khac_canh / 35 KHUNG GIỮA: so với tất cả beat cùng khuôn.
+    # Đọc pixel thật của PNG native, không dùng nhãn/cue để lách.
+    import numpy as np
+    earlier={}
+    differences=[]
+    for bid in plan["thu_tu"]:
+        kind=TEMPLATE[bid]
+        img=np.asarray(thumbs[bid].convert("L").resize((240,135)),
+                       dtype=np.int16)
+        old=earlier.get(kind,[])
+        past=[{"beat":past_id,
+               "hieu_gray":round(float(np.abs(img-past_img).mean()),3)}
+              for past_id,past_img in old]
+        closest=min(past,key=lambda x:x["hieu_gray"]) if past else None
+        score=None if closest is None else closest["hieu_gray"]
+        passed=score is None or score>=12
+        differences.append({"beat":bid,"loai_khuon":kind,
+            "khac_canh":score,
+            "khac_canh_so_voi":None if closest is None else closest["beat"],
+            "so_beat_truoc_cung_khuon":len(old),
+            "tat_ca_hieu_gray":past,
+            "ket_qua":"DAT" if passed else "TRUOT"})
+        if not passed:
+            ci_failures.append("KHAC_CANH_35_%s_%s"%(bc,bid))
+        earlier.setdefault(kind,[]).append((bid,img))
+    (OUT/("khac_canh_35_"+bc+".json")).write_text(
+        json.dumps({"bo_cuc":bc,"nguong":12,"beat_anh_giua":True,
+                    "beats":differences,
+                    "ket_qua":"TRUOT" if any(d["ket_qua"]=="TRUOT"
+                                             for d in differences) else "DAT"},
+                   ensure_ascii=False,indent=2),encoding="utf-8")
+    print("KHAC_CANH_35",bc,
+          sum(q["ket_qua"]=="DAT" for q in differences),"/35",flush=True)
     tw,th=(180,105) if bc=="16x9" else (100,180)
     sheet=Image.new("RGB",(tw*5,(th+25)*7),(237,239,241))
     draw=ImageDraw.Draw(sheet)
