@@ -217,7 +217,7 @@ class LiveScene:
             self.add(drop,animated=True)
         if self.shot in ("needle","radius_measure"):
             x=self.cx
-            needle=Line([x,self.cy+self.radius*1.3,0],[x,self.cy+.08,0]).set_stroke(MUC,5)
+            needle=Line([x,self.cy+self.radius*1.17,0],[x,self.cy+.08,0]).set_stroke(MUC,5)
             self.add(_make_mob(needle,12))
             tip=always_redraw(lambda:
                Circle(radius=.085).set_fill(CANG,.95).set_stroke(MUC,1.5)
