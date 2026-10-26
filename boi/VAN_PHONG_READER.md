@@ -1,6 +1,6 @@
 # Văn phong reader thật — tóm tắt để AI giải bài “có người”
 
-Đọc ngày 26/10/2026 (GMT+7). Mọi ý dưới đây là **tóm tắt bằng lời mình** sau khi đọc các bài giải/bài dạy giải bài của reader thật; không chép nguyên văn. Prompt AI trong `js/ai.js` (`SYSTEM_READING`, `SYSTEM_CHAT`, `readingRequest`) được viết theo đúng các điểm này.
+Đọc ngày 27/10/2026 (GMT+7). Mọi ý dưới đây là **tóm tắt bằng lời mình** sau khi đọc các bài giải/bài dạy giải bài của reader thật; không chép nguyên văn. Prompt AI trong `js/ai.js` (`SYSTEM_READING`, `SYSTEM_CHAT`, `readingRequest`) được viết theo đúng các điểm này.
 
 ## Nguồn đã đọc
 

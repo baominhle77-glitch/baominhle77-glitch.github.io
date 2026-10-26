@@ -57,7 +57,7 @@ function download(name, text, type = "text/markdown") {
 }
 
 function steps(n) {
-  const names = ["Câu hỏi", "Mẫu trải", "Chọn số", "Lật bài", "Giải"];
+  const names = ["Câu hỏi", "Mẫu trải", "Chọn bài", "Lật bài", "Giải"];
   return `<p class="step-label">Bước ${n}/5 · ${names[n - 1]}</p><ol class="steps" aria-hidden="true">${names.map((_, i) => `<li class="${i < n ? "on" : ""}"></li>`).join("")}</ol>`;
 }
 function notFound() {
@@ -239,7 +239,7 @@ function pickView(id, query) {
     for (let k = 1; k <= MAX[p.deck]; k++) h += `<button type="button" class="pick${sel.has(k) ? " picked" : ""}" data-k="${k}" aria-pressed="${sel.has(k)}" aria-label="Lá úp${sel.has(k) ? ", đã chọn" : ""}"></button>`;
     return h;
   };
-  const summary = `<section class="card glow"><h2>Đã lưu đủ ${n}/${n} ${unit === "Tháng" ? "tháng" : "tầng"}</h2>
+  const summary = () => `<section class="card glow"><h2>Đã lưu đủ ${n}/${n} ${unit === "Tháng" ? "tháng" : "tầng"}</h2>
       <ul class="list saved-list">${s.tiers.map((t, i) => `<li class="row wrap"><span class="grow"><b>${esc(t.ten)}</b><span class="note" style="display:block">${p.saved[i].tarot.length} Tarot · ${p.saved[i].lenormand.length} Lenormand · úp, chưa lật</span></span><button type="button" class="btn small" data-edit="${i}">Xem lại / sửa</button></li>`).join("")}</ul>
       <button type="button" class="btn primary block" id="solve">✦ Giải bài</button>
       <p class="note">Bấm Giải bài thì các lá mới được lật. Trước đó có thể sửa bất kỳ ${unit === "Tháng" ? "tháng" : "tầng"} nào.</p></section>`;
@@ -250,7 +250,7 @@ function pickView(id, query) {
     <p class="lead">“${esc(s.cauHoi)}” · ${esc(spreadById(s.spreadId).ten)}</p>
     ${lockBox(s, draw)}
     ${n > 1 ? `<div class="tier-progress" aria-label="Tiến độ"><p class="note" aria-live="polite"><b>${nSaved}/${n}</b> ${unit === "Tháng" ? "tháng" : "tầng"} đã lưu</p><div class="tier-chips">${chips}</div></div>` : ""}
-    ${allSaved ? summary : `
+    ${allSaved ? summary() : `
     <section class="card" id="pickCard">
       <h2>${n > 1 ? `${unit} ${cur + 1}/${n}: ` : ""}${esc(tierName)}</h2>
       <p class="note">${extra ? "Rút thêm: chọn bao nhiêu lá tuỳ ý cho tầng này (có thể bỏ trống)." : `Chọn <b>${nd.tarot}</b> lá Tarot${nd.lenormand ? ` và <b>${nd.lenormand}</b> lá Lenormand` : ""} theo cảm nhận.`} Mọi lá úp giống hệt nhau; vị trí của từng lá chỉ hiện sau khi lật.</p>

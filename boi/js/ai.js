@@ -321,7 +321,11 @@ export async function discoverModels(provider, key, { fetchImpl = globalThis.fet
       const r = await fetchImpl("https://api.openai.com/v1/models", { headers: { authorization: `Bearer ${key}` } });
       if (r.ok) list = rankOpenAI(((await r.json()).data || []).map((m) => m.id));
     }
-  } catch (_) { /* mạng lỗi → dùng danh sách tĩnh */ }
+  } catch (e) {
+    // cầu nối treo quá hạn → báo ngay để chuyển trạm, không chờ thêm từng model
+    if (e?.timeout) throw e;
+    /* mạng lỗi → dùng danh sách tĩnh */
+  }
   const merged = [...new Set([...list.slice(0, 8), ...fb])];
   try {
     const all = JSON.parse(storage?.getItem(MODEL_CACHE) || "{}");
@@ -382,7 +386,7 @@ async function viaTram({ system, messages, json, onText, onModel, signal, fetchI
 
 // Gọi lần lượt model (ưu tiên model người dùng chọn), chuyển dự phòng khi 429/404/quá tải.
 // Cầu nối máy nhà (127.0.0.1/đường hầm) lỗi hoặc không phản hồi trong localTimeoutMs → tự chuyển sang trạm AI, không treo.
-export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, onFallback, signal, fetchImpl = globalThis.fetch, storage, tramTimeoutMs, localTimeoutMs = 15000 }) {
+export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, onFallback, signal, fetchImpl = globalThis.fetch, storage, tramTimeoutMs, localTimeoutMs = 10000 }) {
   if (!key) throw new Error("Chưa có khoá.");
   if (key === TRAM_KEY) return viaTram({ system, messages, json, onText, onModel, signal, fetchImpl, tramTimeoutMs });
   const f = key === LOCAL_KEY ? timedFetch(fetchImpl, localTimeoutMs) : fetchImpl;
