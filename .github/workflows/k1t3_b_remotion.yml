@@ -19,6 +19,7 @@ jobs:
       OPENBLAS_NUM_THREADS: '1'
       OMP_NUM_THREADS: '1'
       B_CODEX_MINUTES: '14.5'
+      B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
     steps:
       - uses: actions/checkout@v4
         with:
