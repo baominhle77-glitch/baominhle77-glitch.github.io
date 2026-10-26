@@ -22,12 +22,14 @@
   ],
   "exposed_mesh_edges": 0,
   "findings": [
-    "Intact continuous main water surface, no wedge or vertical cut planes.",
-    "Analytic smooth rim; no visible polygon faces or wireframe.",
-    "Molecules are separated shaded discs in their own bordered magnification panel; distance >=0.4116 vs required 0.24.",
-    "Pepper grains are flattened ellipses; outward speed decreases with radius and eases in.",
-    "Model is 2.5D, visibly flatter than a physically based 3D rendering.",
-    "Plate composition repeats; full C13 editorial rhythm and C17 motion remain unverified."
+    "Reviewed all 36 native 540p stills; closed water, no wedge, no exposed mesh edges.",
+    "Different optical scales: wide bowl; low surface view and deep wall; needle/ring; molecular comparison; adsorption close-up; filled recirculation section.",
+    "Continuous tracer filaments replace static orange arrows.",
+    "Hydrophilic heads stay wholly below the separate model interface; tails above. Water bonds stretch and weaken during adsorption. Pairwise centre-distance assertions run each simulation frame.",
+    "Thicker ceramic exterior, smooth outline, pepper shadows and impact rings.",
+    "Three original supplied Gemini clips included; portrait foreground is uncut with blurred self-background.",
+    "Editorial and motion acceptance await actual MP4 measurements; no overall pass claim."
   ],
-  "reviewed_at": "2026-10-26T14:30:00Z"
+  "reviewed_at": "2026-10-26T14:58:30Z",
+  "round": 2
 }

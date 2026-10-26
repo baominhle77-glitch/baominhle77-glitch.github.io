@@ -1,5 +1,29 @@
 [
- {"id":"h1","path":null,"start":0,"frames":165,"label":"AI minh hoạ (Gemini)","status":"Missing in aca6c94 and workspace; awaiting original A asset. No substitute generated."},
- {"id":"p2","path":null,"start":null,"frames":165,"label":"AI minh hoạ (Gemini)","status":"Missing original A asset and first-60-second placement; original storyboard places T04 at 80s."},
- {"id":"c2","path":null,"start":null,"frames":165,"label":"AI minh hoạ (Gemini)","status":"Missing original A asset and first-60-second placement; original storyboard places T06 at 172s."}
+  {
+    "id": "h1",
+    "path": "assets/k1t3/broll_gemini/h1_16x9.mp4",
+    "start": 0,
+    "frames": 105,
+    "label": "AI minh hoạ (Gemini)",
+    "source": "GĐ supplied attachment 26/10/2026; Gemini illustration",
+    "in": 3.0
+  },
+  {
+    "id": "c2",
+    "path": "assets/k1t3/broll_gemini/c2_16x9.mp4",
+    "start": 285,
+    "frames": 120,
+    "label": "AI minh hoạ (Gemini)",
+    "source": "GĐ supplied attachment; radial surface flow during h2",
+    "in": 0
+  },
+  {
+    "id": "p2",
+    "path": "assets/k1t3/broll_gemini/p2_16x9.mp4",
+    "start": 555,
+    "frames": 120,
+    "label": "AI minh hoạ (Gemini)",
+    "source": "GĐ supplied attachment; steady feeding during h3",
+    "in": 0
+  }
 ]

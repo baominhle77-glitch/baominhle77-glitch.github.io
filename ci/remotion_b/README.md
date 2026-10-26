@@ -29,3 +29,20 @@ A CI job timings are observed; A CPU/editorial timing was not instrumented and
 is null. B measures child CPU seconds, render wall time, bytes and a warm h3-only
 rebuild. An unchanged warm rebuild is not labelled a measured editorial repair.
 The 8-minute, two-format estimate is explicitly a linear extrapolation.
+
+## Round 2 — GĐ supplied inputs and requested revision
+
+All three original Gemini clips now live in `assets/k1t3/broll_gemini/`.
+The hook uses source h1 3.0–6.5s at timeline 0–3.5s so impact is visible early;
+c2 appears in h2 at 9.5–13.5s; p2 in h3 at 18.5–22.5s. The portrait foreground
+is contained in full, over a blurred copy of the same video. No replacement
+footage or portrait centre crop is used. The earlier missing-input note describes
+round 1 only. Source hashes/placements are stored in `ci/so_sanh_AB.json`.
+
+Round 2 removes static orange arrows, gives the basin a visible exterior depth,
+uses live velocity filaments and separate molecular/recirculation scales. Surface
+adsorption has water-loving heads, water-repelling tails, water bonds and a
+weaker-cohesion region. The numeric comparison is the exact narrated calculated
+gap Δγ=35.54mN/m at 25°C for inferred 25mM SDS, not invented 72/25 values.
+Remotion uses the downloaded headless shell, swangle, 120000ms timeout and
+concurrency=1, with the Ubuntu browser runtime libraries installed explicitly.

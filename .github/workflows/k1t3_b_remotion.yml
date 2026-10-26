@@ -35,7 +35,7 @@ jobs:
       - name: Manim and ffmpeg dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg libcairo2-dev libpango1.0-dev pkg-config fonts-noto-core
+          sudo apt-get install -y -qq ffmpeg libcairo2-dev libpango1.0-dev pkg-config fonts-noto-core libnss3 libatk-bridge2.0-0 libgbm1 libxkbcommon0 libasound2t64 libxcomposite1 libxdamage1 libxrandr2
           python -m pip install -q -r ci_requirements.txt
           npm ci --prefix ci/remotion_b --no-audit --no-fund
           npx --prefix ci/remotion_b remotion browser ensure

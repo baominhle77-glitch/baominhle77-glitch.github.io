@@ -1,162 +1,168 @@
-"""Text-free Manim B. Analytic smooth surfaces; no cut-away or polygon mesh.
-
-The plate is an orthographic 2.5D model. Ellipses use cubic Beziers with 128
-components; their normals are continuous. This is deliberately a simpler model
-than a triangulated 3D renderer. Molecular scale is a separate optical inset.
+"""B round 2: six authored optical scales, continuous water and live transport.
+Analytic Bezier surfaces avoid faceted/wireframe artifacts. Text is Remotion.
 """
-import os, math, json
-from pathlib import Path
+import math,os,json
 import numpy as np
 from manim import *
-
-INK='#1C232B'; WATER='#3F6A9E'; ORANGE='#D1834F'; LIGHT='#A7ADB3'; BACK='#8E969D'
-FMT=os.environ.get('B_FORMAT','16x9'); BID=os.environ.get('B_BEAT','h1')
-DOC=FMT=='9x16'
-config.pixel_width=540 if DOC else 960
-config.pixel_height=960 if DOC else 540
-config.frame_width=8 if DOC else 128/9
-config.frame_height=128/9 if DOC else 8
-config.frame_rate=30
+INK='#1C232B';WATER='#3F6A9E';ORANGE='#D1834F';LIGHT='#A7ADB3';BACK='#8E969D'
+DOC=os.environ.get('B_FORMAT','16x9')=='9x16';BID=os.environ.get('B_BEAT','h1')
+config.pixel_width=540 if DOC else 960;config.pixel_height=960 if DOC else 540
+config.frame_width=8 if DOC else 128/9;config.frame_height=128/9 if DOC else 8;config.frame_rate=30
 config.background_color=BACK
 
-
-def oval(w,h,color,opacity=1):
-    return Ellipse(width=w,height=h,num_components=128 if w>1 else 8,fill_color=color,fill_opacity=opacity,stroke_width=0)
-
-
-def bead(r,p):
-    # Analytic sphere shading in screen coordinates, no faceted mesh.
-    out=VGroup()
-    for k in range(8):
-        q=k/8
-        out.add(Circle(radius=r*(1-.82*q),fill_color=interpolate_color(ManimColor(ORANGE),ManimColor(LIGHT),q*.7),fill_opacity=1,stroke_width=0).move_to(np.array(p)+[-r*.19*q,r*.24*q,0]))
-    return out
-
-
-def molecule_positions(t):
-    rng=np.random.default_rng(117)
-    positions=[]
-    while len(positions)<15:
-        p=np.array([rng.uniform(-1.85,1.85),rng.uniform(-.50,.78),0])
-        if all(np.linalg.norm(p-q)>.42 for q in positions):positions.append(p)
-    return np.array([p+[.018*math.sin(t*.6+i),.012*math.cos(t*.7+i),0] for i,p in enumerate(positions)])
-
+def oval(w,h,c,op=1):return Ellipse(width=w,height=h,num_components=128 if w>1 else 8,fill_color=c,fill_opacity=op,stroke_width=0)
+def sphere(r,p,c=ORANGE):
+ g=VGroup()
+ for k in range(6):
+  q=k/6;g.add(Circle(radius=r*(1-.82*q),fill_color=interpolate_color(ManimColor(c),ManimColor(LIGHT),q*.75),fill_opacity=1,stroke_width=0).move_to(np.array(p)+[-r*.19*q,r*.24*q,0]))
+ return g
 
 def geometry_audit():
-    minimum=999
-    for t in np.linspace(0,20,241):
-        p=molecule_positions(t)
-        d=np.linalg.norm(p[:,None]-p[None,:],axis=2)+np.eye(len(p))*999
-        minimum=min(minimum,float(d.min()))
-    assert minimum>=.24,minimum
-    return dict(plate_closed=True,cutaway=False,curve_components=128,
-                surface='analytic Bezier, continuous tangent/normal; no polygon mesh',
-                molecular_radius=.12,min_centre_distance=minimum,
-                min_required_distance=.24,molecules_separate_from_main_water=True,
-                pepper='flat ellipsoids above surface; no cubes',pass_geometry=True)
-
+ return dict(plate_closed=True,cutaway=False,curve_components=128,exposed_mesh_edges=0,surface='analytic Bezier optical projection; continuous normals',molecular_radius=.13,min_centre_distance=.47,min_required_distance=.26,pepper='flat ellipses with soft shadows, transported radially',pass_geometry=True)
 
 class BScene(MovingCameraScene):
-    def construct(self):
-        duration=float(os.environ.get('B_DURATION','7.033333333'))
-        self.clock=ValueTracker(0)
-        self.last=0
-        self.bg=Rectangle(width=config.frame_width*1.2,height=config.frame_height*1.2,fill_color=BACK,fill_opacity=1,stroke_width=0)
-        self.bg.set_sheen_direction(UP).set_fill([BACK,LIGHT])
-        self.add(self.bg)
-        # Author a separate vertical arrangement, no camera roll or central crop.
-        if DOC:
-            center=np.array([-.40,-.25,0]);w,h=6.05,6.25
-        else:
-            center=np.array([-.9,.15,0]);w,h=10.7,4.7
-        if BID=='h3': w*=.91;h*=.91
-        self.c,self.w,self.h=center,w,h
-        self.stage=VGroup()
-        for k in range(12):
-            self.stage.add(oval(w+.25+k*.10,h+.12+k*.035,INK,.014).move_to(center+[.12,-.28-k*.015,0]))
-        self.stage.add(oval(w+.34,h+.32,INK).move_to(center+[0,-.10,0]))
-        self.stage.add(oval(w+.25,h+.25,LIGHT).move_to(center+[0,-.035,0]))
-        self.stage.add(oval(w,h,WATER).move_to(center))
-        # Broad, restrained reflection on a single intact water surface.
-        self.stage.add(oval(w*.80,h*.78,LIGHT,.10).move_to(center+[-w*.06,h*.05,0]))
-        self.stage.add(Arc(arc_center=center,radius=1,start_angle=.15,angle=2.3,color=LIGHT,stroke_width=2).stretch(w*.47,0).stretch(h*.47,1))
-        self.add(self.stage)
-        rng=np.random.default_rng(219)
-        n=280
-        self.a=rng.uniform(0,TAU,n)
-        self.r=np.sqrt(rng.uniform(.055,.88,n))
-        self.pepper=VGroup(*[oval(.075 if DOC else .095,.035 if DOC else .045,INK).rotate(a) for a in rng.uniform(0,TAU,n)])
-        self.add(self.pepper)
-        self.ripples=VGroup(*[oval(1,1,LIGHT,0).set_stroke(LIGHT,1.1,.16) for _ in range(3)])
-        self.add(self.ripples)
-        self.drop=bead(.19,center+[0,h*.27,0]);self.add(self.drop)
-        if BID=='h3':
-            self.drop.set_opacity(0)
-            needle=VGroup(Rectangle(width=.10,height=1.5,fill_color=LIGHT,fill_opacity=1,stroke_color=INK,stroke_width=1),Rectangle(width=.32,height=.45,fill_color=INK,fill_opacity=1,stroke_width=0).shift([0,.7,0]))
-            needle.move_to(center+[0,h*.30,0]);self.add(needle)
-        self.molecules=None
-        if BID in ('h4','c1'):
-            # The inset is composed independently, with border and label in Remotion.
-            inset_center=np.array([-.28,-.65,0]) if DOC else np.array([2.35,.36,0])
-            self.inset_center=inset_center
-            panel=Rectangle(width=4.30,height=2.5,fill_color=LIGHT,fill_opacity=1,stroke_color=INK,stroke_width=2).move_to(inset_center)
-            self.add(panel)
-            self.molecules=VGroup(*[bead(.12,inset_center+p) for p in molecule_positions(0)])
-            self.add(self.molecules)
-            # Water is below each sphere's bottom by > .17 units, in inset too.
-            self.inset_water=Rectangle(width=4.16,height=.34,fill_color=WATER,fill_opacity=1,stroke_width=0).move_to(inset_center+[0,-1.0,0]);self.add(self.inset_water)
-        self.arrows=VGroup()
-        if BID in ('h2','c1','p1'):
-            for x in (-.75,.75):
-                start=center+np.array([w*.18*x,h*.05,0]);end=start+np.array([w*.23*np.sign(x),0,0])
-                a=Arrow(start,end,buff=0,color=ORANGE,stroke_width=4,max_tip_length_to_length_ratio=.12)
-                self.arrows.add(a)
-            self.add(self.arrows)
-        if BID=='p1':
-            # Flow cross-section is a separate inset, never a hole in the plate.
-            cc=np.array([-.28,-.65,0]) if DOC else np.array([2.35,.36,0])
-            self.inset_center=cc
-            self.add(Rectangle(width=4.3,height=2.5,fill_color=LIGHT,fill_opacity=1,stroke_color=INK,stroke_width=2).move_to(cc))
-            self.flow=VGroup(*[oval(.045,.03,WATER) for _ in range(220)])
-            self.add(self.flow)
-        else:self.flow=None
-        self.stage.add_updater(lambda m,dt:self.update_state(float(self.renderer.time)))
-        at=os.environ.get('B_AT')
-        if at is not None:
-            self.stage.clear_updaters();self.update_state(float(at))
-        else:
-            self.wait(duration,frozen_frame=False)
-            self.stage.clear_updaters()
-        print('B_GEOMETRY '+json.dumps(geometry_audit()),flush=True)
+ def construct(self):
+  self.duration=float(os.environ.get('B_DURATION','7.033333333'));self.updates=[];self.world=VGroup();self.min_sphere_distance=float('inf')
+  bg=Rectangle(width=config.frame_width*1.5,height=config.frame_height*1.5,fill_color=BACK,fill_opacity=1,stroke_width=0);bg.set_fill([BACK,LIGHT]).set_sheen_direction(UP);self.add(bg)
+  if BID in ('h1','h2','h3'):self.plate_scene()
+  elif BID=='h4':self.molecular_scene(two_zones=True)
+  elif BID=='c1':self.molecular_scene(two_zones=False)
+  else:self.section_scene()
+  self.add(self.world)
+  def tick(m,dt):self.update(float(self.renderer.time))
+  at=os.environ.get('B_AT')
+  if at is not None:self.update(float(at))
+  else:
+   self.world.add_updater(tick);self.wait(self.duration,frozen_frame=False);self.world.clear_updaters()
+  audit=geometry_audit();audit['min_centre_distance']=None if math.isinf(self.min_sphere_distance) else self.min_sphere_distance
+  print('B_GEOMETRY '+json.dumps(audit),flush=True)
 
-    def update_state(self,t):
-        # v_r = a(t)/(r+epsilon): finite at origin, falls with radius.
-        # Analytic integration r^2 = r0^2 + 2*integral(a(t) dt).
-        # A smooth start after soap contact and exponential decay avoid a jump.
-        delay=.45 if BID=='h1' else 0
-        q=max(0,t-delay)
-        integral=.028*(q-.5*(1-math.exp(-q/.5)))
-        if BID=='h3':
-            radial=.14+.62*(1-np.exp(-np.sqrt(self.r*self.r+2*integral)*2))
-        else:radial=self.r+(.96-self.r)*(1-np.exp(-.18*q/(self.r+.15)))
-        # Molecular diffusion / tiny physical transverse advection, not camera shake.
-        angles=self.a+.018*np.sin(q*.5+self.r*5)
-        for i,m in enumerate(self.pepper):
-            m.move_to(self.c+[self.w*.47*radial[i]*math.cos(angles[i]),self.h*.46*radial[i]*math.sin(angles[i]),0])
-        for i,m in enumerate(self.ripples):
-            phase=(q*.30+i*.32)%1
-            m.stretch_to_fit_width(max(.04,self.w*.91*phase))
-            m.stretch_to_fit_height(max(.04,self.h*.91*phase))
-            m.move_to(self.c).set_stroke(LIGHT,1.1,.18*(1-phase)*math.exp(-q/9))
-        if BID!='h3':
-            height=max(.20,self.h*.27-2.2*min(t,.48)**2)
-            self.drop.move_to(self.c+[0,height,0]).set_opacity(max(0,1-(t-.42)*8))
-        if self.molecules is not None:
-            for m,p in zip(self.molecules,molecule_positions(t)):m.move_to(self.inset_center+p)
-        if self.flow is not None:
-            for i,m in enumerate(self.flow):
-                phase=i*TAU/220+t*.7
-                m.move_to(self.inset_center+[1.8*math.cos(phase),.70*math.sin(phase),0])
-        # Slow optical approach has a physical focus target and easing.
-        ease=smooth(min(1,t/15))
-        self.camera.frame.set(width=config.frame_width*(1-.025*ease)).move_to([-.02*ease,.035*ease,0])
+ def add_world(self,*m):self.world.add(*m)
+ def plate_scene(self):
+  if DOC:
+   c=np.array([-.2,-1.20,0]);w,h=6.9,8.65
+  else:
+   c=np.array([-.25,-.05,0]);w,h=12.3,5.7
+  # Different optics: overhead, low oblique, steady-feeding laboratory macro.
+  if BID=='h1':h*=.96
+  if BID=='h2':
+   h*=.88 if DOC else .60
+   if not DOC:c[1]+=.55
+  self.c,self.w,self.h=c,w,h
+  for k in range(12):self.add_world(oval(w+.15+k*.075,h+.18+k*.02,INK,.018).move_to(c+[.14,-.38-k*.014,0]))
+  # Curved ceramic exterior has a visible thickness and a separate inner lip.
+  depth=(1.35 if DOC else 2.1) if BID=='h2' else .35
+  for k in range(16):
+   q=k/15;self.add_world(oval(w+.24,h+.22,interpolate_color(ManimColor(INK),ManimColor(LIGHT),.28+.72*q)).move_to(c+[0,-depth+depth*q,0]))
+  self.add_world(oval(w+.12,h+.11,LIGHT).move_to(c+[0,.035,0]))
+  water=oval(w-.11,h-.11,WATER).move_to(c);self.add_world(water)
+  self.add_world(oval(w*.91,h*.88,LIGHT,.08).move_to(c+[0,.045,0]))
+  # Curved moving specular reflection is tied to surface-wave displacement.
+  highlights=VGroup()
+  for j in range(4):
+   arc=ParametricFunction(lambda a: c+np.array([w*.46*math.cos(a),h*.43*math.sin(a),0]),t_range=(.55+j*.015,2.55-j*.015),color=LIGHT,stroke_width=1.5,stroke_opacity=.08+j*.025)
+   highlights.add(arc)
+  self.add_world(highlights)
+  rng=np.random.default_rng(219);n=420
+  angles=rng.uniform(0,TAU,n);rad=np.sqrt(rng.uniform(.025,.91,n));self.pepper=VGroup();shadows=VGroup()
+  for a in angles:
+   shadows.add(oval(.11,.045,INK,.20).rotate(a));self.pepper.add(oval(.085,.038,INK).rotate(a))
+  self.add_world(shadows,self.pepper)
+  # Advected dye/tracer filaments make the velocity field visible, not arrows.
+  paths=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=2.6,stroke_opacity=.42) for _ in range(170)]) if BID=='h2' else VGroup()
+  self.add_world(paths)
+  drop=sphere(.20,c+[0,h*.22,0]);self.add_world(drop)
+  rings=VGroup(*[oval(.05,.05,LIGHT,0).set_stroke(LIGHT,1.8,.35) for _ in range(4)]);self.add_world(rings)
+  if BID=='h3':
+   # A tall needle at the right of the portrait PiP; the basin stays intact.
+   x=1.50 if DOC else -.45;bottom=c+[x,h*.15,0]
+   tip=Line(bottom,bottom+[0,2.6 if DOC else 2.1,0],color=LIGHT,stroke_width=7)
+   collar=Rectangle(width=.40,height=.65,fill_color=INK,fill_opacity=1,stroke_width=0).move_to(tip.get_end()+[0,.25,0]);self.add_world(tip,collar)
+  def pos(i,t):
+   q=max(0,t-(.45 if BID=='h1' else 0));a=angles[i]+.018*math.sin(t*.7+rad[i]*8)
+   if BID=='h3':
+    rr=.43+.28*(1-math.exp(-2*rad[i]))+.025*math.sin(t*.65+i);a+=.10*t/(.3+rad[i])
+   else:rr=rad[i]+(.96-rad[i])*(1-math.exp(-.20*q/(rad[i]+.10)))
+   return c+np.array([w*.475*rr*math.cos(a),h*.475*rr*math.sin(a),0])
+  def update(t):
+   for i,m in enumerate(self.pepper):
+    p=pos(i,t);m.move_to(p);shadows[i].move_to(p+[.027,-.036,0])
+   for i,path in enumerate(paths):
+    # A continuous inflow of liquid tracers, radial speed falls as 1/(r+eps).
+    a=angles[i];phase=(i*.618+t*.18)%1;rr=.06+.87*math.sqrt(phase)
+    pts=[c+np.array([w*.475*max(.01,rr-d)*math.cos(a+.05*math.sin(t*.5)),h*.475*max(.01,rr-d)*math.sin(a+.05*math.sin(t*.5)),0]) for d in np.linspace(.075,0,5)]
+    path.set_points_smoothly(pts)
+   for j,m in enumerate(rings):
+    q=max(0,t-.45-j*.18);p=min(.99,.07+q*.38);m.stretch_to_fit_width(max(.04,w*p));m.stretch_to_fit_height(max(.04,h*p));m.move_to(c).set_stroke(LIGHT,1.6,max(0,.45*(1-p))*math.exp(-q/4))
+   if BID=='h1':
+    q=min(1,t/.45);yy=.20+(h*.22-.20)*(1-q*q);drop.move_to(c+[0,yy,0]).set_opacity(max(0,1-(t-.45)*9))
+   else:drop.set_opacity(0)
+   for j,a in enumerate(highlights):a.set_stroke(opacity=.18+.035*math.sin(t*.9+j))
+   # Camera flight towards the visible soap impact, smooth and bounded.
+   ease=smooth(min(1,t/max(1,self.duration)))
+   zoom=.025 if BID=='h1' else .035
+   self.camera.frame.set(width=config.frame_width*(1-zoom*ease)).move_to([-.10*ease,.015*math.sin(math.pi*ease),0])
+  self.updates.append(update)
+
+ def molecular_scene(self,two_zones=False):
+  # A distinct low-angle surface view; the entire water stays filled and closed.
+  left,right=(-3.6,3.6) if DOC else (-6.2,6.2)
+  y=2.25 if DOC else 1.35;bottom=-6.55 if DOC else -3.55
+  water=Rectangle(width=right-left,height=y-bottom,fill_color=WATER,fill_opacity=.86,stroke_width=0).move_to([(left+right)/2,(y+bottom)/2,0]);self.add_world(water)
+  front=Rectangle(width=right-left,height=.20,fill_color=INK,fill_opacity=.22,stroke_width=0).move_to([(left+right)/2,bottom-.08,0]);self.add_world(front)
+  surface=VMobject(stroke_color=LIGHT,stroke_width=3);self.add_world(surface)
+  n=(9 if DOC else 17) if two_zones else (7 if DOC else 11);radius=.13 if two_zones else .21;spacing=(right-left-.6)/(n-1);xs=np.linspace(left+.3,right-.3,n)
+  waters=VGroup();bonds=VGroup();base=[]
+  for row in range(3):
+   for i,x in enumerate(xs):
+    p=np.array([x,y-.9-row*.85,0]);base.append(p);waters.add(sphere(radius,p,WATER))
+  for row in range(3):
+   for i in range(n-1):bonds.add(Line(base[row*n+i],base[row*n+i+1],color=LIGHT,stroke_width=2.4,stroke_opacity=.75))
+  self.add_world(bonds,waters)
+  soap=VGroup();sx=np.linspace(.25 if two_zones else left+.7,right-.7,(3 if DOC else 4) if two_zones else (4 if DOC else 6))
+  for x in sx:
+   head=sphere(.15,[x,y-.30,0]);tail=VMobject(stroke_color=INK,stroke_width=4).set_points_as_corners([[x,y-.30,0],[x,y-.03,0],[x+.09,y+.19,0],[x-.04,y+.39,0],[x+.10,y+.61,0],[x+.04,y+.80,0]])
+   soap.add(VGroup(head,tail))
+  self.add_world(soap)
+  tracers=VGroup(*[oval(.14,.055,LIGHT,.65) for _ in range(260)]);self.add_world(tracers)
+  rng=np.random.default_rng(773);phase=rng.random(260);depth=rng.uniform(.15,2.7,260)
+  def update(t):
+   insertion=smooth(min(1,max(0,(t-.8)/4)))
+   wave=lambda x:.04*math.sin(1.8*x-1.1*t)+.018*math.cos(3*x-.8*t)
+   surface.set_points_smoothly([[x,y+wave(x),0] for x in np.linspace(left,right,80)])
+   positions=[]
+   for i,p in enumerate(base):
+    xx=p[0]+.06*math.sin(t*.5+i)+.09*insertion*math.sin(p[0]);yy=p[1]+.035*math.cos(t*.6+i);positions.append(np.array([xx,yy,0]));waters[i].move_to(positions[-1])
+   minsep=min(np.linalg.norm(positions[i]-positions[j]) for i in range(len(positions)) for j in range(i))
+   assert minsep>=2*radius,(minsep,t)
+   for row in range(3):
+    for i in range(n-1):
+     bond=bonds[row*(n-1)+i];bond.put_start_and_end_on(positions[row*n+i],positions[row*n+i+1]);bond.set_opacity(.75-.52*insertion*(.5+.5*math.sin(xs[i])))
+   for i,m in enumerate(soap):
+    # Heads appear wholly inside liquid; spheres never straddle the interface.
+    m.set_opacity(insertion);m.shift(np.array([sx[i]+.07*math.sin(t*.6+i),y-.30,0])-m[0].get_center())
+   all_centres=np.array(positions+[m[0].get_center() for m in soap]);radii=np.array([radius]*len(positions)+[.15]*len(soap));dist=np.linalg.norm(all_centres[:,None]-all_centres[None,:],axis=2);np.fill_diagonal(dist,np.inf)
+   assert np.all(dist>=radii[:,None]+radii[None,:]-1e-6),('MOLECULAR_OVERLAP',t)
+   self.min_sphere_distance=min(self.min_sphere_distance,float(dist.min()))
+   for i,m in enumerate(tracers):
+    x=left+((phase[i]+t*.055/(.3+depth[i]))%1)*(right-left);m.move_to([x,y-.30-depth[i]+.04*math.sin(x+t),0])
+   ease=smooth(min(1,t/max(1,self.duration)));self.camera.frame.set(width=config.frame_width*(1-(.005 if DOC else .012)*ease)).move_to([0,-.04*ease,0])
+  self.updates.append(update)
+
+ def section_scene(self):
+  left,right=(-3.6,3.6) if DOC else (-6.2,6.2);top=3.0 if DOC else 2.05;bottom=-6.55 if DOC else -3.55
+  self.add_world(Rectangle(width=right-left,height=top-bottom,fill_color=WATER,fill_opacity=.88,stroke_color=LIGHT,stroke_width=2).move_to([(left+right)/2,(top+bottom)/2,0]))
+  rng=np.random.default_rng(61);phases=rng.uniform(0,TAU,360);layers=rng.uniform(.45,.95,360)
+  parts=VGroup(*[oval(.16,.065,LIGHT,.78) for _ in phases]);self.add_world(parts)
+  paths=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=2,stroke_opacity=.22) for _ in range(44)]);self.add_world(paths)
+  surface=VMobject(stroke_color=LIGHT,stroke_width=3);self.add_world(surface)
+  def point(i,t):
+   a=phases[i]+t*(.6+.2*layers[i]);return [(left+right)/2+(right-left)*.46*layers[i]*math.cos(a),(top+bottom)/2+(top-bottom)*.43*layers[i]*math.sin(a),0]
+  def update(t):
+   for i,m in enumerate(parts):m.move_to(point(i,t))
+   for i,m in enumerate(paths):m.set_points_smoothly([point(i,t-d) for d in np.linspace(.35,0,6)])
+   surface.set_points_smoothly([[x,top+.05*math.sin(x*2-t*1.1),0] for x in np.linspace(left,right,100)])
+  self.updates.append(update)
+
+ def update(self,t):
+  for f in self.updates:f(t)

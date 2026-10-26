@@ -6140,7 +6140,7 @@
     "metric_provenance": "GitHub Actions API jobs + artifact 12646270291; no invented CPU/edit measurements"
   },
   "B": {
-    "status": "FIRST_PUSH_GEOMETRY_REVIEWED; final metrics produced by CI",
+    "status": "ROUND_2_PREFLIGHT_36_REVIEWED; awaiting final MP4 CI",
     "codex_minutes": 13,
     "ci_minutes": null,
     "cpu_seconds_per_video_second": null,
@@ -6151,6 +6151,39 @@
       "C17": "PENDING",
       "MIN_RES": "PENDING",
       "exposed_grid": 0
-    }
+    },
+    "gemini_sources": [
+      {
+        "id": "h1",
+        "path": "assets/k1t3/broll_gemini/h1_16x9.mp4",
+        "start": 0,
+        "frames": 105,
+        "label": "AI minh hoạ (Gemini)",
+        "source": "GĐ supplied attachment 26/10/2026; Gemini illustration",
+        "in": 3.0,
+        "sha256": "165342a15d74d31953b372888eeeeaf4673666c30691083283e87fd563f1476e"
+      },
+      {
+        "id": "c2",
+        "path": "assets/k1t3/broll_gemini/c2_16x9.mp4",
+        "start": 285,
+        "frames": 120,
+        "label": "AI minh hoạ (Gemini)",
+        "source": "GĐ supplied attachment; radial surface flow during h2",
+        "in": 0,
+        "sha256": "468a0b6940f4064f84ea02af544ae2ec9dd6eca387b6f8385c5d83ef1b2872f8"
+      },
+      {
+        "id": "p2",
+        "path": "assets/k1t3/broll_gemini/p2_16x9.mp4",
+        "start": 555,
+        "frames": 120,
+        "label": "AI minh hoạ (Gemini)",
+        "source": "GĐ supplied attachment; steady feeding during h3",
+        "in": 0,
+        "sha256": "e4e0206b82fa03d7ca6355207bb4712d8bdec51a825f53de9bd48c24b9f29546"
+      }
+    ],
+    "revision_scope": "GĐ phiếu lượt 1 + concurrency=1, 120000ms timeout, Chrome system libraries"
   }
 }
