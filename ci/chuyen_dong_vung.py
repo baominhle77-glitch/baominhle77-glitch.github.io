@@ -24,6 +24,12 @@ BEAT_UNION_MIN = 15.
 LOW_PAIR_PCT = .3
 MAX_LOW_STREAK_S = 2.
 FIRST = ("h1", "h2", "h3", "h4", "c1", "p1")
+# Nhóm khuôn chỉ dùng để so cùng BẢN CHẤT HÌNH; so toàn bộ các beat
+# trước cùng nhóm, không chỉ beat liền trước (GĐ 26/10 lần 3).
+TEMPLATE={"h1":"mat_nuoc","h2":"mat_nuoc","h3":"mat_nuoc",
+          "h4":"hai_khay","c1":"mat_cat","p1":"mat_cat"}
+SCENE_DIFF_MIN=12.
+MIN_PASS_2S=28
 
 
 def extract(video, fmt):
@@ -65,8 +71,7 @@ def measure(frames, plan, fmt):
     pixel_base = float(WIDTH*HEIGHT)
     area = 100*np.count_nonzero(effective,axis=(1,2))/pixel_base
     beat_rows=[]
-    prior_frame=None
-    prior_id=None
+    earlier={}
     for bid in FIRST:
         b=plan["beats"][bid]
         t0=float(b["t0"])
@@ -85,12 +90,15 @@ def measure(frames, plan, fmt):
         center_t=(t0+t1_seen)*.5
         center_idx=min(len(frames)-1,max(0,int(round(center_t*FPS))))
         center_frame=frames[center_idx].astype(np.int16)
-        khac_canh = (None if prior_frame is None else
-                     float(np.abs(center_frame-prior_frame).mean()))
-        khac_dat = (prior_frame is None or khac_canh>=8.)
-        prior_frame=center_frame
-        prev_id=prior_id
-        prior_id=bid
+        kind=TEMPLATE[bid]
+        prev=earlier.get(kind,[])
+        differences=[(prior_id,float(np.abs(center_frame-prior_img).mean()))
+                     for prior_id,prior_img in prev]
+        closest=min(differences,key=lambda x:x[1]) if differences else None
+        khac_canh=None if closest is None else closest[1]
+        khac_dat=(khac_canh is None or khac_canh>=SCENE_DIFF_MIN)
+        prev_id=None if closest is None else closest[0]
+        earlier.setdefault(kind,[]).append((bid,center_frame))
         above = 100.*np.count_nonzero(ar>=PAIR_PCT)/len(ar)
         mean = float(ar.mean())
         union = 100.*np.count_nonzero(beat.any(axis=0))/pixel_base
@@ -113,6 +121,11 @@ def measure(frames, plan, fmt):
             "vung_dong_gop_pct":round(union,3),
             "cap_ge_3pct_pct":round(above,3),
             "chuoi_duoi_0_3pct_dai_nhat_s":round(longest_s,3),
+            "loai_khuon":kind,
+            "khac_canh_nguong":SCENE_DIFF_MIN,
+            "khac_canh_voi_tat_ca_cung_khuon":[
+                {"beat":oid,"hieu_gray":round(val,3)}
+                for oid,val in differences],
             "khac_canh":(None if khac_canh is None else round(khac_canh,3)),
             "khac_canh_so_voi":prev_id,
             "khac_canh_dat":khac_dat,
@@ -124,13 +137,36 @@ def measure(frames, plan, fmt):
               (fmt,bid,mean,union,above,longest_s,
                "first" if khac_canh is None else "%.2f"%khac_canh,
                row["ket_qua"]),flush=True)
+    # Cổng phụ GĐ: 30 đoạn rời nhau dài 2 giây trên 60s;
+    # đoạn ĐẠT iff diện tích TB >=5%, hợp >=15%, >=60% cặp >=3%.
+    windows=[]
+    for section in range(30):
+        left,right=section*2.,(section+1)*2.
+        idx=[j-1 for j in range(1,len(frames))
+             if left <= j/FPS < right]
+        if not idx:
+            raise RuntimeError("EMPTY_2S_WINDOW %s %d"%(fmt,section))
+        q=area[idx]
+        wmean=float(q.mean())
+        wunion=100.*np.count_nonzero(effective[idx].any(axis=0))/pixel_base
+        wabove=100.*np.count_nonzero(q>=PAIR_PCT)/len(q)
+        ok=wmean>=BEAT_MEAN_MIN and wunion>=BEAT_UNION_MIN and wabove>=BEAT_PAIRS_GE_3_MIN
+        windows.append({"giay_vao":left,"tb_pct":round(wmean,3),
+                        "gop_pct":round(wunion,3),
+                        "cap_ge_3pct_pct":round(wabove,3),
+                        "ket_qua":"DAT" if ok else "TRUOT"})
+    nwin=sum(q["ket_qua"]=="DAT" for q in windows)
+    print("C17_8_2S %s %d/30 >=%d => %s"%(fmt,nwin,MIN_PASS_2S,
+           "DAT" if nwin>=MIN_PASS_2S else "TRUOT"),flush=True)
     return {
         "bo_cuc":fmt,"so_khung_4fps":len(frames),"so_cap":total_pairs,
         "pixel_bo_lap":int(repeated.sum()),
         "bo_lap_pct":round(100.*repeated.mean(),3),
         "dien_tich_dong_trung_binh_toan_mau_pct":round(float(area.mean()),3),
         "cap_co_chuyen_dong_pct":round(100.*np.count_nonzero(area>0)/len(area),3),
-        "beats":beat_rows}
+        "beats":beat_rows,"so_doan_2s_dat":nwin,
+        "so_doan_2s":30,"cua_so_2s":windows,
+        "cong_2s_dat":nwin>=MIN_PASS_2S}
 
 
 def main():
@@ -156,6 +192,8 @@ def main():
         failures=[r["bo_cuc"]+"/"+b["beat"] for r in reports for b in r["beats"]
                   if b["ket_qua"]=="TRUOT"]
         failures += ["THIEU_VIDEO_"+x["bo_cuc"] for x in missing]
+        failures += ["DOAN_2S_"+r["bo_cuc"]+"_"+str(r["so_doan_2s_dat"])+"/30"
+                     for r in reports if not r["cong_2s_dat"]]
         report={
             "chuan":"C17(8) full-frame v2 + khac_canh",
             "video":"K1 t3 mẫu 00:00–01:00, không suy rộng sang full 553s",
@@ -167,7 +205,8 @@ def main():
                 "dien_tich_trung_binh_pct":5,
                 "vung_gop_pct":15,
                 "chuoi_cap_duoi_0_3pct_toi_da_s":2,
-                "khac_canh_trung_binh_abs_gray_toi_thieu":8},
+                "khac_canh_toi_thieu_so_voi_moi_beat_truoc_cung_khuon":12,
+                "so_doan_2s_dat_toi_thieu_trong_30":28},
             "ket_qua":"TRUOT" if failures else "DAT",
             "loi":failures,"thieu_video":missing,
             "tep_video":file_paths,"bao_cao":reports}
