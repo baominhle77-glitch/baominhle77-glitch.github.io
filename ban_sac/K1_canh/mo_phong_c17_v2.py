@@ -343,6 +343,102 @@ class LiveScene:
         self.add(counter,animated=True)
 
 
+
+class LiveScenePerBeat(LiveScene):
+    """Từng beat cùng phương trình nhưng khác vật/góc và tiến trình của lời."""
+    SHOT_BY_ID={
+        "p2":"needle", "p3":"surfactants", "p4":"micelle",
+        "p5":"section_return", "p6":"overhead", "c2":"needle",
+        "v1":"velocity_field", "v2":"velocity_profile",
+        "v3":"needle", "v4":"section_return", "v5":"radius_measure",
+        "v6":"molecular_section", "v7":"micelle", "c3":"surfactants",
+        "w1":"needle", "w2":"velocity_profile", "w3":"section_return",
+        "w4":"micelle", "w5":"radius_measure", "w6":"viscosity",
+        "w7":"needle", "b1":"needle", "r1":"velocity_field",
+        "r2":"radius_measure", "r3":"radius_measure",
+        "r4":"gamma_compare", "s8":"section_return", "k1":"overhead",
+        "k2":"wine"
+    }
+    def _shot(self):
+        return self.SHOT_BY_ID.get(self.bid,super()._shot())
+
+    def build_micelle(self):
+        # Mỗi cụm là các đầu ưa nước hướng ra ngoài, đuôi trong lõi:
+        # phân tử tập hợp dần do c vượt CMC. Không phải hai hình trước/sau.
+        self.build_section(molecules=False)
+        centers=[(self.cx-self.w*.27,self.cy+.04),
+                 (self.cx+self.w*.25,self.cy+.03),
+                 (self.cx,self.cy-.20)]
+        for i,(cx,cy) in enumerate(centers):
+            r0=.17+self.w*.012
+            for k in range(38):
+                a=2*math.pi*k/38
+                t0=.18*(i+k%8)
+                head=Dot(radius=.056,color=CANG)
+                def ads(m,dt,k=k,i=i,a=a,cx=cx,cy=cy,r0=r0,t0=t0):
+                    tau=max(0.,self.clock_t()-t0)
+                    r=r0+(.48 if i==1 else .32)*(1-math.exp(-tau/3.1))
+                    alpha=a+.12*self.clock_t()*math.exp(-tau/6)
+                    m.move_to([cx+r*math.cos(alpha),cy+.52*r*math.sin(alpha),0])
+                head.add_updater(ads)
+                self.add(head,animated=True)
+            core=always_redraw(lambda cx=cx,cy=cy,i=i:
+                Circle(radius=.10+.30*(1-math.exp(-self.clock_t()/3.6)))
+                .stretch(.68,1)
+                .move_to([cx,cy,0]).set_fill(MUC,.21).set_stroke(CANG,3)
+                .set_z_index(7))
+            self.add(core,animated=True)
+
+    def build_velocity_profile(self):
+        # Dòng mặt kéo ra, đáy hồi lưu: hình cắt, quỹ đạo thẳng/hơi cong
+        # gắn vào gradient vận tốc; đồ thị u(z) biến đổi theo bơm.
+        self.build_section(molecules=False)
+        x0=self.cx+self.w*.13
+        y0=self.cy
+        profile=always_redraw(lambda:
+            VMobject().set_points_smoothly([
+               np.array([x0+self.w*.17*(1-math.exp(-self.clock_t()/2.5))*
+                         math.cos(math.pi*j/42),
+                         y0+self.h*.24*(j/21-1),0])
+               for j in range(43)])
+            .set_stroke(CANG,9,opacity=.9).set_z_index(10))
+        self.add(profile,animated=True)
+
+    def build(self):
+        if self.shot=="micelle":
+            self.build_micelle()
+        elif self.shot in ("velocity_profile","viscosity"):
+            self.build_velocity_profile()
+        elif self.shot=="surfactants":
+            self.build_section(molecules=True)
+            # 8 chất HĐBM là 8 hàng phân tử khác độ dài đuôi,
+            # phân biệt với hình micelle khi qua CMC.
+            for k in range(8):
+                y=self.cy+self.h*(k/8-.42)
+                line=Line([self.cx-self.w*.37,y,0],
+                          [self.cx-self.w*(.16-.022*k),y,0])
+                line.set_stroke(MUC,2.5).set_z_index(9)
+                self.add(line)
+        elif self.shot=="velocity_field":
+            self.build_overhead()
+            for k in range(8):
+                a=math.pi*k/4
+                arc=always_redraw(lambda a=a:
+                     Arc(radius=self.radius*(.20+.5*(1-math.exp(-self.clock_t()/2.9))),
+                         start_angle=a,angle=.72)
+                     .move_to([self.cx,self.cy,0])
+                     .set_stroke(CANG,8).set_z_index(7))
+                self.add(arc,animated=True)
+        else:
+            super().build()
+        if self.shot in ("micelle","velocity_profile","viscosity","surfactants","velocity_field"):
+            # Counter native Text cho những cảnh dùng builder riêng.
+            clock=always_redraw(lambda:
+                 chu("t = %.1f s" % self.clock_t(),28,MUC)
+                 .move_to([self.x0+.35,self.y1-.35,0]).set_z_index(15))
+            self.add(clock,animated=True)
+
+
 def _fit_source(sc,W,doc):
     if W.nguon is not None:
         sc.remove(W.nguon)
@@ -388,7 +484,7 @@ def ve_live(owner,sc,W):
         txt_y=-.45
         maxw=3.45
     _fit_source(sc,W,doc)
-    model=LiveScene(owner,sc,W,rect,upper)
+    model=LiveScenePerBeat(owner,sc,W,rect,upper)
     owner._c17_hats=model.dynamic
     owner._c17_t=model.clock
     owner.hinh_ds.extend([model.static,model.dynamic,model.extra])
