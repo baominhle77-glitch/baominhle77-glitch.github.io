@@ -8,7 +8,7 @@ import math
 import numpy as np
 from manim import (VGroup, VMobject, Circle, Ellipse, Rectangle, RoundedRectangle,
                    Line, Arrow, Dot, Polygon, Arc, FadeIn, FadeOut, Create,
-                   ValueTracker, DecimalNumber, always_redraw, smooth, UP, DOWN,
+                   ValueTracker, always_redraw, smooth, UP, DOWN,
                    RIGHT, LEFT, ORIGIN, PI)
 from K1_ban_quang_hoc import MUC, NUOC, CANG, NEN_TREN, NEN_DUOI, chu
 from K1_canh import trang
@@ -338,11 +338,8 @@ class LiveScene:
         # Manim DecimalNumber bản địa: không bitmap upscale.
         pos=[self.x0+.35,self.y1-.35,0]
         counter=always_redraw(lambda:
-             VGroup(chu("t",22,MUC),
-                    DecimalNumber(self.clock_t(),num_decimal_places=1,
-                                  font_size=25,color=MUC),
-                    chu("s",22,MUC))
-             .arrange(RIGHT,buff=.09).move_to(pos).set_z_index(15))
+            chu("t = %.1f s" % self.clock_t(),28,MUC)
+                .move_to(pos).set_z_index(15))
         self.add(counter,animated=True)
 
 
