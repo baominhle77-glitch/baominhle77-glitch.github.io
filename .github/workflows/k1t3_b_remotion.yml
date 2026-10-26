@@ -43,12 +43,20 @@ jobs:
           python-version: '3.11.9'
       - name: Beat source fingerprint
         id: fingerprint
-        run: echo "key=$(python ci/remotion_b/beat_cache.py --beat ${{ matrix.beat }})" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "key=$(python ci/remotion_b/beat_cache.py --beat ${{ matrix.beat }})" >> "$GITHUB_OUTPUT"
+          echo "panel_key=$(python ci/remotion_b/prepare_panels.py --beat ${{ matrix.beat }} --key)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
         id: beat-cache
         with:
           path: work/B_cache/540/${{ matrix.beat }}
           key: B-media-v3-${{ runner.os }}-${{ matrix.beat }}-${{ steps.fingerprint.outputs.key }}
+      - uses: actions/cache@v4
+        id: panel-cache
+        if: steps.fingerprint.outputs.panel_key != 'none'
+        with:
+          path: work/B_panels/540/${{ matrix.beat }}
+          key: B-panel-v1-${{ runner.os }}-${{ matrix.beat }}-${{ steps.fingerprint.outputs.panel_key }}
       - uses: actions/cache@v4
         with:
           path: ~/.cache/pip
@@ -62,13 +70,15 @@ jobs:
           path: ci/remotion_b/node_modules
           key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
       - name: Native toolchain, no apt FFmpeg
-        if: steps.beat-cache.outputs.cache-hit != 'true'
+        if: steps.beat-cache.outputs.cache-hit != 'true' || (steps.fingerprint.outputs.panel_key != 'none' && steps.panel-cache.outputs.cache-hit != 'true')
         run: bash ci/remotion_b/setup_native.sh manim
       - name: Cached Python and Node packages
         env:
           B_MEDIA_CACHE_HIT: ${{ steps.beat-cache.outputs.cache-hit }}
+          B_PANEL_KEY: ${{ steps.fingerprint.outputs.panel_key }}
+          B_PANEL_CACHE_HIT: ${{ steps.panel-cache.outputs.cache-hit }}
         run: |
-          if [ "$B_MEDIA_CACHE_HIT" != "true" ]; then python -m pip install -q -r ci_requirements.txt; fi
+          if [ "$B_MEDIA_CACHE_HIT" != "true" ] || { [ "$B_PANEL_KEY" != "none" ] && [ "$B_PANEL_CACHE_HIT" != "true" ]; }; then python -m pip install -q -r ci_requirements.txt; fi
           if [ ! -x ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu/ffmpeg ]; then
             npm ci --prefix ci/remotion_b --no-audit --no-fund
           fi
@@ -77,6 +87,7 @@ jobs:
         run: |
           python -u ci/remotion_b/prepare.py --beat ${{ matrix.beat }} --jobs 1
           python ci/remotion_b/finish_beat.py --beat ${{ matrix.beat }}
+          python ci/remotion_b/prepare_panels.py --beat ${{ matrix.beat }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -87,6 +98,16 @@ jobs:
             work/B_cache/540/${{ matrix.beat }}/*.json
             work/B_cache/540/${{ matrix.beat }}/stills/
             work/B_cache/540/${{ matrix.beat }}/media/**/render.log
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.fingerprint.outputs.panel_key != 'none'
+        with:
+          name: B-panel-540-${{ matrix.beat }}
+          retention-days: 14
+          path: |
+            work/B_panels/540/${{ matrix.beat }}/*.mp4
+            work/B_panels/540/${{ matrix.beat }}/*.json
+            work/B_panels/540/${{ matrix.beat }}/*.png
+            work/B_panels/540/${{ matrix.beat }}/render.log
   remotion:
     name: Remotion 540p + unchanged gates
     needs: manim
@@ -114,6 +135,11 @@ jobs:
         with:
           pattern: B-beat-540-*
           path: work/beat-download
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: B-panel-540-*
+          path: work/panel-download
+      - run: python ci/remotion_b/collect_panels.py
       - name: Collect six matrix artifacts
         run: python ci/remotion_b/collect_beats.py --short-side 540
       - uses: actions/cache@v4
@@ -210,6 +236,7 @@ jobs:
           B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
         run: |
           python -u ci/remotion_b/prepare.py --short-side 1080 --jobs 2
+          for bid in h1 h2 h3; do python ci/remotion_b/prepare_panels.py --short-side 1080 --beat "$bid"; done
           python -u ci/remotion_b/compose.py
       - uses: actions/upload-artifact@v4
         if: always()

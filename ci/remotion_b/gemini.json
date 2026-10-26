@@ -8,7 +8,8 @@
     "source": "GĐ supplied attachment 26/10/2026; Gemini illustration",
     "in": 3.0,
     "focus_x": 50,
-    "focus_y": 50
+    "focus_y": 50,
+    "simulation_beat": "h1"
   },
   {
     "id": "c2",
@@ -19,7 +20,8 @@
     "source": "GĐ supplied attachment; radial surface flow during h2",
     "in": 0,
     "focus_x": 38,
-    "focus_y": 50
+    "focus_y": 50,
+    "simulation_beat": "h2"
   },
   {
     "id": "p2",
@@ -30,6 +32,9 @@
     "source": "GĐ supplied attachment; steady feeding during h3",
     "in": 0,
     "focus_x": 63,
-    "focus_y": 50
+    "focus_y": 50,
+    "simulation_beat": "h3",
+    "portrait_start": 570,
+    "portrait_frames": 210
   }
 ]

@@ -24,7 +24,7 @@ def main():
   print('FREEZE '+fmt+' '+(json.dumps(intervals) if intervals else 'NONE'),flush=True)
   cw,ch=(480,294) if fmt=='16x9' else (270,504)
   sheet=Image.new('RGB',(cw*4,ch*3),'#1C232B');d=ImageDraw.Draw(sheet)
-  for i,t in enumerate([.5,5,9,14,19,22,27,33,39,45,53,59.4]):
+  for i,t in enumerate([.5,5,9,14,19,22,25,33,39,45,53,59.4]):
    dest=O/f'contact_{fmt}_{i}.png';subprocess.run(['ffmpeg','-nostdin','-y','-v','error','-ss',str(t),'-i',str(movie),'-frames:v','1',str(dest)],check=True)
    im=Image.open(dest);im.thumbnail((cw,ch-24));x=i%4*cw;y=i//4*ch;sheet.paste(im,(x,y));d.text((x+8,y+ch-21),f'{t:.1f}s',fill='white')
   sheet.save(O/f'contact_sheet_{fmt}.jpg',quality=94)
@@ -35,7 +35,7 @@ def main():
  dom={fmt:read(O/f'dom_{fmt}.json',[]) for fmt in ('16x9','9x16')}
  alignment=read(O/'caption_alignment.json',[])
  semantic_pass=bool(alignment) and all(2<=len(c['text'].split())<=5 for c in data.get('captions',[]))
- layout_pass=all(dom.values()) and visual.get('pass_geometry',False) and visual.get('round')==4 and visual.get('c13_errors')==[] and semantic_pass
+ layout_pass=all(dom.values()) and visual.get('pass_geometry',False) and visual.get('round',0)>=4 and visual.get('c13_errors')==[] and semantic_pass
  c13=layout_pass and motion.get('ket_qua')=='DAT'
  # Count mesh/wireframe edges from their actual construction: B uses no mesh
  # object and no parallel-grid primitives. Visual inspection records any

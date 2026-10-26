@@ -87,7 +87,7 @@ class BScene(MovingCameraScene):
    q=max(0,t-(.45 if BID=='h1' else 0));a=angles[i]+.018*math.sin(t*.7+rad[i]*8)
    if BID=='h3':
     rr=.43+.28*(1-math.exp(-2*rad[i]))+.025*math.sin(t*.65+i);a+=.10*t/(.3+rad[i])
-   else:rr=rad[i]+(.96-rad[i])*(1-math.exp(-.20*q/(rad[i]+.10)))
+   else:rr=rad[i]+(.96-rad[i])*(1-math.exp(-(.09 if BID=='h2' else .20)*q/(rad[i]+.10)))
    return c+np.array([w*.475*rr*math.cos(a),h*.475*rr*math.sin(a),0])
   def update(t):
    for i,m in enumerate(self.pepper):
@@ -95,7 +95,7 @@ class BScene(MovingCameraScene):
    for i,path in enumerate(paths):
     # A continuous inflow of liquid tracers, radial speed falls as 1/(r+eps).
     a=angles[i];phase=(i*.618+t*(.23 if BID=='h2' else .18))%1;rr=.06+.87*math.sqrt(phase)
-    pts=[c+np.array([w*.475*max(.01,rr-d)*math.cos(a+.05*math.sin(t*.5)),h*.475*max(.01,rr-d)*math.sin(a+.05*math.sin(t*.5)),0]) for d in np.linspace(.22 if BID=='h2' else .075,0,5)]
+    pts=[c+np.array([w*.475*max(.01,rr-d)*math.cos(a+.05*math.sin(t*.5)),h*.475*max(.01,rr-d)*math.sin(a+.05*math.sin(t*.5)),0]) for d in np.linspace((.10+.20*smooth(min(1,t/max(1,self.duration)))) if BID=='h2' else .075,0,5)]
     path.set_points_smoothly(pts)
    for j,m in enumerate(rings):
     q=max(0,t-.45-j*.18);p=min(.99,.07+q*.38);m.stretch_to_fit_width(max(.04,w*p));m.stretch_to_fit_height(max(.04,h*p));m.move_to(c).set_stroke(LIGHT,1.6,max(0,.45*(1-p))*math.exp(-q/4))
@@ -106,7 +106,14 @@ class BScene(MovingCameraScene):
    # Camera flight towards the visible soap impact, smooth and bounded.
    ease=smooth(min(1,t/max(1,self.duration)))
    zoom=0 if DOC else (.025 if BID=='h1' else .035)
-   self.camera.frame.set(width=config.frame_width*(1-zoom*ease)).move_to([(-.025 if DOC else -.10)*ease,0 if DOC else .015*math.sin(math.pi*ease),0])
+   self.camera.frame.set(width=config.frame_width*(1-zoom*ease)).move_to([(-.025 if DOC else -.10)*ease,(c[1]+h/2+.12-config.frame_height*.34) if DOC else .015*math.sin(math.pi*ease),0])
+   if BID=='h2':
+    # Eased camera keys are a real change of viewing scale/position, rather
+    # than resetting tiny tracers over an otherwise unchanged late shot.
+    scales=([1.00,1.07,.99,1.06,1.01] if DOC else [1.00,1.13,1.00,1.12,1.02]);xs=([-.01,.01,-.02,.015,0] if DOC else [-.10,.08,-.08,.10,0]);ys=[-.15,.30,-.35,.28,-.15]
+    k=min(3,int(t/3.5));u=smooth(min(1,max(0,(t-k*3.5)/3.5)));scale=(1-u)*scales[k]+u*scales[k+1];xx=(1-u)*xs[k]+u*xs[k+1]
+    yy=c[1]+h/2+.12-config.frame_height*scale*.34 if DOC else (1-u)*ys[k]+u*ys[k+1]
+    self.camera.frame.set(width=config.frame_width*scale).move_to([xx,yy,0])
   self.updates.append(update)
 
  def molecular_scene(self,two_zones=False):
@@ -223,7 +230,7 @@ class BScene(MovingCameraScene):
   self.updates.append(update)
 
  def section_scene(self):
-  left,right=(-3.6,3.6) if DOC else (-6.2,6.2);top=3.0 if DOC else 2.05;bottom=-6.55 if DOC else -3.55
+  left,right=(-3.6,3.6) if DOC else (-6.2,6.2);top=4.1 if DOC else 2.05;bottom=-6.55 if DOC else -3.55
   self.add_world(Rectangle(width=right-left,height=top-bottom,fill_color=WATER,fill_opacity=.88,stroke_color=LIGHT,stroke_width=2).move_to([(left+right)/2,(top+bottom)/2,0]))
   rng=np.random.default_rng(61);phases=rng.uniform(0,TAU,360);layers=rng.uniform(.45,.95,360)
   self.particle_count=len(phases)
@@ -231,12 +238,14 @@ class BScene(MovingCameraScene):
   paths=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=2,stroke_opacity=.22) for _ in range(44)]);self.add_world(paths)
   surface=VMobject(stroke_color=LIGHT,stroke_width=3);self.add_world(surface)
   # Surface-tension arrows are secondary to360 moving liquid tracers.
-  arrows=VGroup(Arrow(LEFT,RIGHT,color=ORANGE,stroke_width=7,buff=0),Arrow(LEFT,RIGHT,color=ORANGE,stroke_width=7,buff=0));self.add_world(arrows)
+  arrows=VGroup(*[VGroup(Arrow(LEFT,RIGHT,color=INK,stroke_width=16,buff=0,max_stroke_width_to_length_ratio=100),Arrow(LEFT,RIGHT,color=ORANGE,stroke_width=10,buff=0,max_stroke_width_to_length_ratio=100)) for _ in range(2)]);self.add_world(arrows)
   def point(i,t):
    a=phases[i]+t*(.6+.2*layers[i]);return [(left+right)/2+(right-left)*.46*layers[i]*math.cos(a),(top+bottom)/2+(top-bottom)*.43*layers[i]*math.sin(a),0]
   def update(t):
    for j,m in enumerate(arrows):
-    x=(left+right)/2+(-1 if j==0 else 1)*(right-left)*.19;length=(1.70 if j==0 else .75)*(1+.10*math.sin(t*1.2));start=np.array([x-length/2,top+.20,0]);m.put_start_and_end_on(start,start+[length,0,0])
+    x=(left+right)/2+(-1 if j==0 else 1)*(right-left)*.19;length=(3.30 if j==0 else 1.20)*(1+.06*math.sin(t*1.2));x+=.10*math.sin(t*1.1);start=np.array([x-length/2,top-.03+.025*math.sin(t*1.1),0])
+    for glyph in m:glyph.put_start_and_end_on(start,start+[length,0,0])
+    m[1].get_tip().set_stroke(INK,2)
    for i,m in enumerate(parts):m.move_to(point(i,t))
    for i,m in enumerate(paths):m.set_points_smoothly([point(i,t-d) for d in np.linspace(.35,0,6)])
    surface.set_points_smoothly([[x,top+.05*math.sin(x*2-t*1.1),0] for x in np.linspace(left,right,100)])
