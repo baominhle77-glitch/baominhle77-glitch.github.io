@@ -4,7 +4,7 @@ import fs from 'node:fs';import path from 'node:path';
 const root=path.resolve(import.meta.dirname,'../..');
 const out=path.join(root,'work/B');fs.mkdirSync(out,{recursive:true});
 const serveUrl=await bundle({entryPoint:path.join(import.meta.dirname,'src/index.tsx'),publicDir:path.join(import.meta.dirname,'public')});
-const browserExecutable=process.env.B_CHROME||undefined;
+const browserExecutable=process.env.B_CHROME||(fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined);
 const reports=[];
 for(const format of ['16x9','9x16']){
  const id='B-'+format;const composition=await selectComposition({serveUrl,id,browserExecutable});const dom=[];

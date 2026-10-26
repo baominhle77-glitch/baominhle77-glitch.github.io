@@ -18,7 +18,7 @@ jobs:
       PYTHONIOENCODING: utf-8
       OPENBLAS_NUM_THREADS: '1'
       OMP_NUM_THREADS: '1'
-      B_CODEX_MINUTES: '0'
+      B_CODEX_MINUTES: '14.5'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,6 +40,7 @@ jobs:
           npx --prefix ci/remotion_b remotion browser ensure
       - name: Original audio and beat-local Manim assets, then Remotion composition
         run: |
+          mkdir -p ci/remotion_b/public
           cp ban_sac/fonts/NotoSans-Regular.ttf ci/remotion_b/public/NotoSans-Regular.ttf
           python ci/remotion_b/pipeline.py
       - name: Measured warm rebuild of one beat
