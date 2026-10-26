@@ -1,0 +1,25 @@
+{
+  "palette": {
+    "ink": "#1C232B",
+    "primary": "#3F6A9E",
+    "accent": "#D1834F",
+    "light": "#A7ADB3",
+    "background": "#8E969D"
+  },
+  "id": "lich_su",
+  "name": "Lịch sử",
+  "simulation_types": [
+    "bản đồ di chuyển quân",
+    "dòng thời gian",
+    "nhân vật minh hoạ"
+  ],
+  "main_scenes": [
+    "địa hình",
+    "sự kiện và mốc năm"
+  ],
+  "real_material_types": [
+    "tư liệu lưu trữ",
+    "bản đồ có nguồn",
+    "clip AI có nhãn"
+  ]
+}

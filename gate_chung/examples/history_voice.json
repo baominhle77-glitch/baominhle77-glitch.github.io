@@ -1,0 +1,154 @@
+{
+  "source": "Flite slt, offline word synthesis; each complete word resampled into its registered0.65s slot,0.1s interword silence; fictional test only",
+  "sha256": "e5aaba274502c85b733bc56f1d9e91b5392a542e072e2967de694ce46dd4a42e",
+  "duration": 20,
+  "words": [
+    {
+      "text": "Two",
+      "start": 0.2,
+      "end": 0.85
+    },
+    {
+      "text": "blue",
+      "start": 0.95,
+      "end": 1.6
+    },
+    {
+      "text": "armies",
+      "start": 1.7,
+      "end": 2.35
+    },
+    {
+      "text": "advance",
+      "start": 2.45,
+      "end": 3.1
+    },
+    {
+      "text": "The",
+      "start": 4.2,
+      "end": 4.85
+    },
+    {
+      "text": "orange",
+      "start": 4.95,
+      "end": 5.6
+    },
+    {
+      "text": "route",
+      "start": 5.7,
+      "end": 6.35
+    },
+    {
+      "text": "grows",
+      "start": 6.45,
+      "end": 7.1
+    },
+    {
+      "text": "The",
+      "start": 8.2,
+      "end": 8.85
+    },
+    {
+      "text": "year",
+      "start": 8.95,
+      "end": 9.6
+    },
+    {
+      "text": "becomes",
+      "start": 9.7,
+      "end": 10.35
+    },
+    {
+      "text": "1601",
+      "start": 10.45,
+      "end": 11.1
+    },
+    {
+      "text": "The",
+      "start": 12.2,
+      "end": 12.85
+    },
+    {
+      "text": "troops",
+      "start": 12.95,
+      "end": 13.6
+    },
+    {
+      "text": "advance",
+      "start": 13.7,
+      "end": 14.35
+    },
+    {
+      "text": "east",
+      "start": 14.45,
+      "end": 15.1
+    },
+    {
+      "text": "This",
+      "start": 16.2,
+      "end": 16.85
+    },
+    {
+      "text": "campaign",
+      "start": 16.95,
+      "end": 17.6
+    },
+    {
+      "text": "remains",
+      "start": 17.7,
+      "end": 18.35
+    },
+    {
+      "text": "fictional",
+      "start": 18.45,
+      "end": 19.1
+    }
+  ],
+  "captions": [
+    {
+      "text": "Two blue armies advance",
+      "start": 0.2,
+      "end": 3.15,
+      "tts_span": [
+        0.2,
+        3.1
+      ]
+    },
+    {
+      "text": "The orange route grows",
+      "start": 4.2,
+      "end": 7.1499999999999995,
+      "tts_span": [
+        4.2,
+        7.1
+      ]
+    },
+    {
+      "text": "The year becomes 1601",
+      "start": 8.2,
+      "end": 11.15,
+      "tts_span": [
+        8.2,
+        11.1
+      ]
+    },
+    {
+      "text": "The troops advance east",
+      "start": 12.2,
+      "end": 15.15,
+      "tts_span": [
+        12.2,
+        15.1
+      ]
+    },
+    {
+      "text": "This campaign remains fictional",
+      "start": 16.2,
+      "end": 19.150000000000002,
+      "tts_span": [
+        16.2,
+        19.1
+      ]
+    }
+  ]
+}

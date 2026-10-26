@@ -1,0 +1,25 @@
+{
+  "palette": {
+    "ink": "#1C232B",
+    "primary": "#3F6A9E",
+    "accent": "#D1834F",
+    "light": "#A7ADB3",
+    "background": "#8E969D"
+  },
+  "id": "thien_van",
+  "name": "Thiên văn",
+  "simulation_types": [
+    "quỹ đạo",
+    "thang kích thước",
+    "chuyển động thiên thể"
+  ],
+  "main_scenes": [
+    "hệ hành tinh",
+    "bầu trời quan sát"
+  ],
+  "real_material_types": [
+    "ảnh kính thiên văn",
+    "video đài quan sát",
+    "clip AI có nhãn"
+  ]
+}

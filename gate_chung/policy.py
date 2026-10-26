@@ -1,0 +1,24 @@
+"""One policy for every genre. Genre JSON is content, never threshold overrides."""
+FPS=4
+PIXEL_DIFFERENCE=6
+RECURRING_PIXEL_FRACTION=.60
+MOTION_MEAN=5.
+MOTION_UNION=15.
+MOTION_PAIR_AREA=3.
+MOTION_PAIR_FRACTION=60.
+WINDOW_PASS_NUMERATOR=28
+WINDOW_PASS_DENOMINATOR=30
+FREEZE_LIMIT_S=2.
+PROGRESSION_LAG_S=4.
+STRUCTURAL_SSIM_LIMIT=.97
+PORTRAIT_EMPTY_LIMIT=.08
+PORTRAIT_PRIMARY_HEIGHT=.60
+SHARPNESS_RETENTION=.50
+MAX_REAL_VIDEO_SCALE=1.0
+SAFE_MARGIN=.03
+MIN_CAPTION_FONT=28.
+TTS_TOLERANCE=.2
+LONG_WIDTH=.15
+BAD_END_EN=set('of the a an to and so not or but for with from than at in on by as that'.split())
+BAD_END_VI=set('của và thì là những các một với từ tại tới đến mà hoặc nhưng về trong trên cho'.split())
+GENRE_KEYS={'id','name','simulation_types','main_scenes','palette','real_material_types'}

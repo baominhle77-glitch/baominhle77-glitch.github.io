@@ -6,7 +6,7 @@ b_native_start=$(date +%s)
 echo "B_NATIVE_START $(date -u +%FT%TZ)"
 b_native_packages=(pkg-config libcairo2-dev libpango1.0-dev)
 if [[ "${1:-manim}" == "browser" ]]; then
-  b_native_packages=(libnss3 libatk-bridge2.0-0 libgbm1 libxkbcommon0 libasound2t64 libxcomposite1 libxdamage1 libxrandr2)
+  b_native_packages=(libnss3 libatk-bridge2.0-0 libgbm1 libxkbcommon0 libasound2t64 libxcomposite1 libxdamage1 libxrandr2 tesseract-ocr)
 fi
 b_native_missing=()
 for b_native_pkg in "${b_native_packages[@]}"; do
