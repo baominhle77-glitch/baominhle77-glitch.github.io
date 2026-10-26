@@ -376,12 +376,14 @@ def ve_live(owner,sc,W):
     if doc:
         # Vùng an toàn riêng: không dùng dải 25% hình + 6 dòng nguồn cũ.
         bc.an_toan=(-3.70,3.65,-4.45,5.75)
+        bc.san=-4.35  # dải cuối cho nhãn + nguồn, không là chân mô phỏng
         rect=(-3.56,3.46,-2.08,3.20)  # nước nhìn từ trên: rộng 95% khung
         upper=(-.78,3.38,3.36,5.58)   # cận cảnh cạnh PiP, nối cùng hiện tượng
         txt_y=-2.83
         maxw=6.60
     else:
-        rect=(-6.40,2.56,-2.60,3.32)
+        bc.san=-3.72  # nguồn một dòng ở mép dưới, không kéo vào vật chính
+        rect=(-6.40,2.56,-2.53,3.32)
         upper=None
         txt_y=-.45
         maxw=3.45
