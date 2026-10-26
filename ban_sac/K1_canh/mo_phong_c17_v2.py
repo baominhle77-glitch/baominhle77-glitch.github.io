@@ -445,16 +445,17 @@ def _fit_source(sc,W,doc):
     srcs=W.ts.get("nguon") or []
     if srcs:
         val=" | ".join(srcs)
-        if "NIST" in val:txt="Source: NIST Chemistry WebBook"
-        elif "Liu" in val:txt="Source: Liu et al. | surface tension"
-        elif "Roch" in val or "Roché" in val:txt="Source: Roche et al., PRL 112 (2014)"
-        else:txt="Source: Meniscus Lab references"
+        if "NIST" in val:txt="NIST · WebBook"
+        elif "Liu" in val:txt="Liu et al."
+        elif "Roch" in val or "Roché" in val:txt="Roché et al."
+        else:txt="References in storyboard"
     else:
-        txt="Meniscus Lab | model illustration"
-    source=chu(txt,24,MUC,.90)
+        txt="Illustrative model"
+    # ≥22 px THỰC ở mẫu 540p: native 46px ở chuẩn 1080.
+    source=chu(txt,46,MUC,.90)
     # Native vector text, lề đáy cố định. Không thu font khi dài.
     bx=(W.bc.an_toan[0]+W.bc.an_toan[1])/2
-    by=-4.12 if doc else -3.49
+    by=-6.52 if doc else -3.49
     source.move_to([bx,by,0])
     W.nguon=trang.ghim(sc,trang.man_sang_the_gioi(sc,source))
     W.hop_ng=trang.hop_man(sc,W.nguon)
@@ -471,18 +472,18 @@ def ve_live(owner,sc,W):
     fw,fh=trang.config.frame_width,trang.config.frame_height
     if doc:
         # Vùng an toàn riêng: không dùng dải 25% hình + 6 dòng nguồn cũ.
-        bc.an_toan=(-3.70,3.65,-4.45,5.75)
-        bc.san=-4.35  # dải cuối cho nhãn + nguồn, không là chân mô phỏng
-        rect=(-3.56,3.46,-2.08,3.20)  # nước nhìn từ trên: rộng 95% khung
-        upper=(-.78,3.38,3.36,5.58)   # cận cảnh cạnh PiP, nối cùng hiện tượng
-        txt_y=-2.83
-        maxw=6.60
+        bc.an_toan=(-3.72,3.70,-6.80,6.10)
+        bc.san=-6.75  # nguồn nằm ở chân màn, hình dọc là cảnh rộng riêng
+        rect=(-3.52,3.44,-4.06,3.22)  # vùng thí nghiệm > 50% chiều cao
+        upper=(.48,3.18,3.42,5.96)   # dụng cụ ở phía PHẢI PiP, không giao PiP
+        txt_y=-5.07
+        maxw=6.80
     else:
         bc.san=-3.72  # nguồn một dòng ở mép dưới, không kéo vào vật chính
-        rect=(-6.40,2.56,-2.53,3.32)
+        rect=(-6.56,3.50,-3.12,3.42)
         upper=None
-        txt_y=-.45
-        maxw=3.45
+        txt_y=-.55
+        maxw=2.55
     _fit_source(sc,W,doc)
     model=LiveScenePerBeat(owner,sc,W,rect,upper)
     owner._c17_hats=model.dynamic
@@ -493,11 +494,14 @@ def ve_live(owner,sc,W):
     os_=owner.muc_chu()
     owner._live_current_label=None
     for index,o in enumerate(os_):
-        label=_addlabel(o["s"],28 if doc else 27,maxw,3 if doc else 4)
+        # Chỉ nhãn 2–5 từ trong vùng giao diện, đủ 22px ở 540p.
+        # Chuỗi nguyên văn được giữ trong W.da_ve/storyboard/TTS.
+        subtitle=" ".join(o["s"].split()[:5])
+        label=_addlabel(subtitle,46,maxw,2 if doc else 3)
         if doc:
             label.move_to([-.15,txt_y,0])
         else:
-            label.move_to([4.65,txt_y,0])
+            label.move_to([5.25,txt_y,0])
         label.set_z_index(25)
         if not doc and label.height>3.2:
             raise ValueError("C17_8_CHU_QUA_CAO "+W.b["id"])
