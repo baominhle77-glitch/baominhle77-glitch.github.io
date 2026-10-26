@@ -4,6 +4,7 @@ from . import policy as P
 from .model import at,active,bbox,pixels,overlaps,norm
 from .video import gray,rgb,ssim,sharpness,contiguous,capabilities,Video
 from .language import phrase_error,visual_nouns,words
+from .semantics import role,screen_data
 from .motion import sample,windows,beat_motion
 
 def row(start,end,ok,detail,**metrics):return dict(start=round(float(start),3),end=round(float(end),3),passed=bool(ok),detail=detail,**metrics)
@@ -95,7 +96,9 @@ def G3(video,plan):
    if not reference:rows.append(row(sec,min(sec+1,video.duration),False,'video asset lacks landscape sharpness reference: '+asset['id']));continue
    if ref is None or str(ref.path)!=reference:ref=Video(reference)
    # Compare the same editorial time, excluding labels/subtitles in each ROI.
-   a=clip_sharpness(video,t,asset.get('sharpness_bbox',asset.get('render_bbox',[0,0,1,1])),plan['texts']);b=clip_sharpness(ref,t,asset.get('reference_sharpness_bbox',[0,0,1,1]),asset.get('reference_texts',[]));retention=a['edge_frequency']/max(1e-9,b['edge_frequency']);raw_ratio=a['laplacian']/max(1e-9,b['laplacian'])
+   reference_t=t-asset.get('reference_start',0)+asset.get('reference_in',0) if asset.get('reference_is_source') else t
+   if not 0<=reference_t<ref.duration:rows.append(row(sec,min(sec+1,video.duration),False,'reference source clock out of range'));continue
+   a=clip_sharpness(video,t,asset.get('sharpness_bbox',asset.get('render_bbox',[0,0,1,1])),plan['texts']);b=clip_sharpness(ref,reference_t,asset.get('reference_sharpness_bbox',[0,0,1,1]),asset.get('reference_texts',[]));retention=a['edge_frequency']/max(1e-9,b['edge_frequency']);raw_ratio=a['laplacian']/max(1e-9,b['laplacian'])
    rows.append(row(sec,min(sec+1,video.duration),retention>=P.SHARPNESS_RETENTION,'portrait sharpness: Laplacian variance normalized by edge energy; weak crop requires native portrait or better source',asset=asset['id'],laplacian=round(a['laplacian'],4),landscape_laplacian=round(b['laplacian'],4),laplacian_ratio=round(raw_ratio,4),edge_frequency_retention=round(retention,4),minimum=P.SHARPNESS_RETENTION))
  if ref:ref.close()
  return result(rows)
@@ -128,6 +131,11 @@ def G5(video,plan):
    if times and all(beat['words'][max(0,i-noun.get('modifier_count',0))]['start']>=video.duration for i,w in times):continue
    if norm(noun['word']) not in covered and norm(noun['lemma']) not in covered:
     rows.append(row(beat['start'],beat['end'],False,'unmapped visual noun: '+noun['word'],sentence=beat['narration']))
+  for w in beat.get('words',[]):
+   if w['start']>=video.duration or role(w['text'].strip('.,;:!?'))!='data':continue
+   token=w['text'].strip('.,;:!?');visible=' '.join(t['text'] for t in at(plan['texts'],min(video.duration-.01,w['start']+.1)));normalized=screen_data(visible);key=token.lower()
+   ok=key in normalized or (key in {'point','points'} and bool(re.search(r'\d+\.\d+',visible))) or (key in {'second','seconds','metre','meter'} and ('m/s' in visible or 'per second' in normalized)) or (key in {'year','years','century','centuries'} and bool(re.search(r'\d{3,4}',visible)))
+   rows.append(row(w['start'],min(video.duration,w['end']),ok,'measurement/time/symbol must map to visible screen data, not a physical-image noun',term=token,screen=visible))
   for term in terms:
    start,end=term['start'],min(video.duration,term['end'])
    if start>=video.duration:continue

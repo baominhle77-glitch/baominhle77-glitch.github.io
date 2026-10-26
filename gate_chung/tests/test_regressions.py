@@ -50,6 +50,12 @@ class Regressions(unittest.TestCase):
   video=SimpleNamespace(width=960,height=540,duration=20,fps=30,frames=600);plan=dict(duration=20,format='16x9',runtime=dict(configured_concurrency=2,effective_concurrency=1))
   with patch('gate_chung.gates.capabilities',return_value=dict(missing=[])):
    self.assertFalse(G8(video,plan)['passed']);plan['runtime']['configured_concurrency']=1;self.assertTrue(G8(video,plan)['passed'])
+ def test_measurement_context_and_predicates_are_shared_roles(self):
+  from gate_chung.semantics import role,screen_data
+  for word in ('second','millimolar','millinewtons','SDS','kilometres','megawatts','NATO'):self.assertEqual(role(word),'data',word)
+  for word in ('lab','study','research','chapter'):self.assertEqual(role(word),'context',word)
+  nouns=visual_nouns('Pepper races to the edge. An army marches across the map.');self.assertFalse(any(n['word'] in ('races','marches') for n in nouns))
+  self.assertIn('millimolar',screen_data('25mM'));self.assertIn('second',screen_data('0.5m/s'))
  def test_core_has_no_episode_import(self):
   root=Path(__file__).resolve().parents[1]
   for p in root.glob('*.py'):
