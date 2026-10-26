@@ -225,6 +225,42 @@ class LiveScene:
             self.add(tip,animated=True)
         self.upper_detail(needle=self.shot in ("impact","needle","radius_measure"))
 
+    def fluid_transport(self, span, center, lanes=26, section=False):
+        """Vệt màu/tuyến dòng VẬT CHẤT bình lưu liên tục: dx/dt=u(z,t).
+        Vùng tô gắn các chất đánh dấu được nguồn liên tục đưa vào dòng; đầu
+        dòng chảy nhanh, đáy hồi lưu ngược. Không chuyển động pixel ngẫu nhiên.
+        """
+        sw,sh=span
+        cx,cy=center
+        for i in range(lanes):
+            rng=self.rng
+            z=float(rng.uniform(-.78,.78))
+            phase=float(rng.uniform(0,1))
+            velocity=float(rng.uniform(1.7,3.6))
+            ribbon_h=float(rng.uniform(.13,.29))*(1.2 if section else 1.0)
+            direction=1 if (z>.05 or not section) else -1
+            dye=CANG if z>=0 else NUOC
+            # Bề rộng lớn + liên tục vận chuyển tạo vùng sáng tối vật lý,
+            # ngay cả lúc hạt tracer nhỏ đã đạt biên.
+            def flow(m,dt,z=z,phase=phase,v=velocity,direction=direction,
+                     dye=dye,ribbon_h=ribbon_h,i=i):
+                t=self.clock_t()
+                total=sw+.95
+                pos=((phase*total+v*t)%total)-total*.5
+                if direction<0: pos=-pos
+                yy=cy+z*sh*.37+.10*math.sin(.40*t+i*.44)
+                ww=.55+.14*math.sin(.25*t+i)
+                m.become(
+                    RoundedRectangle(width=ww,height=ribbon_h,corner_radius=min(.08,ribbon_h*.40))
+                    .set_stroke(width=0).set_fill(dye,.43)
+                    .move_to([cx+pos,yy,0]).set_z_index(4))
+            # Dòng không băng ra ngoài khay: người dùng thấy những đoạn
+            # dải có kích thước hữu hạn tại vùng vật chính.
+            lane=RoundedRectangle(width=.7,height=ribbon_h,corner_radius=.07)
+            lane.set_fill(dye,.43).set_stroke(width=0).set_z_index(4)
+            lane.add_updater(flow)
+            self.add(lane,animated=True)
+
     def build_section(self,molecules=False):
         # Bể nước mặt cắt: mặt trên bị lệch ứng suất, đáy có dòng hồi lưu.
         w,h=self.w*.90,self.h*.77
@@ -234,6 +270,7 @@ class LiveScene:
         outer.move_to([x,y,0]);self.add(outer)
         water=Rectangle(width=w*.96,height=h*.72).set_fill(NUOC,.80).set_stroke(NUOC,2)
         water.move_to([x,y-h*.10,0]);self.add(_make_mob(water,2))
+        self.fluid_transport((w*.79,h*.52),(x,y-h*.12),lanes=38,section=True)
         # Surface wave is actual continuously deforming boundary.
         wave=always_redraw(lambda:
             VMobject().set_points_smoothly(
@@ -277,6 +314,7 @@ class LiveScene:
             plate=RoundedRectangle(width=w*.90,height=self.h*.68,corner_radius=.20)
             plate.set_fill(color,.82).set_stroke(MUC,3).move_to([xc,self.cy,0])
             self.add(plate)
+            self.fluid_transport((w*.64,self.h*.51),(xc,self.cy),lanes=21,section=False)
             # mép nước cong theo độ chênh sức căng mặt
             bands=always_redraw(lambda xc=xc,side=side,color=color:
                 VMobject().set_points_smoothly(
@@ -329,7 +367,16 @@ class LiveScene:
         elif self.shot in ("molecular_section","section_return"):
             self.build_section(molecules=self.shot=="molecular_section")
         elif self.shot=="tension_flow":
-            self.build_gamma()
+            # Ứng suất bề mặt tạo dòng ở mặt và hồi lưu ở đáy; khác cảnh
+            # so sánh gamma (h4) và khác mặt cắt phân tử (c1).
+            self.build_section(molecules=False)
+            flux=always_redraw(lambda:
+               Polygon([self.x0+.12,self.cy+self.h*.24,0],
+                       [self.x1-.12,self.cy+self.h*.24,0],
+                       [self.x1-.12,self.cy+self.h*(.08+.13*math.cos(.35*self.clock_t())),0],
+                       [self.x0+.12,self.cy+self.h*(.08+.13*math.sin(.35*self.clock_t())),0])
+               .set_fill(CANG,.50).set_stroke(width=0).set_z_index(4))
+            self.add(flux,animated=True)
         elif self.shot=="wine":
             self.build_wine()
         else:
