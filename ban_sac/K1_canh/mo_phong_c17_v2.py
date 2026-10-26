@@ -116,8 +116,8 @@ class LiveScene:
         return m
 
     def surface_base(self, oblique=False):
-        rx=min(self.w*.46,self.radius*1.39)
-        ry=self.radius*(.70 if oblique else 1.0)
+        rx=self.w*.475
+        ry=self.h*(.405 if oblique else .465)
         rim=Ellipse(width=2*rx,height=2*ry).set_fill(MUC,.20).set_stroke(MUC,3.3)
         rim.move_to([self.cx,self.cy,0])
         water=Ellipse(width=2*rx*.96,height=2*ry*.96).set_fill(NUOC,.88).set_stroke(NUOC,2.3)
@@ -131,8 +131,8 @@ class LiveScene:
 
     def flowing_front(self, oblique=False):
         rad=self.radius
-        xscale=min(self.w*.46,self.radius*1.39)/self.radius
-        ry=.70 if oblique else 1.
+        xscale=self.w*.475/self.radius
+        ry=(self.h*.405 if oblique else self.h*.465)/self.radius
         # Bán kính vùng xà phòng c(r,t) mở rộng do dòng Marangoni.
         # Mặt tô CANG đi kèm nước vùng ngoài; không có màn overlay giả.
         front=always_redraw(lambda:
@@ -154,7 +154,8 @@ class LiveScene:
 
     def pepper_flow(self, n=390, oblique=False):
         rad=self.radius
-        xscale=min(self.w*.46,self.radius*1.39)/self.radius
+        xscale=self.w*.475/self.radius
+        yscale_outer=(self.h*.405 if oblique else self.h*.465)/self.radius
         rng=self.rng
         ang=rng.uniform(0,2*np.pi,n)
         rr=np.sqrt(rng.uniform(.05,.84,n))
@@ -162,7 +163,7 @@ class LiveScene:
         # Tốc độ không phải dao động trang trí; có một "mặt sóng" γ(r,t).
         for i in range(n):
             a=float(ang[i]);r0=float(rr[i])
-            yscale=.70 if oblique else 1.
+            yscale=yscale_outer
             point=Dot([self.cx+xscale*rad*r0*np.cos(a),
                        self.cy+rad*yscale*r0*np.sin(a),0],
                       radius=.045 if self.W.bc.doc else .034,color=MUC)
@@ -182,9 +183,9 @@ class LiveScene:
         for k in range(20):
             a=2*np.pi*k/20
             line=always_redraw(lambda a=a,k=k:
-                Line([self.cx+.25*xscale*rad*math.cos(a),self.cy+.25*rad*math.sin(a),0],
+                Line([self.cx+.25*xscale*rad*math.cos(a),self.cy+.25*yscale_outer*rad*math.sin(a),0],
                      [self.cx+xscale*rad*(.25+.58*(1-math.exp(-self.clock_t()/3.7)))*math.cos(a),
-                      self.cy+rad*(.25+.58*(1-math.exp(-self.clock_t()/3.7)))*math.sin(a),0])
+                      self.cy+yscale_outer*rad*(.25+.58*(1-math.exp(-self.clock_t()/3.7)))*math.sin(a),0])
                 .set_stroke(CANG,2.8,opacity=.75).set_z_index(8))
             self.add(line,animated=True)
 
@@ -374,25 +375,35 @@ class LiveScene:
 
     def build(self):
         # Mặt bàn vật lý, bóng và lớp phản xạ gắn theo bể, không chỉ nền xám.
-        table=RoundedRectangle(width=self.w,height=self.h,corner_radius=.16)
-        table.set_fill(NEN_TREN,.92).set_stroke(MUC,2.1,opacity=.45)
-        table.move_to([self.cx,self.cy,0]).set_z_index(-5)
-        self.add(table)
+        # Bề mặt bàn quang học nhiều lớp, KHÔNG vẽ khung xám quanh mô phỏng.
+        # Bóng bát, highlight studio và đường vân theo phối cảnh có độ sâu.
+        shadow=Ellipse(width=self.w*.94,height=self.h*.84).set_fill(MUC,.19).set_stroke(width=0)
+        shadow.move_to([self.cx+.16,self.cy-.19,0]).set_z_index(-9)
+        self.add(shadow)
+        for k in range(6):
+            yy=self.y0+.24+k*self.h/6
+            grain=VMobject().set_points_smoothly([
+                np.array([self.x0+.08+self.w*j/24,
+                          yy+.045*math.sin(.44*j+k*.85),0]) for j in range(25)])
+            grain.set_stroke(NEN_DUOI,1.6,opacity=.30).set_z_index(-10)
+            self.add(grain)
         if self.shot in ("impact","overhead","needle","radius_measure","velocity"):
             self.build_overhead()
         elif self.shot in ("molecular_section","section_return"):
             self.build_section(molecules=self.shot=="molecular_section")
         elif self.shot=="tension_flow":
-            # Mặt cắt riêng: lớp xà phòng phủ vùng MẶT, dòng hồi lưu dưới đáy.
-            # Chênh gamma tạo một miền màu rõ lớn, khác c1 phân tử.
+            # MẶT CẮT MARANGONI: chỗ sát mặt chạy ra, đáy hồi lưu.
+            # Không tô mảng cam đặc; nhìn rõ 300 tracer theo dòng.
             self.build_section(molecules=False)
-            flux=always_redraw(lambda:
-               Polygon([self.x0+.12,self.cy+self.h*.32,0],
-                       [self.x1-.12,self.cy+self.h*.32,0],
-                       [self.x1-.12,self.cy+self.h*(.03+.15*math.cos(.55*self.clock_t())),0],
-                       [self.x0+.12,self.cy+self.h*(.03+.15*math.sin(.55*self.clock_t())),0])
-               .set_fill(CANG,.72).set_stroke(width=0).set_z_index(4))
-            self.add(flux,animated=True)
+            self.fluid_transport((self.w*.90,self.h*.62),
+                                 (self.cx,self.cy),lanes=64,section=True)
+            front=always_redraw(lambda:
+                VMobject().set_points_smoothly([
+                    np.array([self.x0+self.w*.05+j*self.w*.90/45,
+                              self.cy+self.h*.28+.11*math.sin(j*.29-2.8*self.clock_t()),0])
+                    for j in range(46)])
+                .set_stroke(CANG,8,opacity=.9).set_z_index(12))
+            self.add(front,animated=True)
         elif self.shot=="wine":
             self.build_wine()
         else:
