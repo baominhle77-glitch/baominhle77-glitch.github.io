@@ -10,6 +10,9 @@ on:
       - "ci/chuyen_dong_vung.py"
       - "ci/kiem_chuyen_dong_beat.py"
       - ".github/workflows/k1t3_mau_540.yml"
+concurrency:
+  group: k1t3-mau-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
   mau-540:
     if: github.head_ref == 'gpt/k1t3-c16-c17-01'
