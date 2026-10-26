@@ -97,6 +97,11 @@ class LiveScene:
     def clock_t(self):
         return self.clock.get_value()
 
+    def physical_t(self):
+        # Hiện tượng bắt đầu SAU khi giọt đầu tiên chạm mặt, không cho
+        # hạt chạy trước giây 0.45 của cảnh impact.
+        return max(0.0,self.clock_t()-(.45 if self.shot=="impact" else 0.0))
+
     def wave_radius(self,t,birth,speed=.44):
         # Sau va chạm, sóng mao dẫn lan dọc mặt, phản xạ ở thành đĩa:
         # đường đi biến thiên, không thể coi là vật trang trí tuần hoàn.
@@ -131,7 +136,7 @@ class LiveScene:
         # Bán kính vùng xà phòng c(r,t) mở rộng do dòng Marangoni.
         # Mặt tô CANG đi kèm nước vùng ngoài; không có màn overlay giả.
         front=always_redraw(lambda:
-          Ellipse(width=2*xscale*(.19*rad+.74*rad*(1-math.exp(-self.clock_t()/3.4))),
+          Ellipse(width=2*xscale*(.19*rad+.74*rad*(1-math.exp(-self.physical_t()/3.4))),
                   height=2*ry*(.19*rad+.74*rad*(1-math.exp(-self.clock_t()/3.4))))
             .move_to([self.cx,self.cy,0]).set_fill(CANG,.38)
             .set_stroke(CANG,3.8,opacity=.75).set_z_index(3))
@@ -139,11 +144,11 @@ class LiveScene:
         # Gói sóng phát từ tiếp xúc, phản xạ ở thành nước sau chạm.
         for birth in (0.,.55,1.1,1.9,3.2,4.5,5.8,7.2,9.0,11.):
             ripple=always_redraw(lambda birth=birth:
-                Ellipse(width=2*xscale*self.wave_radius(self.clock_t(),birth),
+                Ellipse(width=2*xscale*self.wave_radius(self.physical_t(),birth),
                         height=2*ry*self.wave_radius(self.clock_t(),birth))
                 .move_to([self.cx,self.cy,0])
                 .set_stroke(NEN_TREN if int(birth*10)%2 else CANG,12,
-                            opacity=.45 if self.clock_t()>=birth else 0)
+                            opacity=.45 if self.physical_t()>=birth else 0)
                 .set_fill(opacity=0).set_z_index(6))
             self.add(ripple,animated=True)
 
@@ -163,7 +168,7 @@ class LiveScene:
                       radius=.045 if self.W.bc.doc else .034,color=MUC)
             point.set_z_index(9)
             def drift(m,dt,a=a,r0=r0,yscale=yscale):
-                t=self.clock_t()
+                t=self.physical_t()
                 # dr/dt≈μ∂γ/∂r, ∂γ/∂r tập trung tại front surfactant
                 front=.19+.74*(1-math.exp(-t/3.4))
                 local=r0+.80*(.91-r0)*(1-math.exp(-t/3.8))
@@ -220,10 +225,13 @@ class LiveScene:
         if self.shot=="impact":
             # Giọt rơi, méo khi va chạm. Camera ở góc nghiêng nên y tương đối.
             drop=always_redraw(lambda:
-                 Ellipse(width=.18+.10*math.exp(-self.clock_t()*2.0),
-                         height=.31-.10*math.exp(-self.clock_t()*2.0))
-                 .set_fill(CANG,.9).set_stroke(MUC,2.5)
-                 .move_to([self.cx, self.cy+min(1.05,.93*math.exp(-self.clock_t()*1.35)),0])
+                 Ellipse(width=.34+.42*math.exp(-self.clock_t()*.95),
+                         height=.25+.55*math.exp(-self.clock_t()*.95))
+                 .set_fill(CANG,.90*max(0.,min(1.,(1.55-self.clock_t())/.50)))
+                 .set_stroke(MUC,3,opacity=max(0.,min(1.,(1.55-self.clock_t())/.50)))
+                 .move_to([self.cx,
+                           self.cy+.88*self.radius*
+                           max(0.,1.-self.clock_t()/1.08)**2,0])
                  .set_z_index(14))
             self.add(drop,animated=True)
         if self.shot in ("needle","radius_measure"):
