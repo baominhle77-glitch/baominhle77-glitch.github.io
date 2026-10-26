@@ -22,15 +22,15 @@
   ],
   "exposed_mesh_edges": 0,
   "findings": [
-    "Reviewed all 36 current native 540p frames: three per beat per format. Closed water and ceramic surfaces, no wedge or exposed mesh edges; sphere separation is also asserted each simulation frame.",
-    "Six shot scales with independently authored portrait layout. The molecular volume fills the lower field; eased optical azimuth/elevation changes every 3.6s, with no frame rotation.",
-    "Soap coverage advances, bonds weaken and wide material tracers advect continuously outward with a return flow. Orange force arrows are present when the narration names them.",
-    "Also reviewed 36 composited preview frames with semantic captions and the three original Gemini clips. Portrait clips crop to fill the canvas. Protected text panels sit above the physical model; no empty portrait lower half.",
-    "The curved h3 capillary avoids the title and portrait reserved area.",
-    "Actual 30fps MP4 motion/FREEZE gates and final MP4 frame review remain mandatory before delivery."
+    "Reviewed3 compositor540p stills per beat per format, plus native panel proof frames.",
+    "Portrait720p inputs use a full540px-wide16:9 upper pane, without enlargement, above a native540x480 continuous simulation. p2 runs19–26s.",
+    "Late h2 has sustained pepper transport, growing traces and eased camera change. Long orange arrows have a black outline and exceed15% frame width.",
+    "Caption padding is clipped at the next caption start; bands are opaque. Fonts load before auditing/capture.",
+    "The phrase Zoom from the bowl is literal original storyboard narration and TTS word data; speech is unchanged.",
+    "Actual final MP4 G1–G8 and final frame review remain required before delivery."
   ],
-  "reviewed_at": "2026-10-26T18:54:54.519649+00:00",
-  "round": 4,
+  "reviewed_at": "2026-10-26T21:13:36.367296+00:00",
+  "round": 5,
   "particle_limit": 400,
   "particle_counts": {
     "h1": 320,

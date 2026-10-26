@@ -58,7 +58,7 @@ def main():
     i,w=matches[0];key=lemma.lower();modifiers={'long','short','orange','blue','red','green','white','black','yellow','purple','pink','gray','grey'};j=i
     while j>0 and norm(events[j-1]['text']) in modifiers:j-=1
     begin=events[j]['start']
-    aliases={'neighbour':'patch','neighbor':'patch','sketch':'surface','tug':'flow','war':'flow','arrow':'arrows','study':'surface','degree':'water','episode':'soap','metre':'flow','millinewton':'gap','pulling':'flow','pull':'flow','drop':'drop','water':'water','soap':'soap','pepper':'pepper','bowl':'bowl','surface':'surface','ring':'ring','spot':'spot','edge':'edge','gap':'gap','engine':'engine','SDS':'SDS','sds':'SDS','patch':'patch'}
+    aliases={'neighbour':'patch','neighbor':'patch','sketch':'surface','tug':'flow','war':'flow','arrow':'arrows','study':'surface','degree':'water','episode':'soap','metre':'flow','millinewton':'gap','pulling':'flow','pull':'flow','rush':'flow','drop':'drop','water':'water','soap':'soap','pepper':'pepper','bowl':'bowl','surface':'surface','ring':'ring','spot':'spot','edge':'edge','gap':'gap','engine':'engine','SDS':'SDS','sds':'SDS','patch':'patch'}
     target=aliases.get(key)
     if term['tag']=='CD':
      cap=next((c for c in texts if c['role']=='caption' and c['start']-.2<=w['start']<c['end']+.2),None)
