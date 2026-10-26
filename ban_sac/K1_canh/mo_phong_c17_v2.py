@@ -132,10 +132,21 @@ class LiveScene:
 
     def surface_base(self, oblique=False):
         rx=(self.w*.475 if self.W.bc.doc else min(self.w*.475,4.13-self.cx))
-        ry=self.h*(.405 if oblique else .452)
-        rim=Ellipse(width=2*rx,height=2*ry).set_fill(MUC,.20).set_stroke(MUC,3.3)
+        ry=(min(self.h*.52,3.40-self.cy) if self.W.bc.doc else
+            self.h*(.405 if oblique else .490))
+        if self.W.bc.doc:
+            # Dọc là khay sứ hình bầu dục nhìn gần phủ ≥55% chiều cao.
+            rim=Ellipse(width=2*rx,height=2*ry)
+            water=Ellipse(width=2*rx*.96,height=2*ry*.96)
+        else:
+            # Ngang là KHAY KÍNH THẬT phủ lớn cảnh, không phải ô viền xám.
+            # Vùng mặt nước ~10,9x6,4 cộng mặt cắt vật lý bên phải,
+            # chiếm >70% tổng diện tích đầu ra.
+            rim=RoundedRectangle(width=2*rx,height=2*ry,corner_radius=.30)
+            water=RoundedRectangle(width=2*rx*.97,height=2*ry*.97,corner_radius=.27)
+        rim.set_fill(MUC,.20).set_stroke(MUC,3.3)
         rim.move_to([self.cx,self.cy,0])
-        water=Ellipse(width=2*rx*.96,height=2*ry*.96).set_fill(NUOC,.88).set_stroke(NUOC,2.3)
+        water.set_fill(NUOC,.88).set_stroke(NUOC,2.3)
         water.move_to([self.cx,self.cy,0])
         self.add(_make_mob(rim,1))
         self.add(_make_mob(water,2))
@@ -147,7 +158,8 @@ class LiveScene:
     def flowing_front(self, oblique=False):
         rad=self.radius
         xscale=(self.w*.475 if self.W.bc.doc else min(self.w*.475,4.13-self.cx))/self.radius
-        ry=(self.h*.405 if oblique else self.h*.452)/self.radius
+        ry=(min(self.h*.52,3.40-self.cy) if self.W.bc.doc
+            else self.h*(.405 if oblique else .490))/self.radius
         # Bán kính vùng xà phòng c(r,t) mở rộng do dòng Marangoni.
         # Mặt tô CANG đi kèm nước vùng ngoài; không có màn overlay giả.
         front=always_redraw(lambda:
@@ -170,7 +182,8 @@ class LiveScene:
     def pepper_flow(self, n=390, oblique=False):
         rad=self.radius
         xscale=(self.w*.475 if self.W.bc.doc else min(self.w*.475,4.13-self.cx))/self.radius
-        yscale_outer=(self.h*.405 if oblique else self.h*.452)/self.radius
+        yscale_outer=(min(self.h*.52,3.40-self.cy) if self.W.bc.doc
+                       else self.h*(.405 if oblique else .490))/self.radius
         rng=self.rng
         ang=rng.uniform(0,2*np.pi,n)
         rr=np.sqrt(rng.uniform(.05,.84,n))
