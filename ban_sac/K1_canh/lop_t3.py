@@ -1039,12 +1039,6 @@ class _SongC17:
             m.set_z_index(20)  # chữ trước hình sống (đặc biệt bố cục dọc)
         return super().hien(m, key)
 
-    def _bat_song(self):
-        # Chỉ giữ sự kiện chữ đã khoá; bỏ mọi animation hình phác.
-        self.ev = self.ev[getattr(self, "_c17_event_frontier", 0):]
-        from K1_canh.mo_phong_c17 import bat_mo_phong
-        bat_mo_phong(self)
-
     def chay_su_kien(self):
         if not hasattr(self, "_c17_hats"):
             raise ValueError("C17_CHUA_BAT_CHUYEN_DONG %s" % self.b["id"])
