@@ -249,11 +249,7 @@ class LiveScene:
                 pos=((phase*total+v*t)%total)-total*.5
                 if direction<0: pos=-pos
                 yy=cy+z*sh*.37+.10*math.sin(.40*t+i*.44)
-                ww=.55+.14*math.sin(.25*t+i)
-                m.become(
-                    RoundedRectangle(width=ww,height=ribbon_h,corner_radius=min(.08,ribbon_h*.40))
-                    .set_stroke(width=0).set_fill(dye,.43)
-                    .move_to([cx+pos,yy,0]).set_z_index(4))
+                m.move_to([cx+pos,yy,0])
             # Dòng không băng ra ngoài khay: người dùng thấy những đoạn
             # dải có kích thước hữu hạn tại vùng vật chính.
             lane=RoundedRectangle(width=.7,height=ribbon_h,corner_radius=.07)
@@ -367,15 +363,15 @@ class LiveScene:
         elif self.shot in ("molecular_section","section_return"):
             self.build_section(molecules=self.shot=="molecular_section")
         elif self.shot=="tension_flow":
-            # Ứng suất bề mặt tạo dòng ở mặt và hồi lưu ở đáy; khác cảnh
-            # so sánh gamma (h4) và khác mặt cắt phân tử (c1).
+            # Mặt cắt riêng: lớp xà phòng phủ vùng MẶT, dòng hồi lưu dưới đáy.
+            # Chênh gamma tạo một miền màu rõ lớn, khác c1 phân tử.
             self.build_section(molecules=False)
             flux=always_redraw(lambda:
-               Polygon([self.x0+.12,self.cy+self.h*.24,0],
-                       [self.x1-.12,self.cy+self.h*.24,0],
-                       [self.x1-.12,self.cy+self.h*(.08+.13*math.cos(.35*self.clock_t())),0],
-                       [self.x0+.12,self.cy+self.h*(.08+.13*math.sin(.35*self.clock_t())),0])
-               .set_fill(CANG,.50).set_stroke(width=0).set_z_index(4))
+               Polygon([self.x0+.12,self.cy+self.h*.32,0],
+                       [self.x1-.12,self.cy+self.h*.32,0],
+                       [self.x1-.12,self.cy+self.h*(.03+.15*math.cos(.55*self.clock_t())),0],
+                       [self.x0+.12,self.cy+self.h*(.03+.15*math.sin(.55*self.clock_t())),0])
+               .set_fill(CANG,.72).set_stroke(width=0).set_z_index(4))
             self.add(flux,animated=True)
         elif self.shot=="wine":
             self.build_wine()
@@ -502,7 +498,7 @@ def _fit_source(sc,W,doc):
     source=chu(txt,46,MUC,.90)
     # Native vector text, lề đáy cố định. Không thu font khi dài.
     bx=(W.bc.an_toan[0]+W.bc.an_toan[1])/2
-    by=-6.52 if doc else -3.49
+    by=-6.20 if doc else -3.49
     source.move_to([bx,by,0])
     W.nguon=trang.ghim(sc,trang.man_sang_the_gioi(sc,source))
     W.hop_ng=trang.hop_man(sc,W.nguon)
@@ -519,8 +515,8 @@ def ve_live(owner,sc,W):
     fw,fh=trang.config.frame_width,trang.config.frame_height
     if doc:
         # Vùng an toàn riêng: không dùng dải 25% hình + 6 dòng nguồn cũ.
-        bc.an_toan=(-3.72,3.70,-6.80,6.10)
-        bc.san=-6.75  # nguồn nằm ở chân màn, hình dọc là cảnh rộng riêng
+        bc.an_toan=(-3.70,3.70,-6.62,6.10)
+        bc.san=-6.60  # nguồn nằm ở chân màn, hình dọc là cảnh rộng riêng
         rect=(-3.52,3.44,-4.06,3.22)  # vùng thí nghiệm > 50% chiều cao
         upper=(.48,3.18,3.42,5.96)   # dụng cụ ở phía PHẢI PiP, không giao PiP
         txt_y=-5.07
