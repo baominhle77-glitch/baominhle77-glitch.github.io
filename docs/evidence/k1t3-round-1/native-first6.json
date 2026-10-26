@@ -1,0 +1,604 @@
+[
+  {
+    "beat": "h1",
+    "format": "16x9",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "11d7e1209b63773ea5cb4c24b788cb724bd4be50b87838c659a0ccd45616dd60",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 387.619,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76250166578869,
+      "subject_width_pct": 95.4488209962692,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 211,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 532,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 211,
+    "expected_frames": 211,
+    "duration_s": 7.033333,
+    "frame_count_pass": true,
+    "avg_pct": 21.478,
+    "union_pct": 65.284,
+    "pairs_ge_3_pct": 96.296,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [],
+    "scene_difference_min": null,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h2",
+    "format": "16x9",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "2ee13bae368c8c9b8a1b360ab82461a578cb4d918a8c7dbfc3d61d41d695eede",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 650.139,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76251120137118,
+      "subject_width_pct": 95.4488330096015,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 344,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 463,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 344,
+    "expected_frames": 344,
+    "duration_s": 11.466667,
+    "frame_count_pass": true,
+    "avg_pct": 15.661,
+    "union_pct": 52.444,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 19.604475308641977
+      }
+    ],
+    "scene_difference_min": 19.604475308641977,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h3",
+    "format": "16x9",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "d46b8d50e9c6ed1b99c09c199bdfb676f9968f5dd864ebc93e8d9012afdd5926",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 200.009,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76250893429015,
+      "subject_width_pct": 95.4488301534364,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 149,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 149,
+    "expected_frames": 149,
+    "duration_s": 4.966667,
+    "frame_count_pass": true,
+    "avg_pct": 17.65,
+    "union_pct": 52.259,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 25.72996913580247
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 25.14537037037037
+      }
+    ],
+    "scene_difference_min": 25.14537037037037,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h4",
+    "format": "16x9",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "f6f9704effd9b86ef7cc528ba83045f3d675a9636a1bf22ce0d8b8e369fee64d",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 651.076,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 72.58651150085804,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 72.58651150085804,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 573,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 573,
+    "expected_frames": 573,
+    "duration_s": 19.1,
+    "frame_count_pass": true,
+    "avg_pct": 14.682,
+    "union_pct": 57.065,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 36.12101851851852
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 37.34851851851852
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 36.346111111111114
+      }
+    ],
+    "scene_difference_min": 36.12101851851852,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "c1",
+    "format": "16x9",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "5d9ae18895cc266ce497f0199ac0a2f197ab42958f3d616c0bf17d01a6fbfb99",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 445.248,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 73.29760638583511,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 73.29760638583511,
+      "stage_bbox_pct": 76.00623340119556,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 475,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 475,
+    "expected_frames": 475,
+    "duration_s": 15.833333,
+    "frame_count_pass": true,
+    "avg_pct": 17.747,
+    "union_pct": 56.926,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 43.420524691358025
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 47.248703703703704
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 47.24746913580247
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 33.46067901234568
+      }
+    ],
+    "scene_difference_min": 33.46067901234568,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p1",
+    "format": "16x9",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "7485a3677e8eef9b942e3e44df0b6fcda05748919e2f0837b4c213a001ffc3a3",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 749.313,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.79768801489193,
+      "subject_width_pct": 99.8735945157806,
+      "subject_height_pct": 75.79768801489193,
+      "stage_bbox_pct": 77.09032463511751,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 549,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 549,
+    "expected_frames": 549,
+    "duration_s": 18.3,
+    "frame_count_pass": true,
+    "avg_pct": 13.532,
+    "union_pct": 58.614,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 41.1545987654321
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 40.33839506172839
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 43.251666666666665
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 36.410555555555554
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 32.249135802469134
+      }
+    ],
+    "scene_difference_min": 32.249135802469134,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h1",
+    "format": "9x16",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "db92de93e74007df53b06a6fbb75dc6d6539c1858262fc9ef64c1cb5af1106e8",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 325.761,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 76.547484967798,
+      "subject_width_pct": 95.82413441142657,
+      "subject_height_pct": 79.79701331121447,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 211,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 600,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 211,
+    "expected_frames": 211,
+    "duration_s": 7.033333,
+    "frame_count_pass": true,
+    "avg_pct": 20.989,
+    "union_pct": 66.145,
+    "pairs_ge_3_pct": 96.296,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [],
+    "scene_difference_min": null,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h2",
+    "format": "9x16",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "5d354068bfad280b16631504ee89d16e5db31747a030981a8cdac2ae4b351e58",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 1048.098,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.71656563311298,
+      "subject_width_pct": 96.22265862714721,
+      "subject_height_pct": 78.4667926323456,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 35.65867081442424,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 344,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 600,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 344,
+    "expected_frames": 344,
+    "duration_s": 11.466667,
+    "frame_count_pass": true,
+    "avg_pct": 16.162,
+    "union_pct": 56.451,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 17.26462962962963
+      }
+    ],
+    "scene_difference_min": 17.26462962962963,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h3",
+    "format": "9x16",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "3d9906d4dd5804cf30b622b608ff6039c637f860a9e5049cc701606ba1c10777",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 115.323,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 64.75404644598098,
+      "subject_width_pct": 97.7903619301064,
+      "subject_height_pct": 65.94172032459467,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 93.38532953044937,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 149,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 149,
+    "expected_frames": 149,
+    "duration_s": 4.966667,
+    "frame_count_pass": true,
+    "avg_pct": 13.716,
+    "union_pct": 45.08,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 20.167932098765434
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 22.968734567901233
+      }
+    ],
+    "scene_difference_min": 20.167932098765434,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h4",
+    "format": "9x16",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "6b5aa007430a34a8feaae1c89c2eb23b2e686a2522f431457bb65795ffe98c63",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 806.79,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 79.75681641599347,
+      "subject_width_pct": 94.74591648489249,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 573,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 573,
+    "expected_frames": 573,
+    "duration_s": 19.1,
+    "frame_count_pass": true,
+    "avg_pct": 17.024,
+    "union_pct": 58.889,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 29.157283950617284
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 30.285185185185185
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 30.28675925925926
+      }
+    ],
+    "scene_difference_min": 29.157283950617284,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "c1",
+    "format": "9x16",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "68202f6bb90c49a32e90846b0283473f92389252f818bc87248c7950085411fa",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 460.268,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 80.70587047928007,
+      "subject_width_pct": 95.87333105659258,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 475,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 475,
+    "expected_frames": 475,
+    "duration_s": 15.833333,
+    "frame_count_pass": true,
+    "avg_pct": 17.152,
+    "union_pct": 55.373,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 34.90324074074074
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 40.405154320987656
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 36.270617283950614
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 33.36935185185185
+      }
+    ],
+    "scene_difference_min": 33.36935185185185,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p1",
+    "format": "9x16",
+    "kind": "video",
+    "status": "DAT",
+    "source_digest": "d2e7a9608bc020d6b693b7677296ee895de1636a761c66f2f00858dd3f4232dc",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 535.628,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 81.31869092072235,
+      "subject_width_pct": 96.60132192902515,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 82.93067055273372,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 549,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "actual_frames": 549,
+    "expected_frames": 549,
+    "duration_s": 18.3,
+    "frame_count_pass": true,
+    "avg_pct": 16.098,
+    "union_pct": 55.472,
+    "pairs_ge_3_pct": 100.0,
+    "low_streak_s": 0.0,
+    "pass_motion": true,
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 39.14138888888889
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 40.60731481481481
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 37.75858024691358
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 32.24953703703704
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 35.43462962962963
+      }
+    ],
+    "scene_difference_min": 32.24953703703704,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  }
+]

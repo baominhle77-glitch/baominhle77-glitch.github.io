@@ -1,0 +1,76 @@
+# K1 t3 — actual local/run evidence
+
+FINAL 540p/30fps measurements.
+
+| Beat | Format | Frames | C13 boxes | Avg % | Union % | ≥3% pairs % | Difference | Result |
+|---|---|---|---|---|---|---|---|---|
+| h1 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | None (ALL_PRIOR) | STILL_ONLY |
+| h2 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 19.729598765432097 (ALL_PRIOR) | STILL_ONLY |
+| h3 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 25.240617283950616 (ALL_PRIOR) | STILL_ONLY |
+| h4 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 36.37589506172839 (ALL_PRIOR) | STILL_ONLY |
+| c1 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 33.570154320987655 (ALL_PRIOR) | STILL_ONLY |
+| p1 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 32.32962962962963 (ALL_PRIOR) | STILL_ONLY |
+| p2 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 22.349444444444444 (ALL_PRIOR) | STILL_ONLY |
+| p3 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 32.675555555555555 (ALL_PRIOR) | STILL_ONLY |
+| p4 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 35.844475308641975 (ALL_PRIOR) | STILL_ONLY |
+| p5 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 32.86663580246913 (ALL_PRIOR) | STILL_ONLY |
+| p6 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 32.407283950617284 (ALL_PRIOR) | STILL_ONLY |
+| c2 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 22.565524691358025 (ALL_PRIOR) | STILL_ONLY |
+| v1 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 53.21280864197531 (ALL_PRIOR) | STILL_ONLY |
+| v2 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 34.03123456790124 (ALL_PRIOR) | STILL_ONLY |
+| v3 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 30.200617283950617 (ALL_PRIOR) | STILL_ONLY |
+| v4 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 28.64814814814815 (ALL_PRIOR) | STILL_ONLY |
+| v5 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 19.20746913580247 (ALL_PRIOR) | STILL_ONLY |
+| v6 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 36.633672839506175 (ALL_PRIOR) | STILL_ONLY |
+| v7 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 22.999197530864198 (ALL_PRIOR) | STILL_ONLY |
+| c3 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 38.86962962962963 (ALL_PRIOR) | STILL_ONLY |
+| w1 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 18.849845679012347 (ALL_PRIOR) | STILL_ONLY |
+| w2 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 27.67820987654321 (ALL_PRIOR) | STILL_ONLY |
+| w3 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 22.098827160493826 (ALL_PRIOR) | STILL_ONLY |
+| w4 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 26.422376543209875 (ALL_PRIOR) | STILL_ONLY |
+| w5 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 14.24682098765432 (ALL_PRIOR) | STILL_ONLY |
+| w6 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 18.297376543209875 (ALL_PRIOR) | STILL_ONLY |
+| w7 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 22.068148148148147 (ALL_PRIOR) | STILL_ONLY |
+| b1 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 24.815493827160495 (ALL_PRIOR) | STILL_ONLY |
+| r1 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 22.41925925925926 (ALL_PRIOR) | STILL_ONLY |
+| r2 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 31.42746913580247 (ALL_PRIOR) | STILL_ONLY |
+| r3 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 28.196666666666665 (ALL_PRIOR) | STILL_ONLY |
+| r4 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 18.577962962962964 (ALL_PRIOR) | STILL_ONLY |
+| s8 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 21.62858024691358 (ALL_PRIOR) | STILL_ONLY |
+| k1 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 25.460493827160494 (ALL_PRIOR) | STILL_ONLY |
+| k2 | 16x9 | unrun/unrun | DAT | unrun | unrun | unrun | 30.181851851851853 (ALL_PRIOR) | STILL_ONLY |
+| h1 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | None (ALL_PRIOR) | STILL_ONLY |
+| h2 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 17.430925925925926 (ALL_PRIOR) | STILL_ONLY |
+| h3 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 20.158796296296295 (ALL_PRIOR) | STILL_ONLY |
+| h4 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 29.5029012345679 (ALL_PRIOR) | STILL_ONLY |
+| c1 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 33.35691358024691 (ALL_PRIOR) | STILL_ONLY |
+| p1 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 32.49148148148148 (ALL_PRIOR) | STILL_ONLY |
+| p2 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 19.882685185185185 (ALL_PRIOR) | STILL_ONLY |
+| p3 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 41.84601851851852 (ALL_PRIOR) | STILL_ONLY |
+| p4 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 34.93512345679012 (ALL_PRIOR) | STILL_ONLY |
+| p5 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 27.270987654320987 (ALL_PRIOR) | STILL_ONLY |
+| p6 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 31.079104938271605 (ALL_PRIOR) | STILL_ONLY |
+| c2 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 18.685956790123456 (ALL_PRIOR) | STILL_ONLY |
+| v1 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 47.88496913580247 (ALL_PRIOR) | STILL_ONLY |
+| v2 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 29.02925925925926 (ALL_PRIOR) | STILL_ONLY |
+| v3 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 26.663364197530864 (ALL_PRIOR) | STILL_ONLY |
+| v4 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 25.325493827160493 (ALL_PRIOR) | STILL_ONLY |
+| v5 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 15.569938271604938 (ALL_PRIOR) | STILL_ONLY |
+| v6 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 20.19972222222222 (ALL_PRIOR) | STILL_ONLY |
+| v7 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 28.561296296296295 (ALL_PRIOR) | STILL_ONLY |
+| c3 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 38.71472222222222 (ALL_PRIOR) | STILL_ONLY |
+| w1 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 14.511697530864197 (ALL_PRIOR) | STILL_ONLY |
+| w2 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 34.310462962962966 (ALL_PRIOR) | STILL_ONLY |
+| w3 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 23.729043209876544 (ALL_PRIOR) | STILL_ONLY |
+| w4 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 21.755648148148147 (ALL_PRIOR) | STILL_ONLY |
+| w5 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 13.159475308641975 (ALL_PRIOR) | STILL_ONLY |
+| w6 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 15.587345679012346 (ALL_PRIOR) | STILL_ONLY |
+| w7 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 16.126296296296296 (ALL_PRIOR) | STILL_ONLY |
+| b1 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 24.668765432098766 (ALL_PRIOR) | STILL_ONLY |
+| r1 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 19.25783950617284 (ALL_PRIOR) | STILL_ONLY |
+| r2 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 30.384382716049384 (ALL_PRIOR) | STILL_ONLY |
+| r3 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 24.51046296296296 (ALL_PRIOR) | STILL_ONLY |
+| r4 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 16.47996913580247 (ALL_PRIOR) | STILL_ONLY |
+| s8 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 22.45891975308642 (ALL_PRIOR) | STILL_ONLY |
+| k1 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 20.1429012345679 (ALL_PRIOR) | STILL_ONLY |
+| k2 | 9x16 | unrun/unrun | DAT | unrun | unrun | unrun | 24.685493827160492 (ALL_PRIOR) | STILL_ONLY |

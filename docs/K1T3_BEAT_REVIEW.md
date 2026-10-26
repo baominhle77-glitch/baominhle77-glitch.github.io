@@ -1,0 +1,45 @@
+# K1 t3 — bảng tự xem, lượt 1/20
+
+Đã mở contact sheet thật của 70 ảnh giữa 360p và 70 ảnh giữa native 540p, cùng 3 khung h1 mỗi khổ. Bảng dưới ghi vật thể quan sát được; số native được bổ sung khi hoàn tất. Tất cả là hình khối 3D có shading; chữ trắng/cam ở dải nền tối dưới khung, không đè vùng vật thể. Bàn gỗ màu cam ở lớp sau, nước xanh, bát sứ sáng.
+
+Các phần trăm là **hộp bao chiếu thấy được**, không phải diện tích pixel vật thể tô kín. `STILL_ONLY` không chứng minh chuyển động toàn beat. Ngoài 6 beat đầu, chuyển động 29 beat còn lại chưa được dựng/đo native.
+
+| Beat | Vật thấy trong ảnh giữa | C13 / khác cảnh 16:9 | C13 / khác cảnh 9:16 | Tự chấm hình / lỗi còn lại |
+|---|---|---|---|---|
+| h1 | Bát sứ trắng, nước xanh, hạt tiêu đen và giọt cam; thấy độ sâu lòng bát. Tracer trắng còn mảnh. | 540p: DAT; bbox 75.8%; Δ đầu chuỗi | 540p: DAT; bbox 76.6%; Δ đầu chuỗi | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| h2 | Đầu phân tử cam, đuôi đen trên vùng nước giữa bát; tiêu quanh mép. | 540p: DAT; bbox 75.8%; Δ 19.73 | 540p: DAT; bbox 75.7%; Δ 17.43 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| h3 | Kim trắng và vòng ống cam trên mặt nước xanh trong bát. | 540p: DAT; bbox 75.8%; Δ 25.24 | 540p: DAT; bbox 65.0%; Δ 20.16 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| h4 | Bát mở một phần; các chuỗi đen gắn đầu cam ở lớp nước. | 540p: DAT; bbox 73.8%; Δ 36.38 | 540p: DAT; bbox 80.1%; Δ 29.50 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| c1 | Dãy phân tử đầu cam–đuôi đen, lớp nước và mũi tên lực có bề dày. | 540p: DAT; bbox 73.8%; Δ 33.57 | 540p: DAT; bbox 80.9%; Δ 33.36 | CẦN DUYỆT: Một số đuôi phân tử bị cắt mép trên. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| p1 | Bát sâu mở một phần; hạt cam dưới lớp nước, mũi tên trên mặt. | 540p: DAT; bbox 75.8%; Δ 32.33 | 540p: DAT; bbox 81.5%; Δ 32.49 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| p2 | Kim cấp ở giữa bát; mặt nước, tiêu và bàn gỗ cam. | 540p: DAT; bbox 75.8%; Δ 22.35 | 540p: DAT; bbox 65.6%; Δ 19.88 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| p3 | Tám phân tử, đầu cam khác cỡ và đuôi đen khác độ dài; bát mở. | 540p: DAT; bbox 75.8%; Δ 32.68 | 540p: DAT; bbox 60.9%; Δ 41.85 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. |
+| p4 | Cụm phân tử trong khối cầu xanh trong; phân tử rời ở ngoài. | 540p: DAT; bbox 76.4%; Δ 35.84 | 540p: DAT; bbox 62.7%; Δ 34.94 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. |
+| p5 | Các lớp khối xanh/cam trượt trong bát cắt mở. | 540p: DAT; bbox 75.8%; Δ 32.87 | 540p: DAT; bbox 70.5%; Δ 27.27 | TRƯỢT mỹ thuật: Hình các lớp khối còn giống các tấm màu; cần sửa mỹ thuật. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| p6 | Hạt tiêu đen phóng lớn tại mép bát, nhiều hạt nhỏ trên nước. | 540p: DAT; bbox 72.4%; Δ 32.41 | 540p: DAT; bbox 80.0%; Δ 31.08 | CẦN DUYỆT: Hạt phóng lớn cần nhãn giải thích tỷ lệ. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| c2 | Bát mở nhìn nghiêng từ trên; vệt hạt cam giữa vùng tiêu đen. | 540p: DAT; bbox 75.9%; Δ 22.57 | 540p: DAT; bbox 63.0%; Δ 18.69 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| v1 | Mặt nước và kim ở góc thấp; thành bát sáng phía trước. | 540p: DAT; bbox 75.8%; Δ 53.21 | 540p: DAT; bbox 81.2%; Δ 47.88 | CẦN DUYỆT: Góc thấp làm thành bát che vùng nước phía trước. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| v2 | Hạt tracer cam trên mặt nước và tiêu đen, thành bát có bề dày. | 540p: DAT; bbox 72.2%; Δ 34.03 | 540p: DAT; bbox 81.7%; Δ 29.03 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| v3 | Kim lệch tâm, vùng tiêu và phân tử lớn sát bờ. | 540p: DAT; bbox 75.8%; Δ 30.20 | 540p: DAT; bbox 78.4%; Δ 26.66 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| v4 | Bát mở sâu, các hạt cam theo đường vòng phía dưới mặt nước. | 540p: DAT; bbox 77.8%; Δ 28.65 | 540p: DAT; bbox 63.9%; Δ 25.33 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| v5 | Kim cấp và piston cam trên mặt nước có tiêu. | 540p: DAT; bbox 75.8%; Δ 19.21 | 540p: DAT; bbox 62.4%; Δ 15.57 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| v6 | Hai phân tử đầu cam, đuôi đen khác độ dài trên bát mở. | 540p: DAT; bbox 75.6%; Δ 36.63 | 540p: DAT; bbox 62.2%; Δ 20.20 | CẦN DUYỆT: Đuôi dài bị cắt mép ở cận cảnh. |
+| v7 | Hai phân tử cùng đuôi, cụm đầu có hình và kích thước khác nhau. | 540p: DAT; bbox 78.8%; Δ 23.00 | 540p: DAT; bbox 61.9%; Δ 28.56 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. |
+| c3 | Phân tử đầu cam xuất hiện ở mặt và dưới lớp nước; bát mở. | 540p: DAT; bbox 71.8%; Δ 38.87 | 540p: DAT; bbox 79.9%; Δ 38.71 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| w1 | Bát nước xanh với vùng tiêu thưa ở giữa; nhìn nghiêng từ trên. | 540p: DAT; bbox 75.8%; Δ 18.85 | 540p: DAT; bbox 61.5%; Δ 14.51 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| w2 | Kim và cụm phân tử đầu cam cạnh dòng tiêu trên mặt nước. | 540p: DAT; bbox 75.7%; Δ 27.68 | 540p: DAT; bbox 71.1%; Δ 34.31 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| w3 | Bát sâu mở một phần, lớp cam mỏng có bề dày trong nước. | 540p: DAT; bbox 77.7%; Δ 22.10 | 540p: DAT; bbox 68.8%; Δ 23.73 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| w4 | Chồng lớp khối xanh và hàng đầu phân tử cam phía trên. | 540p: DAT; bbox 79.4%; Δ 26.42 | 540p: DAT; bbox 67.2%; Δ 21.76 | TRƯỢT mỹ thuật: Chồng khối còn giống sơ đồ tấm phẳng; chưa đạt ý đồ hình tự nhiên. |
+| w5 | Kim lệch tâm trên bát nước, vùng hạt quanh tâm. | 540p: DAT; bbox 75.8%; Δ 14.25 | 540p: DAT; bbox 62.7%; Δ 13.16 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| w6 | Kim ngắn và mặt nước nhô meniscus tại điểm cấp. | 540p: DAT; bbox 75.8%; Δ 18.30 | 540p: DAT; bbox 67.2%; Δ 15.59 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| w7 | Bát mở hẹp, kim và thanh đo trắng nằm sát bờ. | 540p: DAT; bbox 76.8%; Δ 22.07 | 540p: DAT; bbox 63.2%; Δ 16.13 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| b1 | Kim bên trái, phân tử lớn giữa, bát nhỏ bên phải trên bàn gỗ. | 540p: DAT; bbox 79.4%; Δ 24.82 | 540p: DAT; bbox 83.5%; Δ 24.67 | CẦN DUYỆT: Ba vật cùng khung còn nhỏ và rời nhau. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| r1 | Bát mở, kim và các vệt tiêu; góc nhìn cao hơn các cảnh mô hình. | 540p: DAT; bbox 76.0%; Δ 22.42 | 540p: DAT; bbox 67.2%; Δ 19.26 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| r2 | Bát thấp ngang, phân tử đầu cam và tiêu trên lớp nước. | 540p: DAT; bbox 74.2%; Δ 31.43 | 540p: DAT; bbox 81.2%; Δ 30.38 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| r3 | Bát mở, kim và thanh trắng sát bờ; vùng tiêu trên nước. | 540p: DAT; bbox 75.8%; Δ 28.20 | 540p: DAT; bbox 76.5%; Δ 24.51 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| r4 | Chai xanh nắp đen cạnh bát nước, bề mặt có tiêu. | 540p: DAT; bbox 75.8%; Δ 18.58 | 540p: DAT; bbox 63.5%; Δ 16.48 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| s8 | Kim và phân tử lớn ở hai phía bát mở. | 540p: DAT; bbox 75.7%; Δ 21.63 | 540p: DAT; bbox 73.3%; Δ 22.46 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| k1 | Giọt cam giữa bát nước, hàng trăm hạt tiêu đen quanh nó. | 540p: DAT; bbox 73.9%; Δ 25.46 | 540p: DAT; bbox 82.1%; Δ 20.14 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. Khổ dọc xoay 90°, còn yếu về bố cục. |
+| k2 | Ly chân trắng, bầu xanh bán trong với các giọt cam dọc thành. | 540p: DAT; bbox 76.6%; Δ 30.18 | 540p: DAT; bbox 62.4%; Δ 24.69 | CẦN DUYỆT: Khối chính có chiều sâu, hiện tượng nhận ra trong ảnh giữa. |
+
+Chỉ ảnh giữa không xác nhận được giọt chạm hay chuyển động. Bảng video native và cổng mẫu 60 giây được đính kèm riêng. Không tuyên bố toàn bộ 35 beat đã đạt yêu cầu mỹ thuật.

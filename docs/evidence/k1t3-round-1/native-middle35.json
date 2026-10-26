@@ -1,0 +1,6938 @@
+[
+  {
+    "beat": "h1",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "5219e4c259a62a8bff556b59ddf5befcfeb449d11df6fe6871940f9bb313e95a",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 12.895,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76250166578869,
+      "subject_width_pct": 95.4488209962692,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 584,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [],
+    "scene_difference_min": null,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h2",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "2367c1d8a893ab4a0289074f9dcc6ffd158c10017cc46643932e1684c16941d6",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 12.969,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76251120137118,
+      "subject_width_pct": 95.4488330096015,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 563,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 19.729598765432097
+      }
+    ],
+    "scene_difference_min": 19.729598765432097,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h3",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "ce5da3acd7853914e337c9981ce775d1378189ee0eb83de4ed15fcf6a45aadcc",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.756,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76250893429015,
+      "subject_width_pct": 95.4488301534364,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 25.97824074074074
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 25.240617283950616
+      }
+    ],
+    "scene_difference_min": 25.240617283950616,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h4",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "06759ac1f21c8e8f859d819ae3eefbd4fb3ecaa431feeda28420dc415d3eeaad",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 6.703,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 73.79390863602643,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 73.79390863602644,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 36.37589506172839
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 37.31783950617284
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 36.51901234567901
+      }
+    ],
+    "scene_difference_min": 36.37589506172839,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "c1",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "6f7f1301d11e3e8ac8a1072dcb58218d317adfa5d5231e5d0a864becab99c6dd",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.148,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 73.81623537217648,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 73.81623537217648,
+      "stage_bbox_pct": 76.27612086975229,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 43.92635802469136
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 47.149845679012344
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 47.30824074074074
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 33.570154320987655
+      }
+    ],
+    "scene_difference_min": 33.570154320987655,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p1",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "ac2bfa5c3b529b2d0c2f29ad7b9bc19944c522e236aff9989d4f6ed419b1d383",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 6.945,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.81173374810213,
+      "subject_width_pct": 99.96834918030775,
+      "subject_height_pct": 75.81173374810213,
+      "stage_bbox_pct": 77.09604815855114,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 41.42993827160494
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 40.27645061728395
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 43.35546296296296
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 36.481759259259256
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 32.32962962962963
+      }
+    ],
+    "scene_difference_min": 32.32962962962963,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p2",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "5c3d6777c29d26bbb7d2b3aa3ba0bd8264f3366dbcbc30e9a6237aaef1ffe44f",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.592,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76249464365397,
+      "subject_width_pct": 95.44881214948532,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 27.77138888888889
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 23.92530864197531
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 22.349444444444444
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 36.30716049382716
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 46.22743827160494
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 40.881574074074074
+      }
+    ],
+    "scene_difference_min": 22.349444444444444,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p3",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "e9120ade6127c42ae157579c80b262ade7727d0952dd06cfdb97a1d6d3f3a0a9",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.079,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.80674253688555,
+      "subject_width_pct": 95.50455752678494,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 32.675555555555555
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 34.691574074074076
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 34.207253086419755
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 34.530092592592595
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 33.35382716049383
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 35.724506172839504
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 33.1895987654321
+      }
+    ],
+    "scene_difference_min": 32.675555555555555,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p4",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "a763570646d5789279db6175d369b88b843837996aa63bf1d6dde9219c7de776",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 6.417,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 76.40382766812921,
+      "subject_width_pct": 96.25679076299744,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 43.18944444444445
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 38.33083333333333
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 39.234783950617285
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 42.79490740740741
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 48.56172839506173
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 38.461543209876545
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 35.844475308641975
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 42.14641975308642
+      }
+    ],
+    "scene_difference_min": 35.844475308641975,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p5",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "b1f92febbdf7d1459d34a92b566f9a8d359d6ea671ee44288c69219f3d5c7260",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 4.666,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76063242170842,
+      "subject_width_pct": 95.44646604309723,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 32.86663580246913
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 35.76549382716049
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 34.38388888888889
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 40.324753086419754
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 45.63003086419753
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 38.222438271604936
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 36.90530864197531
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 39.621697530864196
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 45.86941358024691
+      }
+    ],
+    "scene_difference_min": 32.86663580246913,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p6",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "690343dc4a99bf2a26ef9cb042983bea2f33345fbce0113790b173ac18f05acf",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 9.871,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 72.43443672824333,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 72.43443672824333,
+      "stage_bbox_pct": 76.65323441908473,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 371,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 44.48614197530864
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 47.09462962962963
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 46.81487654320988
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 32.407283950617284
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 35.48922839506173
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 40.36404320987654
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 46.7287037037037
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 39.564413580246914
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 43.908672839506174
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 44.23746913580247
+      }
+    ],
+    "scene_difference_min": 32.407283950617284,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "c2",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "05cf0a4e6bef1aed16bc2955e9654ef1bfd5b5dd311c0c3fcce3660476aeea49",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 12.353,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.85355010839662,
+      "subject_width_pct": 95.5635276956178,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 25.53530864197531
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 25.142438271604938
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 22.565524691358025
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 41.622006172839505
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 49.58962962962963
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 48.302592592592596
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 23.672932098765433
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 34.284691358024695
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 42.629629629629626
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 37.30503086419753
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 50.28521604938272
+      }
+    ],
+    "scene_difference_min": 22.565524691358025,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v1",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "68115368f490274941aa0b770280bda517685ad4e0601f538b5daf58e741d2d1",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 10.643,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.75952969649543,
+      "subject_width_pct": 95.44507678298638,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 64.03515432098766
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 59.65851851851852
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 63.270123456790124
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 63.54259259259259
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 58.893364197530865
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 53.42145061728395
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 64.98475308641976
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 54.12953703703704
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 53.21280864197531
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 67.1179012345679
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 56.93993827160494
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 64.46182098765432
+      }
+    ],
+    "scene_difference_min": 53.21280864197531,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v2",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "87fff08d00559b3907fc1e6664856d98d0c6401fe059bc96fb89471ac9012b3f",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 11.177,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 72.21640133167749,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 72.21640133167749,
+      "stage_bbox_pct": 74.99400290832467,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 41.06904320987654
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 44.30858024691358
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 42.92413580246914
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 34.03123456790124
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 37.262191358024694
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 43.20348765432099
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 42.532407407407405
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 36.40182098765432
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 50.22046296296296
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 46.96395061728395
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 34.50512345679012
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 44.19922839506173
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 71.57925925925926
+      }
+    ],
+    "scene_difference_min": 34.03123456790124,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v3",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "c3e04416f6743439f84eb62833593a55601bc33feeb8309b5a3490ade2595fb9",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 11.547,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76250741233008,
+      "subject_width_pct": 95.44882823600642,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 34.62283950617284
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 34.80583333333333
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 30.22317901234568
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 38.97138888888889
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 38.84734567901234
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 36.244814814814816
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 31.103796296296295
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 30.200617283950617
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 41.839444444444446
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 35.49280864197531
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 45.76145061728395
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 33.41407407407407
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 54.41101851851852
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 42.76447530864198
+      }
+    ],
+    "scene_difference_min": 30.200617283950617,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v4",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "c19c2dbbb2fc2f664a794bf41a8218760f78e4ebac184b2f0ab9139bf0b71e1f",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 4.393,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 77.79511088297147,
+      "subject_width_pct": 98.0095885139798,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 28.64814814814815
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 30.053734567901234
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 28.76861111111111
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 39.76632716049383
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 45.46104938271605
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 47.58246913580247
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 30.431574074074074
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 37.45148148148148
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 44.00179012345679
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 40.28509259259259
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 44.470216049382714
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 30.28358024691358
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 64.0049074074074
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 43.22391975308642
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 37.494753086419756
+      }
+    ],
+    "scene_difference_min": 28.64814814814815,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v5",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "8f01da89980f0516cfccc76a3f60994626a0a677af5dffd65e104eddd949f1ca",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.383,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76252060483371,
+      "subject_width_pct": 95.4488448564834,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 22.531141975308643
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 20.53716049382716
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 19.68006172839506
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 35.92574074074074
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 46.16552469135802
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 41.97206790123457
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 19.20746913580247
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 32.575771604938275
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 39.32231481481482
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 34.64425925925926
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 46.85166666666667
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 21.469166666666666
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 65.06716049382716
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 42.366913580246916
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 32.40404320987654
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 27.194104938271604
+      }
+    ],
+    "scene_difference_min": 19.20746913580247,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v6",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "d5522c1a11b4fa7301f1a31ca913a323dac246ed9350fb33e6c28a8bcac6e4e3",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 8.254,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.61822293827927,
+      "subject_width_pct": 95.26705252066682,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 47.89746913580247
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 46.1104012345679
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 44.76163580246914
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 48.68083333333333
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 43.272716049382716
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.82648148148148
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 47.286512345679014
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 37.065802469135804
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 45.303827160493825
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 54.34904320987654
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 50.6320061728395
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 47.330925925925925
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 36.633672839506175
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 53.23391975308642
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 39.39604938271605
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 47.212407407407404
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 47.52515432098765
+      }
+    ],
+    "scene_difference_min": 36.633672839506175,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v7",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "53200c4c7b908cf9bde797ddcf238cd66e0e516a80c150206f3eb5f569012400",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 7.109,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 78.81380090251285,
+      "subject_width_pct": 99.29297751497684,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 25.44472222222222
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 25.674320987654323
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 22.999197530864198
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 38.42308641975308
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 42.960092592592595
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 41.35780864197531
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 26.422962962962963
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 32.37145061728395
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 41.8708950617284
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 34.022777777777776
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 44.321851851851854
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 23.47219135802469
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 59.89006172839506
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 41.27672839506173
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 30.172006172839506
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 31.159166666666668
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 24.12617283950617
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 44.908734567901234
+      }
+    ],
+    "scene_difference_min": 22.999197530864198,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "c3",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "abdb82e88f1ab77ea81f612c2fadea5a5078c274b8bdfebe86429b5a7c53f3b7",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.213,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 71.7675439842719,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 71.7675439842719,
+      "stage_bbox_pct": 74.54101195712306,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 52.44216049382716
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 50.80262345679012
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 52.225524691358025
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 39.850771604938274
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 38.86962962962963
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 46.303827160493825
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 46.82287037037037
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 41.36265432098765
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 39.49765432098766
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 58.39972222222222
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 45.064166666666665
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 51.27753086419753
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 58.2666975308642
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 44.70182098765432
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 47.928333333333335
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 51.367716049382715
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 49.371882716049384
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 41.5570987654321
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 53.057808641975306
+      }
+    ],
+    "scene_difference_min": 38.86962962962963,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w1",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "74fd7466c059d9f6d1f3c4cc560e47392635752dbdeb2b196b436a800a152b2a",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 6.347,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76250025456679,
+      "subject_width_pct": 95.44881921835187,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 25.03320987654321
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 23.168117283950618
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 23.21009259259259
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 38.054043209876546
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 48.35962962962963
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.30283950617284
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 20.889104938271604
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 36.19716049382716
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 38.65567901234568
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 37.21237654320988
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 47.03138888888889
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 22.945740740740742
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 66.54274691358025
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 43.530648148148146
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 35.05203703703704
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 31.15530864197531
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 18.849845679012347
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 49.55413580246913
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 26.464845679012345
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 49.37314814814815
+      }
+    ],
+    "scene_difference_min": 18.849845679012347,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w2",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "a84bccb85fa8902837766244a2060aedaf27e6c08a1835d37ab0f370d2b0229b",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.505,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.71469050827608,
+      "subject_width_pct": 95.38858646711948,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 59.638703703703705
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 54.819783950617285
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 56.088858024691355
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 57.971944444444446
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 53.65425925925926
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 49.01265432098766
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 57.082685185185184
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 49.14672839506173
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 49.952345679012346
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 60.30824074074074
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 55.52354938271605
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 58.029506172839504
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 28.891141975308642
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 64.35978395061728
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 47.808703703703706
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 58.108148148148146
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 57.56552469135802
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 27.67820987654321
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 53.23595679012346
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 52.157098765432096
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 60.099197530864195
+      }
+    ],
+    "scene_difference_min": 27.67820987654321,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w3",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "6664ebcb99e80c69341b9ada54e9cdfffe8d0f1c2b38df50fa1d49823e77b3f0",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.769,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 77.69338262588188,
+      "subject_width_pct": 97.88142693024488,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 36.40577160493827
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 40.01271604938272
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 39.16117283950617
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 42.34962962962963
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 46.51083333333333
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.789104938271606
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 42.36716049382716
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 43.05212962962963
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 47.82799382716049
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 22.098827160493826
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 41.1979012345679
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 42.14836419753087
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 63.06574074074074
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 49.14462962962963
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 37.77632716049383
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 35.17138888888889
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 39.8112962962963
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 53.46756172839506
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 37.8316049382716
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 58.7362037037037
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 43.25033950617284
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 58.35151234567901
+      }
+    ],
+    "scene_difference_min": 22.098827160493826,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w4",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "b59b70670cac54817ef1a99dd6257b56ebbebbf6d1837fc4312d436f59405fa6",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 3.991,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 79.37499999999999,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 57.31009259259259
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 50.37598765432099
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 54.05413580246913
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 50.632345679012346
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 55.26953703703704
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 41.487932098765434
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 49.65524691358025
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 52.05243827160494
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 26.422376543209875
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 57.82376543209877
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 51.43302469135803
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 56.938302469135806
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 44.017407407407404
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 62.492654320987654
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 51.43657407407407
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 55.94570987654321
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 53.7079012345679
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 45.963302469135805
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 56.595925925925926
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 44.44731481481482
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 51.859537037037036
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 45.637685185185184
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 55.67975308641975
+      }
+    ],
+    "scene_difference_min": 26.422376543209875,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w5",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "b5e757271151aa290817876deef4ff92cb5012955de6c767d59d28b08b3546e6",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.224,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.78883635270893,
+      "subject_width_pct": 95.48199855459391,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 20.595
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 20.110648148148147
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 17.128611111111113
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 33.93367283950617
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 43.562469135802466
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 39.626666666666665
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 21.08287037037037
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 30.51654320987654
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 39.31450617283951
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 31.096882716049382
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 44.064537037037034
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 20.66888888888889
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 63.30466049382716
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 40.54731481481482
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 31.30672839506173
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 26.842469135802467
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 14.24682098765432
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 45.67858024691358
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 21.64033950617284
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 49.5791975308642
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 18.155123456790122
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 56.59734567901234
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 36.43929012345679
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 54.43521604938272
+      }
+    ],
+    "scene_difference_min": 14.24682098765432,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w6",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "2efb8463831297af87d7b393e31797d1b9eb080105906e126d6614c7cb2526a2",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 6.373,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.7623346814562,
+      "subject_width_pct": 95.44861062230702,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 22.505154320987653
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 21.0079012345679
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 22.93962962962963
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 35.83777777777778
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 46.530154320987656
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 39.94410493827161
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 23.056913580246913
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 34.48033950617284
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 38.848117283950614
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 32.574382716049385
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 46.1612962962963
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 23.077438271604937
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 64.69648148148148
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 42.42123456790124
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 33.86212962962963
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 30.012623456790124
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 18.662469135802468
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 48.43219135802469
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 24.279012345679014
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 51.83280864197531
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 19.261635802469137
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 59.42768518518518
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 38.3129012345679
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 52.85944444444444
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 18.297376543209875
+      }
+    ],
+    "scene_difference_min": 18.297376543209875,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w7",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "a97f5e31c02cea669378aa93e940b744c2996c423073466722f8362d8d8009de",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.653,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 76.83904762106349,
+      "subject_width_pct": 96.80509936511935,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 26.89929012345679
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 26.991481481481483
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 27.20425925925926
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 38.53888888888889
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 46.72095679012346
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.98891975308642
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 22.825432098765432
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 35.98626543209877
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 40.69651234567901
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 36.132716049382715
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 46.32950617283951
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 25.84175925925926
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 66.465
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 42.28975308641975
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 34.689043209876544
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 29.521203703703705
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 22.068148148148147
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 50.640154320987655
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 28.122407407407408
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 49.42262345679012
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 23.977314814814815
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 60.60225308641975
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 36.67956790123457
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 53.81993827160494
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 24.176203703703703
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 25.59351851851852
+      }
+    ],
+    "scene_difference_min": 22.068148148148147,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "b1",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "91d20bc7900ea69a8599554a509b5c42516356480b27be25372f0f8986adc5fd",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.657,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 79.37499999999999,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 30.08645061728395
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 28.134506172839505
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 24.815493827160495
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 38.03679012345679
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 51.8512037037037
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.08688271604938
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 26.04388888888889
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 41.98879629629629
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 28.740154320987653
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 35.59475308641975
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 46.08197530864197
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 28.346882716049382
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 62.96691358024692
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 45.803827160493825
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 36.9095987654321
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 31.413734567901233
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 26.75716049382716
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 50.78157407407407
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 28.832592592592594
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 48.71077160493827
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 27.468487654320988
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 56.4295987654321
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 37.02172839506173
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 41.910555555555554
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 25.08354938271605
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 27.06320987654321
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 29.342222222222222
+      }
+    ],
+    "scene_difference_min": 24.815493827160495,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "r1",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "5b9a02159f9ebe33e547a3123c8596590dfed5d07e298f006a90b5506ed6a4e7",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 6.681,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 76.03146817133224,
+      "subject_width_pct": 95.78767643632409,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 26.738425925925927
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 28.389197530864198
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 29.255864197530865
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 33.486296296296295
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 43.80737654320988
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 43.392993827160495
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 27.32179012345679
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 37.24904320987655
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 43.85453703703703
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 29.573395061728394
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 42.97314814814815
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 30.385833333333334
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 70.50407407407407
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 42.66975308641975
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 37.13175925925926
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 31.850092592592592
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 22.41925925925926
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 52.92799382716049
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 31.07327160493827
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 49.561635802469134
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 28.917067901234567
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 63.66836419753086
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 31.848703703703702
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 57.464382716049386
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 24.80009259259259
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 25.208765432098765
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 27.845864197530865
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 31.147222222222222
+      }
+    ],
+    "scene_difference_min": 22.41925925925926,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "r2",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "034dd32ed64b4ba573c74c747ad7a0616bfa7fd4271a2b5008b345f1ccbd7ab8",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 9.271,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 74.20747832021691,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 74.20747832021691,
+      "stage_bbox_pct": 77.73514482364419,
+      "caption_gap_px": 30.12253506672317,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 57.989382716049384
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 55.703734567901236
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 59.53317901234568
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 49.71873456790124
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 45.39654320987654
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 40.93395061728395
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 57.69966049382716
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 49.98228395061729
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 44.61185185185185
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 56.938672839506175
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 49.305154320987654
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 62.24635802469136
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 36.247067901234566
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 55.994104938271605
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 50.53716049382716
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 57.6012962962963
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 60.487561728395065
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 32.53413580246914
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 57.58756172839506
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 43.623703703703704
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 61.03938271604938
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 31.42746913580247
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 54.225401234567904
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 40.72737654320988
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 58.19827160493827
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 59.7275
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 58.45478395061728
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 53.658364197530865
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 58.84626543209877
+      }
+    ],
+    "scene_difference_min": 31.42746913580247,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "r3",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "b7b1c9f8d5434a97b9b4119cd7ce873e27b2d6b47412b67b16da94eeb1e1834a",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 9.324,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76250895400626,
+      "subject_width_pct": 95.44883017827563,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 46.25222222222222
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 43.77033950617284
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 45.14688271604938
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 47.2608950617284
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 44.53456790123457
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 41.73067901234568
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 45.78490740740741
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 40.19395061728395
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 38.440987654320985
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 51.40657407407407
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 51.225216049382716
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 47.10493827160494
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 42.12632716049383
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 53.56805555555555
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 40.255
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 45.60043209876543
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 46.649166666666666
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 28.196666666666665
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 45.06780864197531
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 38.70814814814815
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 47.62277777777778
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 37.15314814814815
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 50.50861111111111
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 39.03867283950617
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 45.34820987654321
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 46.09898148148148
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 49.56435185185185
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 43.61287037037037
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 46.6666975308642
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 34.736111111111114
+      }
+    ],
+    "scene_difference_min": 28.196666666666665,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "r4",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "6eb312bfff9ed8a5ab8c824ecf21d0586599dffec3e6f5ecc4bc7e97cc458b6c",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 8.958,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.76394400161894,
+      "subject_width_pct": 95.45063811227584,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 23.154938271604937
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 23.732253086419753
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 22.32348765432099
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 37.85157407407407
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 47.54938271604938
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 44.980246913580245
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 22.379228395061727
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 32.387962962962966
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 38.54543209876543
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 33.892993827160495
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 47.16898148148148
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 19.98462962962963
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 63.36780864197531
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 44.017932098765435
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 32.9220987654321
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 25.246296296296297
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 19.320586419753088
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 45.623641975308644
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 23.54929012345679
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 48.657345679012344
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 23.369382716049383
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 56.9258024691358
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 35.16348765432099
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 52.2583024691358
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 18.577962962962964
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 22.74422839506173
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 19.360524691358023
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 24.817746913580248
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 25.10108024691358
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 58.47024691358025
+      },
+      {
+        "beat": "r3",
+        "gray_mean": 43.66438271604938
+      }
+    ],
+    "scene_difference_min": 18.577962962962964,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "s8",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "9ef282aa1e6f28db1339c71506428e6bdc40e6ea7e744156bc3673ac80f5b073",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 8.511,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.71911464313041,
+      "subject_width_pct": 95.39416018032179,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 61.68891975308642
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 57.26438271604938
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 57.654074074074074
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 57.51962962962963
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 56.454845679012344
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 50.80009259259259
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 59.42925925925926
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 52.01077160493827
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 51.307993827160495
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 64.12166666666667
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 54.42172839506173
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 60.561018518518516
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 21.62858024691358
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 64.21308641975308
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 51.539907407407405
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 58.59972222222222
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 60.108271604938274
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 29.80645061728395
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 56.47845679012346
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 53.59274691358025
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 61.292314814814816
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 24.227685185185184
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 59.94777777777778
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 44.75567901234568
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 58.3362037037037
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 60.90240740740741
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 62.1329012345679
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 57.88104938271605
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 67.05858024691358
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 32.68712962962963
+      },
+      {
+        "beat": "r3",
+        "gray_mean": 39.524537037037035
+      },
+      {
+        "beat": "r4",
+        "gray_mean": 59.420154320987656
+      }
+    ],
+    "scene_difference_min": 21.62858024691358,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "k1",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "252cf7294d8daeaf64915ad531024c9f87400ae65f1514ea0eedefa651fe7fce",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 8.445,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 73.89351451610545,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 73.89351451610544,
+      "stage_bbox_pct": 75.74586107986582,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 574,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 29.862098765432098
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 28.11533950617284
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 29.152993827160493
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 30.60527777777778
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 37.12246913580247
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 33.47635802469136
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 28.051388888888887
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 27.862345679012346
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 35.36987654320988
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 39.744043209876544
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 35.337623456790126
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 31.248086419753086
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 55.91231481481481
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 33.27509259259259
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 31.69679012345679
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 34.85012345679012
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 27.376944444444444
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 41.294012345679015
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 28.069228395061728
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 42.73685185185185
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 30.076975308641977
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 51.42783950617284
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 43.204598765432095
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 46.735216049382714
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 25.460493827160494
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 27.940956790123458
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 31.229104938271604
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 33.03472222222222
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 33.8283024691358
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 49.68925925925926
+      },
+      {
+        "beat": "r3",
+        "gray_mean": 41.7158024691358
+      },
+      {
+        "beat": "r4",
+        "gray_mean": 28.259938271604938
+      },
+      {
+        "beat": "s8",
+        "gray_mean": 52.68675925925926
+      }
+    ],
+    "scene_difference_min": 25.460493827160494,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "k2",
+    "format": "16x9",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "284f9b423cd87c945ce9202e8688f063801ea6ae48667d9ccf325e703e7e37fc",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 3.818,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 76.55120977136262,
+      "subject_width_pct": 96.4424690032915,
+      "subject_height_pct": 79.375,
+      "stage_bbox_pct": 79.37499999999999,
+      "caption_gap_px": 19.575000000000003,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 44.7695987654321
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 39.50222222222222
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 40.67364197530864
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 48.74987654320988
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 60.04046296296296
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 46.44324074074074
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 37.330493827160495
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 50.365092592592596
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 31.08824074074074
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 47.64327160493827
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 53.96345679012346
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 43.17311728395062
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 45.218148148148146
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 59.724074074074075
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 45.46737654320987
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 41.9370061728395
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 40.5491975308642
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 49.72929012345679
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 44.147962962962964
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 54.18737654320988
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 40.152006172839506
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 51.14675925925926
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 44.00302469135802
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 32.901172839506174
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 40.51935185185185
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 41.08
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 42.379320987654324
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 30.181851851851853
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 47.04901234567901
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 49.17163580246913
+      },
+      {
+        "beat": "r3",
+        "gray_mean": 46.753425925925924
+      },
+      {
+        "beat": "r4",
+        "gray_mean": 39.18793209876543
+      },
+      {
+        "beat": "s8",
+        "gray_mean": 47.18234567901234
+      },
+      {
+        "beat": "k1",
+        "gray_mean": 42.545092592592596
+      }
+    ],
+    "scene_difference_min": 30.181851851851853,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h1",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "bddbdbbc4236b7d10115964ae5be213059bbd2c25e5ddbb5c5286041a30ca999",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 7.746,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 76.55870047151382,
+      "subject_width_pct": 95.82826655733076,
+      "subject_height_pct": 79.79701331121447,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 600,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [],
+    "scene_difference_min": null,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h2",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "2ee2752cda2bdcdaa1b60165d1531ad12e4433ee713ace702e5d75e36539842f",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 8.289,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 75.71848590341725,
+      "subject_width_pct": 96.2262831763347,
+      "subject_height_pct": 78.4667926323456,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 35.79618827140806,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 600,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 17.430925925925926
+      }
+    ],
+    "scene_difference_min": 17.430925925925926,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h3",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "10e156c568a27af8507f13e1827dcbf919b5da859220f3b8628c00e1636a87a2",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.058,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 65.01447899776022,
+      "subject_width_pct": 97.89503335854101,
+      "subject_height_pct": 65.94172032459467,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 93.53967257327598,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 20.158796296296295
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 22.96527777777778
+      }
+    ],
+    "scene_difference_min": 20.158796296296295,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "h4",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "1bcb29fa8651a55f7d2d353ea5f92aaf98d3057f2767b81210b484f392594a51",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.638,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 80.06143964475898,
+      "subject_width_pct": 95.10778909075776,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 29.5029012345679
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 30.410432098765433
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 30.23577160493827
+      }
+    ],
+    "scene_difference_min": 29.5029012345679,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "c1",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "23f75f2936600b0634a0f5887da0cc8d073f3eb18c076b0b2f8b44531c2beda0",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 4.801,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 80.87305450379499,
+      "subject_width_pct": 96.07193481657316,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 35.21345679012346
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 40.48808641975309
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 36.363055555555555
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 33.35691358024691
+      }
+    ],
+    "scene_difference_min": 33.35691358024691,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p1",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "f91b7d20a3cdbb4f6702dfdc2216ebdb888f33cfe931bc21c089e21c039c8b01",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.902,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 81.5426346128527,
+      "subject_width_pct": 96.86735248672989,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 83.03788032314242,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 39.58716049382716
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 40.6579012345679
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 37.9445987654321
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 32.49148148148148
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 35.29660493827161
+      }
+    ],
+    "scene_difference_min": 32.49148148148148,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p2",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "903c86e801dcabcc0f40bd42c2c180506e7e522a914d8e17403eed470690c21f",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.181,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 65.57092491243365,
+      "subject_width_pct": 99.04131884529764,
+      "subject_height_pct": 65.83650176531948,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 94.20245503906372,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 24.248796296296295
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 19.882685185185185
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 20.099382716049384
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 34.21108024691358
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 43.28805555555556
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.70478395061728
+      }
+    ],
+    "scene_difference_min": 19.882685185185185,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p3",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "79ff7cf2339a60b23f683f2c7ec5a52de40b6a5c75447ff906ae9d6d43b0e360",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 6.83,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 60.889560628496795,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 60.889560628496795,
+      "stage_bbox_pct": 70.06624217710646,
+      "caption_gap_px": 98.59297198438082,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 48.97814814814815
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 45.96716049382716
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 47.55854938271605
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 51.626604938271605
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 60.217777777777776
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 55.80246913580247
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 41.84601851851852
+      }
+    ],
+    "scene_difference_min": 41.84601851851852,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p4",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "1d96d32071feac950fd41858b11d344e61d13b67596407a1b40c00520ad52492",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 8.232,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 62.72771888312563,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 62.72771888312563,
+      "stage_bbox_pct": 74.69868553735668,
+      "caption_gap_px": 112.66868791266893,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 45.19858024691358
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 41.07395061728395
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 42.11188271604938
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 50.028827160493826
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 61.123456790123456
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 54.80277777777778
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 36.8987962962963
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 34.93512345679012
+      }
+    ],
+    "scene_difference_min": 34.93512345679012,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p5",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "81cf1a5222ee068fd2df1d2d7b48423b29c7ef0ac442de0e41dc1ba68e6e5abf",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.421,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 70.51147421747321,
+      "subject_width_pct": 97.74347624743143,
+      "subject_height_pct": 72.01898094048717,
+      "stage_bbox_pct": 83.51997398319598,
+      "caption_gap_px": 70.29866493834122,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 32.635864197530864
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 34.52938271604938
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 30.84577160493827
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 32.71993827160494
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 39.08864197530864
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 27.270987654320987
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 33.96361111111111
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 47.2420987654321
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 44.424814814814816
+      }
+    ],
+    "scene_difference_min": 27.270987654320987,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "p6",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "927ab302c2aa83ebb23dda3f1422e5abcda7f3fe41adc74203310e7bd5f6bb7e",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 7.816,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 79.98917628331822,
+      "subject_width_pct": 95.02194491196967,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 340,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 37.53799382716049
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 40.37342592592593
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 38.5629012345679
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 31.079104938271605
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 32.4375
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 35.97787037037037
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 42.309938271604935
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 53.61731481481481
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 59.351018518518515
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 38.56762345679012
+      }
+    ],
+    "scene_difference_min": 31.079104938271605,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "c2",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "604dc2772a07a5317af1f22b70b0cf8fc2560f2bcacb4300045b8a59332fbf2b",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 9.507,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 62.96884225259281,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 62.96884225259281,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 95.3406381278777,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 22.853024691358026
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 25.139938271604937
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 18.685956790123456
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 34.806543209876544
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 38.18327160493827
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.75364197530864
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 23.176141975308642
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 46.97512345679012
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 43.51438271604938
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 34.86938271604938
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 39.93391975308642
+      }
+    ],
+    "scene_difference_min": 18.685956790123456,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v1",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "9a6fabc3b28c7337f44c41fbc1f2b6ec9ccd3c047631bb8d0185deddf38cb56f",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.137,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 81.152806976252,
+      "subject_width_pct": 96.40426257967754,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 49.76611111111111
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 47.93382716049383
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 47.88496913580247
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 54.67907407407407
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 58.36216049382716
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 50.93574074074074
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 48.29966049382716
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 55.995370370370374
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 55.03086419753087
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 50.8229012345679
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 59.518487654320985
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 49.17388888888889
+      }
+    ],
+    "scene_difference_min": 47.88496913580247,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v2",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "2d1ab8d4fe635a87df7d5f5fedd43ac8197b679666fbc736b70289c065849d73",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.172,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 81.69260524640174,
+      "subject_width_pct": 97.04550785651438,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 29.02925925925926
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 34.013456790123456
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 29.603672839506174
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 32.86969135802469
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 33.01820987654321
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 41.23814814814815
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 36.57212962962963
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 59.68845679012345
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 57.51524691358025
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 38.60635802469136
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 36.16064814814815
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 32.07388888888889
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 52.78722222222222
+      }
+    ],
+    "scene_difference_min": 29.02925925925926,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v3",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "99c17a9b02957edd9cafc304739efc3ed12caf6fb6890c3b0ffc88549734dcb2",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.118,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 78.42423684150289,
+      "subject_width_pct": 98.22174200534329,
+      "subject_height_pct": 79.53403654369316,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 26.663364197530864
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 27.798055555555557
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 27.012283950617284
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 28.88601851851852
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 35.4045987654321
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 35.41398148148148
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 27.374259259259258
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 49.02996913580247
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 44.216635802469135
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 32.490154320987656
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 36.2070987654321
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 30.450648148148147
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 49.44941358024691
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 33.356944444444444
+      }
+    ],
+    "scene_difference_min": 26.663364197530864,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v4",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "726f82087ffb0baa4101048ea4697ed3dd881c9d2308dd4949f029ca19bfc10b",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 3.969,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 63.90082755683035,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 63.90082755683035,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 91.42802051731402,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 30.689783950617283
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 29.34175925925926
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 26.664197530864197
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 31.379783950617284
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 39.59243827160494
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 40.061697530864194
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 25.325493827160493
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 47.866327160493825
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 40.508734567901236
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 32.88151234567901
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 36.285493827160494
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 28.719475308641975
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 48.53577160493827
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 37.57391975308642
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 32.916234567901235
+      }
+    ],
+    "scene_difference_min": 25.325493827160493,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v5",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "5ab154ae114dc473ebdbe7990cf1e86c1789261faa08dff6d3a7783de8e538a2",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.112,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 62.42143463241343,
+      "subject_width_pct": 94.86466523759395,
+      "subject_height_pct": 65.52885192641415,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 96.46119255126993,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 20.225092592592592
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 21.204783950617283
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 16.643024691358026
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 30.022438271604937
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 38.75385802469136
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 39.518055555555556
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 15.569938271604938
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 42.649043209876545
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 38.93163580246914
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 32.19175925925926
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 38.577962962962964
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 20.729043209876544
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 49.08651234567901
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 32.57503086419753
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 26.091234567901235
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 24.776172839506174
+      }
+    ],
+    "scene_difference_min": 15.569938271604938,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v6",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "145aec491726386b10d1dd91c0277678ed12f4bc359c4a2d4dec199fc7dbc46a",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 3.484,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 62.21407697124774,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 62.21407697124774,
+      "stage_bbox_pct": 71.51440282180307,
+      "caption_gap_px": 105.51625147927915,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 55.060462962962966
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 52.39768518518518
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 54.24166666666667
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 57.44657407407407
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 64.78033950617284
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 60.545524691358025
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 49.556604938271605
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 20.19972222222222
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 41.01212962962963
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 51.685956790123456
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 58.870061728395065
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 53.957685185185184
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 59.23416666666667
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 66.55984567901234
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 57.99777777777778
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 52.60962962962963
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 49.236604938271604
+      }
+    ],
+    "scene_difference_min": 20.19972222222222,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "v7",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "6b00cedb2a373eef05eff82595e9f94becc43ce70f0c703caf5c14018027c19d",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 3.657,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 61.91958941635592,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 61.91958941635592,
+      "stage_bbox_pct": 77.86289850095588,
+      "caption_gap_px": 95.74833759599093,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 37.06345679012345
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 35.5370987654321
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 35.3941049382716
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 43.31932098765432
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 52.15765432098765
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 50.00555555555555
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 32.39885802469136
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 28.561296296296295
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 30.914444444444445
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 42.42314814814815
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 51.408302469135805
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 36.71216049382716
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 55.264197530864195
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 47.96308641975309
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 41.18848765432099
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 39.01385802469136
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 30.082376543209875
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 34.38632716049383
+      }
+    ],
+    "scene_difference_min": 28.561296296296295,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "c3",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "62f4c4c2f205dc1815b23a8f7fc351d250b1cd22e2dc99a3e809d5ed99b8532c",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 7.664,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 79.90792632256726,
+      "subject_width_pct": 94.92542523701727,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 82.19995408554561,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 44.267993827160495
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 45.90626543209876
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 44.294506172839505
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 42.12003086419753
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 45.549166666666665
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 38.71472222222222
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 44.90950617283951
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 57.692746913580244
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 59.893117283950616
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 41.62212962962963
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 42.220987654320986
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 47.18163580246914
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 46.222993827160494
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 46.55922839506173
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 39.499135802469134
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 43.15808641975308
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 44.220864197530865
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 62.068888888888885
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 52.878364197530864
+      }
+    ],
+    "scene_difference_min": 38.71472222222222,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w1",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "bd2953bf4bb803abe1ceb6c68cc221a900740fa2c7e5d9d7da818a4a8b670079",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.712,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 61.50878335085948,
+      "subject_width_pct": 97.92474215533456,
+      "subject_height_pct": 62.71120170540612,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 112.57788437150744,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 22.576975308641977
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 18.920061728395062
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 20.463672839506174
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 31.63604938271605
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 41.08296296296297
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.23388888888889
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 15.834413580246913
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 40.95493827160494
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 38.483333333333334
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 34.2220987654321
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 40.25033950617284
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 22.650123456790123
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 49.73154320987654
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 35.514074074074074
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 29.164783950617284
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 25.095401234567902
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 14.511697530864197
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 47.34305555555556
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 30.501851851851853
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 46.86114197530864
+      }
+    ],
+    "scene_difference_min": 14.511697530864197,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w2",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "6ada9b4c1324e8f74b994eb270d4cee663831ff53b005dc97e785b32f8c36e10",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.605,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 71.1415556899067,
+      "subject_width_pct": 97.07529801914865,
+      "subject_height_pct": 71.65345843814339,
+      "stage_bbox_pct": 83.61555599972209,
+      "caption_gap_px": 53.35264931053784,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 39.72138888888889
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 41.25287037037037
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 36.38327160493827
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 42.34077160493827
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 49.90114197530864
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 37.88175925925926
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 38.799814814814816
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 52.80354938271605
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 50.62595679012345
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 34.310462962962966
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 49.11388888888889
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 41.17151234567901
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 34.65391975308642
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 47.56891975308642
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 35.34234567901235
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 40.999197530864194
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 38.62179012345679
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 57.25246913580247
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 47.66787037037037
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 34.97179012345679
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 41.173364197530866
+      }
+    ],
+    "scene_difference_min": 34.310462962962966,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w3",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "fdafb45f27757070279d33749b6b726e35b7cb52e675eba6f1b56dcdf5adc0fa",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 4.861,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 68.81956760902817,
+      "subject_width_pct": 96.59414898629433,
+      "subject_height_pct": 71.24610375602867,
+      "stage_bbox_pct": 82.88493038026084,
+      "caption_gap_px": 57.56321498946648,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 41.07274691358025
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 42.15175925925926
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 38.69561728395062
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 34.222623456790124
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 42.03101851851852
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 30.61003086419753
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 40.837098765432096
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 47.10305555555556
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 45.27651234567901
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 23.729043209876544
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 37.2258024691358
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 41.82175925925926
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 50.884907407407404
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 46.649907407407404
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 36.39635802469136
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 33.2520987654321
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 38.71691358024692
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 51.4379012345679
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 42.615092592592596
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 39.56969135802469
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 39.92756172839506
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 37.10469135802469
+      }
+    ],
+    "scene_difference_min": 23.729043209876544,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w4",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "dc2678010cc83d7f71e5d5925f6b4c293a5cb37d27f0507442afc0789729a8ce",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 3.102,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 67.19979315506993,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 67.19979315506993,
+      "stage_bbox_pct": 73.40526088500546,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 57.853796296296295
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 53.01299382716049
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 55.54944444444445
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 62.23225308641975
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 73.00725308641975
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 63.28447530864197
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 49.73975308641975
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 35.83120370370371
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 21.755648148148147
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 54.46824074074074
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 67.61734567901235
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 55.35805555555555
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 54.706882716049385
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 69.86651234567901
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 56.25716049382716
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 52.71327160493827
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 52.6954938271605
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 38.330123456790126
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 44.32706790123457
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 65.02574074074074
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 51.81787037037037
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 54.58611111111111
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 55.50679012345679
+      }
+    ],
+    "scene_difference_min": 21.755648148148147,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w5",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "3bff45bc6b7f31e14b335544eb1077ecdae4b8563af83470f3c55c294a5f02c0",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 4.803,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 62.726571250557605,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 62.726571250557605,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 110.29148451534633,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 20.466543209876544
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 22.67246913580247
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 16.237191358024692
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 30.686234567901234
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 38.8112962962963
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 40.775740740740744
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 18.818055555555556
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 44.657098765432096
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 40.26524691358025
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 31.694567901234567
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 40.39836419753087
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 17.30672839506173
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 49.31
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 31.258086419753088
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 27.804783950617285
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 25.420833333333334
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 13.159475308641975
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 51.703981481481485
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 31.77253086419753
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 45.509043209876545
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 16.295925925925925
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 38.99601851851852
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 38.518117283950616
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 53.725462962962965
+      }
+    ],
+    "scene_difference_min": 13.159475308641975,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w6",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "b3a6bc7cdadf6efe334532478a267942a92619334ebfd04c43a1f2e995ebf17c",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.053,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 67.21051940437303,
+      "subject_width_pct": 95.81321568457489,
+      "subject_height_pct": 69.84621474849446,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 76.0543476338507,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 22.997808641975308
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 20.32719135802469
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 22.20074074074074
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 30.72225308641975
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 39.67577160493827
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 39.30601851851852
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 15.587345679012346
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 42.466265432098766
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 37.19688271604938
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 31.78033950617284
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 38.627037037037034
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 25.264845679012346
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 49.11719135802469
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 35.396697530864195
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 27.11314814814815
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 26.17827160493827
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 17.83716049382716
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 49.55104938271605
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 33.746820987654324
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 43.85537037037037
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 18.633425925925927
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 40.02030864197531
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 38.321913580246914
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 50.04265432098765
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 20.38256172839506
+      }
+    ],
+    "scene_difference_min": 15.587345679012346,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "w7",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "2fd582175ec327494d9b45647f48b9f8a117b3d5b533737bb62505482b1ab038",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 4.874,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 63.20226298551009,
+      "subject_width_pct": 97.93637463049652,
+      "subject_height_pct": 63.20226298551009,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 100.89623360744828,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 25.13141975308642
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 23.595925925925926
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 22.69614197530864
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 30.79358024691358
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 40.7570987654321
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.05802469135803
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 18.090216049382715
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 42.50179012345679
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 37.23475308641975
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 32.398395061728394
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 40.048611111111114
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 24.620246913580246
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 50.71827160493827
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 36.33030864197531
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 28.66891975308642
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 23.518302469135804
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 16.438117283950618
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 47.6145987654321
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 32.46246913580247
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 45.43132716049383
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 16.126296296296296
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 40.90984567901234
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 34.488425925925924
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 51.104043209876544
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 19.487037037037037
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 21.27891975308642
+      }
+    ],
+    "scene_difference_min": 16.126296296296296,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "b1",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "db978500d97f86c3f6178a2277ee3e8aaf1d270a5d6b03e251cc6ae17632aa8a",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 3.767,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 83.53801738945809,
+      "subject_width_pct": 99.23773759490149,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 29.709753086419752
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 28.625555555555554
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 26.383549382716048
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 35.31722222222222
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 48.53604938271605
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 47.0708024691358
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 25.57645061728395
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 51.56716049382716
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 34.14364197530864
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 36.39049382716049
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 46.35311728395062
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 28.165555555555557
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 51.56179012345679
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 38.39962962962963
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 32.47145061728395
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 29.39608024691358
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 25.12070987654321
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 58.73027777777778
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 41.434012345679015
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 52.00064814814815
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 25.62858024691358
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 43.743302469135806
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 41.09256172839506
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 46.506141975308644
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 24.668765432098766
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 26.448611111111113
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 25.356604938271605
+      }
+    ],
+    "scene_difference_min": 24.668765432098766,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "r1",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "88eba2da6d80ec752ec8087c035d2d0360c066666a258ee64caa742164dcc07f",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 4.917,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 67.16156276015285,
+      "subject_width_pct": 99.53102250602402,
+      "subject_height_pct": 67.2203856614882,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 88.73752245524435,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 28.682253086419752
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 27.603179012345677
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 25.921358024691358
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 27.61601851851852
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 38.55015432098765
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 38.317006172839505
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 22.3320987654321
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 42.6716975308642
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 39.96966049382716
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 31.568672839506174
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 35.95993827160494
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 28.455524691358026
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 53.72385802469136
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 37.97391975308642
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 27.448024691358025
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 25.062654320987654
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 19.25783950617284
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 49.544444444444444
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 35.60175925925926
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 42.9879012345679
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 22.604104938271604
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 42.388456790123456
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 32.080432098765435
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 53.08901234567901
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 23.58533950617284
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 19.9708024691358
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 22.657314814814814
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 26.979104938271604
+      }
+    ],
+    "scene_difference_min": 19.25783950617284,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "r2",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "2b03b1c9203fe341a4788567ce34ac3fc5eefd3a176fa11555e2a09e014a693c",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.117,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 81.24254258963389,
+      "subject_width_pct": 96.51086265868341,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 49.12324074074074
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 51.40391975308642
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 48.19833333333333
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 46.98503086419753
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 47.01046296296296
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 39.87682098765432
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 50.72462962962963
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 60.768117283950616
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 62.569413580246916
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 44.378796296296294
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 47.44598765432099
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 52.19287037037037
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 39.441882716049385
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 50.06496913580247
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 44.656666666666666
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 47.141728395061726
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 50.50222222222222
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 64.59716049382716
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 57.97015432098765
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 36.19592592592593
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 52.55700617283951
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 30.384382716049384
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 43.07555555555555
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 66.85728395061729
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 51.75237654320988
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 50.477654320987654
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 51.88348765432099
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 56.11429012345679
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 50.06172839506173
+      }
+    ],
+    "scene_difference_min": 30.384382716049384,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "r3",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "50c1e658d972ea927c667f20a4cbc0aabb4f27ced6384db333b8b9ace972c255",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 4.812,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 76.51980440891569,
+      "subject_width_pct": 97.50858635439774,
+      "subject_height_pct": 78.35094010718686,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 29.233765432098764
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 26.549629629629628
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 28.58570987654321
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 31.171913580246912
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 40.88061728395062
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 36.538086419753085
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 27.34645061728395
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 47.54234567901234
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 43.63716049382716
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 31.86246913580247
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 37.23595679012346
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 31.24685185185185
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 46.572407407407404
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 39.626666666666665
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 31.130154320987653
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 25.211203703703703
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 28.171450617283952
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 52.72373456790123
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 41.73246913580247
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 39.55287037037037
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 28.244814814814816
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 39.575462962962966
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 33.535833333333336
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 53.606203703703706
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 30.073024691358025
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 26.29391975308642
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 28.31820987654321
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 31.606975308641974
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 24.51046296296296
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 42.29817901234568
+      }
+    ],
+    "scene_difference_min": 24.51046296296296,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "r4",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "c9694c179b0e622f4c232b167f071fd391b406ddc966f8e1e0fbaf8f70c4891e",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 5.072,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 63.51479215236063,
+      "subject_width_pct": 95.83626647526431,
+      "subject_height_pct": 63.51479215236063,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 80.79536943826635,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 19.754413580246915
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 23.054845679012345
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 17.35537037037037
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 30.538858024691358
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 38.27354938271605
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 40.70645061728395
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 20.913703703703703
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 44.74293209876543
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 39.11089506172839
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 30.58972222222222
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 39.952716049382715
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 18.963055555555556
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 49.16299382716049
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 31.878611111111113
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 28.684753086419754
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 24.9420987654321
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 16.54358024691358
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 50.84203703703704
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 33.81237654320988
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 45.385185185185186
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 19.837438271604938
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 39.760987654320985
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 35.858271604938274
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 52.59401234567901
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 16.47996913580247
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 20.473271604938272
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 17.339351851851852
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 24.320586419753088
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 22.85679012345679
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 50.51104938271605
+      },
+      {
+        "beat": "r3",
+        "gray_mean": 27.116450617283952
+      }
+    ],
+    "scene_difference_min": 16.47996913580247,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "s8",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "1ab9ee03de720ec0dc762ff0963790bc36f4ddd64549efc4e270728085e21971",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 4.919,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 73.2714636255514,
+      "subject_width_pct": 96.56275429309056,
+      "subject_height_pct": 75.50129892150244,
+      "stage_bbox_pct": 83.20331960315818,
+      "caption_gap_px": 49.953711237377775,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 44.61567901234568
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 45.31055555555555
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 40.688734567901236
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 48.78864197530864
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 53.14598765432099
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 42.202345679012346
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 43.81108024691358
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 57.65432098765432
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 54.61395061728395
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 41.559320987654324
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 54.70558641975309
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 43.98129629629629
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 26.321049382716048
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 50.08759259259259
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 42.67552469135803
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 43.072685185185186
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 43.63317901234568
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 62.00929012345679
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 51.10716049382716
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 39.911635802469135
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 44.90253086419753
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 22.45891975308642
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 42.66077160493827
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 57.89688271604938
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 43.688024691358024
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 44.905956790123454
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 45.081234567901234
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 48.964506172839506
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 49.98651234567901
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 33.43984567901234
+      },
+      {
+        "beat": "r3",
+        "gray_mean": 43.334074074074074
+      },
+      {
+        "beat": "r4",
+        "gray_mean": 43.832006172839506
+      }
+    ],
+    "scene_difference_min": 22.45891975308642,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "k1",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "70a22a1cd4a32edc7bb47a892b113fc49e053b914c190a1660e6d0aead75ac30",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 8.174,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 82.08464526532985,
+      "subject_width_pct": 97.5112259300438,
+      "subject_height_pct": 84.1796875,
+      "stage_bbox_pct": 84.1796875,
+      "caption_gap_px": 34.875,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "projected_pepper_centres_min": 550,
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 22.756728395061728
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 20.1429012345679
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 24.309783950617284
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 27.416913580246913
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 39.21858024691358
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 38.25925925925926
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 23.645216049382714
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 47.46135802469136
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 43.0570987654321
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 35.30358024691358
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 37.61151234567901
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 26.81716049382716
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 46.8020987654321
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 29.665123456790123
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 28.782808641975308
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 32.48614197530864
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 22.709351851851853
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 54.04200617283951
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 36.70925925925926
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 45.9925
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 23.20432098765432
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 41.16842592592592
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 42.26064814814815
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 55.862253086419756
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 23.5058024691358
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 23.191203703703703
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 26.448333333333334
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 30.230864197530863
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 29.399907407407408
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 51.01583333333333
+      },
+      {
+        "beat": "r3",
+        "gray_mean": 30.014382716049383
+      },
+      {
+        "beat": "r4",
+        "gray_mean": 24.79601851851852
+      },
+      {
+        "beat": "s8",
+        "gray_mean": 45.89345679012346
+      }
+    ],
+    "scene_difference_min": 20.1429012345679,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  },
+  {
+    "beat": "k2",
+    "format": "9x16",
+    "kind": "still",
+    "status": "STILL_ONLY",
+    "source_digest": "dea1896b1a0f8230737ab5c6a22fc9cacb31f963f9dd046f157620abb8ae8782",
+    "tier": "final",
+    "render_fps": 30,
+    "wall_s": 3.859,
+    "exit_code": 0,
+    "composition": {
+      "subject_bbox_pct": 62.43468867881487,
+      "subject_width_pct": 100.0,
+      "subject_height_pct": 62.43468867881487,
+      "stage_bbox_pct": 70.6235204451396,
+      "caption_gap_px": 101.12280600035102,
+      "max_under_50_s": 0.0,
+      "subject_clipped": true,
+      "samples": 2,
+      "measurement": "projected visible bounding boxes; not filled-pixel coverage",
+      "pass": true
+    },
+    "C13": "DAT",
+    "C13_scope": "label boxes and projected visible subject/stage bounds; artistic quality still requires viewing",
+    "cache_reused": true,
+    "scene_differences": [
+      {
+        "beat": "h1",
+        "gray_mean": 49.608395061728395
+      },
+      {
+        "beat": "h2",
+        "gray_mean": 44.61382716049383
+      },
+      {
+        "beat": "h3",
+        "gray_mean": 47.52922839506173
+      },
+      {
+        "beat": "h4",
+        "gray_mean": 53.39351851851852
+      },
+      {
+        "beat": "c1",
+        "gray_mean": 64.26697530864197
+      },
+      {
+        "beat": "p1",
+        "gray_mean": 57.02567901234568
+      },
+      {
+        "beat": "p2",
+        "gray_mean": 40.94898148148148
+      },
+      {
+        "beat": "p3",
+        "gray_mean": 28.6629012345679
+      },
+      {
+        "beat": "p4",
+        "gray_mean": 24.685493827160492
+      },
+      {
+        "beat": "p5",
+        "gray_mean": 48.266234567901236
+      },
+      {
+        "beat": "p6",
+        "gray_mean": 60.53478395061728
+      },
+      {
+        "beat": "c2",
+        "gray_mean": 47.43876543209876
+      },
+      {
+        "beat": "v1",
+        "gray_mean": 50.56012345679012
+      },
+      {
+        "beat": "v2",
+        "gray_mean": 62.70771604938272
+      },
+      {
+        "beat": "v3",
+        "gray_mean": 49.613425925925924
+      },
+      {
+        "beat": "v4",
+        "gray_mean": 44.81466049382716
+      },
+      {
+        "beat": "v5",
+        "gray_mean": 42.74546296296296
+      },
+      {
+        "beat": "v6",
+        "gray_mean": 30.995277777777776
+      },
+      {
+        "beat": "v7",
+        "gray_mean": 32.81382716049383
+      },
+      {
+        "beat": "c3",
+        "gray_mean": 58.0195987654321
+      },
+      {
+        "beat": "w1",
+        "gray_mean": 40.723641975308645
+      },
+      {
+        "beat": "w2",
+        "gray_mean": 48.59947530864198
+      },
+      {
+        "beat": "w3",
+        "gray_mean": 49.756388888888885
+      },
+      {
+        "beat": "w4",
+        "gray_mean": 24.887561728395063
+      },
+      {
+        "beat": "w5",
+        "gray_mean": 44.96049382716049
+      },
+      {
+        "beat": "w6",
+        "gray_mean": 42.987993827160494
+      },
+      {
+        "beat": "w7",
+        "gray_mean": 41.90314814814815
+      },
+      {
+        "beat": "b1",
+        "gray_mean": 43.620864197530864
+      },
+      {
+        "beat": "r1",
+        "gray_mean": 46.94305555555555
+      },
+      {
+        "beat": "r2",
+        "gray_mean": 59.643179012345676
+      },
+      {
+        "beat": "r3",
+        "gray_mean": 46.99469135802469
+      },
+      {
+        "beat": "r4",
+        "gray_mean": 45.8062037037037
+      },
+      {
+        "beat": "s8",
+        "gray_mean": 52.52759259259259
+      },
+      {
+        "beat": "k1",
+        "gray_mean": 47.724382716049384
+      }
+    ],
+    "scene_difference_min": 24.685493827160492,
+    "scene_difference_scope": "ALL_PRIOR",
+    "scene_difference_pass": true
+  }
+]
