@@ -312,9 +312,9 @@ class LiveScene:
             for k in range(24):
                 xp=x-w*.40+k*w*.80/23
                 phase=k*.17
-                head=Circle(radius=.07).set_fill(CANG,.94).set_stroke(MUC,2)
+                head=Circle(radius=.115).set_fill(CANG,.94).set_stroke(MUC,2)
                 head.move_to([xp,y+h*.23,0])  # đầu ưa nước bám mặt nước
-                tail=Line([xp,y+h*.23,0],[xp,y+h*.39,0]).set_stroke(MUC,2.5)
+                tail=Line([xp,y+h*.23,0],[xp,y+h*.45,0]).set_stroke(MUC,4.5)
                 entity=VGroup(head,tail).set_z_index(9)
                 def adsorb(m,dt,xp=xp,phase=phase):
                     t=self.clock_t()
@@ -458,6 +458,70 @@ class LiveScenePerBeat(LiveScene):
     def _shot(self):
         return self.SHOT_BY_ID.get(self.bid,super()._shot())
 
+    def build_flow_loop(self):
+        """p1: mặt cắt bể thật, hàng trăm tracer khép một dòng hồi lưu.
+        Vệt trên chạy từ vùng giảm gamma ra vùng tăng gamma; lớp đáy về nguồn.
+        Không dùng hình chữ nhật cam phủ mặt.
+        """
+        w,h=self.w*.94,self.h*.79
+        x,y=self.cx,self.cy
+        bowl=RoundedRectangle(width=w,height=h,corner_radius=.28)
+        bowl.set_stroke(MUC,4).set_fill(NUOC,.28).set_z_index(1)
+        bowl.move_to([x,y,0]);self.add(bowl)
+        water=RoundedRectangle(width=w*.97,height=h*.88,corner_radius=.22)
+        water.set_stroke(NUOC,2).set_fill(NUOC,.63).set_z_index(2)
+        water.move_to([x,y-.11,0]);self.add(water)
+        # Nguồn xà phòng nhỏ tại mép trái; màu hòa tan đi về phía phải
+        # theo chênh gradient gamma ở mặt trên.
+        jet=Circle(radius=.15).set_stroke(MUC,3).set_fill(CANG,.95)
+        jet.move_to([x-w*.43,y+h*.25,0]).set_z_index(15)
+        self.add(jet)
+        rx,ry=w*.405,h*.285
+        for k in range(410):
+            a=float(self.rng.uniform(-math.pi,math.pi))
+            radius=float(self.rng.uniform(.60,.99))
+            omega=float(self.rng.uniform(.60,1.25))
+            dot=Dot(radius=.048 if self.W.bc.doc else .035,
+                    color=CANG if math.sin(a)>.1 else MUC).set_z_index(9)
+            def circulate(m,dt,a=a,radius=radius,omega=omega):
+                t=self.clock_t()
+                ang=a-omega*t  # ở đỉnh: x tăng, đáy: x giảm
+                xx=x+rx*radius*math.cos(ang)
+                yy=y+ry*radius*math.sin(ang)
+                m.move_to([xx,yy,0])
+                m.set_color(CANG if math.sin(ang)>.12 else MUC)
+            dot.add_updater(circulate)
+            self.add(dot,animated=True)
+        # Các đường dòng khép kín, chạy dọc vận tốc của các dấu màu.
+        for k in range(4):
+            rr=.63+.10*k
+            ln=Ellipse(width=2*rx*rr,height=2*ry*rr)
+            ln.set_stroke(NEN_TREN,5,opacity=.68).set_fill(opacity=0)
+            ln.move_to([x,y,0]).set_z_index(5)
+            self.add(ln)
+        for k in range(36):
+            # Dải vệt đánh dấu ngắn bay theo chính streamline, không phải
+            # mũi tên hoặc tuyến scan độc lập.
+            phase=2*math.pi*k/36
+            q=Dot(radius=.095,color=CANG).set_z_index(10)
+            def trace(m,dt,phase=phase,k=k):
+                a=phase-(.63+.13*(k%5))*self.clock_t()
+                m.move_to([x+rx*.92*math.cos(a),y+ry*.92*math.sin(a),0])
+            q.add_updater(trace);self.add(q,animated=True)
+        surface=always_redraw(lambda:
+            VMobject().set_points_smoothly([
+                np.array([x-w*.44+w*.88*k/52,
+                          y+h*.365+.07*math.sin(3.2*self.clock_t()-k*.23),0])
+                for k in range(53)])
+            .set_stroke(CANG,11,opacity=.90).set_z_index(13))
+        self.add(surface,animated=True)
+        # "Dụng cụ" ngay trên mặt nước theo bố cục này.
+        needle=Line([x-w*.43,y+h*.42,0],[x-w*.43,y+h*.26,0])
+        needle.set_stroke(MUC,4).set_z_index(15)
+        self.add(needle)
+        if self.upper is not None:
+            self.upper_detail(needle=False)
+
     def build_micelle(self):
         # Mỗi cụm là các đầu ưa nước hướng ra ngoài, đuôi trong lõi:
         # phân tử tập hợp dần do c vượt CMC. Không phải hai hình trước/sau.
@@ -501,7 +565,9 @@ class LiveScenePerBeat(LiveScene):
         self.add(profile,animated=True)
 
     def build(self):
-        if self.shot=="micelle":
+        if self.shot=="tension_flow":
+            self.build_flow_loop()
+        elif self.shot=="micelle":
             self.build_micelle()
         elif self.shot in ("velocity_profile","viscosity"):
             self.build_velocity_profile()
@@ -527,7 +593,7 @@ class LiveScenePerBeat(LiveScene):
                 self.add(arc,animated=True)
         else:
             super().build()
-        if self.shot in ("micelle","velocity_profile","viscosity","surfactants","velocity_field"):
+        if self.shot in ("tension_flow","micelle","velocity_profile","viscosity","surfactants","velocity_field"):
             # Counter native Text cho những cảnh dùng builder riêng.
             clock=always_redraw(lambda:
                  chu("t = %.1f s" % self.clock_t(),46,MUC)
