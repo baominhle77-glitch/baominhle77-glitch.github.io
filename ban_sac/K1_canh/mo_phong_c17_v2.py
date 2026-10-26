@@ -418,6 +418,28 @@ class LiveScene:
 
 
 
+# Chú thích là bản tóm tắt 2–5 từ; không đổi lời/nhãn TTS gốc.
+# Font v2 ≥60 ở chuẩn 1080 => xấp xỉ 30 px tại output 540.
+CAPTION_BY_BEAT={
+ "h1":"A drop touches water","h2":"Pepper rushes outward",
+ "h3":"A steady soap pump","h4":"Surface tension contrast",
+ "c1":"Surfactants line up","p1":"Marangoni flow circulates",
+ "p2":"Needle injects surfactant","p3":"Molecular heads and tails",
+ "p4":"Micelles start forming","p5":"Viscous shear balances pull",
+ "p6":"Pepper tracks the surface","c2":"Tracer-free zone expands",
+ "v1":"Surface velocity field","v2":"Velocity versus radius",
+ "v3":"Flow stops at ring","v4":"Bottom return flow",
+ "v5":"Pump changes zone radius","v6":"Tail length shifts radius",
+ "v7":"Different molecular heads","c3":"Molecules travel outward",
+ "w1":"Clean water recovers","w2":"Speed scaling law",
+ "w3":"Viscous boundary layer","w4":"Diffusion below the film",
+ "w5":"Radius versus pump rate","w6":"Viscosity changes spread",
+ "w7":"Measure a ring radius","b1":"Experiment and model",
+ "r1":"Flow-speed observation","r2":"Model estimates","r3":"A fifteen-millimetre ring",
+ "r4":"Pepper is not oil","s8":"Three physical scales",
+ "k1":"Clean water pulls harder","k2":"Tears of wine"
+}
+
 class LiveScenePerBeat(LiveScene):
     """Từng beat cùng phương trình nhưng khác vật/góc và tiến trình của lời."""
     SHOT_BY_ID={
@@ -548,15 +570,15 @@ def ve_live(owner,sc,W):
         # Vùng an toàn riêng: không dùng dải 25% hình + 6 dòng nguồn cũ.
         bc.an_toan=(-3.70,3.70,-6.62,6.10)
         bc.san=-6.60  # nguồn nằm ở chân màn, hình dọc là cảnh rộng riêng
-        rect=(-3.52,3.44,-4.06,3.22)  # vùng thí nghiệm > 50% chiều cao
+        rect=(-3.63,3.53,-4.36,3.32)  # vùng thí nghiệm > 50% chiều cao
         upper=(.48,3.18,3.42,5.96)   # dụng cụ ở phía PHẢI PiP, không giao PiP
-        txt_y=-5.07
+        txt_y=-5.02
         maxw=6.80
     else:
         bc.san=-3.72  # nguồn một dòng ở mép dưới, không kéo vào vật chính
-        rect=(-6.56,3.50,-3.12,3.42)
+        rect=(-6.72,5.04,-3.35,3.50)
         upper=None
-        txt_y=-.55
+        txt_y=-2.99
         maxw=2.55
     _fit_source(sc,W,doc)
     model=LiveScenePerBeat(owner,sc,W,rect,upper)
@@ -567,25 +589,26 @@ def ve_live(owner,sc,W):
     # Nguồn/nhãn/biểu đồ không che hiện tượng chính; ít chữ, đúng mốc.
     os_=owner.muc_chu()
     owner._live_current_label=None
-    for index,o in enumerate(os_):
-        # Chỉ nhãn 2–5 từ trong vùng giao diện, đủ 22px ở 540p.
-        # Chuỗi nguyên văn được giữ trong W.da_ve/storyboard/TTS.
-        subtitle=" ".join(o["s"].split()[:5])
-        label=_addlabel(subtitle,46,maxw,2 if doc else 3)
-        if doc:
-            label.move_to([-.15,txt_y,0])
-        else:
-            label.move_to([5.25,txt_y,0])
-        label.set_z_index(25)
-        if not doc and label.height>3.2:
-            raise ValueError("C17_8_CHU_QUA_CAO "+W.b["id"])
+    # Tối đa một dòng; không chẻ từ, không co font.
+    label_text=CAPTION_BY_BEAT.get(W.b["id"],"Surface flow physics")
+    label=chu(label_text,60,MUC)
+    if doc:
+        center=[-.10,-5.02,0]
+        allowed=7.0
+    else:
+        center=[-.05,-2.99,0]
+        allowed=12.9
+    if label.width>allowed:
+        raise ValueError("NHAN_28PX_QUA_DAI %s %.2f>%.2f" %
+                         (W.b["id"],label.width,allowed))
+    label.move_to(center).set_z_index(25)
+    owner._live_current_label=label
+    # Nhãn caption bắt đầu cùng từ có nghĩa đầu tiên, giữ cue TTS nguyên vẹn.
+    cues=list(os_)
+    tm=float(cues[0]["t"]) if cues else 0
+    owner.su(tm,lambda label=label:[FadeIn(label)])
+    for o in os_:
         W.da_ve.append(o["s"])
-        def change_label(label=label):
-            prev=owner._live_current_label
-            owner._live_current_label=label
-            if prev is None:return [FadeIn(label)]
-            return [FadeOut(prev),FadeIn(label)]
-        owner.su(o["t"],change_label)
     law=W.b.get("chuyen_dong_chinh") or {}
     if not all(law.get(k) for k in ("vat_chuyen_dong","luat_chuyen_dong","chay_lien_tuc")):
         raise ValueError("C17_8_THIEU_LUAT "+W.b["id"])
