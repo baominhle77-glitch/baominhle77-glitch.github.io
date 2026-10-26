@@ -100,7 +100,7 @@ class LiveScene:
         return m
 
     def surface_base(self, oblique=False):
-        rx=self.radius*(1.17 if oblique else 1.0)
+        rx=min(self.w*.46,self.radius*1.39)
         ry=self.radius*(.70 if oblique else 1.0)
         rim=Ellipse(width=2*rx,height=2*ry).set_fill(MUC,.20).set_stroke(MUC,3.3)
         rim.move_to([self.cx,self.cy,0])
@@ -115,11 +115,12 @@ class LiveScene:
 
     def flowing_front(self, oblique=False):
         rad=self.radius
+        xscale=min(self.w*.46,self.radius*1.39)/self.radius
         ry=.70 if oblique else 1.
         # Bán kính vùng xà phòng c(r,t) mở rộng do dòng Marangoni.
         # Mặt tô CANG đi kèm nước vùng ngoài; không có màn overlay giả.
         front=always_redraw(lambda:
-          Ellipse(width=2*(.19*rad+.74*rad*(1-math.exp(-self.clock_t()/3.4))),
+          Ellipse(width=2*xscale*(.19*rad+.74*rad*(1-math.exp(-self.clock_t()/3.4))),
                   height=2*ry*(.19*rad+.74*rad*(1-math.exp(-self.clock_t()/3.4))))
             .move_to([self.cx,self.cy,0]).set_fill(CANG,.38)
             .set_stroke(CANG,3.8,opacity=.75).set_z_index(3))
@@ -127,7 +128,7 @@ class LiveScene:
         # Gói sóng phát từ tiếp xúc, phản xạ ở thành nước sau chạm.
         for birth in (0.,.55,1.1,1.9,3.2,4.5,5.8,7.2,9.0,11.):
             ripple=always_redraw(lambda birth=birth:
-                Ellipse(width=2*self.wave_radius(self.clock_t(),birth),
+                Ellipse(width=2*xscale*self.wave_radius(self.clock_t(),birth),
                         height=2*ry*self.wave_radius(self.clock_t(),birth))
                 .move_to([self.cx,self.cy,0])
                 .set_stroke(NEN_TREN if int(birth*10)%2 else CANG,12,
@@ -137,6 +138,7 @@ class LiveScene:
 
     def pepper_flow(self, n=390, oblique=False):
         rad=self.radius
+        xscale=min(self.w*.46,self.radius*1.39)/self.radius
         rng=self.rng
         ang=rng.uniform(0,2*np.pi,n)
         rr=np.sqrt(rng.uniform(.05,.84,n))
@@ -145,7 +147,7 @@ class LiveScene:
         for i in range(n):
             a=float(ang[i]);r0=float(rr[i])
             yscale=.70 if oblique else 1.
-            point=Dot([self.cx+rad*r0*np.cos(a),
+            point=Dot([self.cx+xscale*rad*r0*np.cos(a),
                        self.cy+rad*yscale*r0*np.sin(a),0],
                       radius=.028 if self.W.bc.doc else .021,color=MUC)
             point.set_z_index(9)
@@ -156,7 +158,7 @@ class LiveScene:
                 local=r0+.80*(.91-r0)*(1-math.exp(-t/3.8))
                 # phần đầu/chất lỏng chảy ra trong 0...4s rồi chậm dần.
                 local=min(.94,local+.025*math.exp(-((local-front)/.18)**2))
-                m.move_to([self.cx+rad*local*math.cos(a),
+                m.move_to([self.cx+xscale*rad*local*math.cos(a),
                            self.cy+rad*yscale*local*math.sin(a),0])
             point.add_updater(drift)
             self.add(point,animated=True)
@@ -164,8 +166,8 @@ class LiveScene:
         for k in range(20):
             a=2*np.pi*k/20
             line=always_redraw(lambda a=a,k=k:
-                Line([self.cx+.25*rad*math.cos(a),self.cy+.25*rad*math.sin(a),0],
-                     [self.cx+rad*(.25+.58*(1-math.exp(-self.clock_t()/3.7)))*math.cos(a),
+                Line([self.cx+.25*xscale*rad*math.cos(a),self.cy+.25*rad*math.sin(a),0],
+                     [self.cx+xscale*rad*(.25+.58*(1-math.exp(-self.clock_t()/3.7)))*math.cos(a),
                       self.cy+rad*(.25+.58*(1-math.exp(-self.clock_t()/3.7)))*math.sin(a),0])
                 .set_stroke(CANG,2.8,opacity=.75).set_z_index(8))
             self.add(line,animated=True)
@@ -200,7 +202,7 @@ class LiveScene:
                 self.add(mol,animated=True)
 
     def build_overhead(self):
-        oblique=self.shot=="impact"
+        oblique=self.shot in ("impact","needle","radius_measure")
         self.surface_base(oblique)
         self.flowing_front(oblique)
         self.pepper_flow(420 if self.shot in ("impact","overhead") else 320,oblique)
@@ -317,10 +319,17 @@ class LiveScene:
         self.upper_detail(needle=False)
 
     def build(self):
+        # Mặt bàn vật lý, bóng và lớp phản xạ gắn theo bể, không chỉ nền xám.
+        table=RoundedRectangle(width=self.w,height=self.h,corner_radius=.16)
+        table.set_fill(NEN_TREN,.92).set_stroke(MUC,2.1,opacity=.45)
+        table.move_to([self.cx,self.cy,0]).set_z_index(-5)
+        self.add(table)
         if self.shot in ("impact","overhead","needle","radius_measure","velocity"):
             self.build_overhead()
-        elif self.shot in ("molecular_section","section_return","tension_flow"):
+        elif self.shot in ("molecular_section","section_return"):
             self.build_section(molecules=self.shot=="molecular_section")
+        elif self.shot=="tension_flow":
+            self.build_gamma()
         elif self.shot=="wine":
             self.build_wine()
         else:
@@ -377,7 +386,7 @@ def ve_live(owner,sc,W):
     else:
         rect=(-6.40,2.56,-2.60,3.32)
         upper=None
-        txt_y=.90
+        txt_y=-.45
         maxw=3.45
     _fit_source(sc,W,doc)
     model=LiveScene(owner,sc,W,rect,upper)
@@ -421,7 +430,11 @@ def ve_live(owner,sc,W):
           (W.b["id"],bc.ten,model.shot,*rect),flush=True)
     sc.chuyen_dau(W.b)
     owner.chay_su_kien()
-    owner.man["hinh"] = model.static
+    # Kiểm từng vật riêng: hộp gộp giữa cận cảnh phía trên và bể phía
+    # dưới là hộp ảo cắt PiP, trong khi các vật thật hoàn toàn không cắt.
+    for i,part in enumerate(model.static):
+        if len(part.get_all_points()) or len(part.submobjects):
+            owner.man["hinh_%03d" % i]=part
     if owner._live_current_label is not None:
         owner.man["nhan_hien"] = owner._live_current_label
     return owner.man
