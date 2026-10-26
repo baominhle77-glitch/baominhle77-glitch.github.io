@@ -24,13 +24,13 @@ def visual_nouns(text,language='en'):
   if (word.lower() in sizes or wn.synsets(word.lower(),pos=wn.ADJ)) and i+1<len(tags) and (tags[i+1][0].lower() in colors or wn.synsets(tags[i+1][0].lower(),pos=wn.NOUN)):continue
   if word.lower() in colors and i+1<len(tags) and wn.synsets(tags[i+1][0].lower(),pos=wn.NOUN):continue
   if tag.startswith('VB') and not (i>0 and tags[i-1][0].lower() in colors|sizes):continue
-  if i+1<len(tags) and tags[i+1][0].lower() in {'to','toward','towards','through','across','over','into','along','outward'} and wn.morphy(word.lower(),wn.VERB) and i>0:continue
+  if i>0 and i+1<len(tags) and tags[i+1][0].lower() in {'to','toward','towards','through','across','over','into','along','outward'} and (tags[i-1][1].startswith('NN') or tags[i-1][1]=='PRP') and word.lower().endswith('s') and wn.morphy(word.lower(),wn.VERB) not in (None,word.lower()):continue
   modified=i>0 and tags[i-1][0].lower() in colors|sizes and bool(wn.synsets(word.lower(),pos=wn.NOUN))
   if not (tag.startswith('NN') or tag=='CD' or modified):continue
   lemma=wn.morphy(word.lower(),wn.NOUN) or word.lower();syn=wn.synsets(lemma,pos=wn.NOUN)
   # Proper names and unknown nouns cannot silently disappear from coverage.
   symbol=bool(syn and any(h.name().startswith(('visual_communication.','symbol.','visual_signal.')) for h in syn[0].closure(lambda q:q.hypernyms())))
-  if tag=='CD' or modified or not syn or syn[0].lexname() in visible or symbol:
+  if tag=='CD' or modified or not syn or any(s.lexname() in visible for s in syn) or symbol:
    modifiers=[];j=i-1
    while j>=0 and (tags[j][1].startswith('JJ') or tags[j][0].lower() in colors|sizes):modifiers.insert(0,tags[j][0].lower());j-=1
    attrs={}

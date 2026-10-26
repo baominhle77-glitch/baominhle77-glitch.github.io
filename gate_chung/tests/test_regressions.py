@@ -60,6 +60,15 @@ class Regressions(unittest.TestCase):
   from gate_chung.captions import nonoverlapping
   rows=nonoverlapping([dict(start=0,end=32,text='Over clean water'),dict(start=30,end=60,text='the pull is strong')]);self.assertEqual(rows[0]['end'],rows[1]['start'])
   with self.assertRaises(ValueError):nonoverlapping([dict(start=0,end=60),dict(start=30,end=90)])
+ def test_positive_nouns_without_images_fail_g5(self):
+  from types import SimpleNamespace
+  image=np.zeros((540,960,3),np.uint8);video=SimpleNamespace(width=960,height=540,duration=3,frame=lambda t:image)
+  for noun in ('bowl','pepper','arrow','ship','boat','film','wave','map','army','molecule'):
+   sentence='The '+noun+' is visible.';plan=dict(language='en',objects=[],texts=[],beats=[dict(start=0,end=3,narration=sentence,words=[dict(text=noun,start=.2,end=.5)],visual_terms=[])])
+   report=G5(video,plan);self.assertFalse(report['passed'],noun);self.assertTrue(any(noun in r['detail'] and not r['passed'] for r in report['rows']),noun)
+ def test_preposition_does_not_remove_ship_or_boat(self):
+  for sentence,noun in (('The ship across the ocean','ship'),('A boat to the island','boat')):
+   self.assertIn(noun,[x['lemma'] for x in visual_nouns(sentence)])
  def test_core_has_no_episode_import(self):
   root=Path(__file__).resolve().parents[1]
   for p in root.glob('*.py'):
