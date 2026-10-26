@@ -1,11 +1,17 @@
-// Lớp AI (phần chính khi có khoá). Khoá chỉ nằm trong localStorage máy người dùng, gọi thẳng nhà cung cấp.
-// Gemini mặc định; tự dò model mạnh nhất, lỗi 429/404/503 thì chuyển model dự phòng. JSON có cấu trúc + streaming.
+// Lớp AI. Mặc định gọi trạm AI (Google Apps Script) — khoá Gemini nằm ở trạm, trang web không giữ khoá nào,
+// người dùng không phải cài hay nhập gì. Trạm tự chuyển model khi 429/404/5xx, không stream.
+// Nhánh cầu nối 127.0.0.1 (và khoá riêng) chỉ còn là lựa chọn ẩn: tự dò model, JSON có cấu trúc + streaming.
 import { cardName, tarotCard, lenCard } from "./reading.js";
 import { spreadById, posLabel, posKey } from "./spreads.js";
 import { cardYesNo } from "./data.js";
 
 // Cầu nối máy nhà: tiến trình ở 127.0.0.1 tự gắn khoá Gemini từ tệp .env trên máy, trang không giữ khoá.
 export const LOCAL_KEY = "@may-nha";
+// Trạm AI mặc định: POST text/plain (không preflight CORS) → {ok, model, data} hoặc {ok:false, status, error}
+export const TRAM_KEY = "@tram";
+export const TRAM_URL = "https://script.google.com/macros/s/AKfycbzP8FRrraCnXh1mXJqvlR-FwoSJ5brshRFbWP_fj4MbzsX0bGT67M_Ot2GgirMpBIjW/exec";
+export const TRAM_MODEL = "gemini-flash-latest";
+const TRAM_TIMEOUT = 60000;
 export const LOCAL_BASE = "http://127.0.0.1:8787/gemini";
 // Cầu nối máy nhà: trên máy chủ nhân gọi thẳng 127.0.0.1; ở máy khác (điện thoại) đi qua đường hầm kèm mã ghép
 export const via = { base: LOCAL_BASE, token: "" };
@@ -173,15 +179,46 @@ async function failOf(res) {
 }
 
 // messages: [{role: "user"|"assistant", text}]
+const geminiBody = (system, messages, json) => ({
+  systemInstruction: { parts: [{ text: system }] },
+  contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.text }] })),
+  generationConfig: json ? { responseMimeType: "application/json", responseSchema: SCHEMA, temperature: 0.9 } : { temperature: 0.9 },
+});
+
+// Một lượt gọi trạm: trả cả bài một lần; quá thời hạn thì dừng và báo lỗi có cờ timeout
+async function tramOnce({ model, system, messages, json, onText, signal, fetchImpl, timeoutMs = TRAM_TIMEOUT }) {
+  const ctrl = new AbortController();
+  const stop = () => ctrl.abort();
+  if (signal?.aborted) ctrl.abort(); else signal?.addEventListener("abort", stop, { once: true });
+  let timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, timeoutMs);
+  try {
+    const res = await fetchImpl(TRAM_URL, {
+      method: "POST", redirect: "follow", signal: ctrl.signal,
+      headers: { "content-type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ model, body: geminiBody(system, messages, json) }),
+    });
+    let j = null;
+    try { j = await res.json(); } catch (_) { /* trạm trả trang lỗi */ }
+    if (!j || typeof j !== "object") throw new HttpError(res.ok ? 502 : res.status, "Trạm trả về không đọc được");
+    if (!j.ok) throw new HttpError(Number(j.status) || 500, String(j.error || "Trạm lỗi"));
+    const text = (j.data?.candidates?.[0]?.content?.parts || []).filter((p) => !p.thought).map((p) => p.text || "").join("");
+    if (text) onText?.(text, text);
+    return { text, model: String(j.model || model) };
+  } catch (e) {
+    if (timedOut && !signal?.aborted) { const t = new Error("Trạm quá thời hạn"); t.timeout = true; throw t; }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", stop);
+  }
+}
+
 async function streamOnce({ provider, model, key, system, messages, json, onText, signal, fetchImpl }) {
   let full = "";
   const push = (t) => { if (t) { full += t; onText?.(full, t); } };
   if (provider === "gemini") {
-    const body = {
-      systemInstruction: { parts: [{ text: system }] },
-      contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.text }] })),
-      generationConfig: json ? { responseMimeType: "application/json", responseSchema: SCHEMA, temperature: 0.9 } : { temperature: 0.9 },
-    };
+    const body = geminiBody(system, messages, json);
     const res = await fetchImpl(`${gBase(key)}/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
       method: "POST", signal, headers: { "content-type": "application/json", ...gHead(key) }, body: JSON.stringify(body),
     });
@@ -285,17 +322,37 @@ const RETRY = new Set([404, 429, 500, 503, 529]);
 
 // Lỗi gọi AI → câu dễ hiểu cho người dùng (không lộ chi tiết kỹ thuật); bản giải offline vẫn hiển thị bên dưới.
 export function friendlyError(e, key) {
-  if (e?.timeout) return "AI phản hồi quá lâu nên đã dừng chờ.";
   const net = e instanceof TypeError || /failed to fetch|networkerror|load failed|network/i.test(String(e?.message || ""));
+  if (key === TRAM_KEY) {
+    if (e?.status === 429) return "Đang đông người hỏi, thử lại sau ít phút.";
+    if (net && !e?.timeout) return "Không kết nối được máy giải, kiểm tra mạng.";
+    return "Máy giải đang bận.";
+  }
+  if (e?.timeout) return "AI phản hồi quá lâu nên đã dừng chờ.";
   if (net) return key === LOCAL_KEY ? "Cầu nối AI trên máy đang tắt hoặc không kết nối được." : "Không kết nối được tới AI (mất mạng hoặc bị chặn).";
   if (e?.status === 401 || e?.status === 403) return "Khoá AI không hợp lệ hoặc chưa được cấp quyền.";
   if (e?.status === 429) return "AI đang quá tải hoặc hết hạn mức — thử lại sau ít phút.";
   if (e?.status >= 500) return "Máy chủ AI đang lỗi tạm thời — thử lại sau.";
   return String(e?.message || "Lỗi không rõ.").slice(0, 160);
 }
-// Gọi lần lượt model (ưu tiên model người dùng chọn), chuyển dự phòng khi 429/404/quá tải
-export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, signal, fetchImpl = globalThis.fetch, storage }) {
+// AI lỗi → câu báo trên đầu và lời dẫn tới bản giải theo luật (động cơ luật giữ nguyên làm dự phòng)
+export function aiFailNotice(e, key) {
+  return {
+    status: `Chưa giải được bằng AI: ${friendlyError(e, key)}`,
+    note: "Đang hiển thị bản giải theo luật ngay bên dưới — đọc được đầy đủ, không cần mạng. Có thể bấm “Giải lại bằng AI” sau ít phút.",
+  };
+}
+
+// Gọi lần lượt model (ưu tiên model người dùng chọn), chuyển dự phòng khi 429/404/quá tải.
+// Trạm: một lượt duy nhất (trạm tự chuyển model), model thật lấy từ phản hồi của trạm.
+export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, signal, fetchImpl = globalThis.fetch, storage, tramTimeoutMs }) {
   if (!key) throw new Error("Chưa có khoá.");
+  if (key === TRAM_KEY) {
+    onModel?.(TRAM_MODEL);
+    const out = await tramOnce({ model: TRAM_MODEL, system, messages, json, onText, signal, fetchImpl, timeoutMs: tramTimeoutMs });
+    if (!out.text.trim()) throw new HttpError(503, "Phản hồi rỗng");
+    return out;
+  }
   const list = model ? [model, ...(await discoverModels(provider, key, { fetchImpl, storage })).filter((m) => m !== model)] : await discoverModels(provider, key, { fetchImpl, storage });
   let lastErr;
   for (const m of list) {

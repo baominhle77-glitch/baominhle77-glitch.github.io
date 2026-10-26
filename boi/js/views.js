@@ -6,8 +6,8 @@ import { analyze, ruleFollowUp } from "./insight.js";
 import { suggestSpread } from "./topic.js";
 import { tarotSVG, lenormandSVG, backSVG } from "./cards.js";
 import { readingToMarkdown } from "./markdown.js";
-import { LOCAL_KEY, PROVIDERS, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, discoverModels, friendlyError } from "./ai.js";
-import { store, persist, saveSettings, aiKey, setAiKey, aiReady, bridge, probeBridge, ghepToken, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
+import { LOCAL_KEY, TRAM_KEY, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, friendlyError, aiFailNotice } from "./ai.js";
+import { store, persist, saveSettings, aiKey, aiReady, bridge, cauNoiAn, probeBridge, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
 import { gmt7 } from "./core.js";
 
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -83,7 +83,7 @@ function home() {
     <section class="card features">
       <div class="feature"><span class="fi" aria-hidden="true">🔒</span><div><b>Khoá công bằng</b><p class="note">Seed ngẫu nhiên 32 byte → xáo Fisher–Yates; mã SHA-256 hiện trước khi chọn số. Trải xong bấm “Kiểm chứng” để tự tính lại.</p></div></div>
       <div class="feature"><span class="fi" aria-hidden="true">↻</span><div><b>Mỗi câu hỏi một bộ bài</b><p class="note">Rút thêm dùng lại đúng bộ cũ; số trùng ra đúng lá cũ — lá lặp là nhấn mạnh, không phải xác nhận độc lập.</p></div></div>
-      <div class="feature"><span class="fi" aria-hidden="true">✧</span><div><b>Giải sâu</b><p class="note">Có khoá Gemini/OpenAI/Claude: AI đọc như người có nghề. Không khoá: động cơ luật vẫn đọc vị trí, cặp, bộ ba, nối tầng và mâu thuẫn.</p></div></div>
+      <div class="feature"><span class="fi" aria-hidden="true">✧</span><div><b>Giải sâu</b><p class="note">AI (Gemini) đọc như người có nghề — không phải cài hay nhập gì. Khi máy giải bận hoặc mất mạng: bản giải theo luật vẫn đọc vị trí, cặp, bộ ba, nối tầng và mâu thuẫn.</p></div></div>
     </section>
     <p class="foot">Mang tính chiêm nghiệm. Mọi con số tiền là quy đổi huyền học, không phải dự báo tài chính.</p>`,
   };
@@ -400,9 +400,8 @@ function moneyHTML(m) {
 }
 
 async function runAI(s, el, ctx, rule) {
-  const provider = store.settings.aiProvider || "gemini";
-  const key = aiKey(provider);
-  if (!key) return toast("Chưa có khoá — thêm ở Cài đặt.");
+  const provider = "gemini";
+  const key = aiKey();
   const prev = live.get(s.id);
   prev?.ctrl?.abort();
   const st = { text: "", model: "", err: "", ctrl: new AbortController() };
@@ -415,14 +414,14 @@ async function runAI(s, el, ctx, rule) {
     if (out) out.innerHTML = obj ? readingHTML(normalizeReading(obj, rule), { streaming: true }) : `<p class="note streaming">Đang đọc bài…</p>`;
   };
   if (status) status.textContent = "Đang kết nối…";
-  // Quá 60 giây không nhận thêm chữ nào thì dừng chờ, giữ bản giải offline
+  // Quá 60 giây không nhận thêm chữ nào thì dừng chờ, giữ bản giải offline (trạm tự dừng ở 60 s, đây là lưới an toàn)
   let idle = 0;
-  const kick = () => { clearTimeout(idle); idle = setTimeout(() => { st.timeout = true; st.ctrl.abort(); }, 60000); };
+  const kick = () => { clearTimeout(idle); idle = setTimeout(() => { st.timeout = true; st.ctrl.abort(); }, key === TRAM_KEY ? 65000 : 60000); };
   kick();
   try {
     const money = rule._money;
     const { text, model } = await streamWithFallback({
-      provider, key, model: store.settings.aiModel || "", storage,
+      provider, key, model: "", storage,
       system: SYSTEM_READING, json: true,
       messages: [{ role: "user", text: readingRequest(store.db, s, { reading: rule, money, settings: store.settings }) }],
       signal: st.ctrl.signal,
@@ -443,8 +442,9 @@ async function runAI(s, el, ctx, rule) {
     live.delete(s.id);
     if (st.timeout) e.timeout = true;
     if (key === LOCAL_KEY) probeBridge();
-    if (status) status.innerHTML = `<span class="err">Chưa giải được bằng AI: ${esc(friendlyError(e, key))}</span>`;
-    if (out) out.innerHTML = `<p class="note">Đang hiển thị bản giải offline ngay bên dưới — đọc được đầy đủ, không cần mạng. Có thể thử AI lại sau, hoặc bấm “Chép prompt cho ChatGPT”.</p>`;
+    const fail = aiFailNotice(e, key);
+    if (status) status.innerHTML = `<span class="err">${esc(fail.status)}</span>`;
+    if (out) out.innerHTML = `<p class="note">${esc(fail.note)}</p>`;
   }
 }
 
@@ -469,9 +469,10 @@ function readView(id, query) {
     <section class="card glow" id="aiCard">
       <div class="row wrap"><h2 class="grow" style="margin:0">${viewing === "ai" ? "Giải sâu bằng AI" : "Giải theo luật"}</h2>
         <span class="src">${s.ai ? `<a class="btn small ${viewing === "ai" ? "primary" : ""}" href="#/giai/${id}">Bản AI</a><a class="btn small ${viewing === "luat" ? "primary" : ""}" href="#/giai/${id}?ban=luat">Bản luật</a>` : ""}</span></div>
-      <p class="note" id="aiStatus">${viewing === "ai" ? `Giải bởi ${esc(s.ai.model)} · ${esc(gmt7(new Date(s.ai.at)))}${aiStale ? " · <span class='warn'>có lượt rút mới sau bản này — bấm Giải lại</span>" : ""}` : hasKey ? (aiKey() === LOCAL_KEY ? "Cầu nối AI máy nhà sẵn sàng — đang chuẩn bị giải bằng AI." : "Có khoá — đang chuẩn bị giải bằng AI.") : "Đang dùng bộ giải offline (chạy ngay trên máy, không cần mạng). Thêm khoá Gemini ở Cài đặt để AI đọc sâu hơn."}</p>
+      <p class="note" id="aiStatus">${viewing === "ai" ? `Giải bởi ${esc(s.ai.model)} · ${esc(gmt7(new Date(s.ai.at)))}${aiStale ? " · <span class='warn'>có lượt rút mới sau bản này — bấm Giải lại</span>" : ""}` : query.get("ban") === "luat" ? "Bản giải theo luật (chạy ngay trên máy, không cần mạng)." : aiKey() === LOCAL_KEY ? "Cầu nối AI máy nhà sẵn sàng — đang chuẩn bị giải bằng AI." : "Đang chuẩn bị giải bằng AI…"}</p>
       <div id="aiOut"></div>
       ${readingHTML(shown)}
+      ${viewing === "ai" ? `<p class="note ai-by">Giải bởi AI (${esc(s.ai.model)})</p>` : ""}
     </section>
     ${moneyHTML(rule._money)}
     ${extras.map((r, i) => `<section class="card"><h2>Lượt rút thêm #${i + 1}</h2>${tableHTML(s, i + 1)}<details><summary>Bản giải luật của lượt này</summary>${readingHTML(r)}</details><p><a href="#/lat/${id}?r=${i + 1}">Xem lá đã lật →</a></p></section>`).join("")}
@@ -543,20 +544,20 @@ function followView(id) {
           ctx.rerender();
           return;
         }
-        const provider = store.settings.aiProvider || "gemini";
+        const provider = "gemini";
         const base = buildContext(store.db, s, { reading: s.ai?.reading || rule, money: rule._money, settings: store.settings });
         const messages = [{ role: "user", text: `${base}\n\n(Bản giải đã đưa ở trên. Từ đây trả lời các câu hỏi tiếp theo.)` }, { role: "assistant", text: s.ai?.raw || "Đã nắm bản giải và các lá." }, ...s.chat.map((m) => ({ role: m.role, text: m.text }))];
         let raf = 0, cur = "";
         try {
           const { text, model } = await streamWithFallback({
-            provider, key: aiKey(provider), model: store.settings.aiModel || "", storage, system: SYSTEM_CHAT, json: false, messages,
+            provider, key: aiKey(), model: "", storage, system: SYSTEM_CHAT, json: false, messages,
             onModel: (m) => { box.querySelector(".who").textContent = `AI · ${m}`; },
             onText: (full) => { cur = full; if (!raf) raf = requestAnimationFrame(() => { raf = 0; box.innerHTML = `<div class="who">${esc(box.querySelector(".who")?.textContent || "AI")}</div><div class="streaming">${mdLite(cur)}</div>`; }); },
           });
           s.chat.push({ role: "assistant", text, model, at: new Date().toISOString() });
         } catch (err) {
-          if (aiKey(provider) === LOCAL_KEY) probeBridge();
-          s.chat.push({ role: "assistant", text: `Chưa hỏi được AI (${friendlyError(err, aiKey(provider))}). Trả lời theo bộ giải offline:\n\n${ruleFollowUp(rule, q)}`, at: new Date().toISOString() });
+          if (aiKey() === LOCAL_KEY) probeBridge();
+          s.chat.push({ role: "assistant", text: `Chưa hỏi được AI (${friendlyError(err, aiKey())}) Trả lời theo bản giải theo luật:\n\n${ruleFollowUp(rule, q)}`, at: new Date().toISOString() });
         }
         save();
         ctx.rerender();
@@ -619,7 +620,6 @@ function verifyView(id) {
 // ================= Cài đặt =================
 function settingsView() {
   const st = store.settings;
-  const prov = st.aiProvider || "gemini";
   return {
     title: "Cài đặt",
     html: `<h1>Cài đặt</h1>
@@ -630,40 +630,20 @@ function settingsView() {
         <label>Mục tiêu / tháng<input name="mucTieu" type="number" inputmode="decimal" step="0.1" min="0" value="${esc(st.mucTieu ?? "")}"></label>
         <label>Tổng thu năm trước (để so khi trải cả năm)<input name="namTruoc" type="number" inputmode="decimal" step="0.1" min="0" value="${esc(st.namTruoc ?? "")}"></label>
       </fieldset>
-      <fieldset class="card"><legend>Giải sâu bằng AI</legend>
-        <p class="note">Có khoá thì AI là phần giải chính. Khoá chỉ lưu trong trình duyệt của máy này và được gửi thẳng tới nhà cung cấp bạn chọn — không qua máy chủ nào khác. Đừng lưu khoá trên máy dùng chung.</p>
-        ${bridge.ok ? `<p class="note">✓ Cầu nối AI máy nhà đang chạy${bridge.xa ? " (qua đường hầm)" : ""} — không cần dán khoá: khoá nằm trên máy nhà, trang web không giữ.</p>` : ghepToken() ? `<p class="note warn">Đã ghép cầu nối máy nhà nhưng chưa nối được (máy nhà tắt hoặc mất mạng) — đang dùng động cơ luật.</p>` : ""}
-        <label>Nhà cung cấp<select name="aiProvider">${Object.entries(PROVIDERS).map(([k, p]) => `<option value="${k}" ${k === prov ? "selected" : ""}>${esc(p.ten)}${k === "gemini" ? " (mặc định)" : ""}</option>`).join("")}</select></label>
-        <label>Khoá API của bạn<input name="aiKey" type="password" autocomplete="off" placeholder="${aiKey(prov) === LOCAL_KEY ? "Đang dùng cầu nối máy nhà (dán khoá để thay)" : aiKey(prov) ? "Đã lưu khoá (gõ để thay)" : "Dán khoá vào đây"}"></label>
-        <label>Model<input name="aiModel" list="models" value="${esc(st.aiModel || "")}" placeholder="Để trống = tự chọn model mạnh nhất"><datalist id="models">${PROVIDERS[prov].fallback.map((m) => `<option value="${m}">`).join("")}</datalist></label>
-        <p class="note" id="mlist">Dự phòng khi lỗi 429/404: ${PROVIDERS[prov].fallback.map(esc).join(" → ")}</p>
-        <div class="btns"><button type="button" class="btn small" id="testKey">Kiểm tra khoá &amp; dò model</button><button type="button" class="btn small ghost" id="forget">Xoá khoá khỏi máy</button></div>
-      </fieldset>
+      <section class="card"><h2>Giải sâu bằng AI</h2>
+        <p class="note">Bài được giải tự động bằng AI (Google Gemini) — không cần cài đặt hay nhập khoá. Để giải, câu hỏi và các lá đã lật được gửi tới máy giải AI. Khi máy giải bận hoặc mất mạng, trang tự dùng bản giải theo luật ngay trên máy.</p>
+        ${cauNoiAn() ? `<p class="note">${bridge.ok ? `✓ Đang dùng cầu nối AI máy nhà${bridge.xa ? " (qua đường hầm)" : ""}.` : "Cầu nối máy nhà chưa nối được — đang dùng máy giải AI mặc định."}</p>` : ""}
+      </section>
       <button class="btn primary block" type="submit">Lưu cài đặt</button>
     </form>`,
     mount(el, ctx) {
       const f = el.querySelector("#fSet");
-      f.elements.aiProvider.onchange = () => { saveSettings({ aiProvider: f.elements.aiProvider.value, aiModel: "" }); ctx.rerender(); };
       f.onsubmit = (e) => {
         e.preventDefault();
         const x = f.elements;
-        saveSettings({ xungHo: x.xungHo.value.trim() || "Queen Linh", thuNhap: x.thuNhap.value, mucTieu: x.mucTieu.value, namTruoc: x.namTruoc.value, aiProvider: x.aiProvider.value, aiModel: x.aiModel.value.trim() });
-        if (x.aiKey.value.trim()) setAiKey(x.aiProvider.value, x.aiKey.value.trim());
-        x.aiKey.value = "";
+        saveSettings({ xungHo: x.xungHo.value.trim() || "Queen Linh", thuNhap: x.thuNhap.value, mucTieu: x.mucTieu.value, namTruoc: x.namTruoc.value });
         toast("Đã lưu cài đặt.");
         ctx.rerender();
-      };
-      el.querySelector("#forget").onclick = () => { setAiKey(f.elements.aiProvider.value, ""); toast("Đã xoá khoá khỏi máy."); ctx.rerender(); };
-      el.querySelector("#testKey").onclick = async () => {
-        const p = f.elements.aiProvider.value;
-        if (!f.elements.aiKey.value.trim() && p === "gemini" && await probeBridge()) { ctx.rerender(); return toast("✓ AI máy nhà đang chạy — không cần dán khoá."); }
-        const k = f.elements.aiKey.value.trim() || aiKey(p);
-        if (!k) return toast("Chưa nối được AI máy nhà (máy nhà tắt?) và chưa có khoá.");
-        if (f.elements.aiKey.value.trim()) setAiKey(p, k);
-        try { storage?.removeItem("boi.v2.models"); } catch (_) { /* bỏ qua */ }
-        const list = await discoverModels(p, k, { storage });
-        el.querySelector("#mlist").textContent = `Thứ tự sẽ thử: ${list.join(" → ")}`;
-        toast("Đã dò model.");
       };
     },
   };

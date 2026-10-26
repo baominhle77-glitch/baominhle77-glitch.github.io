@@ -1,6 +1,6 @@
 // Khởi động SPA: tải dữ liệu lá, hash router, hiệu ứng chuyển trang, nút Back.
 import { ROUTES, NEEDS_DB, toast, esc } from "./views.js";
-import { store, probeBridge, setGhep } from "./store.js";
+import { store, probeBridge, setGhep, setCauNoiAn } from "./store.js";
 import { mergeKnowledge } from "./data.js";
 
 const view = document.getElementById("view");
@@ -90,6 +90,9 @@ async function init() {
   // Link ghép một lần (?ghep=<mã>): lưu mã cầu nối máy nhà rồi xoá khỏi thanh địa chỉ
   const ghep = new URLSearchParams(location.search).get("ghep");
   if (ghep && /^[\w-]{20,}$/.test(ghep)) { setGhep(ghep); history.replaceState(null, "", location.pathname + location.hash); toast("Đã ghép cầu nối AI máy nhà."); }
+  // Lựa chọn ẩn cho chủ nhân: ?cau-noi=1 bật / ?cau-noi=0 tắt cầu nối máy nhà (mặc định dùng trạm AI)
+  const cau = new URLSearchParams(location.search).get("cau-noi");
+  if (cau === "1" || cau === "0") { setCauNoiAn(cau === "1"); history.replaceState(null, "", location.pathname + location.hash); }
   syncIdx(true);
   render();
   // Dò cầu nối lúc mở trang và mỗi khi quay lại tab / có mạng lại; trạng thái đổi thì vẽ lại màn hiện tại
