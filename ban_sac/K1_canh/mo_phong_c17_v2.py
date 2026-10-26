@@ -458,6 +458,176 @@ class LiveScenePerBeat(LiveScene):
     def _shot(self):
         return self.SHOT_BY_ID.get(self.bid,super()._shot())
 
+    def build_pump_bench(self):
+        """Cơ cấu kim-bơm và vòng dừng: đầu kim chạy, r*(Q) thay theo bơm.
+        Các scene p2/c2/v3/v5/w7/r3/b1 có đồng hồ/góc quan sát khác.
+        """
+        bid=self.bid
+        x,y,w,h=self.cx,self.cy,self.w,self.h
+        rx,ry=w*.45,h*.37
+        rim=Ellipse(width=rx*2,height=ry*2).set_fill(NUOC,.70).set_stroke(MUC,4)
+        rim.move_to([x,y-.20,0]);self.add(rim)
+        # Dòng dung dịch lan trên nước với lượng bơm hữu hạn.
+        rate=(.36 if bid in ("v3","w7") else .72 if bid in ("v5","r3") else .55)
+        ring=always_redraw(lambda:
+            Ellipse(width=rx*(.20+1.47*(1-math.exp(-rate*self.clock_t()/3))),
+                    height=ry*(.20+1.47*(1-math.exp(-rate*self.clock_t()/3))))
+                .move_to([x,y-.20,0]).set_fill(CANG,.20)
+                .set_stroke(CANG,8,opacity=.87).set_z_index(5))
+        self.add(ring,animated=True)
+        # Kim bơm/trục và nòng bơm được mô phỏng tịnh tiến theo áp suất.
+        syringe=RoundedRectangle(width=.48,height=h*.37,corner_radius=.12)
+        syringe.set_fill(NEN_TREN,.90).set_stroke(MUC,4)
+        syringe.move_to([x-.1,y+1.40,0]).set_z_index(10)
+        self.add(syringe)
+        needle=Line([x-.1,y+.60,0],[x-.1,y-.18,0]).set_stroke(MUC,7).set_z_index(11)
+        self.add(needle)
+        plunger=always_redraw(lambda:
+           Rectangle(width=.30,height=.19)
+              .set_fill(CANG,.92).set_stroke(MUC,2)
+              .move_to([x-.1,y+1.85-.55*(1-math.exp(-self.clock_t()/2.1)),0])
+              .set_z_index(12))
+        self.add(plunger,animated=True)
+        for k in range(360):
+            ang=float(self.rng.uniform(0,2*math.pi))
+            rr=float(self.rng.uniform(.20,.80))
+            dot=Dot(radius=.032 if not self.W.bc.doc else .044,color=MUC).set_z_index(8)
+            def move(m,dt,ang=ang,rr=rr):
+                t=self.clock_t()
+                r=rr+(1.-rr)*.22*(1-math.exp(-rate*t/1.6))
+                m.move_to([x+rx*r*math.cos(ang),y-.20+ry*r*math.sin(ang),0])
+            dot.add_updater(move);self.add(dot,animated=True)
+        if bid in ("v5","w7","r3"):
+            # Thước đo bán kính thay theo chính biến r*(t), không fake ticker.
+            gauge=always_redraw(lambda:
+                Line([x-.1,y-.28,0],
+                     [x+rx*(.10+.73*(1-math.exp(-rate*self.clock_t()/3))),y-.28,0])
+                .set_stroke(CANG,8).set_z_index(15))
+            self.add(gauge,animated=True)
+        if self.upper is not None:
+            self.upper_detail(needle=True)
+
+    def build_molecular_bench(self):
+        """Mô hình đầu ưa nước/đuôi kỵ nước đủ lớn, nhìn cắt ngang.
+        Các beat thay đúng biến: 8 loại, carbon tail, head, khuếch tán,
+        hay quá trình hấp phụ từ nguồn.
+        """
+        bid=self.bid
+        x,y,w,h=self.cx,self.cy,self.w,self.h
+        sea=Rectangle(width=w*.94,height=h*.49)
+        sea.set_fill(NUOC,.78).set_stroke(NUOC,3)
+        sea.move_to([x,y-h*.20,0]).set_z_index(2)
+        self.add(sea)
+        interface=always_redraw(lambda:
+            VMobject().set_points_smoothly([
+                np.array([x-w*.47+w*.94*i/48,
+                          y+h*.045+.045*math.sin(i*.37-2.2*self.clock_t()),0])
+                for i in range(49)])
+            .set_stroke(CANG,9,opacity=.88).set_z_index(5))
+        self.add(interface,animated=True)
+        n=34 if bid in ("p3","v6","v7") else 54
+        for i in range(n):
+            pos=i/(n-1)-.5
+            xp=x+pos*w*.84
+            tail_len=(.28+.40*(i%7)/6) if bid in ("p3","v6") else (.42 if bid!="w4" else .24)
+            headsize=.11 if bid=="v7" and i%2 else .15
+            head=Circle(radius=headsize).set_fill(CANG,.93).set_stroke(MUC,2.4)
+            tail=Line(ORIGIN,UP*tail_len).set_stroke(MUC,4.5)
+            entity=VGroup(tail,head).set_z_index(9)
+            def adsorb(m,dt,xp=xp,tail_len=tail_len,i=i):
+                t=self.clock_t()
+                settling=.43*(1-math.exp(-t/1.7))
+                yy=y+h*.045+.30-settling+.022*math.sin(2*t+i)
+                m[1].move_to([xp,yy,0])
+                m[0].put_start_and_end_on([xp,yy,0],[xp+.06*math.sin(t+i),yy+tail_len,0])
+            entity.add_updater(adsorb)
+            self.add(entity,animated=True)
+        # Từ vùng nước: phân tử rải rác, phải CHUYỂN thành màng trên mặt.
+        for i in range(140):
+            xp=float(self.rng.uniform(-.46,.46))
+            zp=float(self.rng.uniform(-.48,-.04))
+            m=Dot(radius=.035,color=CANG).set_z_index(6)
+            def drift(q,dt,xp=xp,zp=zp,i=i):
+                t=self.clock_t()
+                u=math.exp(-.18*t)
+                q.move_to([x+w*(xp+.04*math.sin(.3*t+i)*u),
+                           y+h*(zp+.10*(1-u)),0])
+            m.add_updater(drift);self.add(m,animated=True)
+        if self.upper is not None:
+            self.upper_detail(needle=False)
+
+    def build_velocity_chart(self):
+        """Đường cong u(r) hoặc r*(Q) sống; điểm đo chuyển trên curve.
+        Chỉ thể hiện mô hình định tính, không giả vờ số thật mới đo.
+        """
+        bid=self.bid
+        x,y,w,h=self.cx,self.cy,self.w,self.h
+        left,right=x-w*.43,x+w*.44
+        bottom,top=y-h*.35,y+h*.36
+        base=Line([left,bottom,0],[right,bottom,0]).set_stroke(MUC,4)
+        side=Line([left,bottom,0],[left,top,0]).set_stroke(MUC,4)
+        self.add(base);self.add(side)
+        growth=bid in ("v5","w5","r2","s8")
+        def ordinate(p,t):
+            if growth:
+                return (p**(.75 if bid=="w5" else .55))*(.58+.36*(1-math.exp(-t/3)))
+            return .08+.83*math.exp(-3.4*p)*(.56+.39*(1-math.exp(-t/3.1)))
+        trace=always_redraw(lambda:
+            VMobject().set_points_smoothly([
+                np.array([left+(right-left)*k/65,
+                          bottom+(top-bottom)*ordinate(k/65,self.clock_t()),0])
+                for k in range(66)])
+            .set_stroke(CANG,11,opacity=.96).set_z_index(7))
+        self.add(trace,animated=True)
+        for i in range(160):
+            k=float(self.rng.uniform(.03,.97))
+            mark=Dot(radius=.038,color=NUOC).set_z_index(8)
+            def particle(m,dt,k=k,i=i):
+                p=(k+.13*self.clock_t())%1.0
+                m.move_to([left+(right-left)*p,
+                    bottom+(top-bottom)*ordinate(p,self.clock_t()),0])
+            mark.add_updater(particle);self.add(mark,animated=True)
+        # Bể/tracer thực ở chân biểu đồ: đồ thị lấy từ chính trường dòng,
+        # không phải hình đứng kèm mũi tên trang trí.
+        tray=RoundedRectangle(width=w*.71,height=.42,corner_radius=.14)
+        tray.set_fill(NUOC,.55).set_stroke(MUC,2)
+        tray.move_to([x,bottom-.45,0]);self.add(tray)
+        for k in range(30):
+            yy=bottom-.55+.10*(k%3)
+            q=Dot(radius=.07,color=CANG).set_z_index(11)
+            q.add_updater(lambda m,dt,k=k,yy=yy:
+                 m.move_to([left+.90+((k*.38+.65*self.clock_t())%(w*.61)),yy,0]))
+            self.add(q,animated=True)
+
+    def build_stratified_flow(self):
+        """Lớp chất lỏng có vận tốc u(z): mặt chạy ra, đáy hồi lưu.
+        Vùng nước chiếm đa số, không hình hộp cam đặc hay mũi tên tĩnh.
+        """
+        x,y,w,h=self.cx,self.cy,self.w,self.h
+        basin=RoundedRectangle(width=w*.95,height=h*.82,corner_radius=.24)
+        basin.set_fill(NUOC,.76).set_stroke(MUC,3)
+        basin.move_to([x,y,0]);self.add(basin)
+        viscosity=(.50 if self.bid=="w6" else 1.0)
+        for i in range(520):
+            xp=float(self.rng.uniform(-.47,.47))
+            zp=float(self.rng.uniform(-.40,.40))
+            top=zp>0
+            vel=viscosity*(.70 if top else -.32)
+            q=Dot(radius=.037,color=CANG if top else MUC).set_z_index(8)
+            def move(m,dt,xp=xp,zp=zp,vel=vel):
+                t=self.clock_t()
+                xp2=((xp+.45+vel*t)% .90)-.45
+                m.move_to([x+w*xp2,y+h*(zp+.025*math.sin(2*t+xp)),0])
+            q.add_updater(move);self.add(q,animated=True)
+        film=always_redraw(lambda:
+            VMobject().set_points_smoothly([
+              np.array([x-w*.455+w*.91*k/58,
+              y+h*.375+.038*math.sin(4*self.clock_t()+k*.3),0])
+              for k in range(59)])
+            .set_stroke(CANG,10).set_z_index(9))
+        self.add(film,animated=True)
+        if self.upper is not None:self.upper_detail(needle=False)
+
     def build_flow_loop(self):
         """p1: mặt cắt bể thật, hàng trăm tracer khép một dòng hồi lưu.
         Vệt trên chạy từ vùng giảm gamma ra vùng tăng gamma; lớp đáy về nguồn.
