@@ -15,7 +15,9 @@ import { suggestSpread, mainTopic } from "./js/topic.js";
 import { mergeKnowledge, tarotMeaning, capMeaning, cardYesNo } from "./js/data.js";
 import { friendlyError, LOCAL_KEY, TRAM_KEY, TRAM_URL, aiFailNotice } from "./js/ai.js";
 import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING, SYSTEM_CHAT, LOCAL_BASE } from "./js/ai.js";
-import { probeBridge, bridge, aiKey } from "./js/store.js";
+import { goiCoDau, tyLeDau, tyLeDauBai, matDau, normYN, suaTenLa, YN, BAO_MAT_DAU, NHAC_DAU, NGUONG_DAU, SCHEMA } from "./js/ai.js";
+import { probeBridge, bridge, aiKey, store } from "./js/store.js";
+import { ROUTES } from "./js/views.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const readJSON = (f) => JSON.parse(readFileSync(join(HERE, f), "utf8"));
@@ -561,6 +563,125 @@ test("cầu nối 127.0.0.1 không gọi được → dò trả về nhanh, dùn
   // cả cầu nối lẫn trạm đều hỏng → báo lỗi dễ hiểu (trang hiện bản giải theo luật), không treo
   const eAll = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", storage, messages: [{ role: "user", text: "x" }], fetchImpl: refused }).then(() => null, (e) => e);
   assert.equal(friendlyError(eAll, TRAM_KEY), "Không kết nối được máy giải, kiểm tra mạng.");
+});
+
+// ---- Vòng 2: chống mất dấu, nhãn phán một bộ, tên lá theo dữ liệu, bỏ ô nhập số ----
+const tramReply = (text, model = "gemini-flash-lite-latest") => new Response(JSON.stringify({ ok: true, model, data: { candidates: [{ content: { parts: [{ text }] } }] } }), { status: 200 });
+const BAI = (ch) => JSON.stringify({ tong_quan: ch, chu_de_troi: [ch], tang: [{ ten: "Tháng 11/2026", diem: 7, tarot_doc: [ch], dong_chay: ch, lenormand_cap: [ch], chot: ch, diem_nghen: ch, loi_khuyen: ch }], noi_tang: [ch], mau_thuan: [ch], tong_ket: ch, loi_khuyen: [ch] });
+const KHONG_DAU = "Chao Queen Linh, toi ngoi day voi ban va doc tung la mot. Thang nay tien vao deu nhung phai giu ky luat chi tieu.";
+const CO_DAU = "Chào Queen Linh, tôi ngồi đây với bạn và đọc từng lá một. Tháng này tiền vào đều nhưng phải giữ kỷ luật chi tiêu.";
+
+test("(b) tỉ lệ dấu: câu không dấu < 0,15, câu có dấu > 0,2; JSON chỉ tính giá trị chuỗi", () => {
+  assert.ok(tyLeDau("Chao Queen Linh, toi ngoi day voi ban") < NGUONG_DAU);
+  assert.ok(tyLeDau("Chào Queen Linh, tôi ngồi đây với bạn") > 0.2);
+  assert.ok(tyLeDauBai(BAI(CO_DAU)) > 0.2, "khoá JSON không dấu không kéo tỉ lệ xuống");
+  assert.ok(tyLeDauBai(BAI(KHONG_DAU)) < NGUONG_DAU);
+  assert.equal(matDau(BAI(KHONG_DAU)), true);
+  assert.equal(matDau(BAI(CO_DAU)), false);
+  assert.equal(matDau("OK"), false, "quá ít chữ thì không kết luận");
+});
+
+test("(a) trạm trả không dấu → gọi lại đúng 1 lần; lần 2 có dấu → nhận; lần 2 vẫn không dấu → bản luật + câu báo", async () => {
+  const s = await demoSession();
+  addRound(s, `${T_IN}\n${L_IN}`);
+  const rule = analyze(db, s, { thuNhap: 20 });
+  const messages = [{ role: "user", text: readingRequest(db, s, { reading: rule, money: rule._money }) }];
+  // lần 2 có dấu
+  const sent = [], shown = [];
+  const lan2Ok = async (url, o) => { sent.push(JSON.parse(o.body)); return tramReply(BAI(sent.length === 1 ? KHONG_DAU : CO_DAU)); };
+  const ok = await goiCoDau({ provider: "gemini", key: TRAM_KEY, system: SYSTEM_READING, json: true, messages, fetchImpl: lan2Ok, onText: (t) => shown.push(t) });
+  assert.equal(sent.length, 2, "gọi lại đúng 1 lần");
+  assert.equal(ok.lan, 2);
+  assert.ok(tyLeDauBai(ok.text) > 0.2);
+  const lastMsg = sent[1].body.contents.at(-1).parts[0].text;
+  assert.ok(lastMsg.endsWith(NHAC_DAU), "lần gọi lại có dòng nhắc mất dấu");
+  assert.ok(!sent[0].body.contents.at(-1).parts[0].text.includes(NHAC_DAU));
+  assert.equal(shown.length, 1, "chữ không dấu không được đẩy ra màn hình");
+  assert.ok(!matDau(shown[0]));
+  // có dấu ngay lần 1 → chỉ 1 lần gọi
+  let n1 = 0;
+  await goiCoDau({ provider: "gemini", key: TRAM_KEY, system: "s", json: true, messages, fetchImpl: async () => { n1++; return tramReply(BAI(CO_DAU)); } });
+  assert.equal(n1, 1);
+  // lần 2 vẫn không dấu → lỗi matDau, câu báo, bản luật vẫn đủ
+  let n2 = 0;
+  const e = await goiCoDau({ provider: "gemini", key: TRAM_KEY, system: "s", json: true, messages, fetchImpl: async () => { n2++; return tramReply(BAI(KHONG_DAU)); } }).then(() => null, (x) => x);
+  assert.equal(n2, 2, "không gọi quá 2 lần");
+  assert.ok(e?.matDau);
+  assert.equal(friendlyError(e, TRAM_KEY), BAO_MAT_DAU);
+  assert.equal(aiFailNotice(e, TRAM_KEY).status, "Máy giải trả chữ không dấu, đang dùng bản giải theo luật.");
+  assert.ok(rule.tang.length && rule.tong_ket, "bản giải theo luật vẫn có để hiện");
+  // hỏi tiếp (chữ thường, không JSON) cũng qua cổng
+  let n3 = 0;
+  const e3 = await goiCoDau({ provider: "gemini", key: TRAM_KEY, system: SYSTEM_CHAT, json: false, messages: [{ role: "user", text: "Thang 12 the nao?" }], fetchImpl: async () => { n3++; return tramReply(KHONG_DAU); } }).then(() => null, (x) => x);
+  assert.equal(n3, 2);
+  assert.ok(e3?.matDau);
+});
+
+test("(c) nhãn phán: một bộ có dấu trùng động cơ luật; gập không dấu về đúng nhãn; không khớp lấy theo điểm", async () => {
+  assert.deepEqual(YN, ["CÓ", "CÓ, NHƯNG CÓ ĐIỀU KIỆN", "NGHIÊNG VỀ KHÔNG", "KHÔNG"]);
+  assert.deepEqual(SCHEMA.properties.tang.items.properties.tra_loi.enum, YN);
+  assert.ok(SYSTEM_READING.includes(YN.join(" / ")));
+  assert.ok(!/CÓ CÓ ĐIỀU KIỆN|NGHIÊNG KHÔNG /.test(SYSTEM_READING), "prompt không còn bộ nhãn cũ");
+  assert.equal(normYN("CO CO DIEU KIEN"), "CÓ, NHƯNG CÓ ĐIỀU KIỆN");
+  assert.equal(normYN("7.5/10 CÓ"), "CÓ");
+  assert.equal(normYN("CÓ ĐIỀU KIỆN"), "CÓ, NHƯNG CÓ ĐIỀU KIỆN");
+  assert.equal(normYN("nghieng khong"), "NGHIÊNG VỀ KHÔNG");
+  assert.equal(normYN("KHÔNG"), "KHÔNG");
+  assert.equal(normYN("???"), null);
+  const sp = spreadById("cokhong");
+  const s = await createSession({ cauHoi: "Có nên ký hợp đồng không?", spreadId: sp.id, tiers: sp.tiers(2027), money: false, seed: SEED });
+  addRound(s, "T: 1 2 3 / 4 5 6 / 7 8 9\nL: 1 2 3 / 4 5 6 / 7 8 9");
+  const rule = analyze(db, s, {});
+  const tier = (tra_loi, diem) => ({ ten: "t", diem, tra_loi, tarot_doc: ["x", "y", "z"], dong_chay: "d", lenormand_cap: ["c"], chot: "c", diem_nghen: "n", loi_khuyen: "k" });
+  const r = normalizeReading({ tang: [tier("CÓ ĐIỀU KIỆN", 6), tier("7.5/10 CÓ", 7.5), tier("hmm", 3)] }, rule);
+  assert.deepEqual(r.tang.map((t) => t.tra_loi), ["CÓ, NHƯNG CÓ ĐIỀU KIỆN", "CÓ", "KHÔNG"]);
+  // câu hỏi không phải Có/Không thì không gắn nhãn phán
+  const s2 = await demoSession();
+  addRound(s2, T_IN);
+  assert.equal(normalizeReading({ tang: [tier("CÓ", 7)] }, analyze(db, s2, {})).tang[0].tra_loi, null);
+});
+
+test("(d) tên lá theo dữ liệu: AI tự dịch sai → thay bằng tên dữ liệu; nhãn tên lá đứng trước mỗi câu Tarot", async () => {
+  assert.equal(suaTenLa(db, "La Phân Xết (Judgement)"), "Phán Xét (Judgement)");
+  assert.equal(suaTenLa(db, "Tháng này lá Phân Xết (Judgement) gọi bạn."), "Tháng này lá Phán Xét (Judgement) gọi bạn.");
+  assert.equal(suaTenLa(db, "Gặp Nguoi Đàn Ông (Man) ở đây."), "Gặp Người Đàn Ông (Man) ở đây.");
+  assert.equal(suaTenLa(db, "Mặt Trăng (The Moon) mờ."), "Mặt Trăng (The Moon) mờ.", "tên đúng giữ nguyên");
+  assert.equal(suaTenLa(db, "Không có ngoặc"), "Không có ngoặc");
+  const s = await demoSession();
+  addRound(s, T_IN);
+  const rule = analyze(db, s, {});
+  const r = normalizeReading({ tong_quan: "Bắt đầu với La Phân Xết (Judgement).", tang: [{ ten: "t", diem: 7, tarot_doc: ["a", "b", "c", "d"] }] }, rule, { db, session: s });
+  assert.equal(r.tong_quan, "Bắt đầu với Phán Xét (Judgement).");
+  assert.deepEqual(r.tang[0].tarot_ten, s.rounds[0].tarot[0].map((c) => cardName(db, "tarot", c)), "nhãn lấy từ dữ liệu, đúng thứ tự lá đã lật");
+  assert.match(SYSTEM_READING, /không tự dịch/u);
+});
+
+test("(e) thân gửi trạm chỉ có ASCII (không byte > 127), giải mã lại đúng chữ có dấu; temperature 0.7; dòng dặn có dấu", async () => {
+  const s = await demoSession();
+  addRound(s, `${T_IN}\n${L_IN}`);
+  const rule = analyze(db, s, { thuNhap: 20 });
+  const req = readingRequest(db, s, { reading: rule, money: rule._money });
+  let raw = "";
+  await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: SYSTEM_READING, json: true, messages: [{ role: "user", text: req }], fetchImpl: async (u, o) => { raw = o.body; return tramReply(BAI(CO_DAU)); } });
+  assert.ok([...Buffer.from(raw, "utf8")].every((b) => b < 128), "không còn byte > 127");
+  const back = JSON.parse(raw);
+  assert.equal(back.body.contents[0].parts[0].text, req, "giải mã lại đúng nguyên văn");
+  assert.equal(back.body.generationConfig.temperature, 0.7);
+  const DAU = "Mọi giá trị chuỗi phải là tiếng Việt CÓ DẤU đầy đủ; khoá JSON không dấu chỉ là tên trường, không được bắt chước.";
+  assert.ok(SYSTEM_READING.trimEnd().endsWith(DAU));
+  assert.ok(req.trimEnd().endsWith(DAU));
+});
+
+test("(f) màn chọn bài: không có ô gõ số, không lộ dải số 01–78 / 01–36", async () => {
+  const s = await demoSession();
+  store.sessions.push(s);
+  const [, view] = ROUTES.find(([re]) => re.test(`/chon-so/${s.id}`));
+  const { html } = view(`/chon-so/${s.id}`.match(/^\/chon-so\/([\w-]+)$/), new URLSearchParams());
+  assert.ok(html.includes("grid-backs"), "đúng là màn chọn bài");
+  assert.ok(!/id="typed"|<textarea/.test(html), "không có textarea #typed");
+  assert.ok(!/01[–-]78|01[–-]36|(Tarot|Lenormand) \d+(\s*\/\s*\d+){2,}/.test(html), "không lộ dải số / số lá kiểu Tarot 3/3/3");
+  assert.ok(!/<button[^>]*class="pick[^"]*"[^>]*>[^<]+<\/button>/.test(html), "lá úp không mang chữ/số hiển thị");
+  store.sessions.pop();
 });
 
 export async function run(extra = []) {

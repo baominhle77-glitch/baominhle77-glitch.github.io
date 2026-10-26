@@ -23,7 +23,7 @@ export function readingToMarkdown(db, session, reading, roundIndex = 0) {
   if (reading.chu_de_troi?.length) { L.push("## Chủ đề trội"); reading.chu_de_troi.forEach((x) => L.push(`- ${x}`)); L.push(""); }
   for (const t of reading.tang) {
     L.push(`## ${t.ten} — ${t.diem ?? "?"}/10${t.tra_loi ? ` · ${t.tra_loi}` : ""}`);
-    if (t.tarot_doc?.length) { L.push("**Tarot theo vị trí**"); t.tarot_doc.forEach((x) => L.push(`- ${x}`)); }
+    if (t.tarot_doc?.length) { L.push("**Tarot theo vị trí**"); t.tarot_doc.forEach((x, i) => L.push(`- ${t.tarot_ten?.[i] ? `**${t.tarot_ten[i]}** — ` : ""}${x}`)); }
     if (t.dong_chay) L.push("", `**Dòng chảy:** ${t.dong_chay}`);
     if (t.lenormand_cap?.length) { L.push("", "**Lenormand theo cặp**"); t.lenormand_cap.forEach((x) => L.push(`- ${x}`)); }
     if (t.lenormand_bo_ba?.length) { L.push("", "**Bộ ba**"); t.lenormand_bo_ba.forEach((x) => L.push(`- ${x}`)); }

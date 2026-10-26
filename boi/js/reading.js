@@ -90,7 +90,7 @@ export function readTier(db, session, ti, tarotCells = [], lenCells = [], opts =
 
   const tarot = tarotCells.map((cell, i) => {
     const pos = posLabel(tierCfg, i);
-    if (!cell.ok) { empty.push({ deck: "tarot", i, cell }); return { pos, cell, text: `${pos}: ô trống — số ${cell.raw} ngoài khoảng 01–78, chờ số thay.` }; }
+    if (!cell.ok) { empty.push({ deck: "tarot", i, cell }); return { pos, cell, text: `${pos}: ô trống — số ${cell.raw} ngoài khoảng của bộ 78 lá, chờ số thay.` }; }
     const c = tarotCard(db, cell.card);
     const s = cardScore(c, cell.rev, money);
     scored.push({ deck: "tarot", card: c, s, cell });

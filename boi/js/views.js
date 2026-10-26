@@ -1,12 +1,12 @@
 // Các màn của SPA. Mỗi màn trả {title, step, html, mount(el, ctx)}.
 import { SPREADS, spreadById, defaultYear, posLabel } from "./spreads.js";
-import { addRound, addPickedRound, fixCell, applyCorrectionText, errorsOf, reveal, MAX, exportJSON, importJSON, pendingDraw, newDraw, ensureMapping, drawsOf, isFresh } from "./state.js";
+import { addPickedRound, fixCell, applyCorrectionText, errorsOf, reveal, MAX, exportJSON, importJSON, pendingDraw, newDraw, ensureMapping, drawsOf, isFresh } from "./state.js";
 import { tarotCard, lenCard, cardName } from "./reading.js";
 import { analyze, ruleFollowUp } from "./insight.js";
 import { suggestSpread } from "./topic.js";
 import { tarotSVG, lenormandSVG, backSVG } from "./cards.js";
 import { readingToMarkdown } from "./markdown.js";
-import { LOCAL_KEY, TRAM_KEY, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, streamWithFallback, partialJSON, normalizeReading, friendlyError, aiFailNotice } from "./ai.js";
+import { LOCAL_KEY, TRAM_KEY, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, goiCoDau, partialJSON, normalizeReading, friendlyError, aiFailNotice, suaTenLa, BAO_MAT_DAU } from "./ai.js";
 import { store, persist, saveSettings, aiKey, aiReady, bridge, cauNoiAn, probeBridge, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
 import { gmt7 } from "./core.js";
 import { startPick, needOf, pickReady, savedCount, togglePick, saveTier, editTier } from "./pick.js";
@@ -262,10 +262,7 @@ function pickView(id, query) {
       <p class="picked-line" id="line" aria-live="polite">${esc(count(p.draft))}</p>
       <div class="btns"><button type="button" class="btn primary" id="saveTier">Lưu ${n > 1 ? `${unit.toLowerCase()} ${cur + 1}` : ""}</button><button type="button" class="btn ghost" id="clr">Bỏ chọn</button></div>
     </section>`}
-    ${!extra ? `<details class="card"><summary>Nhập nhanh bằng dãy số (cho người đã quen)</summary>
-      <p class="note">Số 01–78 / 01–36 ứng với vị trí lá trong bộ đã xáo của từng tầng; dấu “/” tách tầng.</p>
-      <label for="typed" class="sr-only">Dãy số</label><textarea id="typed" rows="3" placeholder="T: 8 37 50 69/ 68 75 36 22/ 8 36 55 71&#10;Lenor: 22 25 27 29 / 10 20 25 21/ 11 23 26 34"></textarea>
-      <button type="button" class="btn small" id="go">Lật theo dãy số →</button></details>` : ""}`,
+`,
     mount(el, ctx) {
       const g = el.querySelector("#grid"), ln = el.querySelector("#line");
       const redraw = () => { if (g) g.innerHTML = grid(); if (ln) ln.textContent = count(p.draft); };
@@ -305,19 +302,6 @@ function pickView(id, query) {
           ctx.go(`#/lat/${id}`);
         } catch (err) { solve.disabled = false; toast(err.message); }
       };
-      const go = el.querySelector("#go");
-      if (go) go.onclick = async () => {
-        const text = el.querySelector("#typed").value.trim();
-        if (!text) return toast("Chưa gõ số nào.");
-        try {
-          await ensureMapping(s, di);
-          const { errors } = addRound(s, text, "tarot");
-          delete s.pick;
-          save();
-          if (errors.length) toast(`Có ${errors.length} số ngoài khoảng — các số hợp lệ đã lật, nhập số thay ở ô trống.`);
-          ctx.go(`#/lat/${id}`);
-        } catch (err) { toast(err.message); }
-      };
     },
   };
 }
@@ -344,7 +328,7 @@ function fixBox(s, ri) {
   const errs = errorsOf(s.rounds[ri]);
   if (!errs.length) return "";
   return `<div class="fix-box" id="fix"><b>Có ${errs.length} số ngoài khoảng.</b> Đã lật các số hợp lệ và để trống đúng ô lỗi — không tự thay.
-    ${errs.map((e) => `<div class="row wrap" style="margin-top:8px"><span class="grow">${e.deck === "tarot" ? "Tarot" : "Lenormand"} · tầng ${e.tier + 1} · ô ${e.idx + 1}: số <b>${esc(e.raw)}</b> (chỉ có 01–${MAX[e.deck]}). Số thay:</span><input style="width:90px" inputmode="numeric" data-fix="${e.deck}|${e.tier}|${e.idx}" aria-label="Số thay cho ô ${e.idx + 1} tầng ${e.tier + 1}" placeholder="01–${MAX[e.deck]}"></div>`).join("")}
+    ${errs.map((e) => `<div class="row wrap" style="margin-top:8px"><span class="grow">${e.deck === "tarot" ? "Tarot" : "Lenormand"} · tầng ${e.tier + 1} · ô ${e.idx + 1}: số <b>${esc(e.raw)}</b> (ngoài khoảng của bộ ${MAX[e.deck]} lá). Số thay:</span><input style="width:90px" inputmode="numeric" data-fix="${e.deck}|${e.tier}|${e.idx}" aria-label="Số thay cho ô ${e.idx + 1} tầng ${e.tier + 1}" placeholder="số"></div>`).join("")}
     <label style="margin-top:10px">Hoặc gõ kiểu “Là số 04” (thay lần lượt ô trống)<input id="fixText" placeholder="Là số 04"></label>
     <button type="button" class="btn small" id="fixGo" style="margin-top:8px">Thay</button></div>`;
 }
@@ -401,7 +385,7 @@ function flipView(id, query) {
       el.querySelectorAll("[data-fix]").forEach((inp) => (inp.onchange = () => {
         const [deck, tier, idx] = inp.dataset.fix.split("|");
         const r = fixCell(s, ri, deck, +tier, +idx, parseInt(inp.value, 10));
-        if (!r.ok) { toast(`Số ${inp.value} vẫn ngoài khoảng 01–${r.max}.`); inp.value = ""; return; }
+        if (!r.ok) { toast(`Số ${inp.value} vẫn ngoài khoảng của bộ ${r.max} lá.`); inp.value = ""; return; }
         save(); delete s.ai; ctx.rerender();
       }));
       const ft = el.querySelector("#fixGo");
@@ -423,7 +407,7 @@ function readingHTML(r, { streaming = false, aiTiersOnly = false } = {}) {
   const tiers = (r.tang || []).map((t) => `
     <section class="tier">
       <div class="tier-title"><h3>${esc(t.ten)}</h3><span>${t.diem != null ? `<span class="score ${scoreCls(t.diem)}">${t.diem}/10</span>` : ""}${t.tra_loi ? ` <span class="chip gold">${esc(t.tra_loi)}</span>` : ""}</span></div>
-      ${t.tarot_doc?.length ? `<p class="lbl">Tarot theo vị trí</p>${L(t.tarot_doc)}` : ""}
+      ${t.tarot_doc?.length ? `<p class="lbl">Tarot theo vị trí</p>${t.tarot_ten?.length ? `<ul>${t.tarot_doc.map((x, i) => `<li>${t.tarot_ten[i] ? `<b class="la-ten">${esc(t.tarot_ten[i])}</b> — ` : ""}${esc(x)}</li>`).join("")}</ul>` : L(t.tarot_doc)}` : ""}
       ${t.dong_chay ? `<p class="lbl">Dòng chảy</p><p>${esc(t.dong_chay)}</p>` : ""}
       ${t.lenormand_cap?.length ? `<p class="lbl">Lenormand theo cặp</p>${L(t.lenormand_cap)}` : ""}
       ${t.lenormand_bo_ba?.length ? `<p class="lbl">Bộ ba</p>${L(t.lenormand_bo_ba)}` : ""}
@@ -476,7 +460,7 @@ async function runAI(s, el, ctx, rule) {
   const paint = () => {
     raf = 0;
     const obj = partialJSON(st.text);
-    if (out) out.innerHTML = obj ? readingHTML(normalizeReading(obj, rule), { streaming: true }) : `<p class="note streaming">Đang đọc bài…</p>`;
+    if (out) out.innerHTML = obj ? readingHTML(normalizeReading(obj, rule, { db: store.db, session: s }), { streaming: true }) : `<p class="note streaming">Đang đọc bài…</p>`;
   };
   if (status) status.textContent = "Đang kết nối…";
   // Quá 60 giây không nhận thêm chữ nào thì dừng chờ, giữ bản giải offline (trạm tự dừng ở 60 s, đây là lưới an toàn)
@@ -485,7 +469,7 @@ async function runAI(s, el, ctx, rule) {
   kick();
   try {
     const money = rule._money;
-    const { text, model } = await streamWithFallback({
+    const { text, model } = await goiCoDau({
       provider, key, model: "", storage,
       system: SYSTEM_READING, json: true,
       messages: [{ role: "user", text: readingRequest(store.db, s, { reading: rule, money, settings: store.settings }) }],
@@ -496,7 +480,7 @@ async function runAI(s, el, ctx, rule) {
     });
     clearTimeout(idle);
     const obj = partialJSON(text);
-    const reading = normalizeReading(obj, rule);
+    const reading = normalizeReading(obj, rule, { db: store.db, session: s });
     if (!reading || !reading.tang.length) throw new Error("AI trả về sai khuôn — thử lại hoặc dùng bản luật.");
     s.ai = { provider, model, at: new Date().toISOString(), rounds: s.rounds.length, reading: { ...reading, _money: null }, raw: text };
     save();
@@ -511,6 +495,7 @@ async function runAI(s, el, ctx, rule) {
     const fail = aiFailNotice(e, st.viaTram ? TRAM_KEY : key);
     if (status) status.innerHTML = `<span class="err">${esc(fail.status)}</span>`;
     if (out) out.innerHTML = `<p class="note">${esc(fail.note)}</p>`;
+    if (e.matDau && status) status.innerHTML = `<span class="err">${esc(BAO_MAT_DAU)}</span>`;
   }
 }
 
@@ -615,16 +600,16 @@ function followView(id) {
         const messages = [{ role: "user", text: `${base}\n\n(Bản giải đã đưa ở trên. Từ đây trả lời các câu hỏi tiếp theo.)` }, { role: "assistant", text: s.ai?.raw || "Đã nắm bản giải và các lá." }, ...s.chat.map((m) => ({ role: m.role, text: m.text }))];
         let raf = 0, cur = "";
         try {
-          const { text, model } = await streamWithFallback({
+          const { text: raw, model } = await goiCoDau({
             provider, key: aiKey(), model: "", storage, system: SYSTEM_CHAT, json: false, messages,
             onModel: (m) => { box.querySelector(".who").textContent = `AI · ${m}`; },
             onFallback: () => probeBridge(),
             onText: (full) => { cur = full; if (!raf) raf = requestAnimationFrame(() => { raf = 0; box.innerHTML = `<div class="who">${esc(box.querySelector(".who")?.textContent || "AI")}</div><div class="streaming">${mdLite(cur)}</div>`; }); },
           });
-          s.chat.push({ role: "assistant", text, model, at: new Date().toISOString() });
+          s.chat.push({ role: "assistant", text: suaTenLa(store.db, raw), model, at: new Date().toISOString() });
         } catch (err) {
           if (aiKey() === LOCAL_KEY) probeBridge();
-          s.chat.push({ role: "assistant", text: `Chưa hỏi được AI (${friendlyError(err, aiKey())}) Trả lời theo bản giải theo luật:\n\n${ruleFollowUp(rule, q)}`, at: new Date().toISOString() });
+          s.chat.push({ role: "assistant", text: `${err.matDau ? BAO_MAT_DAU : `Chưa hỏi được AI (${friendlyError(err, aiKey())}) Trả lời theo bản giải theo luật:`}\n\n${ruleFollowUp(rule, q)}`, at: new Date().toISOString() });
         }
         save();
         ctx.rerender();
