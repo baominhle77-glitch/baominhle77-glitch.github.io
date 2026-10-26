@@ -517,7 +517,8 @@ def ve_live(owner,sc,W):
         tm=float(cue["t_s"])
         end=float(law["t_ra_s"])
         if tm<1.8 or tm>end-1.5:continue
-        delta=.18 if i%2==0 else -.10
+        # Bay máy quay có ease nhưng không tràn lề vùng an toàn ở 9:16.
+        delta=(.07 if i%2==0 else -.055) if doc else (.14 if i%2==0 else -.09)
         target=np.array([delta,.05 if doc else .03,0])
         owner.su(tm,lambda target=target:
                  [sc.camera.frame.animate.move_to(target)],uu=25)
