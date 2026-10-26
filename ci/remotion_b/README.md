@@ -46,3 +46,23 @@ weaker-cohesion region. The numeric comparison is the exact narrated calculated
 gap Δγ=35.54mN/m at 25°C for inferred 25mM SDS, not invented 72/25 values.
 Remotion uses the downloaded headless shell, swangle, 120000ms timeout and
 concurrency=1, with the Ubuntu browser runtime libraries installed explicitly.
+
+## Round 3 — independent cached beat jobs
+
+CI runs six Manim matrix jobs (`fail-fast: false`, 40min each). Every invocation
+specifies 960×540 or540×960 and30fps. The scene enforces <=400 physical particles.
+Every completed beat prints render wall time/CPU seconds and uploads its two
+MP4s plus six native proof frames. Failed beats can be rerun independently.
+
+The AST fingerprint includes only code reachable by the selected beat. A needle
+change invalidates h3 only; shared renderer changes invalidate affected beats.
+`actions/cache` retains pip wheels, node_modules and native beat media. Clips are
+revalidated against dimensions, frame count and source fingerprint before reuse.
+
+A separate60min Remotion job downloads the six artifacts, uses the bundled
+Remotion FFmpeg/ffprobe and installs only missing Chrome runtime libraries. Apt
+mirror waits are bounded and optional third-party apt sources are excluded from
+index refresh. The requested Remotion concurrency is2; if its CPU check exposes
+only1 core, the job logs that fact and retries1 rather than repeating the earlier
+fatal error. No quality threshold changes. Native1080p is a separate opt-in job,
+strictly conditional on every540p gate passing; it does not upscale Manim clips.

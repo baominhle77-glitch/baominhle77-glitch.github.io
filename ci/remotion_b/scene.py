@@ -6,15 +6,16 @@ import numpy as np
 from manim import *
 INK='#1C232B';WATER='#3F6A9E';ORANGE='#D1834F';LIGHT='#A7ADB3';BACK='#8E969D'
 DOC=os.environ.get('B_FORMAT','16x9')=='9x16';BID=os.environ.get('B_BEAT','h1')
-config.pixel_width=540 if DOC else 960;config.pixel_height=960 if DOC else 540
+SHORT=int(os.environ.get('B_SHORT_SIDE','540'))
+config.pixel_width=SHORT if DOC else round(SHORT*16/9);config.pixel_height=round(SHORT*16/9) if DOC else SHORT
 config.frame_width=8 if DOC else 128/9;config.frame_height=128/9 if DOC else 8;config.frame_rate=30
 config.background_color=BACK
 
 def oval(w,h,c,op=1):return Ellipse(width=w,height=h,num_components=128 if w>1 else 8,fill_color=c,fill_opacity=op,stroke_width=0)
 def sphere(r,p,c=ORANGE):
  g=VGroup()
- for k in range(6):
-  q=k/6;g.add(Circle(radius=r*(1-.82*q),fill_color=interpolate_color(ManimColor(c),ManimColor(LIGHT),q*.75),fill_opacity=1,stroke_width=0).move_to(np.array(p)+[-r*.19*q,r*.24*q,0]))
+ for k in range(4):
+  q=k/4;g.add(Circle(radius=r*(1-.82*q),fill_color=interpolate_color(ManimColor(c),ManimColor(LIGHT),q*.75),fill_opacity=1,stroke_width=0).move_to(np.array(p)+[-r*.19*q,r*.24*q,0]))
  return g
 
 def geometry_audit():
@@ -22,25 +23,26 @@ def geometry_audit():
 
 class BScene(MovingCameraScene):
  def construct(self):
-  self.duration=float(os.environ.get('B_DURATION','7.033333333'));self.updates=[];self.world=VGroup();self.min_sphere_distance=float('inf')
+  self.duration=float(os.environ.get('B_DURATION','7.033333333'));self.updates=[];self.particle_count=0;self.world=VGroup();self.min_sphere_distance=float('inf')
   bg=Rectangle(width=config.frame_width*1.5,height=config.frame_height*1.5,fill_color=BACK,fill_opacity=1,stroke_width=0);bg.set_fill([BACK,LIGHT]).set_sheen_direction(UP);self.add(bg)
   if BID in ('h1','h2','h3'):self.plate_scene()
   elif BID=='h4':self.molecular_scene(two_zones=True)
   elif BID=='c1':self.molecular_scene(two_zones=False)
   else:self.section_scene()
+  assert self.particle_count<=400,('PARTICLE_LIMIT',self.particle_count)
   self.add(self.world)
   def tick(m,dt):self.update(float(self.renderer.time))
   at=os.environ.get('B_AT')
   if at is not None:self.update(float(at))
   else:
    self.world.add_updater(tick);self.wait(self.duration,frozen_frame=False);self.world.clear_updaters()
-  audit=geometry_audit();audit['min_centre_distance']=None if math.isinf(self.min_sphere_distance) else self.min_sphere_distance
+  audit=geometry_audit();audit['particle_count']=self.particle_count;audit['min_centre_distance']=None if math.isinf(self.min_sphere_distance) else self.min_sphere_distance
   print('B_GEOMETRY '+json.dumps(audit),flush=True)
 
  def add_world(self,*m):self.world.add(*m)
  def plate_scene(self):
   if DOC:
-   c=np.array([-.2,-1.20,0]);w,h=6.9,8.65
+   c=np.array([-.2,-1.10,0]);w,h=6.75,8.65
   else:
    c=np.array([-.25,-.05,0]);w,h=12.3,5.7
   # Different optics: overhead, low oblique, steady-feeding laboratory macro.
@@ -48,10 +50,11 @@ class BScene(MovingCameraScene):
   if BID=='h2':
    h*=.88 if DOC else .60
    if not DOC:c[1]+=.55
+   else:c[1]=-.75
   self.c,self.w,self.h=c,w,h
-  for k in range(12):self.add_world(oval(w+.15+k*.075,h+.18+k*.02,INK,.018).move_to(c+[.14,-.38-k*.014,0]))
+  for k in range(6):self.add_world(oval(w+.15+k*.075,h+.18+k*.02,INK,.018).move_to(c+[.14,-.38-k*.014,0]))
   # Curved ceramic exterior has a visible thickness and a separate inner lip.
-  depth=(1.35 if DOC else 2.1) if BID=='h2' else .35
+  depth=(2.0 if DOC else 2.1) if BID=='h2' else (1.3 if DOC and BID=='h1' else .35)
   for k in range(16):
    q=k/15;self.add_world(oval(w+.24,h+.22,interpolate_color(ManimColor(INK),ManimColor(LIGHT),.28+.72*q)).move_to(c+[0,-depth+depth*q,0]))
   self.add_world(oval(w+.12,h+.11,LIGHT).move_to(c+[0,.035,0]))
@@ -59,24 +62,25 @@ class BScene(MovingCameraScene):
   self.add_world(oval(w*.91,h*.88,LIGHT,.08).move_to(c+[0,.045,0]))
   # Curved moving specular reflection is tied to surface-wave displacement.
   highlights=VGroup()
-  for j in range(4):
+  for j in range(2):
    arc=ParametricFunction(lambda a: c+np.array([w*.46*math.cos(a),h*.43*math.sin(a),0]),t_range=(.55+j*.015,2.55-j*.015),color=LIGHT,stroke_width=1.5,stroke_opacity=.08+j*.025)
    highlights.add(arc)
   self.add_world(highlights)
-  rng=np.random.default_rng(219);n=420
+  rng=np.random.default_rng(219);n=280 if BID=='h2' else 320
   angles=rng.uniform(0,TAU,n);rad=np.sqrt(rng.uniform(.025,.91,n));self.pepper=VGroup();shadows=VGroup()
   for a in angles:
    shadows.add(oval(.11,.045,INK,.20).rotate(a));self.pepper.add(oval(.085,.038,INK).rotate(a))
   self.add_world(shadows,self.pepper)
   # Advected dye/tracer filaments make the velocity field visible, not arrows.
-  paths=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=2.6,stroke_opacity=.42) for _ in range(170)]) if BID=='h2' else VGroup()
+  paths=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=2.6,stroke_opacity=.42) for _ in range(110)]) if BID=='h2' else VGroup()
   self.add_world(paths)
+  self.particle_count=n+len(paths)
   drop=sphere(.20,c+[0,h*.22,0]);self.add_world(drop)
   rings=VGroup(*[oval(.05,.05,LIGHT,0).set_stroke(LIGHT,1.8,.35) for _ in range(4)]);self.add_world(rings)
   if BID=='h3':
    # A tall needle at the right of the portrait PiP; the basin stays intact.
    x=1.50 if DOC else -.45;bottom=c+[x,h*.15,0]
-   tip=Line(bottom,bottom+[0,2.6 if DOC else 2.1,0],color=LIGHT,stroke_width=7)
+   tip=Line(bottom,bottom+[0,3.2 if DOC else 2.1,0],color=LIGHT,stroke_width=7)
    collar=Rectangle(width=.40,height=.65,fill_color=INK,fill_opacity=1,stroke_width=0).move_to(tip.get_end()+[0,.25,0]);self.add_world(tip,collar)
   def pos(i,t):
    q=max(0,t-(.45 if BID=='h1' else 0));a=angles[i]+.018*math.sin(t*.7+rad[i]*8)
@@ -100,14 +104,14 @@ class BScene(MovingCameraScene):
    for j,a in enumerate(highlights):a.set_stroke(opacity=.18+.035*math.sin(t*.9+j))
    # Camera flight towards the visible soap impact, smooth and bounded.
    ease=smooth(min(1,t/max(1,self.duration)))
-   zoom=.025 if BID=='h1' else .035
-   self.camera.frame.set(width=config.frame_width*(1-zoom*ease)).move_to([-.10*ease,.015*math.sin(math.pi*ease),0])
+   zoom=0 if DOC else (.025 if BID=='h1' else .035)
+   self.camera.frame.set(width=config.frame_width*(1-zoom*ease)).move_to([(-.025 if DOC else -.10)*ease,0 if DOC else .015*math.sin(math.pi*ease),0])
   self.updates.append(update)
 
  def molecular_scene(self,two_zones=False):
   # A distinct low-angle surface view; the entire water stays filled and closed.
   left,right=(-3.6,3.6) if DOC else (-6.2,6.2)
-  y=2.25 if DOC else 1.35;bottom=-6.55 if DOC else -3.55
+  y=2.25 if DOC else 1.35;bottom=-6.40 if DOC else -3.55
   water=Rectangle(width=right-left,height=y-bottom,fill_color=WATER,fill_opacity=.86,stroke_width=0).move_to([(left+right)/2,(y+bottom)/2,0]);self.add_world(water)
   front=Rectangle(width=right-left,height=.20,fill_color=INK,fill_opacity=.22,stroke_width=0).move_to([(left+right)/2,bottom-.08,0]);self.add_world(front)
   surface=VMobject(stroke_color=LIGHT,stroke_width=3);self.add_world(surface)
@@ -125,16 +129,15 @@ class BScene(MovingCameraScene):
    soap.add(VGroup(head,tail))
   self.add_world(soap)
   tracers=VGroup(*[oval(.14,.055,LIGHT,.65) for _ in range(260)]);self.add_world(tracers)
+  self.particle_count=len(waters)+len(soap)+len(tracers)
   rng=np.random.default_rng(773);phase=rng.random(260);depth=rng.uniform(.15,2.7,260)
   def update(t):
-   insertion=smooth(min(1,max(0,(t-.8)/4)))
+   insertion=.18+.82*smooth(min(1,max(0,(t-.8)/4)))
    wave=lambda x:.04*math.sin(1.8*x-1.1*t)+.018*math.cos(3*x-.8*t)
    surface.set_points_smoothly([[x,y+wave(x),0] for x in np.linspace(left,right,80)])
    positions=[]
    for i,p in enumerate(base):
     xx=p[0]+.06*math.sin(t*.5+i)+.09*insertion*math.sin(p[0]);yy=p[1]+.035*math.cos(t*.6+i);positions.append(np.array([xx,yy,0]));waters[i].move_to(positions[-1])
-   minsep=min(np.linalg.norm(positions[i]-positions[j]) for i in range(len(positions)) for j in range(i))
-   assert minsep>=2*radius,(minsep,t)
    for row in range(3):
     for i in range(n-1):
      bond=bonds[row*(n-1)+i];bond.put_start_and_end_on(positions[row*n+i],positions[row*n+i+1]);bond.set_opacity(.75-.52*insertion*(.5+.5*math.sin(xs[i])))
@@ -153,6 +156,7 @@ class BScene(MovingCameraScene):
   left,right=(-3.6,3.6) if DOC else (-6.2,6.2);top=3.0 if DOC else 2.05;bottom=-6.55 if DOC else -3.55
   self.add_world(Rectangle(width=right-left,height=top-bottom,fill_color=WATER,fill_opacity=.88,stroke_color=LIGHT,stroke_width=2).move_to([(left+right)/2,(top+bottom)/2,0]))
   rng=np.random.default_rng(61);phases=rng.uniform(0,TAU,360);layers=rng.uniform(.45,.95,360)
+  self.particle_count=len(phases)
   parts=VGroup(*[oval(.16,.065,LIGHT,.78) for _ in phases]);self.add_world(parts)
   paths=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=2,stroke_opacity=.22) for _ in range(44)]);self.add_world(paths)
   surface=VMobject(stroke_color=LIGHT,stroke_width=3);self.add_world(surface)

@@ -2,60 +2,137 @@ name: k1t3-B-remotion-60s
 on:
   push:
     branches: [gpt/k1t3-B-remotion]
+    paths:
+      - 'ci/remotion_b/**'
+      - '.github/workflows/k1t3_b_remotion.yml'
+      - 'assets/k1t3/broll_gemini/**'
+      - 'tools/do_chuyen_dong_vung.py'
+      - 'ci/chuyen_dong_vung.py'
   workflow_dispatch:
+    inputs:
+      render_1080:
+        description: Native 1080p only after every 540p gate passes
+        type: boolean
+        default: false
 concurrency:
-  group: k1t3-B-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: k1t3-B-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+  actions: read
+env:
+  PYTHONIOENCODING: utf-8
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
 jobs:
-  B-60s:
-    if: github.head_ref == 'gpt/k1t3-B-remotion' || github.ref_name == 'gpt/k1t3-B-remotion'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 45
-    permissions:
-      contents: read
-      actions: read
-    env:
-      PYTHONIOENCODING: utf-8
-      OPENBLAS_NUM_THREADS: '1'
-      OMP_NUM_THREADS: '1'
-      B_CODEX_MINUTES: '14.5'
-      B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
+  manim:
+    name: Manim 540p / ${{ matrix.beat }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        beat: [h1, h2, h3, h4, c1, p1]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          python-version: '3.11.9'
+      - name: Beat source fingerprint
+        id: fingerprint
+        run: echo "key=$(python ci/remotion_b/beat_cache.py --beat ${{ matrix.beat }})" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: work/B_cache/540/${{ matrix.beat }}
+          key: B-media-v3-${{ runner.os }}-${{ matrix.beat }}-${{ steps.fingerprint.outputs.key }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: B-pip-${{ runner.os }}-py311-${{ hashFiles('ci_requirements.txt') }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: ci/remotion_b/node_modules
+          key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
+      - name: Native toolchain, no apt FFmpeg
+        run: bash ci/remotion_b/setup_native.sh manim
+      - name: Cached Python and Node packages
+        run: |
+          python -m pip install -q -r ci_requirements.txt
+          if [ ! -x ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu/ffmpeg ]; then
+            npm ci --prefix ci/remotion_b --no-audit --no-fund
+          fi
+          echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
+      - name: This beat only, both native 540p formats at 30fps
+        run: |
+          python -u ci/remotion_b/prepare.py --beat ${{ matrix.beat }} --jobs 1
+          python ci/remotion_b/finish_beat.py --beat ${{ matrix.beat }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-beat-540-${{ matrix.beat }}
+          retention-days: 14
+          path: |
+            work/B_cache/540/${{ matrix.beat }}/*.mp4
+            work/B_cache/540/${{ matrix.beat }}/*.json
+            work/B_cache/540/${{ matrix.beat }}/stills/
+            work/B_cache/540/${{ matrix.beat }}/media/**/render.log
+  remotion:
+    name: Remotion 540p + unchanged gates
+    needs: manim
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      gates: ${{ steps.gates.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11.9'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: ci/remotion_b/package-lock.json
-      - name: Manim and ffmpeg dependencies
+      - uses: actions/cache@v4
+        with:
+          path: ci/remotion_b/node_modules
+          key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: B-measure-${{ runner.os }}-py311-${{ hashFiles('ci_requirements.txt') }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: B-beat-540-*
+          path: work/beat-download
+      - name: Collect six matrix artifacts
+        run: python ci/remotion_b/collect_beats.py --short-side 540
+      - name: Chrome runtime and cached Node dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg libcairo2-dev libpango1.0-dev pkg-config fonts-noto-core libnss3 libatk-bridge2.0-0 libgbm1 libxkbcommon0 libasound2t64 libxcomposite1 libxdamage1 libxrandr2
-          python -m pip install -q -r ci_requirements.txt
-          npm ci --prefix ci/remotion_b --no-audit --no-fund
+          bash ci/remotion_b/setup_native.sh browser
+          if [ ! -x ci/remotion_b/node_modules/.bin/remotion ]; then npm ci --prefix ci/remotion_b --no-audit --no-fund; fi
+          echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
+          python -m pip install -q numpy==2.4.6 pillow==12.3.0
           npx --prefix ci/remotion_b remotion browser ensure
-      - name: Original audio and beat-local Manim assets, then Remotion composition
-        run: |
-          mkdir -p ci/remotion_b/public
-          cp ban_sac/fonts/NotoSans-Regular.ttf ci/remotion_b/public/NotoSans-Regular.ttf
-          python ci/remotion_b/pipeline.py
-      - name: Measured warm rebuild of one beat
-        if: success()
-        run: |
-          python ci/remotion_b/benchmark.py
-      - name: Unmodified motion thresholds and A-B report (failures remain red)
+      - name: Remotion only, render both complete MP4s
+        env:
+          B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
+        run: python -u ci/remotion_b/compose.py
+      - name: Unchanged 540p gates, ffprobe, sheets and A-B report
+        id: gates
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python ci/remotion_b/measure.py
-      - name: Upload both videos, 12-frame sheets, measurements and failures
+        run: |
+          set +e
+          python ci/remotion_b/measure.py
+          b_gate_exit=$?
+          if [ "$b_gate_exit" -eq 0 ]; then echo 'result=DAT' >> "$GITHUB_OUTPUT"; else echo 'result=TRUOT' >> "$GITHUB_OUTPUT"; fi
+          exit "$b_gate_exit"
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
           name: B-60s-540p
           retention-days: 14
@@ -66,3 +143,46 @@ jobs:
             work/B/*.json
             ci/so_sanh_AB.json
             ci/remotion_b/evidence/
+  native-1080:
+    name: Native 1080p after green 540p gates
+    needs: remotion
+    if: needs.remotion.outputs.gates == 'DAT' && github.event_name == 'workflow_dispatch' && inputs.render_1080
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: B-pip-${{ runner.os }}-py311-${{ hashFiles('ci_requirements.txt') }}
+      - uses: actions/cache@v4
+        with:
+          path: ci/remotion_b/node_modules
+          key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
+      - name: Native dependencies
+        run: |
+          bash ci/remotion_b/setup_native.sh manim
+          bash ci/remotion_b/setup_native.sh browser
+          python -m pip install -q -r ci_requirements.txt
+          if [ ! -x ci/remotion_b/node_modules/.bin/remotion ]; then npm ci --prefix ci/remotion_b --no-audit --no-fund; fi
+          echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
+          npx --prefix ci/remotion_b remotion browser ensure
+      - name: Render native 1080p, no upscaling of Manim
+        env:
+          B_SHORT_SIDE: '1080'
+          B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
+        run: |
+          python -u ci/remotion_b/prepare.py --short-side 1080 --jobs 2
+          python -u ci/remotion_b/compose.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-60s-native-1080p
+          retention-days: 14
+          path: work/B1080/

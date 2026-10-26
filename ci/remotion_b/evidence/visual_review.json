@@ -30,6 +30,21 @@
     "Three original supplied Gemini clips included; portrait foreground is uncut with blurred self-background.",
     "Editorial and motion acceptance await actual MP4 measurements; no overall pass claim."
   ],
-  "reviewed_at": "2026-10-26T14:58:30Z",
-  "round": 2
+  "reviewed_at": "2026-10-26T17:33:00Z",
+  "round": 3,
+  "particle_limit": 400,
+  "particle_counts": {
+    "h1": 320,
+    "h2": 390,
+    "h3": 320,
+    "h4": 315,
+    "c1": 299,
+    "p1": 360
+  },
+  "performance_changes": [
+    "Matrix one beat/job, fail-fast=false; both formats explicit 540p at30fps.",
+    "Only4 visible sphere shading layers; fewer indistinguishable shadow/reflection layers.",
+    "No wedge, no mesh edges or intersecting spheres in36 reviewed native frames.",
+    "Native portrait subjects enlarged, independent layout; all original Gemini assets kept."
+  ]
 }

@@ -3,15 +3,15 @@ import {registerRoot,Composition,AbsoluteFill,OffthreadVideo,Audio,Sequence,stat
 import data from '../public/data.json';
 const INK='#1C232B';const LIGHT='#A7ADB3';
 const titles:Record<string,string>={h1:'What pulls the pepper?',h2:'Clean water pulls harder',h3:'A ring under steady feeding',h4:'A difference in surface tension',c1:'A closer look at the surface',p1:'The surface drags water along'};
-const Movie:React.FC<{format:string}>=({format})=>{
- const frame=useCurrentFrame();const {width,height}=useVideoConfig();const doc=format==='9x16';
+const Movie:React.FC<{format:string;shortSide:number}>=({format,shortSide=540})=>{
+ const frame=useCurrentFrame();const config=useVideoConfig();const scale=shortSide/540;const width=config.width/scale,height=config.height/scale;const doc=format==='9x16';
  const beat=data.beats.find(b=>frame>=b.start&&frame<b.start+b.frames)!;
  const cap=data.captions.find(c=>frame>=c.start&&frame<c.end);
  const clip=data.clips.find(c=>c.available&&c.start!==null&&frame>=c.start&&frame<c.start+c.frames);
  const local=frame-beat.start;
  const opacity=beat.start===0?1:interpolate(local,[0,8],[0,1],{extrapolateRight:'clamp'});
  useLayoutEffect(()=>{
-  const boxes=[...document.querySelectorAll('[data-audit]')].map(el=>{const r=el.getBoundingClientRect();return {name:el.getAttribute('data-audit'),x:r.x,y:r.y,w:r.width,h:r.height,text:el.textContent,font:parseFloat(getComputedStyle(el).fontSize)}});
+  const boxes=[...document.querySelectorAll('[data-audit]')].map(el=>{const r=el.getBoundingClientRect();return {name:el.getAttribute('data-audit'),x:r.x/scale,y:r.y/scale,w:r.width/scale,h:r.height/scale,text:el.textContent,font:parseFloat(getComputedStyle(el).fontSize)}});
   const pip=doc?{x:31,y:133,w:188,h:121}:{x:776,y:18,w:166,h:105};
   for(const b of boxes){
    if(b.x<width*.03-1||b.y<height*.03-1||b.x+b.w>width*.97+1||b.y+b.h>height*.97+1)throw Error('C13_SAFE '+JSON.stringify(b));
@@ -23,7 +23,7 @@ const Movie:React.FC<{format:string}>=({format})=>{
   }
   if(local===0||cap?.start===frame)console.log('B_DOM '+JSON.stringify({frame,format,boxes}));
  },[frame]);
- return <AbsoluteFill style={{backgroundColor:'#8E969D',fontFamily:'Noto Sans',color:INK}}>
+ return <AbsoluteFill style={{backgroundColor:'#8E969D',fontFamily:'Noto Sans',color:INK}}><div style={{position:'absolute',width,height,transform:`scale(${scale})`,transformOrigin:'top left'}}>
   <style>{`@font-face{font-family:'Noto Sans';src:url('${staticFile('NotoSans-Regular.ttf')}')}*{box-sizing:border-box}`}</style>
   {data.beats.map(b=><Sequence key={b.id} from={b.start} durationInFrames={b.frames}><OffthreadVideo src={staticFile(format+'_'+b.id+'.mp4')} muted style={{width:'100%',height:'100%',opacity:b.id===beat.id?opacity:1}}/></Sequence>)}
   {data.beats.map(b=><Sequence key={'a'+b.id} from={b.audioStart} durationInFrames={Math.min(1800-b.audioStart,b.frames)}><Audio src={staticFile(b.audio)}/></Sequence>)}
@@ -39,7 +39,7 @@ const Movie:React.FC<{format:string}>=({format})=>{
     <div data-audit="caption" style={{fontSize:30,fontWeight:800,color:'white',lineHeight:1.2,textAlign:'center',padding:'6px 12px',background:'rgba(28,35,43,.84)',maxWidth:'100%',whiteSpace:doc?'normal':'nowrap'}}>{cap.text}</div>
   </div>}
   <div data-audit="source" style={{position:'absolute',left:width*.05,top:doc?height*.81:height*.93,fontSize:doc?14:13,lineHeight:1.15,backgroundColor:'rgba(167,173,179,.95)',padding:'2px 4px'}}>{beat.id==='h4'?'NIST · Liu · Roché · calculated comparison':'Roché et al. · PRL 2014 · model illustration'}</div>
- </AbsoluteFill>
+ </div></AbsoluteFill>
 };
-const Root=()=> <>{['16x9','9x16'].map(format=><Composition key={format} id={'B-'+format} component={Movie} defaultProps={{format}} durationInFrames={1800} fps={30} width={format==='16x9'?960:540} height={format==='16x9'?540:960}/>)}</>;
+const Root=()=> <>{['16x9','9x16'].map(format=><Composition key={format} id={'B-'+format} component={Movie} defaultProps={{format,shortSide:540}} calculateMetadata={({props})=>({width:Math.round((props.format==='16x9'?960:540)*props.shortSide/540),height:Math.round((props.format==='16x9'?540:960)*props.shortSide/540)})} durationInFrames={1800} fps={30} width={format==='16x9'?960:540} height={format==='16x9'?540:960}/>)}</>;
 registerRoot(Root);
