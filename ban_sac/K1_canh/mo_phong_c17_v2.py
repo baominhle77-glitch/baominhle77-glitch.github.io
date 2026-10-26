@@ -801,7 +801,7 @@ def _fit_source(sc,W,doc):
     source=chu(txt,46,MUC,.90)
     # Native vector text, lề đáy cố định. Không thu font khi dài.
     bx=(W.bc.an_toan[0]+W.bc.an_toan[1])/2
-    by=-6.20 if doc else -3.48
+    by=-6.20 if doc else -3.36
     source.move_to([bx,by,0])
     W.nguon=trang.ghim(sc,trang.man_sang_the_gioi(sc,source))
     W.hop_ng=trang.hop_man(sc,W.nguon)
