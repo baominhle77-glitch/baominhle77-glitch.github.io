@@ -42,6 +42,7 @@ jobs:
         id: fingerprint
         run: echo "key=$(python ci/remotion_b/beat_cache.py --beat ${{ matrix.beat }})" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
+        id: beat-cache
         with:
           path: work/B_cache/540/${{ matrix.beat }}
           key: B-media-v3-${{ runner.os }}-${{ matrix.beat }}-${{ steps.fingerprint.outputs.key }}
@@ -58,10 +59,13 @@ jobs:
           path: ci/remotion_b/node_modules
           key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
       - name: Native toolchain, no apt FFmpeg
+        if: steps.beat-cache.outputs.cache-hit != 'true'
         run: bash ci/remotion_b/setup_native.sh manim
       - name: Cached Python and Node packages
+        env:
+          B_MEDIA_CACHE_HIT: ${{ steps.beat-cache.outputs.cache-hit }}
         run: |
-          python -m pip install -q -r ci_requirements.txt
+          if [ "$B_MEDIA_CACHE_HIT" != "true" ]; then python -m pip install -q -r ci_requirements.txt; fi
           if [ ! -x ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu/ffmpeg ]; then
             npm ci --prefix ci/remotion_b --no-audit --no-fund
           fi
@@ -120,6 +124,9 @@ jobs:
         env:
           B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
         run: python -u ci/remotion_b/compose.py
+      - name: Full FFmpeg for the original fps and freezedetect gates
+        if: always()
+        run: python ci/remotion_b/gate_ffmpeg.py
       - name: Unchanged 540p gates, ffprobe, sheets and A-B report
         id: gates
         if: always()

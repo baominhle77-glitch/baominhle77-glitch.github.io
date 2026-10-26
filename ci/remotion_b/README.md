@@ -66,3 +66,12 @@ index refresh. The requested Remotion concurrency is2; if its CPU check exposes
 only1 core, the job logs that fact and retries1 rather than repeating the earlier
 fatal error. No quality threshold changes. Native1080p is a separate opt-in job,
 strictly conditional on every540p gate passing; it does not upscale Manim clips.
+
+The minimal Remotion FFmpeg is used for native encoding only. Before measurement,
+`gate_ffmpeg.py` verifies a full binary has fps/freezedetect/scale/format, selects
+the system binary or a pinned imageio-ffmpeg0.6.0 wheel, and records its version.
+The original gate implementation is unchanged. A complete media cache hit skips
+the Manim native headers and Python installation. Current warm CPU cost and the
+recorded cold model cost are reported separately, so8-minute projections do not
+mistake cached frames for free new rendering. Gemini inserts now fade softly and
+molecular text is shorter; every other model asset keeps the same fingerprint.

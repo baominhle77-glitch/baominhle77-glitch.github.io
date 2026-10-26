@@ -12,4 +12,7 @@ for bid in ('h1','h2','h3','h4','c1','p1'):
  metrics=list(folder.rglob('metrics.json'))
  if len(metrics)!=1:raise SystemExit('MISSING_METRICS '+bid)
  shutil.copy2(metrics[0],out/'metrics.json')
+ for fmt in ('16x9','9x16'):
+  history=list(folder.rglob(fmt+'.json'))
+  if len(history)==1:shutil.copy2(history[0],out/(fmt+'.json'))
  print('B_COLLECT '+bid,flush=True)

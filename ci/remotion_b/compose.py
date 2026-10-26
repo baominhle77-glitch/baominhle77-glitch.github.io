@@ -8,7 +8,7 @@ for b in data['beats']:
  bid=b['id'];folder=R/'work/B_cache'/str(SHORT)/bid
  metric=folder/'metrics.json'
  if metric.exists():
-  m=json.loads(metric.read_text());stages.append(dict(stage='manim/'+bid,wall_s=m['wall_s'],cpu_s=m['cpu_s'],cache_reused=all(x.get('cache_reused') for x in m['rows'])))
+  m=json.loads(metric.read_text());history=[json.loads((folder/(fmt+'.json')).read_text()) for fmt in ('16x9','9x16') if (folder/(fmt+'.json')).exists()];stages.append(dict(stage='manim/'+bid,wall_s=m['wall_s'],cpu_s=m['cpu_s'],cold_render_wall_s=sum(x['wall_s'] for x in history),cold_render_cpu_s=sum(x['cpu_s'] for x in history),cache_reused=all(x.get('cache_reused') for x in m['rows'])))
  for fmt in ('16x9','9x16'):
   src=folder/f'{fmt}_{bid}.mp4'
   if not src.is_file():missing.append(str(src));continue

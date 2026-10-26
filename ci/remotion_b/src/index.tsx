@@ -2,12 +2,13 @@ import React,{useLayoutEffect} from 'react';
 import {registerRoot,Composition,AbsoluteFill,OffthreadVideo,Audio,Sequence,staticFile,useCurrentFrame,useVideoConfig,interpolate} from 'remotion';
 import data from '../public/data.json';
 const INK='#1C232B';const LIGHT='#A7ADB3';
-const titles:Record<string,string>={h1:'What pulls the pepper?',h2:'Clean water pulls harder',h3:'A ring under steady feeding',h4:'A difference in surface tension',c1:'A closer look at the surface',p1:'The surface drags water along'};
+const titles:Record<string,string>={h1:'What pulls the pepper?',h2:'Clean water pulls harder',h3:'A ring under steady feeding',h4:'Tension drives flow',c1:'Molecular surface',p1:'The surface drags water along'};
 const Movie:React.FC<{format:string;shortSide:number}>=({format,shortSide=540})=>{
  const frame=useCurrentFrame();const config=useVideoConfig();const scale=shortSide/540;const width=config.width/scale,height=config.height/scale;const doc=format==='9x16';
  const beat=data.beats.find(b=>frame>=b.start&&frame<b.start+b.frames)!;
  const cap=data.captions.find(c=>frame>=c.start&&frame<c.end);
  const clip=data.clips.find(c=>c.available&&c.start!==null&&frame>=c.start&&frame<c.start+c.frames);
+ const clipOpacity=clip?(clip.start===0?interpolate(frame-clip.start,[clip.frames-5,clip.frames],[1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'}):interpolate(frame-clip.start,[0,5,clip.frames-5,clip.frames],[0,1,1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'})):0;
  const local=frame-beat.start;
  const opacity=beat.start===0?1:interpolate(local,[0,8],[0,1],{extrapolateRight:'clamp'});
  useLayoutEffect(()=>{
@@ -23,22 +24,22 @@ const Movie:React.FC<{format:string;shortSide:number}>=({format,shortSide=540})=
   }
   if(local===0||cap?.start===frame)console.log('B_DOM '+JSON.stringify({frame,format,boxes}));
  },[frame]);
- return <AbsoluteFill style={{backgroundColor:'#8E969D',fontFamily:'Noto Sans',color:INK}}><div style={{position:'absolute',width,height,transform:`scale(${scale})`,transformOrigin:'top left'}}>
+ return <AbsoluteFill style={{backgroundColor:INK,fontFamily:'Noto Sans',color:INK}}><div style={{position:'absolute',width,height,transform:`scale(${scale})`,transformOrigin:'top left'}}>
   <style>{`@font-face{font-family:'Noto Sans';src:url('${staticFile('NotoSans-Regular.ttf')}')}*{box-sizing:border-box}`}</style>
   {data.beats.map(b=><Sequence key={b.id} from={b.start} durationInFrames={b.frames}><OffthreadVideo src={staticFile(format+'_'+b.id+'.mp4')} muted style={{width:'100%',height:'100%',opacity:b.id===beat.id?opacity:1}}/></Sequence>)}
   {data.beats.map(b=><Sequence key={'a'+b.id} from={b.audioStart} durationInFrames={Math.min(1800-b.audioStart,b.frames)}><Audio src={staticFile(b.audio)}/></Sequence>)}
-  {clip&&<Sequence from={clip.start!} durationInFrames={clip.frames}><AbsoluteFill style={{backgroundColor:INK}}>{doc&&<OffthreadVideo src={staticFile(clip.src!)} startFrom={Math.round(clip.in*30)} muted style={{position:'absolute',width:'100%',height:'100%',objectFit:'cover',filter:'blur(28px)',transform:'scale(1.08)',opacity:.55}}/>}<OffthreadVideo src={staticFile(clip.src!)} startFrom={Math.round(clip.in*30)} muted style={{position:'absolute',width:'100%',height:'100%',objectFit:'contain'}}/><div data-audit="gemini" style={{position:'absolute',left:width*.05,top:height*.30,fontSize:doc?18:16,color:'white',background:'rgba(28,35,43,.85)',padding:'4px 8px'}}>{clip.label}</div></AbsoluteFill></Sequence>}
+  {clip&&<Sequence from={clip.start!} durationInFrames={clip.frames}><AbsoluteFill style={{backgroundColor:INK,opacity:clipOpacity}}>{doc&&<OffthreadVideo src={staticFile(clip.src!)} startFrom={Math.round(clip.in*30)} muted style={{position:'absolute',width:'100%',height:'100%',objectFit:'cover',filter:'blur(28px)',transform:'scale(1.08)',opacity:.55}}/>}<OffthreadVideo src={staticFile(clip.src!)} startFrom={Math.round(clip.in*30)} muted style={{position:'absolute',width:'100%',height:'100%',objectFit:'contain'}}/><div data-audit="gemini" style={{position:'absolute',left:width*.05,top:height*.30,fontSize:doc?18:16,color:'white',background:'rgba(28,35,43,.85)',padding:'4px 8px'}}>{clip.label}</div></AbsoluteFill></Sequence>}
   <div data-audit="title" style={{position:'absolute',left:width*.05,top:height*.045,width:width*(doc?.82:.70),fontSize:doc?32:32,fontWeight:700,lineHeight:1.18,color:clip?'white':INK}}>{titles[beat.id]}</div>
   {!clip&&['h4','c1','p1'].includes(beat.id)&&<>
-    <div data-audit="model-label" style={{position:'absolute',left:width*.05,top:height*(doc?.28:.20),fontSize:doc?18:18,fontWeight:700}}>{beat.id==='p1'?'Flow cross-section · model':beat.id==='c1'?'Molecular surface · close-up':'Surface tension · molecular model'}</div>
-    {beat.id!=='p1'&&<div data-audit="mechanism" style={{position:'absolute',left:width*.06,top:height*(doc?.37:.32),fontSize:doc?17:18,lineHeight:1.5,fontWeight:700}}>{beat.id==='h4'?'25°C · SDS 25 mM':'Water-loving head'}<br/>{beat.id==='h4'?'Δγ = 35.54 mN/m':''}</div>}
+    <div data-audit="model-label" style={{position:'absolute',left:width*.05,top:height*(doc?.28:.20),fontSize:doc?18:18,fontWeight:700}}>{beat.id==='p1'?'Flow cross-section · model':beat.id==='c1'?'Adsorption model':'Tension comparison'}</div>
+    {beat.id!=='p1'&&<div data-audit="mechanism" style={{position:'absolute',left:width*.06,top:height*(doc?.37:.32),fontSize:doc?17:18,lineHeight:1.5,fontWeight:700}}>{beat.id==='h4'?'Δγ = 35.54 mN/m':'Water-loving head'}</div>}
     {beat.id==='c1'&&<div data-audit="molecular-tail" style={{position:'absolute',left:width*.06,top:height*(doc?.31:.26),fontSize:doc?17:18,fontWeight:700}}>Water-repelling tail</div>}
     {beat.id!=='p1'&&<div data-audit="weak-pull" style={{position:'absolute',right:width*(doc?.15:.08),top:height*(doc?.46:.48),fontSize:doc?18:20,fontWeight:700,color:'#D1834F'}}>Weaker surface pull</div>}
   </>}
   {cap&&<div style={{position:'absolute',left:width*.035,bottom:doc?height*.205:height*.105,width:width*(doc?.82:.93),display:'flex',justifyContent:'center'}}>
     <div data-audit="caption" style={{fontSize:30,fontWeight:800,color:'white',lineHeight:1.2,textAlign:'center',padding:'6px 12px',background:'rgba(28,35,43,.84)',maxWidth:'100%',whiteSpace:doc?'normal':'nowrap'}}>{cap.text}</div>
   </div>}
-  <div data-audit="source" style={{position:'absolute',left:width*.05,top:doc?height*.81:height*.93,fontSize:doc?14:13,lineHeight:1.15,backgroundColor:'rgba(167,173,179,.95)',padding:'2px 4px'}}>{beat.id==='h4'?'NIST · Liu · Roché · calculated comparison':'Roché et al. · PRL 2014 · model illustration'}</div>
+  <div data-audit="source" style={{position:'absolute',left:width*.05,top:doc?height*.81:height*.93,fontSize:doc?14:13,lineHeight:1.15,backgroundColor:'rgba(167,173,179,.95)',padding:'2px 4px'}}>{beat.id==='h4'?'NIST · Liu · Roché · 25°C · SDS 25 mM (inferred)':'Roché et al. · PRL 2014 · model illustration'}</div>
  </div></AbsoluteFill>
 };
 const Root=()=> <>{['16x9','9x16'].map(format=><Composition key={format} id={'B-'+format} component={Movie} defaultProps={{format,shortSide:540}} calculateMetadata={({props})=>({width:Math.round((props.format==='16x9'?960:540)*props.shortSide/540),height:Math.round((props.format==='16x9'?540:960)*props.shortSide/540)})} durationInFrames={1800} fps={30} width={format==='16x9'?960:540} height={format==='16x9'?540:960}/>)}</>;
