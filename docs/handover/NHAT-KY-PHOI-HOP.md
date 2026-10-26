@@ -29,6 +29,7 @@
 - Test: `node boi/test.mjs` 17/17; `check-public-content` đạt; e2e Playwright Pixel 7 (trạm giả ok/429/mất mạng) đạt.
 - Đã biết (phía trạm): với `gemini-flash-latest` trạm trả 404 vì chuỗi dự phòng dừng ở `gemini-2.5-flash` (đã ngừng) → web rơi về bản luật; cần sửa chuỗi model trong trạm.
 - Không thêm secret. Không đụng Worker/workflow.
+- 23:40: khoá BOI-20261026-01 → `completed` trong PR #150 trước khi merge (Chủ tịch duyệt merge). Kiểm `boi/sw.js` = `boi-v6` trên GitHub Pages sau merge.
 
 ### 2026-10-25 09:30 GMT+7 — Claude Code — đóng CHOICE-20261024-01 (trong PR #139)
 - Xoá Hội Chọn Đúng (#134, `46d3029`) đã deploy SUCCESS (run 40114714384): Worker không còn route/cron choice, Pages không còn `/hoi-chon-dung/`; hậu kiểm Bói toán, cộng đồng, xác minh search đạt. "Xác minh Admin V8 production" fail là lỗi có sẵn từ 25/07 (bộ xác minh chờ v8, production v11), không do #134.
