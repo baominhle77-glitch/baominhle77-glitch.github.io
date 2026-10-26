@@ -895,13 +895,45 @@ def ve_live(owner,sc,W):
         upper=None
         txt_y=-2.99
         maxw=2.55
-    _fit_source(sc,W,doc)
     model=LiveScenePerBeat(owner,sc,W,rect,upper)
     sc._c17_snapshot_clock=model.clock
     owner._c17_hats=model.dynamic
     owner._c17_t=model.clock
     owner.hinh_ds.extend([model.static,model.dynamic,model.extra])
     sc._co_chuyen_dong_song=True
+    # BẮT BUỘC hoàn tất chuyen_dau trước khi tạo/ghim chữ.
+    # Trước đây c1 (và các beat zoom) đặt nhan_hien khi camera rộng
+    # > khung chuẩn, khiến bbox chữ phóng gần x2 và đè nguồn ở cuối beat.
+    # Giữ nguyên N khung chuyển cảnh/TTS: chỉ đổi lúc KHỞI TẠO nhãn.
+    sc.chuyen_dau(W.b)
+    _fit_source(sc,W,doc)
+
+    # Preflight TẤT CẢ 35 caption trên bố cục hiện hành; dùng bbox
+    # Text MANIM thực, không ước lượng ký tự. Mọi beat đều dùng đúng một
+    # trong hai bố cục và 1 dòng nguồn cùng cao độ.
+    # Fail fast trước render MP4 nếu MỘT nhãn đè nguồn, PiP hay safe.
+    bx0,bx1,by0,by1=bc.an_toan
+    caption_center=[-.10,-5.02,0] if doc else [-.45,-2.57,0]
+    pip=trang.o_pip_rong(bc)
+    if len(CAPTION_BY_BEAT)!=35:
+        raise ValueError("C13_CAPTION_COUNT_%d"%len(CAPTION_BY_BEAT))
+    for candidate_id,candidate_text in CAPTION_BY_BEAT.items():
+        nwords=len(candidate_text.split())
+        if nwords<2 or nwords>5:
+            raise ValueError("C13_CAPTION_WORDS %s %s"%(candidate_id,candidate_text))
+        candidate=chu(candidate_text,60,MUC)
+        candidate.move_to(caption_center)
+        A=trang.hop_man(sc,candidate)
+        inside=(A[0]>=bx0+.02 and A[1]<=bx1-.02 and
+                A[2]>=by0+.02 and A[3]<=by1-.02)
+        collision_source=(W.hop_ng is not None and
+                          trang._cat(A,W.hop_ng,0.0))
+        collision_pip=trang._cat(A,pip,0.0)
+        if not inside or collision_source or collision_pip:
+            raise ValueError("C13_NHAN_HIEN_PREFLIGHT %s %s x %.2f..%.2f y %.2f..%.2f source=%s pip=%s safe=%s"%
+              (bc.ten,candidate_id,*A,collision_source,collision_pip,inside))
+    print("C13_NHAN_HIEN_AUDIT %s 35/35 SAFE source+PiP+bo_cuc"%bc.ten,flush=True)
+
     # Nguồn/nhãn/biểu đồ không che hiện tượng chính; ít chữ, đúng mốc.
     os_=owner.muc_chu()
     owner._live_current_label=None
@@ -944,7 +976,6 @@ def ve_live(owner,sc,W):
                  [sc.camera.frame.animate.move_to(target)],uu=25)
     print("C17_8_SCENE %s %s shot=%s native=Manim vector F=%.2f,%.2f,%.2f,%.2f" %
           (W.b["id"],bc.ten,model.shot,*rect),flush=True)
-    sc.chuyen_dau(W.b)
     owner.chay_su_kien()
     # Kiểm từng vật riêng: hộp gộp giữa cận cảnh phía trên và bể phía
     # dưới là hộp ảo cắt PiP, trong khi các vật thật hoàn toàn không cắt.
