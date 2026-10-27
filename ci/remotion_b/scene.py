@@ -54,7 +54,7 @@ class BScene(MovingCameraScene):
   self.c,self.w,self.h=c,w,h
   for k in range(6):self.add_world(oval(w+.15+k*.075,h+.18+k*.02,INK,.018).move_to(c+[.14,-.38-k*.014,0]))
   # Curved ceramic exterior has a visible thickness and a separate inner lip.
-  depth=(2.0 if DOC else 2.1) if BID=='h2' else (1.3 if DOC and BID=='h1' else .35)
+  depth=(2.8 if DOC else 2.1) if BID=='h2' else (1.8 if DOC and BID=='h1' else .35)
   for k in range(16):
    q=k/15;self.add_world(oval(w+.24,h+.22,interpolate_color(ManimColor(INK),ManimColor(LIGHT),.28+.72*q)).move_to(c+[0,-depth+depth*q,0]))
   self.add_world(oval(w+.12,h+.11,LIGHT).move_to(c+[0,.035,0]))
@@ -126,6 +126,7 @@ class BScene(MovingCameraScene):
   depth=2.0 if two_zones else 1.65
   # Native portrait and landscape have separately authored display frustums.
   view=(-3.55,3.55,-6.45,3.25) if DOC else (-6.55,6.55,-3.35,1.93)
+  if DOC and BID=='c1':view=(-3.55,3.55,-6.55,3.85)
   nx,ny=(7,4) if two_zones else (5,4)
   radius=.13 if two_zones else .18
   base=[]

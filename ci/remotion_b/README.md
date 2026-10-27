@@ -10,9 +10,12 @@ Manim renders six text-free simulations with separately authored960×540 and
 native media are cached; a validated media hit skips the native toolchain.
 Remotion assembles the original TTS, semantic2–5-word captions aligned to word
 clocks, titles, transitions and the three original GĐ-supplied Gemini clips.
-Portrait Gemini uses a focal crop covering the frame, per the latest instruction.
+Portrait Gemini retains the complete original16:9 image at540px wide in the
+upper panel, with a native Manim simulation of the same phenomenon below.
+The common G3 gate forbids enlarging real/AI footage beyond1.0× source pixels.
 The hook uses h1 source3–9s at timeline0–6s; c2 appears9.5–13.5s and p2
-18.5–22.5s, all labelled `AI minh hoạ (Gemini)`. Hashes and sources are recorded.
+18.5–22.5s in landscape and19–26s in portrait, all labelled
+`AI minh hoạ (Gemini)`. Hashes and sources are recorded.
 
 Each beat has its own scale/view. Molecular soap adsorption, weakening bonds and
 surface/return flow evolve throughout the shot; its eased optical camera changes
@@ -25,8 +28,10 @@ Use `--stills` for three native540p frames per beat/format. Run
 `python ci/remotion_b/compose.py` for Remotion only; install Node packages using
 `npm ci --prefix ci/remotion_b`, and use `B_CHROME=/usr/bin/chromium` locally.
 CI runs `remotion browser ensure`, uses swangle and120000ms timeouts. It requests
-concurrency2; a genuinely one-core runner is logged and retried at1 without
-spoofing its CPU count. The actual value is included in render metrics.
+concurrency2; the selected configuration is capped by the actual CPU capacity.
+The renderer's `onStart.resolvedConcurrency` callback supplies the effective
+value, which must equal the selected configuration in G8. Desired2, capacity1,
+configured1 and effective1 are reported separately on a one-core runner.
 
 Before measurement, `gate_ffmpeg.py` verifies the rawvideo muxer and original
 fps/freezedetect/scale/format filters. It chooses a full system FFmpeg or pinned
