@@ -27,8 +27,7 @@
     "Late h2 has sustained pepper transport, growing traces and eased camera change. Long orange arrows have a black outline and exceed15% frame width.",
     "Caption padding is clipped at the next caption start; bands are opaque. Fonts load before auditing/capture.",
     "The phrase Zoom from the bowl is literal original storyboard narration and TTS word data; speech is unchanged.",
-    "Actual final MP4 G1–G8 and final frame review remain required before delivery.",
-    "D18 G3: increased portrait h1/h2 bowl depth and c1 model height. Reviewed36 updated native frames, thresholds unchanged. Actual final CI MP4 review follows."
+    "Reviewed actual final MP4s:36 beat frames,12 targeted frames and both12-frame contact sheets. At25.1s caption is opaque; at25.2s it has ended. At50.7s only the pull is strong caption appears. At59.4s long orange arrows are present. G1-G8 pass both formats; C17 30/30 each; FREEZE0."
   ],
   "reviewed_at": "2026-10-26T21:13:36.367296+00:00",
   "round": 5,
@@ -49,5 +48,55 @@
   ],
   "c13_errors": [],
   "native_geometry_recheck_utc": "2026-10-27T07:26:37.584638+00:00",
-  "native_geometry_recheck_frames": 36
+  "native_geometry_recheck_frames": 36,
+  "final_ci_run": 40467151566,
+  "final_render_sha": "d552a58b3c9574372f19bd0b4e0ce510523936c8",
+  "final_reviewed_at": "2026-10-27T07:45:39.753863+00:00",
+  "final_video_frames_reviewed": 36,
+  "targeted_additional_frames": 12,
+  "final_contact_sheets_reviewed": 2,
+  "final_c13_errors": [],
+  "remaining_issues": [],
+  "final_gate_summary": {
+    "K1 16x9": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT"
+    },
+    "lich_su 16x9": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT"
+    },
+    "K1 9x16": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT"
+    },
+    "lich_su 9x16": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT"
+    }
+  }
 }

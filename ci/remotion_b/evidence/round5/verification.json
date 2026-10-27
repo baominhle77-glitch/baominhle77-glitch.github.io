@@ -1,0 +1,83 @@
+{
+  "render_sha": "d552a58b3c9574372f19bd0b4e0ce510523936c8",
+  "run": 40467151566,
+  "history_run": 40467179450,
+  "regressions_passed": 16,
+  "positive_nouns_missing_images_fail": [
+    "bowl",
+    "pepper",
+    "arrow",
+    "ship",
+    "boat",
+    "film",
+    "wave",
+    "map",
+    "army",
+    "molecule"
+  ],
+  "C13_remaining": [],
+  "FREEZE_remaining": [],
+  "main_source": "Original user-supplied h1/p2/c2 1280x720; native split portrait with no enlargement",
+  "runtime": [
+    {
+      "format": "16x9",
+      "shortSide": 540,
+      "wall_s": 212.55882633000002,
+      "desired_concurrency": 2,
+      "cpu_capacity": 1,
+      "configured_concurrency": 1,
+      "effective_concurrency": 1
+    },
+    {
+      "format": "9x16",
+      "shortSide": 540,
+      "wall_s": 256.997633416,
+      "desired_concurrency": 2,
+      "cpu_capacity": 1,
+      "configured_concurrency": 1,
+      "effective_concurrency": 1
+    }
+  ],
+  "gates": {
+    "K1 16x9": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT"
+    },
+    "lich_su 16x9": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT"
+    },
+    "K1 9x16": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT"
+    },
+    "lich_su 9x16": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT"
+    }
+  }
+}

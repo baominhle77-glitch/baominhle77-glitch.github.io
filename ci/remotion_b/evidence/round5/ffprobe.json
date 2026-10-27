@@ -1,0 +1,108 @@
+{
+  "16x9": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "width": 960,
+        "height": 540,
+        "r_frame_rate": "30/1",
+        "duration": "60.000000",
+        "nb_frames": "1800",
+        "side_data_list": [
+          {}
+        ]
+      },
+      {
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "60.053333",
+        "nb_frames": "2815"
+      }
+    ],
+    "format": {
+      "duration": "60.053333",
+      "size": "15725718"
+    },
+    "sha256": "6d3478d1c60a1157e82f3037eca693ff5f4be8959ef1635b2f409b3e80b66dfe"
+  },
+  "history_16x9": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "width": 960,
+        "height": 540,
+        "r_frame_rate": "30/1",
+        "nb_frames": "600",
+        "side_data_list": [
+          {}
+        ]
+      },
+      {
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "nb_frames": "940"
+      }
+    ],
+    "format": {
+      "duration": "20.053333",
+      "size": "7834719"
+    }
+  },
+  "9x16": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "width": 540,
+        "height": 960,
+        "r_frame_rate": "30/1",
+        "duration": "60.000000",
+        "nb_frames": "1800",
+        "side_data_list": [
+          {}
+        ]
+      },
+      {
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "duration": "60.053333",
+        "nb_frames": "2815"
+      }
+    ],
+    "format": {
+      "duration": "60.053333",
+      "size": "15690365"
+    },
+    "sha256": "a74179fe4d89f81dc1bdbd5b5f54cd71c2451b391b027e106768ec73400fbe32"
+  },
+  "history_9x16": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_type": "video",
+        "width": 540,
+        "height": 960,
+        "r_frame_rate": "30/1",
+        "nb_frames": "600",
+        "side_data_list": [
+          {}
+        ]
+      },
+      {
+        "codec_type": "audio",
+        "r_frame_rate": "0/0",
+        "nb_frames": "940"
+      }
+    ],
+    "format": {
+      "duration": "20.053333",
+      "size": "7750566"
+    }
+  }
+}
