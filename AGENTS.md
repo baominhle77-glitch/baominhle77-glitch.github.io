@@ -17,7 +17,7 @@ Lệnh Chủ tịch 27/10/2026: **từ nay mọi video dùng phương án B; b�
 ## D18 — Lỗi chung = cổng chung (27/10)
 
 - Với mọi lỗi mới, tự hỏi: **có phụ thuộc nội dung không?** Không phụ thuộc thì thêm/siết kiểm tra trong `gate_chung/`, có mẫu hồi quy làm cổng đỏ trước khi sửa; có phụ thuộc thì sửa kế hoạch/nội dung trong `the_loai/` và bộ dựng cảnh tương ứng.
-- `gate_chung/` chỉ nhận MP4, kế hoạch episode gồm beat/lời/TTS/phụ đề/vật thể/bbox/nhãn/nguồn/telemetry dựng, và JSON thể loại. Không import cảnh hay adapter K1. Ngưỡng G1–G8 dùng chung cho mọi thể loại; JSON thể loại cấm chứa ngưỡng, miễn trừ hay cấu hình cổng.
+- `gate_chung/` chỉ nhận MP4, kế hoạch episode gồm beat/lời/TTS/phụ đề/vật thể/bbox/nhãn/nguồn/telemetry dựng, và JSON thể loại. Không import cảnh hay adapter K1. Ngưỡng G1–G9 dùng chung cho mọi thể loại; JSON thể loại cấm chứa ngưỡng, miễn trừ hay cấu hình cổng.
 - Manim: updater sửa đối tượng nào thì đối tượng đó phải nằm trong nhóm động/updater được renderer theo dõi. Không sửa vật static từ updater của một hạt nhỏ rồi để Cairo cache mất diễn biến; G1 phải bắt lỗi này ở mọi thể loại.
 - G1 phải đo khung cách4 giây sau khi bỏ chữ biên tập; vệt nhấp nháy/phụ đề thay không thay thế diễn biến mới. FREEZE>2s bị loại.
 - G2 giữ ngưỡng C17 và kết luận >=28/30 cửa sổ2s cho60s, không đòi30/30; cửa sổ riêng trượt vẫn phải in ra. Mẫu20s dùng cùng tỷ lệ28/30 (ceil=>10/10). Không nới ngưỡng theo chủ đề.
@@ -26,4 +26,5 @@ Lệnh Chủ tịch 27/10/2026: **từ nay mọi video dùng phương án B; b�
 - G5 dùng vai từ chung cho số đo/đơn vị/thời gian/ngữ cảnh; số liệu phải khớp chữ hiện trên màn. Không bỏ danh từ thật chỉ vì có nghĩa động từ hoặc đứng trước giới từ: giữ `ship/boat`; cả10 đối chứng `bowl, pepper, arrow, ship, boat, film, wave, map, army, molecule` phải làm G5 đỏ khi có lời mà thiếu hình. Sửa dương tính giả phải giữ các đối chứng dương này.
 - G6 đo đúng đồng hồ khung được giải mã, khoảng chữ lấy đầu vào/loại đầu ra; sai số dấu phẩy động ở ranh giới không được chọn câu của khung trước. Giữ nguyên kiểm tra vật thể cắt hộp chữ và test hồi quy vật cắt chữ.
 - G8 lấy số luồng thực từ callback `onStart.resolvedConcurrency`, đối chiếu với cấu hình đã chọn. In riêng desired/capacity/configured/effective; runner1 lõi chọn1 và phải thực chạy1.
-- Mọi CI xuất video phải chạy G1–G8; cổng đỏ thì job đỏ và vẫn upload báo cáo lỗi. Mẫu lịch sử giả lập20s phải chạy cùng chính các cổng này để giữ bằng chứng không lệ thuộc vật lý.
+- G9 chống méo tỉ lệ: mọi lớp ảnh/video phải có nguồn gốc/kích thước nguồn, bbox nội dung và viewport đo từ renderer. Chỉ scale đều; contain dùng min(W/w,H/h), cover dùng max và khai báo crop. Tĩnh lệch quá0,5% hoặc điểm ảnh nguồn–khung xuất lệch quá1% thì đỏ, in tên lớp và giây. Không kéo riêng trục X/Y trong panel Manim/FFmpeg/Remotion để lấp khung. Nguồn phải giữ hình học chuẩn trước khi bố cục; khổ dọc dùng khuôn fit/crop chung hoặc cảnh dọc riêng, không sửa hình dạng vật để lấp khung.
+- Mọi CI xuất video phải chạy G1–G9; cổng đỏ thì job đỏ và vẫn upload báo cáo lỗi. Mẫu lịch sử giả lập20s phải chạy cùng chính các cổng này để giữ bằng chứng không lệ thuộc vật lý.

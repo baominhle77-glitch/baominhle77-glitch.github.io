@@ -1,5 +1,6 @@
 import React from 'react';
 import {AbsoluteFill,OffthreadVideo,Sequence,staticFile} from 'remotion';
+import {UniformVideo} from './UniformVideo';
 export function sourceLayout(clip:any,width:number,height:number,physicalScale=1){
  const sourceW=clip.source_width,sourceH=clip.source_height;
  if(!(sourceW>0&&sourceH>0))throw Error('G3 missing measured source dimensions');
@@ -15,8 +16,8 @@ export function sourceLayout(clip:any,width:number,height:number,physicalScale=1
 export const SourceLayout:React.FC<{clip:any;width:number;height:number;opacity:number;start:number;frames:number;physicalScale?:number}>=({clip,width,height,opacity,start,frames,physicalScale=1})=>{
  const layout=sourceLayout(clip,width,height,physicalScale);
  return <Sequence from={start} durationInFrames={frames}><AbsoluteFill style={{backgroundColor:'#8E969D',opacity}}>
-  <div data-audit-layout="real-video" data-asset={clip.id} style={{position:'absolute',left:layout.video.x,top:layout.video.y,width:layout.video.width,height:layout.video.height}}><OffthreadVideo src={staticFile(clip.src)} startFrom={Math.round(clip.in*30)} muted style={{position:'absolute',width:'100%',height:'100%',objectFit:layout.kind==='full'&&height>width?'cover':'contain',objectPosition:`${clip.focus_x||50}% ${clip.focus_y||50}%`}}/></div>
-  {layout.panel&&<div data-audit-layout="simulation-panel" data-asset={clip.id} style={{position:'absolute',left:layout.panel.x,top:layout.panel.y,width:layout.panel.width,height:layout.panel.height}}><OffthreadVideo src={staticFile(clip.panel_src)} muted style={{width:'100%',height:'100%',objectFit:'contain'}}/></div>}
+  <div data-audit-layout="real-video" data-asset={clip.id} style={{position:'absolute',left:layout.video.x,top:layout.video.y,width:layout.video.width,height:layout.video.height}}><UniformVideo src={staticFile(clip.src)} sourceWidth={clip.source_width} sourceHeight={clip.source_height} layerId={'gemini-'+clip.id} startFrom={Math.round(clip.in*30)} slot={{x:0,y:0,width:layout.video.width,height:layout.video.height}} mode={layout.kind==='full'&&height>width?'cover':'contain'}/></div>
+  {layout.panel&&<div data-audit-layout="simulation-panel" data-asset={clip.id} style={{position:'absolute',left:layout.panel.x,top:layout.panel.y,width:layout.panel.width,height:layout.panel.height}}><UniformVideo src={staticFile(clip.panel_src)} sourceWidth={clip.panel_dimensions.width} sourceHeight={clip.panel_dimensions.height} layerId={'panel-'+clip.id} slot={{x:0,y:0,width:layout.panel.width,height:layout.panel.height}}/></div>}
   <div data-audit="gemini" style={{position:'absolute',left:width*.05,top:layout.kind==='split'?440:height*.30,fontSize:height>width?18:16,color:'white',background:'rgba(28,35,43,.95)',padding:'4px 8px'}}>AI minh hoạ (Gemini)</div>
  </AbsoluteFill></Sequence>
 };

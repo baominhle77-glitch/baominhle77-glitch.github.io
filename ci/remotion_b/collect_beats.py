@@ -8,6 +8,8 @@ for bid in ('h1','h2','h3','h4','c1','p1'):
   found=list(download.rglob(f'{fmt}_{bid}.mp4'))
   if len(found)!=1:raise SystemExit(f'EXPECTED_ONE_CLIP {bid}/{fmt}: {len(found)}')
   shutil.copy2(found[0],out/found[0].name)
+  manifest=found[0].with_suffix('.layout.json')
+  if manifest.exists():shutil.copy2(manifest,out/manifest.name)
  folder=next(download.glob('B-beat-'+str(a.short_side)+'-'+bid))
  metrics=list(folder.rglob('metrics.json'))
  if len(metrics)!=1:raise SystemExit('MISSING_METRICS '+bid)

@@ -41,20 +41,17 @@ class BScene(MovingCameraScene):
 
  def add_world(self,*m):self.world.add(*m)
  def plate_scene(self):
-  if DOC:
-   c=np.array([-.2,-1.10,0]);w,h=6.75,8.65
-  else:
-   c=np.array([-.25,-.05,0]);w,h=12.3,5.7
+  # Physical geometry is independent of output aspect. Portrait uses the
+  # shared uniform context/detail compositor, never a taller water ellipse.
+  c=np.array([-.25,-.05,0]);w,h=12.3,5.7
   # Different optics: overhead, low oblique, steady-feeding laboratory macro.
   if BID=='h1':h*=.96
   if BID=='h2':
-   h*=.88 if DOC else .60
-   if not DOC:c[1]+=.55
-   else:c[1]=-.75
+   h*=.60;c[1]+=.55
   self.c,self.w,self.h=c,w,h
   for k in range(6):self.add_world(oval(w+.15+k*.075,h+.18+k*.02,INK,.018).move_to(c+[.14,-.38-k*.014,0]))
   # Curved ceramic exterior has a visible thickness and a separate inner lip.
-  depth=(2.8 if DOC else 2.1) if BID=='h2' else (1.8 if DOC and BID=='h1' else .35)
+  depth=2.1 if BID=='h2' else .35
   for k in range(16):
    q=k/15;self.add_world(oval(w+.24,h+.22,interpolate_color(ManimColor(INK),ManimColor(LIGHT),.28+.72*q)).move_to(c+[0,-depth+depth*q,0]))
   self.add_world(oval(w+.12,h+.11,LIGHT).move_to(c+[0,.035,0]))

@@ -4,6 +4,8 @@ on:
     branches: [gpt/k1t3-B-remotion]
     paths:
       - 'ci/remotion_b/**'
+      - 'ci/frame_layout.py'
+      - 'ci/layer_plan.py'
       - '.github/workflows/k1t3_b_remotion.yml'
       - 'assets/k1t3/broll_gemini/**'
       - 'tools/do_chuyen_dong_vung.py'
@@ -200,6 +202,30 @@ jobs:
             work/B/gate_chung_9x16/
             ci/so_sanh_AB.json
             ci/remotion_b/evidence/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-video-540-16x9
+          retention-days: 14
+          path: work/B/B_60s_16x9.mp4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-video-540-9x16
+          retention-days: 14
+          path: work/B/B_60s_9x16.mp4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-reports-540
+          retention-days: 14
+          path: |
+            work/B/*.json
+            work/B/*.md
+            work/B/*.jpg
+            work/B/plans/
+            work/B/gate_chung_16x9/
+            work/B/gate_chung_9x16/
   native-1080:
     name: Native 1080p after green 540p gates
     needs: remotion

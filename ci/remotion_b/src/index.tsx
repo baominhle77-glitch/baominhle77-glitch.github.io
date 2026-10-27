@@ -3,6 +3,7 @@ import {registerRoot,Composition,AbsoluteFill,OffthreadVideo,Audio,Sequence,stat
 import data from '../public/data.json';
 import {SourceLayout} from '../components/SourceLayout';
 import {useReadyFont} from '../components/FontReady';
+import {UniformVideo,measureImageLayers} from '../components/UniformVideo';
 const INK='#1C232B';const LIGHT='#A7ADB3';
 const titles:Record<string,string>={h1:'What pulls the pepper?',h2:'Clean water pulls harder',h3:'Ring under steady feeding',h4:'Tension drives flow',c1:'Molecular model',p1:'Surface drags water'};
 const Movie:React.FC<{format:string;shortSide:number}>=({format,shortSide=540})=>{
@@ -27,14 +28,16 @@ const Movie:React.FC<{format:string;shortSide:number}>=({format,shortSide=540})=
   for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){
    const a=boxes[i],b=boxes[j];if(a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y)throw Error('C13_OVERLAP '+a.name+' '+b.name);
   }
-  const layouts=[...document.querySelectorAll('[data-audit-layout]')].map(el=>{const r=el.getBoundingClientRect();return {name:el.getAttribute('data-audit-layout'),asset:el.getAttribute('data-asset'),x:r.x/scale,y:r.y/scale,w:r.width/scale,h:r.height/scale}});const key=JSON.stringify({boxes,layouts});if(key!==lastAudit.current){console.log('B_DOM '+JSON.stringify({frame,format,boxes,layouts}));lastAudit.current=key;}
+  const layers=measureImageLayers();for(const layer of layers)if(Math.abs(layer.scale_x/layer.scale_y-1)>.005)throw Error('G9 unequal layer scales '+JSON.stringify(layer));
+  const layouts=[...document.querySelectorAll('[data-audit-layout]')].map(el=>{const r=el.getBoundingClientRect();return {name:el.getAttribute('data-audit-layout'),asset:el.getAttribute('data-asset'),x:r.x/scale,y:r.y/scale,w:r.width/scale,h:r.height/scale}});const key=JSON.stringify({boxes,layouts,layers});if(key!==lastAudit.current){console.log('B_DOM '+JSON.stringify({frame,format,boxes,layouts,layers}));lastAudit.current=key;}
  },[frame,fontReady]);
  return <AbsoluteFill style={{backgroundColor:INK,fontFamily:'Noto Sans',color:INK}}><div style={{position:'absolute',width,height,transform:`scale(${scale})`,transformOrigin:'top left'}}>
   <style>{`@font-face{font-family:'Noto Sans';src:url('${staticFile('NotoSans-Regular.ttf')}')}*{box-sizing:border-box}`}</style>
-  {data.beats.map(b=><Sequence key={b.id} from={b.start} durationInFrames={b.frames}><OffthreadVideo src={staticFile(format+'_'+b.id+'.mp4')} muted style={{width:'100%',height:'100%',opacity:b.id===beat.id?opacity:1}}/></Sequence>)}
+  {data.beats.map(b=><Sequence key={b.id} from={b.start} durationInFrames={b.frames}><UniformVideo src={staticFile(format+'_'+b.id+'.mp4')} sourceWidth={(b as any).media[format].width} sourceHeight={(b as any).media[format].height} layerId={'beat-'+b.id} slot={{x:0,y:0,width,height}} opacity={b.id===beat.id?opacity:1}/></Sequence>)}
   {data.beats.map(b=><Sequence key={'a'+b.id} from={b.audioStart} durationInFrames={Math.min(1800-b.audioStart,b.frames)}><Audio src={staticFile(b.audio)}/></Sequence>)}
   {clip&&<SourceLayout clip={clip} width={width} height={height} opacity={clipOpacity} start={clipStart} frames={clipFrames} physicalScale={scale}/>}
   <div data-audit="title" style={{position:'absolute',left:width*.05,top:height*.04,maxWidth:width*(doc?.82:.70),width:'max-content',fontSize:doc?32:32,fontWeight:700,lineHeight:1.18,color:'white',backgroundColor:INK,padding:'7px 10px'}}>{titles[beat.id]}</div>
+  {doc&&!clip&&['h1','h2','h3'].includes(beat.id)&&<div data-audit="detail-label" style={{position:'absolute',left:27,top:448,fontSize:18,fontWeight:700,color:'white',backgroundColor:INK,padding:'5px 8px'}}>Surface detail</div>}
   {!clip&&['h4','c1','p1'].includes(beat.id)&&<>
     {beat.id==='p1'&&<div data-audit="model-label" style={{position:'absolute',left:width*(doc?.50:.52),top:height*(doc?.125:.04),fontSize:18,fontWeight:700,color:'white',backgroundColor:INK,padding:'6px 8px'}}>Flow cross-section</div>}
     {beat.id==='h4'&&<div style={{position:'absolute',left:width*(doc?.50:.52),top:height*(doc?.125:.04),fontSize:18,lineHeight:1.3,fontWeight:700,color:'white',backgroundColor:INK,padding:'6px 8px'}}><div data-audit="mechanism">Surface tension falls</div><div style={{width:180,height:12,marginTop:6,backgroundColor:LIGHT}}><div style={{height:12,width:(1-.50*(.10+.88*interpolate(local,[0,beat.frames],[0,1],{extrapolateRight:'clamp'})))*180,backgroundColor:'#D1834F'}}/></div></div>}

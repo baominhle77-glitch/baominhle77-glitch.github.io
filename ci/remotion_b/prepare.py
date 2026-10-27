@@ -52,6 +52,16 @@ def render_one(item,force=False):
  if at is None and not force and cached.exists() and meta_path.exists() and read(meta_path).get('source_digest')==digest:
   validate(cached,fmt,b);shutil.copy2(cached,dest);row=read(meta_path);row.update(cache_reused=True,wall_s=0.,cpu_s=0.);print('B_BEAT_CACHE_HIT '+fmt+'/'+bid,flush=True);return row
  env=dict(os.environ,B_FORMAT=fmt,B_BEAT=bid,B_DURATION=str(b['frames']/30),B_SHORT_SIDE=str(SHORT),PYTHONPATH=str(R/'ban_sac'),OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1');env.pop('B_AT',None)
+ if fmt=='9x16' and bid in ('h1','h2','h3'):
+  # The reusable frame compositor preserves geometry and records every crop.
+  sys.path.insert(0,str(R));from ci.frame_layout import portrait_panels
+  source=cache/f'16x9_{bid}.mp4'
+  if not source.exists() or read(cache/'16x9.json').get('source_digest')!=digest:render_one(('16x9',b,None),force)
+  detail=read(HERE/'portrait_layouts.json')[bid]['detail_crop'];t=time.perf_counter();before=resource.getrusage(resource.RUSAGE_CHILDREN)
+  if at is not None:
+   target=folder/'images'/'portrait.png';portrait_panels(source,target,SHORT,at,detail);return dict(format=fmt,beat=bid,at=at,image=str(target),wall_s=time.perf_counter()-t)
+  portrait_panels(source,cached,SHORT,detail_crop=detail);validate(cached,fmt,b);shutil.copy2(cached,dest);after=resource.getrusage(resource.RUSAGE_CHILDREN)
+  row=dict(format=fmt,beat=bid,frames=b['frames'],wall_s=time.perf_counter()-t,cpu_s=after.ru_utime+after.ru_stime-before.ru_utime-before.ru_stime,bytes=dest.stat().st_size,source_digest=digest,cache_reused=False);write(meta_path,row);print('B_BEAT_END '+json.dumps(row),flush=True);return row
  if at is not None:env['B_AT']=str(at)
  resolution=f'{SHORT},{round(SHORT*16/9)}' if fmt=='9x16' else f'{round(SHORT*16/9)},{SHORT}'
  args=[sys.executable,'-m','manim','render','--resolution',resolution,'--fps','30','--disable_caching','--progress_bar','none','-v','ERROR','--media_dir',folder,HERE/'scene.py','BScene']

@@ -4,6 +4,7 @@ from PIL import ImageFont
 from pathlib import Path
 R=Path(__file__).resolve().parents[2];sys.path.insert(0,str(R));from gate_chung.language import visual_nouns
 from gate_chung.model import norm
+from ci.layer_plan import measured_layers,nested_layers
 H=Path(__file__).resolve().parent
 
 def main():
@@ -11,7 +12,8 @@ def main():
  data=json.loads((H/'public/data.json').read_text());original=json.loads((H/'ke_hoach_A.json').read_text());tts=json.loads((R/'out/M1_MARANGONI_DUNG/_build/tts.json').read_text());align=json.loads((a.video_root/'caption_alignment.json').read_text());runtime=json.loads((a.video_root/'remotion_render.json').read_text())
  landscape_texts=[]
  for fmt in ('16x9','9x16'):
-  doc=fmt=='9x16';W,HH=(540,960) if doc else (960,540);dom=json.loads((a.video_root/f'dom_{fmt}.json').read_text());texts=[];objects=[];beats=[];assets=[]
+  doc=fmt=='9x16';W,HH=(540,960) if doc else (960,540);dom=json.loads((a.video_root/f'dom_{fmt}.json').read_text());texts=[];objects=[];beats=[];assets=[];layer_specs=[];internal=[]
+  hidden=[dict(start=(c.get('portrait_start',c['start']) if doc else c['start'])/30,end=((c.get('portrait_start',c['start']) if doc else c['start'])+(c.get('portrait_frames',c['frames']) if doc else c['frames']))/30) for c in data['clips'] if c.get('available') and c['start'] is not None]
   def latest_box(name,text,start):
    found=[(abs(z['frame']/30-max(.15,start)),b) for z in dom for b in z['boxes'] if b['name']==name and b.get('text')==text and z['frame']>=3]
    if not found:
@@ -32,6 +34,8 @@ def main():
    texts.append(item);return item
   for b in data['beats']:
    start=b['start']/30;end=(b['start']+b['frames'])/30;bid=b['id'];n=original['beats'][bid]['n'];offset=original['beats'][bid]['t0']+original['beats'][bid]['t_chuyen'];raw=json.loads((R/'out/_tts_cache'/Path(tts['beats'][bid]['words']).name).read_text());events=[dict(text=w['w'],start=offset+w['t0'],end=offset+w['t1']) for w in raw]
+   source_root=R/'work/B_cache/540'/bid;layer_specs.append(dict(id='beat-'+bid,source=str(source_root/f'{fmt}_{bid}.mp4'),start=start,end=end,occluded=hidden))
+   internal.extend(nested_layers(b.get('internal_layers',{}).get(fmt,[]),'beat-'+bid,start,end,source_root,hidden))
    beat=dict(id=bid,start=start,end=end,narration=n,words=events,source_required=True,visual_terms=[],nonvisual_terms=[]);beats.append(beat)
    records=[(z,bx) for z in dom if start<=z['frame']/30<end for bx in z['boxes'] if bx['name'] not in ('caption','gemini')];unique={}
    for z,bx in records:unique[(bx['name'],bx['text'])]=bx
@@ -81,8 +85,10 @@ def main():
     objects.append(dict(id=group+'-real-primary',label='primary phenomenon in original footage',primary=True,primary_group=group,start=start,end=end,bbox=[rx+.02*rw,ry+.12*rh,.96*rw,.84*rh],evidence=dict(background='#8E969D',tolerance=20)))
     objects.append(dict(id=group+'-simulation-primary',label='same primary phenomenon in simulation',primary=True,primary_group=group,start=start,end=end,bbox=[panel['x']/W+.025,panel['y']/HH+.025,panel['w']/W-.05,panel['h']/HH-.05],evidence=dict(background='#8E969D',tolerance=24)))
    assets.append(dict(id=c['id'],start=start,end=end,kind='ai_video',ai_label=c['label'],source=c['path'],source_dimensions=meta,source_crop=crop,render_bbox=display,reference_texts=[],landscape_reference=str((R/c['path']).resolve()),reference_is_source=True,reference_start=start,reference_in=c['in']))
+   layer_specs.append(dict(id='gemini-'+c['id'],source=str(R/c['path']),start=start,end=end,source_in=c['in']))
+   if panel:layer_specs.append(dict(id='panel-'+c['id'],source=str(H/'public'/c['panel_src']),start=start,end=end))
 
-  run=next(r for r in runtime if r['format']==fmt);plan=dict(schema_version=1,id='K1t3-'+fmt,duration=60,format=fmt,language='en',beats=beats,texts=texts,objects=objects,assets=assets,runtime=run)
+  run=next(r for r in runtime if r['format']==fmt);plan=dict(schema_version=1,id='K1t3-'+fmt,duration=60,format=fmt,language='en',beats=beats,texts=texts,objects=objects,assets=assets,layers=measured_layers(dom,W,HH,layer_specs)+internal,runtime=run)
   if not doc:landscape_texts=texts.copy()
   (a.out/(fmt+'.json')).write_text(json.dumps(plan,ensure_ascii=False,indent=2)+'\n')
 if __name__=='__main__':main()

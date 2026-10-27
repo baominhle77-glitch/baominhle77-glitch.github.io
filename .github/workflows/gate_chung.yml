@@ -2,7 +2,7 @@ name: D18 universal video gates
 on:
   push:
     branches: [gpt/k1t3-B-remotion]
-    paths: ['gate_chung/**', 'the_loai/**', 'ci/remotion_b/history/**', 'ci/remotion_b/history_scene.py', '.github/workflows/gate_chung.yml']
+    paths: ['gate_chung/**', 'the_loai/**', 'ci/layer_plan.py', 'ci/remotion_b/components/**', 'ci/remotion_b/history/**', 'ci/remotion_b/history_scene.py', '.github/workflows/gate_chung.yml']
   workflow_call:
   workflow_dispatch:
     inputs:
@@ -41,7 +41,7 @@ jobs:
       - run: python -m gate_chung.setup
       - run: python -m unittest discover -s gate_chung/tests -v
   history:
-    name: History20s / same G1-G8 / both formats
+    name: History20s / same G1-G9 / both formats
     needs: tests
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -94,7 +94,7 @@ jobs:
       - name: Full measurement FFmpeg
         if: always()
         run: python ci/remotion_b/gate_ffmpeg.py
-      - name: Same G1-G8, no genre threshold changes
+      - name: Same G1-G9, no genre threshold changes
         run: |
           python ci/remotion_b/history/export_plan.py
           set +e
