@@ -4,7 +4,11 @@ from .policy import GENRE_KEYS
 
 def read(path):return json.loads(Path(path).read_text(encoding='utf-8'))
 def norm(s):return re.sub(r'[^a-z0-9]+',' ',unicodedata.normalize('NFKD',s.lower()).encode('ascii','ignore').decode()).strip()
-def active(item,t):return float(item['start'])<=t<float(item['end'])
+def active(item,t):
+ # Canonicalize floating arithmetic at edit boundaries (e.g. np.arange).
+ # This is a nanosecond rounding, not an editorial timing tolerance.
+ t=round(float(t),9)
+ return round(float(item['start']),9)<=t<round(float(item['end']),9)
 def at(items,t):return [v for v in items if active(v,t)]
 def bbox(item,t):
  points=item.get('keyframes')

@@ -69,6 +69,25 @@ class Regressions(unittest.TestCase):
  def test_preposition_does_not_remove_ship_or_boat(self):
   for sentence,noun in (('The ship across the ocean','ship'),('A boat to the island','boat')):
    self.assertIn(noun,[x['lemma'] for x in visual_nouns(sentence)])
+ def test_decimal_speech_is_screen_data_not_an_image_object(self):
+  from types import SimpleNamespace
+  from gate_chung.semantics import role,screen_data
+  self.assertEqual(role('four'),'data');self.assertIn('thirty five point five four',screen_data('35.54 mN/m'))
+  image=np.zeros((540,960,3),np.uint8);video=SimpleNamespace(width=960,height=540,duration=3,frame=lambda t:image)
+  plan=dict(language='en',objects=[],texts=[dict(text='35.54 mN/m',start=0,end=3)],beats=[dict(start=0,end=3,narration='Thirty five point five four millinewtons per metre.',words=[dict(text=w,start=.2+i*.2,end=.4+i*.2) for i,w in enumerate(('Thirty','five','point','five','four','millinewtons','per','metre'))],visual_terms=[])])
+  self.assertTrue(G5(video,plan)['passed'])
+  plan['texts']=[];self.assertFalse(G5(video,plan)['passed'])
+ def test_caption_boundary_uses_the_decoded_frame_clock(self):
+  from gate_chung.model import active
+  from gate_chung.video import Video
+  self.assertFalse(active(dict(start=2,end=3.2),3.1999999999999997))
+  self.assertTrue(active(dict(start=3.2,end=4),3.1999999999999997))
+  with tempfile.TemporaryDirectory() as folder:
+   path=Path(folder)/'clock.mp4';writer=cv2.VideoWriter(str(path),cv2.VideoWriter_fourcc(*'mp4v'),30,(96,54))
+   for i in range(30):writer.write(np.full((54,96,3),40 if i<10 else 210,np.uint8))
+   writer.release();v=Video(path)
+   self.assertEqual(v.frame_index(.324),9);self.assertLess(v.frame(.324).mean(),70)
+   self.assertEqual(v.frame_index(10/30),10);self.assertGreater(v.frame(10/30).mean(),180);v.close()
  def test_core_has_no_episode_import(self):
   root=Path(__file__).resolve().parents[1]
   for p in root.glob('*.py'):

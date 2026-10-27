@@ -8,9 +8,11 @@ class Video:
   self.path=Path(path);self.capture=cv2.VideoCapture(str(path))
   if not self.capture.isOpened():raise ValueError('Cannot decode '+str(path))
   self.width=int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH));self.height=int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT));self.fps=self.capture.get(cv2.CAP_PROP_FPS);self.frames=int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT));self.duration=self.frames/self.fps
+ def frame_index(self,t):return min(self.frames-1,max(0,int(np.floor(float(t)*self.fps+1e-7))))
+ def frame_time(self,t):return self.frame_index(t)/self.fps
  @functools.lru_cache(maxsize=8)
  def frame(self,t):
-  self.capture.set(cv2.CAP_PROP_POS_MSEC,min(self.duration-1/self.fps,max(0,t))*1000);ok,f=self.capture.read()
+  self.capture.set(cv2.CAP_PROP_POS_FRAMES,self.frame_index(t));ok,f=self.capture.read()
   if not ok:raise ValueError(f'Decode failed {self.path} at {t}s')
   return cv2.cvtColor(f,cv2.COLOR_BGR2RGB)
  def crop(self,t,box):

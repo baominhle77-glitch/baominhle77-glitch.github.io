@@ -181,6 +181,7 @@ def background_error(image,text,t):
 def G6(video,plan):
  rows=[];seen=set()
  for sec in np.arange(.2,video.duration,.5):
+  sec=video.frame_time(sec)
   texts=at(plan['texts'],float(sec))
   for a in texts:
    box=bbox(a,float(sec));bg=a.get('background',{});safe=min(box[0],box[1],1-box[0]-box[2],1-box[1]-box[3])>=P.SAFE_MARGIN-.001
