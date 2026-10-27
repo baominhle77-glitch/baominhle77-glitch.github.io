@@ -171,3 +171,20 @@ Thiếu bất kỳ mục nào = TRƯỢT.
    - freezedetect K1 t3, trong `out\_giam_doc\a1e_k1t3\phieu_pr144_v3.md`.
 
 Các link 1, 2, 3, 5, 7 đã kiểm trả HTTP 200 ngày 26/10. Link 6 chặn máy đọc (403), nhưng bài là bài hội nghị có thật, đã được trích dẫn rộng rãi. Vùng an toàn 9:16 ở mục 3.3 là ước lượng, cần đo lại trên ảnh chụp thật.
+
+### Bổ sung D17/D18 theo phiếu r13
+
+Mô phỏng phải cho thấy hiện tượng đang xảy ra. Trước khi dựng đủ, chấm khung540p
+mỗi beat theo §8; sau dựng, xem6 khung mô phỏng/beat và khung từ MP4 thật.
+Vật liệu cần ánh sáng, chiều sâu và chuyển động của chính vật/hiện tượng;
+mũi tên hoặc hình học tĩnh không thay thế được chuyển động đó. Camera/frustum
+có thể đổi giữa các khổ, nhưng không thay kích thước vật lý của vật để lấp khung.
+
+G10 áp mọi thể loại: trong ROI mô phỏng, >35% pixel cùng màu CIE76 ΔE<3 xuyên
+suốt beat thì trượt. G11: overlay biên tập phi chữ có bbox pixel đứng>2s thì
+trượt; inventory phải từ renderer, metadata chuyển động giả không đủ. Giữ
+nguyên C17: TB>=5%, vùng gộp>=15%, >=60% cặp có>=3%; kết luận>=28/30 cửa sổ.
+Cổng không tự chấm thẩm mỹ thay người xem. Mẫu60s phải được Chủ tịch chốt
+trước mọi lần dựng full>=480s.
+
+Artifact r13 phải có tờ ghép đúng0.5/5/11.5/17/22/30/40/50/59.4s ở cả hai khổ.

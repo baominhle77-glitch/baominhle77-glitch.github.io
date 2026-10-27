@@ -141,8 +141,8 @@
    "cach_uoc": "ƯỚC LƯỢNG 2,5 từ/s (barem) và 2,9 từ/s, + 0,5 s nghỉ mỗi beat; mốc thật đo bằng words.json sau TTS (chặng ii)",
    "nhip": {
     "h1": [
-     0.0,
-     0.0
+     0,
+     0
     ],
     "h2": [
      9.3,
@@ -158,7 +158,7 @@
     ],
     "c1": [
      48.4,
-     42.0
+     42
     ]
    },
    "V1": "chuyển động từ khung 0: khay nước đã rắc tiêu, giọt xà phòng rơi quay chậm ở 'drop', hạt tiêu dạt ra mép ở 'races'",
@@ -426,7 +426,24 @@
     "trung": 0
    }
   },
-  "duyet": "HỒ SƠ tự soát bằng _lam/tao_storyboard.py (kiểm ghi ở đầu tệp). Nộp lần đầu chặng (i) tập 3 theo lệnh 20261024-0150 (lô t3 K1→K5); chủ đề = KE_HOACH_TAP hàng 3 (GĐ duyệt 07:42 19/10 cùng câu hứa k2 tập 2); chờ KĐ chấm."
+  "duyet": "HỒ SƠ tự soát bằng _lam/tao_storyboard.py (kiểm ghi ở đầu tệp). Nộp lần đầu chặng (i) tập 3 theo lệnh 20261024-0150 (lô t3 K1→K5); chủ đề = KE_HOACH_TAP hàng 3 (GĐ duyệt 07:42 19/10 cùng câu hứa k2 tập 2); chờ KĐ chấm.",
+  "C16_C17": {
+   "ap_dung": "26/10/2026",
+   "so_clip": 16,
+   "tong_clip_s": 87,
+   "bat_buoc": "clip tả thực chồng lên mô phỏng đang chuyển động, Gemini do GĐ tạo sau; không phụ thuộc clip trong CI",
+   "thoi_luong_khoa_s": 553.367,
+   "mau_vong_1": "540p 00:00-01:00 hai khổ + 35 khung/khổ; không render đủ",
+   "kiem": "ffmpeg freezedetect=n=0.001:d=2; tổng <=10%, đoạn <=4s"
+  },
+  "C17_G": {
+   "giao_viec": "GĐ bổ sung g 26/10/2026",
+   "moi_beat": "vat_chuyen_dong + luat_chuyen_dong + t_vao_s..t_ra_s, chay_lien_tuc",
+   "nguyen_tac": "Bắt buộc chuyển động vật lý trong vùng vật chính, không tính pan/zoom/fade/chữ/mũi tên đơn độc",
+   "cong_may": "4 fps, tối thiểu 90% cặp động; không chuỗi đứng >2 s; job đỏ nếu một beat trượt",
+   "mau_60_s": "đo riêng các beat giao đoạn 0:00-1:00; beat cắt bởi mốc 60s ghi coverage",
+   "chua_duyet_full": true
+  }
  },
  "beats": [
   {
@@ -500,10 +517,59 @@
    "rao": [],
    "so_tu": 22,
    "thoi_luong_uoc": {
-    "bat_dau_s_2_5": 0.0,
-    "bat_dau_s_2_9": 0.0,
+    "bat_dau_s_2_5": 0,
+    "bat_dau_s_2_9": 0,
     "dai_s_2_5": 8.8,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 3.52,
+     "moc_tts": "edge",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T01",
+     "t_vao": 0,
+     "t_ra": 5.5,
+     "vai": "hook",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "An overhead real-life kitchen close-up of floating black pepper in a shallow bowl. A single soap drop lands centrally; pepper grains visibly race outward to the rim within the first 2 seconds. Daylight, macro focus, realistic ripples. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tiêu trên mặt bát nước",
+    "luat_chuyen_dong": "Sau khi giọt xà phòng chạm mặt, ∂σ/∂r hướng tới vùng sạch làm hạt tiêu trôi từ giữa ra mép; hạt trôi theo dr/dt = v_r(r,t).",
+    "co_che": "marangoni",
+    "t_vao_s": 0,
+    "t_ra_s": 7.0333,
+    "khung_dau": 0,
+    "t_vao_toan_tap_s": 0,
+    "t_ra_toan_tap_s": 7.0333,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -575,6 +641,62 @@
     "bat_dau_s_2_9": 8.1,
     "dai_s_2_5": 12.8,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 3.82,
+     "moc_tts": "harder",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 7.64,
+     "moc_tts": "outward",
+     "kieu": "doi_vat",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T02",
+     "t_vao": 8,
+     "t_ra": 13.5,
+     "vai": "hook",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Macro overhead close-up of pepper on water drifting radially outward from a tiny soap drop, natural water reflections and distinct moving particles, slow sideways camera glide in a bright kitchen. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tiêu và lớp mặt nước sạch",
+    "luat_chuyen_dong": "Sức căng phía ngoài lớn hơn phía trong; v_r(r,t)>0 nơi có gradient σ, hạt trôi liên tục ra phía sức căng cao.",
+    "co_che": "marangoni",
+    "t_vao_s": 0,
+    "t_ra_s": 11.4667,
+    "khung_dau": 211,
+    "t_vao_toan_tap_s": 7.0333,
+    "t_ra_toan_tap_s": 18.5,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -634,6 +756,55 @@
     "bat_dau_s_2_9": 19.6,
     "dai_s_2_5": 5.6,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 2.48,
+     "moc_tts": "ring",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T03",
+     "t_vao": 18.5,
+     "t_ra": 23,
+     "vai": "hook",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead laboratory petri dish with constant slow surfactant feed through a thin stationary needle. A particle-free circular zone forms near the source, real liquid reflections and moving tracers. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tiêu, bơm kim và vòng dừng",
+    "luat_chuyen_dong": "Kim cấp xà phòng liên tục; hạt theo v_r(r,t) đi ra trong vùng sạch, tốc độ giảm về 0 tại r=r*; biên vòng duy trì chứ không đổi ảnh tĩnh.",
+    "co_che": "stop_ring",
+    "t_vao_s": 0,
+    "t_ra_s": 4.9667,
+    "khung_dau": 555,
+    "t_vao_toan_tap_s": 18.5,
+    "t_ra_toan_tap_s": 23.4667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -724,6 +895,49 @@
     "bat_dau_s_2_9": 24.9,
     "dai_s_2_5": 19.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.78,
+     "moc_tts": "episode",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.55,
+     "moc_tts": "millimolar",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 14.33,
+     "moc_tts": "calculated",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tracer và bề mặt nước giữa vùng σcao và σthấp",
+    "luat_chuyen_dong": "∂σ/∂r>0 kéo lớp mặt từ vùng xà phòng sức căng thấp ra vùng nước sạch sức căng cao; ứng suất τ=∂σ/∂r, hạt mặt có dr/dt=v_r(r,t), lớp đáy hồi lưu.",
+    "co_che": "tension",
+    "t_vao_s": 0,
+    "t_ra_s": 19.1,
+    "khung_dau": 704,
+    "t_vao_toan_tap_s": 23.4667,
+    "t_ra_toan_tap_s": 42.5667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -800,9 +1014,45 @@
    "so_tu": 42,
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 48.4,
-    "bat_dau_s_2_9": 42.0,
+    "bat_dau_s_2_9": 42,
     "dai_s_2_5": 16.8,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.28,
+     "moc_tts": "neighbours",
+     "kieu": "doi_goc",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.56,
+     "moc_tts": "strong",
+     "kieu": "doi_vat",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Các mảng mặt nước và phân tử sát mặt",
+    "luat_chuyen_dong": "Camera tiến vào mặt nước thật đang có hạt chạy; trường vận tốc Marangoni và biến dạng biên η(r,t) giữ chạy suốt quá trình lấy nét.",
+    "co_che": "marangoni",
+    "t_vao_s": 0,
+    "t_ra_s": 15.8333,
+    "khung_dau": 1277,
+    "t_vao_toan_tap_s": 42.5667,
+    "t_ra_toan_tap_s": 58.4,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -882,9 +1132,52 @@
    "so_tu": 47,
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 65.7,
-    "bat_dau_s_2_9": 57.0,
+    "bat_dau_s_2_9": 57,
     "dai_s_2_5": 18.8,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.58,
+     "moc_tts": "dragged",
+     "kieu": "doi_goc",
+     "vat_chinh": "MuiTenCang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.15,
+     "moc_tts": "outward",
+     "kieu": "doi_vat",
+     "vat_chinh": "MuiTenCang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.73,
+     "moc_tts": "difference",
+     "kieu": "doi_khung",
+     "vat_chinh": "MuiTenCang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Phần tử nước bị kéo và hạt tracer",
+    "luat_chuyen_dong": "Hai gradient sức căng chênh lệch kéo mặt nước ra phía mạnh hơn; hạt theo dr/dt=v_r, lớp đáy hồi lưu; mũi tên chỉ là lớp chú giải.",
+    "co_che": "tension",
+    "t_vao_s": 0,
+    "t_ra_s": 18.3,
+    "khung_dau": 1752,
+    "t_vao_toan_tap_s": 58.4,
+    "t_ra_toan_tap_s": 76.7,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -955,10 +1248,73 @@
    "rao": [],
    "so_tu": 45,
    "thoi_luong_uoc": {
-    "bat_dau_s_2_5": 85.0,
+    "bat_dau_s_2_5": 85,
     "bat_dau_s_2_9": 73.7,
-    "dai_s_2_5": 18.0,
+    "dai_s_2_5": 18,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.7,
+     "moc_tts": "needle",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.4,
+     "moc_tts": "rated",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 14.1,
+     "moc_tts": "micrometres",
+     "kieu": "doi_khung",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T04",
+     "t_vao": 80,
+     "t_ra": 85.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "A laboratory syringe pump connects to a fine needle over a clear shallow dish of water. Small illuminated tracer particles visibly drift outward. Three-quarter macro view, soft white lab lighting. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tracer trong đĩa dưới kim bơm",
+    "luat_chuyen_dong": "Nguồn bơm Q tạo dòng radial u_r(r,z,t) trên mặt và dòng hồi lưu dưới đáy, hạt theo dx/dt=u(x,t).",
+    "co_che": "pump",
+    "t_vao_s": 0,
+    "t_ra_s": 18.8,
+    "khung_dau": 2301,
+    "t_vao_toan_tap_s": 76.7,
+    "t_ra_toan_tap_s": 95.5,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1047,6 +1403,49 @@
     "bat_dau_s_2_9": 89.7,
     "dai_s_2_5": 21.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.66,
+     "moc_tts": "heads",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 11.32,
+     "moc_tts": "sds",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 16.98,
+     "moc_tts": "study",
+     "kieu": "doi_khung",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Phân tử chất hoạt động bề mặt trong đĩa",
+    "luat_chuyen_dong": "Phân tử hấp phụ/di chuyển theo gradient nồng độ c(r,t); hạt nước chạy do σ(c), bảng CMC xuất hiện cạnh mô hình.",
+    "co_che": "molecule",
+    "t_vao_s": 0,
+    "t_ra_s": 22.6333,
+    "khung_dau": 2865,
+    "t_vao_toan_tap_s": 95.5,
+    "t_ra_toan_tap_s": 118.1333,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1115,8 +1514,51 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 125.2,
     "bat_dau_s_2_9": 108.5,
-    "dai_s_2_5": 16.0,
+    "dai_s_2_5": 16,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.21,
+     "moc_tts": "above",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.42,
+     "moc_tts": "clump",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 12.63,
+     "moc_tts": "model",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Phân tử hấp phụ và micelle",
+    "luat_chuyen_dong": "Phân tử khuếch tán theo ∂c/∂t=D∇²c, hấp phụ rồi tụ micelle khi c đạt CMC; phân tử/giọt nước vẫn chuyển động nhiệt.",
+    "co_che": "molecule",
+    "t_vao_s": 0,
+    "t_ra_s": 16.8333,
+    "khung_dau": 3544,
+    "t_vao_toan_tap_s": 118.1333,
+    "t_ra_toan_tap_s": 134.9667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1177,6 +1619,49 @@
     "bat_dau_s_2_9": 122.8,
     "dai_s_2_5": 18.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.57,
+     "moc_tts": "patch",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.13,
+     "moc_tts": "layer",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.7,
+     "moc_tts": "equals",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Mặt nước và dòng đáy",
+    "luat_chuyen_dong": "Cân bằng ứng suất μ∂u/∂z=∂σ/∂r, lớp mặt chạy ra ngoài và lớp đáy quay vào trong, hạt chạy cả hai lớp.",
+    "co_che": "recirculation",
+    "t_vao_s": 0,
+    "t_ra_s": 18.2667,
+    "khung_dau": 4049,
+    "t_vao_toan_tap_s": 134.9667,
+    "t_ra_toan_tap_s": 153.2333,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1240,6 +1725,69 @@
     "bat_dau_s_2_9": 139.1,
     "dai_s_2_5": 17.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.17,
+     "moc_tts": "outward",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.35,
+     "moc_tts": "trick",
+     "kieu": "doi_vat",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 12.52,
+     "moc_tts": "transported",
+     "kieu": "doi_khung",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T05",
+     "t_vao": 156,
+     "t_ra": 161.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead shallow ceramic kitchen bowl, pepper sprinkled on still water. After a soap droplet touches the center, pepper glides outward with convincing meniscus and reflections, natural light. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tiêu trên mặt",
+    "luat_chuyen_dong": "Dòng mặt do σ kéo hạt tiêu ra khỏi nơi có xà phòng, theo dr/dt=v_r, gợn mặt η(r,t) chạy liên tục.",
+    "co_che": "marangoni",
+    "t_vao_s": 0,
+    "t_ra_s": 16.7,
+    "khung_dau": 4597,
+    "t_vao_toan_tap_s": 153.2333,
+    "t_ra_toan_tap_s": 169.9333,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1313,6 +1861,62 @@
     "bat_dau_s_2_9": 154.5,
     "dai_s_2_5": 14.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.53,
+     "moc_tts": "source",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.07,
+     "moc_tts": "clear",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T06",
+     "t_vao": 172,
+     "t_ra": 177.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Directly overhead shallow laboratory water dish. Continuous fine-needle soap injection creates a visible circular clear patch between floating tracers. Outer tracer swirls keep moving, neutral studio light. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Kim bơm, hạt tracer và cặp xoáy",
+    "luat_chuyen_dong": "Nguồn Q đẩy vùng dòng radial trên mặt; hạt ngoài vòng đi chậm, lớp dưới hình thành hai vòng tuần hoàn khép kín.",
+    "co_che": "pump",
+    "t_vao_s": 0,
+    "t_ra_s": 13.6,
+    "khung_dau": 5098,
+    "t_vao_toan_tap_s": 169.9333,
+    "t_ra_toan_tap_s": 183.5333,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1376,6 +1980,42 @@
     "bat_dau_s_2_9": 167.4,
     "dai_s_2_5": 14.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.56,
+     "moc_tts": "slightly",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.11,
+     "moc_tts": "confined",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tracer trong/ngoài vùng trong",
+    "luat_chuyen_dong": "v(r) mạnh phía trong vòng, giảm gần 0 ngoài r*; hạt vẫn chuyển động đúng tương quan vận tốc đo.",
+    "co_che": "velocity",
+    "t_vao_s": 0,
+    "t_ra_s": 13.6667,
+    "khung_dau": 5506,
+    "t_vao_toan_tap_s": 183.5333,
+    "t_ra_toan_tap_s": 197.2,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1442,6 +2082,42 @@
     "bat_dau_s_2_9": 180.3,
     "dai_s_2_5": 15.6,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.66,
+     "moc_tts": "speeds",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.31,
+     "moc_tts": "second#2",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tracer và điểm tốc độ trên biểu đồ",
+    "luat_chuyen_dong": "v(r) tăng gần kim rồi giảm tại vùng trong, đột ngột giảm khi r→r*; tracer và điểm trên đồ thị dùng cùng v(r).",
+    "co_che": "velocity",
+    "t_vao_s": 0,
+    "t_ra_s": 13.9667,
+    "khung_dau": 5916,
+    "t_vao_toan_tap_s": 197.2,
+    "t_ra_toan_tap_s": 211.1667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1508,6 +2184,62 @@
     "bat_dau_s_2_9": 194.2,
     "dai_s_2_5": 14.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.57,
+     "moc_tts": "sudden",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.13,
+     "moc_tts": "abruptly",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T07",
+     "t_vao": 214,
+     "t_ra": 219.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead macro laboratory dish, steady surfactant feed. Tracers move rapidly inside the clear circular region, then abruptly slow at its boundary. Subtle light reflections, smooth focus pull. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tracer tại mép vùng trong",
+    "luat_chuyen_dong": "v_r(r) giảm mạnh tại r=r*, hạt trước mép chạy nhanh, sau mép chậm; biên là dòng vật lý, không chuyển khung tĩnh.",
+    "co_che": "stop_ring",
+    "t_vao_s": 0,
+    "t_ra_s": 13.7,
+    "khung_dau": 6335,
+    "t_vao_toan_tap_s": 211.1667,
+    "t_ra_toan_tap_s": 224.8667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1590,6 +2322,42 @@
     "bat_dau_s_2_9": 207.2,
     "dai_s_2_5": 17.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.69,
+     "moc_tts": "container",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.38,
+     "moc_tts": "sketch",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Tracers theo mặt cắt và dòng hồi lưu",
+    "luat_chuyen_dong": "u_r>0 ở gần mặt, u_r<0 sát đáy, quỹ đạo đối lưu khép kín theo trường u(r,z).",
+    "co_che": "recirculation",
+    "t_vao_s": 0,
+    "t_ra_s": 14.0667,
+    "khung_dau": 6746,
+    "t_vao_toan_tap_s": 224.8667,
+    "t_ra_toan_tap_s": 238.9333,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1657,6 +2425,62 @@
     "bat_dau_s_2_9": 222.5,
     "dai_s_2_5": 16.8,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.24,
+     "moc_tts": "sulfate",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.49,
+     "moc_tts": "field",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T08",
+     "t_vao": 244,
+     "t_ra": 249.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Two shallow petri dishes viewed from above under separate continuous soap-feed needles. Clear-zone sizes differ under two pumping rates; tracer motion is visible. Laboratory lighting, no quantitative annotations. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Kim bơm và vòng vùng trong",
+    "luat_chuyen_dong": "Q(t) tăng theo đúng lời, vòng r*(t) nở cùng trường dòng, hạt đi ra với vận tốc u_r(r,Q).",
+    "co_che": "radius_q",
+    "t_vao_s": 0,
+    "t_ra_s": 15.7333,
+    "khung_dau": 7168,
+    "t_vao_toan_tap_s": 238.9333,
+    "t_ra_toan_tap_s": 254.6667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1719,6 +2543,42 @@
     "bat_dau_s_2_9": 237.5,
     "dai_s_2_5": 15.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.57,
+     "moc_tts": "radius",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.13,
+     "moc_tts": "magnitude",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Phân tử có đuôi khác nhau và hạt nước",
+    "luat_chuyen_dong": "Độ hấp phụ thay đổi σ(c) và r*, hạt trôi theo v(r;σ) trong khi phân tử tiếp tục khuếch tán.",
+    "co_che": "molecule",
+    "t_vao_s": 0,
+    "t_ra_s": 13.7,
+    "khung_dau": 7640,
+    "t_vao_toan_tap_s": 254.6667,
+    "t_ra_toan_tap_s": 268.3667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1784,8 +2644,44 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 289.8,
     "bat_dau_s_2_9": 251.1,
-    "dai_s_2_5": 14.0,
+    "dai_s_2_5": 14,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.83,
+     "moc_tts": "swap",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.67,
+     "moc_tts": "bromide",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhanTu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Nhóm đầu phân cực và vùng trong",
+    "luat_chuyen_dong": "Cấu trúc phân tử thay đổi điều kiện biên σ(c), hạt chuyển động và vòng r*(t) đáp ứng liên tục.",
+    "co_che": "molecule",
+    "t_vao_s": 0,
+    "t_ra_s": 14.5,
+    "khung_dau": 8051,
+    "t_vao_toan_tap_s": 268.3667,
+    "t_ra_toan_tap_s": 282.8667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1856,6 +2752,42 @@
     "bat_dau_s_2_9": 263.6,
     "dai_s_2_5": 15.6,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.69,
+     "moc_tts": "zoom",
+     "kieu": "doi_goc",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.38,
+     "moc_tts": "rides",
+     "kieu": "doi_vat",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Phân tử ở bề mặt và hạt nước",
+    "luat_chuyen_dong": "Máy quay bay vào phân tử đang hấp phụ/nhả khỏi mặt, hạt nước chuyển động theo gradient sức căng.",
+    "co_che": "molecule",
+    "t_vao_s": 0,
+    "t_ra_s": 14.0667,
+    "khung_dau": 8486,
+    "t_vao_toan_tap_s": 282.8667,
+    "t_ra_toan_tap_s": 296.9333,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -1928,6 +2860,69 @@
     "bat_dau_s_2_9": 277.6,
     "dai_s_2_5": 18.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.41,
+     "moc_tts": "desorbed",
+     "kieu": "doi_goc",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.82,
+     "moc_tts": "clean",
+     "kieu": "doi_vat",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.22,
+     "moc_tts": "drives",
+     "kieu": "doi_khung",
+     "vat_chinh": "DongMarangoni",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T09",
+     "t_vao": 302,
+     "t_ra": 307.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Stationary fine-needle soap feed in a shallow laboratory dish viewed overhead. Tiny tracers move outward within a circular region and slow strongly outside its boundary, realistic highlights. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Phân tử desorb, vòng dừng, hạt tracer",
+    "luat_chuyen_dong": "Xà phòng suy giảm làm ∂σ/∂r→0 gần r*, hạt mặt giảm tốc tới vòng rồi có hồi lưu bên dưới.",
+    "co_che": "stop_ring",
+    "t_vao_s": 0,
+    "t_ra_s": 17.6333,
+    "khung_dau": 8908,
+    "t_vao_toan_tap_s": 296.9333,
+    "t_ra_toan_tap_s": 314.5667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2015,8 +3010,58 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 339.3,
     "bat_dau_s_2_9": 293.9,
-    "dai_s_2_5": 22.0,
+    "dai_s_2_5": 22,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.88,
+     "moc_tts": "density",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 11.77,
+     "moc_tts": "four",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 17.65,
+     "moc_tts": "millimetres",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tracer và tốc độ u*",
+    "luat_chuyen_dong": "Hạt chạy liên tục theo u_r(r,t); giá trị u*≈0,46 m/s là kết quả tính được nối với chuyển động hạt, công thức xuất hiện theo lời.",
+    "co_che": "velocity",
+    "t_vao_s": 0,
+    "t_ra_s": 23.5333,
+    "khung_dau": 9437,
+    "t_vao_toan_tap_s": 314.5667,
+    "t_ra_toan_tap_s": 338.1,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2101,6 +3146,69 @@
     "bat_dau_s_2_9": 313.4,
     "dai_s_2_5": 20.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.88,
+     "moc_tts": "thickness",
+     "kieu": "doi_goc",
+     "vat_chinh": "ThuocLc",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.75,
+     "moc_tts": "seven",
+     "kieu": "doi_vat",
+     "vat_chinh": "ThuocLc",
+     "canh_tts": true
+    },
+    {
+     "t_s": 14.63,
+     "moc_tts": "calculated",
+     "kieu": "doi_khung",
+     "vat_chinh": "ThuocLc",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T10",
+     "t_vao": 345,
+     "t_ra": 350.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Extreme macro side view just below water surface. Microscopic tracer beads move in the thin surface-adjacent layer, realistic liquid reflection and smooth camera drift. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt trong lớp biên độ dày ℓν",
+    "luat_chuyen_dong": "Vận tốc v(z) biến đổi theo độ sâu và chiều dày lớp ℓν≈0,17 mm, tracer gần mặt trôi nhanh hơn phía dưới.",
+    "co_che": "recirculation",
+    "t_vao_s": 0,
+    "t_ra_s": 19.5,
+    "khung_dau": 10143,
+    "t_vao_toan_tap_s": 338.1,
+    "t_ra_toan_tap_s": 357.6,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2175,6 +3283,49 @@
     "bat_dau_s_2_9": 331.5,
     "dai_s_2_5": 17.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.32,
+     "moc_tts": "slowly",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.63,
+     "moc_tts": "thousand",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 12.95,
+     "moc_tts": "root",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Lớp khuếch tán và phân tử chất hoạt động",
+    "luat_chuyen_dong": "Phân tử thực hiện khuếch tán D, lớp theo chiều sâu δ(t)∝√(Dt) và hạt nước hồi lưu.",
+    "co_che": "molecule",
+    "t_vao_s": 0,
+    "t_ra_s": 17.2667,
+    "khung_dau": 10728,
+    "t_vao_toan_tap_s": 357.6,
+    "t_ra_toan_tap_s": 374.8667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2258,6 +3409,69 @@
     "bat_dau_s_2_9": 346.8,
     "dai_s_2_5": 21.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.25,
+     "moc_tts": "rises",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.5,
+     "moc_tts": "calculated",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 15.75,
+     "moc_tts": "estimate",
+     "kieu": "doi_khung",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T11",
+     "t_vao": 384,
+     "t_ra": 389.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead lab petri dish. Adjusted continuous flow through a micro-needle causes the clear tracer-free circle to grow gradually. Realistic water reflections, neutral lighting. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Kim bơm Q(t), vòng r*(t) và điểm đồ thị",
+    "luat_chuyen_dong": "Cùng một Q(t) dùng cho cả mô phỏng và đồ thị: r*(t)=r0[Q(t)/Q0]^(3/4); vòng nở/thu và hạt v_r(r,Q) chạy suốt beat, điểm biểu đồ đi đồng bộ.",
+    "co_che": "radius_q",
+    "t_vao_s": 0,
+    "t_ra_s": 21,
+    "khung_dau": 11246,
+    "t_vao_toan_tap_s": 374.8667,
+    "t_ra_toan_tap_s": 395.8667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2312,6 +3526,62 @@
     "bat_dau_s_2_9": 365.6,
     "dai_s_2_5": 15.6,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.49,
+     "moc_tts": "fails",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.98,
+     "moc_tts": "meniscus",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T12",
+     "t_vao": 399,
+     "t_ra": 404.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Side-by-side shallow dishes with different liquid viscosities. A narrow capillary adds a drop to each, producing visibly differing tracer flows and clear zones. Stable scientific lighting. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Tracers trong chất lỏng hai độ nhớt",
+    "luat_chuyen_dong": "μ khác nhau làm v_r(r;μ) giảm tương ứng, hạt hai bên vẫn chuyển động theo phương trình dòng mặt.",
+    "co_che": "viscosity",
+    "t_vao_s": 0,
+    "t_ra_s": 13.4667,
+    "khung_dau": 11876,
+    "t_vao_toan_tap_s": 395.8667,
+    "t_ra_toan_tap_s": 409.3333,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2375,6 +3645,69 @@
     "bat_dau_s_2_9": 379.6,
     "dai_s_2_5": 20.8,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.64,
+     "moc_tts": "useful",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.28,
+     "moc_tts": "single",
+     "kieu": "doi_vat",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.93,
+     "moc_tts": "independent",
+     "kieu": "doi_khung",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T13",
+     "t_vao": 416,
+     "t_ra": 421.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Overhead laboratory dish under continuous surfactant feed, circular clear zone stable while tracer particles move. A transparent unmarked measuring guide is positioned at the edge, no hands in frame. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Vòng đo r*(t), kim bơm và hạt tracer",
+    "luat_chuyen_dong": "Hạt trôi tới vòng dừng; vòng đo bán kính được suy từ trường σ(c) của dòng bơm, không thay hình tĩnh.",
+    "co_che": "stop_ring",
+    "t_vao_s": 0,
+    "t_ra_s": 18.5667,
+    "khung_dau": 12280,
+    "t_vao_toan_tap_s": 409.3333,
+    "t_ra_toan_tap_s": 427.9,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2438,9 +3771,52 @@
    "so_tu": 28,
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 459.5,
-    "bat_dau_s_2_9": 398.0,
+    "bat_dau_s_2_9": 398,
     "dai_s_2_5": 11.2,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 3.92,
+     "moc_tts": "measured",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 7.84,
+     "moc_tts": "episode",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Kim bơm và hạt tracer bên cạnh bảng số liệu",
+    "luat_chuyen_dong": "Bảng measured/episode/calculated không chiếm >40% khung; ≥50% khung là mô hình kim bơm có hạt liên tục theo v_r(r,Q), vùng r* và tốc độ gắn từng con số.",
+    "co_che": "pump",
+    "t_vao_s": 0,
+    "t_ra_s": 11.7667,
+    "khung_dau": 12837,
+    "t_vao_toan_tap_s": 427.9,
+    "t_ra_toan_tap_s": 439.6667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2502,8 +3878,51 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 471.2,
     "bat_dau_s_2_9": 408.1,
-    "dai_s_2_5": 18.0,
+    "dai_s_2_5": 18,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.13,
+     "moc_tts": "second#2",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.27,
+     "moc_tts": "hundredfold",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tracer và tốc độ đo cạnh đồ thị",
+    "luat_chuyen_dong": "≥50% khung mô phỏng hạt radial với v(r) theo số đo 0,01→~0,5 m/s và vùng gần dừng; ≤40% khung hiển thị đồ thị, điểm số chạy đồng bộ.",
+    "co_che": "velocity",
+    "t_vao_s": 0,
+    "t_ra_s": 15.4,
+    "khung_dau": 13190,
+    "t_vao_toan_tap_s": 439.6667,
+    "t_ra_toan_tap_s": 455.0667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2584,8 +4003,58 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 489.7,
     "bat_dau_s_2_9": 424.2,
-    "dai_s_2_5": 20.0,
+    "dai_s_2_5": 20,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.35,
+     "moc_tts": "six",
+     "kieu": "doi_goc",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 8.7,
+     "moc_tts": "thinner",
+     "kieu": "doi_vat",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    },
+    {
+     "t_s": 13.05,
+     "moc_tts": "wider",
+     "kieu": "doi_khung",
+     "vat_chinh": "PhepTinh",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Kim bơm, vòng r* và số tính",
+    "luat_chuyen_dong": "Hạt chạy theo Q, vòng bán kính thay đổi đúng hệ số tính ×1,68; số tính dần xuất hiện tối đa 40% khung.",
+    "co_che": "radius_q",
+    "t_vao_s": 0,
+    "t_ra_s": 17.4,
+    "khung_dau": 13652,
+    "t_vao_toan_tap_s": 455.0667,
+    "t_ra_toan_tap_s": 472.4667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2663,6 +4132,56 @@
     "bat_dau_s_2_9": 441.9,
     "dai_s_2_5": 20.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.03,
+     "moc_tts": "patch",
+     "kieu": "doi_goc",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 10.05,
+     "moc_tts": "measurement",
+     "kieu": "doi_vat",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    },
+    {
+     "t_s": 15.08,
+     "moc_tts": "millimolar",
+     "kieu": "doi_khung",
+     "vat_chinh": "BangKe",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "bo_cuc_so_lieu": {
+    "ti_le_mo_phong_pct": 55,
+    "ti_le_cong_thuc_pct": 35,
+    "phan_trang_chu": true,
+    "dong_bo_tts": true,
+    "the_chu_max_s": 3
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Mô hình vòng dừng r*=15 mm và hạt tracer",
+    "luat_chuyen_dong": "Lấy bán kính đĩa mô phỏng 35 mm: r*/R=15/35; hạt trong vòng chạy theo v_r(r), giảm về 0 ở biên r*=15 mm; vùng ngoài chuyển động yếu; thẻ giả định ≤40% khung.",
+    "co_che": "ring_15mm",
+    "t_vao_s": 0,
+    "t_ra_s": 20.1,
+    "khung_dau": 14174,
+    "t_vao_toan_tap_s": 472.4667,
+    "t_ra_toan_tap_s": 492.5667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2728,9 +4247,65 @@
    "so_tu": 40,
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 531.1,
-    "bat_dau_s_2_9": 460.0,
-    "dai_s_2_5": 16.0,
+    "bat_dau_s_2_9": 460,
+    "dai_s_2_5": 16,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.88,
+     "moc_tts": "pump",
+     "kieu": "doi_goc",
+     "vat_chinh": "BanQuang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.76,
+     "moc_tts": "household",
+     "kieu": "doi_vat",
+     "vat_chinh": "BanQuang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T14",
+     "t_vao": 496,
+     "t_ra": 501.5,
+     "vai": "than",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Side-by-side comparison: a kitchen bowl with pepper and one soap droplet; a lab dish with a continuous surfactant needle. Different living surface patterns, overhead close-up. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tiêu trong bát và kim bơm liên tục",
+    "luat_chuyen_dong": "Hai hiện tượng cùng do gradient σ nhưng một giọt gây xung lan, bơm liên tục tạo vòng ổn định; cả hai dòng hạt chuyển động.",
+    "co_che": "comparison",
+    "t_vao_s": 0,
+    "t_ra_s": 14.6333,
+    "khung_dau": 14777,
+    "t_vao_toan_tap_s": 492.5667,
+    "t_ra_toan_tap_s": 507.2,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2815,6 +4390,49 @@
     "bat_dau_s_2_9": 474.3,
     "dai_s_2_5": 20.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 5.84,
+     "moc_tts": "capillary",
+     "kieu": "doi_goc",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 11.68,
+     "moc_tts": "four",
+     "kieu": "doi_vat",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    },
+    {
+     "t_s": 17.52,
+     "moc_tts": "drives",
+     "kieu": "doi_khung",
+     "vat_chinh": "ZoomThang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt nước và phân tử trong 3 thang độ dài",
+    "luat_chuyen_dong": "Camera chuyển xuyên các thang phân tử–bề mặt–đĩa có mô hình nước/hạt chuyển động liên tục theo v(r), không cắt giữa ảnh đứng.",
+    "co_che": "recirculation",
+    "t_vao_s": 0,
+    "t_ra_s": 23.3667,
+    "khung_dau": 15216,
+    "t_vao_toan_tap_s": 507.2,
+    "t_ra_toan_tap_s": 530.5667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2880,6 +4498,62 @@
     "bat_dau_s_2_9": 492.4,
     "dai_s_2_5": 18.4,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 4.96,
+     "moc_tts": "spot",
+     "kieu": "doi_goc",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    },
+    {
+     "t_s": 9.91,
+     "moc_tts": "ends",
+     "kieu": "doi_vat",
+     "vat_chinh": "KhayTieu",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T15",
+     "t_vao": 534,
+     "t_ra": 539.5,
+     "vai": "ket",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Kitchen bowl with black pepper floating on water. One small soap drop triggers a quick outward rush of pepper. Photorealistic overhead view in natural daylight, match opening experiment. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Hạt tiêu và dòng nước mặt",
+    "luat_chuyen_dong": "Tái hiện tiêu bị kéo ra ngoài bởi ∂σ/∂r>0, cùng hình vòng dừng do bơm, hạt luôn chạy tới khi kết beat.",
+    "co_che": "marangoni",
+    "t_vao_s": 0,
+    "t_ra_s": 14.8667,
+    "khung_dau": 15917,
+    "t_vao_toan_tap_s": 530.5667,
+    "t_ra_toan_tap_s": 545.4333,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   },
   {
@@ -2919,8 +4593,57 @@
    "thoi_luong_uoc": {
     "bat_dau_s_2_5": 587.4,
     "bat_dau_s_2_9": 508.7,
-    "dai_s_2_5": 6.0,
+    "dai_s_2_5": 6,
     "pad_s": 0.5
+   },
+   "doi_hinh": [
+    {
+     "t_s": 3.97,
+     "moc_tts": "wine",
+     "kieu": "doi_goc",
+     "vat_chinh": "BanQuang",
+     "canh_tts": true
+    }
+   ],
+   "mo_phong": {
+    "chinh": "Trường vận tốc/vật lý có diễn biến thật",
+    "phu": "mặt chất lỏng sống và tracer",
+    "so_hat_toi_thieu": 200,
+    "mat_chat_long": "always_redraw",
+    "mui_ten_chi_phu": true
+   },
+   "canh_thuc": [
+    {
+     "id": "T16",
+     "t_vao": 547,
+     "t_ra": 552.5,
+     "vai": "ket",
+     "tep": null,
+     "nguon": "Gemini pending, generated asset not yet supplied",
+     "giay_phep": "Chờ GĐ xác minh điều kiện sử dụng sau khi tạo",
+     "nhan": "AI minh hoạ (Gemini)",
+     "crop_9x16": {
+      "chu_the_giua": true,
+      "ngang_an_toan_pct": [
+       22,
+       78
+      ]
+     },
+     "prompt_gemini_en": "Close-up of wine in a clear stemmed glass. Thin liquid film climbs the inner glass wall, forms tears and slides down again. Warm tabletop light, graceful macro camera move. 8-second continuous photorealistic shot. Main action centered for safe 9:16 crop. No text, subtitles, logos, faces or people."
+    }
+   ],
+   "chuyen_dong_chinh": {
+    "vat_chuyen_dong": "Màng rượu leo thành ly và các giọt rượu",
+    "luat_chuyen_dong": "Gradient sức căng do bay hơi làm màng rượu leo ngược trọng lực rồi tụ giọt chảy xuống; chiều cao màng và vị trí giọt đổi liên tục.",
+    "co_che": "wine_tears",
+    "t_vao_s": 0,
+    "t_ra_s": 7.9333,
+    "khung_dau": 16363,
+    "t_vao_toan_tap_s": 545.4333,
+    "t_ra_toan_tap_s": 553.3667,
+    "chay_lien_tuc": true,
+    "khung_bao_vat": "C17_ROI phát bởi Manim từ self.F/vùng mô phỏng vật chính",
+    "duyet_bang_video": true
    }
   }
  ]

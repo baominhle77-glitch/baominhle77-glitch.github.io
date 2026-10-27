@@ -44,3 +44,4 @@ typing_extensions==4.16.0
 typst==0.15.0
 watchdog==6.0.0
 yarl==1.25.1
+opencv-python-headless==4.13.0.92

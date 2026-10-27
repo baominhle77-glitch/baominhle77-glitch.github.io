@@ -1,0 +1,1 @@
+{"name":"k1t3-b-remotion","private":true,"version":"1.0.0","scripts":{"render":"node render.mjs"},"dependencies":{"@remotion/bundler":"4.0.366","@remotion/renderer":"4.0.366","@remotion/cli":"4.0.366","remotion":"4.0.366","react":"19.1.0","react-dom":"19.1.0"}}

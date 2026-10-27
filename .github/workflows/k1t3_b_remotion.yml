@@ -1,0 +1,435 @@
+name: k1t3-B-remotion-60s
+on:
+  push:
+    branches: [gpt/k1t3-B-remotion]
+    paths:
+      - 'ci/remotion_b/**'
+      - 'ci/simulation/**'
+      - 'ci/frame_layout.py'
+      - 'ci/analysis_video.py'
+      - 'ci/kiem_khuon_sha.py'
+      - 'ci/kiem_ban_ve.py'
+      - 'ci/g12_vat_chinh.py'
+      - 'ci/khuon_dung_thu.py'
+      - 'khuon/**'
+      - 'ci/layer_plan.py'
+      - '.github/workflows/k1t3_b_remotion.yml'
+      - '.github/workflows/gate_chung.yml'
+      - 'assets/k1t3/broll_gemini/**'
+      - 'tools/do_chuyen_dong_vung.py'
+      - 'ci/chuyen_dong_vung.py'
+      - 'gate_chung/**'
+      - 'the_loai/**'
+  workflow_dispatch:
+    inputs:
+      render_1080:
+        description: Native 1080p only after every 540p gate passes
+        type: boolean
+        default: false
+concurrency:
+  group: k1t3-B-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+  actions: read
+env:
+  PYTHONIOENCODING: utf-8
+  NLTK_DATA: ${{ github.workspace }}/work/gate_nlp
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+jobs:
+  ban-ve:
+    name: KHUON v1 / SHA and blueprint before rendering
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+          cache: pip
+          cache-dependency-path: gate_chung/requirements.txt
+      - run: python ci/kiem_khuon_sha.py
+      - run: python -m pip install -q -r gate_chung/requirements.txt
+      - run: python ci/kiem_ban_ve.py ci/remotion_b/ban_ve_B60.json
+      - run: python ci/remotion_b/semantic_captions.py --alignment-out work/preflight/caption_alignment.json
+  manim:
+    needs: ban-ve
+    name: Manim 540p / ${{ matrix.beat }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        beat: [h1, h2, h3, h4, c1, p1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+      - name: Beat source fingerprint
+        id: fingerprint
+        run: |
+          echo "key=$(python ci/remotion_b/beat_cache.py --beat ${{ matrix.beat }})" >> "$GITHUB_OUTPUT"
+          echo "panel_key=$(python ci/remotion_b/prepare_panels.py --beat ${{ matrix.beat }} --key)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: beat-cache
+        with:
+          path: work/B_cache/540/${{ matrix.beat }}
+          key: B-media-v3-${{ runner.os }}-${{ matrix.beat }}-${{ steps.fingerprint.outputs.key }}
+      - uses: actions/cache@v4
+        id: panel-cache
+        if: steps.fingerprint.outputs.panel_key != 'none'
+        with:
+          path: work/B_panels/540/${{ matrix.beat }}
+          key: B-panel-v1-${{ runner.os }}-${{ matrix.beat }}-${{ steps.fingerprint.outputs.panel_key }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: B-pip-${{ runner.os }}-py311-${{ hashFiles('ci_requirements.txt') }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: ci/remotion_b/node_modules
+          key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
+      - name: Native toolchain, no apt FFmpeg
+        if: steps.beat-cache.outputs.cache-hit != 'true' || (steps.fingerprint.outputs.panel_key != 'none' && steps.panel-cache.outputs.cache-hit != 'true')
+        run: bash ci/remotion_b/setup_native.sh manim
+      - name: Cached Python and Node packages
+        env:
+          B_MEDIA_CACHE_HIT: ${{ steps.beat-cache.outputs.cache-hit }}
+          B_PANEL_KEY: ${{ steps.fingerprint.outputs.panel_key }}
+          B_PANEL_CACHE_HIT: ${{ steps.panel-cache.outputs.cache-hit }}
+        run: |
+          if [ "$B_MEDIA_CACHE_HIT" != "true" ] || { [ "$B_PANEL_KEY" != "none" ] && [ "$B_PANEL_CACHE_HIT" != "true" ]; }; then python -m pip install -q -r ci_requirements.txt; fi
+          if [ ! -x ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu/ffmpeg ]; then
+            npm ci --prefix ci/remotion_b --no-audit --no-fund
+          fi
+          python -m pip install -q Pillow==12.3.0
+          echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
+          python ci/remotion_b/gate_ffmpeg.py
+      - name: This beat only, both native 540p formats at 30fps
+        run: |
+          python -u ci/remotion_b/prepare.py --beat ${{ matrix.beat }} --jobs 1
+          python ci/remotion_b/finish_beat.py --beat ${{ matrix.beat }}
+          python ci/remotion_b/prepare_panels.py --beat ${{ matrix.beat }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-beat-540-${{ matrix.beat }}
+          retention-days: 14
+          path: |
+            work/B_cache/540/${{ matrix.beat }}/*.mp4
+            work/B_cache/540/${{ matrix.beat }}/*.json
+            work/B_cache/540/${{ matrix.beat }}/stills/
+            work/B_cache/540/${{ matrix.beat }}/media/**/render.log
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.fingerprint.outputs.panel_key != 'none'
+        with:
+          name: B-panel-540-${{ matrix.beat }}
+          retention-days: 14
+          path: |
+            work/B_panels/540/${{ matrix.beat }}/*.mp4
+            work/B_panels/540/${{ matrix.beat }}/*.json
+            work/B_panels/540/${{ matrix.beat }}/*.png
+            work/B_panels/540/${{ matrix.beat }}/render.log
+  remotion:
+    name: Remotion 540p + unchanged gates
+    needs: manim
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      gates: ${{ steps.gates.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/cache@v4
+        with:
+          path: ci/remotion_b/node_modules
+          key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: B-measure-${{ runner.os }}-py311-${{ hashFiles('ci_requirements.txt') }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: B-beat-540-*
+          path: work/beat-download
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: B-panel-540-*
+          path: work/panel-download
+      - run: python ci/remotion_b/collect_panels.py
+      - name: Collect six matrix artifacts
+        run: python ci/remotion_b/collect_beats.py --short-side 540
+      - uses: actions/cache@v4
+        with:
+          path: work/gate_nlp
+          key: D18-nlp-v1-${{ runner.os }}
+      - name: Chrome runtime and cached Node dependencies
+        run: |
+          bash ci/remotion_b/setup_native.sh browser
+          if [ ! -x ci/remotion_b/node_modules/.bin/remotion ]; then npm ci --prefix ci/remotion_b --no-audit --no-fund; fi
+          echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
+          python -m pip install -q -r gate_chung/requirements.txt
+          python -m gate_chung.setup
+          npx --prefix ci/remotion_b remotion browser ensure
+      - name: Remotion only, render both complete MP4s
+        env:
+          B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
+        run: python -u ci/remotion_b/compose.py --caption-alignment work/B/caption_alignment.json
+      - name: Full FFmpeg for the original fps and freezedetect gates
+        if: always()
+        run: python ci/remotion_b/gate_ffmpeg.py
+      - name: KHUON v1 G12 on both actual formats
+        id: g12
+        run: |
+          set +e
+          python ci/g12_vat_chinh.py --video work/B/B_60s_16x9.mp4 --kho 16x9 --out work/B/g12_16x9.json
+          g12_land=$?
+          python ci/g12_vat_chinh.py --video work/B/B_60s_9x16.mp4 --kho 9x16 --out work/B/g12_9x16.json
+          g12_portrait=$?
+          exit $((g12_land || g12_portrait))
+      - name: Universal D18 gates on both actual MP4s
+        id: common
+        run: |
+          python ci/remotion_b/export_gate_plan.py --video-root work/B --caption-alignment work/B/caption_alignment.json --out work/B/plans
+          set +e
+          python -m gate_chung --video work/B/B_60s_16x9.mp4 --plan work/B/plans/16x9.json --genre the_loai/khoa_hoc_vat_ly.json --out work/B/gate_chung_16x9
+          d18_land=$?
+          python -m gate_chung --video work/B/B_60s_9x16.mp4 --plan work/B/plans/9x16.json --genre the_loai/khoa_hoc_vat_ly.json --out work/B/gate_chung_9x16
+          d18_portrait=$?
+          exit $((d18_land || d18_portrait))
+      - name: Unchanged 540p gates, ffprobe, sheets and A-B report
+        id: gates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          python ci/remotion_b/measure.py --caption-alignment work/B/caption_alignment.json
+          b_gate_exit=$?
+          if [ '${{ steps.common.outcome }}' != 'success' ]; then b_gate_exit=1; fi
+          if [ "$b_gate_exit" -eq 0 ]; then echo 'result=DAT' >> "$GITHUB_OUTPUT"; else echo 'result=TRUOT' >> "$GITHUB_OUTPUT"; fi
+          exit "$b_gate_exit"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-60s-540p
+          retention-days: 14
+          path: |
+            work/B/B_60s_16x9.mp4
+            work/B/B_60s_9x16.mp4
+            work/B/contact_sheet_*.jpg
+            work/B/*.json
+            work/B/*.md
+            work/B/plans/
+            work/B/gate_chung_16x9/
+            work/B/gate_chung_9x16/
+            ci/so_sanh_AB.json
+            ci/remotion_b/evidence/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-video-540-16x9
+          retention-days: 14
+          path: work/B/B_60s_16x9.mp4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-video-540-9x16
+          retention-days: 14
+          path: work/B/B_60s_9x16.mp4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-reports-540
+          retention-days: 14
+          path: |
+            work/B/*.json
+            work/B/*.md
+            work/B/*.jpg
+            work/B/plans/
+            work/B/gate_chung_16x9/
+            work/B/gate_chung_9x16/
+  manim-1080:
+    needs: remotion
+    if: needs.remotion.outputs.gates == 'DAT'
+    name: Native Manim 1080p / ${{ matrix.beat }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        beat: [h1, h2, h3, h4, c1, p1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+      - name: Beat source fingerprint
+        id: fingerprint
+        run: |
+          echo "key=$(python ci/remotion_b/beat_cache.py --short-side 1080 --beat ${{ matrix.beat }})" >> "$GITHUB_OUTPUT"
+          echo "panel_key=$(python ci/remotion_b/prepare_panels.py --short-side 1080 --beat ${{ matrix.beat }} --key)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: beat-cache
+        with:
+          path: work/B_cache/1080/${{ matrix.beat }}
+          key: B-media-1080-v4-${{ runner.os }}-${{ matrix.beat }}-${{ steps.fingerprint.outputs.key }}
+      - uses: actions/cache@v4
+        id: panel-cache
+        if: steps.fingerprint.outputs.panel_key != 'none'
+        with:
+          path: work/B_panels/1080/${{ matrix.beat }}
+          key: B-panel-1080-v2-${{ runner.os }}-${{ matrix.beat }}-${{ steps.fingerprint.outputs.panel_key }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: B-pip-${{ runner.os }}-py311-${{ hashFiles('ci_requirements.txt') }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: ci/remotion_b/node_modules
+          key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
+      - name: Native toolchain, no apt FFmpeg
+        if: steps.beat-cache.outputs.cache-hit != 'true' || (steps.fingerprint.outputs.panel_key != 'none' && steps.panel-cache.outputs.cache-hit != 'true')
+        run: bash ci/remotion_b/setup_native.sh manim
+      - name: Cached Python and Node packages
+        env:
+          B_MEDIA_CACHE_HIT: ${{ steps.beat-cache.outputs.cache-hit }}
+          B_PANEL_KEY: ${{ steps.fingerprint.outputs.panel_key }}
+          B_PANEL_CACHE_HIT: ${{ steps.panel-cache.outputs.cache-hit }}
+        run: |
+          if [ "$B_MEDIA_CACHE_HIT" != "true" ] || { [ "$B_PANEL_KEY" != "none" ] && [ "$B_PANEL_CACHE_HIT" != "true" ]; }; then python -m pip install -q -r ci_requirements.txt; fi
+          if [ ! -x ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu/ffmpeg ]; then
+            npm ci --prefix ci/remotion_b --no-audit --no-fund
+          fi
+          python -m pip install -q Pillow==12.3.0
+          echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
+          python ci/remotion_b/gate_ffmpeg.py
+      - name: This beat only, both native 1080p formats at 30fps
+        run: |
+          python -u ci/remotion_b/prepare.py --short-side 1080 --beat ${{ matrix.beat }} --jobs 1
+          python ci/remotion_b/finish_beat.py --short-side 1080 --beat ${{ matrix.beat }}
+          python ci/remotion_b/prepare_panels.py --short-side 1080 --beat ${{ matrix.beat }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-beat-1080-${{ matrix.beat }}
+          retention-days: 14
+          path: |
+            work/B_cache/1080/${{ matrix.beat }}/*.mp4
+            work/B_cache/1080/${{ matrix.beat }}/*.json
+            work/B_cache/1080/${{ matrix.beat }}/stills/
+            work/B_cache/1080/${{ matrix.beat }}/media/**/render.log
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.fingerprint.outputs.panel_key != 'none'
+        with:
+          name: B-panel-1080-${{ matrix.beat }}
+          retention-days: 14
+          path: |
+            work/B_panels/1080/${{ matrix.beat }}/*.mp4
+            work/B_panels/1080/${{ matrix.beat }}/*.json
+            work/B_panels/1080/${{ matrix.beat }}/*.png
+            work/B_panels/1080/${{ matrix.beat }}/render.log
+  remotion-1080:
+    name: Remotion native 1080p + G1-G11
+    needs: manim-1080
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      B_SHORT_SIDE: '1080'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/cache@v4
+        with:
+          path: ci/remotion_b/node_modules
+          key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: B-measure-${{ runner.os }}-py311-${{ hashFiles('ci_requirements.txt') }}
+      - uses: actions/cache@v4
+        with:
+          path: work/gate_nlp
+          key: D18-nlp-v1-${{ runner.os }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: B-beat-1080-*
+          path: work/beat-download
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: B-panel-1080-*
+          path: work/panel-download
+      - run: python ci/remotion_b/collect_panels.py
+      - run: python ci/remotion_b/collect_beats.py --short-side 1080
+      - name: Full FFmpeg and Chrome
+        run: |
+          bash ci/remotion_b/setup_native.sh browser
+          python -m pip install -q -r gate_chung/requirements.txt
+          python -m gate_chung.setup
+          if [ ! -x ci/remotion_b/node_modules/.bin/remotion ]; then npm ci --prefix ci/remotion_b --no-audit --no-fund; fi
+          python -m pip install -q Pillow==12.3.0
+          echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
+          python ci/remotion_b/gate_ffmpeg.py
+          npx --prefix ci/remotion_b remotion browser ensure
+      - name: Two native 1080p sample MP4s only, no full episode
+        env:
+          B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
+        run: python -u ci/remotion_b/compose.py --caption-alignment work/B1080/caption_alignment.json
+      - name: KHUON v1 G12 on both actual formats
+        id: g12
+        run: |
+          set +e
+          python ci/g12_vat_chinh.py --video work/B1080/B_60s_16x9.mp4 --kho 16x9 --out work/B1080/g12_16x9.json
+          g12_land=$?
+          python ci/g12_vat_chinh.py --video work/B1080/B_60s_9x16.mp4 --kho 9x16 --out work/B1080/g12_9x16.json
+          g12_portrait=$?
+          exit $((g12_land || g12_portrait))
+      - name: G1-G11 and original C17 on actual native 1080p videos
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python ci/remotion_b/export_gate_plan.py --video-root work/B1080 --caption-alignment work/B1080/caption_alignment.json --out work/B1080/plans
+          set +e
+          python -m gate_chung --video work/B1080/B_60s_16x9.mp4 --plan work/B1080/plans/16x9.json --genre the_loai/khoa_hoc_vat_ly.json --out work/B1080/gate_chung_16x9
+          land=$?
+          python -m gate_chung --video work/B1080/B_60s_9x16.mp4 --plan work/B1080/plans/9x16.json --genre the_loai/khoa_hoc_vat_ly.json --out work/B1080/gate_chung_9x16
+          portrait=$?
+          python ci/remotion_b/measure.py --caption-alignment work/B1080/caption_alignment.json
+          original=$?
+          exit $((land || portrait || original))
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-60s-native-1080p
+          retention-days: 14
+          path: work/B1080/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B-reports-1080
+          retention-days: 14
+          path: |
+            work/B1080/*.json
+            work/B1080/*.md
+            work/B1080/*.jpg
+            work/B1080/gate_chung_16x9/
+            work/B1080/gate_chung_9x16/

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Tệp cảnh ML_K1_t3 — SINH bởi tools/nha_may_k1.py từ out/M1_XAPHONG/storyboard.json sha256-8 4a8ffa1d; KHÔNG sửa tay.
+# Tệp cảnh ML_K1_t3 — SINH bởi tools/nha_may_k1.py từ out/M1_XAPHONG/storyboard.json sha256-8 9fa65270; KHÔNG sửa tay.
 # Mỗi beat một lớp TrangK1 (ban_sac/K1_canh/trang.py); lớp cảnh + tham số + lời đọc từ _build/ke_hoach.json.
 # Dòng nguồn góc trên phải do TrangK1 vẽ từ tham_so.nguon; tập này không có DOI.
 import os
@@ -12,6 +12,7 @@ import vung_cam  # noqa: E402 — vùng cấm PiP từ t3 (lệnh GĐ 2240 mục
 import K1_canh.trang as _vc_bo_cuc  # noqa: E402
 vung_cam.ap(_vc_bo_cuc, 'b3747a29')
 import K1_canh.lop_t3  # noqa: E402,F401 — lớp cảnh của tập
+from K1_canh.mo_phong_c17_v2 import SceneK1T3 as TrangK1
 
 
 class h1(TrangK1):
