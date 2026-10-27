@@ -1,0 +1,46 @@
+{
+  "K1 16x9": {
+    "G1": "DAT",
+    "G2": "DAT",
+    "G3": "DAT",
+    "G4": "DAT",
+    "G5": "DAT",
+    "G6": "DAT",
+    "G7": "DAT",
+    "G8": "DAT",
+    "G9": "DAT"
+  },
+  "lich_su 16x9": {
+    "G1": "DAT",
+    "G2": "DAT",
+    "G3": "DAT",
+    "G4": "DAT",
+    "G5": "DAT",
+    "G6": "DAT",
+    "G7": "DAT",
+    "G8": "DAT",
+    "G9": "DAT"
+  },
+  "K1 9x16": {
+    "G1": "DAT",
+    "G2": "DAT",
+    "G3": "DAT",
+    "G4": "DAT",
+    "G5": "DAT",
+    "G6": "DAT",
+    "G7": "DAT",
+    "G8": "DAT",
+    "G9": "DAT"
+  },
+  "lich_su 9x16": {
+    "G1": "DAT",
+    "G2": "DAT",
+    "G3": "DAT",
+    "G4": "DAT",
+    "G5": "DAT",
+    "G6": "DAT",
+    "G7": "DAT",
+    "G8": "DAT",
+    "G9": "DAT"
+  }
+}

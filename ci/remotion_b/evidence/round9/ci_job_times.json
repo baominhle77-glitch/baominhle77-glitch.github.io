@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Manim 540p / h4",
+    "conclusion": "success",
+    "started_at": "2026-10-27T08:39:02Z",
+    "completed_at": "2026-10-27T08:39:30Z",
+    "duration_s": 28.0
+  },
+  {
+    "name": "Manim 540p / p1",
+    "conclusion": "success",
+    "started_at": "2026-10-27T08:39:02Z",
+    "completed_at": "2026-10-27T08:39:29Z",
+    "duration_s": 27.0
+  },
+  {
+    "name": "Manim 540p / c1",
+    "conclusion": "success",
+    "started_at": "2026-10-27T08:39:02Z",
+    "completed_at": "2026-10-27T08:39:25Z",
+    "duration_s": 23.0
+  },
+  {
+    "name": "Manim 540p / h1",
+    "conclusion": "success",
+    "started_at": "2026-10-27T08:39:02Z",
+    "completed_at": "2026-10-27T08:40:48Z",
+    "duration_s": 106.0
+  },
+  {
+    "name": "Manim 540p / h2",
+    "conclusion": "success",
+    "started_at": "2026-10-27T08:39:02Z",
+    "completed_at": "2026-10-27T08:40:36Z",
+    "duration_s": 94.0
+  },
+  {
+    "name": "Manim 540p / h3",
+    "conclusion": "success",
+    "started_at": "2026-10-27T08:39:02Z",
+    "completed_at": "2026-10-27T08:40:50Z",
+    "duration_s": 108.0
+  },
+  {
+    "name": "Remotion 540p + unchanged gates",
+    "conclusion": "success",
+    "started_at": "2026-10-27T08:40:53Z",
+    "completed_at": "2026-10-27T08:52:09Z",
+    "duration_s": 676.0
+  },
+  {
+    "name": "Native 1080p after green 540p gates",
+    "conclusion": "skipped",
+    "started_at": "2026-10-27T08:52:10Z",
+    "completed_at": "2026-10-27T08:52:09Z",
+    "duration_s": 0.0
+  }
+]

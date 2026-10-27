@@ -1,0 +1,35 @@
+[
+  {
+    "second": 9,
+    "scope": "visible water surface in full-context pane; human-review evidence, outside universal gates",
+    "bbox": [
+      61,
+      197,
+      401,
+      109
+    ],
+    "height_over_width": 0.2718204488778055
+  },
+  {
+    "second": 14,
+    "scope": "visible water surface in full-context pane; human-review evidence, outside universal gates",
+    "bbox": [
+      46,
+      174,
+      435,
+      118
+    ],
+    "height_over_width": 0.271264367816092
+  },
+  {
+    "second": 19,
+    "scope": "visible water surface in full-context pane; human-review evidence, outside universal gates",
+    "bbox": [
+      44,
+      165,
+      435,
+      199
+    ],
+    "height_over_width": 0.4574712643678161
+  }
+]

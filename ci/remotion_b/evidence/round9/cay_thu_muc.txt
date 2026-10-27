@@ -1,0 +1,25 @@
+gate_chung/
+  README.md
+  __init__.py
+  __main__.py
+  aspect.py
+  captions.py
+  examples/history_voice.json
+  examples/history_voice.wav
+  gates.py
+  language.py
+  model.py
+  motion.py
+  policy.py
+  requirements.txt
+  semantics.py
+  setup.py
+  tests/test_aspect.py
+  tests/test_regressions.py
+  timeline.py
+  video.py
+the_loai/
+  chuyen_dai_ky.json
+  khoa_hoc_vat_ly.json
+  lich_su.json
+  thien_van.json
