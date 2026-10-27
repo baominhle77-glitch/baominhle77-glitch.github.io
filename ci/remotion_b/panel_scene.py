@@ -1,14 +1,15 @@
 """Native540×480 simulation panels, sharing the exact full simulation updates.
 The optical projection is authored for the lower panel; no rotated/cropped scene.
 """
-import math
+import math,json
+from pathlib import Path
 import numpy as np
 from manim import *
 from scene import BScene,BID,DOC,SHORT,oval,LIGHT,WATER
 config.pixel_width=SHORT;config.pixel_height=round(SHORT*8/9);config.frame_width=8;config.frame_height=64/9;config.frame_rate=30
 class PanelScene(BScene):
  def plate_scene(self):
-  super().plate_scene()
+  super().plate_scene();focus=json.loads((Path(__file__).parent/'portrait_layouts.json').read_text())[BID].get('panel_focus',[0,0]);self._panel_focus=np.array([self.w*focus[0],self.h*focus[1],0])
   if BID=='h3':
    drops=VGroup(*[oval(.07,.10,LIGHT) for _ in range(8)]);waves=VGroup(*[oval(.1,.1,LIGHT,0).set_stroke(LIGHT,2,.4) for _ in range(3)]);self.add_world(drops,waves);self.particle_count+=len(drops)
    def feed(t):
@@ -23,4 +24,4 @@ class PanelScene(BScene):
   # A camera close-up changes one scalar, preserving circles and proportions.
   # This is a declared detail viewport; the upper pane retains full context.
   keys=[3.7,4.2,3.8,4.1];k=min(2,int(t/3.2));u=smooth(min(1,max(0,(t-k*3.2)/3.2)));width=(1-u)*keys[k]+u*keys[k+1]
-  self.camera.frame.set(width=width).move_to(self.c+[.10*math.sin(t*.6),0,0])
+  self.camera.frame.set(width=width).move_to(self.c+self._panel_focus+[.10*math.sin(t*.6),0,0])
