@@ -2,7 +2,7 @@ name: D18 universal video gates
 on:
   push:
     branches: [gpt/k1t3-B-remotion]
-    paths: ['ci/simulation/**', 'gate_chung/**', 'the_loai/**', 'ci/layer_plan.py', 'ci/remotion_b/components/**', 'ci/remotion_b/history/**', 'ci/remotion_b/history_scene.py', '.github/workflows/gate_chung.yml']
+    paths: ['ci/analysis_video.py', 'tools/do_chuyen_dong_vung.py', 'ci/chuyen_dong_vung.py', 'ci/simulation/**', 'gate_chung/**', 'the_loai/**', 'ci/layer_plan.py', 'ci/remotion_b/components/**', 'ci/remotion_b/history/**', 'ci/remotion_b/history_scene.py', '.github/workflows/gate_chung.yml']
   workflow_call:
   workflow_dispatch:
     inputs:
@@ -39,6 +39,19 @@ jobs:
           path: work/gate_nlp
           key: D18-nlp-v1-${{ runner.os }}
       - run: python -m gate_chung.setup
+      - uses: actions/cache@v4
+        with:
+          path: work/gate_ffmpeg_static
+          key: D18-full-ffmpeg-static-linux-amd64-v1
+      - name: Full FFmpeg and ffprobe for media regressions
+        run: |
+          if [ ! -x work/gate_ffmpeg_static/ffmpeg ] || [ ! -x work/gate_ffmpeg_static/ffprobe ]; then
+            mkdir -p work/gate_ffmpeg_static
+            curl -fL --retry 2 --connect-timeout 15 --max-time 150 https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -o work/gate_ffmpeg_static.tar.xz
+            tar -xJf work/gate_ffmpeg_static.tar.xz --strip-components=1 -C work/gate_ffmpeg_static
+          fi
+          echo "$GITHUB_WORKSPACE/work/gate_ffmpeg_static" >> "$GITHUB_PATH"
+          PATH="$GITHUB_WORKSPACE/work/gate_ffmpeg_static:$PATH" python -c "from gate_chung.video import capabilities; result=capabilities(); print(result); assert not result['missing']"
       - run: python -m unittest discover -s gate_chung/tests -v
   history:
     name: History20s / same G1-G11 / both formats
