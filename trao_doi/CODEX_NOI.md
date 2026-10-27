@@ -1,3 +1,18 @@
+# CODEX NÓI — G1 progression9:16 / h4,c1
+
+| mã lỗi · beat | đã sửa gì | số đo bản vẽ / kiểm trước khi đẩy |
+|---|---|---|
+| G1 · h4,32–36s | Chỉ đổi3 giá trị `lia_doc`: t8.2=-0.10, t10.8=+0.80, t13.4=-1.00. Tách pha pan khỏi nhịp nâng/hạ cũ, tránh4s sau quay gần đúng vị trí trước. Điểm13.4 là phần tiếp nối cần thiết để không chuyển lỗi sang36–40s. | Các bước chênh0.55/0.90/1.80 trong2.6–2.7s; ease1.2s của khuôn giữ nguyên. Preview270p encoded: mọi cặp4s nằm trong h4 đạt, SSIM lớn nhất0.959921. |
+| G1 · c1,51–55s và53–57s | Chỉ đổi3 giá trị `lia_doc`: t8.2=-0.10, t10.9=+0.45, t13.6=+1.00. Pan tiến một chiều thay cho đi-về khiến khung4s bị lặp. | Mỗi bước chênh0.55/2.7s; preview270p encoded: mọi cặp4s nằm trong c1 đạt, SSIM lớn nhất0.953357. |
+| Hai tầng ·9:16 | Cùng sự kiện camera được khuôn áp cho cả hai tầng, không zoom ảnh tĩnh/fade, không thêm overlay. Đã tự xem sáu khung native540 ở32/36/51/55/53/57s. | SSIM từng tầng trên/dưới tại540:32–36=.831591/.841006;51–55=.767867/.781285;53–57=.791113/.801741. `panes_540.json` và `doi_chieu_hai_tang.jpg`. Đây là mô phỏng chưa ghép chữ/clip. |
+| G12 ·9:16 | Dựng lại riêng h4/c1 trong preview270p/15fps, tái dùng các phần khác. Không đổi bản vẽ hình học/vùng chữ. | G12 preview DAT; h4 min72.5%/70.9%, c1 min75.9%/73.4% ở tầng trên/dưới;100% khung được đo đạt, tĩnh dài nhất0s. |
+| Giới hạn sửa · toàn mẫu | Không sửa bất kỳ tệp Python/TSX/workflow/khuôn; optics, do_cao, lia ngang, khung16:9, lời/phụ đề/vùng chữ/mốc không đổi. h1,h2,h3,p1 giữ nguyên nội dung và fingerprint cache. | `kiem_khuon_sha` DAT6/6 byte-identical; `kiem_ban_ve` DAT6beat, min76.1%, lề4.0%. Chỉ fingerprint h4/c1 đổi. Lịch sự kiện v1 dùng chung hai khổ nên pan dọc h4/c1 cũng được renderer16:9 tính lại; không tuyên bố pixel16:9 giữ nguyên. Không sửa khuôn để tách lịch riêng. |
+| CI · PR149 | Run trước40568627056 đã kết thúc trước khi đẩy. Một commit mới, cùng nhánh; không merge, không full. | Các số trên là kiểm preview, chưa thay bảng G1–G12 của MP4 Remotion mới. CI540p hai khổ vẫn chạy nguyên ngưỡng, native1080p chỉ sau540p đạt. |
+
+Bằng chứng lượt này: `ci/remotion_b/evidence/r15_progression/`. Không gọi mẫu XONG trước CI và GĐ/Chủ tịch chấm.
+
+---
+
 # CODEX NÓI — KHUÔN v1 / lệnh28-10
 
 Nguồn mã: `codex-khung@3dd997bbec2209ee5471486aaff7bc2bba0acc13`. Sáu tệp Python được chép **nguyên văn**; `scene.py` chỉ đổi một dòng import theo hướng dẫn. Không sửa `optical_water.py`, `transport.py`, `views.py`. Quy trình được chép nguyên văn vào `dao_tao/QUY_TRINH_CHUAN.md`; lược đồ bản vẽ và đường dẫn áp dụng theo hướng dẫn KHUÔN v1 mới nhất.

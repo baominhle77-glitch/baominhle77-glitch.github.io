@@ -521,21 +521,21 @@
           "kieu": "camera",
           "do_cao": 0.56,
           "lia": 0.65,
-          "lia_doc": 0.65
+          "lia_doc": -0.1
         },
         {
           "t": 10.8,
           "kieu": "camera",
           "do_cao": 0.34,
           "lia": -0.65,
-          "lia_doc": -0.65
+          "lia_doc": 0.8
         },
         {
           "t": 13.4,
           "kieu": "camera",
           "do_cao": 0.62,
           "lia": 0.65,
-          "lia_doc": 0.65
+          "lia_doc": -1.0
         },
         {
           "t": 16.0,
@@ -753,21 +753,21 @@
           "kieu": "camera",
           "do_cao": 0.54,
           "lia": 0.65,
-          "lia_doc": 0.65
+          "lia_doc": -0.1
         },
         {
           "t": 10.9,
           "kieu": "camera",
           "do_cao": 0.3,
           "lia": -0.65,
-          "lia_doc": -0.65
+          "lia_doc": 0.45
         },
         {
           "t": 13.6,
           "kieu": "camera",
           "do_cao": 0.58,
           "lia": 0.65,
-          "lia_doc": 0.65
+          "lia_doc": 1.0
         }
       ],
       "khoang_clip": [],
