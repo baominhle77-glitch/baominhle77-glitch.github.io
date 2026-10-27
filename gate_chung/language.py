@@ -2,11 +2,14 @@
 import re,os
 from .model import norm
 from .semantics import role
-from .policy import BAD_END_EN,BAD_END_VI
+from .policy import BAD_END_EN,BAD_END_VI,GRAPHIC_CAPTION_WORDS,GRAPHIC_CAPTION_PHRASES
 
 def words(text):return re.findall(r"[\w]+(?:['’][\w]+)?",text,flags=re.UNICODE)
 def phrase_error(text):
  tokens=words(text)
+ forbidden=sorted({t.lower() for t in tokens}&GRAPHIC_CAPTION_WORDS)
+ forbidden.extend(p for p in GRAPHIC_CAPTION_PHRASES if p in text.lower())
+ if forbidden:return 'caption describes graphics instead of the phenomenon: '+', '.join(forbidden)
  if not 2<=len(text.split())<=5:return 'caption must contain2–5 display words'
  if tokens and tokens[-1].lower() in BAD_END_EN|BAD_END_VI:return 'incomplete phrase ends with '+tokens[-1]
  return None
@@ -21,6 +24,10 @@ def visual_nouns(text,language='en'):
  for i,(word,tag) in enumerate(tags):
   if word.lower() in function or role(word)!='object':continue
   noun_syn=wn.synsets(word.lower(),pos=wn.NOUN)
+  # Short clauses can mistag a direction/manner adverb after the object as
+  # NN ("Flow drags water outward"). No noun sense means no image-object noun;
+  # preserve proper names and all words with genuine noun senses.
+  if not noun_syn and not tag.startswith('NNP') and wn.synsets(word.lower(),pos=wn.ADV):continue
   if (word.lower() in sizes or wn.synsets(word.lower(),pos=wn.ADJ)) and i+1<len(tags) and (tags[i+1][0].lower() in colors or wn.synsets(tags[i+1][0].lower(),pos=wn.NOUN)):continue
   if word.lower() in colors and i+1<len(tags) and wn.synsets(tags[i+1][0].lower(),pos=wn.NOUN):continue
   if tag.startswith('VB') and not (i>0 and tags[i-1][0].lower() in colors|sizes):continue

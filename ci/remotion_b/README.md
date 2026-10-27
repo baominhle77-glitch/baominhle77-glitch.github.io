@@ -8,7 +8,7 @@ Manim renders six text-free simulations with separately authored960×540 and
 540×960 layouts, at30fps. Six matrix jobs run independently (`fail-fast:false`,
 40min each). AST fingerprints invalidate only affected beats. Pip, Node and
 native media are cached; a validated media hit skips the native toolchain.
-Remotion assembles the original TTS, semantic2–5-word captions aligned to word
+Remotion assembles measured TTS, semantic2–5-word captions aligned to word
 clocks, titles, transitions and the three original GĐ-supplied Gemini clips.
 Portrait Gemini retains the complete original16:9 image at540px wide in the
 upper panel, with a native Manim simulation of the same phenomenon below.
@@ -21,7 +21,18 @@ Each beat has its own scale/view. Molecular soap adsorption, weakening bonds and
 surface/return flow evolve throughout the shot; its eased optical camera changes
 azimuth/elevation every3.6s. Closed surfaces have no cutaway wedges or mesh edges.
 Actual3D sphere separation is asserted every frame; physical particles<=400.
-The final cross-section shows the long orange arrow mentioned at59s.
+The final cross-section shows surface force and transported water; narration
+describes the outward flow.
+
+The round11 instruction replaces diagram-description speech in c1/p1 with
+phenomenon narration. The original Andrew voice is retained using measured
+cached sentence/word spans and pitch-preserving tempo. `narration_overrides.json`
+records source hashes, joins and transformed word clocks; the original episode
+cache remains immutable. At59.4s both speech and caption say
+`Flow drags water outward.` G4 rejects graphic-description captions in every genre.
+G7/C14 binds each provenance badge to its material asset and requires its box
+to fit completely inside that real/AI panel. The badge lives in that panel's
+upper-left corner, below any title that shares the panel.
 
 Run `python ci/remotion_b/prepare.py --beat h4 --jobs 1` to rebuild one beat.
 Use `--stills` for three native540p frames per beat/format. Run

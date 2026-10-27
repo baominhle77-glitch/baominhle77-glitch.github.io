@@ -69,6 +69,8 @@ class Regressions(unittest.TestCase):
  def test_preposition_does_not_remove_ship_or_boat(self):
   for sentence,noun in (('The ship across the ocean','ship'),('A boat to the island','boat')):
    self.assertIn(noun,[x['lemma'] for x in visual_nouns(sentence)])
+ def test_direction_adverb_after_object_is_not_an_unmapped_image_noun(self):
+  nouns=visual_nouns('Flow drags water outward.');self.assertNotIn('outward',[n['lemma'] for n in nouns]);self.assertIn('water',[n['lemma'] for n in nouns]);self.assertIn('flow',[n['lemma'] for n in nouns])
  def test_decimal_speech_is_screen_data_not_an_image_object(self):
   from types import SimpleNamespace
   from gate_chung.semantics import role,screen_data

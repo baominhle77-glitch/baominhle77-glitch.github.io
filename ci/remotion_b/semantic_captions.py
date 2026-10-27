@@ -1,16 +1,17 @@
-"""Curated meaning units, aligned to immutable TTS words; no narration edits."""
-import json,re,math,sys
+"""Meaning units aligned to measured original or explicitly edited word clocks."""
+import json,re,math,sys,shutil
 from pathlib import Path
 H=Path(__file__).resolve().parent;R=H.parents[1]
 sys.path.insert(0,str(R))
 from gate_chung.captions import nonoverlapping
+from narration_source import for_beat
 def tokens(text):
  text=text.lower().replace('35.54','thirty five point five four').replace('25mm','twenty five millimolar').replace('0.5m/s','half a metre per second')
  return re.findall(r"[a-z]+(?:'[a-z]+)?",text)
 def apply(data):
  phrases=json.loads((H/'caption_phrases.json').read_text());tts=json.loads((R/'out/M1_MARANGONI_DUNG/_build/tts.json').read_text());plan=json.loads((H/'ke_hoach_A.json').read_text());caps=[];alignment=[]
  for b in data['beats']:
-  bid=b['id'];words=json.loads((R/'out/_tts_cache'/Path(tts['beats'][bid]['words']).name).read_text());i=0;offset=plan['beats'][bid]['t0']+plan['beats'][bid]['t_chuyen']
+  bid=b['id'];source=for_beat(bid);words=source['words'];i=0;offset=source['offset'];name='narration_'+bid+source['audio'].suffix;shutil.copy2(source['audio'],H/'public'/name);b.update(audio=name,audioStart=round(offset*30),narration=source['narration'])
   for phrase in phrases[bid]:
    assert 2<=len(phrase.split())<=5,phrase
    expected=tokens(phrase);chunk=words[i:i+len(expected)];actual=[q for w in chunk for q in tokens(w['w'])]

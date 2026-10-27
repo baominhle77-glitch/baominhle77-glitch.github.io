@@ -206,8 +206,14 @@ def G7(video,plan):
   texts=at(plan['texts'],float(sec));beat=next((b for b in plan['beats'] if active(b,float(sec))),None);sources=[t for t in texts if t.get('role')=='source']
   if beat and beat.get('source_required'):rows.append(row(sec,min(sec+1,video.duration),bool(sources),'source line throughout material beat',beat=beat['id']))
   for asset in at(plan.get('assets',[]),float(sec)):
-   if asset.get('kind')!='ai_video':continue
-   label=asset.get('ai_label');labels=[t for t in texts if t.get('role')=='ai_label' and norm(t['text'])==norm(label or '')];rows.append(row(sec,min(sec+1,video.duration),bool(labels) and bool(re.match(r'^AI minh hoạ \(.+\)$',label or '')),'AI provenance label',asset=asset['id'],label=label))
+   if asset.get('kind') not in ('ai_video','real_video'):continue
+   ai=asset['kind']=='ai_video';label=asset.get('ai_label') if ai else asset.get('source_label');role_name='ai_label' if ai else 'source';panel=asset.get('render_bbox');labels=[t for t in texts if t.get('role')==role_name and t.get('asset_id')==asset['id'] and norm(t['text'])==norm(label or '')]
+   def inside(t):
+    if panel is None:return False
+    x,y,w,h=bbox(t,float(sec));X,Y,W,H=panel
+    return x>=X-1e-9 and y>=Y-1e-9 and x+w<=X+W+1e-9 and y+h<=Y+H+1e-9
+   valid=bool(labels) and all(inside(t) for t in labels) and (not ai or bool(re.match(r'^AI minh hoạ \(.+\)$',label or '')))
+   rows.append(row(sec,min(sec+1,video.duration),valid,'C14 source badge must belong to and fit wholly inside its own real/AI panel',asset=asset['id'],label=label,panel_bbox=panel,label_bboxes=[bbox(t,float(sec)) for t in labels]))
  return result(rows)
 
 def G8(video,plan):

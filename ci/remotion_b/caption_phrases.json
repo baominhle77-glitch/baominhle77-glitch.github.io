@@ -39,30 +39,18 @@
     "does the pulling."
   ],
   "c1": [
-    "Zoom from the bowl",
-    "down to its surface.",
     "Every patch of that surface",
     "pulls on its neighbours.",
     "Over clean water",
     "the pull is strong;",
     "over the soapy spot",
     "it is weaker.",
-    "In our sketch,",
-    "that tug of war",
-    "is drawn as arrows."
-  ],
-  "p1": [
-    "Long orange arrows",
-    "over clean water,",
-    "short ones over the soap.",
-    "Where long meets short,",
-    "the surface is dragged",
-    "toward the long arrows, outward,",
-    "and the water just below",
-    "is dragged along.",
     "A flow driven",
     "by a difference in pull",
     "like this is called",
     "a Marangoni flow."
+  ],
+  "p1": [
+    "Flow drags water outward."
   ]
 }

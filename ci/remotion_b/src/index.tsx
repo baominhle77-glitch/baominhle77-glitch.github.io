@@ -18,11 +18,9 @@ const Movie:React.FC<{format:string;shortSide:number}>=({format,shortSide=540})=
  const lastAudit=useRef('');const fontReady=useReadyFont();
  useLayoutEffect(()=>{
   if(!fontReady)return;
-  const boxes=[...document.querySelectorAll('[data-audit]')].map(el=>{const r=el.getBoundingClientRect();return {name:el.getAttribute('data-audit'),x:r.x/scale,y:r.y/scale,w:r.width/scale,h:r.height/scale,text:el.textContent,font:parseFloat(getComputedStyle(el).fontSize)}});
-  const pip=doc?{x:31,y:133,w:188,h:121}:{x:776,y:18,w:166,h:105};
+  const boxes=[...document.querySelectorAll('[data-audit]')].map(el=>{const r=el.getBoundingClientRect();return {name:el.getAttribute('data-audit'),asset:el.getAttribute('data-source-asset'),x:r.x/scale,y:r.y/scale,w:r.width/scale,h:r.height/scale,text:el.textContent,font:parseFloat(getComputedStyle(el).fontSize)}});
   for(const b of boxes){
    if(b.x<width*.03-1||b.y<height*.03-1||b.x+b.w>width*.97+1||b.y+b.h>height*.97+1)throw Error('C13_SAFE '+JSON.stringify(b));
-   if(b.x<pip.x+pip.w&&b.x+b.w>pip.x&&b.y<pip.y+pip.h&&b.y+b.h>pip.y)throw Error('C13_PIP '+JSON.stringify(b));
    if(b.name==='caption'&&b.font<28)throw Error('C13_FONT');
   }
   for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){

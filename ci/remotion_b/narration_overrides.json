@@ -1,0 +1,76 @@
+{
+  "c1": {
+    "narration": "Every patch of that surface pulls on its neighbours. Over clean water the pull is strong; over the soapy spot it is weaker. A flow driven by a difference in pull like this is called a Marangoni flow.",
+    "audio_path": "assets/k1t3/narration_b/c1.wav",
+    "audio_sha256": "29daa8996169e0aa90bd31ac6c3151ed174f94ef3aec2d971f20a9071b2126e3",
+    "words_path": "assets/k1t3/narration_b/c1.words.json",
+    "offset": 44.1667,
+    "duration": 13.9,
+    "tempo": 0.8255395683453238,
+    "source_spans": [
+      {
+        "beat": "c1",
+        "audio_sha256": "bc7fbcfdf54a62b48b58e6b797347ed7f46dfe7f778c83cc8364fee4f616d009",
+        "source_start": 2.5755,
+        "source_end": 9.8055,
+        "word_first": 8,
+        "word_last": 30
+      },
+      {
+        "beat": "p1",
+        "audio_sha256": "8e806b9fb727d7d5f4f4192c5e6972dbfd7ef99ca450c2ccdcfc68a1a20f0cf1",
+        "source_start": 12.5255,
+        "source_end": 16.6305,
+        "word_first": 32,
+        "word_last": 46
+      }
+    ],
+    "voice": "en-US-AndrewNeural",
+    "method": "Original cached Andrew TTS; measured source spans, short silent joins, pitch-preserving atempo; word clocks transformed by the same tempo"
+  },
+  "p1": {
+    "narration": "Flow drags water outward.",
+    "audio_path": "assets/k1t3/narration_b/p1.wav",
+    "audio_sha256": "b4a81f288c8d4c2e1771ff012abfc230fcb380c21bfa989cb5d13243e96e6160",
+    "words_path": "assets/k1t3/narration_b/p1.words.json",
+    "offset": 58.4,
+    "duration": 1.55,
+    "tempo": 1.0925806451612903,
+    "source_spans": [
+      {
+        "beat": "p1",
+        "audio_sha256": "8e806b9fb727d7d5f4f4192c5e6972dbfd7ef99ca450c2ccdcfc68a1a20f0cf1",
+        "source_start": 12.6005,
+        "source_end": 12.968,
+        "word_first": 33,
+        "word_last": 33
+      },
+      {
+        "beat": "h2",
+        "audio_sha256": "81deddbb23880746cc27a93fd950de7fa5eaee64743829ee8be2a41c467bdd52",
+        "source_start": 4.588,
+        "source_end": 5.018,
+        "word_first": 14,
+        "word_last": 14
+      },
+      {
+        "beat": "h2",
+        "audio_sha256": "81deddbb23880746cc27a93fd950de7fa5eaee64743829ee8be2a41c467bdd52",
+        "source_start": 1.388,
+        "source_end": 1.768,
+        "word_first": 4,
+        "word_last": 4
+      },
+      {
+        "beat": "h2",
+        "audio_sha256": "81deddbb23880746cc27a93fd950de7fa5eaee64743829ee8be2a41c467bdd52",
+        "source_start": 5.588,
+        "source_end": 6.068,
+        "word_first": 17,
+        "word_last": 17
+      }
+    ],
+    "voice": "en-US-AndrewNeural",
+    "method": "Original cached Andrew TTS; measured source spans, short silent joins, pitch-preserving atempo; word clocks transformed by the same tempo"
+  }
+}

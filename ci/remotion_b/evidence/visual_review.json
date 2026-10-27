@@ -1,6 +1,5 @@
 {
   "pass_geometry": true,
-  "reviewed_images": 36,
   "resolution": {
     "16x9": [
       960,
@@ -21,16 +20,6 @@
     "p1"
   ],
   "exposed_mesh_edges": 0,
-  "findings": [
-    "Reviewed actual CI MP4:36 frames across six beats and both formats; both12-frame contact sheets; target9/12/14/19s in both formats.",
-    "Portrait full-context dish keeps horizontal source geometry; water surface H/W is0.2718 at9s,0.2713 at14s and0.4575 at19s. These are human-review evidence, outside universal gates.",
-    "G9:16:9 maximum static0%, pixel0.0812%;9:16 maximum static0.0874%, pixel0.6168%. Source/layout and actual pixel registration both pass.",
-    "Shared UniformVideo and FFmpeg compositor use one scalar; crop is explicit; native close-up camera preserves geometry, without world.stretch(Y).",
-    "Exact disjoint annotation intervals exported from renderer telemetry; no phantom Surface detail label over Gemini. Soft capillary-light reflections keep water close-ups informative.",
-    "G1-G9 pass K1 and history proof in both formats; C17 30/30 each K1 format; FREEZE0;22 common regressions pass."
-  ],
-  "reviewed_at": "2026-10-27T08:56:38.829711+00:00",
-  "round": 9,
   "particle_limit": 400,
   "particle_counts": {
     "h1": 320,
@@ -40,67 +29,15 @@
     "c1": 232,
     "p1": 360
   },
-  "performance_changes": [
-    "Matrix one beat/job, fail-fast=false; both formats explicit 540p at30fps.",
-    "Only4 visible sphere shading layers; fewer indistinguishable shadow/reflection layers.",
-    "No wedge, no mesh edges or intersecting spheres in36 reviewed native frames.",
-    "Native portrait subjects enlarged, independent layout; all original Gemini assets kept."
-  ],
+  "round": 12,
+  "reviewed_at": "2026-10-27T09:33:39.710937+00:00",
+  "reviewed_images": 36,
   "c13_errors": [],
-  "final_reviewed_at": "2026-10-27T08:56:38.829727+00:00",
-  "final_video_frames_reviewed": 36,
-  "final_contact_sheets_reviewed": 2,
-  "final_c13_errors": [],
-  "final_ci_run": 40474973068,
-  "final_render_sha": "dd2c9816f57c3d1c12bf70c6d8b5b7cbcf24ae6e",
-  "history_run": 40474752942,
-  "targeted_ratio_frames_reviewed": 8,
-  "remaining_blocking_issues": [],
-  "final_gate_summary": {
-    "K1 16x9": {
-      "G1": "DAT",
-      "G2": "DAT",
-      "G3": "DAT",
-      "G4": "DAT",
-      "G5": "DAT",
-      "G6": "DAT",
-      "G7": "DAT",
-      "G8": "DAT",
-      "G9": "DAT"
-    },
-    "lich_su 16x9": {
-      "G1": "DAT",
-      "G2": "DAT",
-      "G3": "DAT",
-      "G4": "DAT",
-      "G5": "DAT",
-      "G6": "DAT",
-      "G7": "DAT",
-      "G8": "DAT",
-      "G9": "DAT"
-    },
-    "K1 9x16": {
-      "G1": "DAT",
-      "G2": "DAT",
-      "G3": "DAT",
-      "G4": "DAT",
-      "G5": "DAT",
-      "G6": "DAT",
-      "G7": "DAT",
-      "G8": "DAT",
-      "G9": "DAT"
-    },
-    "lich_su 9x16": {
-      "G1": "DAT",
-      "G2": "DAT",
-      "G3": "DAT",
-      "G4": "DAT",
-      "G5": "DAT",
-      "G6": "DAT",
-      "G7": "DAT",
-      "G8": "DAT",
-      "G9": "DAT"
-    }
-  },
-  "remaining_optional_work": "59.4s narration still describes arrows; retain original TTS this round. See ci/remotion_b/remaining_work.md."
+  "findings": [
+    "Reviewed three540p compositor frames per beat and format after the round11 source/caption corrections.",
+    "AI badge is a child of the real-footage panel at its upper-left; source asset identity and containment are exported from measured DOM. Portrait lower pane begins448px, preserving its540x480 source aspect and reducing the gap.",
+    "Both narrated c1/p1 ending and captions describe the phenomenon. At59.4s: Flow drags water outward. Andrew voice retained by re-editing measured cached speech spans.",
+    "G4/G7 pass both preflight plans; revised ending G5 passes; hook MP4 passes G3/G7/G9/C17.26 common regression tests pass locally.",
+    "Final actual CI MP4 gates and final frame review remain required before delivery."
+  ]
 }

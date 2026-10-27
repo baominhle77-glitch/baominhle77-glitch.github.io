@@ -38,6 +38,10 @@ có noun spans trong kế hoạch, ngoài kiểm tra cụm nghĩa tiếng Việt
 - G6: nền nhãn, lề3%, caption>=28px tại540p; OCR, vật cắt hộp chữ và chữ chồng.
   Loại sai khác do subpixel font khi đo nền, không bỏ qua màu vật xâm nhập.
 - G7: dòng nguồn phủ beat tư liệu và nhãn AI minh hoạ(...) phủ insert AI.
+  Mỗi nhãn AI/tư liệu phải gắn đúng asset_id và nằm trọn trong render_bbox của
+  chính panel clip thật. Nhãn ở panel mô phỏng hoặc cắt qua mép clip làm G7 đỏ.
+- G4 chặn phụ đề tả đồ hoạ (arrow/orange/panel/label/diagram/sketch/zoom… và
+  cụm tương đương tiếng Việt). Test cả hai lỗi ở tests/test_provenance_captions.py.
 - G9: chống méo tỉ lệ, mọi khổ/mọi chủ đề. `layers` khai nguồn MP4/PNG gốc,
   start/end, content_bbox/viewport chuẩn hoá, scale_x/scale_y, source_crop,
   fit và crop_declared. Nguồn phải truy cập được khi đo. Kiểm tĩnh sai số0,5%;

@@ -6,6 +6,7 @@ R=Path(__file__).resolve().parents[2];sys.path.insert(0,str(R));from gate_chung.
 from gate_chung.model import norm
 from ci.layer_plan import measured_layers,nested_layers
 from gate_chung.timeline import visibility_intervals
+from narration_source import for_beat
 H=Path(__file__).resolve().parent
 
 def main():
@@ -15,8 +16,8 @@ def main():
  for fmt in ('16x9','9x16'):
   doc=fmt=='9x16';W,HH=(540,960) if doc else (960,540);dom=json.loads((a.video_root/f'dom_{fmt}.json').read_text());texts=[];objects=[];beats=[];assets=[];layer_specs=[];internal=[]
   hidden=[dict(start=(c.get('portrait_start',c['start']) if doc else c['start'])/30,end=((c.get('portrait_start',c['start']) if doc else c['start'])+(c.get('portrait_frames',c['frames']) if doc else c['frames']))/30) for c in data['clips'] if c.get('available') and c['start'] is not None]
-  def latest_box(name,text,start):
-   found=[(abs(z['frame']/30-max(.15,start)),b) for z in dom for b in z['boxes'] if b['name']==name and b.get('text')==text and z['frame']>=3]
+  def latest_box(name,text,start,asset_id=None):
+   found=[(abs(z['frame']/30-max(.15,start)),b) for z in dom for b in z['boxes'] if b['name']==name and b.get('text')==text and z['frame']>=3 and (asset_id is None or b.get('asset')==asset_id)]
    if not found:
     if name!='caption':raise ValueError((name,text,start))
     font=ImageFont.truetype(str(R/'ban_sac/fonts/NotoSans-Regular.ttf'),30);limit=W*(.82 if doc else .93);lines=[];line=''
@@ -27,14 +28,15 @@ def main():
     lines.append(line);width=min(limit,math.ceil(max(font.getlength(l) for l in lines))+24);height=36*len(lines)+12;center=W*.035+limit/2;bottom=HH*(1-(.115 if doc else .105))
     return [(center-width/2)/W,(bottom-height)/HH,width/W,height/HH],30
    b=min(found,key=lambda z:z[0])[1];return [b['x']/W,b['y']/HH,b['w']/W,b['h']/HH],b['font']
-  def add_text(id,name,text,start,end,role,tts_span=None):
-   box,font=latest_box(name,text,start)
+  def add_text(id,name,text,start,end,role,tts_span=None,asset_id=None):
+   box,font=latest_box(name,text,start,asset_id)
    if name=='mechanism':box[3]=min(box[3],(font*1.3+10)/HH)
    item=dict(id=id,start=start,end=end,bbox=box,text=text,role=role,font_size=font,foreground='#1C232B' if role=='source' else '#FFFFFF',background=dict(color='#A7ADB3' if role=='source' else '#1C232B',opacity=.95 if role in ('source','ai_label') else 1.))
    if tts_span:item['tts_span']=tts_span
+   if asset_id:item['asset_id']=asset_id
    texts.append(item);return item
   for b in data['beats']:
-   start=b['start']/30;end=(b['start']+b['frames'])/30;bid=b['id'];n=original['beats'][bid]['n'];offset=original['beats'][bid]['t0']+original['beats'][bid]['t_chuyen'];raw=json.loads((R/'out/_tts_cache'/Path(tts['beats'][bid]['words']).name).read_text());events=[dict(text=w['w'],start=offset+w['t0'],end=offset+w['t1']) for w in raw]
+   start=b['start']/30;end=(b['start']+b['frames'])/30;bid=b['id'];spoken=for_beat(bid);n=spoken['narration'];offset=spoken['offset'];raw=spoken['words'];events=[dict(text=w['w'],start=offset+w['t0'],end=offset+w['t1']) for w in raw]
    source_root=R/'work/B_cache/540'/bid;layer_specs.append(dict(id='beat-'+bid,source=str(source_root/f'{fmt}_{bid}.mp4'),start=start,end=end,occluded=hidden))
    internal.extend(nested_layers(b.get('internal_layers',{}).get(fmt,[]),'beat-'+bid,start,end,source_root,hidden))
    beat=dict(id=bid,start=start,end=end,narration=n,words=events,source_required=True,visual_terms=[],nonvisual_terms=[]);beats.append(beat)
@@ -64,7 +66,7 @@ def main():
     while j>0 and norm(events[j-1]['text']) in modifiers:j-=1
     begin=events[j]['start']
     aliases={'neighbour':'patch','neighbor':'patch','sketch':'surface','tug':'flow','war':'flow','arrow':'arrows','study':'surface','degree':'water','episode':'soap','metre':'flow','millinewton':'gap','pulling':'flow','pull':'flow','rush':'flow','drop':'drop','water':'water','soap':'soap','pepper':'pepper','bowl':'bowl','surface':'surface','ring':'ring','spot':'spot','edge':'edge','gap':'gap','engine':'engine','SDS':'SDS','sds':'SDS','patch':'patch'}
-    target=aliases.get(key)
+    aliases.update(flow='flow',difference='gap',marangoni='flow');target=aliases.get(key)
     if term['tag']=='CD':
      cap=next((c for c in texts if c['role']=='caption' and c['start']-.2<=w['start']<c['end']+.2),None)
      if cap:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(60,w['end']),object_ids=[cap['id']+'-number'],attributes={}))
@@ -74,7 +76,7 @@ def main():
     beat['visual_terms'].append(dict(text=word,noun=word,start=begin,end=min(60,w['end']),object_ids=[bid+'-'+target],attributes=dict(color='#D1834F',size='long') if bid=='p1' and target=='arrows' else {}))
   for c in data['clips']:
    if not c.get('available') or c['start'] is None:continue
-   clip_start=c.get('portrait_start',c['start']) if doc else c['start'];clip_frames=c.get('portrait_frames',c['frames']) if doc else c['frames'];start=clip_start/30;end=(clip_start+clip_frames)/30;add_text('ai-'+c['id'],'gemini',c['label'],start,end,'ai_label')
+   clip_start=c.get('portrait_start',c['start']) if doc else c['start'];clip_frames=c.get('portrait_frames',c['frames']) if doc else c['frames'];start=clip_start/30;end=(clip_start+clip_frames)/30;add_text('ai-'+c['id'],'gemini',c['label'],start,end,'ai_label',asset_id=c['id'])
    meta=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',str(R/c['path'])]))['streams'][0]
    layouts=[q for z in dom if start+.15<=z['frame']/30<end for q in z.get('layouts',[]) if q.get('asset')==c['id']];real=next((q for q in layouts if q['name']=='real-video'),None);panel=next((q for q in layouts if q['name']=='simulation-panel'),None)
    display=[real['x']/W,real['y']/HH,real['w']/W,real['h']/HH] if real else [0,0,1,1]

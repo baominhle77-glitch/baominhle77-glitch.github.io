@@ -3,7 +3,7 @@ import json,subprocess,wave,io,hashlib
 from pathlib import Path
 import numpy as np
 R=Path(__file__).resolve().parents[3];out=R/'gate_chung/examples';out.mkdir(exist_ok=True);rate=16000;track=np.zeros(rate*20,dtype=np.int16);words=[];caps=[]
-phrases=['Two blue armies advance','The orange route grows','The year becomes1601','The troops advance east','This campaign remains fictional']
+phrases=['Two armies move east','The route keeps growing','The year becomes1601','The troops advance east','This campaign remains fictional']
 # The third phrase uses a normal space before the spoken year.
 phrases[2]='The year becomes1601'.replace('becomes1601','becomes1601')
 phrases[2]='The year becomes 1601'

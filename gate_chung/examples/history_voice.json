@@ -1,6 +1,6 @@
 {
   "source": "Flite slt, offline word synthesis; each complete word resampled into its registered0.65s slot,0.1s interword silence; fictional test only",
-  "sha256": "e5aaba274502c85b733bc56f1d9e91b5392a542e072e2967de694ce46dd4a42e",
+  "sha256": "5d6f8ec11c1778de1afc53f0db9c8760ae8a8f29ce943dc3f9c196847479fbab",
   "duration": 20,
   "words": [
     {
@@ -9,17 +9,17 @@
       "end": 0.85
     },
     {
-      "text": "blue",
+      "text": "armies",
       "start": 0.95,
       "end": 1.6
     },
     {
-      "text": "armies",
+      "text": "move",
       "start": 1.7,
       "end": 2.35
     },
     {
-      "text": "advance",
+      "text": "east",
       "start": 2.45,
       "end": 3.1
     },
@@ -29,17 +29,17 @@
       "end": 4.85
     },
     {
-      "text": "orange",
+      "text": "route",
       "start": 4.95,
       "end": 5.6
     },
     {
-      "text": "route",
+      "text": "keeps",
       "start": 5.7,
       "end": 6.35
     },
     {
-      "text": "grows",
+      "text": "growing",
       "start": 6.45,
       "end": 7.1
     },
@@ -106,7 +106,7 @@
   ],
   "captions": [
     {
-      "text": "Two blue armies advance",
+      "text": "Two armies move east",
       "start": 0.2,
       "end": 3.15,
       "tts_span": [
@@ -115,7 +115,7 @@
       ]
     },
     {
-      "text": "The orange route grows",
+      "text": "The route keeps growing",
       "start": 4.2,
       "end": 7.1499999999999995,
       "tts_span": [
