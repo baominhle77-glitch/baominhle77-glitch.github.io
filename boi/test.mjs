@@ -5,14 +5,19 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildMapping, commitHash, verifyLock, makeRng, shuffle, gmt7 } from "./js/core.js";
 import { parseDraw, parseCorrection, splitBySizes } from "./js/parser.js";
-import { createSession, addRound, applyCorrectionText, fixCell, errorsOf, reveal, exportJSON, importJSON, loadSessions, saveSessions } from "./js/state.js";
+import { createSession, addRound, addPickedRound, applyCorrectionText, fixCell, errorsOf, reveal, exportJSON, importJSON, loadSessions, saveSessions, ensureMapping, newDraw, pendingDraw, normalizeSession } from "./js/state.js";
+import { startPick, togglePick, saveTier, editTier, pickReady, savedCount, tierComplete } from "./js/pick.js";
+import { cardName } from "./js/reading.js";
 import { spreadById, SPREADS } from "./js/spreads.js";
 import { moneyTable, periodEstimate, roundNice } from "./js/money.js";
 import { analyze, allSentences, ruleFollowUp } from "./js/insight.js";
 import { suggestSpread, mainTopic } from "./js/topic.js";
 import { mergeKnowledge, tarotMeaning, capMeaning, cardYesNo } from "./js/data.js";
 import { friendlyError, LOCAL_KEY, TRAM_KEY, TRAM_URL, aiFailNotice } from "./js/ai.js";
-import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING } from "./js/ai.js";
+import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING, SYSTEM_CHAT, LOCAL_BASE } from "./js/ai.js";
+import { goiCoDau, tyLeDau, tyLeDauBai, matDau, normYN, suaTenLa, YN, BAO_MAT_DAU, NHAC_DAU, NGUONG_DAU, SCHEMA } from "./js/ai.js";
+import { probeBridge, bridge, aiKey, store } from "./js/store.js";
+import { ROUTES } from "./js/views.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const readJSON = (f) => JSON.parse(readFileSync(join(HERE, f), "utf8"));
@@ -105,34 +110,68 @@ async function demoSession(seed = SEED) {
   return createSession({ cauHoi: "thu nhập 3 tháng tới", spreadId: sp.id, tiers: sp.tiers(), money: true, reversals: false, seed });
 }
 
-test("state: số 40 lỗi để trống đúng ô, 'Là số 04' chỉ thay ô đó; lá lặp", async () => {
+test("state: số 40 lỗi để trống đúng ô, 'Là số 04' chỉ thay ô đó; mỗi tầng một bảng riêng", async () => {
   const s = await demoSession();
+  const m = await ensureMapping(s, 0);
+  assert.equal(m.v, 2);
+  assert.equal(m.tang.length, 3, "3 tầng → 3 bảng");
   const { round, errors } = addRound(s, `${T_IN}\n${L_IN.replace("34", "40")}`);
   assert.equal(errors.length, 1);
   assert.deepEqual([errors[0].deck, errors[0].tier, errors[0].idx, errors[0].n], ["lenormand", 2, 3, 40]);
   const before = JSON.stringify(round.lenormand[2].slice(0, 3));
   assert.equal(round.lenormand[2].filter((c) => c.ok).length, 3, "các số hợp lệ vẫn lật");
-  // số lặp: Tarot 8 ở tầng 1 và tầng 3, cùng một lá
-  assert.equal(round.tarot[2][0].card, round.tarot[0][0].card);
-  assert.deepEqual(round.tarot[2][0].repeatOf, { round: 1, tier: 1, pos: 1 });
-  assert.equal(round.lenormand[1][2].card, round.lenormand[0][1].card, "Lenormand 25 lặp");
+  // số 8 ở tầng 1 và tầng 3 đọc từ HAI bảng khác nhau
+  assert.equal(round.tarot[0][0].card, m.tang[0].tarot[7]);
+  assert.equal(round.tarot[2][0].card, m.tang[2].tarot[7]);
   const fix = applyCorrectionText(s, "Là số 04");
   assert.equal(fix.filled.length, 1);
   assert.equal(round.lenormand[2][3].n, 4);
-  assert.equal(round.lenormand[2][3].card, s.mapping.lenormand[3]);
+  assert.equal(round.lenormand[2][3].card, m.tang[2].lenormand[3], "ô thay đọc bảng của đúng tầng 3");
   assert.equal(round.lenormand[2][3].fixedFrom, "40");
   assert.equal(JSON.stringify(round.lenormand[2].slice(0, 3)), before, "không đụng ô khác");
   assert.equal(errorsOf(round).length, 0);
-  // số thay vẫn sai → giữ ô trống
-  addRound(s, "L: 99");
-  assert.equal(fixCell(s, 1, "lenormand", 0, 0, 37).ok, false);
-  assert.equal(errorsOf(s.rounds[1]).length, 1);
-  // rút thêm cùng state: số cũ → lá cũ
-  addRound(s, "T: 37");
-  assert.equal(s.rounds[2].tarot[0][0].card, round.tarot[0][1].card);
-  assert.ok(s.rounds[2].tarot[0][0].repeatOf);
+  // lượt đã dùng thì không rút tiếp trên bộ cũ
+  assert.throws(() => addRound(s, "L: 3"), /Rút thêm/u);
   const v = await reveal(s);
   assert.ok(v.hashOk && v.mappingOk);
+});
+
+test("rút thêm: xáo bộ mới (seed mới, mã khoá mới), số ngoài khoảng giữ ô trống; kiểm chứng mọi lượt", async () => {
+  const s = await demoSession();
+  addRound(s, T_IN);
+  assert.equal(pendingDraw(s), -1);
+  const d1 = await newDraw(s);
+  assert.equal(d1, 1);
+  assert.equal(await newDraw(s), 1, "bấm lại không sinh thêm lượt khi lượt mới chưa dùng");
+  assert.notEqual(s.draws[1].seed, s.draws[0].seed);
+  assert.notEqual(s.draws[1].hash, s.draws[0].hash);
+  assert.notDeepEqual((await ensureMapping(s, 1)).tang[0].tarot, (await ensureMapping(s, 0)).tang[0].tarot, "rút thêm không dùng lại bảng cũ");
+  addRound(s, "L: 99");
+  assert.equal(s.rounds[1].draw, 1);
+  assert.equal(fixCell(s, 1, "lenormand", 0, 0, 37).ok, false);
+  assert.equal(errorsOf(s.rounds[1]).length, 1);
+  assert.equal(fixCell(s, 1, "lenormand", 0, 0, 5).ok, true);
+  assert.equal(s.rounds[1].lenormand[0][0].card, (await ensureMapping(s, 1)).tang[0].lenormand[4]);
+  const v = await reveal(s);
+  assert.equal(v.draws.length, 2);
+  assert.ok(v.hashOk && v.mappingOk);
+  // sửa tay một lá đã lật → kiểm chứng lộ ngay
+  const c = s.rounds[0].tarot[0][0];
+  c.card = (c.card + 1) % 78;
+  assert.equal((await reveal(s)).mappingOk, false);
+});
+
+test("phiên cũ (v1, một bảng chung) vẫn mở, giải và kiểm chứng được; bảng cũ bị xoá khỏi bộ nhớ máy", async () => {
+  const old = await buildMapping(SEED, false);
+  const legacy = { v: 1, id: "qcu", cauHoi: "cũ", spreadId: "3thang", tiers: spreadById("3thang").tiers(), money: true, reversals: false, nam: null, seed: SEED, hash: await commitHash(SEED, old), mapping: old, lockedAt: "2026-10-01T00:00:00.000Z", lockedAtText: "x", rounds: [] };
+  normalizeSession(legacy);
+  assert.equal(legacy.mapping, undefined, "không giữ bảng ánh xạ cũ");
+  assert.equal(legacy.draws[0].kieu, 1);
+  await ensureMapping(legacy, 0);
+  addRound(legacy, T_IN);
+  assert.equal(legacy.rounds[0].tarot[2][0].card, legacy.rounds[0].tarot[0][0].card, "v1: cùng số = cùng lá");
+  assert.equal(legacy.rounds[0].tarot[2][0].repeatOf.doclap, false);
+  assert.ok((await reveal(legacy)).hashOk);
 });
 
 test("lưu/xuất/nhập JSON không mất ánh xạ, không ghi đè", async () => {
@@ -142,11 +181,12 @@ test("lưu/xuất/nhập JSON không mất ánh xạ, không ghi đè", async ()
   const fake = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
   assert.ok(saveSessions([s], fake));
   const back = loadSessions(fake);
-  assert.deepEqual(back[0].mapping, s.mapping);
+  assert.equal(back[0].seed, s.seed);
+  assert.deepEqual(back[0].rounds, JSON.parse(JSON.stringify(s.rounds)));
   const list = [];
   assert.equal(importJSON(exportJSON([s]), list), 1);
   assert.equal(importJSON(exportJSON([s]), list), 0, "trùng id thì bỏ qua");
-  assert.equal((await verifyLock(list[0])).hashOk, true);
+  assert.equal((await reveal(list[0])).hashOk, true, "seed đủ để kiểm chứng sau khi nhập");
 });
 
 test("mẫu trải đúng số lá", () => {
@@ -273,7 +313,7 @@ test("Có/Không theo ngữ cảnh: 4 lá Tiền không còn Có tuyệt đối"
   // bản giải luật và prompt AI đều dùng câu trả lời theo ngữ cảnh
   const sp = spreadById("cokhong");
   const s = await createSession({ cauHoi: "Có nên đầu tư thêm vào cửa hàng không?", spreadId: sp.id, tiers: sp.tiers(2027), money: false, reversals: false, seed: "d".repeat(64) });
-  const n4 = s.mapping.tarot.indexOf(67) + 1; // số nào ra 4 Tiền trong bộ đã khoá
+  const n4 = (await ensureMapping(s, 0)).tang[0].tarot.indexOf(67) + 1; // vị trí nào ra 4 Tiền trong bảng tầng 1
   const rest = Array.from({ length: 78 }, (_, i) => i + 1).filter((n) => n !== n4).slice(0, 8);
   addRound(s, [`T: ${n4} ${rest[0]} ${rest[1]} / ${rest.slice(2, 5).join(" ")} / ${rest.slice(5, 8).join(" ")}`, "L: 1 2 3 / 4 5 6 / 7 8 9"].join(String.fromCharCode(10)));
   const four = s.rounds[0].tarot[0][0];
@@ -379,6 +419,269 @@ test("trạm AI: ok → hiện chữ + model; 429 → câu báo + bản giải t
   const eSlow = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages, fetchImpl: hang, tramTimeoutMs: 30 }).then(() => null, (e) => e);
   assert.ok(eSlow?.timeout, "quá thời hạn phải có cờ timeout");
   assert.equal(friendlyError(eSlow, TRAM_KEY), "Máy giải đang bận.");
+});
+
+test("mỗi câu hỏi một bảng ánh xạ MỚI (crypto.getRandomValues), không ghi bảng vào localStorage", async () => {
+  const sp = spreadById("3thang");
+  const q1 = await createSession({ cauHoi: "câu 1", spreadId: sp.id, tiers: sp.tiers(), money: true });
+  const q2 = await createSession({ cauHoi: "câu 2", spreadId: sp.id, tiers: sp.tiers(), money: true });
+  assert.match(q1.seed, /^[0-9a-f]{64}$/);
+  assert.notEqual(q1.seed, q2.seed, "seed mới cho mỗi câu hỏi");
+  assert.notEqual(q1.hash, q2.hash);
+  const m1 = await ensureMapping(q1, 0), m2 = await ensureMapping(q2, 0);
+  assert.notDeepEqual(m1.tang[0].tarot, m2.tang[0].tarot, "2 câu hỏi liên tiếp → 2 bảng Tarot khác nhau");
+  assert.notDeepEqual(m1.tang[0].lenormand, m2.tang[0].lenormand, "2 câu hỏi liên tiếp → 2 bảng Lenormand khác nhau");
+  // các tầng trong cùng câu hỏi cũng xáo riêng, mỗi tầng là hoán vị đủ 78 / 36
+  assert.notDeepEqual(m1.tang[0].tarot, m1.tang[1].tarot);
+  for (const t of m1.tang) {
+    assert.deepEqual([...t.tarot].sort((x, y) => x - y), [...Array(78).keys()]);
+    assert.deepEqual([...t.lenormand].sort((x, y) => x - y), Array.from({ length: 36 }, (_, i) => i + 1));
+  }
+  // lưu xuống máy: chỉ seed + mã khoá, không có bảng ánh xạ để tái dùng
+  addRound(q1, T_IN);
+  const mem = new Map();
+  const fake = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
+  saveSessions([q1, q2, { ...q2, id: "x", mapping: m2 }], fake);
+  const raw = [...mem.values()].join("");
+  assert.doesNotMatch(raw, /"mapping"|"tang":\[\{/u, "localStorage không chứa bảng ánh xạ");
+  assert.ok(!raw.includes(JSON.stringify(m1.tang[0].tarot)), "không có hoán vị 78 lá trong localStorage");
+  assert.doesNotMatch(exportJSON([q1]), /"mapping"/u);
+});
+
+// Tìm vị trí (1-based) của một lá trong bảng một tầng
+const slotOf = (m, ti, deck, card) => m.tang[ti][deck].indexOf(card) + 1;
+
+test("luồng Lưu từng tầng: đủ lá mới Lưu được, xáo lại, sửa tầng đã lưu, đủ tầng mới Giải bài; lá trùng = chủ đề lặp lại", async () => {
+  const s = await demoSession("e".repeat(64));
+  const m = await ensureMapping(s, 0);
+  const p = startPick(s, 0, false);
+  assert.equal(p.cur, 0);
+  assert.equal(pickReady(p), false);
+  // Tầng 1: 4 Tarot + 4 Lenormand. Cài cho lá Vua Gậy (id 50) ra ở tầng 1 và tầng 3, Con Cá ở tầng 1 và 2
+  const KING = db.tarot.la.findIndex((c) => c.en === "King of Wands");
+  const FISH = db.lenormand.la.find((c) => c.en === "Fish").id;
+  const t1 = [slotOf(m, 0, "tarot", KING), ...[1, 2, 3, 4, 5].filter((k) => m.tang[0].tarot[k - 1] !== KING).slice(0, 3)];
+  const l1 = [slotOf(m, 0, "lenormand", FISH), ...[1, 2, 3, 4, 5].filter((k) => m.tang[0].lenormand[k - 1] !== FISH).slice(0, 3)];
+  for (const k of t1.slice(0, 3)) assert.ok(togglePick(s, p, "tarot", k).ok);
+  assert.equal(saveTier(s, p).ok, false, "chưa đủ lá thì không Lưu");
+  const last = togglePick(s, p, "tarot", t1[3]);
+  assert.ok(last.ok && last.switched, "đủ Tarot thì tự sang Lenormand");
+  assert.equal(togglePick(s, p, "tarot", 70).reason, "full", "không chọn quá số lá của tầng");
+  for (const k of l1) togglePick(s, p, "lenormand", k);
+  assert.ok(tierComplete(s, p));
+  const r1 = saveTier(s, p);
+  assert.deepEqual([r1.ok, r1.next, p.cur, savedCount(p)], [true, 1, 1, 1]);
+  assert.deepEqual(p.draft, { tarot: [], lenormand: [] }, "sang tầng 2 là bộ mới, chưa chọn gì");
+  assert.equal(pickReady(p), false, "mới lưu 1/3 thì chưa có Giải bài");
+  // Tầng 2: Con Cá lại ở vị trí khác vì bảng tầng 2 xáo riêng
+  const l2 = [slotOf(m, 1, "lenormand", FISH), ...[6, 7, 8, 9, 10].filter((k) => m.tang[1].lenormand[k - 1] !== FISH).slice(0, 3)];
+  for (const k of [11, 12, 13, 14]) togglePick(s, p, "tarot", k);
+  for (const k of l2) togglePick(s, p, "lenormand", k);
+  saveTier(s, p);
+  // Tầng 3: Vua Gậy ra lại
+  const t3 = [slotOf(m, 2, "tarot", KING), ...[20, 21, 22, 23, 24].filter((k) => m.tang[2].tarot[k - 1] !== KING).slice(0, 3)];
+  for (const k of t3) togglePick(s, p, "tarot", k);
+  for (const k of [30, 31, 32, 33]) togglePick(s, p, "lenormand", k);
+  const r3 = saveTier(s, p);
+  assert.equal(r3.next, -1);
+  assert.ok(pickReady(p), "đủ 3/3 tầng → hiện Giải bài");
+  // Xem lại / sửa tầng 2 trước khi giải: Giải bài ẩn lại cho tới khi Lưu
+  assert.ok(editTier(s, p, 1));
+  assert.equal(pickReady(p), false);
+  assert.deepEqual(p.draft.lenormand, l2, "nháp nạp lại đúng lá đã chọn của tầng 2");
+  togglePick(s, p, "tarot", 14); togglePick(s, p, "tarot", 15);
+  saveTier(s, p);
+  assert.ok(pickReady(p));
+  assert.deepEqual(p.saved[1].tarot, [11, 12, 13, 15]);
+  // Giải bài
+  addPickedRound(s, p.saved);
+  const round = s.rounds[0];
+  assert.equal(round.tarot[0][0].card, KING);
+  assert.equal(round.tarot[2][0].card, KING);
+  assert.equal(round.lenormand[1][0].card, FISH);
+  assert.ok(round.tarot[0][0].chon && !cardName(db, "tarot", round.tarot[0][0]).match(/\d+ →/), "lá bấm từ lưới úp không mang số");
+  assert.deepEqual(round.tarot[2][0].repeatOf, { round: 1, tier: 1, pos: 1, doclap: true });
+  assert.ok(round.lenormand[1][0].repeatOf?.doclap);
+  const r = analyze(db, s, { xungHo: "Queen Linh", thuNhap: 20 });
+  assert.match(r.tang[2].lap.join(" "), /chủ đề lặp lại xuyên các tháng/u);
+  assert.match(r.noi_tang.join(" "), /Vua Gậy ra ở cả Tháng .+ và Tháng .+ dù mỗi tháng xáo lại đủ bộ/u);
+  assert.match(r.noi_tang.join(" "), /Con Cá ra ở cả/u);
+  assert.match(r.tang[2].tarot_doc[0], /ra lại dù bộ bài xáo lại đủ lá/u);
+  const req = readingRequest(db, s, { reading: r, settings: {} });
+  assert.match(req, /mỗi tầng xáo lại từ đủ 78 Tarot \+ 36 Lenormand/u);
+  assert.match(req, /RA LẠI \(đã ra ở tầng 1/u);
+  assert.ok((await reveal(s)).mappingOk);
+});
+
+test("trải 1 tầng vẫn Lưu → Giải bài", async () => {
+  const sp = spreadById("canam");
+  const s = await createSession({ cauHoi: "cả năm", spreadId: sp.id, tiers: sp.tiers(2027), money: true });
+  const p = startPick(s, 0, false);
+  for (let k = 1; k <= 12; k++) togglePick(s, p, "tarot", k);
+  for (let k = 1; k <= 9; k++) togglePick(s, p, "lenormand", k);
+  assert.equal(pickReady(p), false, "chưa Lưu thì chưa Giải bài");
+  assert.equal(saveTier(s, p).next, -1);
+  assert.ok(pickReady(p));
+  await ensureMapping(s, 0);
+  addPickedRound(s, p.saved);
+  assert.equal(s.rounds[0].tarot[0].length, 12);
+});
+
+test("prompt AI: văn phong reader thật, luôn tiếng Việt, đọc từng tầng rồi kết luận chung", async () => {
+  for (const k of ["LUÔN viết bằng tiếng Việt", "chi tiết hình ảnh", "TỪNG TẦNG", "CHỦ ĐỀ LẶP LẠI", "CẤM sáo rỗng", "kết luận chung"]) assert.ok(SYSTEM_READING.includes(k), k);
+  assert.match(SYSTEM_CHAT, /Luôn trả lời bằng tiếng Việt/u);
+  const s = await demoSession();
+  addRound(s, T_IN);
+  assert.match(readingRequest(db, s, {}), /hoàn toàn bằng tiếng Việt: mở bài, rồi đọc lần lượt từng tầng/u);
+});
+
+test("cầu nối 127.0.0.1 không gọi được → dò trả về nhanh, dùng trạm AI; cầu nối chết giữa chừng → tự chuyển trạm, không treo", async () => {
+  const refused = async () => { throw new TypeError("Failed to fetch"); };
+  const hang = (url, opts = {}) => new Promise((_, rej) => opts.signal?.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError"))));
+  let t0 = Date.now();
+  assert.equal(await probeBridge(refused, { on: true }), false);
+  assert.ok(Date.now() - t0 < 1000);
+  t0 = Date.now();
+  assert.equal(await probeBridge(hang, { on: true, localMs: 40, listMs: 40, xaMs: 40 }), false, "127.0.0.1 treo + GitHub treo vẫn trả lời");
+  assert.ok(Date.now() - t0 < 1500, "dò không treo");
+  assert.equal(bridge.ok, false);
+  assert.equal(aiKey(), TRAM_KEY, "không có cầu nối → trạm AI");
+  // đang dùng cầu nối thì nó chết: chuyển sang trạm
+  const answer = JSON.stringify({ tong_quan: "Từ trạm.", tang: [] });
+  const tramOk = (url) => (url === TRAM_URL ? Promise.resolve(new Response(JSON.stringify({ ok: true, model: "gemini-x", data: { candidates: [{ content: { parts: [{ text: answer }] } }] } }), { status: 200 })) : null);
+  const mem = new Map(), storage = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
+  let fell = 0;
+  const outA = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, storage, messages: [{ role: "user", text: "x" }],
+    fetchImpl: (url, o) => tramOk(url) || refused(url, o), onFallback: () => fell++ });
+  assert.equal(outA.text, answer);
+  assert.equal(fell, 1);
+  t0 = Date.now();
+  const outB = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, storage, messages: [{ role: "user", text: "x" }], localTimeoutMs: 50,
+    fetchImpl: (url, o) => tramOk(url) || (url.startsWith(LOCAL_BASE) ? hang(url, o) : refused(url, o)) });
+  assert.equal(outB.model, "gemini-x", "127.0.0.1 treo → sau hạn chờ chuyển trạm");
+  assert.ok(Date.now() - t0 < 2000);
+  // cả cầu nối lẫn trạm đều hỏng → báo lỗi dễ hiểu (trang hiện bản giải theo luật), không treo
+  const eAll = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", storage, messages: [{ role: "user", text: "x" }], fetchImpl: refused }).then(() => null, (e) => e);
+  assert.equal(friendlyError(eAll, TRAM_KEY), "Không kết nối được máy giải, kiểm tra mạng.");
+});
+
+// ---- Vòng 2: chống mất dấu, nhãn phán một bộ, tên lá theo dữ liệu, bỏ ô nhập số ----
+const tramReply = (text, model = "gemini-flash-lite-latest") => new Response(JSON.stringify({ ok: true, model, data: { candidates: [{ content: { parts: [{ text }] } }] } }), { status: 200 });
+const BAI = (ch) => JSON.stringify({ tong_quan: ch, chu_de_troi: [ch], tang: [{ ten: "Tháng 11/2026", diem: 7, tarot_doc: [ch], dong_chay: ch, lenormand_cap: [ch], chot: ch, diem_nghen: ch, loi_khuyen: ch }], noi_tang: [ch], mau_thuan: [ch], tong_ket: ch, loi_khuyen: [ch] });
+const KHONG_DAU = "Chao Queen Linh, toi ngoi day voi ban va doc tung la mot. Thang nay tien vao deu nhung phai giu ky luat chi tieu.";
+const CO_DAU = "Chào Queen Linh, tôi ngồi đây với bạn và đọc từng lá một. Tháng này tiền vào đều nhưng phải giữ kỷ luật chi tiêu.";
+
+test("(b) tỉ lệ dấu: câu không dấu < 0,15, câu có dấu > 0,2; JSON chỉ tính giá trị chuỗi", () => {
+  assert.ok(tyLeDau("Chao Queen Linh, toi ngoi day voi ban") < NGUONG_DAU);
+  assert.ok(tyLeDau("Chào Queen Linh, tôi ngồi đây với bạn") > 0.2);
+  assert.ok(tyLeDauBai(BAI(CO_DAU)) > 0.2, "khoá JSON không dấu không kéo tỉ lệ xuống");
+  assert.ok(tyLeDauBai(BAI(KHONG_DAU)) < NGUONG_DAU);
+  assert.equal(matDau(BAI(KHONG_DAU)), true);
+  assert.equal(matDau(BAI(CO_DAU)), false);
+  assert.equal(matDau("OK"), false, "quá ít chữ thì không kết luận");
+});
+
+test("(a) trạm trả không dấu → gọi lại đúng 1 lần; lần 2 có dấu → nhận; lần 2 vẫn không dấu → bản luật + câu báo", async () => {
+  const s = await demoSession();
+  addRound(s, `${T_IN}\n${L_IN}`);
+  const rule = analyze(db, s, { thuNhap: 20 });
+  const messages = [{ role: "user", text: readingRequest(db, s, { reading: rule, money: rule._money }) }];
+  // lần 2 có dấu
+  const sent = [], shown = [];
+  const lan2Ok = async (url, o) => { sent.push(JSON.parse(o.body)); return tramReply(BAI(sent.length === 1 ? KHONG_DAU : CO_DAU)); };
+  const ok = await goiCoDau({ provider: "gemini", key: TRAM_KEY, system: SYSTEM_READING, json: true, messages, fetchImpl: lan2Ok, onText: (t) => shown.push(t) });
+  assert.equal(sent.length, 2, "gọi lại đúng 1 lần");
+  assert.equal(ok.lan, 2);
+  assert.ok(tyLeDauBai(ok.text) > 0.2);
+  const lastMsg = sent[1].body.contents.at(-1).parts[0].text;
+  assert.ok(lastMsg.endsWith(NHAC_DAU), "lần gọi lại có dòng nhắc mất dấu");
+  assert.ok(!sent[0].body.contents.at(-1).parts[0].text.includes(NHAC_DAU));
+  assert.equal(shown.length, 1, "chữ không dấu không được đẩy ra màn hình");
+  assert.ok(!matDau(shown[0]));
+  // có dấu ngay lần 1 → chỉ 1 lần gọi
+  let n1 = 0;
+  await goiCoDau({ provider: "gemini", key: TRAM_KEY, system: "s", json: true, messages, fetchImpl: async () => { n1++; return tramReply(BAI(CO_DAU)); } });
+  assert.equal(n1, 1);
+  // lần 2 vẫn không dấu → lỗi matDau, câu báo, bản luật vẫn đủ
+  let n2 = 0;
+  const e = await goiCoDau({ provider: "gemini", key: TRAM_KEY, system: "s", json: true, messages, fetchImpl: async () => { n2++; return tramReply(BAI(KHONG_DAU)); } }).then(() => null, (x) => x);
+  assert.equal(n2, 2, "không gọi quá 2 lần");
+  assert.ok(e?.matDau);
+  assert.equal(friendlyError(e, TRAM_KEY), BAO_MAT_DAU);
+  assert.equal(aiFailNotice(e, TRAM_KEY).status, "Máy giải trả chữ không dấu, đang dùng bản giải theo luật.");
+  assert.ok(rule.tang.length && rule.tong_ket, "bản giải theo luật vẫn có để hiện");
+  // hỏi tiếp (chữ thường, không JSON) cũng qua cổng
+  let n3 = 0;
+  const e3 = await goiCoDau({ provider: "gemini", key: TRAM_KEY, system: SYSTEM_CHAT, json: false, messages: [{ role: "user", text: "Thang 12 the nao?" }], fetchImpl: async () => { n3++; return tramReply(KHONG_DAU); } }).then(() => null, (x) => x);
+  assert.equal(n3, 2);
+  assert.ok(e3?.matDau);
+});
+
+test("(c) nhãn phán: một bộ có dấu trùng động cơ luật; gập không dấu về đúng nhãn; không khớp lấy theo điểm", async () => {
+  assert.deepEqual(YN, ["CÓ", "CÓ, NHƯNG CÓ ĐIỀU KIỆN", "NGHIÊNG VỀ KHÔNG", "KHÔNG"]);
+  assert.deepEqual(SCHEMA.properties.tang.items.properties.tra_loi.enum, YN);
+  assert.ok(SYSTEM_READING.includes(YN.join(" / ")));
+  assert.ok(!/CÓ CÓ ĐIỀU KIỆN|NGHIÊNG KHÔNG /.test(SYSTEM_READING), "prompt không còn bộ nhãn cũ");
+  assert.equal(normYN("CO CO DIEU KIEN"), "CÓ, NHƯNG CÓ ĐIỀU KIỆN");
+  assert.equal(normYN("7.5/10 CÓ"), "CÓ");
+  assert.equal(normYN("CÓ ĐIỀU KIỆN"), "CÓ, NHƯNG CÓ ĐIỀU KIỆN");
+  assert.equal(normYN("nghieng khong"), "NGHIÊNG VỀ KHÔNG");
+  assert.equal(normYN("KHÔNG"), "KHÔNG");
+  assert.equal(normYN("???"), null);
+  const sp = spreadById("cokhong");
+  const s = await createSession({ cauHoi: "Có nên ký hợp đồng không?", spreadId: sp.id, tiers: sp.tiers(2027), money: false, seed: SEED });
+  addRound(s, "T: 1 2 3 / 4 5 6 / 7 8 9\nL: 1 2 3 / 4 5 6 / 7 8 9");
+  const rule = analyze(db, s, {});
+  const tier = (tra_loi, diem) => ({ ten: "t", diem, tra_loi, tarot_doc: ["x", "y", "z"], dong_chay: "d", lenormand_cap: ["c"], chot: "c", diem_nghen: "n", loi_khuyen: "k" });
+  const r = normalizeReading({ tang: [tier("CÓ ĐIỀU KIỆN", 6), tier("7.5/10 CÓ", 7.5), tier("hmm", 3)] }, rule);
+  assert.deepEqual(r.tang.map((t) => t.tra_loi), ["CÓ, NHƯNG CÓ ĐIỀU KIỆN", "CÓ", "KHÔNG"]);
+  // câu hỏi không phải Có/Không thì không gắn nhãn phán
+  const s2 = await demoSession();
+  addRound(s2, T_IN);
+  assert.equal(normalizeReading({ tang: [tier("CÓ", 7)] }, analyze(db, s2, {})).tang[0].tra_loi, null);
+});
+
+test("(d) tên lá theo dữ liệu: AI tự dịch sai → thay bằng tên dữ liệu; nhãn tên lá đứng trước mỗi câu Tarot", async () => {
+  assert.equal(suaTenLa(db, "La Phân Xết (Judgement)"), "Phán Xét (Judgement)");
+  assert.equal(suaTenLa(db, "Tháng này lá Phân Xết (Judgement) gọi bạn."), "Tháng này lá Phán Xét (Judgement) gọi bạn.");
+  assert.equal(suaTenLa(db, "Gặp Nguoi Đàn Ông (Man) ở đây."), "Gặp Người Đàn Ông (Man) ở đây.");
+  assert.equal(suaTenLa(db, "Mặt Trăng (The Moon) mờ."), "Mặt Trăng (The Moon) mờ.", "tên đúng giữ nguyên");
+  assert.equal(suaTenLa(db, "Không có ngoặc"), "Không có ngoặc");
+  const s = await demoSession();
+  addRound(s, T_IN);
+  const rule = analyze(db, s, {});
+  const r = normalizeReading({ tong_quan: "Bắt đầu với La Phân Xết (Judgement).", tang: [{ ten: "t", diem: 7, tarot_doc: ["a", "b", "c", "d"] }] }, rule, { db, session: s });
+  assert.equal(r.tong_quan, "Bắt đầu với Phán Xét (Judgement).");
+  assert.deepEqual(r.tang[0].tarot_ten, s.rounds[0].tarot[0].map((c) => cardName(db, "tarot", c)), "nhãn lấy từ dữ liệu, đúng thứ tự lá đã lật");
+  assert.match(SYSTEM_READING, /không tự dịch/u);
+});
+
+test("(e) thân gửi trạm chỉ có ASCII (không byte > 127), giải mã lại đúng chữ có dấu; temperature 0.7; dòng dặn có dấu", async () => {
+  const s = await demoSession();
+  addRound(s, `${T_IN}\n${L_IN}`);
+  const rule = analyze(db, s, { thuNhap: 20 });
+  const req = readingRequest(db, s, { reading: rule, money: rule._money });
+  let raw = "";
+  await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: SYSTEM_READING, json: true, messages: [{ role: "user", text: req }], fetchImpl: async (u, o) => { raw = o.body; return tramReply(BAI(CO_DAU)); } });
+  assert.ok([...Buffer.from(raw, "utf8")].every((b) => b < 128), "không còn byte > 127");
+  const back = JSON.parse(raw);
+  assert.equal(back.body.contents[0].parts[0].text, req, "giải mã lại đúng nguyên văn");
+  assert.equal(back.body.generationConfig.temperature, 0.7);
+  const DAU = "Mọi giá trị chuỗi phải là tiếng Việt CÓ DẤU đầy đủ; khoá JSON không dấu chỉ là tên trường, không được bắt chước.";
+  assert.ok(SYSTEM_READING.trimEnd().endsWith(DAU));
+  assert.ok(req.trimEnd().endsWith(DAU));
+});
+
+test("(f) màn chọn bài: không có ô gõ số, không lộ dải số 01–78 / 01–36", async () => {
+  const s = await demoSession();
+  store.sessions.push(s);
+  const [, view] = ROUTES.find(([re]) => re.test(`/chon-so/${s.id}`));
+  const { html } = view(`/chon-so/${s.id}`.match(/^\/chon-so\/([\w-]+)$/), new URLSearchParams());
+  assert.ok(html.includes("grid-backs"), "đúng là màn chọn bài");
+  assert.ok(!/id="typed"|<textarea/.test(html), "không có textarea #typed");
+  assert.ok(!/01[–-]78|01[–-]36|(Tarot|Lenormand) \d+(\s*\/\s*\d+){2,}/.test(html), "không lộ dải số / số lá kiểu Tarot 3/3/3");
+  assert.ok(!/<button[^>]*class="pick[^"]*"[^>]*>[^<]+<\/button>/.test(html), "lá úp không mang chữ/số hiển thị");
+  store.sessions.pop();
 });
 
 export async function run(extra = []) {

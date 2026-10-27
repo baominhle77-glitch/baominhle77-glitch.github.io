@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-26T23:40:00+07:00",
+  "updated_at": "2026-10-27T12:57:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
@@ -612,6 +612,22 @@
       "heartbeat_at": "2026-10-26T23:40:00+07:00",
       "summary": "Web bói gọi trạm AI (Apps Script) làm mặc định, bỏ ô nhập khoá; PR #150",
       "completed_at": "2026-10-26T23:40:00+07:00"
+    },
+    {
+      "id": "BOI-20261027-01",
+      "owner": "Claude Code",
+      "branch": "claude/sleepy-babbage-z3mzgb",
+      "base_sha": "676b33c2913d1eb05489177058e6b6d218e5f274",
+      "paths": [
+        "boi/**",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-27T03:49:00+07:00",
+      "heartbeat_at": "2026-10-27T12:57:00+07:00",
+      "summary": "Web bói, PR #151: lá úp một mặt sau không số; chọn bài từng tầng Lưu → xáo lại đủ 78+36 → Giải bài; bảng ánh xạ mới mỗi câu hỏi/mỗi lần Rút thêm (crypto.getRandomValues, không lưu localStorage); prompt AI theo văn phong reader thật, luôn tiếng Việt; cầu nối 127.0.0.1 hỏng/treo → trạm; vòng 2 chống mất dấu (cổng tỉ lệ dấu, nhãn phán một bộ, tên lá theo dữ liệu, bỏ ô nhập dãy số). Code xong, test 30/30, CI xanh; Chủ tịch duyệt merge 27/10.",
+      "completed_at": "2026-10-27T12:57:00+07:00"
     }
   ]
 }

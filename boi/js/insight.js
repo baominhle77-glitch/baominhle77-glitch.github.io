@@ -1,6 +1,7 @@
 // Động cơ luật sâu: phân tích chủ đề trội, dòng chảy vị trí, Lenormand cặp/bộ ba/chuỗi, nối tầng, mâu thuẫn.
 // Kết quả cùng khuôn với JSON mà lớp AI trả về → giao diện dựng chung một kiểu.
-import { readTier, tarotCard, lenCard, SCAM, band, yesNo } from "./reading.js";
+import { readTier, tarotCard, lenCard, SCAM, band, yesNo, tierWord, repeatTierName } from "./reading.js";
+import { drawsOf } from "./state.js";
 import { spreadById, posKey } from "./spreads.js";
 import { mainTopic } from "./topic.js";
 import { tarotMeaning, lenMeaning, cardYesNo } from "./data.js";
@@ -169,7 +170,11 @@ function tarotLine(w, t, x, topic, idx, ti, mode = "", question = "") {
     `${name} đứng ở ${posl}: ${low(posMean)}.`,
   ];
   const body = [];
-  if (x.cell.repeatOf) body.push(`Lá này lặp lại từ tầng ${x.cell.repeatOf.tier} — nhấn mạnh “${c.tu_khoa.split(",")[0]}”, không phải xác nhận độc lập.`);
+  // Lá ra lại luôn được nói ra (gắn sau câu chính), không phải một biến thể có thể bị bỏ
+  const repNote = !x.cell.repeatOf ? "" : (x.cell.repeatOf.doclap
+    ? `Lá này đã ra ở tầng ${x.cell.repeatOf.tier} và giờ ra lại dù bộ bài xáo lại đủ lá — “${c.tu_khoa.split(",")[0]}” là chủ đề lặp lại, không phải ngẫu nhiên.`
+    : `Lá này lặp lại từ tầng ${x.cell.repeatOf.tier} — nhấn mạnh “${c.tu_khoa.split(",")[0]}”, không phải xác nhận độc lập.`);
+  const tail = (line) => (repNote ? `${line} ${repNote}` : line);
   const tri = tarotMeaning(c, x.cell.rev, topic, x.pos);
   // Có/Không đọc theo ngữ cảnh câu hỏi (cả lá ngược), không gán một câu trả lời cố định cho lá
   const yn = topic === "cokhong" || mode === "yesno" ? cardYesNo(c, x.cell.rev, question) : null;
@@ -181,9 +186,9 @@ function tarotLine(w, t, x, topic, idx, ti, mode = "", question = "") {
   else body.push(`Năng lượng chính: ${c.tu_khoa}.`, `Điều cần để ý: ${low(c.rui_ro)}`);
   if (yn) {
     const ynText = `Xét câu Có/Không${x.cell.rev ? " (lá ngược)" : ""}, lá này nghiêng “${yn.tra_loi}”: ${low(yn.ly_do)}`;
-    return w.join(`t${ti}-${idx}`, [intro, body.map((b) => `${b} ${ynText}`)]);
+    return tail(w.join(`t${ti}-${idx}`, [intro, body.map((b) => `${b} ${ynText}`)]));
   }
-  return w.join(`t${ti}-${idx}`, [intro, body]);
+  return tail(w.join(`t${ti}-${idx}`, [intro, body]));
 }
 
 function flowLine(w, td, topic, ti) {
@@ -352,14 +357,18 @@ export function analyze(db, session, settings = {}, roundIndex = 0) {
     // sợi chỉ xuyên tầng: cùng lá ở nhiều tầng
     const where = new Map();
     tang.forEach((t, ti) => t._td.scored.forEach((x) => {
-      const k = `${x.deck}:${x.cell.n}`;
+      const k = `${x.deck}:${x.cell.card}`;
       if (!where.has(k)) where.set(k, { x, tiers: new Set() });
       where.get(k).tiers.add(ti + 1);
     }));
+    const fresh = drawsOf(session)[round.draw ?? 0]?.kieu === 2;
+    const unit = tierWord(session);
     for (const { x, tiers } of where.values()) {
-      if (tiers.size >= 2) noi_tang.push(w.pick(`thread-${x.deck}-${x.cell.n}`, [
-        `${x.card.vi} có mặt ở tầng ${[...tiers].join(" và ")}: sợi chỉ xuyên suốt là “${(x.card.tu_khoa || "").split(",")[0]}” — nhấn mạnh, không phải bằng chứng thêm.`,
-      ]));
+      if (tiers.size < 2) continue;
+      const kw = (x.card.tu_khoa || "").split(",")[0];
+      noi_tang.push(w.pick(`thread-${x.deck}-${x.cell.card}`, fresh
+        ? [`${x.card.vi} ra ở cả ${[...tiers].map((t) => repeatTierName(session, t)).join(" và ")} dù mỗi ${unit} xáo lại đủ bộ: “${kw}” là chủ đề lặp lại xuyên các ${unit} — việc này chưa xong, nó còn quay lại.`]
+        : [`${x.card.vi} có mặt ở tầng ${[...tiers].join(" và ")}: sợi chỉ xuyên suốt là “${kw}” — nhấn mạnh, không phải bằng chứng thêm.`]));
     }
     // dịch chuyển chất
     const dom = tang.map((t) => {

@@ -22,6 +22,14 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-27 11:48 GMT+7 — Claude Code — BOI-20261027-01 — web bói: chọn bài từng tầng, chống mất dấu (PR #151)
+- Lệnh chủ web + GĐ (vòng 1–3). Nhánh `claude/sleepy-babbage-z3mzgb` (base `676b33c`, đã merge `main` mới nhất). Sửa `boi/**` (`js/core.js`, `state.js`, `pick.js` mới, `views.js`, `ai.js`, `store.js`, `insight.js`, `reading.js`, `markdown.js`, `css/app.css`, `sw.js` → `boi-v8`, `test.mjs`, `MAU_GIAI.md`, `VAN_PHONG_READER.md` mới, `TIEN_DO.md` mục 23–24).
+- Lá úp một mặt sau không số; chọn bài từng tầng (Lưu → xáo lại đủ bộ → Giải bài); bảng ánh xạ mới mỗi câu hỏi và mỗi lần Rút thêm (seed `crypto.getRandomValues`, mỗi tầng Fisher–Yates riêng, không ghi localStorage); lá ra lại ở nhiều tầng = chủ đề lặp lại.
+- AI: prompt theo văn phong reader thật, luôn tiếng Việt; cổng kiểm dấu (tỉ lệ < 0,15 → gọi lại 1 lần → vẫn mất dấu thì bản luật + câu báo), nhãn phán một bộ (enum), tên lá theo dữ liệu, thân gửi trạm ASCII-escape, temperature 0.7. Trạm thật: tỉ lệ dấu 0,291 / 0,293. Cầu nối 127.0.0.1 hỏng/treo → trạm.
+- Test: `node boi/test.mjs` 30/30; e2e Playwright 375px 6 kịch bản đạt; `check-public-content` đạt. Không thêm secret, không đụng Worker/workflow.
+- Khoá `BOI-20261027-01` để `in_progress` trong lúc PR chờ chủ web duyệt merge; chuyển `completed` trong PR ngay trước khi merge.
+- 12:57: khoá BOI-20261027-01 → `completed` trong PR #151 trước khi merge (Chủ tịch duyệt merge). Kiểm `boi/sw.js` = `boi-v8` trên GitHub Pages sau merge.
+
 ### 2026-10-26 23:30 GMT+7 — Claude Code — BOI-20261026-01 — web bói gọi trạm AI (PR #150)
 - Lệnh GĐ, Chủ tịch duyệt: người dùng không cài gì, không nhập khoá; mặc định giải bằng Gemini qua trạm Google Apps Script (khoá nằm ở Script Properties của trạm, không có trong web).
 - Nhánh `claude/determined-brown-r799sm` (base `70d099e`). Sửa `boi/js/ai.js`, `store.js`, `views.js`, `app.js`, `boi/sw.js` (`boi-v6`, không cache trạm), `boi/test.mjs`, `boi/TIEN_DO.md` (mục 22).

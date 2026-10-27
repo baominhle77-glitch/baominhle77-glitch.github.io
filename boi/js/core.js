@@ -63,24 +63,36 @@ export async function shuffle(n, rng) {
 }
 
 // Bảng ánh xạ: số k (1-based) → lá. tarot[k-1] = id lá 0..77; lenormand[k-1] = số lá 1..36
-export async function buildMapping(seedHex, reversals) {
-  const tarot = await shuffle(78, makeRng(seedHex, "tarot"));
-  const lenormand = (await shuffle(36, makeRng(seedHex, "lenormand"))).map((i) => i + 1);
+// tiers = 0 → bản cũ (v1): một bảng dùng chung mọi tầng.
+// tiers ≥ 1 → v2: mỗi tầng một lần xáo Fisher–Yates riêng từ đủ 78 + 36 lá (nhãn "tarot#2", "lenormand#2"…),
+// nên một lá có thể ra lại ở tầng khác — đó là rút độc lập, không phải số trùng.
+async function deckOnce(seedHex, reversals, suffix) {
+  const tarot = await shuffle(78, makeRng(seedHex, "tarot" + suffix));
+  const lenormand = (await shuffle(36, makeRng(seedHex, "lenormand" + suffix))).map((i) => i + 1);
   let tarotRev = null;
   if (reversals) {
-    const r = makeRng(seedHex, "tarot-nguoc");
+    const r = makeRng(seedHex, "tarot-nguoc" + suffix);
     tarotRev = [];
     for (let i = 0; i < 78; i++) tarotRev.push((await r.u32()) & 1);
   }
   return { tarot, tarotRev, lenormand };
 }
+export async function buildMapping(seedHex, reversals, tiers = 0) {
+  if (!tiers) return deckOnce(seedHex, reversals, "");
+  const tang = [];
+  for (let i = 0; i < tiers; i++) tang.push(await deckOnce(seedHex, reversals, `#${i + 1}`));
+  return { v: 2, tang };
+}
 
-export const canonical = (m) => JSON.stringify({ v: 1, tarot: m.tarot, tarotRev: m.tarotRev, lenormand: m.lenormand });
+const one = (m) => ({ tarot: m.tarot, tarotRev: m.tarotRev, lenormand: m.lenormand });
+export const canonical = (m) => (m.v === 2
+  ? JSON.stringify({ v: 2, tang: m.tang.map(one) })
+  : JSON.stringify({ v: 1, ...one(m) }));
 export const commitHash = (seedHex, mapping) => sha256Hex(seedHex + "|" + canonical(mapping));
 
 // Tính lại từ seed: bảng ánh xạ có trùng và mã khoá có khớp không
 export async function verifyLock({ seed, reversals, mapping, hash }) {
-  const rebuilt = await buildMapping(seed, reversals);
+  const rebuilt = await buildMapping(seed, reversals, mapping.v === 2 ? mapping.tang.length : 0);
   const recomputed = await commitHash(seed, rebuilt);
   return {
     mappingOk: canonical(rebuilt) === canonical(mapping),
