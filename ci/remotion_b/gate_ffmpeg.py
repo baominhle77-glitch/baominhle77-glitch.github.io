@@ -1,6 +1,7 @@
 """Select a complete FFmpeg for unchanged fps/freezedetect measurements."""
 import json,os,shutil,subprocess,sys
 from pathlib import Path
+from output_paths import output_root
 R=Path(__file__).resolve().parents[2];required={'fps','freezedetect','scale','format','setsar','color','split','crop','pad','overlay'}
 def filters(binary):
  try:
@@ -23,4 +24,4 @@ if os.environ.get('GITHUB_PATH'):
  with open(os.environ['GITHUB_PATH'],'a') as f:f.write(str(bindir)+'\n')
 version=subprocess.check_output([str(binary),'-hide_banner','-version'],text=True).splitlines()[0]
 report=dict(binary=str(binary),version=version,required_filters=sorted(required),filters_verified=True,gate_code='ci/chuyen_dong_vung.py unchanged')
-out=R/'work/B';out.mkdir(parents=True,exist_ok=True);(out/'gate_ffmpeg.json').write_text(json.dumps(report,indent=2));print('B_GATE_FFMPEG '+json.dumps(report),flush=True)
+out=output_root(R);out.mkdir(parents=True,exist_ok=True);(out/'gate_ffmpeg.json').write_text(json.dumps(report,indent=2));print('B_GATE_FFMPEG '+json.dumps(report),flush=True)

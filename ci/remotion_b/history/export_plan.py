@@ -1,7 +1,7 @@
 import json,sys
 from pathlib import Path
 R=Path(__file__).resolve().parents[3];sys.path.insert(0,str(R));from gate_chung.language import visual_nouns
-from ci.layer_plan import measured_layers
+from ci.layer_plan import measured_layers,measured_overlays
 H=R/'work/D18_history';voice=json.loads((R/'gate_chung/examples/history_voice.json').read_text());metrics=json.loads((H/'remotion_render.json').read_text())
 for fmt in ('16x9','9x16'):
  W,HH=(960,540) if fmt=='16x9' else (540,960);doc=fmt=='9x16';dom=json.loads((H/f'dom_{fmt}.json').read_text());texts=[]
@@ -28,4 +28,5 @@ for fmt in ('16x9','9x16'):
   if target:terms.append(dict(text=c['word'],noun=c['word'],start=match['start'],end=match['end'],object_ids=[target]))
  beat=dict(id='fictional-campaign',start=0,end=20,narration=narration,words=voice['words'],visual_terms=terms,source_required=True)
  layers=measured_layers(dom,W,HH,[dict(id='history-map',source=str(R/'ci/remotion_b/public'/('history_'+fmt+'.mp4')),start=0,end=20)])
- plan=dict(schema_version=1,id='history20-'+fmt,format=fmt,duration=20,language='en',beats=[beat],texts=texts,objects=objects,assets=[],layers=layers,runtime=next(m for m in metrics if m['format']==fmt));(H/('plan_'+fmt+'.json')).write_text(json.dumps(plan,ensure_ascii=False,indent=2)+'\n')
+ plan=dict(schema_version=1,id='history20-'+fmt,format=fmt,duration=20,language='en',beats=[beat],texts=texts,objects=objects,assets=[],layers=layers,runtime=next(m for m in metrics if m['format']==fmt),simulation_regions=[dict(id='terrain',start=0,end=20,bbox=box)],nontext_overlays=measured_overlays(dom,W,HH,20),overlay_audit=dict(complete=True,renderer='Manim physical terrain/troop/advancing-route scenegraph + Remotion text-only'))
+ (H/('plan_'+fmt+'.json')).write_text(json.dumps(plan,ensure_ascii=False,indent=2)+'\n')

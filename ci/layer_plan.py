@@ -15,3 +15,13 @@ def measured_layers(dom,width,height,specs):
 
 def nested_layers(items,prefix,start,end,source_root,occluded):
  return [dict(item,id=prefix+'-'+item['id'],source=str((Path(source_root)/Path(item['source']).name).resolve()),start=start,end=end,timeline_origin=start,occluded=occluded) for item in items]
+
+def measured_overlays(dom,width,height,duration):
+ if not dom or any('overlays' not in z for z in dom):raise ValueError('G11 missing renderer overlay snapshots')
+ ordered=sorted(dom,key=lambda z:z['frame']);items={}
+ for i,z in enumerate(ordered):
+  end=ordered[i+1]['frame']/30 if i+1<len(ordered) else duration
+  for q in z['overlays']:
+   t=z['frame']/30;box=[q['x']/width,q['y']/height,q['w']/width,q['h']/height];item=items.setdefault(q['id'],dict(id=q['id'],start=t,end=end,bbox=box,keyframes=[],evidence=dict(palette=q['palette'])))
+   item['end']=end;item['keyframes'].append(dict(time=t,bbox=box))
+ return list(items.values())

@@ -25,9 +25,12 @@ def key(beat,short_side=540):
   if isinstance(node,ast.ClassDef) and node.name=='BScene':node.body=[x for x in node.body if not isinstance(x,ast.FunctionDef) or x.name in methods]
  plan=json.loads((H/'ke_hoach_A.json').read_text());b=plan['beats'][beat]
  digest=hashlib.sha256(ast.dump(tree,include_attributes=False).encode())
- for p in ('prepare.py','beat_cache.py','../../ci_requirements.txt'):digest.update((H/p).resolve().read_bytes())
- if beat in ('h1','h2','h3'):
-  digest.update((H/'../frame_layout.py').resolve().read_bytes());digest.update(json.dumps(json.loads((H/'portrait_layouts.json').read_text())[beat],sort_keys=True).encode())
+ for p in ('prepare.py','beat_cache.py','stage_spec.py','../../ci_requirements.txt'):digest.update((H/p).resolve().read_bytes())
+ for p in sorted((H/'../simulation').resolve().glob('*.py')):digest.update(p.read_bytes())
+ digest.update(json.dumps(json.loads((H/'optics.json').read_text())[beat],sort_keys=True).encode())
+ clip=next((c for c in json.loads((H/'gemini.json').read_text()) if c['simulation_beat']==beat),None)
+ detail=clip['simulation_optics'] if clip else json.loads((H/'portrait_views.json').read_text())[beat]
+ digest.update(json.dumps(detail,sort_keys=True).encode())
  digest.update(json.dumps([beat,b['so_khung'],b['t0'],short_side,30,'v3']).encode())
  return digest.hexdigest()
 if __name__=='__main__':

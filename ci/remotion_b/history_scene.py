@@ -9,7 +9,10 @@ class HistoryProof(MovingCameraScene):
   terrain=VGroup()
   for i in range(9):
    a=TAU*i/9;p=center+np.array([W*.22*math.cos(a),H*.20*math.sin(a),0]);poly=Polygon(*[p+np.array([W*.21*math.cos(a+TAU*j/7),H*.25*math.sin(a+TAU*j/7),0]) for j in range(7)],fill_color=['#3F6A9E','#527D75','#6E8170'][i%3],fill_opacity=1,stroke_color='#1C232B',stroke_width=2);terrain.add(poly)
-  base=RoundedRectangle(width=W,height=H,corner_radius=.25,fill_color='#A7ADB3',fill_opacity=1,stroke_color='#1C232B',stroke_width=2).move_to(center);self.add(base,terrain)
+  base=RoundedRectangle(width=W,height=H,corner_radius=.25,fill_color='#A7ADB3',fill_opacity=1,stroke_color='#1C232B',stroke_width=2).move_to(center)
+  base.set_fill(['#6B7C85','#BBC4C7']).set_sheen_direction(UR)
+  for i,patch in enumerate(terrain):patch.set_fill([['#3F6A9E','#527D75','#6E8170'][i%3],'#A7ADB3']).set_sheen_direction(UR)
+  self.add(base,terrain)
   ownership=Rectangle(width=W*.10,height=H*.88,fill_color='#3F6A9E',fill_opacity=.40,stroke_width=0).move_to(center+[-W*.4,0,0]);self.add(ownership)
   towns=VGroup(*[Circle(radius=.11,fill_color='#D1834F',fill_opacity=1,stroke_color='#1C232B',stroke_width=2).move_to(center+[W*x,H*y,0]) for x,y in ((-.3,-.3),(.27,.26),(-.28,.3),(.30,-.22))]);self.add(towns)
   n=140;phase=rng.random(n);lanes=rng.uniform(-.39,.39,n);units=VGroup(*[Triangle(fill_color='#3F6A9E' if i%2 else '#D1834F',fill_opacity=1,stroke_color='#1C232B',stroke_width=1.5).scale(.14) for i in range(n)]);self.add(units)

@@ -1,43 +1,47 @@
 {
+  "round": 13,
   "pass_geometry": true,
-  "resolution": {
-    "16x9": [
-      960,
-      540
-    ],
-    "9x16": [
-      540,
-      960
-    ]
-  },
-  "samples_per_beat": 3,
-  "beats": [
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "c1",
-    "p1"
-  ],
   "exposed_mesh_edges": 0,
-  "particle_limit": 400,
-  "particle_counts": {
-    "h1": 320,
-    "h2": 390,
-    "h3": 320,
-    "h4": 248,
-    "c1": 232,
-    "p1": 360
-  },
-  "round": 12,
-  "reviewed_at": "2026-10-27T09:33:39.710937+00:00",
-  "reviewed_images": 36,
+  "particle_limit": null,
+  "pepper_count": 640,
+  "pepper_size_range": [
+    0.6,
+    1.4
+  ],
+  "pepper_colors": "correlated brown/gray/black, no independent RGB green/purple flecks",
+  "samples_per_beat": 1,
+  "reviewed_images": 15,
+  "source_digest": "90f8ac9ab82b5be7844e261a14a5b764e8534314ea0993a2626328a54f8e7723",
   "c13_errors": [],
+  "scope": "Pre-full-render native540p material/camera review. Full actual MP4 G1-G11 and six-frame/beat review remain required.",
+  "physical_geometry": "same vessel dimensions in every aspect; two native camera rasters compose portrait, never deepen/stretch the vessel to fill height",
   "findings": [
-    "Reviewed three540p compositor frames per beat and format after the round11 source/caption corrections.",
-    "AI badge is a child of the real-footage panel at its upper-left; source asset identity and containment are exported from measured DOM. Portrait lower pane begins448px, preserving its540x480 source aspect and reducing the gap.",
-    "Both narrated c1/p1 ending and captions describe the phenomenon. At59.4s: Flow drags water outward. Andrew voice retained by re-editing measured cached speech spans.",
-    "G4/G7 pass both preflight plans; revised ending G5 passes; hook MP4 passes G3/G7/G9/C17.26 common regression tests pass locally.",
-    "Final actual CI MP4 gates and final frame review remain required before delivery."
+    "No blue rectangular slab, molecular lollipop symbols, arrows, parallel-grid stream overlays or schematic chips in this60s sample.",
+    "Continuous shaded water, refraction/depth, caustics, meniscus and soft flake shadows. Impulse opens the clear patch rapidly then slows.",
+    "Lower pane matches the source oblique mouth ratio; native macro camera eases towards water.",
+    "Pepper remains at the surface; distinct cyan dye/microtracers circulate below.",
+    "Actual540p CI caught a remaining28–32s four-second repeat. The common eased-camera travel is now verified through every4s span in the19.1s scene; no gate threshold changed. Full final MP4 CI remains required."
+  ],
+  "section8": {
+    "H1": "Three original Gemini assets; first clip begins0s.",
+    "H2": "Sample scope only; full-episode material count not claimed, full>=480s forbidden before approval.",
+    "M1": "Full actual MP4 freeze/progression verdict pending CI.",
+    "M2": "Physical radial transport and closed return-cell preview reviewed; no arrow-driven diagram.",
+    "M3": "Native optical camera easing and tracking; physical geometry independent of output aspect.",
+    "B1": "Portrait context plus optical close-up; full actual MP4 G3 measurement pending.",
+    "B2": "Noto white captions on opaque ink band retained; water lighting and brown/gray/black pepper material reviewed.",
+    "B3": "Camera keys3.2s plus clip/model state progression; full actual MP4 G1/C17 verdict pending."
+  },
+  "tests_passed": 41,
+  "requested_MP4_contact_seconds": [
+    0.5,
+    5,
+    11.5,
+    17,
+    22,
+    30,
+    40,
+    50,
+    59.4
   ]
 }

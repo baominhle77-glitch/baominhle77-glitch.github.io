@@ -2,8 +2,9 @@
 import json,subprocess,sys,os,re,hashlib,time
 from datetime import datetime,timezone
 from pathlib import Path
-from PIL import Image,ImageDraw
-R=Path(__file__).resolve().parents[2];H=Path(__file__).resolve().parent;O=R/'work/B'
+from PIL import Image,ImageDraw,ImageFont
+from output_paths import output_root
+R=Path(__file__).resolve().parents[2];H=Path(__file__).resolve().parent;O=output_root(R)
 def read(p,default=None):return json.loads(p.read_text()) if p.exists() else default
 
 def main():
@@ -23,10 +24,10 @@ def main():
   freeze.append(dict(format=fmt,total_s=sum(spans),max_s=max(spans,default=0),intervals=intervals,pass_freeze=p.returncode==0 and not intervals,command_ok=p.returncode==0))
   print('FREEZE '+fmt+' '+(json.dumps(intervals) if intervals else 'NONE'),flush=True)
   cw,ch=(480,294) if fmt=='16x9' else (270,504)
-  sheet=Image.new('RGB',(cw*4,ch*3),'#1C232B');d=ImageDraw.Draw(sheet)
-  for i,t in enumerate([.5,5,9,14,19,22,25,33,39,45,53,59.4]):
+  sheet=Image.new('RGB',(cw*3,ch*3),'#1C232B');d=ImageDraw.Draw(sheet);stamp=ImageFont.truetype(str(R/'ban_sac/fonts/NotoSans-Regular.ttf'),20 if fmt=='16x9' else 18)
+  for i,t in enumerate([.5,5,11.5,17,22,30,40,50,59.4]):
    dest=O/f'contact_{fmt}_{i}.png';subprocess.run(['ffmpeg','-nostdin','-y','-v','error','-ss',str(t),'-i',str(movie),'-frames:v','1',str(dest)],check=True)
-   im=Image.open(dest);im.thumbnail((cw,ch-24));x=i%4*cw;y=i//4*ch;sheet.paste(im,(x,y));d.text((x+8,y+ch-21),f'{t:.1f}s',fill='white')
+   im=Image.open(dest);im.thumbnail((cw,ch-24));x=i%3*cw;y=i//3*ch;sheet.paste(im,(x,y));d.rectangle((x,y+ch-24,x+110,y+ch),fill='#E00000');d.text((x+8,y+ch-21),f'{t:g} s',font=stamp,fill='white',anchor='lt')
   sheet.save(O/f'contact_sheet_{fmt}.jpg',quality=94)
  metrics=read(O/'pipeline_metrics.json',[]);cpu=sum(x['cpu_s'] for x in metrics);cold_cpu=sum(x.get('cold_render_cpu_s',x['cpu_s']) for x in metrics);cold_critical=max((x.get('cold_render_wall_s',x['wall_s']) for x in metrics if x['stage'].startswith('manim/')),default=0)+sum(x['wall_s'] for x in metrics if x['stage']=='remotion')
  common={fmt:read(O/('gate_chung_'+fmt)/'gates.json',{'passed':False}) for fmt in ('16x9','9x16')}
@@ -40,11 +41,11 @@ def main():
  # Count mesh/wireframe edges from their actual construction: B uses no mesh
  # object and no parallel-grid primitives. Visual inspection records any
  # exposed edge in all 36 preflight images. Never equate this with image CV.
- grid=dict(visible_exposed_mesh_edges=visual.get('exposed_mesh_edges'),method='manual review of 36 native 540p images + analytic geometry construction',pass_grid=visual.get('exposed_mesh_edges')==0)
+ grid=dict(visible_exposed_mesh_edges=visual.get('exposed_mesh_edges'),method='manual preflight native540p material review + shared closed optical height-field construction',pass_grid=visual.get('exposed_mesh_edges')==0)
  baseline=read(H/'A_baseline.json')
  h3_stage=next((s for s in metrics if s['stage']=='manim/h3'),{})
- repair=dict(beat='h3',formats=2,edit_minutes=None,rebuild_wall_s=h3_stage.get('cold_render_wall_s'),cpu_s=h3_stage.get('cold_render_cpu_s'),current_run_cache_reused=h3_stage.get('cache_reused'),method='Recorded cold render of the round 4 curved-capillary correction, both native 540p formats; retained per-format measurements survive cache hits. Editing time was not separately instrumented; final Remotion assembly is a separate stage.')
- B=dict(sha=os.environ.get('GITHUB_SHA'),run=os.environ.get('GITHUB_RUN_ID'),codex_minutes=(datetime.now(timezone.utc)-datetime.fromisoformat('2026-10-26T18:12:53+00:00')).total_seconds()/60,codex_time_scope='elapsed round 4 from its first persisted commit 13d8ecc at 2026-10-26T18:12:53Z, including local verification and CI; active editing time was not separately instrumented',active_edit_minutes=None,ci_minutes=None,pipeline_minutes=(max((x['wall_s'] for x in metrics if x['stage'].startswith('manim/')),default=0)+sum(x['wall_s'] for x in metrics if x['stage']=='remotion'))/60,cpu_seconds=cpu,cold_models_plus_current_remotion_cpu_s=cold_cpu,cold_models_plus_current_remotion_minutes=cold_critical/60,cpu_seconds_per_video_second=cpu/120 if metrics else None,cpu_denominator='120 output seconds: 60s x 2 formats',stages=metrics,repair_one_beat=read(O/'repair_one_beat.json',repair),bytes={f.name:f.stat().st_size for f in O.glob('B_60s_*.mp4')},gates=dict(C13={'ket_qua':'DAT' if c13 else 'TRUOT','layout_pass':layout_pass,'geometry_pass':visual.get('pass_geometry',False),'manual_errors':visual.get('c13_errors'),'semantic_captions_pass':semantic_pass,'scope':'Every rendered frame runs DOM safe-margin/overlap/font assertions; manual native geometry review plus semantic TTS alignment. Full C13 cannot pass while motion/rhythm fails.'},C16={'ket_qua':'DAT' if len(available)==3 else 'TRUOT','available_clips':available,'sources':data.get('clips',[]),'reason':'Three original Gemini attachments supplied by GĐ; latest round 4 instruction uses a focal portrait crop covering the whole frame, without letterbox.'},C17=motion,MIN_RES=minres,exposed_grid=grid,freeze=freeze,ffmpeg=read(O/'gate_ffmpeg.json')))
+ repair=dict(beat='h3',formats=2,edit_minutes=None,rebuild_wall_s=h3_stage.get('cold_render_wall_s'),cpu_s=h3_stage.get('cold_render_cpu_s'),current_run_cache_reused=h3_stage.get('cache_reused'),method='Recorded cold render of the shared optical material/camera rebuild, both native formats; retained per-format measurements survive cache hits. Editing time was not separately instrumented; final Remotion assembly is a separate stage.')
+ B=dict(sha=os.environ.get('GITHUB_SHA'),run=os.environ.get('GITHUB_RUN_ID'),codex_minutes=None,codex_time_scope='Active authoring time was not instrumented for this revision; measured native render and CI timing are reported separately',active_edit_minutes=None,ci_minutes=None,pipeline_minutes=(max((x['wall_s'] for x in metrics if x['stage'].startswith('manim/')),default=0)+sum(x['wall_s'] for x in metrics if x['stage']=='remotion'))/60,cpu_seconds=cpu,cold_models_plus_current_remotion_cpu_s=cold_cpu,cold_models_plus_current_remotion_minutes=cold_critical/60,cpu_seconds_per_video_second=cpu/120 if metrics else None,cpu_denominator='120 output seconds: 60s x 2 formats',stages=metrics,repair_one_beat=read(O/'repair_one_beat.json',repair),bytes={f.name:f.stat().st_size for f in O.glob('B_60s_*.mp4')},gates=dict(C13={'ket_qua':'DAT' if c13 else 'TRUOT','layout_pass':layout_pass,'geometry_pass':visual.get('pass_geometry',False),'manual_errors':visual.get('c13_errors'),'semantic_captions_pass':semantic_pass,'scope':'Every rendered frame runs DOM safe-margin/overlap/font assertions; manual native geometry review plus semantic TTS alignment. Full C13 cannot pass while motion/rhythm fails.'},C16={'ket_qua':'DAT' if len(available)==3 else 'TRUOT','available_clips':available,'sources':data.get('clips',[]),'reason':'Three original Gemini attachments. Shared split layout: original footage above, angle-matched native water simulation below; no real-video enlargement beyond1.0x.'},C17=motion,MIN_RES=minres,exposed_grid=grid,freeze=freeze,ffmpeg=read(O/'gate_ffmpeg.json')))
  B['gates']['D18']=common
  if os.environ.get('GITHUB_RUN_ID'):
   import urllib.request

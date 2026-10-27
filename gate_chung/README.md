@@ -60,3 +60,20 @@ chứa clocks từ audio được ghép, không đoán timestamps từ độ dà
 Chạy regression: python -m unittest discover -s gate_chung/tests -v
 Ví dụ adapter K1 nằm ngoài package ở ci/remotion_b/export_gate_plan.py;
 đổi adapter/nội dung không đổi thuật toán hay ngưỡng G.
+# G10/G11 — hiện tượng sống, mọi thể loại
+
+`simulation_regions` khai vùng mô phỏng và phần bị tư liệu che; G10 đọc pixel
+MP4 trong vùng đó, bỏ chữ, đo quần thể màu CIE76 ΔE<3. Nếu tỷ lệ lớn hơn35%
+xuyên suốt span thì trượt. Không thêm texture chỉ để lách cổng: vật liệu vẫn
+phải được người dựng chấm theo §8; cổng không tự kết luận "đẹp" hay đúng vật lý.
+
+`nontext_overlays` và `overlay_audit` là inventory của renderer. Với overlay
+biên tập phi chữ, G11 dùng chữ ký màu của chính overlay để theo dấu bbox pixel,
+không tin bbox keyframe tự khai; đứng>2s thì trượt. Thiếu inventory/chữ ký thì
+trượt. Thiết bị vật lý trong mô phỏng không phải overlay biên tập. Text panels
+vẫn do G6 kiểm. Các lớp camera/ảnh vẫn phải qua G9, không kéo giãn.
+
+Test: `tests/test_appearance.py` có mặt phẳng+hạt động trượt, vật liệu có gradient
+đạt, màu chỉ lệch1 RGB vẫn bị gộp, mũi tên/đường/hình tĩnh trượt dù metadata giả
+chuyển động, và overlay chạy thật đạt. `tests/test_material_transport.py` kiểm
+xung mở vòng nhanh rồi giảm tốc và dòng hồi bên dưới, không gắn tên beat K1.

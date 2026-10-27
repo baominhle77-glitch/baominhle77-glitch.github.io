@@ -14,6 +14,8 @@ for bid in ('h1','h2','h3','h4','c1','p1'):
  metrics=list(folder.rglob('metrics.json'))
  if len(metrics)!=1:raise SystemExit('MISSING_METRICS '+bid)
  shutil.copy2(metrics[0],out/'metrics.json')
+ for sheet in folder.rglob('simulation_6frames_*.jpg'):
+  dest=root/('work/B' if a.short_side==540 else 'work/B1080');dest.mkdir(parents=True,exist_ok=True);shutil.copy2(sheet,dest/sheet.name)
  for fmt in ('16x9','9x16'):
   history=list(folder.rglob(fmt+'.json'))
   if len(history)==1:shutil.copy2(history[0],out/(fmt+'.json'))

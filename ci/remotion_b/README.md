@@ -1,58 +1,46 @@
-# B: the approved production method, first 60-second sample
+# B production method — first60s, review r13
 
-Follow [AGENTS.md](../../AGENTS.md). Work remains on `gpt/k1t3-B-remotion`,
-PR149; do not merge. The Chairman must approve this sample before any full
->=480-second episode is rendered. The previous A method is retired.
+Follow [AGENTS.md](../../AGENTS.md). Work stays on gpt/k1t3-B-remotion,
+draft PR149. No merge and no full>=480s episode before Chairman approval.
 
-Manim renders six text-free simulations with separately authored960×540 and
-540×960 layouts, at30fps. Six matrix jobs run independently (`fail-fast:false`,
-40min each). AST fingerprints invalidate only affected beats. Pip, Node and
-native media are cached; a validated media hit skips the native toolchain.
-Remotion assembles measured TTS, semantic2–5-word captions aligned to word
-clocks, titles, transitions and the three original GĐ-supplied Gemini clips.
-Portrait Gemini retains the complete original16:9 image at540px wide in the
-upper panel, with a native Manim simulation of the same phenomenon below.
-The common G3 gate forbids enlarging real/AI footage beyond1.0× source pixels.
-The hook uses h1 source3–9s at timeline0–6s; c2 appears9.5–13.5s and p2
-18.5–22.5s in landscape and19–26s in portrait, all labelled
-`AI minh hoạ (Gemini)`. Hashes and sources are recorded.
+Manim runs the shared [native optical renderer](../simulation/README.md),
+with640 irregular brown/gray/black pepper flakes, soft shadows, a fast opening
+impulse followed by deceleration, continuous water shading/refraction/reflection,
+caustics, vessel rim and meniscus. Distinct cyan dye/microtracers show transport
+and closed subsurface return cells. Pepper stays on the surface. The old flat
+blue slabs, molecular lollipop diagrams, arrows and static flow-line overlays
+are absent from this60s sample.
 
-Each beat has its own scale/view. Molecular soap adsorption, weakening bonds and
-surface/return flow evolve throughout the shot; its eased optical camera changes
-azimuth/elevation every3.6s. Closed surfaces have no cutaway wedges or mesh edges.
-Actual3D sphere separation is asserted every frame; physical particles<=400.
-The final cross-section shows surface force and transported water; narration
-describes the outward flow.
+Both formats are rendered natively at30fps. A portrait scene composes two native
+camera rasters of the same physical geometry; it does not deepen a vessel or
+stretch a panel. Camera/source calibration is content data in optics.json,
+portrait_views.json and gemini.json. Real footage remains at<=1.0x source pixels.
+The lower macro camera matches the source's oblique mouth ratio and moves with
+easing. Its field clock continues from the corresponding full beat, including
+when a Gemini panel appears or disappears. H1 opens0–6s, c2 is9.5–12.5s, and p2
+is18.5–22.5s in landscape /19–26s in portrait. All three are the original supplied
+Gemini files, each labelled inside its own panel.
 
-The round11 instruction replaces diagram-description speech in c1/p1 with
-phenomenon narration. The original Andrew voice is retained using measured
-cached sentence/word spans and pitch-preserving tempo. `narration_overrides.json`
-records source hashes, joins and transformed word clocks; the original episode
-cache remains immutable. At59.4s both speech and caption say
-`Flow drags water outward.` G4 rejects graphic-description captions in every genre.
-G7/C14 binds each provenance badge to its material asset and requires its box
-to fit completely inside that real/AI panel. The badge lives in that panel's
-upper-left corner, below any title that shares the panel.
+Six540p matrix jobs run independently, fail-fast:false, timeout40min. Only after
+the540p gates are green do six native1080p matrix jobs and a separate composition
+job run. All outputs remain60s samples. Pip, Node and beat-local media are cached;
+fingerprints include the shared renderer and only the camera data for that beat.
+The same G1–G11 and original C17 thresholds run on both resolutions/formats.
+Chrome uses swangle/120000ms; concurrency is capped by the actual CPU capacity
+and checked against onStart.resolvedConcurrency. A one-core runner reports
+configured1/effective1, separately from desired2. Full FFmpeg is verified first.
 
-Run `python ci/remotion_b/prepare.py --beat h4 --jobs 1` to rebuild one beat.
-Use `--stills` for three native540p frames per beat/format. Run
-`python ci/remotion_b/compose.py` for Remotion only; install Node packages using
-`npm ci --prefix ci/remotion_b`, and use `B_CHROME=/usr/bin/chromium` locally.
-CI runs `remotion browser ensure`, uses swangle and120000ms timeouts. It requests
-concurrency2; the selected configuration is capped by the actual CPU capacity.
-The renderer's `onStart.resolvedConcurrency` callback supplies the effective
-value, which must equal the selected configuration in G8. Desired2, capacity1,
-configured1 and effective1 are reported separately on a one-core runner.
+Preflight: python ci/remotion_b/preflight.py. The r13 §8 scorecard and source
+material snapshots are in evidence/. Full-MP4 measurement remains required.
+CI extracts six simulation frames per beat/format, and a red-timecode contact
+sheet from each final MP4 at0.5/5/11.5/17/22/30/40/50/59.4s. Reports include
+all30 C17 windows, freeze intervals, source/aspect/colour/overlay checks and CPU/
+wall timing. G10 uses CIE76 ΔE<3 and35%; G11 tracks measured overlay pixels, not
+invented moving metadata. CSS/SVG overlays are inventoried by the shared DOM
+inspector; the native simulation image contains only physical actors/materials.
 
-Before measurement, `gate_ffmpeg.py` verifies the rawvideo muxer and original
-fps/freezedetect/scale/format filters. It chooses a full system FFmpeg or pinned
-imageio-ffmpeg0.6.0. `tools/do_chuyen_dong_vung.py` uses A's unchanged extract and
-measure functions; every beat, scene-difference and2-second threshold is retained.
-The log and `c17_windows.md` print all30 windows per format. FREEZE detection logs
-exact intervals and requires none. No red gate is relabelled green. CI always
-uploads the two MP4s, contact sheets, timing and gate reports, including failures.
-Native1080p is a separate explicit opt-in sample job after all540p gates pass.
-
-A CPU/editorial timing was not instrumented and stays null. B records child CPU,
-wall time, bytes, current warm cost and historical cold-model cost separately.
-The8-minute×2-format estimate is arithmetic only; it does not render the episode.
+The original Andrew voice is retained. The r11 phenomenon ending and word clocks
+are documented in narration_overrides.json; at59.4s both speech and captions say
+Flow drags water outward. G4/G7 preserve semantic captions and panel provenance.
+A/B authoring time stays null when uninstrumented. Extrapolation to8min×2 formats
+is arithmetic only and does not render a full episode.

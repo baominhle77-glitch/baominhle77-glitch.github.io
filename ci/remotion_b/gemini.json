@@ -9,19 +9,39 @@
     "in": 3.0,
     "focus_x": 50,
     "focus_y": 50,
-    "simulation_beat": "h1"
+    "simulation_beat": "h1",
+    "simulation_optics": {
+      "ellipse_ratio": 0.34,
+      "shot": "macro",
+      "camera_width": 2.3,
+      "camera_width_start": 2.0,
+      "camera_y": 0.45,
+      "lock_elevation": true,
+      "environment": "dark",
+      "vessel_depth": 0.14
+    }
   },
   {
     "id": "c2",
     "path": "assets/k1t3/broll_gemini/c2_16x9.mp4",
     "start": 285,
-    "frames": 120,
+    "frames": 90,
     "label": "AI minh hoạ (Gemini)",
     "source": "GĐ supplied attachment; radial surface flow during h2",
     "in": 0,
     "focus_x": 38,
     "focus_y": 50,
-    "simulation_beat": "h2"
+    "simulation_beat": "h2",
+    "simulation_optics": {
+      "ellipse_ratio": 0.3,
+      "shot": "macro",
+      "camera_width": 2.3,
+      "camera_width_start": 2.0,
+      "camera_y": 0.45,
+      "lock_elevation": true,
+      "environment": "dark",
+      "vessel_depth": 0.16
+    }
   },
   {
     "id": "p2",
@@ -35,6 +55,16 @@
     "focus_y": 50,
     "simulation_beat": "h3",
     "portrait_start": 570,
-    "portrait_frames": 210
+    "portrait_frames": 210,
+    "simulation_optics": {
+      "ellipse_ratio": 0.3,
+      "shot": "macro",
+      "camera_width": 2.3,
+      "camera_width_start": 2.0,
+      "camera_y": 0.45,
+      "lock_elevation": true,
+      "environment": "dark",
+      "vessel_depth": 0.16
+    }
   }
 ]
