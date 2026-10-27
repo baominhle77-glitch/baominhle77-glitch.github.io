@@ -1,0 +1,80 @@
+{
+  "phien_ban": "khuon-v1",
+  "ghi_chu": "BẢN MẪU do GĐ viết để chạy thử khuôn. Mốc beat là giả định; Codex thay bằng mốc thật (public/data.json) và nội dung beat thật, giữ nguyên lược đồ.",
+  "tong_giay": 60.0,
+  "fps": 30,
+  "bo_cuc_doc": {"tren": 0.375},
+  "beats": [
+    {"id": "h1", "bat_dau": 0.0, "ket_thuc": 9.0, "loai": "mo_phong",
+     "mo_ta": "khay sứ tối, giọt xà phòng rơi, tiêu dạt ra mép",
+     "optics": {"ellipse_ratio": 0.34, "vessel": "ceramic", "shot": "wide", "impact": 1.0, "seed": 219, "environment": "dark"},
+     "khung": {"16x9": "toan"},
+     "su_kien": [
+       {"t": 1.0, "kieu": "giot", "manh": 1.0},
+       {"t": 3.5, "kieu": "camera", "do_cao": 0.44, "lia": 0.6},
+       {"t": 6.0, "kieu": "camera", "do_cao": 0.38, "lia": -0.5}
+     ],
+     "khoang_clip": [[0.0, 6.0]],
+     "vung_chu": {"16x9": [], "9x16": []}},
+    {"id": "h2", "bat_dau": 9.0, "ket_thuc": 19.0, "loai": "mo_phong",
+     "mo_ta": "đĩa thuỷ tinh, cấp xà phòng liên tục, dòng mặt kéo tiêu ra ngoài",
+     "optics": {"ellipse_ratio": 0.33, "vessel": "glass", "shot": "wide", "impact": 0.05, "feeding": true, "camera_y": 0.48, "seed": 220},
+     "khung": {"16x9": "toan"},
+     "su_kien": [
+       {"t": 0.3, "kieu": "giot", "manh": 1.0},
+       {"t": 2.5, "kieu": "camera", "do_cao": 0.42, "lia": 0.5},
+       {"t": 5.0, "kieu": "camera", "do_cao": 0.36, "lia": -0.5},
+       {"t": 7.5, "kieu": "camera", "do_cao": 0.40, "lia": 0.0}
+     ],
+     "khoang_clip": [[9.5, 12.5]],
+     "vung_chu": {"16x9": [], "9x16": []}},
+    {"id": "h3", "bat_dau": 19.0, "ket_thuc": 29.0, "loai": "mo_phong",
+     "mo_ta": "vòi cấp đều, vòng trống giữ ổn định",
+     "optics": {"ellipse_ratio": 0.30, "vessel": "glass", "shot": "wide", "impact": 0.1, "feeding": true, "nozzle": true, "seed": 221, "environment": "dark"},
+     "khung": {"16x9": "toan"},
+     "su_kien": [
+       {"t": 0.1, "kieu": "giot", "manh": 1.0},
+       {"t": 2.8, "kieu": "camera", "do_cao": 0.40, "lia": -0.6},
+       {"t": 5.6, "kieu": "camera", "do_cao": 0.34, "lia": 0.6},
+       {"t": 8.4, "kieu": "camera", "do_cao": 0.42, "lia": 0.0}
+     ],
+     "khoang_clip": [[19.0, 22.5]],
+     "vung_chu": {"16x9": [], "9x16": []}},
+    {"id": "h4", "bat_dau": 29.0, "ket_thuc": 41.0, "loai": "mo_phong",
+     "mo_ta": "ngược sáng, cấp đều rồi ngừng, giọt thứ hai yếu",
+     "optics": {"ellipse_ratio": 0.43, "vessel": "glass", "shot": "wide", "impact": 0.15, "feeding": true, "environment": "backlit", "seed": 222},
+     "khung": {"16x9": "toan"},
+     "su_kien": [
+       {"t": 0.15, "kieu": "giot", "manh": 1.0},
+       {"t": 3.0, "kieu": "camera", "do_cao": 0.48, "lia": 0.5},
+       {"t": 6.0, "kieu": "ngung_nhap"},
+       {"t": 7.5, "kieu": "giot", "manh": 0.4},
+       {"t": 9.5, "kieu": "camera", "do_cao": 0.40, "lia": -0.5}
+     ],
+     "khoang_clip": [],
+     "vung_chu": {"16x9": [], "9x16": []}},
+    {"id": "c1", "bat_dau": 41.0, "ket_thuc": 51.0, "loai": "mo_phong",
+     "mo_ta": "mặt cắt: tiêu trên mặt, ô tuần hoàn quay về bên dưới",
+     "optics": {"ellipse_ratio": 0.28, "vessel": "glass", "shot": "wide", "impact": 0.15, "feeding": true, "section": true, "environment": "dark", "seed": 223},
+     "khung": {"16x9": "toan"},
+     "su_kien": [
+       {"t": 0.15, "kieu": "giot", "manh": 1.0},
+       {"t": 3.0, "kieu": "camera", "do_cao": 0.32, "lia": 0.5},
+       {"t": 6.0, "kieu": "camera", "do_cao": 0.26, "lia": -0.5},
+       {"t": 8.5, "kieu": "camera", "do_cao": 0.30, "lia": 0.0}
+     ],
+     "khoang_clip": [],
+     "vung_chu": {"16x9": [], "9x16": []}},
+    {"id": "p1", "bat_dau": 51.0, "ket_thuc": 60.0, "loai": "mo_phong",
+     "mo_ta": "kết: dòng chảy kéo nước ra ngoài",
+     "optics": {"ellipse_ratio": 0.28, "vessel": "glass", "shot": "wide", "impact": 0.05, "section": true, "environment": "backlit", "seed": 224},
+     "khung": {"16x9": "toan"},
+     "su_kien": [
+       {"t": 0.05, "kieu": "giot", "manh": 1.0},
+       {"t": 3.0, "kieu": "camera", "do_cao": 0.32, "lia": -0.5},
+       {"t": 6.0, "kieu": "camera", "do_cao": 0.27, "lia": 0.5}
+     ],
+     "khoang_clip": [],
+     "vung_chu": {"16x9": [], "9x16": []}}
+  ]
+}
