@@ -57,6 +57,9 @@ class BScene(MovingCameraScene):
   self.add_world(oval(w+.12,h+.11,LIGHT).move_to(c+[0,.035,0]))
   water=oval(w-.11,h-.11,WATER).move_to(c);self.add_world(water)
   self.add_world(oval(w*.91,h*.88,LIGHT,.08).move_to(c+[0,.045,0]))
+  # Continuous, advected capillary-light bands keep a close-up informative
+  # after particles leave the centre. These are smooth reflections, no mesh.
+  sheen=VGroup(*[VMobject(stroke_color=LIGHT,stroke_width=1.8,stroke_opacity=.25) for _ in range(24)]);self.add_world(sheen)
   # Curved moving specular reflection is tied to surface-wave displacement.
   highlights=VGroup()
   for j in range(2):
@@ -87,6 +90,9 @@ class BScene(MovingCameraScene):
    else:rr=rad[i]+(.96-rad[i])*(1-math.exp(-(.09 if BID=='h2' else .20)*q/(rad[i]+.10)))
    return c+np.array([w*.475*rr*math.cos(a),h*.475*rr*math.sin(a),0])
   def update(t):
+   for j,line in enumerate(sheen):
+    yy=-.90+1.80*j/23+.012*math.sin(t*.5+j);span=math.sqrt(max(.01,1-(abs(yy)+.04)**2))
+    line.set_points_smoothly([c+np.array([w*.475*x,h*.475*(yy+.022*math.sin(x*7-t*.8+j*.6)+.008*math.sin(x*13+t*.45)),0]) for x in np.linspace(-span,span,28)])
    for i,m in enumerate(self.pepper):
     p=pos(i,t);m.move_to(p);shadows[i].move_to(p+[.027,-.036,0])
    for i,path in enumerate(paths):

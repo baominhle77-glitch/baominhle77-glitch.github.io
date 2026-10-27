@@ -94,4 +94,10 @@ class Regressions(unittest.TestCase):
    tree=ast.parse(p.read_text())
    for n in ast.walk(tree):
     if isinstance(n,ast.ImportFrom):self.assertFalse((n.module or '').startswith(('ci.remotion_b','scene','manim')))
+ def test_hidden_annotation_does_not_span_a_material_insert(self):
+  from gate_chung.timeline import visibility_intervals
+  from gate_chung.model import active
+  detail=dict(name='detail',text='Map detail');source=dict(name='ai',text='AI minh hoạ (Example)')
+  snapshots=[dict(frame=120,boxes=[detail]),dict(frame=0,boxes=[detail]),dict(frame=60,boxes=[source])]
+  spans=visibility_intervals(snapshots,'detail','Map detail',0,6);self.assertEqual(spans,[(0,2),(4,6)]);self.assertFalse(any(active(dict(start=a,end=b),3) for a,b in spans))
 if __name__=='__main__':unittest.main()

@@ -5,6 +5,7 @@ from pathlib import Path
 R=Path(__file__).resolve().parents[2];sys.path.insert(0,str(R));from gate_chung.language import visual_nouns
 from gate_chung.model import norm
 from ci.layer_plan import measured_layers,nested_layers
+from gate_chung.timeline import visibility_intervals
 H=Path(__file__).resolve().parent
 
 def main():
@@ -40,8 +41,8 @@ def main():
    records=[(z,bx) for z in dom if start<=z['frame']/30<end for bx in z['boxes'] if bx['name'] not in ('caption','gemini')];unique={}
    for z,bx in records:unique[(bx['name'],bx['text'])]=bx
    for (name,text),bx in unique.items():
-    seen=[z['frame']/30 for z in dom if start<=z['frame']/30<end and any(q['name']==name and q.get('text')==text for q in z['boxes'])];actual_start=start if name in ('title','source') else min(seen,default=start)
-    add_text(bid+'-'+name,name,text,actual_start,end,'title' if name=='title' else ('source' if name=='source' else 'legend'))
+    spans=[(start,end)] if name in ('title','source') else visibility_intervals(dom,name,text,start,end)
+    for occurrence,(visible_start,visible_end) in enumerate(spans):add_text(bid+'-'+name+'-'+str(occurrence),name,text,visible_start,visible_end,'title' if name=='title' else ('source' if name=='source' else 'legend'))
    mainbox=([.03,.14,.94,.80] if bid in ('h1','h2','h3') else [.03,.25,.94,.71]) if doc else ([.03,.1,.94,.85] if bid in ('h1','h2','h3') else [.03,.23,.94,.71])
    if bid=='p1':mainbox=[.04,.28,.92,.68] if doc else [.05,.23,.9,.73]
    main=dict(id=bid+'-main',start=start,end=end,bbox=mainbox,label='surface model' if bid in ('h4','c1','p1') else 'bowl of water and pepper',primary=True,kind='model',evidence=dict(background='#8E969D',tolerance=24));objects.append(main)
