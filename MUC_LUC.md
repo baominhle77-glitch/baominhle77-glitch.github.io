@@ -1,5 +1,11 @@
 # MỤC LỤC (mới nhất ở đầu)
 
+## 2026-10-27 22:19 · vòng phieu_B_r14
+- khung/phieu_B_r14/r14_16x9.jpg
+- khung/phieu_B_r14/r14_9x16.jpg
+
+phiếu phieu_B_r14.txt
+
 ## 2026-10-27 19:50 · vòng r13 · commit Codex aa2792a3
 - khung/r13/aa2792a3_16x9.jpg
 - khung/r13/aa2792a3_9x16.jpg
