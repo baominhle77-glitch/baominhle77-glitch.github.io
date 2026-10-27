@@ -1,5 +1,5 @@
 {
-  "round": 13,
+  "round": 14,
   "pass_geometry": true,
   "exposed_mesh_edges": 0,
   "particle_limit": null,
@@ -9,29 +9,20 @@
     1.4
   ],
   "pepper_colors": "correlated brown/gray/black, no independent RGB green/purple flecks",
-  "samples_per_beat": 1,
-  "reviewed_images": 15,
-  "source_digest": "90f8ac9ab82b5be7844e261a14a5b764e8534314ea0993a2626328a54f8e7723",
+  "samples_per_beat": 3,
+  "reviewed_images": 36,
+  "source_digest": "4c56814e86cbcd2eb0cf2a2ba636df3154df1dda01145062067d6c01b918985a",
   "c13_errors": [],
-  "scope": "Pre-full-render native540p material/camera review. Full actual MP4 G1-G11 and six-frame/beat review remain required.",
-  "physical_geometry": "same vessel dimensions in every aspect; two native camera rasters compose portrait, never deepen/stretch the vessel to fill height",
+  "scope": "KHUON v1 content preflight: simulation-only 270p/15fps; 3 frames per beat per format reviewed. Actual 540p/1080p Remotion, G1-G11/G12 and GĐ eye review remain pending.",
+  "physical_geometry": "Verbatim GĐ StageOm fit; wide whole vessel and two native portrait cameras, upper40%/lower60%; no independent-axis scaling.",
   "findings": [
-    "No blue rectangular slab, molecular lollipop symbols, arrows, parallel-grid stream overlays or schematic chips in this60s sample.",
-    "Continuous shaded water, refraction/depth, caustics, meniscus and soft flake shadows. Impulse opens the clear patch rapidly then slows.",
-    "Lower pane matches the source oblique mouth ratio; native macro camera eases towards water.",
-    "Pepper remains at the surface; distinct cyan dye/microtracers circulate below.",
-    "Actual540p CI caught a remaining28–32s four-second repeat. The common eased-camera travel is now verified through every4s span in the19.1s scene; no gate threshold changed. Full final MP4 CI remains required."
+    "6 template Python files copied byte for byte from codex-khung 3dd997bb; source manifest in khuon_v1/sha256.json.",
+    "Blueprint true TTS/frame bounds cover0–60s; analytic main area min76.1%, margin min4.0%; event gap max2.8s.",
+    "Simulation preview G12 DAT both formats. Wide measured area min72.7%; portrait min70.0%; no static streak. These are270p previews, not final MP4 gate results.",
+    "No crop-only empty macro pane: portrait uses the two native StageOm views and source-specific lower panel with matched raster height.",
+    "L7 remains a content/template API issue: source reference color measured; Optics v1 has no water-color parameter. Protected renderer files were not edited.",
+    "Section return-cell detail is small in upper portrait pane; Chairman/GĐ eye review is still required."
   ],
-  "section8": {
-    "H1": "Three original Gemini assets; first clip begins0s.",
-    "H2": "Sample scope only; full-episode material count not claimed, full>=480s forbidden before approval.",
-    "M1": "Full actual MP4 freeze/progression verdict pending CI.",
-    "M2": "Physical radial transport and closed return-cell preview reviewed; no arrow-driven diagram.",
-    "M3": "Native optical camera easing and tracking; physical geometry independent of output aspect.",
-    "B1": "Portrait context plus optical close-up; full actual MP4 G3 measurement pending.",
-    "B2": "Noto white captions on opaque ink band retained; water lighting and brown/gray/black pepper material reviewed.",
-    "B3": "Camera keys3.2s plus clip/model state progression; full actual MP4 G1/C17 verdict pending."
-  },
   "tests_passed": 44,
   "requested_MP4_contact_seconds": [
     0.5,

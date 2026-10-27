@@ -7,6 +7,11 @@ on:
       - 'ci/simulation/**'
       - 'ci/frame_layout.py'
       - 'ci/analysis_video.py'
+      - 'ci/kiem_khuon_sha.py'
+      - 'ci/kiem_ban_ve.py'
+      - 'ci/g12_vat_chinh.py'
+      - 'ci/khuon_dung_thu.py'
+      - 'khuon/**'
       - 'ci/layer_plan.py'
       - '.github/workflows/k1t3_b_remotion.yml'
       - '.github/workflows/gate_chung.yml'
@@ -33,7 +38,23 @@ env:
   OPENBLAS_NUM_THREADS: '1'
   OMP_NUM_THREADS: '1'
 jobs:
+  ban-ve:
+    name: KHUON v1 / SHA and blueprint before rendering
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+          cache: pip
+          cache-dependency-path: gate_chung/requirements.txt
+      - run: python ci/kiem_khuon_sha.py
+      - run: python -m pip install -q -r gate_chung/requirements.txt
+      - run: python ci/kiem_ban_ve.py ci/remotion_b/ban_ve_B60.json
+      - run: python ci/remotion_b/semantic_captions.py --alignment-out work/preflight/caption_alignment.json
   manim:
+    needs: ban-ve
     name: Manim 540p / ${{ matrix.beat }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -164,15 +185,23 @@ jobs:
       - name: Remotion only, render both complete MP4s
         env:
           B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
-        run: python -u ci/remotion_b/compose.py
+        run: python -u ci/remotion_b/compose.py --caption-alignment work/B/caption_alignment.json
       - name: Full FFmpeg for the original fps and freezedetect gates
         if: always()
         run: python ci/remotion_b/gate_ffmpeg.py
+      - name: KHUON v1 G12 on both actual formats
+        id: g12
+        run: |
+          set +e
+          python ci/g12_vat_chinh.py --video work/B/B_60s_16x9.mp4 --kho 16x9 --out work/B/g12_16x9.json
+          g12_land=$?
+          python ci/g12_vat_chinh.py --video work/B/B_60s_9x16.mp4 --kho 9x16 --out work/B/g12_9x16.json
+          g12_portrait=$?
+          exit $((g12_land || g12_portrait))
       - name: Universal D18 gates on both actual MP4s
         id: common
-        if: always()
         run: |
-          python ci/remotion_b/export_gate_plan.py --video-root work/B --out work/B/plans
+          python ci/remotion_b/export_gate_plan.py --video-root work/B --caption-alignment work/B/caption_alignment.json --out work/B/plans
           set +e
           python -m gate_chung --video work/B/B_60s_16x9.mp4 --plan work/B/plans/16x9.json --genre the_loai/khoa_hoc_vat_ly.json --out work/B/gate_chung_16x9
           d18_land=$?
@@ -181,12 +210,11 @@ jobs:
           exit $((d18_land || d18_portrait))
       - name: Unchanged 540p gates, ffprobe, sheets and A-B report
         id: gates
-        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set +e
-          python ci/remotion_b/measure.py
+          python ci/remotion_b/measure.py --caption-alignment work/B/caption_alignment.json
           b_gate_exit=$?
           if [ '${{ steps.common.outcome }}' != 'success' ]; then b_gate_exit=1; fi
           if [ "$b_gate_exit" -eq 0 ]; then echo 'result=DAT' >> "$GITHUB_OUTPUT"; else echo 'result=TRUOT' >> "$GITHUB_OUTPUT"; fi
@@ -365,19 +393,27 @@ jobs:
       - name: Two native 1080p sample MP4s only, no full episode
         env:
           B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
-        run: python -u ci/remotion_b/compose.py
+        run: python -u ci/remotion_b/compose.py --caption-alignment work/B1080/caption_alignment.json
+      - name: KHUON v1 G12 on both actual formats
+        id: g12
+        run: |
+          set +e
+          python ci/g12_vat_chinh.py --video work/B1080/B_60s_16x9.mp4 --kho 16x9 --out work/B1080/g12_16x9.json
+          g12_land=$?
+          python ci/g12_vat_chinh.py --video work/B1080/B_60s_9x16.mp4 --kho 9x16 --out work/B1080/g12_9x16.json
+          g12_portrait=$?
+          exit $((g12_land || g12_portrait))
       - name: G1-G11 and original C17 on actual native 1080p videos
-        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          python ci/remotion_b/export_gate_plan.py --video-root work/B1080 --out work/B1080/plans
+          python ci/remotion_b/export_gate_plan.py --video-root work/B1080 --caption-alignment work/B1080/caption_alignment.json --out work/B1080/plans
           set +e
           python -m gate_chung --video work/B1080/B_60s_16x9.mp4 --plan work/B1080/plans/16x9.json --genre the_loai/khoa_hoc_vat_ly.json --out work/B1080/gate_chung_16x9
           land=$?
           python -m gate_chung --video work/B1080/B_60s_9x16.mp4 --plan work/B1080/plans/9x16.json --genre the_loai/khoa_hoc_vat_ly.json --out work/B1080/gate_chung_9x16
           portrait=$?
-          python ci/remotion_b/measure.py
+          python ci/remotion_b/measure.py --caption-alignment work/B1080/caption_alignment.json
           original=$?
           exit $((land || portrait || original))
       - uses: actions/upload-artifact@v4

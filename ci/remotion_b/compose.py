@@ -1,14 +1,15 @@
 """Collect cached beat artifacts, compose only, persist metrics before gates."""
-import json,os,resource,shutil,subprocess,sys,time
+import argparse,json,os,resource,shutil,subprocess,sys,time
 from pathlib import Path
 from prepare import source_data,read_probe
 from semantic_captions import apply as semantic_captions
 from asset_layout import enrich as enrich_assets
 from output_paths import output_root
 R=Path(__file__).resolve().parents[2];SHORT=int(os.environ.get('B_SHORT_SIDE','540'));O=output_root(R,SHORT);O.mkdir(parents=True,exist_ok=True)
-data=enrich_assets(semantic_captions(source_data()));stages=[];missing=[]
-alignment=json.loads((O/'caption_alignment.json').read_text());assert alignment,'B_MISSING_CAPTION_ALIGNMENT'
-print('B_REPORT_READY '+json.dumps(dict(short_side=SHORT,root=str(O),aligned_phrases=len(alignment))),flush=True)
+parser=argparse.ArgumentParser();parser.add_argument('--caption-alignment',type=Path,required=True);args=parser.parse_args()
+data=enrich_assets(semantic_captions(source_data(),args.caption_alignment));stages=[];missing=[]
+alignment=json.loads(args.caption_alignment.read_text());assert alignment,'B_MISSING_CAPTION_ALIGNMENT'
+print('B_REPORT_READY '+json.dumps(dict(short_side=SHORT,root=str(O),alignment_path=str(args.caption_alignment.resolve()),aligned_phrases=len(alignment))),flush=True)
 for b in data['beats']:
  bid=b['id'];folder=R/'work/B_cache'/str(SHORT)/bid
  metric=folder/'metrics.json'

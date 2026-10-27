@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 R=Path(__file__).resolve().parents[2];H=Path(__file__).resolve().parent;O=R/'assets/k1t3/narration_b';O.mkdir(parents=True,exist_ok=True);RATE=24000
 tts=json.loads((R/'out/M1_MARANGONI_DUNG/_build/tts.json').read_text());clips={}
-for bid in ('c1','p1','h2'):
+for bid in ('c1','p1','h2','h4','w2'):
  entry=tts['beats'][bid];audio=R/'out/_tts_cache'/Path(entry['mp3']).name;assert hashlib.sha256(audio.read_bytes()).hexdigest()==entry['mp3_sha256'];clips[bid]=(audio,json.loads((R/'out/_tts_cache'/Path(entry['words']).name).read_text()))
 def clean(w):return w['w'].lower().strip('.,;:!?')
 def extract(bid,first,last):
@@ -27,11 +27,20 @@ def make(bid,parts,duration,offset,narration):
  for w in events:w['t0']/=tempo;w['t1']/=tempo
  words_path=O/(bid+'.words.json');words_path.write_text(json.dumps(events,ensure_ascii=False,indent=2)+'\n')
  return dict(narration=narration,audio_path=str(target.relative_to(R)),audio_sha256=hashlib.sha256(target.read_bytes()).hexdigest(),words_path=str(words_path.relative_to(R)),offset=offset,duration=duration,tempo=tempo,source_spans=provenance,voice=tts['voice'],method='Original cached Andrew TTS; measured source spans, short silent joins, pitch-preserving atempo; word clocks transformed by the same tempo')
-c1=clips['c1'][1];p1=clips['p1'][1];h2=clips['h2'][1];begin=next(i for i,w in enumerate(c1) if clean(w)=='every');end=next(i for i,w in enumerate(c1) if clean(w)=='weaker');a=next(i for i,w in enumerate(p1) if clean(w)=='a')
-text='Every patch of that surface pulls on its neighbours. Over clean water the pull is strong; over the soapy spot it is weaker. A flow driven by a difference in pull like this is called a Marangoni flow.'
-overrides={'c1':make('c1',[('c1',begin,end),('p1',a,len(p1)-1)],13.90,44.1667,text)}
-parts=[]
-for bid,word in (('p1','flow'),('h2','drags'),('h2','water'),('h2','outward')):
- words=clips[bid][1];index=next(i for i,w in enumerate(words) if clean(w)==word);parts.append((bid,index,index))
-overrides['p1']=make('p1',parts,1.55,58.4,'Flow drags water outward.')
-(H/'narration_overrides.json').write_text(json.dumps(overrides,ensure_ascii=False,indent=2)+'\n');print({k:dict(words=len(json.loads((R/v['words_path']).read_text())),duration=v['duration'],tempo=v['tempo']) for k,v in overrides.items()})
+def main():
+ import argparse
+ p=argparse.ArgumentParser();p.add_argument('--only',choices=('all','h4'),default='all');a=p.parse_args()
+ path=H/'narration_overrides.json';overrides=json.loads(path.read_text()) if path.exists() else {}
+ if a.only=='all':
+  c1=clips['c1'][1];p1=clips['p1'][1];begin=next(i for i,w in enumerate(c1) if clean(w)=='every');end=next(i for i,w in enumerate(c1) if clean(w)=='weaker');start=next(i for i,w in enumerate(p1) if clean(w)=='a')
+  text='Every patch of that surface pulls on its neighbours. Over clean water the pull is strong; over the soapy spot it is weaker. A flow driven by a difference in pull like this is called a Marangoni flow.'
+  overrides['c1']=make('c1',[('c1',begin,end),('p1',start,len(p1)-1)],13.90,44.1667,text)
+  parts=[]
+  for bid,word in (('p1','flow'),('h2','drags'),('h2','water'),('h2','outward')):
+   words=clips[bid][1];index=next(i for i,w in enumerate(words) if clean(w)==word);parts.append((bid,index,index))
+  overrides['p1']=make('p1',parts,1.55,58.4,'Flow drags water outward.')
+ text='Here is the engine. At twenty five degrees, clean water pulls harder than our soap, SDS at an inferred twenty five millimolar in water: a gap of thirty six millinewtons per metre, calculated. That gap, not the soap itself, does the pulling.'
+ overrides['h4']=make('h4',[('h4',0,14),('h4',18,30),('w2',50,50),('h4',35,47)],17.784,24.2667,text)
+ path.write_text(json.dumps(overrides,ensure_ascii=False,indent=2)+'\n')
+ print({k:dict(words=len(json.loads((R/v['words_path']).read_text())),duration=v['duration'],tempo=v['tempo']) for k,v in overrides.items()})
+if __name__=='__main__':main()

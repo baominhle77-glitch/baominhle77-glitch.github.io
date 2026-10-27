@@ -72,5 +72,50 @@
     ],
     "voice": "en-US-AndrewNeural",
     "method": "Original cached Andrew TTS; measured source spans, short silent joins, pitch-preserving atempo; word clocks transformed by the same tempo"
+  },
+  "h4": {
+    "narration": "Here is the engine. At twenty five degrees, clean water pulls harder than our soap, SDS at an inferred twenty five millimolar in water: a gap of thirty six millinewtons per metre, calculated. That gap, not the soap itself, does the pulling.",
+    "audio_path": "assets/k1t3/narration_b/h4.wav",
+    "audio_sha256": "c04ad7ba29ee658fe6a06d00387088835d83cc7b64144b92510046e73412fd03",
+    "words_path": "assets/k1t3/narration_b/h4.words.json",
+    "offset": 24.2667,
+    "duration": 17.784,
+    "tempo": 0.8220029239766082,
+    "source_spans": [
+      {
+        "beat": "h4",
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b",
+        "source_start": 0.1255,
+        "source_end": 4.680499999999999,
+        "word_first": 0,
+        "word_last": 14
+      },
+      {
+        "beat": "h4",
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b",
+        "source_start": 6.238,
+        "source_end": 10.743,
+        "word_first": 18,
+        "word_last": 30
+      },
+      {
+        "beat": "w2",
+        "audio_sha256": "548d22ca37f0171fb1425de5fd2eab95a46ee68445da1a9e770c72b468aac903",
+        "source_start": 19.6755,
+        "source_end": 19.968,
+        "word_first": 50,
+        "word_last": 50
+      },
+      {
+        "beat": "h4",
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b",
+        "source_start": 12.2005,
+        "source_end": 17.430500000000002,
+        "word_first": 35,
+        "word_last": 47
+      }
+    ],
+    "voice": "en-US-AndrewNeural",
+    "method": "Original cached Andrew TTS; measured source spans, short silent joins, pitch-preserving atempo; word clocks transformed by the same tempo"
   }
 }

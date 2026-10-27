@@ -39,3 +39,12 @@ Lệnh Chủ tịch 27/10/2026: **từ nay mọi video dùng phương án B; b�
 - G10/G11 là cổng chung mọi thể loại, chạy trên cả hai khổ540p và1080p; không có ngưỡng/miễn trừ trong JSON thể loại. G10 đo CIE76 ΔE<3, loại vùng mô phỏng có>35% cùng màu suốt beat. G11 kiểm inventory overlay phi chữ và theo dấu bbox từ pixel thật; overlay đứng>2s trượt, metadata chuyển động giả không đủ để qua. Nền của hộp chữ thuộc lớp chữ; thiết bị/vật thể vật lý thuộc cảnh, không phải overlay biên tập.
 - K1 lần này dùng>=400 mảnh tiêu méo (640), cỡ±40%, màu nâu/xám/đen và bóng mềm; yêu cầu mới này thay giới hạn<=400 của phiếu cũ. Tiêu chỉ nổi trên mặt. Hạt dò trong nước có màu/hình riêng, chạy theo ô tuần hoàn; không dùng tiêu làm hạt dò dưới mặt.
 - Giữ nguyên ngưỡng C17/C13/G1–G9. Matrix540p trước, chỉ dựng native1080p sau cổng540p xanh. Cả1080p vẫn là mẫu60s; không tự dựng full hoặc merge.
+
+## Quy trình chuẩn và KHUÔN v1 — 28/10
+
+- Đọc `dao_tao/QUY_TRINH_CHUAN.md`; hướng dẫn cụ thể mới nhất là `khuon/HUONG_DAN.md` từ ref `codex-khung` (KHUON v1).
+- GĐ sở hữu mã khuôn. Sáu tệp `khuon/ci/**/*.py` chép nguyên văn sang `ci/`; không sửa dù gặp lỗi. Không sửa `optical_water.py`, `transport.py`, `views.py` để vá riêng mẫu. Lỗi API khuôn phải ghi vào bảng `trao_doi/CODEX_NOI.md` cho GĐ.
+- Codex viết nội dung ở `ci/remotion_b/ban_ve_B60.json`, đúng lược đồ v1 và mốc frame/TTS thật; không dùng mốc mẫu. Các nối ghép với Remotion/CI phải dùng bố cục và vùng chữ của bản vẽ, không thay thuật toán khuôn.
+- Thứ tự CI: `kiem_khuon_sha` → `kiem_ban_ve` → render → G12 hai khổ → `gate_chung` (giữ G1–G11 hiện có). Lỗi ở bước trước dừng bước sau; vẫn lưu artifact chẩn đoán.
+- Thử270p/15fps và kiểm bản vẽ trước khi đẩy. Mỗi lượt một commit; không đẩy chồng khi run trước chưa xong. Chi tiết L1–L8 và số đo ghi vào `CODEX_NOI.md`; trong chat chỉ trả một dòng SHA.
+- XONG cần cả CI, GĐ kiểm mắt và Chủ tịch chốt mẫu theo D17. Không merge, không dựng full trước chốt.

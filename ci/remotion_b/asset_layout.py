@@ -4,6 +4,7 @@ from pathlib import Path
 H=Path(__file__).resolve().parent;R=H.parents[1]
 def enrich(data):
  short=os.environ.get('B_SHORT_SIDE','540')
+ blueprint=json.loads((H/'ban_ve_B60.json').read_text());data['portrait_top']=blueprint['bo_cuc_doc']['tren'];data['blueprint_text']={b['id']:b['vung_chu'] for b in blueprint['beats']}
  for beat in data['beats']:
   beat['media']={};beat['internal_layers']={}
   for fmt in ('16x9','9x16'):

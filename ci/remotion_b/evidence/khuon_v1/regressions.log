@@ -1,0 +1,56 @@
+test_540_passthrough_and_wrong_aspect_are_not_rewritten (test_analysis_video.AnalysisInputRegressions.test_540_passthrough_and_wrong_aspect_are_not_rewritten) ... ok
+test_native_two_formats_keep_circles_round_and_frame_clock (test_analysis_video.AnalysisInputRegressions.test_native_two_formats_keep_circles_round_and_frame_clock) ... ok
+test_original_gate_still_rejects_a_static_native_video_after_normalization (test_analysis_video.AnalysisInputRegressions.test_original_gate_still_rejects_a_static_native_video_after_normalization) ... C17_8 16x9/h1 avg=0.00% union=0.00% >=3%=0.00% low_streak=9.75s khac_canh=first => TRUOT
+C17_8 16x9/h2 avg=0.00% union=0.00% >=3%=0.00% low_streak=10.00s khac_canh=0.00 => TRUOT
+C17_8 16x9/h3 avg=0.00% union=0.00% >=3%=0.00% low_streak=10.00s khac_canh=0.00 => TRUOT
+C17_8 16x9/h4 avg=0.00% union=0.00% >=3%=0.00% low_streak=10.00s khac_canh=0.00 => TRUOT
+C17_8 16x9/c1 avg=0.00% union=0.00% >=3%=0.00% low_streak=10.00s khac_canh=0.00 => TRUOT
+C17_8 16x9/p1 avg=0.00% union=0.00% >=3%=0.00% low_streak=10.00s khac_canh=0.00 => TRUOT
+C17_8_2S 16x9 0/30 >=28 => TRUOT
+ok
+test_flat_surface_fails_even_though_small_particles_move (test_appearance.AppearanceRegressions.test_flat_surface_fails_even_though_small_particles_move) ... ok
+test_inventory_must_come_from_renderer_snapshots (test_appearance.AppearanceRegressions.test_inventory_must_come_from_renderer_snapshots) ... ok
+test_lit_depth_gradient_surface_passes (test_appearance.AppearanceRegressions.test_lit_depth_gradient_surface_passes) ... ok
+test_missing_inventory_is_not_silently_accepted (test_appearance.AppearanceRegressions.test_missing_inventory_is_not_silently_accepted) ... ok
+test_nearly_identical_colors_still_count_as_one_population (test_appearance.AppearanceRegressions.test_nearly_identical_colors_still_count_as_one_population) ... ok
+test_static_arrow_and_line_fail_but_transported_overlay_passes (test_appearance.AppearanceRegressions.test_static_arrow_and_line_fail_but_transported_overlay_passes) ... ok
+test_declared_uniform_cover_crop_passes (test_aspect.AspectRegressions.test_declared_uniform_cover_crop_passes) ... ok
+test_static_nonuniform_scale_fails (test_aspect.AspectRegressions.test_static_nonuniform_scale_fails) ... ok
+test_uniform_layout_formula (test_aspect.AspectRegressions.test_uniform_layout_formula) ... ok
+test_uniform_scale_passes (test_aspect.AspectRegressions.test_uniform_scale_passes) ... ok
+test_vertical_stretch_1_3_fails_even_with_forged_equal_scales (test_aspect.AspectRegressions.test_vertical_stretch_1_3_fails_even_with_forged_equal_scales) ... ok
+test_camera_aspect_does_not_change_physical_mouth_ratio (test_material_transport.MaterialTransportRegressions.test_camera_aspect_does_not_change_physical_mouth_ratio) ... ok
+test_eased_camera_progresses_through_every_four_second_span (test_material_transport.MaterialTransportRegressions.test_eased_camera_progresses_through_every_four_second_span) ... ok
+test_lit_studio_does_not_leave_a_flat_gray_simulation_region (test_material_transport.MaterialTransportRegressions.test_lit_studio_does_not_leave_a_flat_gray_simulation_region) ... ok
+test_opening_is_fast_then_decelerates (test_material_transport.MaterialTransportRegressions.test_opening_is_fast_then_decelerates) ... ok
+test_pepper_is_never_painted_inside_the_return_flow_volume (test_material_transport.MaterialTransportRegressions.test_pepper_is_never_painted_inside_the_return_flow_volume) ... ok
+test_return_cell_has_outward_top_and_inward_bottom (test_material_transport.MaterialTransportRegressions.test_return_cell_has_outward_top_and_inward_bottom) ... ok
+test_shared_water_is_not_a_flat_blue_surface (test_material_transport.MaterialTransportRegressions.test_shared_water_is_not_a_flat_blue_surface) ... ok
+test_metadata_follows_the_selected_resolution (test_pipeline_reports.ReportRoutingRegressions.test_metadata_follows_the_selected_resolution) ... ok
+test_graphic_description_is_rejected_as_a_caption (test_provenance_captions.ProvenanceAndCaptionRegressions.test_graphic_description_is_rejected_as_a_caption) ... ok
+test_real_footage_badge_also_requires_containment (test_provenance_captions.ProvenanceAndCaptionRegressions.test_real_footage_badge_also_requires_containment) ... ok
+test_source_badge_must_stay_inside_its_own_panel_in_both_formats (test_provenance_captions.ProvenanceAndCaptionRegressions.test_source_badge_must_stay_inside_its_own_panel_in_both_formats) ... ok
+test_static_short_scene_can_export_its_initial_geometry (test_provenance_captions.ProvenanceAndCaptionRegressions.test_static_short_scene_can_export_its_initial_geometry) ... ok
+test_actual_concurrency_must_equal_configuration (test_regressions.Regressions.test_actual_concurrency_must_equal_configuration) ... ok
+test_blurred_crop_has_less_edge_frequency (test_regressions.Regressions.test_blurred_crop_has_less_edge_frequency) ... ok
+test_caption_boundary_uses_the_decoded_frame_clock (test_regressions.Regressions.test_caption_boundary_uses_the_decoded_frame_clock) ... ok
+test_caption_padding_cannot_create_two_simultaneous_boxes (test_regressions.Regressions.test_caption_padding_cannot_create_two_simultaneous_boxes) ... ok
+test_color_size_is_inferred_without_self_declared_attributes (test_regressions.Regressions.test_color_size_is_inferred_without_self_declared_attributes) ... ok
+test_core_has_no_episode_import (test_regressions.Regressions.test_core_has_no_episode_import) ... ok
+test_decimal_speech_is_screen_data_not_an_image_object (test_regressions.Regressions.test_decimal_speech_is_screen_data_not_an_image_object) ... ok
+test_direction_adverb_after_object_is_not_an_unmapped_image_noun (test_regressions.Regressions.test_direction_adverb_after_object_is_not_an_unmapped_image_noun) ... ok
+test_foreign_object_crossing_label (test_regressions.Regressions.test_foreign_object_crossing_label) ... ok
+test_four_second_repeat_despite_flicker (test_regressions.Regressions.test_four_second_repeat_despite_flicker) ... ok
+test_genre_cannot_override_thresholds (test_regressions.Regressions.test_genre_cannot_override_thresholds) ... ok
+test_hidden_annotation_does_not_span_a_material_insert (test_regressions.Regressions.test_hidden_annotation_does_not_span_a_material_insert) ... ok
+test_meaningless_caption_boundaries (test_regressions.Regressions.test_meaningless_caption_boundaries) ... ok
+test_measurement_context_and_predicates_are_shared_roles (test_regressions.Regressions.test_measurement_context_and_predicates_are_shared_roles) ... ok
+test_positive_nouns_without_images_fail_g5 (test_regressions.Regressions.test_positive_nouns_without_images_fail_g5) ... ok
+test_preposition_does_not_remove_ship_or_boat (test_regressions.Regressions.test_preposition_does_not_remove_ship_or_boat) ... ok
+test_short_or_wrong_colored_arrow_cannot_hide_behind_plan_claim (test_regressions.Regressions.test_short_or_wrong_colored_arrow_cannot_hide_behind_plan_claim) ... ok
+test_twenty_eight_of_thirty_is_acceptance (test_regressions.Regressions.test_twenty_eight_of_thirty_is_acceptance) ... ok
+
+----------------------------------------------------------------------
+Ran 44 tests in 44.706s
+
+OK

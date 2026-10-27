@@ -1,0 +1,50 @@
+{
+  "h1": {
+    "time": 6.0,
+    "source_roi": [
+      0.25,
+      0.35,
+      0.5,
+      0.35
+    ],
+    "median_hex": "#9d9e93",
+    "lab": [
+      64.70947265625,
+      -2.375,
+      5.609375
+    ],
+    "note": "Tham chiếu nội dung; khuôn v1/Optics chưa có trường nhập màu nước, không sửa mã khóa."
+  },
+  "c2": {
+    "time": 1.5,
+    "source_roi": [
+      0.25,
+      0.35,
+      0.5,
+      0.35
+    ],
+    "median_hex": "#484945",
+    "lab": [
+      30.694580078125,
+      -1.25,
+      2.25
+    ],
+    "note": "Tham chiếu nội dung; khuôn v1/Optics chưa có trường nhập màu nước, không sửa mã khóa."
+  },
+  "p2": {
+    "time": 3.5,
+    "source_roi": [
+      0.25,
+      0.35,
+      0.5,
+      0.35
+    ],
+    "median_hex": "#4a4a46",
+    "lab": [
+      31.2255859375,
+      -0.8125,
+      2.390625
+    ],
+    "note": "Tham chiếu nội dung; khuôn v1/Optics chưa có trường nhập màu nước, không sửa mã khóa."
+  }
+}

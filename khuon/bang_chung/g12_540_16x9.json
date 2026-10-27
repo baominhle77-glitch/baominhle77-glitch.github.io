@@ -1,0 +1,87 @@
+{
+ "cong": "G12",
+ "kho": "16x9",
+ "video": "..\\bang_chung\\khuon_v1_540_16x9.mp4",
+ "dat": true,
+ "loi": [],
+ "chi_tiet": [
+  {
+   "beat": "h1",
+   "tang": "16x9",
+   "kieu": "toan",
+   "so_khung": 12,
+   "vat_chinh_min": 0.764,
+   "vat_chinh_tb": 0.771,
+   "le_min": 0.037,
+   "ti_le_khung_dat": 1.0,
+   "dong_tb": 0.1745,
+   "ti_le_cap_dong": 1.0,
+   "tinh_dai_nhat_s": 0.0
+  },
+  {
+   "beat": "h2",
+   "tang": "16x9",
+   "kieu": "toan",
+   "so_khung": 28,
+   "vat_chinh_min": 0.737,
+   "vat_chinh_tb": 0.752,
+   "le_min": 0.044,
+   "ti_le_khung_dat": 1.0,
+   "dong_tb": 0.1735,
+   "ti_le_cap_dong": 1.0,
+   "tinh_dai_nhat_s": 0.0
+  },
+  {
+   "beat": "h3",
+   "tang": "16x9",
+   "kieu": "toan",
+   "so_khung": 26,
+   "vat_chinh_min": 0.75,
+   "vat_chinh_tb": 0.764,
+   "le_min": 0.042,
+   "ti_le_khung_dat": 1.0,
+   "dong_tb": 0.1675,
+   "ti_le_cap_dong": 1.0,
+   "tinh_dai_nhat_s": 0.0
+  },
+  {
+   "beat": "h4",
+   "tang": "16x9",
+   "kieu": "toan",
+   "so_khung": 48,
+   "vat_chinh_min": 0.742,
+   "vat_chinh_tb": 0.764,
+   "le_min": 0.042,
+   "ti_le_khung_dat": 1.0,
+   "dong_tb": 0.1942,
+   "ti_le_cap_dong": 1.0,
+   "tinh_dai_nhat_s": 0.0
+  },
+  {
+   "beat": "c1",
+   "tang": "16x9",
+   "kieu": "toan",
+   "so_khung": 40,
+   "vat_chinh_min": 0.755,
+   "vat_chinh_tb": 0.762,
+   "le_min": 0.042,
+   "ti_le_khung_dat": 1.0,
+   "dong_tb": 0.2483,
+   "ti_le_cap_dong": 1.0,
+   "tinh_dai_nhat_s": 0.0
+  },
+  {
+   "beat": "p1",
+   "tang": "16x9",
+   "kieu": "toan",
+   "so_khung": 36,
+   "vat_chinh_min": 0.727,
+   "vat_chinh_tb": 0.738,
+   "le_min": 0.044,
+   "ti_le_khung_dat": 1.0,
+   "dong_tb": 0.266,
+   "ti_le_cap_dong": 1.0,
+   "tinh_dai_nhat_s": 0.0
+  }
+ ]
+}

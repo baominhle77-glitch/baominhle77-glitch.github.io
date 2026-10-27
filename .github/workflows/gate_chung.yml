@@ -152,8 +152,8 @@ jobs:
       - run: python ci/remotion_b/gate_ffmpeg.py
       - name: Export plan from original content and measured DOM
         run: |
-          python ci/remotion_b/semantic_captions.py
-          python ci/remotion_b/export_gate_plan.py --video-root work/R4_CI/work/B --out work/R4_plans
+          python ci/remotion_b/semantic_captions.py --alignment-out work/R4_CI/work/B/caption_alignment.json
+          python ci/remotion_b/export_gate_plan.py --video-root work/R4_CI/work/B --caption-alignment work/R4_CI/work/B/caption_alignment.json --out work/R4_plans
       - name: Original MP4 quality verdict (a failure remains red)
         run: |
           set +e

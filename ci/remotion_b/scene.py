@@ -5,7 +5,7 @@ import numpy as np
 from manim import Scene,ImageMobject,config
 R=Path(__file__).resolve().parents[2];sys.path.insert(0,str(R))
 from ci.simulation.optical_water import WaterStage,Optics
-from stage_spec import make_stage as build_stage,base_optics
+from stage_khuon import make_stage as build_stage,base_optics
 DOC=os.environ.get('B_FORMAT','16x9')=='9x16';BID=os.environ.get('B_BEAT','h1');SHORT=int(os.environ.get('B_SHORT_SIDE','540'))
 config.pixel_width=SHORT if DOC else round(SHORT*16/9);config.pixel_height=round(SHORT*16/9) if DOC else SHORT
 config.frame_width=config.pixel_width/SHORT*8;config.frame_height=config.pixel_height/SHORT*8;config.frame_rate=30

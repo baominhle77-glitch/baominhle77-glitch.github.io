@@ -1,5 +1,5 @@
 """Measurements and honest A/B comparison; missing evidence stays null/red."""
-import json,subprocess,sys,os,re,hashlib,time
+import argparse,json,subprocess,sys,os,re,hashlib,time
 from datetime import datetime,timezone
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
@@ -8,6 +8,7 @@ R=Path(__file__).resolve().parents[2];H=Path(__file__).resolve().parent;O=output
 def read(p,default=None):return json.loads(p.read_text()) if p.exists() else default
 
 def main():
+ parser=argparse.ArgumentParser();parser.add_argument('--caption-alignment',type=Path,required=True);args=parser.parse_args()
  O.mkdir(parents=True,exist_ok=True)
  gate=subprocess.run([sys.executable,'tools/do_chuyen_dong_vung.py','--root',str(O)],cwd=R)
  motion=read(O/'chuyen_dong_vung.json',{})
@@ -34,7 +35,7 @@ def main():
  available=[c['id'] for c in data.get('clips',[]) if c['available'] and c['start'] is not None]
  visual=read(H/'evidence/visual_review.json',{'pass_geometry':False})
  dom={fmt:read(O/f'dom_{fmt}.json',[]) for fmt in ('16x9','9x16')}
- alignment=read(O/'caption_alignment.json',[])
+ alignment=read(args.caption_alignment,[])
  semantic_pass=bool(alignment) and all(2<=len(c['text'].split())<=5 for c in data.get('captions',[]))
  layout_pass=all(dom.values()) and visual.get('pass_geometry',False) and visual.get('round',0)>=4 and visual.get('c13_errors')==[] and semantic_pass
  c13=layout_pass and motion.get('ket_qua')=='DAT'

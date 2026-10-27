@@ -11,11 +11,12 @@ const Movie:React.FC<{format:string;shortSide:number}>=({format,shortSide=540})=
  const frame=useCurrentFrame();const config=useVideoConfig();const scale=shortSide/540;const width=config.width/scale,height=config.height/scale;const doc=format==='9x16';
  const beat=data.beats.find(b=>frame>=b.start&&frame<b.start+b.frames)!;
  const cap=data.captions.find(c=>frame>=c.start&&frame<c.end);
+ const textRegions=(data as any).blueprint_text?.[beat.id]?.[format];const capIndex=cap?data.captions.filter(c=>c.beat===beat.id).findIndex(c=>c.start===cap.start):-1;const capBox=textRegions?.[2+capIndex];
  const clip=(data.clips as any[]).find(c=>{const s=doc?(c.portrait_start??c.start):c.start;const n=doc?(c.portrait_frames??c.frames):c.frames;return c.available&&s!==null&&frame>=s&&frame<s+n});
  const clipStart=clip?(doc?(clip.portrait_start??clip.start):clip.start):0,clipFrames=clip?(doc?(clip.portrait_frames??clip.frames):clip.frames):0;
  const clipOpacity=clip?(clipStart===0?interpolate(frame-clipStart,[clipFrames-5,clipFrames],[1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'}):interpolate(frame-clipStart,[0,5,clipFrames-5,clipFrames],[0,1,1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'})):0;
- const local=frame-beat.start;
- const opacity=beat.start===0?1:interpolate(local,[0,8],[0,1],{extrapolateRight:'clamp'});
+ // Match-cut native full bowls; footage keeps its source crossfades.
+ const opacity=1;
  const lastAudit=useRef('');const fontReady=useReadyFont();
  useLayoutEffect(()=>{
   if(!fontReady)return;
@@ -34,12 +35,12 @@ const Movie:React.FC<{format:string;shortSide:number}>=({format,shortSide=540})=
   <style>{`@font-face{font-family:'Noto Sans';src:url('${staticFile('NotoSans-Regular.ttf')}')}*{box-sizing:border-box}`}</style>
   {data.beats.map(b=><Sequence key={b.id} from={b.start} durationInFrames={b.frames}><UniformVideo src={staticFile(format+'_'+b.id+'.mp4')} sourceWidth={(b as any).media[format].width} sourceHeight={(b as any).media[format].height} layerId={'beat-'+b.id} slot={{x:0,y:0,width,height}} opacity={b.id===beat.id?opacity:1}/></Sequence>)}
   {data.beats.map(b=><Sequence key={'a'+b.id} from={b.audioStart} durationInFrames={Math.min(1800-b.audioStart,b.frames)}><Audio src={staticFile(b.audio)}/></Sequence>)}
-  {clip&&<SourceLayout clip={clip} width={width} height={height} opacity={clipOpacity} start={clipStart} frames={clipFrames} physicalScale={scale}/>}
-  <div data-audit="title" style={{position:'absolute',left:width*.05,top:height*.04,maxWidth:width*(doc?.82:.70),width:'max-content',fontSize:doc?32:32,fontWeight:700,lineHeight:1.18,color:'white',backgroundColor:INK,padding:'7px 10px'}}>{titles[beat.id]}</div>
-  {cap&&<div style={{position:'absolute',left:width*.035,bottom:doc?height*.115:height*.105,width:width*(doc?.82:.93),display:'flex',justifyContent:'center'}}>
+  {clip&&<SourceLayout clip={clip} width={width} height={height} opacity={clipOpacity} start={clipStart} frames={clipFrames} physicalScale={scale} portraitTop={(data as any).portrait_top}/>}
+  <div data-audit="title" style={{position:'absolute',left:width*(textRegions?.[0]?.[0]??.05),top:height*(textRegions?.[0]?.[1]??(doc?((data as any).portrait_top-.015):.04)),maxWidth:width*(doc?.82:.70),width:'max-content',fontSize:doc?32:32,fontWeight:700,lineHeight:1.18,color:'white',backgroundColor:INK,padding:'7px 10px'}}>{titles[beat.id]}</div>
+  {cap&&<div style={{position:'absolute',left:capBox?width*capBox[0]:width*.035,top:capBox?height*capBox[1]:undefined,bottom:capBox?undefined:(doc?height*.115:height*.20),width:capBox?width*capBox[2]:width*(doc?.82:.93),display:'flex',justifyContent:'center'}}>
     <div data-audit="caption" style={{fontSize:30,fontWeight:800,color:'white',lineHeight:1.2,textAlign:'center',padding:'6px 12px',background:INK,maxWidth:'100%',whiteSpace:doc?'normal':'nowrap'}}>{cap.text}</div>
   </div>}
-  <div data-audit="source" style={{position:'absolute',left:width*.05,top:doc?height*.94:height*.93,fontSize:doc?14:13,lineHeight:1.15,backgroundColor:'rgba(167,173,179,.95)',padding:'2px 4px'}}>{beat.id==='h4'?'NIST · Liu · Roché · 25°C · SDS 25 mM (inferred)':'Roché et al. · PRL 2014 · model illustration'}</div>
+  <div data-audit="source" style={{position:'absolute',left:width*(textRegions?.[1]?.[0]??.05),top:height*(textRegions?.[1]?.[1]??(doc?.94:.93)),fontSize:doc?14:13,lineHeight:1.15,backgroundColor:'rgba(167,173,179,.95)',padding:'2px 4px'}}>{beat.id==='h4'?'NIST · Liu · Roché · 25°C · SDS 25 mM (inferred)':'Roché et al. · PRL 2014 · model illustration'}</div>
  </div></AbsoluteFill>
 };
 const Root=()=> <>{['16x9','9x16'].map(format=><Composition key={format} id={'B-'+format} component={Movie} defaultProps={{format,shortSide:540}} calculateMetadata={({props})=>({width:Math.round((props.format==='16x9'?960:540)*props.shortSide/540),height:Math.round((props.format==='16x9'?540:960)*props.shortSide/540)})} durationInFrames={1800} fps={30} width={format==='16x9'?960:540} height={format==='16x9'?540:960}/>)}</>;

@@ -10,8 +10,8 @@ from narration_source import for_beat
 H=Path(__file__).resolve().parent
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--video-root',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
- data=json.loads((H/'public/data.json').read_text());original=json.loads((H/'ke_hoach_A.json').read_text());tts=json.loads((R/'out/M1_MARANGONI_DUNG/_build/tts.json').read_text());align=json.loads((a.video_root/'caption_alignment.json').read_text());runtime=json.loads((a.video_root/'remotion_render.json').read_text())
+ p=argparse.ArgumentParser();p.add_argument('--video-root',type=Path,required=True);p.add_argument('--caption-alignment',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
+ data=json.loads((H/'public/data.json').read_text());original=json.loads((H/'ke_hoach_A.json').read_text());tts=json.loads((R/'out/M1_MARANGONI_DUNG/_build/tts.json').read_text());align=json.loads(a.caption_alignment.read_text());runtime=json.loads((a.video_root/'remotion_render.json').read_text())
  landscape_texts=[];short=int(os.environ.get('B_SHORT_SIDE','540'));u=short/540
  for fmt in ('16x9','9x16'):
   doc=fmt=='9x16';W,HH=(540*u,960*u) if doc else (960*u,540*u);dom=json.loads((a.video_root/f'dom_{fmt}.json').read_text());texts=[];objects=[];beats=[];assets=[];layer_specs=[];internal=[];simulation=[]
