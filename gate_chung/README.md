@@ -1,4 +1,4 @@
-# D18: cổng chung G1–G8
+# D18: cổng chung G1–G9
 
 Python package độc lập: không import Manim, Remotion, cảnh K1 hay adapter tập.
 Mọi thể loại dùng cùng policy.py. the_loai/*.json chỉ có nội dung; thêm khóa
@@ -38,6 +38,14 @@ có noun spans trong kế hoạch, ngoài kiểm tra cụm nghĩa tiếng Việt
 - G6: nền nhãn, lề3%, caption>=28px tại540p; OCR, vật cắt hộp chữ và chữ chồng.
   Loại sai khác do subpixel font khi đo nền, không bỏ qua màu vật xâm nhập.
 - G7: dòng nguồn phủ beat tư liệu và nhãn AI minh hoạ(...) phủ insert AI.
+- G9: chống méo tỉ lệ, mọi khổ/mọi chủ đề. `layers` khai nguồn MP4/PNG gốc,
+  start/end, content_bbox/viewport chuẩn hoá, scale_x/scale_y, source_crop,
+  fit và crop_declared. Nguồn phải truy cập được khi đo. Kiểm tĩnh sai số0,5%;
+  SIFT+RANSAC đo affine từ pixel nguồn sang pixel MP4, sai số hai trục tối đa1%.
+  Không đủ điểm ảnh đối chiếu là đỏ. Cổng in tên lớp, giây, bbox thực và số đo.
+  Các crop đồng đều khai báo đúng được chấp nhận; khai scale đều mà pixel bị kéo
+  vẫn đỏ. Test mã hoá MP4 ở `gate_chung/tests/test_aspect.py` gồm kéo dọc1,3×,
+  fit đều và cover-crop. Khuôn chung: `UniformVideo.tsx` và `ci/frame_layout.py`.
 - G8: FFmpeg đủ chức năng,540p/30fps/thời lượng đúng; concurrency thực bằng
   cấu hình. Chọn cấu hình theo CPU thật trước render, không giả số lõi.
 

@@ -4,9 +4,12 @@ from .model import read,validate
 from .video import Video
 from .motion import sample
 from . import gates
+from .aspect import G9
 
 def main():
- p=argparse.ArgumentParser(description='D18 universal G1–G8. Same thresholds for every genre.');p.add_argument('--video',type=Path,required=True);p.add_argument('--plan',type=Path,required=True);p.add_argument('--genre',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True);plan=read(a.plan);genre=read(a.genre)
+ p=argparse.ArgumentParser(description='D18 universal G1–G9. Same thresholds for every genre.');p.add_argument('--video',type=Path,required=True);p.add_argument('--plan',type=Path,required=True);p.add_argument('--genre',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True);plan=read(a.plan);genre=read(a.genre)
+ for layer in plan.get('layers',[]):
+  path=Path(layer['source']);layer['source']=str((a.plan.parent/path).resolve() if not path.is_absolute() else path)
  for asset in plan.get('assets',[]):
   reference=asset.get('landscape_reference')
   if reference:
@@ -19,11 +22,11 @@ def main():
  video=Video(a.video);reports={};tech=gates.G8(video,plan);reports['G8']=tech
  try:frames=sample(a.video,video.duration) if tech['rows'][0]['passed'] else None
  except Exception:frames=None
- for name in ('G1','G2','G3','G4','G5','G6','G7'):
+ for name in ('G1','G2','G3','G4','G5','G6','G7','G9'):
   print('D18_START '+name,flush=True);started=time.monotonic()
   try:
    if name in ('G1','G2') and frames is None:raise RuntimeError('full FFmpeg preflight/decode failed')
-   reports[name]=getattr(gates,name)(video,plan,frames) if name in ('G1','G2') else getattr(gates,name)(video,plan)
+   reports[name]=getattr(gates,name)(video,plan,frames) if name in ('G1','G2') else (G9(video,plan) if name=='G9' else getattr(gates,name)(video,plan))
   except Exception as exc:reports[name]=dict(passed=False,rows=[gates.row(0,video.duration,False,str(exc))],traceback=traceback.format_exc())
   print('D18_DONE '+name+' '+('DAT' if reports[name]['passed'] else 'TRUOT')+' seconds='+str(round(time.monotonic()-started,2)),flush=True)
  report=dict(schema_version=1,video=str(a.video),plan_id=plan['id'],genre=genre['id'],passed=all(r['passed'] for r in reports.values()),gates={k:reports[k] for k in sorted(reports)})
