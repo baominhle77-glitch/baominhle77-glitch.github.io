@@ -1,5 +1,9 @@
 # MỤC LỤC (mới nhất ở đầu)
 
+## 2026-10-27 23:25 · tệp quy_trinh/QUY_TRINH_CHUAN_GPT.md
+
+QUY TRÌNH CHUẨN bản 1 — thay phiếu vá từng lượt. Đọc trước mọi lượt.
+
 ## 2026-10-27 23:02 · vòng phieu_B_r14
 - khung/phieu_B_r14/r14_16x9.jpg
 - khung/phieu_B_r14/r14_9x16.jpg
