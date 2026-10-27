@@ -85,6 +85,7 @@ jobs:
             npm ci --prefix ci/remotion_b --no-audit --no-fund
           fi
           echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
+          python ci/remotion_b/gate_ffmpeg.py
       - name: This beat only, both native 540p formats at 30fps
         run: |
           python -u ci/remotion_b/prepare.py --beat ${{ matrix.beat }} --jobs 1

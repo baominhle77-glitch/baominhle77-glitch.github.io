@@ -1,7 +1,7 @@
 """Select a complete FFmpeg for unchanged fps/freezedetect measurements."""
 import json,os,shutil,subprocess,sys
 from pathlib import Path
-R=Path(__file__).resolve().parents[2];required={'fps','freezedetect','scale','format'}
+R=Path(__file__).resolve().parents[2];required={'fps','freezedetect','scale','format','setsar','color','split','crop','pad','overlay'}
 def filters(binary):
  try:
   p=subprocess.run([str(binary),'-hide_banner','-filters'],capture_output=True,text=True,timeout=15)

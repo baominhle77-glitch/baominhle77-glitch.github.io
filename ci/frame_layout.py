@@ -2,10 +2,18 @@
 Context stays complete; detail is an explicitly declared, uniformly scaled crop.
 The emitted manifest is consumed by the same G9 pixel gate as Remotion layers.
 """
-import json,subprocess
+import json,subprocess,shutil,functools
 from pathlib import Path
 
 def probe(path):return json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',str(path)]))['streams'][0]
+
+@functools.lru_cache(maxsize=1)
+def full_ffmpeg():
+ for candidate in dict.fromkeys((shutil.which('ffmpeg'),'/usr/bin/ffmpeg','/usr/local/bin/ffmpeg')):
+  if not candidate or not Path(candidate).exists():continue
+  mux=subprocess.run([candidate,'-hide_banner','-muxers'],capture_output=True,text=True)
+  if mux.returncode==0 and 'rawvideo' in mux.stdout:return candidate
+ raise RuntimeError('G8 full FFmpeg required for panel composition; initialize the shared FFmpeg runtime before rendering')
 
 def portrait_panels(source,target,short=540,at=None,detail_crop=None):
  w,h=(lambda q:(q['width'],q['height']))(probe(source));W=short;H=round(short*16/9);u=short/540
@@ -23,7 +31,7 @@ def portrait_panels(source,target,short=540,at=None,detail_crop=None):
   tail=f'pad={bw}:{bh}:({bw}-iw)/2:({bh}-ih)/2:color=0x8E969D' if item['mode']=='contain' else f'crop={bw}:{bh}:(iw-{bw})/2:(ih-{bh})/2'
   filters.extend([f'[v{i}]crop={cw}:{ch}:{X}:{Y},scale={scaled}:flags=lanczos,setsar=1,{tail}[panel{i}]',f'[{last}][panel{i}]overlay={round(x)}:{round(y)}:shortest=1[out{i}]']);last='out'+str(i)
   layers.append(dict(id=item['id'],source=str(Path(source).resolve()),viewport=[x/W,y/H,bw/W,bh/H],content_bbox=[dx/W,dy/H,sw/W,sh/H],source_crop=actual_crop,scale_x=sw/cw,scale_y=sh/ch,fit=item['mode'],crop_declared=item['mode']=='cover'))
- target=Path(target);target.parent.mkdir(parents=True,exist_ok=True);args=['ffmpeg','-nostdin','-v','error','-y']
+ target=Path(target);target.parent.mkdir(parents=True,exist_ok=True);args=[full_ffmpeg(),'-nostdin','-v','error','-y']
  if at is not None:args+=['-ss',str(at)]
  args+=['-i',str(source),'-filter_complex',';'.join(filters),'-map','['+last+']','-an']
  args+=['-frames:v','1'] if at is not None else ['-r','30','-c:v','libx264','-threads','2','-crf','18','-pix_fmt','yuv420p']
