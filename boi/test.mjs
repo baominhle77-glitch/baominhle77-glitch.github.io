@@ -8,7 +8,7 @@ import { parseDraw, parseCorrection, splitBySizes } from "./js/parser.js";
 import { createSession, addRound, addPickedRound, applyCorrectionText, fixCell, errorsOf, reveal, exportJSON, importJSON, loadSessions, saveSessions, ensureMapping, newDraw, pendingDraw, normalizeSession } from "./js/state.js";
 import { startPick, togglePick, saveTier, editTier, pickReady, savedCount, tierComplete } from "./js/pick.js";
 import { cardName } from "./js/reading.js";
-import { spreadById, SPREADS } from "./js/spreads.js";
+import { spreadById, SPREADS, defaultYear } from "./js/spreads.js";
 import { moneyTable, periodEstimate, roundNice } from "./js/money.js";
 import { analyze, allSentences, ruleFollowUp } from "./js/insight.js";
 import { suggestSpread, mainTopic } from "./js/topic.js";
@@ -19,7 +19,7 @@ import { goiCoDau, tyLeDau, tyLeDauBai, matDau, normYN, suaTenLa, YN, BAO_MAT_DA
 import { probeBridge, bridge, aiKey, store } from "./js/store.js";
 import { ROUTES } from "./js/views.js";
 import * as DT from "./dao-tao/dao-tao-core.js";
-import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai } from "./js/auto.js";
+import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai, thamSoTrai } from "./js/auto.js";
 import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK, tenViTriCua, chuCamTrong, yKhop, tyLeCauSao, viTriTrong, traLoiThang, nguCanh, hopNguCanh } from "./js/loi.js";
 import { datCuuTram, via } from "./js/ai.js";
 // store.js đăng ký đường cứu trạm → cầu nối khi được nạp; các test cũ dùng fetch giả trả 200 cho mọi địa chỉ nên tắt đi, test riêng tự bật
@@ -1196,6 +1196,117 @@ test("trạm 429 + cầu nối chết → nguồn “luat”, lyDo “trạm 429
     await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages: [{ role: "user", text: "x" }], fetchImpl: async (u) => (u === TRAM_URL ? new Response("<html>", { status: 500 }) : chet(u)) }).catch(() => {});
     assert.equal(ping, 1, "trạm 500 không kích hoạt dò cầu nối");
   } finally { datCuuTram(null); bridge.ok = false; bridge.xa = false; via.base = LOCAL_BASE; via.token = ""; }
+});
+
+// ---- Lệnh Chủ tịch 28/10: khách không chọn kiểu trải, agent tự chọn theo câu hỏi ----
+test("agent tự chọn trải theo câu hỏi: tinhcam / 3thang / canam / cokhong / tudo; mỗi ca ra lời gửi khách qua cổng", async () => {
+  const ca = [["Người ấy còn thương em không?", "tinhcam"], ["Tháng sau có tăng lương không?", "3thang"], ["Năm 2027 của em thế nào?", "canam"], ["Có nên nghỉ việc không?", "cokhong"], ["Em nên làm gì bây giờ?", "tudo"]];
+  for (const [q, id] of ca) {
+    let s;
+    const r = await giaiTuDong({ db, cauHoi: q, tenKhach: "Lan", onSession: (x) => (s = x) });
+    assert.equal(r.trai, id, q);
+    assert.equal(s.spreadId, id);
+    assert.ok(r.lyDoTrai && r.tenTrai, "có lý do chọn trải");
+    assert.ok(kiemLoiGuiKhach(r.loiGuiKhach, db, { tenKhach: "Lan", xungHo: "Queen Linh", session: s }).ok, `${q}: lời gửi qua cổng`);
+    if (id === "canam") { assert.equal(s.nam, 2027, "năm lấy từ câu hỏi"); assert.match(s.tiers[0].ten, /2027/); }
+    if (id === "3thang") assert.equal(s.money, true);
+    if (id === "cokhong") assert.equal(s.tiers[0].ten, q, "tầng Có/Không đặt theo chính câu hỏi");
+  }
+});
+
+test("trải cần tham số thì agent tự điền: canam/12thang năm mặc định, vanhan, tudo — chạy trọn, không hỏi khách", async () => {
+  const sp = (id) => SPREADS.find((x) => x.id === id);
+  assert.equal(thamSoTrai("Cả năm tới của em ra sao?", sp("canam")).nam, defaultYear(), "không nêu năm → năm mặc định");
+  assert.equal(thamSoTrai("Xem 12 tháng năm 2028", sp("12thang")).tiers.length, 12);
+  assert.equal(thamSoTrai("x", sp("tudo")).tiers[0].pos.length, 3);
+  for (const [q, id] of [["Vận hạn của em dạo này có xui không?", "vanhan"], ["Xem giúp em 12 tháng năm 2027 từng tháng", "12thang"], ["Cả năm tới của em ra sao?", "canam"]]) {
+    let s;
+    const r = await giaiTuDong({ db, cauHoi: q, onSession: (x) => (s = x) });
+    assert.equal(r.trai, id, q);
+    assert.ok(s.rounds[0].tarot.flat().length > 0);
+    assert.ok(kiemLoiGuiKhach(r.loiGuiKhach, db, { session: s }).ok, `${q}: lời gửi qua cổng`);
+  }
+  // vẫn nhận trai khi truyền tường minh
+  assert.equal((await giaiTuDong({ db, cauHoi: "Người ấy còn thương em không?", trai: "3la" })).trai, "3la");
+});
+
+test("BoiAuto.giai(q, {tenKhach}) không truyền trai → câu tình cảm không còn ra “3la”; gói nhiều câu mỗi câu tự chọn trải riêng", async () => {
+  const auto = taoBoiAuto(async () => ({ db, settings: {} }));
+  const r = await auto.giai("Người ấy còn thương em không?", { tenKhach: "Lan" });
+  assert.notEqual(r.trai, "3la");
+  assert.equal(r.trai, "tinhcam");
+  assert.match(r.lyDoTrai, /tình cảm/u);
+  const goi = await Promise.all(["Người ấy còn thương em không?", "Có nên nghỉ việc không?", "Tháng sau có tăng lương không?"].map((q) => auto.giai(q, { tenKhach: "Lan" })));
+  assert.deepEqual(goi.map((x) => x.trai), ["tinhcam", "cokhong", "3thang"]);
+});
+
+test("trang đào tạo không còn ô “Kiểu trải”; nút Trải bài gọi auto.giai(q) không truyền trai; dòng “Agent chọn” chỉ ở trang đào tạo", () => {
+  const html = readFileSync(join(HERE, "dao-tao/index.html"), "utf8");
+  assert.ok(!/id="trai"/.test(html) && !/Kiểu trải/u.test(html));
+  const js = readFileSync(join(HERE, "dao-tao/dao-tao.js"), "utf8");
+  assert.ok(!/st\.trai/.test(js) && !/\$\("trai"\)/.test(js));
+  assert.match(js, /auto\.giai\(q\)/);
+  assert.match(js, /Agent chọn: /u);
+  // phần gửi agent/khách chỉ có nội dung tin, không kèm dòng chọn trải
+  const req = DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 2, lich_su: [{ vai: "agent", noi_dung: "Lan ơi…", loai: "loi_gui_khach", ten_trai: "Tình cảm 3 tầng", ly_do_trai: "câu hỏi về tình cảm" }] });
+  assert.deepEqual(req.lich_su, [{ vai: "agent", noi_dung: "Lan ơi…" }]);
+});
+
+// ---- v11 (28/10): đường hầm hỏng thoáng qua ở trang đào tạo → nối lại rồi gửi lại 1 lần ----
+test("đào tạo: lỗi mạng lần 1 → nối lại (dò lại cầu nối) rồi gửi lại đúng tin đó, hiện câu agent, không ⚠; hỏng cả 2 lần → báo lỗi", async () => {
+  let lan = 0, noiLai = 0;
+  const bat = [], gui = [];
+  const fetch1 = async (u, o) => { lan++; gui.push(o.body); if (lan === 1) throw new TypeError("Failed to fetch"); return new Response(JSON.stringify({ tra_loi: "Mình nghe bạn đây." }), { status: 200 }); };
+  const body = DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 3, lich_su: [{ vai: "khach", noi_dung: "Em mệt lắm rồi…" }] });
+  const j = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body, fetchImpl: fetch1 }), { noiLai: async () => { noiLai++; }, onNoiLai: (on) => bat.push(on) });
+  assert.equal(DT.docTraLoi(j).noi_dung, "Mình nghe bạn đây.");
+  assert.equal(lan, 2); assert.equal(noiLai, 1);
+  assert.equal(gui[0], gui[1], "gửi lại đúng tin đó");
+  assert.deepEqual(bat, [true, false], "dòng “Đang nối lại máy nhà…” bật rồi tắt");
+  // hỏng cả hai lần → lỗi (trang mới hiện ⚠)
+  let n = 0;
+  const e = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body, fetchImpl: async () => { n++; throw new TypeError("Failed to fetch"); } }), { noiLai: async () => {} }).then(() => null, (x) => x);
+  assert.equal(n, 2); assert.equal(e?.message, DT.LOI_CAU_NOI_TAT);
+  // chưa có địa chỉ cầu nối lúc đầu, nối lại thì có → chạy
+  let base = "";
+  const j2 = await DT.goiCoThuLai(() => DT.goiTroLy({ base, path: "/tro_ly/tra_loi", body, fetchImpl: async () => new Response(JSON.stringify({ tra_loi: "Có đây." }), { status: 200 }) }), { noiLai: async () => { base = "https://t2.example"; } });
+  assert.equal(j2.tra_loi, "Có đây.");
+  // hết giờ thì không gửi lại (tránh agent trả lời 2 lần)
+  let h = 0;
+  const hang = (u, o) => { h++; return new Promise((_, rej) => o.signal.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError")))); };
+  const eh = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/x", body, fetchImpl: hang, ms: 20 }), { noiLai: async () => {} }).then(() => null, (x) => x);
+  assert.equal(h, 1); assert.match(eh.message, /quá lâu/u);
+});
+
+test("đào tạo: cầu nối trả 429 → báo quá lượt, không báo “cầu nối tắt”, không nối lại", async () => {
+  let n = 0, noiLai = 0;
+  const e = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body: {}, fetchImpl: async () => { n++; return new Response(JSON.stringify({ error: "quota" }), { status: 429 }); } }), { noiLai: async () => { noiLai++; } }).then(() => null, (x) => x);
+  assert.equal(e.message, DT.LOI_QUA_LUOT);
+  assert.ok(e.quaLuot && !e.tat);
+  assert.notEqual(e.message, DT.LOI_CAU_NOI_TAT);
+  assert.equal(n, 1); assert.equal(noiLai, 0);
+});
+
+test("đào tạo: lưu “Sửa câu này” hỏng → bản Chủ tịch sửa nằm trong hàng chờ localStorage, cầu nối sống thì gửi lại được", async () => {
+  const mem = new Map(), storage = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, String(v)), removeItem: (k) => mem.delete(k) };
+  const body = DT.yeuCauMauSua({ kenh: "02", goi: 3, lich_su: [{ vai: "khach", noi_dung: "Em mệt lắm rồi…" }], ban_agent: "Bản agent", ban_chu_tich: "Bản Chủ tịch sửa", ly_do: "giọng chưa ấm" });
+  DT.themHangCho(storage, "m1", body);
+  const hong = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/mau_sua", body, fetchImpl: async () => { throw new TypeError("Failed to fetch"); } }), { noiLai: async () => {} }).then(() => null, (x) => x);
+  assert.ok(hong?.tat);
+  assert.equal(DT.docHangCho(storage).length, 1, "lưu hỏng vẫn còn trong hàng chờ");
+  assert.equal(DT.docHangCho(storage)[0].body.ban_chu_tich, "Bản Chủ tịch sửa");
+  // vẫn chết → giữ nguyên
+  let r = await DT.guiHangCho(storage, async () => { throw new TypeError("Failed to fetch"); });
+  assert.deepEqual(r, { daGui: [], con: 1 });
+  // cầu nối sống → gửi lại đúng bản đó, hàng chờ trống
+  const daNhan = [];
+  DT.themHangCho(storage, "m2", { ...body, ban_chu_tich: "Bản thứ hai" });
+  r = await DT.guiHangCho(storage, async (b) => { daNhan.push(b); return DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/mau_sua", body: b, fetchImpl: async () => new Response('{"ok":true}', { status: 200 }) }); });
+  assert.deepEqual(r, { daGui: ["m1", "m2"], con: 0 });
+  assert.deepEqual(daNhan.map((b) => b.ban_chu_tich), ["Bản Chủ tịch sửa", "Bản thứ hai"]);
+  assert.equal(storage.getItem(DT.HANG_CHO_KEY), null);
+  DT.themHangCho(storage, "m3", body); DT.boHangCho(storage, "m3");
+  assert.equal(DT.docHangCho(storage).length, 0);
 });
 
 export async function run(extra = []) {

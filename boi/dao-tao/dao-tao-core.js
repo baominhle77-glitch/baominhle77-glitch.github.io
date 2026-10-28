@@ -72,10 +72,13 @@ export function sapMauSua(j) {
 }
 
 export const LOI_CAU_NOI_TAT = "Cầu nối máy nhà đang tắt hoặc đường hầm chưa mở — chưa gọi được agent. Bật cầu nối ở máy nhà rồi bấm Thử lại.";
+export const LOI_QUA_LUOT = "Máy nhà đang quá lượt (429) — đợi ít phút rồi gửi lại.";
+export const DANG_NOI_LAI = "Đang nối lại máy nhà…";
 
-// Gọi một route của cầu nối. Không có cầu nối / mạng hỏng / quá hạn → lỗi rõ ràng, không tự rơi về AI khác.
+// Gọi một route của cầu nối. Không có cầu nối / mạng hỏng → lỗi có cờ mang (để nối lại rồi gửi lại); quá hạn → lỗi
+// không có cờ mang; 429 → báo quá lượt, không báo “cầu nối tắt”. Không tự rơi về AI khác.
 export async function goiTroLy({ fetchImpl = globalThis.fetch, base, token = "", path, method = "POST", body, ms = 90000 }) {
-  if (!base) { const e = new Error(LOI_CAU_NOI_TAT); e.tat = true; throw e; }
+  if (!base) { const e = new Error(LOI_CAU_NOI_TAT); e.tat = true; e.mang = true; throw e; }
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), ms);
   let r;
@@ -86,16 +89,59 @@ export async function goiTroLy({ fetchImpl = globalThis.fetch, base, token = "",
       ...(method === "POST" ? { body: JSON.stringify(body) } : {}),
     });
   } catch (err) {
-    const e = new Error(err?.name === "AbortError" ? "Agent trả lời quá lâu nên đã dừng chờ." : LOI_CAU_NOI_TAT);
-    e.tat = err?.name !== "AbortError";
+    const het = err?.name === "AbortError";
+    const e = new Error(het ? "Agent trả lời quá lâu nên đã dừng chờ." : LOI_CAU_NOI_TAT);
+    e.tat = !het;
+    e.mang = !het;
     throw e;
   } finally { clearTimeout(t); }
   let j = null;
   try { j = await r.json(); } catch (_) { /* không phải JSON */ }
   if (!r.ok) {
-    const e = new Error(r.status === 404 ? `Cầu nối chưa có route ${path} (máy nhà chưa cập nhật).` : `Cầu nối báo lỗi ${r.status}${j?.error ? `: ${j.error}` : ""}.`);
+    const e = new Error(r.status === 429 ? LOI_QUA_LUOT : r.status === 404 ? `Cầu nối chưa có route ${path} (máy nhà chưa cập nhật).` : `Cầu nối báo lỗi ${r.status}${j?.error ? `: ${j.error}` : ""}.`);
     e.status = r.status;
+    if (r.status === 429) e.quaLuot = true;
     throw e;
   }
   return j;
+}
+
+// Lỗi mạng thoáng qua của đường hầm (fetch ném lỗi, không phải hết giờ; hoặc chưa có địa chỉ cầu nối):
+// nối lại (dò lại cầu nối, đọc lại cau_noi.json không cache) rồi gửi lại đúng yêu cầu đó 1 lần. Lần hai hỏng mới báo.
+// goi: hàm gọi lại từ đầu (lấy địa chỉ cầu nối mới nhất mỗi lần). onNoiLai(true/false): bật/tắt dòng “Đang nối lại…”.
+export async function goiCoThuLai(goi, { noiLai, onNoiLai } = {}) {
+  try { return await goi(); } catch (e) {
+    if (!e?.mang || !noiLai) throw e;
+    onNoiLai?.(true);
+    try {
+      try { await noiLai(); } catch (_) { /* dò hỏng: lần gọi lại sẽ báo lỗi */ }
+      return await goi();
+    } finally { onNoiLai?.(false); }
+  }
+}
+
+// Hàng chờ mẫu sửa: bấm lưu mà gửi hỏng thì bản Chủ tịch sửa nằm lại ở localStorage, cầu nối sống thì tự gửi lại.
+export const HANG_CHO_KEY = "boi.daotao.mau-cho.v1";
+export function docHangCho(storage) {
+  try { const x = JSON.parse(storage?.getItem(HANG_CHO_KEY) || "[]"); return Array.isArray(x) ? x.filter((m) => m && m.body) : []; } catch (_) { return []; }
+}
+function ghiHangCho(storage, list) {
+  try { if (list.length) storage?.setItem(HANG_CHO_KEY, JSON.stringify(list)); else storage?.removeItem(HANG_CHO_KEY); return true; } catch (_) { return false; }
+}
+export function themHangCho(storage, ma, body) {
+  const list = docHangCho(storage).filter((m) => m.ma !== ma);
+  list.push({ ma, body, luc: new Date().toISOString() });
+  return ghiHangCho(storage, list);
+}
+export const boHangCho = (storage, ma) => ghiHangCho(storage, docHangCho(storage).filter((m) => m.ma !== ma));
+// Gửi lần lượt từ cũ tới mới; gửi được cái nào bỏ cái đó khỏi hàng, hỏng thì dừng và giữ phần còn lại.
+export async function guiHangCho(storage, gui) {
+  const list = docHangCho(storage);
+  const daGui = [];
+  while (list.length) {
+    try { await gui(list[0].body); } catch (_) { break; }
+    daGui.push(list.shift().ma);
+    ghiHangCho(storage, list);
+  }
+  return { daGui, con: list.length };
 }
