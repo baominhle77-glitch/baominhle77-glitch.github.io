@@ -19,3 +19,6 @@
 
 /* Trang này không có thanh tab dưới: ô gõ tin nằm yên trong khung chat, không nổi đè nội dung */
 .composer { position: static; }
+
+/* vạch ngăn cuộc chat của từng tình huống */
+.cuoc-moi { margin: 14px 0 6px; text-align: center; font-size: .8rem; color: var(--gold); letter-spacing: .02em; border-top: 1px dashed var(--line2); padding-top: 8px; }

@@ -4,7 +4,7 @@ import { probeBridge, bridge, aiKey, storage } from "../js/store.js";
 import { via } from "../js/ai.js";
 import { mergeKnowledge } from "../js/data.js";
 import { taoBoiAuto } from "../js/auto.js";
-import { KENH, GOI, TINH_HUONG, NHAN_CHUYEN, LOI_CAU_NOI_TAT, DANG_NOI_LAI, goc, yeuCauTraLoi, yeuCauMauSua, docTraLoi, sapMauSua, goiTroLy, goiCoThuLai, kiemTraLoiAgent, themHangCho, guiHangCho, docHangCho, boHangCho } from "./dao-tao-core.js";
+import { KENH, GOI, TINH_HUONG, NHAN_CHUYEN, LOI_CAU_NOI_TAT, DANG_NOI_LAI, goc, yeuCauTraLoi, yeuCauMauSua, lichSuCuoc, docTraLoi, sapMauSua, goiTroLy, goiCoThuLai, kiemTraLoiAgent, themHangCho, guiHangCho, docHangCho, boHangCho } from "./dao-tao-core.js";
 
 const KEY = "boi.daotao.v1";
 const $ = (id) => document.getElementById(id);
@@ -89,8 +89,10 @@ function veTin(m, i) {
     ${m.ghi_chu ? `<details><summary class="note">Ghi chú kỹ thuật</summary><p class="note">${esc(m.ghi_chu)}</p></details>` : ""}
     ${sua}${suaO === i ? form : `<button type="button" class="btn small ghost" data-sua-mo="${i}">Sửa câu này</button>`}</div>`;
 }
+// vạch ngăn trước mỗi tình huống: tình huống mới = cuộc chat mới (chỉ cuộc đó được gửi lên cầu nối)
+const vachCuoc = (m) => (m.vai === "khach" && m.tinh_huong ? `<p class="cuoc-moi" role="separator">— Cuộc mới: ${esc(th(m.tinh_huong)?.ten || m.tinh_huong)} —</p>` : "");
 function veChat() {
-  $("chat").innerHTML = st.lich_su.length ? st.lich_su.map(veTin).join("") : `<p class="note">Chưa có tin nào. Gõ tin của khách hoặc bấm một tình huống khó.</p>`;
+  $("chat").innerHTML = st.lich_su.length ? st.lich_su.map((m, i) => vachCuoc(m) + veTin(m, i)).join("") : `<p class="note">Chưa có tin nào. Gõ tin của khách hoặc bấm một tình huống khó.</p>`;
   veNutTrai();
 }
 function veMau(list, err = "") {
@@ -116,7 +118,8 @@ async function guiTin(text) {
   luu(); veChat();
   const iKhach = st.lich_su.length - 1;
   try {
-    const body = yeuCauTraLoi(st);
+    // chỉ gửi lịch sử của cuộc hiện tại (từ tình huống gần nhất), cau_con giữ nguyên
+    const body = yeuCauTraLoi({ ...st, lich_su: lichSuCuoc(st.lich_su, iKhach) });
     const j = await coThuLai(() => goiTroLy({ ...cauNoi(), path: "/tro_ly/tra_loi", body }), iKhach);
     st.lich_su.push({ ...docTraLoi(j), ...(tinhHuong ? { tinh_huong: tinhHuong } : {}) });
     luu(); veChat();
@@ -144,7 +147,7 @@ async function traiBai() {
 
 async function guiMauSua(i, ban, lydo) {
   const m = st.lich_su[i];
-  const body = yeuCauMauSua({ kenh: st.kenh, goi: st.goi, lich_su: st.lich_su.slice(0, i), ban_agent: m.noi_dung, ban_chu_tich: ban, ly_do: lydo });
+  const body = yeuCauMauSua({ kenh: st.kenh, goi: st.goi, lich_su: lichSuCuoc(st.lich_su, i, { denCuoi: false }), ban_agent: m.noi_dung, ban_chu_tich: ban, ly_do: lydo });
   // giữ bản sửa trước khi gửi: gửi hỏng (cả lần thử lại) thì nằm ở hàng chờ, cầu nối sống sẽ tự gửi
   const ma = `${Date.now().toString(36)}-${i}`;
   m.sua = { ban_chu_tich: body.ban_chu_tich, ly_do: body.ly_do, ma, cho: true };
