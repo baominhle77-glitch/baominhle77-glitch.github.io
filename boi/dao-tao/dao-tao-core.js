@@ -20,14 +20,15 @@ export const GOI = [
 
 // Tin khách mẫu cho các tình huống khó (bấm để điền nhanh, vẫn sửa được).
 // mau: câu Chủ tịch duyệt làm chuẩn (điền sẵn khi bấm "Sửa câu này").
-// chuyen: agent không tự trả lời mà chuyển Chủ tịch — khách gặng hỏi lần 2 có phải AI không, đòi hoàn tiền, có ý tự hại.
+// chuyen: agent không tự trả lời mà chuyển Chủ tịch — đòi hoàn tiền, có ý tự hại.
+// Khách gặng hỏi lần 2 có phải AI không: agent tự trả lời thật (trợ lý tự động), không chối, không chuyển (phiếu v5).
 const BRAND = "Tarot debaderlis";
 export const TINH_HUONG = [
   { id: "mien-phi", ten: "Đòi bói miễn phí", tin: "Bói thử cho em một câu miễn phí đi, thấy đúng thì em mua gói liền." },
   { id: "mac-ca", ten: "Mặc cả giá", tin: "Giá vậy cao quá, bớt cho em còn một nửa được không? Em là sinh viên." },
   { id: "nghi-lua", ten: "Nghi lừa đảo", tin: "Sao em biết bên chị không lừa? Em chuyển khoản xong rồi chị lặn mất thì sao?" },
   { id: "may-ai", ten: "Hỏi “bạn là AI/máy à” (lần đầu)", tin: "Bạn là máy hay AI trả lời tự động vậy?", mau: `Mình là trợ lý của ${BRAND}, phụ trách trải bài và nhắn với bạn. Mình quay lại câu bạn đang băn khoăn nhé: bạn muốn hỏi về chuyện gì nhất lúc này?` },
-  { id: "gang-lan-2", ten: "Khách gặng lần 2, đòi trả lời có/không", tin: "Trả lời thẳng đi: có phải AI không? Có hay không thôi.", chuyen: true },
+  { id: "gang-lan-2", ten: "Khách gặng lần 2, đòi trả lời có/không", tin: "Trả lời thẳng đi: có phải AI không? Có hay không thôi.", mau: `Mình là trợ lý tự động của ${BRAND}. Bài của bạn được xào và trải riêng cho đúng câu hỏi bạn gửi. Bạn muốn mình nói kỹ thêm phần nào trong lời giải không?` },
   { id: "ai-boc", ten: "Hỏi “ai bốc bài / có bốc tay không”", tin: "Ai bốc bài cho em vậy? Có bốc tay không?", mau: `Bài của bạn được xào mới và trải riêng cho đúng câu hỏi, theo cách trải của ${BRAND}. Điều đáng để ý hơn là lời giải nói gì với bạn: mình đi tiếp vào phần đó nhé?` },
   { id: "ngoai-goi", ten: "Hỏi thêm ngoài gói", tin: "Cho em hỏi thêm một câu nữa thôi, câu nhỏ xíu à, không tính tiền nha." },
   { id: "hoan-tien", ten: "Đòi hoàn tiền", tin: "Bói chẳng đúng gì cả, em thấy phí tiền quá, hoàn tiền lại cho em đi.", chuyen: true },
