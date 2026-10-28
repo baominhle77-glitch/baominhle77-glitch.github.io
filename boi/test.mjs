@@ -19,7 +19,8 @@ import { goiCoDau, tyLeDau, tyLeDauBai, matDau, normYN, suaTenLa, YN, BAO_MAT_DA
 import { probeBridge, bridge, aiKey, store } from "./js/store.js";
 import { ROUTES } from "./js/views.js";
 import * as DT from "./dao-tao/dao-tao-core.js";
-import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai, thamSoTrai } from "./js/auto.js";
+import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai, thamSoTrai, laCauHoiBoi, tachCauHoi, HOI_LAI } from "./js/auto.js";
+import { cauTraiChieu, chieuTrongLoi, chieuTraLoi, traiChieu, nghiaTrai } from "./js/loi.js";
 import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK, tenViTriCua, chuCamTrong, yKhop, tyLeCauSao, viTriTrong, traLoiThang, nguCanh, hopNguCanh } from "./js/loi.js";
 import { datCuuTram, via } from "./js/ai.js";
 // store.js đăng ký đường cứu trạm → cầu nối khi được nạp; các test cũ dùng fetch giả trả 200 cho mọi địa chỉ nên tắt đi, test riêng tự bật
@@ -851,9 +852,11 @@ test("BoiAuto: gọi nhiều câu cùng lúc thì xếp hàng, câu nào xong c�
   assert.equal(new Set(res.map((r) => r.maKhoa)).size, 3, "3 câu → 3 mã khoá khác nhau");
   assert.ok(res.every((r) => kiemLoiGuiKhach(r.loiGuiKhach, db).ok));
   // một câu lỗi không chặn câu sau
-  const bad = auto.giai("", {});
+  const bad = auto.giai("Câu lỗi về tình cảm?", { trai: "khong-co" });
   const ok = auto.giai("Câu sau vẫn chạy?", { trai: "1la" });
-  await assert.rejects(bad, /Thiếu câu hỏi/u);
+  await assert.rejects(bad, /Không có mẫu trải/u);
+  // câu rỗng không còn là lỗi: hỏi lại khách
+  assert.equal((await auto.giai("", {})).canHoiLai, true);
   assert.match((await ok).maKhoa, /^[0-9a-f]{64}$/);
 });
 
@@ -1240,12 +1243,12 @@ test("BoiAuto.giai(q, {tenKhach}) không truyền trai → câu tình cảm khô
   assert.deepEqual(goi.map((x) => x.trai), ["tinhcam", "cokhong", "3thang"]);
 });
 
-test("trang đào tạo không còn ô “Kiểu trải”; nút Trải bài gọi auto.giai(q) không truyền trai; dòng “Agent chọn” chỉ ở trang đào tạo", () => {
+test("trang đào tạo không còn ô “Kiểu trải”; nút Trải bài gọi auto.giaiGoi (không truyền trai); dòng “Agent chọn” chỉ ở trang đào tạo", () => {
   const html = readFileSync(join(HERE, "dao-tao/index.html"), "utf8");
   assert.ok(!/id="trai"/.test(html) && !/Kiểu trải/u.test(html));
   const js = readFileSync(join(HERE, "dao-tao/dao-tao.js"), "utf8");
   assert.ok(!/st\.trai/.test(js) && !/\$\("trai"\)/.test(js));
-  assert.match(js, /auto\.giai\(q\)/);
+  assert.match(js, /auto\.giaiGoi\(q, \{ soCau \}\)/);
   assert.match(js, /Agent chọn: /u);
   // phần gửi agent/khách chỉ có nội dung tin, không kèm dòng chọn trải
   const req = DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 2, lich_su: [{ vai: "agent", noi_dung: "Lan ơi…", loai: "loi_gui_khach", ten_trai: "Tình cảm 3 tầng", ly_do_trai: "câu hỏi về tình cảm" }] });
@@ -1307,6 +1310,143 @@ test("đào tạo: lưu “Sửa câu này” hỏng → bản Chủ tịch sử
   assert.equal(storage.getItem(DT.HANG_CHO_KEY), null);
   DT.themHangCho(storage, "m3", body); DT.boHangCho(storage, "m3");
   assert.equal(DT.docHangCho(storage).length, 0);
+});
+
+// ---- Lệnh 28/10: mọi câu sau câu trả lời thẳng phải cùng chiều với nó ----
+const MAU_CU_TRAI_CHIEU = "Về câu bạn hỏi “Người ấy còn thương em không?”, trải bài nói khá rõ về chuyện đang diễn ra. Câu trả lời là còn, và điều đó khá rõ. Khoảng đầu, mối quan hệ đang có nhiều tranh cãi này lửa do sự khác biệt trong tư duy.\n\nĐiều đang đẩy bạn đi tới là người có đôi tận hưởng những khoảnh khắc ngọt ngào, thấu hiểu và gắn kết bền chặt. Thêm một chi tiết đáng để ý: gặp được người mới tốt hơn sau khi tan vỡ.\n\nVề sau, trong tình yêu, đây là biểu hiện của sự cam kết bền vững và biết cách nhường nhịn. Điều nên làm lúc này: hãy dùng sự bao dung để đối đãi với đối phương, mọi hiểu lầm sẽ được hóa giải.";
+
+test("cùng chiều: mẫu chụp màn hình cũ bị cổng bắt câu “người mới… tan vỡ”; dựng lại đúng cặp lá đó → bản luật 0 câu trái chiều", async () => {
+  assert.deepEqual(chieuTrongLoi(MAU_CU_TRAI_CHIEU), { chieu: "tot", i: 1 });
+  const phienCu = { cauHoi: "Người ấy còn thương em không?", spreadId: "tinhcam", tiers: spreadById("tinhcam").tiers(), rounds: [] };
+  assert.deepEqual(cauTraiChieu(MAU_CU_TRAI_CHIEU, phienCu), ["Thêm một chi tiết đáng để ý: gặp được người mới tốt hơn sau khi tan vỡ."]);
+  const k = kiemLoiGuiKhach(MAU_CU_TRAI_CHIEU, db, { session: phienCu });
+  assert.ok(!k.ok && k.loi.some((x) => /trái chiều câu trả lời \(đã nói có\/còn\)/u.test(x)), k.loi.join("; "));
+  // dựng lại: trải tình cảm “Người ấy còn thương em không?”, câu trả lời “còn”, tầng đầu có cặp Lenormand Coffin + Clover
+  const idLen = (en) => db.lenormand.la.findIndex((c) => c.en === en) + 1;
+  let gap = 0;
+  for (let lan = 0; lan < 60 && gap < 5; lan++) {
+    let s;
+    await giaiTuDong({ db, cauHoi: "Người ấy còn thương em không?", tenKhach: "Lan", onSession: (x) => (s = x) });
+    s.rounds[0].lenormand[0] = [{ card: idLen("Coffin"), ok: true }, { card: idLen("Clover"), ok: true }, ...s.rounds[0].lenormand[0].slice(2)];
+    const rule = analyze(db, s, {}, 0);
+    if (chieuTraLoi(s, nghiaTrai(db, s, rule), rule) === "xau") continue;
+    assert.ok(nghiaTrai(db, s, rule)[0].cap.some((c) => /người mới tốt hơn sau khi tan vỡ/u.test(c)), "ca này có đúng câu cặp lá cũ");
+    gap++;
+    const t = loiGuiKhachLuat(db, s, rule, { tenKhach: "Lan" });
+    assert.deepEqual(cauTraiChieu(t, s), [], t);
+    assert.ok(!/người mới|tan vỡ/u.test(t), t);
+    assert.ok(kiemLoiGuiKhach(t, db, { tenKhach: "Lan", session: s }).ok, t);
+  }
+  assert.ok(gap >= 3, "đủ ca chiều “còn” để kiểm");
+});
+
+test("cùng chiều: lá cản nói như điều đang che/làm chậm thì cho qua; câu phủ định không tính; đã nói “nghiêng về không” thì chặn câu hứa chắc thành", () => {
+  assert.equal(traiChieu("Điều đang che bớt câu trả lời là nỗi sợ chia tay còn lởn vởn.", "tot"), false);
+  assert.equal(traiChieu("Đừng vội buông tay khi mọi chuyện còn đang ấm lại.", "tot"), false);
+  assert.equal(traiChieu("Sau đó hai người sẽ chia tay.", "tot"), true);
+  assert.equal(traiChieu("Đây là lúc cần dũng cảm buông bỏ những thứ không còn mang lại giá trị.", "tot", false), false, "lời khuyên buông bỏ không phải đảo ngược câu “có đỗ”");
+  assert.equal(traiChieu("Cuối cùng mọi chuyện sẽ kết thúc.", "tot", false), false, "“kết thúc” chỉ là đảo ngược khi hỏi chuyện tình cảm");
+  assert.equal(traiChieu("Rồi kết quả sẽ thất bại.", "tot", false), true);
+  assert.equal(traiChieu("Chuyện này chắc chắn sẽ thành.", "xau"), true);
+  assert.equal(traiChieu("Chuyện này chưa chắc chắn sẽ thành.", "xau"), false);
+  assert.equal(traiChieu("Mọi việc sẽ suôn sẻ và viên mãn.", "xau"), true);
+  assert.equal(traiChieu("Chuyện này chắc chắn sẽ thành.", "giua"), true, "có điều kiện thì không hứa chắc");
+  const xau = "Về câu bạn hỏi, trải bài nói khá rõ. Câu trả lời nghiêng về không, ít nhất là ở thời điểm này. Rồi mọi việc sẽ suôn sẻ và viên mãn.";
+  assert.equal(chieuTrongLoi(xau).chieu, "xau");
+  assert.deepEqual(cauTraiChieu(xau), ["Rồi mọi việc sẽ suôn sẻ và viên mãn."]);
+  // câu hỏi tình cảm: “chia tay” sau câu trả lời “còn” là trái chiều; câu hỏi thi cử: “kết thúc” thì không
+  const tinh = "Về câu bạn hỏi, trải bài nói khá rõ. Câu trả lời là còn, và điều đó khá rõ. Rồi hai người sẽ chia tay.";
+  assert.equal(cauTraiChieu(tinh, { cauHoi: "Người ấy còn thương em không?", spreadId: "tinhcam" }).length, 1);
+  assert.equal(cauTraiChieu(tinh.replace("chia tay", "kết thúc kỳ thi"), { cauHoi: "Em có đỗ đại học không?", spreadId: "cokhong" }).length, 0);
+  // lời không nói câu trả lời rõ thì không phán chiều
+  assert.equal(chieuTrongLoi("Lan ơi, trải bài của bạn nói khá rõ. Tuần này hãy làm một việc nhỏ."), null);
+});
+
+test("cùng chiều: AI viết mâu thuẫn → cổng trả lại, viết lại 1 lần; bản viết lại cùng chiều thì nhận", async () => {
+  let s, rule, dung;
+  for (let lan = 0; lan < 40; lan++) {
+    await giaiTuDong({ db, cauHoi: "Em có đỗ đại học không?", tenKhach: "Lan", onSession: (x) => (s = x) });
+    rule = analyze(db, s, {}, 0);
+    if (chieuTraLoi(s, nghiaTrai(db, s, rule), rule) !== "xau") { dung = loiGuiKhachLuat(db, s, rule, { tenKhach: "Lan" }); break; }
+  }
+  assert.ok(dung && kiemLoiGuiKhach(dung, db, { tenKhach: "Lan", session: s }).ok);
+  assert.notEqual(chieuTrongLoi(dung).chieu, "xau");
+  const mauThuan = dung.replace(/\n\n/u, " Rồi cuối cùng kết quả sẽ thất bại.\n\n");
+  const k = kiemLoiGuiKhach(mauThuan, db, { tenKhach: "Lan", session: s });
+  assert.ok(!k.ok && k.loi.some((x) => /trái chiều câu trả lời/u.test(x)), k.loi.join("; "));
+  let n = 0, msg = "";
+  const r = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: mauThuan }, tenKhach: "Lan", call: async (sys, m) => { n++; msg = m; return dung; } });
+  assert.equal(n, 1, "viết lại đúng 1 lần");
+  assert.match(msg, /trái chiều câu trả lời/u);
+  assert.equal(r.nguon, "ai-viet-lai");
+  assert.equal(r.text, dung);
+  assert.match(SYSTEM_LGK, /cùng chiều/u);
+  assert.match(SYSTEM_READING, /cùng chiều/u);
+});
+
+test("cùng chiều: 400 lượt bản luật (8 kiểu câu hỏi) đều qua cổng, 0 câu trái chiều, câu trả lời luôn đọc được chiều", async () => {
+  const qs = ["Người ấy còn thương em không?", "Anh ấy có quay lại không?", "Có nên nghỉ việc không?", "Tháng sau có tăng lương không?", "Năm 2027 của em thế nào?", "Em có đỗ đại học không?", "Vận hạn của em dạo này có xui không?", "Em nên làm gì bây giờ?"];
+  let qua = 0, trai = 0, khongChieu = 0;
+  for (let k = 0; k < 400; k++) {
+    let s;
+    const r = await giaiTuDong({ db, cauHoi: qs[k % qs.length], tenKhach: k % 3 ? "Lan" : "", onSession: (x) => (s = x) });
+    if (kiemLoiGuiKhach(r.loiGuiKhach, db, { tenKhach: r.tenKhach, xungHo: "Queen Linh", session: s }).ok) qua++;
+    if (cauTraiChieu(r.loiGuiKhach, s).length) trai++;
+    if (!chieuTrongLoi(r.loiGuiKhach)) khongChieu++;
+    const cau = r.loiGuiKhach.split(/(?<=[.!?…])\s+/u).map((c) => c.replace(/^[^,:]{0,40}[,:]\s*/u, "").trim().toLowerCase()).filter((c) => c.length > 30);
+    assert.equal(new Set(cau).size, cau.length, `không lặp câu: ${r.loiGuiKhach}`);
+  }
+  assert.equal(qua, 400);
+  assert.equal(trai, 0);
+  assert.equal(khongChieu, 0);
+});
+
+// ---- Lệnh 28/10 (mẫu sửa số 3): chốt câu hỏi thật trước khi trải ----
+test("chốt câu hỏi: “Ai à”, “alo”, “?”, “ok”, “shop ơi”, hỏi shop/AI/giá → hỏi lại khách, 0 lá; câu bói thật → trải bình thường", async () => {
+  for (const q of ["Ai à", "alo", "?", "ok", "shop ơi", "Bạn là máy hay AI trả lời tự động vậy?", "Trả lời thẳng đi: có phải AI không? Có hay không thôi.", "Ai bốc bài cho em vậy? Có bốc tay không?", "Giá vậy cao quá, bớt cho em còn một nửa được không?", "Bói thử cho em một câu miễn phí đi", "Dạo này em mệt lắm, em cũng không biết mình muốn hỏi gì nữa, chị nghe em kể chút được không…"]) {
+    let phien = 0;
+    const r = await giaiTuDong({ db, cauHoi: q, onSession: () => phien++ });
+    assert.equal(r.canHoiLai, true, q);
+    assert.equal(r.loiGuiKhach, "Câu hỏi bạn muốn hỏi là gì ạ? Bạn viết rõ giúp shop");
+    assert.equal(r.maKhoa, null, `${q}: không bốc lá`);
+    assert.equal(phien, 0, `${q}: không tạo phiên`);
+    assert.ok(DT.kiemTraLoiAgent(r.loiGuiKhach).ok);
+  }
+  // đòi hoàn tiền / ý tự hại: không trải, chuyển Chủ tịch
+  for (const q of ["Bói chẳng đúng gì cả, hoàn tiền lại cho em đi.", "Em mệt lắm rồi, chẳng còn thiết sống nữa, bói xem em còn cố được không…"]) {
+    const r = await giaiTuDong({ db, cauHoi: q });
+    assert.equal(r.chuyenNguoi, true, q); assert.equal(r.maKhoa, null);
+  }
+  // câu bói thật vẫn trải (không chặn nhầm)
+  for (const q of ["Người ấy còn thương em không?", "Ai đang nói xấu em?", "Em có nên học AI không?", "Tháng này em kiếm được bao nhiêu tiền?", "Tình yêu?", "Em nên làm gì bây giờ?"]) assert.ok(laCauHoiBoi(q).ok, q);
+  let s;
+  const r = await giaiTuDong({ db, cauHoi: "Người ấy còn thương em không?", tenKhach: "Lan", onSession: (x) => (s = x) });
+  assert.ok(!r.canHoiLai && r.maKhoa && s.rounds[0].tarot.flat().length > 0);
+  assert.equal(r.trai, "tinhcam");
+});
+
+test("gói N câu: tách đúng câu hỏi trong tin khách; gửi thừa thì chỉ trải N câu đầu và trả về câu thừa; tin không có câu hỏi bói → hỏi lại", async () => {
+  assert.deepEqual(tachCauHoi("Shop ơi\nNgười ấy còn thương em không?"), ["Người ấy còn thương em không?"]);
+  assert.deepEqual(tachCauHoi("Em hỏi 3 câu: 1. Người ấy còn thương em không 2. Tháng sau có tăng lương không 3) Có nên nghỉ việc không"), ["Người ấy còn thương em không", "Tháng sau có tăng lương không", "Có nên nghỉ việc không"]);
+  assert.deepEqual(tachCauHoi("Dạo này em buồn lắm. Người ấy còn thương em không? Còn chuyện công việc, tháng sau có tăng lương không?"), ["Dạo này em buồn lắm. Người ấy còn thương em không?", "Còn chuyện công việc, tháng sau có tăng lương không?"]);
+  assert.deepEqual(tachCauHoi("Xem giúp em 12 tháng năm 2027 từng tháng"), ["Xem giúp em 12 tháng năm 2027 từng tháng"]);
+  const auto = taoBoiAuto(async () => ({ db, settings: {} }));
+  const g = await auto.giaiGoi("Người ấy còn thương em không? Tháng sau có tăng lương không? Có nên nghỉ việc không?", { soCau: 2, tenKhach: "Lan" });
+  assert.deepEqual(g.cau.map((c) => c.cauHoi), ["Người ấy còn thương em không?", "Tháng sau có tăng lương không?"]);
+  assert.deepEqual(g.cau.map((c) => c.trai), ["tinhcam", "3thang"], "mỗi câu tự chọn trải riêng");
+  assert.deepEqual(g.thua, ["Có nên nghỉ việc không?"]);
+  for (const c of g.cau) assert.ok(c.maKhoa && kiemLoiGuiKhach(c.loiGuiKhach, db, { tenKhach: "Lan" }).ok);
+  const h = await auto.giaiGoi("Ai à", { soCau: 3 });
+  assert.equal(h.canHoiLai, true); assert.equal(h.loiGuiKhach, HOI_LAI); assert.equal(h.cau.length, 0);
+  const t = await auto.giaiGoi("Hoàn tiền cho em đi", { soCau: 3 });
+  assert.equal(t.chuyenNguoi, true); assert.equal(t.cau.length, 0);
+  // trang đào tạo: Trải bài gọi giaiGoi theo số câu còn lại, có ghi chú câu thừa, có nhãn hỏi lại
+  const js = readFileSync(join(HERE, "dao-tao/dao-tao.js"), "utf8");
+  assert.match(js, /auto\.giaiGoi\(q, \{ soCau \}\)/);
+  assert.match(js, /chỉ trải \$\{r\.cau\.length\} câu đầu/u);
+  assert.match(js, /Chưa trải — hỏi lại khách/u);
+  // ghi chú câu thừa không đi tới agent/khách
+  assert.deepEqual(DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 0, lich_su: [{ vai: "ghi_chu", noi_dung: "Khách gửi 3 câu…" }] }).lich_su, []);
 });
 
 // ---- Lỗi gấp 28/10 11:25: mỗi tình huống ở trang đào tạo là một cuộc chat riêng ----

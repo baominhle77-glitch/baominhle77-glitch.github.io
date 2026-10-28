@@ -28,6 +28,10 @@ Cập nhật: 28/10/2026 (GMT+7). Task-ID: BOI-20261028-01. Nhánh: `claude/slee
 ## Trang đào tạo nối lại khi đường hầm chập chờn (mục 36)
 - Lỗi mạng → dò lại cầu nối rồi gửi lại 1 lần; 429 báo quá lượt; mẫu sửa lưu hỏng nằm ở hàng chờ `boi.daotao.mau-cho.v1`, tự gửi khi cầu nối sống.
 
+## Cùng chiều + chốt câu hỏi (mục 37–38)
+- Lời gửi khách: mọi câu cùng chiều với câu trả lời thẳng (bản luật lọc, cổng trả lại AI viết mâu thuẫn).
+- `laCauHoiBoi`/`tachCauHoi`/`BoiAuto.giaiGoi`: “Ai à”, “alo”, “?”… → hỏi lại “Câu hỏi bạn muốn hỏi là gì ạ? Bạn viết rõ giúp shop”, không bốc lá; gói N câu trải N câu đầu.
+
 ## Trang đào tạo: mỗi tình huống một cuộc (mục 39)
 - Gửi cầu nối và mẫu sửa chỉ lịch sử từ tình huống gần nhất (`lichSuCuoc`); vạch “— Cuộc mới: … —” trên màn hình.
 
@@ -37,5 +41,5 @@ Cập nhật: 28/10/2026 (GMT+7). Task-ID: BOI-20261028-01. Nhánh: `claude/slee
 - Sổ khoá `docs/handover/ACTIVE_TASKS.json` chưa ghi BOI-20261028-01 (lệnh chỉ sửa `boi/**`), nên `coordination-guard` đỏ trên các PR này.
 
 ## Lệnh chạy lại
-- `node boi/test.mjs` (58/58 đạt ngày 28/10/2026).
+- `node boi/test.mjs` (65/65 đạt ngày 28/10/2026).
 - Mở thử: https://baominhle77-glitch.github.io/boi/dao-tao/ (nút “Đào tạo nhắn tin” ở thanh tab dưới của web bói).
