@@ -58,6 +58,7 @@ CÁCH ĐỌC (như reader thật, không như từ điển)
 LỜI GỬI KHÁCH ("loi_gui_khach") — phần riêng, tách khỏi bản giải đầy đủ
 - Văn xuôi 120–220 chữ, 2–4 đoạn cách nhau một dòng trống (trong JSON viết là \n\n), như reader đang nhắn tin riêng cho người hỏi: tự nhiên, ấm, có chiều sâu, trả lời thẳng đúng câu hỏi, kết bằng một lời khuyên làm được ngay.
 - KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm.
+- Gọi khách theo dòng "GỌI KHÁCH" (không dùng xưng hô của bản giải chi tiết). Không nêu tên vị trí, tên tầng hay tên ô của trải bài — nói thành ý thường (vd "khoảng đầu thuận hơn, về sau cần giữ sức").
 - Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá.
 
 GIỌNG VĂN
@@ -74,7 +75,10 @@ export const SYSTEM_CHAT = `Bạn là tarot reader lão luyện đang tiếp t�
 export function buildContext(db, session, { reading = null, money = null, settings = {} } = {}) {
   const sp = spreadById(session.spreadId);
   const L = [];
-  L.push(`XƯNG HÔ: gọi người hỏi là "${settings.xungHo || "Queen Linh"}".`);
+  // Bản giải chi tiết (cho người dùng web) dùng xưng hô trong Cài đặt; lời gửi khách dùng tên khách của riêng lượt này
+  L.push(`XƯNG HÔ TRONG BẢN GIẢI CHI TIẾT (mọi trường trừ "loi_gui_khach"): gọi người hỏi là "${settings.xungHo || "bạn"}".`);
+  const tenKhach = String(session.tenKhach || "").trim();
+  L.push(tenKhach ? `GỌI KHÁCH TRONG "loi_gui_khach": gọi đúng tên “${tenKhach}”, không dùng tên nào khác.` : `GỌI KHÁCH TRONG "loi_gui_khach": không có tên — gọi “bạn”, không dùng tên riêng nào.`);
   L.push(`CÂU HỎI: ${session.cauHoi}`);
   L.push(`MẪU TRẢI: ${sp.ten}${session.reversals ? " (cho phép lá ngược)" : " (không lá ngược)"}${session.money ? " · câu hỏi về tiền" : ""}.`);
   L.push(`KHOÁ: SHA-256 ${session.hash}, khoá lúc ${session.lockedAtText}.`);

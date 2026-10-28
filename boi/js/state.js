@@ -19,12 +19,14 @@ async function lockDraw(seed, reversals, nTiers, now) {
   return d;
 }
 
-export async function createSession({ cauHoi, spreadId, tiers, money, reversals, nam = null, seed = newSeed(), now = new Date() }) {
+export async function createSession({ cauHoi, spreadId, tiers, money, reversals, nam = null, tenKhach = "", seed = newSeed(), now = new Date() }) {
   const draw = await lockDraw(seed, !!reversals, Math.max(1, tiers.length), now);
   return {
     v: 2,
     id: "q" + now.getTime().toString(36) + seed.slice(0, 6),
     cauHoi: String(cauHoi || "").trim(),
+    // tên khách của riêng lượt này (gọi trong "Lời gửi khách"); trống = gọi "bạn"
+    tenKhach: String(tenKhach || "").trim().slice(0, 40),
     spreadId, tiers, money: !!money, reversals: !!reversals, nam,
     seed, hash: draw.hash, draws: [draw],
     lockedAt: now.toISOString(), lockedAtText: gmt7(now),

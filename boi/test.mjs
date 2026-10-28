@@ -20,7 +20,7 @@ import { probeBridge, bridge, aiKey, store } from "./js/store.js";
 import { ROUTES } from "./js/views.js";
 import * as DT from "./dao-tao/dao-tao-core.js";
 import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai } from "./js/auto.js";
-import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK } from "./js/loi.js";
+import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK, tenViTriCua } from "./js/loi.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const readJSON = (f) => JSON.parse(readFileSync(join(HERE, f), "utf8"));
@@ -911,6 +911,81 @@ test("đào tạo: trang noindex, không gắn link ở trang khách; service wo
   const sw = readFileSync(join(HERE, "sw.js"), "utf8");
   assert.match(sw, /\/dao-tao\/"\)\) return;/);
   assert.ok(!/dao-tao/.test(sw.slice(sw.indexOf("const CORE"), sw.indexOf("];"))), "không cache trang đào tạo");
+});
+
+// ---- Lỗi khẩn 28/10: lời gửi khách gọi "Queen Linh" cho mọi khách ----
+test("tên khách theo từng lượt: “Lan” rồi “Hùng” → mỗi lời gửi đúng tên của lượt đó, không còn “Queen Linh”", async () => {
+  const caiDat = { xungHo: "Queen Linh" }; // tên xưng hô đã lưu trong Cài đặt (của chủ web)
+  const auto = taoBoiAuto(async () => ({ db, settings: caiDat }));
+  const lan = await auto.giai("Tháng này em có nên nhận lời đi làm xa không?", { trai: "3la", tenKhach: "Lan" });
+  const hung = await auto.giai("Tháng này em có nên nhận lời đi làm xa không?", { trai: "3la", tenKhach: "Hùng" });
+  assert.match(lan.loiGuiKhach, /^Lan ơi/u);
+  assert.match(hung.loiGuiKhach, /^Hùng ơi/u);
+  for (const r of [lan, hung]) {
+    assert.ok(!/Queen Linh/u.test(r.loiGuiKhach), "không còn Queen Linh");
+    assert.ok(kiemLoiGuiKhach(r.loiGuiKhach, db, { tenKhach: r.tenKhach, xungHo: "Queen Linh" }).ok);
+  }
+  assert.ok(!/Lan/u.test(hung.loiGuiKhach) && !/Hùng/u.test(lan.loiGuiKhach), "tên lượt trước không lọt sang lượt sau");
+  // đường AI: lời gửi gọi đúng tên thì nhận; prompt có dòng GỌI KHÁCH đúng tên lượt này
+  const sent = [];
+  const lgkTen = (ten) => LGK_OK.replace("Bạn ơi", `${ten} ơi`);
+  const fake = async (u, o) => { const b = JSON.parse(o.body); sent.push(b.body.contents.at(-1).parts[0].text); const ten = /gọi đúng tên “([^”]+)”/u.exec(sent.at(-1))?.[1] || "Bạn"; return tramReply(JSON.stringify({ tong_quan: CO_DAU, tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], tong_ket: CO_DAU, loi_gui_khach: lgkTen(ten) }), "gemini-x"); };
+  const autoAI = taoBoiAuto(async () => ({ db, settings: caiDat, key: TRAM_KEY, fetchImpl: fake }));
+  const a1 = await autoAI.giai("Em có nên chuyển nhà không?", { tenKhach: "Lan" });
+  const a2 = await autoAI.giai("Em có nên chuyển nhà không?", { tenKhach: "Hùng" });
+  assert.deepEqual([a1.nguon, a2.nguon], ["ai", "ai"]);
+  assert.match(a1.loiGuiKhach, /^Lan ơi/u);
+  assert.match(a2.loiGuiKhach, /^Hùng ơi/u);
+  assert.match(sent[0], /GỌI KHÁCH TRONG "loi_gui_khach": gọi đúng tên “Lan”/u);
+  assert.match(sent[1], /GỌI KHÁCH TRONG "loi_gui_khach": gọi đúng tên “Hùng”/u);
+  assert.ok(!sent.some((t) => /Queen Linh/u.test(t)), "lượt tự động không gửi “Queen Linh” cho AI");
+  // AI lỡ gọi "Queen Linh" → cổng chặn, viết lại 1 lần; vẫn sai → bản luật gọi đúng tên
+  const sai = async () => tramReply(JSON.stringify({ tong_quan: CO_DAU, tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], tong_ket: CO_DAU, loi_gui_khach: lgkTen("Queen Linh") }), "gemini-x");
+  const a3 = await taoBoiAuto(async () => ({ db, settings: caiDat, key: TRAM_KEY, fetchImpl: sai })).giai("Em có nên chuyển nhà không?", { tenKhach: "Lan" });
+  assert.equal(a3.nguon, "luat");
+  assert.match(a3.loiGuiKhach, /^Lan ơi/u);
+});
+
+test("không có tên khách → không gọi tên riêng nào (“Về câu bạn hỏi…”)", async () => {
+  const r = await giaiTuDong({ db, cauHoi: "Tháng này em có nên nhận lời đi làm xa không?", trai: "3la", settings: { xungHo: "Queen Linh" } });
+  assert.match(r.loiGuiKhach, /^Về câu bạn hỏi/u);
+  assert.ok(!/Queen Linh|ơi,/u.test(r.loiGuiKhach), "không gọi tên ai");
+  assert.equal(r.tenKhach, "");
+  // màn Hỏi mới có ô Tên khách trống; màn giải gọi theo tên của lượt đó
+  const [, askView] = ROUTES.find(([re]) => re.test("/hoi-moi"));
+  assert.match(askView([], new URLSearchParams()).html, /id="tenKhach"[^>]*value=""/);
+  const s = await sessionNgauNhien("tinhcam", 7);
+  s.tenKhach = "Lan";
+  store.db = db; store.settings.xungHo = "Queen Linh"; store.sessions.push(s);
+  const [, view] = ROUTES.find(([re]) => re.test(`/giai/${s.id}`));
+  const html = view(`/giai/${s.id}`.match(/^\/giai\/([\w-]+)$/), new URLSearchParams("ban=luat")).html;
+  const txt = html.match(/id="loi-gui-khach"[^>]*data-text="([^"]*)"/)[1];
+  assert.match(txt, /^Lan ơi/u);
+  assert.ok(!/Queen Linh/u.test(txt));
+  store.sessions.pop();
+});
+
+test("cổng chặn “Queen Linh ơi” (khác tên khách) và tên vị trí như “Hao tài”; bản luật nói thành ý thường", async () => {
+  const k = kiemLoiGuiKhach(LGK_OK.replace("Bạn ơi", "Queen Linh ơi"), db, { tenKhach: "Lan", xungHo: "Queen Linh" });
+  assert.equal(k.ok, false);
+  assert.match(k.loi.join("; "), /gọi sai tên: Queen Linh/u);
+  assert.ok(kiemLoiGuiKhach(LGK_OK.replace("Bạn ơi", "Queen Linh ơi"), db, { tenKhach: "Queen Linh", xungHo: "Queen Linh" }).ok, "khách đúng tên Queen Linh thì được gọi");
+  const s = await sessionNgauNhien("vanhan", 4);
+  assert.ok(tenViTriCua(s).includes("Hao tài") && tenViTriCua(s).includes("Khía cạnh khác"));
+  const kh = kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Ở phần Hao tài, nhìn chung"), db, { session: s });
+  assert.equal(kh.ok, false);
+  assert.match(kh.loi.join("; "), /tên vị trí\/tầng: Hao tài/u);
+  assert.match(kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Về Khía cạnh khác, nhìn chung"), db, { session: s }).loi.join("; "), /Khía cạnh khác/u);
+  assert.match(kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Ô 2 cho thấy nhìn chung"), db, { session: s }).loi.join("; "), /tên tầng\/ô/u);
+  assert.ok(kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Bạn nên tránh hao tài, nhìn chung"), db, { session: s }).ok, "chữ thường “hao tài” trong câu không phải tên vị trí");
+  assert.ok(!tenViTriCua(s).includes("4–6 tuần tới"), "chữ có trong câu khách hỏi thì được nhắc lại");
+  // bản luật: các mẫu nhiều tầng không nêu tên tầng/vị trí
+  for (const [i, id] of ["vanhan", "3thang", "tinhcam", "12thang", "cokhong"].entries()) {
+    const ss = await sessionNgauNhien(id, i + 20);
+    const t = loiGuiKhachLuat(db, ss, analyze(db, ss, {}), { tenKhach: "Hùng" });
+    const kk = kiemLoiGuiKhach(t, db, { tenKhach: "Hùng", xungHo: "Queen Linh", session: ss });
+    assert.ok(kk.ok, `${id}: ${kk.loi.join("; ")}\n${t}`);
+  }
 });
 
 export async function run(extra = []) {

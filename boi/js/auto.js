@@ -29,29 +29,32 @@ export function chonTrai(cauHoi, trai = "3la") {
   return sp;
 }
 
-export async function giaiTuDong({ db, cauHoi, trai = "3la", nguoc = false, settings = {}, key = null, fetchImpl, storage, onSession }) {
+// tenKhach: tên khách của riêng câu này (trống = gọi "bạn"); settings.xungHo KHÔNG được dùng để gọi khách
+export async function giaiTuDong({ db, cauHoi, trai = "3la", nguoc = false, tenKhach = "", settings = {}, key = null, fetchImpl, storage, onSession }) {
   const q = String(cauHoi || "").trim();
   if (!q) throw new Error("Thiếu câu hỏi.");
   if (!db) throw new Error("Bộ bài chưa tải xong.");
   const sp = chonTrai(q, trai);
-  const s = await createSession({ cauHoi: q, spreadId: sp.id, tiers: sp.tiers(defaultYear()), money: !!sp.money, reversals: !!nguoc, nam: sp.needsYear ? defaultYear() : null });
+  const s = await createSession({ cauHoi: q, tenKhach, spreadId: sp.id, tiers: sp.tiers(defaultYear()), money: !!sp.money, reversals: !!nguoc, nam: sp.needsYear ? defaultYear() : null });
+  // bản giải chi tiết của lượt tự động cũng gọi đúng khách (hoặc "bạn"), không dùng xưng hô đã lưu
+  const caiDat = { ...settings, xungHo: s.tenKhach || "bạn" };
   await ensureMapping(s, 0);
   addPickedRound(s, s.tiers.map((t) => ({ tarot: viTriNgauNhien(78, t.t), lenormand: viTriNgauNhien(36, t.l) })));
-  const rule = analyze(db, s, settings, 0);
+  const rule = analyze(db, s, caiDat, 0);
   let reading = null, model = "";
   const call = key ? (system, text) => goiCoDau({ provider: "gemini", key, system, json: false, messages: [{ role: "user", text }], fetchImpl, storage }).then((r) => r.text) : null;
   if (key) {
     try {
-      const res = await goiCoDau({ provider: "gemini", key, system: SYSTEM_READING, json: true, fetchImpl, storage, messages: [{ role: "user", text: readingRequest(db, s, { reading: rule, money: rule._money, settings }) }] });
+      const res = await goiCoDau({ provider: "gemini", key, system: SYSTEM_READING, json: true, fetchImpl, storage, messages: [{ role: "user", text: readingRequest(db, s, { reading: rule, money: rule._money, settings: caiDat }) }] });
       const r = normalizeReading(partialJSON(res.text), rule, { db, session: s });
       if (r && r.tang.length) { reading = r; model = res.model; }
     } catch (_) { /* AI lỗi → lời gửi theo luật */ }
   }
-  const lgk = await chotLoiGuiKhach({ db, session: s, rule, reading, settings, call: reading ? call : null });
+  const lgk = await chotLoiGuiKhach({ db, session: s, rule, reading, tenKhach: s.tenKhach, xungHo: settings.xungHo || "", call: reading ? call : null });
   if (reading) s.ai = { provider: "gemini", model, at: new Date().toISOString(), rounds: 1, reading: { ...reading, _money: null }, raw: "", loiGuiKhach: lgk.text, loiNguon: lgk.nguon };
   s.tuDong = true;
   onSession?.(s);
-  return { loiGuiKhach: lgk.text, maKhoa: s.hash, nguon: lgk.nguon, trai: sp.id, phien: s.id };
+  return { loiGuiKhach: lgk.text, maKhoa: s.hash, nguon: lgk.nguon, trai: sp.id, phien: s.id, tenKhach: s.tenKhach };
 }
 
 // Hàng đợi: lời gọi sau chờ lời gọi trước xong (kể cả khi lời trước lỗi)

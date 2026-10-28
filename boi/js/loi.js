@@ -53,7 +53,35 @@ export const CHU_CAM = [
 ];
 export const chuCamTrong = (text) => CHU_CAM.filter(([, re]) => re.test(text)).map(([ten]) => ten);
 
-export function kiemLoiGuiKhach(text, db) {
+// Tên vị trí / tầng / ô của trải bài (vd "Hao tài", "Khía cạnh khác", "Tháng 11/2026", "Ô 2") không được xuất hiện.
+// Nhãn chung trùng chữ thường ngày ("Kết quả", "Diễn biến"…) chỉ tính khi dùng như nhãn: theo sau ":" hoặc nằm trong ngoặc kép.
+const VI_TRI_CHUNG = new Set(["Kết quả", "Kết luận", "Diễn biến", "Hiện trạng", "Tổng quan", "Xu hướng", "Thông điệp", "Câu hỏi", "Hiệu quả", "Tiến trình", "Gốc", "Điểm sáng"]);
+export function tenViTriCua(session) {
+  const out = new Set();
+  for (const t of session?.tiers || []) {
+    if (t.ten) out.add(String(t.ten).trim());
+    for (const p of t.pos || []) if (p) out.add(String(p).trim());
+  }
+  // chữ có sẵn trong chính câu khách hỏi (vd "4–6 tuần tới") thì nhắc lại được
+  const q = String(session?.cauHoi || "");
+  return [...out].filter((nm) => nm && !q.includes(nm));
+}
+export function viTriTrong(text, names) {
+  const hit = [];
+  for (const nm of names) {
+    const e = escRe(nm);
+    const re = VI_TRI_CHUNG.has(nm)
+      ? new RegExp(`(?:[“"'‘]${e}[”"'’]|(?<![\\p{L}\\p{N}])${e}[ \\t]*:)`, "u")
+      : new RegExp(`(?<![\\p{L}\\p{N}])${e}(?![\\p{L}\\p{N}])`, "u");
+    if (re.test(text)) hit.push(nm);
+  }
+  if (/(?<![\p{L}])(?:Ô|ô|Tầng|tầng) \d+(?![\p{N}])/u.test(text)) hit.push("tên tầng/ô");
+  return hit;
+}
+
+// opts.tenKhach: tên khách của đúng lượt này ("" = gọi "bạn"); opts.xungHo: tên xưng hô đã lưu trong Cài đặt
+// (dùng cho bản giải chi tiết) — không được xuất hiện trong lời gửi khách nếu khác tenKhach; opts.session: để lấy tên vị trí.
+export function kiemLoiGuiKhach(text, db, opts = {}) {
   const t = String(text || "").trim();
   if (!t) return { ok: false, loi: ["trống"] };
   const loi = [];
@@ -69,6 +97,11 @@ export function kiemLoiGuiKhach(text, db) {
   const cam = chuCamTrong(t);
   if (cam.length) loi.push(`có chữ cấm: ${cam.join(", ")}`);
   if (tyLeDau(t) < NGUONG_DAU) loi.push("mất dấu");
+  const tenKhach = String(opts.tenKhach || "").trim();
+  const xh = String(opts.xungHo || "").trim();
+  if (xh && xh.toLowerCase() !== tenKhach.toLowerCase() && new RegExp(`(?<![\\p{L}\\p{N}])${escRe(xh)}(?![\\p{L}\\p{N}])`, "iu").test(t)) loi.push(`gọi sai tên: ${xh}`);
+  const vt = viTriTrong(t, tenViTriCua(opts.session));
+  if (vt.length) loi.push(`có tên vị trí/tầng: ${vt.join(", ")}`);
   return { ok: !loi.length, loi };
 }
 
@@ -100,8 +133,12 @@ const LOT = [
 const capFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const bandKey = (x) => (x == null ? "mid" : x >= 6.5 ? "hi" : x >= 5 ? "mid" : "lo");
 
-export function loiGuiKhachLuat(db, session, rule, settings = {}) {
-  const goi = (settings.xungHo || "").trim();
+// Tên gọi khách chỉ lấy từ lượt này (tenKhach), KHÔNG BAO GIỜ lấy settings.xungHo
+export const tenKhachCua = (session, opts = {}) => String(opts.tenKhach ?? session?.tenKhach ?? "").trim().slice(0, 40);
+const VI_TRI_Y = (i, n) => (i === 0 ? "khoảng đầu" : i === n - 1 ? "về sau" : "khoảng giữa");
+
+export function loiGuiKhachLuat(db, session, rule, opts = {}) {
+  const goi = tenKhachCua(session, opts);
   const round = session.rounds[0];
   const tiers = rule.tang.filter((t) => t.diem != null);
   const mean = rule.diem_tb ?? (tiers.length ? tiers.reduce((a, t) => a + t.diem, 0) / tiers.length : 5);
@@ -122,7 +159,9 @@ export function loiGuiKhachLuat(db, session, rule, settings = {}) {
     if (last?.tra_loi) p1.push(`Nếu cần một câu trả lời gọn, thì đó là: ${last.tra_loi.toLowerCase()}.`);
   } else if (tiers.length >= 2) {
     const best = [...tiers].sort((a, b) => b.diem - a.diem)[0], worst = [...tiers].sort((a, b) => a.diem - b.diem)[0];
-    if (best !== worst && best.diem - worst.diem >= 1) p1.push(`Giai đoạn sáng nhất là ${best.ten}, còn ${worst.ten} là lúc bạn cần giữ sức và cẩn trọng hơn.`);
+    // nói thành ý thường, không nêu tên tầng/vị trí
+    const bi = tiers.indexOf(best), wi = tiers.indexOf(worst);
+    if (best !== worst && best.diem - worst.diem >= 1) p1.push(`${capFirst(VI_TRI_Y(bi, tiers.length))} thuận hơn, còn ${VI_TRI_Y(wi, tiers.length)} là lúc bạn cần giữ sức và cẩn trọng hơn.`);
     else p1.push("Các giai đoạn khá đều nhau: không có lúc nào sập, nhưng cũng chưa có cú bứt phá rõ ràng.");
   }
 
@@ -157,27 +196,32 @@ export function loiGuiKhachLuat(db, session, rule, settings = {}) {
 }
 
 // ---------- Chốt: AI → viết lại 1 lần → luật ----------
-export const SYSTEM_LGK = `Bạn là tarot reader lão luyện đang nhắn tin riêng cho người hỏi. Viết lời gửi bằng tiếng Việt CÓ DẤU đầy đủ: văn xuôi ${LGK_MIN}–${LGK_MAX} chữ, 2–4 đoạn cách nhau một dòng trống; giọng tự nhiên, ấm, có chiều sâu; trả lời thẳng đúng câu hỏi; kết bằng một lời khuyên làm được ngay. KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm, không emoji. Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá. Chỉ trả về đúng phần lời gửi.`;
+export const SYSTEM_LGK = `Bạn là tarot reader lão luyện đang nhắn tin riêng cho một khách. Gọi khách đúng tên được cho trong yêu cầu; không có tên thì gọi "bạn", không dùng tên riêng nào khác. Không nêu tên vị trí, tên tầng hay tên ô của trải bài. Viết lời gửi bằng tiếng Việt CÓ DẤU đầy đủ: văn xuôi ${LGK_MIN}–${LGK_MAX} chữ, 2–4 đoạn cách nhau một dòng trống; giọng tự nhiên, ấm, có chiều sâu; trả lời thẳng đúng câu hỏi; kết bằng một lời khuyên làm được ngay. KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm, không emoji. Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá. Chỉ trả về đúng phần lời gửi.`;
 
-export function yeuCauVietLai(session, reading, loi) {
+export const dongGoiKhach = (tenKhach) => (tenKhach ? `GỌI KHÁCH: gọi đúng tên “${tenKhach}”, không dùng tên nào khác.` : `GỌI KHÁCH: không có tên — gọi “bạn”, không dùng tên riêng nào.`);
+export function yeuCauVietLai(session, reading, loi, tenKhach = tenKhachCua(session)) {
   const tom = [reading?.tong_quan, ...(reading?.tang || []).map((t) => `${t.ten}: ${t.diem ?? "?"}/10${t.tra_loi ? ` (${t.tra_loi})` : ""}. ${t.chot || ""}`), reading?.tong_ket].filter(Boolean).join("\n");
-  return `CÂU HỎI: ${session.cauHoi}\n\nTÓM TẮT BẢN GIẢI (chỉ để bạn nắm ý, không chép tên lá):\n${tom}\n\nBản lời gửi trước bị trả lại vì: ${loi.join("; ")}. Hãy viết lại lời gửi khách đúng mọi yêu cầu.`;
+  return `${dongGoiKhach(tenKhach)}\nCÂU HỎI: ${session.cauHoi}\n\nTÓM TẮT BẢN GIẢI (chỉ để bạn nắm ý, không chép tên lá, tên tầng hay tên vị trí):\n${tom}\n\nBản lời gửi trước bị trả lại vì: ${loi.join("; ")}. Hãy viết lại lời gửi khách đúng mọi yêu cầu.`;
 }
 
 // call(system, text) → Promise<string>: gọi AI dạng chữ (đã qua cổng kiểm dấu)
-export async function chotLoiGuiKhach({ db, session, rule, reading = null, settings = {}, call = null }) {
+// tenKhach: tên khách của lượt này; xungHo: tên xưng hô đã lưu (bị chặn trong lời gửi nếu khác tenKhach)
+export async function chotLoiGuiKhach({ db, session, rule, reading = null, tenKhach, xungHo = "", call = null }) {
+  const ten = tenKhachCua(session, { tenKhach });
+  const opts = { tenKhach: ten, xungHo, session };
+  const luat = () => loiGuiKhachLuat(db, session, rule, { tenKhach: ten });
   const first = String(reading?.loi_gui_khach || "").trim();
-  const k1 = kiemLoiGuiKhach(first, db);
+  const k1 = kiemLoiGuiKhach(first, db, opts);
   if (k1.ok) return { text: first, nguon: "ai", loi: [] };
   if (first && call) {
     try {
-      const again = String(await call(SYSTEM_LGK, yeuCauVietLai(session, reading, k1.loi)) || "").trim();
-      const k2 = kiemLoiGuiKhach(again, db);
+      const again = String(await call(SYSTEM_LGK, yeuCauVietLai(session, reading, k1.loi, ten)) || "").trim();
+      const k2 = kiemLoiGuiKhach(again, db, opts);
       if (k2.ok) return { text: again, nguon: "ai-viet-lai", loi: k1.loi };
-      return { text: loiGuiKhachLuat(db, session, rule, settings), nguon: "luat", loi: k2.loi };
+      return { text: luat(), nguon: "luat", loi: k2.loi };
     } catch (e) {
       if (e?.name === "AbortError") throw e;
     }
   }
-  return { text: loiGuiKhachLuat(db, session, rule, settings), nguon: "luat", loi: k1.loi };
+  return { text: luat(), nguon: "luat", loi: k1.loi };
 }
