@@ -376,6 +376,7 @@ export function friendlyError(e, key) {
 // Phân loại lỗi đường AI cho GĐ biết đường nào cần chữa (ghi console + chú thích dưới ô Lời gửi khách)
 export function phanLoaiLoiAI(e, key) {
   if (e?.matDau) return "AI trả chữ không dấu";
+  if (e?.cuu) return e.cuu;
   if (e?.timeout) return key === LOCAL_KEY ? "cầu nối quá giờ" : "trạm quá giờ";
   if (e?.status === 429) return "429 — trạm hết lượt/đang đông";
   const net = e instanceof TypeError || /failed to fetch|networkerror|load failed|network/i.test(String(e?.message || ""));
@@ -416,11 +417,42 @@ async function viaTram({ system, messages, json, onText, onModel, signal, fetchI
   return out;
 }
 
+// Trạm 429 hoặc quá giờ → dò cầu nối máy nhà một lần (store.js đăng ký hàm dò, kể cả khi chưa bật cờ cầu nối);
+// dò thấy thì gọi lại đúng yêu cầu đó qua cầu nối. Dò hụt thì 60 giây sau mới dò lại, đỡ bắt khách chờ thêm.
+let cuuTram = null, cuuHongLuc = 0;
+const CUU_NGHI = 60000;
+export function datCuuTram(fn) { cuuTram = typeof fn === "function" ? fn : null; cuuHongLuc = 0; }
+
+async function tramRoiCauNoi({ provider, system, messages, json, onText, onModel, onCuu, signal, fetchImpl, storage, tramTimeoutMs, localTimeoutMs }) {
+  try {
+    return await viaTram({ system, messages, json, onText, onModel, signal, fetchImpl, tramTimeoutMs });
+  } catch (e) {
+    if (signal?.aborted || !cuuTram || !(e?.status === 429 || e?.timeout)) throw e;
+    const tag = e.status === 429 ? "trạm 429" : "trạm quá giờ";
+    let ok = false;
+    if (Date.now() - cuuHongLuc >= CUU_NGHI) {
+      onCuu?.(e);
+      try { ok = await cuuTram(fetchImpl); } catch (_) { ok = false; }
+      cuuHongLuc = ok ? 0 : Date.now();
+    }
+    if (signal?.aborted) throw e;
+    if (!ok) { e.cuu = `${tag}, cầu nối không có → luật`; throw e; }
+    try {
+      const out = await modelLoop({ provider, key: LOCAL_KEY, model: "", system, messages, json, onText, onModel, signal, fetchImpl: timedFetch(fetchImpl, localTimeoutMs), storage });
+      return { ...out, key: LOCAL_KEY, cuu: `${tag} → cầu nối` };
+    } catch (e2) {
+      if (!signal?.aborted) e2.cuu = `${tag} → cầu nối lỗi (${phanLoaiLoiAI(e2, LOCAL_KEY)}) → luật`;
+      throw e2;
+    }
+  }
+}
+
 // Gọi lần lượt model (ưu tiên model người dùng chọn), chuyển dự phòng khi 429/404/quá tải.
 // Cầu nối máy nhà (127.0.0.1/đường hầm) lỗi hoặc không phản hồi trong localTimeoutMs → tự chuyển sang trạm AI, không treo.
-export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, onFallback, signal, fetchImpl = globalThis.fetch, storage, tramTimeoutMs, localTimeoutMs = 10000 }) {
+// Kết quả đi đường cứu trạm → cầu nối có thêm {key: LOCAL_KEY, cuu}; lỗi sau khi đã thử cứu có e.cuu (ghi vào lyDo).
+export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, onFallback, onCuu, signal, fetchImpl = globalThis.fetch, storage, tramTimeoutMs, localTimeoutMs = 10000 }) {
   if (!key) throw new Error("Chưa có khoá.");
-  if (key === TRAM_KEY) return viaTram({ system, messages, json, onText, onModel, signal, fetchImpl, tramTimeoutMs });
+  if (key === TRAM_KEY) return tramRoiCauNoi({ provider, system, messages, json, onText, onModel, onCuu, signal, fetchImpl, storage, tramTimeoutMs, localTimeoutMs });
   const f = key === LOCAL_KEY ? timedFetch(fetchImpl, localTimeoutMs) : fetchImpl;
   try {
     return await modelLoop({ provider, key, model, system, messages, json, onText, onModel, signal, fetchImpl: f, storage });
@@ -491,8 +523,9 @@ export async function goiCoDau(opts) {
   const last = msgs.length - 1;
   if (msgs[last]?.role === "user") msgs[last].text += `\n\n${NHAC_DAU}`;
   else msgs.push({ role: "user", text: NHAC_DAU });
-  const second = await streamWithFallback({ ...opts, messages: msgs, onText });
-  if (!matDau(second.text)) return { ...second, lan: 2 };
+  // lượt đầu đã phải chuyển sang cầu nối thì lượt gọi lại đi thẳng cầu nối, không gõ lại trạm đang 429
+  const second = await streamWithFallback({ ...opts, ...(first.cuu ? { key: LOCAL_KEY } : {}), messages: msgs, onText });
+  if (!matDau(second.text)) return { ...second, lan: 2, ...(first.cuu ? { key: LOCAL_KEY, cuu: first.cuu } : {}) };
   const e = new Error(BAO_MAT_DAU);
   e.matDau = true;
   e.tyLe = tyLeDauBai(second.text);

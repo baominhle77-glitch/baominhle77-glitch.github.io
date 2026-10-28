@@ -1,7 +1,7 @@
 // Kho dữ liệu dùng chung cho các màn: phiên câu hỏi, cài đặt (chỉ localStorage máy người dùng).
 // AI mặc định đi qua trạm (không khoá trong web); cầu nối máy nhà chỉ dùng khi bật lựa chọn ẩn.
 import { loadSessions, saveSessions, createSession } from "./state.js";
-import { LOCAL_KEY, LOCAL_BASE, TRAM_KEY, via } from "./ai.js";
+import { LOCAL_KEY, LOCAL_BASE, TRAM_KEY, via, datCuuTram } from "./ai.js";
 
 const SETTINGS_KEY = "boi.v1.settings";
 const AIKEY_KEY = "boi.v1.aikey";
@@ -62,6 +62,8 @@ export async function probeBridge(fetchImpl = globalThis.fetch, { on = cauNoiAn(
   bridge.ok = ok; bridge.xa = ok;
   return ok;
 }
+// Trạm 429/quá giờ → dò cầu nối một lần dù chưa bật cờ (thứ tự thường không đổi: chưa bật cờ thì trạm vẫn đứng đầu)
+datCuuTram((fetchImpl) => probeBridge(fetchImpl, { on: true }));
 export const aiReady = () => !!aiKey();
 
 export const getSession = (id) => store.sessions.find((s) => s.id === id) || null;

@@ -7,7 +7,7 @@ import { spreadById, SPREADS, defaultYear } from "./spreads.js";
 import { suggestSpread } from "./topic.js";
 import { analyze } from "./insight.js";
 import { chotLoiGuiKhach } from "./loi.js";
-import { goiCoDau, SYSTEM_READING, readingRequest, partialJSON, normalizeReading, phanLoaiLoiAI } from "./ai.js";
+import { goiCoDau, SYSTEM_READING, readingRequest, partialJSON, normalizeReading, phanLoaiLoiAI, LOCAL_KEY } from "./ai.js";
 
 // k vị trí khác nhau trong 1..n, đều, không lệch (loại bỏ phần dư)
 export function viTriNgauNhien(n, k, rand = globalThis.crypto) {
@@ -41,22 +41,24 @@ export async function giaiTuDong({ db, cauHoi, trai = "3la", nguoc = false, tenK
   await ensureMapping(s, 0);
   addPickedRound(s, s.tiers.map((t) => ({ tarot: viTriNgauNhien(78, t.t), lenormand: viTriNgauNhien(36, t.l) })));
   const rule = analyze(db, s, caiDat, 0);
-  let reading = null, model = "", aiLoi = "";
-  const call = key ? (system, text) => goiCoDau({ provider: "gemini", key, system, json: false, messages: [{ role: "user", text }], fetchImpl, storage }).then((r) => r.text) : null;
+  let reading = null, model = "", aiLoi = "", cuu = "", khoa = key;
+  // trạm 429 đã phải chuyển sang cầu nối → lượt viết lại lời gửi đi thẳng cầu nối
+  const call = key ? (system, text) => goiCoDau({ provider: "gemini", key: khoa, system, json: false, messages: [{ role: "user", text }], fetchImpl, storage }).then((r) => r.text) : null;
   if (key) {
     try {
       const res = await goiCoDau({ provider: "gemini", key, system: SYSTEM_READING, json: true, fetchImpl, storage, messages: [{ role: "user", text: readingRequest(db, s, { reading: rule, money: rule._money, settings: caiDat }) }] });
       const r = normalizeReading(partialJSON(res.text), rule, { db, session: s });
+      if (res.cuu) { cuu = res.cuu; khoa = LOCAL_KEY; }
       if (r && r.tang.length) { reading = r; model = res.model; }
-    } catch (e) { aiLoi = phanLoaiLoiAI(e, key); /* AI lỗi → lời gửi theo luật */ }
+    } catch (e) { aiLoi = e.cuu || `AI lỗi: ${phanLoaiLoiAI(e, key)}`; /* AI lỗi → lời gửi theo luật */ }
   }
   const lgk = await chotLoiGuiKhach({ db, session: s, rule, reading, tenKhach: s.tenKhach, xungHo: settings.xungHo || "", call: reading ? call : null });
   if (reading) s.ai = { provider: "gemini", model, at: new Date().toISOString(), rounds: 1, reading: { ...reading, _money: null }, raw: "", loiGuiKhach: lgk.text, loiNguon: lgk.nguon };
   s.tuDong = true;
   onSession?.(s);
-  // lý do lời gửi rơi về bản luật (để biết đường AI nào cần chữa)
-  const lyDo = lgk.nguon === "luat" ? (reading ? `bị cổng trả lại: ${lgk.loi.join("; ")}` : key ? `AI lỗi: ${aiLoi || "không rõ"}` : "không gọi AI") : "";
-  if (lyDo && key) console.warn("[loi-gui-khach] bản theo luật vì:", lyDo);
+  // lý do lời gửi rơi về bản luật, hoặc đường AI đã đi (trạm 429 → cầu nối) — để biết đường nào cần chữa
+  const lyDo = lgk.nguon === "luat" ? (reading ? `${cuu ? `${cuu}; ` : ""}bị cổng trả lại: ${lgk.loi.join("; ")}` : key ? (aiLoi || "AI lỗi: không rõ") : "không gọi AI") : cuu;
+  if (lyDo && key) console[lgk.nguon === "luat" ? "warn" : "info"]("[loi-gui-khach]", lgk.nguon === "luat" ? "bản theo luật vì:" : "đường AI:", lyDo);
   return { loiGuiKhach: lgk.text, maKhoa: s.hash, nguon: lgk.nguon, lyDo, trai: sp.id, phien: s.id, tenKhach: s.tenKhach };
 }
 
