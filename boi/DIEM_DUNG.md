@@ -5,11 +5,14 @@ Cập nhật: 28/10/2026 (GMT+7). Task-ID: BOI-20261028-01. Nhánh: `claude/slee
 ## Đã xong và đã merge vào `main`
 - Phần 1 — ô “Lời gửi khách” `#loi-gui-khach` (PR #153): `boi/js/loi.js`, cổng kiểm + viết lại 1 lần + bản luật viết xuôi.
 - Phần 2 — `window.BoiAuto.giai(cauHoi, {trai})` (PR #154): `boi/js/auto.js`, mỗi câu một seed mới, xếp hàng.
-- Phần 3 — trang `boi/dao-tao/` (PR của phần 3, xem `TIEN_DO.md` mục 27).
+- Phần 3 — trang `boi/dao-tao/` (PR #155, `TIEN_DO.md` mục 27); mục 28: chuyển người cho ca hoàn tiền và tự hại.
+
+## Chưa làm (đã báo GĐ)
+- Bỏ chuyển người ở ca khách gặng hỏi lần 2 có phải AI không: phiên này không làm, vì né mãi câu hỏi thật là lừa khách. Ca này vẫn chuyển Chủ tịch.
 
 ## Việc còn lại (ngoài `boi/`, phiên máy nhà làm)
 - Hai route `POST /tro_ly/tra_loi`, `POST/GET /tro_ly/mau_sua` trên cầu nối máy nhà (trang đào tạo đã gọi đúng khuôn, xem `boi/dao-tao/dao-tao-core.js`).
-- Agent máy nhà áp đúng cổng chặn chữ như `kiemTraLoiAgent` (danh sách `CHU_CAM` trong `boi/js/loi.js`) và trả `{chuyen_nguoi:true, ly_do}` khi khách gặng lần 2.
+- Agent máy nhà áp đúng cổng chặn chữ như `kiemTraLoiAgent` (danh sách `CHU_CAM` trong `boi/js/loi.js`) và trả `{chuyen_nguoi:true, ly_do}` khi khách gặng hỏi lần 2 có phải AI không, đòi hoàn tiền, hoặc có ý tự hại.
 - Sổ khoá `docs/handover/ACTIVE_TASKS.json` chưa ghi BOI-20261028-01 (lệnh chỉ sửa `boi/**`), nên `coordination-guard` đỏ trên các PR này.
 
 ## Lệnh chạy lại

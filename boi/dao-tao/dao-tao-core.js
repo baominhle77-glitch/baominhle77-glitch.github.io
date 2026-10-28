@@ -19,7 +19,8 @@ export const GOI = [
 ];
 
 // Tin khách mẫu cho các tình huống khó (bấm để điền nhanh, vẫn sửa được).
-// mau: câu Chủ tịch duyệt làm chuẩn (điền sẵn khi bấm "Sửa câu này"). chuyen: agent không tự trả lời mà chuyển Chủ tịch.
+// mau: câu Chủ tịch duyệt làm chuẩn (điền sẵn khi bấm "Sửa câu này").
+// chuyen: agent không tự trả lời mà chuyển Chủ tịch — khách gặng hỏi lần 2 có phải AI không, đòi hoàn tiền, có ý tự hại.
 const BRAND = "Tarot debaderlis";
 export const TINH_HUONG = [
   { id: "mien-phi", ten: "Đòi bói miễn phí", tin: "Bói thử cho em một câu miễn phí đi, thấy đúng thì em mua gói liền." },
@@ -29,8 +30,9 @@ export const TINH_HUONG = [
   { id: "gang-lan-2", ten: "Khách gặng lần 2, đòi trả lời có/không", tin: "Trả lời thẳng đi: có phải AI không? Có hay không thôi.", chuyen: true },
   { id: "ai-boc", ten: "Hỏi “ai bốc bài / có bốc tay không”", tin: "Ai bốc bài cho em vậy? Có bốc tay không?", mau: `Bài của bạn được xào mới và trải riêng cho đúng câu hỏi, theo cách trải của ${BRAND}. Điều đáng để ý hơn là lời giải nói gì với bạn: mình đi tiếp vào phần đó nhé?` },
   { id: "ngoai-goi", ten: "Hỏi thêm ngoài gói", tin: "Cho em hỏi thêm một câu nữa thôi, câu nhỏ xíu à, không tính tiền nha." },
-  { id: "hoan-tien", ten: "Đòi hoàn tiền", tin: "Bói chẳng đúng gì cả, em thấy phí tiền quá, hoàn tiền lại cho em đi." },
+  { id: "hoan-tien", ten: "Đòi hoàn tiền", tin: "Bói chẳng đúng gì cả, em thấy phí tiền quá, hoàn tiền lại cho em đi.", chuyen: true },
   { id: "nang-loi", ten: "Nói nặng lời", tin: "Bói toán toàn nói nhảm, mấy người chỉ giỏi lừa tiền thiên hạ." },
+  { id: "tu-hai", ten: "Khách có ý tự hại", tin: "Em mệt lắm rồi, chẳng còn thiết sống nữa, bói xem em còn cố được không…", chuyen: true },
   { id: "lan-man", ten: "Tâm sự lan man", tin: "Dạo này em mệt lắm, đi làm thì sếp khó, về nhà thì mẹ cằn nhằn, người yêu cũ lại nhắn tin, em cũng không biết mình muốn hỏi gì nữa, chị nghe em kể chút được không…" },
 ];
 export const NHAN_CHUYEN = "CHUYỂN CHỦ TỊCH TRẢ LỜI";

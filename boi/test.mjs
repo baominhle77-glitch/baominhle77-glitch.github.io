@@ -835,10 +835,10 @@ test("BoiAuto: gọi nhiều câu cùng lúc thì xếp hàng, câu nào xong c�
 });
 
 // ---- Trang Đào tạo nhắn tin ----
-test("đào tạo: 10 tình huống (8 khó + ai bốc bài + gặng lần 2), mẫu Chủ tịch qua cổng, gặng lần 2 chuyển người", () => {
-  assert.equal(DT.TINH_HUONG.length, 10);
-  for (const id of ["mien-phi", "mac-ca", "nghi-lua", "may-ai", "ngoai-goi", "hoan-tien", "nang-loi", "lan-man", "ai-boc", "gang-lan-2"]) assert.ok(DT.TINH_HUONG.find((t) => t.id === id), id);
-  assert.deepEqual(DT.TINH_HUONG.filter((t) => t.chuyen).map((t) => t.id), ["gang-lan-2"]);
+test("đào tạo: 11 tình huống (8 khó + ai bốc bài + gặng lần 2 + tự hại), mẫu Chủ tịch qua cổng; gặng lần 2, hoàn tiền, tự hại chuyển người", () => {
+  assert.equal(DT.TINH_HUONG.length, 11);
+  for (const id of ["mien-phi", "mac-ca", "nghi-lua", "may-ai", "ngoai-goi", "hoan-tien", "nang-loi", "lan-man", "ai-boc", "gang-lan-2", "tu-hai"]) assert.ok(DT.TINH_HUONG.find((t) => t.id === id), id);
+  assert.deepEqual(DT.TINH_HUONG.filter((t) => t.chuyen).map((t) => t.id).sort(), ["gang-lan-2", "hoan-tien", "tu-hai"]);
   const may = DT.TINH_HUONG.find((t) => t.id === "may-ai").mau, boc = DT.TINH_HUONG.find((t) => t.id === "ai-boc").mau;
   assert.ok(may.startsWith("Mình là trợ lý của Tarot debaderlis, phụ trách trải bài và nhắn với bạn"));
   assert.ok(boc.startsWith("Bài của bạn được xào mới và trải riêng cho đúng câu hỏi, theo cách trải của Tarot debaderlis"));
