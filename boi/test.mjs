@@ -1449,6 +1449,55 @@ test("gói N câu: tách đúng câu hỏi trong tin khách; gửi thừa thì c
   assert.deepEqual(DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 0, lich_su: [{ vai: "ghi_chu", noi_dung: "Khách gửi 3 câu…" }] }).lich_su, []);
 });
 
+// ---- Lỗi gấp 28/10 11:25: mỗi tình huống ở trang đào tạo là một cuộc chat riêng ----
+test("đào tạo: mỗi tình huống một cuộc — tự hại → câu 115; “Hỏi thêm ngoài gói”, “Đòi bói miễn phí” sau đó KHÔNG còn câu 115; gõ tay “em vẫn muốn chết” → vẫn 115", async () => {
+  const C115 = "Bạn đợi mình chút nhé. Nếu bạn đang nghĩ tới việc làm hại bản thân, hãy gọi ngay 115.";
+  // cầu nối giả mô phỏng máy nhà: thấy tin tự hại trong lịch sử gửi lên thì trả câu 115
+  const mayNha = (body) => {
+    const khach = body.lich_su.filter((m) => m.vai === "khach").map((m) => m.noi_dung);
+    if (khach.some((t) => /thiết sống|muốn chết/u.test(t))) return { chuyen_nguoi: true, ly_do: "tự hại", tra_loi: C115 };
+    if (/miễn phí/u.test(khach.at(-1))) return { tra_loi: "Shop chưa xem miễn phí được bạn ơi, bạn chọn gói 1 câu để mình trải kỹ cho bạn nhé." };
+    return { tra_loi: "Mỗi gói tính theo số câu bạn ơi, câu thêm mình tính như gói 1 câu nhé." };
+  };
+  const ls = [];
+  const gui = (tin, tinh_huong) => {
+    ls.push({ vai: "khach", noi_dung: tin, ...(tinh_huong ? { tinh_huong } : {}) });
+    const body = DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 2, lich_su: DT.lichSuCuoc(ls) });
+    assert.equal(body.cau_con, 2, "không đổi cau_con");
+    const tl = DT.docTraLoi(mayNha(body));
+    ls.push({ ...tl, ...(tinh_huong ? { tinh_huong } : {}) });
+    return { tl, body };
+  };
+  const th = (id) => DT.TINH_HUONG.find((x) => x.id === id);
+  const a = gui(th("tu-hai").tin, "tu-hai");
+  assert.equal(a.tl.noi_dung, C115);
+  const b = gui(th("ngoai-goi").tin, "ngoai-goi");
+  assert.notEqual(b.tl.noi_dung, C115);
+  assert.deepEqual(b.body.lich_su, [{ vai: "khach", noi_dung: th("ngoai-goi").tin }], "chỉ gửi cuộc của tình huống này");
+  const c = gui(th("mien-phi").tin, "mien-phi");
+  assert.match(c.tl.noi_dung, /chưa xem miễn phí/u);
+  assert.notEqual(c.tl.noi_dung, C115);
+  // tin gõ tay thuộc cuộc của tình huống gần nhất phía trên
+  const d = gui("Vậy thôi, cho em hỏi gói 1 câu bao nhiêu?");
+  assert.equal(d.body.lich_su.length, 3, "gõ tay tiếp nối cuộc “Đòi bói miễn phí”");
+  assert.equal(d.body.lich_su[0].noi_dung, th("mien-phi").tin);
+  // gõ tay ngay sau tình huống tự hại → cuộc tự hại → vẫn 115
+  const ls2 = [];
+  ls2.push({ vai: "khach", noi_dung: th("tu-hai").tin, tinh_huong: "tu-hai" }, { vai: "agent", noi_dung: C115, chuyen_nguoi: true, tinh_huong: "tu-hai" });
+  ls2.push({ vai: "khach", noi_dung: "em vẫn muốn chết" });
+  const e = DT.docTraLoi(mayNha(DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 2, lich_su: DT.lichSuCuoc(ls2) })));
+  assert.equal(e.noi_dung, C115);
+  // mẫu sửa: chỉ lịch sử của đúng cuộc, tới trước tin agent đang sửa
+  const iAgentB = ls.findIndex((m) => m.vai === "agent" && m.tinh_huong === "ngoai-goi");
+  assert.deepEqual(DT.lichSuCuoc(ls, iAgentB, { denCuoi: false }).map((m) => m.noi_dung), [th("ngoai-goi").tin]);
+  const ms = DT.yeuCauMauSua({ kenh: "01", goi: 3, lich_su: DT.lichSuCuoc(ls, iAgentB, { denCuoi: false }), ban_agent: ls[iAgentB].noi_dung, ban_chu_tich: "Bản sửa", ly_do: "" });
+  assert.ok(!ms.lich_su.some((m) => /thiết sống/u.test(m.noi_dung)), "mẫu sửa không kéo tin tự hại của tình huống khác");
+  // chưa bấm tình huống nào: cả lịch sử là một cuộc
+  assert.equal(DT.lichSuCuoc([{ vai: "khach", noi_dung: "a" }, { vai: "agent", noi_dung: "b" }, { vai: "khach", noi_dung: "c" }]).length, 3);
+  // trang có vạch ngăn “— Cuộc mới: … —”
+  assert.match(readFileSync(join(HERE, "dao-tao/dao-tao.js"), "utf8"), /— Cuộc mới: /u);
+});
+
 export async function run(extra = []) {
   let fail = 0;
   for (const [name, fn] of [...tests, ...extra]) {
