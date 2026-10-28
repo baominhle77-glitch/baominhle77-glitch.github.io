@@ -10,7 +10,7 @@ from narration_source import for_beat
 H=Path(__file__).resolve().parent
 # All episode/subject terminology is data supplied by the genre registry.
 GENRE=json.loads((R/'the_loai/khoa_hoc_vat_ly.json').read_text())
-VISUAL_BINDINGS=GENRE.get('visual_noun_bindings',{})
+VISUAL_BINDINGS=json.loads((H/'visual_noun_bindings.json').read_text())
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--video-root',type=Path,required=True);p.add_argument('--caption-alignment',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
@@ -91,7 +91,7 @@ def main():
      if cap:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[cap['id']+'-number'],attributes={}));continue
     aliases.update(tails='tail',light='surface',motion='flow',oil='tracer',solution='soap',pair='swirl',pumping='needle',pump='needle',injection='needle',field='flow',bottom='layer',loop='flow',atom='tail',trimethylammonium='head',interface='surface',rest='zone',start='ring',meniscus='edge',tip='needle',sheet='layer',household='soap',kitchen='bowl',liquid='water',mixture='soap',**{"zone's":'zone',"water's":'water'})
     target=aliases.get(key,target)
-    # The genre registry owns specialized visual entities and their beats.
+    # Episode-local data (visual_noun_bindings.json) owns beat-specific entities.
     # Normalization allows inflected nouns (micelles -> micelle).
     explicit=VISUAL_BINDINGS.get(key,{}).get(bid)
     if explicit is not None:target=explicit
