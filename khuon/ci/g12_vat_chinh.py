@@ -93,7 +93,10 @@ def main():
         else:
             tangs = [('9x16-tren', (0, 0, 1, tren), 'toan'), ('9x16-duoi', (0, tren, 1, 1 - tren), 'toan')]
         clip = b.get('khoang_clip', [])
-        idx = [i for i in range(len(fr)) if b['bat_dau'] <= i / FPS_DO < b['ket_thuc'] - 1e-9
+        # fps=FPS_DO lấy khung gần nhất trong cả ô 1/FPS_DO: mẫu cách mốc cắt < nửa ô có thể là khung beat kề
+        # (chữ/mặt nạ của beat kia) -> bỏ, chỉ đo mẫu chắc chắn thuộc beat này.
+        bien = 0.5 / FPS_DO
+        idx = [i for i in range(len(fr)) if b['bat_dau'] + bien <= i / FPS_DO < b['ket_thuc'] - bien
                and not any(c0 <= i / FPS_DO < c1 for c0, c1 in clip)]
         vung = b.get('vung_chu', {}).get(a.kho, [])
         for ten, (x, y, tw, th), kieu in tangs:
