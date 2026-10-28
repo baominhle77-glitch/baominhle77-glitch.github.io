@@ -246,3 +246,8 @@ details summary { cursor: pointer; color: var(--gold); min-height: 36px; display
 h1[tabindex]:focus { outline: none; }
 .flip-inner, .flip .face, .flip .back { display: block; }
 .flip { display: block; }
+
+/* Ô "Lời gửi khách": văn xuôi dễ đọc, tách khỏi bản giải */
+.lgk { margin: 10px 0 4px; padding: 14px 16px; border-radius: 14px; background: rgba(236, 208, 139, .06); border: 1px solid var(--line2); line-height: 1.7; overflow-wrap: anywhere; }
+.lgk p { margin: 0 0 .8em; }
+.lgk p:last-child { margin-bottom: 0; }

@@ -18,6 +18,7 @@ import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYST
 import { goiCoDau, tyLeDau, tyLeDauBai, matDau, normYN, suaTenLa, YN, BAO_MAT_DAU, NHAC_DAU, NGUONG_DAU, SCHEMA } from "./js/ai.js";
 import { probeBridge, bridge, aiKey, store } from "./js/store.js";
 import { ROUTES } from "./js/views.js";
+import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK } from "./js/loi.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const readJSON = (f) => JSON.parse(readFileSync(join(HERE, f), "utf8"));
@@ -681,6 +682,107 @@ test("(f) màn chọn bài: không có ô gõ số, không lộ dải số 01–
   assert.ok(!/id="typed"|<textarea/.test(html), "không có textarea #typed");
   assert.ok(!/01[–-]78|01[–-]36|(Tarot|Lenormand) \d+(\s*\/\s*\d+){2,}/.test(html), "không lộ dải số / số lá kiểu Tarot 3/3/3");
   assert.ok(!/<button[^>]*class="pick[^"]*"[^>]*>[^<]+<\/button>/.test(html), "lá úp không mang chữ/số hiển thị");
+  store.sessions.pop();
+});
+
+// ---- Ô "Lời gửi khách" ----
+const LGK_OK = [
+  "Bạn ơi, mình đã đọc kỹ câu bạn hỏi về chuyện công việc mới. Nhìn chung con đường đang mở ra theo hướng thuận, nhưng không phải kiểu dễ dàng ngồi chờ. Cơ hội đến từ chính những gì bạn đã chuẩn bị trong mấy tháng qua, và người quyết định đang để ý đến bạn nhiều hơn bạn nghĩ.",
+  "Điều mình thấy rõ nhất là bạn đang tự nghi ngờ mình hơi nhiều. Chính sự do dự đó làm bạn chậm một nhịp so với người khác. Nếu bạn nói rõ mong muốn của mình, mọi chuyện sẽ trôi hơn hẳn, và những lo lắng hiện giờ phần lớn sẽ tự tan khi bạn bắt tay vào việc.",
+  "Trong tuần này, bạn hãy viết ra ba điều bạn làm tốt nhất ở công việc cũ, rồi mang chúng vào buổi nói chuyện sắp tới. Đừng hạ giá bản thân, cứ bình tĩnh nói về những gì bạn đã làm được. Mình tin bạn sẽ thấy khác ngay sau buổi đó.",
+].join("\n\n");
+
+test("lời gửi khách — cổng kiểm: đạt khi văn xuôi chuẩn; bắt tên lá, gạch đầu dòng, đánh số, tiêu đề, in đậm, độ dài, số đoạn, mất dấu", () => {
+  assert.ok(demChu(LGK_OK) >= 120 && demChu(LGK_OK) <= 220, `mẫu dài ${demChu(LGK_OK)}`);
+  assert.deepEqual(kiemLoiGuiKhach(LGK_OK, db), { ok: true, loi: [] });
+  const bad = (t, re) => { const k = kiemLoiGuiKhach(t, db); assert.equal(k.ok, false, t.slice(0, 40)); assert.match(k.loi.join("; "), re); };
+  bad(LGK_OK.replace("Nhìn chung", "Lá Mặt Trăng cho thấy, nhìn chung"), /tên lá: Mặt Trăng/u);
+  bad(LGK_OK.replace("Nhìn chung", "The Tower cho thấy"), /tên lá: The Tower/u);
+  bad(LGK_OK.replace("Trong tuần này", "- Trong tuần này"), /đầu dòng/u);
+  bad(LGK_OK.replace("Trong tuần này", "• Trong tuần này"), /đầu dòng/u);
+  bad(LGK_OK.replace("Trong tuần này", "2. Trong tuần này"), /đánh số/u);
+  bad(LGK_OK.replace("Trong tuần này", "## Lời khuyên\nTrong tuần này"), /tiêu đề/u);
+  bad(LGK_OK.replace("Trong tuần này", "Lời khuyên:\nTrong tuần này"), /tiêu đề/u);
+  bad(LGK_OK.replace("Mình tin bạn", "**Mình tin bạn**"), /in đậm/u);
+  bad(LGK_OK.split("\n\n")[0], /dài|đoạn/u);
+  bad(LGK_OK.replace(/\n\n/g, " "), /1 đoạn/u);
+  bad(LGK_OK + "\n\n" + LGK_OK, /dài/u);
+  bad("Ban oi, minh da doc ky cau ban hoi. ".repeat(14) + "\n\nThang nay ban nen giu nhip.", /mất dấu/u);
+  assert.deepEqual(tenLaTrong("căn ngôi nhà nhỏ và trái tim ấm", db), [], "chữ thường trong câu không bị coi là tên lá");
+  for (const [w, re] of [["web", /web/], ["app", /app/], ["ứng dụng", /app/], ["AI", /AI/], ["hệ thống", /hệ thống/], ["máy", /máy/], ["công cụ", /công cụ/], ["bốc ngẫu nhiên", /ngẫu nhiên/], ["thuật toán", /thuật toán/], ["seed", /seed/], ["mã khoá", /mã khoá/]]) {
+    bad(LGK_OK.replace("Nhìn chung", `Theo ${w} thì nhìn chung`), new RegExp("chữ cấm: .*" + re.source, "u"));
+  }
+  assert.ok(kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Ai cũng mong điều tốt, và nhìn chung"), db).ok, "“Ai” (đại từ) không bị bắt nhầm là AI");
+  assert.match(SYSTEM_LGK, /Không nhắc tới web, ứng dụng, AI, công cụ, máy/u);
+});
+
+async function sessionNgauNhien(id, i) {
+  const sp = spreadById(id);
+  const q = { "3thang": "Thu nhập 3 tháng tới thế nào?", cokhong: "Có nên ký hợp đồng không?", tinhcam: "Người ấy có quay lại không?", vanhan: "Vận hạn 4–6 tuần tới", canam: "Tổng quan cả năm 2027", "12thang": "Tài chính năm 2027" }[id];
+  const s = await createSession({ cauHoi: q, spreadId: id, tiers: sp.tiers(2027), money: !!sp.money, reversals: i % 2 === 0 });
+  const p = startPick(s, 0, false);
+  for (const [ti, t] of s.tiers.entries()) {
+    p.cur = ti; p.draft = { tarot: [], lenormand: [] };
+    for (let k = 1; k <= t.t; k++) togglePick(s, p, "tarot", ((k * 7 + i * 13 + ti * 5) % 78) + 1);
+    for (let k = 1; k <= t.l; k++) togglePick(s, p, "lenormand", ((k * 5 + i * 11 + ti * 3) % 36) + 1);
+    p.saved[ti] = { tarot: [...p.draft.tarot], lenormand: [...p.draft.lenormand] };
+  }
+  addPickedRound(s, p.saved);
+  return s;
+}
+
+test("lời gửi khách — bản luật viết xuôi luôn qua cổng (nhiều mẫu trải, seed ngẫu nhiên), không tên lá", async () => {
+  const ids = ["3thang", "cokhong", "tinhcam", "vanhan", "canam", "12thang"];
+  for (let i = 0; i < 36; i++) {
+    const s = await sessionNgauNhien(ids[i % ids.length], i);
+    const settings = i % 3 ? {} : { xungHo: "Queen Linh" };
+    const t = loiGuiKhachLuat(db, s, analyze(db, s, settings), settings);
+    const k = kiemLoiGuiKhach(t, db);
+    assert.ok(k.ok, `${s.spreadId}: ${k.loi.join("; ")}\n${t}`);
+    assert.ok(doanVan(t).length >= 2 && doanVan(t).length <= 4);
+  }
+  // câu hỏi có tên lá thì không trích nguyên văn
+  const s = await sessionNgauNhien("cokhong", 1);
+  s.cauHoi = "Lá Mặt Trăng hôm qua có nghĩa là tôi nên dừng không?";
+  assert.ok(kiemLoiGuiKhach(loiGuiKhachLuat(db, s, analyze(db, s, {}), {}), db).ok);
+});
+
+test("lời gửi khách — AI đạt thì dùng; trượt thì viết lại đúng 1 lần; vẫn trượt thì bản luật", async () => {
+  const s = await sessionNgauNhien("3thang", 2);
+  const rule = analyze(db, s, {});
+  const ok = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: LGK_OK }, call: async () => assert.fail("không được gọi lại") });
+  assert.deepEqual([ok.nguon, ok.text], ["ai", LGK_OK]);
+  const calls = [];
+  const coTen = LGK_OK.replace("Nhìn chung", "Lá Vua Gậy cho thấy, nhìn chung");
+  const r2 = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: coTen, tong_quan: "x", tang: [] }, call: async (sys, msg) => { calls.push({ sys, msg }); return LGK_OK; } });
+  assert.equal(calls.length, 1, "viết lại đúng 1 lần");
+  assert.equal(calls[0].sys, SYSTEM_LGK);
+  assert.match(calls[0].msg, /tên lá: Vua Gậy/u, "lời nhắc nói rõ lý do bị trả lại");
+  assert.deepEqual([r2.nguon, r2.text], ["ai-viet-lai", LGK_OK]);
+  let n = 0;
+  const r3 = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: "- Mặt Trăng: lo âu" }, call: async () => { n++; return "1. Vua Gậy\n2. Con Rắn"; } });
+  assert.equal(n, 1);
+  assert.equal(r3.nguon, "luat");
+  assert.ok(kiemLoiGuiKhach(r3.text, db).ok, "bản luật dự phòng qua cổng");
+  const r4 = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: "x" }, call: async () => { throw new TypeError("Failed to fetch"); } });
+  assert.equal(r4.nguon, "luat", "lỗi mạng khi viết lại → bản luật");
+  assert.ok(SCHEMA.required.includes("loi_gui_khach"));
+  assert.match(SYSTEM_READING, /LỜI GỬI KHÁCH/u);
+  assert.match(SYSTEM_READING, /KHÔNG nêu tên bất kỳ lá nào/u);
+});
+
+test("lời gửi khách — màn giải có ô #loi-gui-khach riêng và nút chép riêng", async () => {
+  const s = await sessionNgauNhien("tinhcam", 3);
+  store.db = db;
+  store.sessions.push(s);
+  const [, view] = ROUTES.find(([re]) => re.test(`/giai/${s.id}`));
+  const { html } = view(`/giai/${s.id}`.match(/^\/giai\/([\w-]+)$/), new URLSearchParams("ban=luat"));
+  assert.match(html, /id="loi-gui-khach"/);
+  assert.match(html, /id="chepLgk"[^>]*>Chép lời gửi khách</);
+  const m = html.match(/id="loi-gui-khach"[^>]*data-text="([^"]*)"/);
+  const txt = m[1].replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'");
+  assert.ok(kiemLoiGuiKhach(txt, db).ok, "ô hiện bản qua cổng");
+  assert.ok(html.indexOf('id="loi-gui-khach"') < html.indexOf('id="aiCard"'), "ô tách riêng, đứng trước bản giải đầy đủ");
   store.sessions.pop();
 });
 
