@@ -76,6 +76,9 @@ class Regressions(unittest.TestCase):
    nouns=visual_nouns(sentence)
    self.assertFalse({'keeps','makes','shows','gets'} & {x['word'].lower() for x in nouns},sentence)
   self.assertIn('head',[x['lemma'] for x in visual_nouns('The heads and tails are distinct.')])
+  history='Two armies move east. The route keeps growing. The year becomes 1601. The troops advance east. This campaign remains fictional.'
+  self.assertNotIn('keeps',[x['word'].lower() for x in visual_nouns(history)])
+  self.assertIn('army',[x['lemma'] for x in visual_nouns(history)])
  def test_direction_adverb_after_object_is_not_an_unmapped_image_noun(self):
   nouns=visual_nouns('Flow drags water outward.');self.assertNotIn('outward',[n['lemma'] for n in nouns]);self.assertIn('water',[n['lemma'] for n in nouns]);self.assertIn('flow',[n['lemma'] for n in nouns])
  def test_decimal_speech_is_screen_data_not_an_image_object(self):

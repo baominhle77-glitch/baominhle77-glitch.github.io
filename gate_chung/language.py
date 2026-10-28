@@ -46,7 +46,9 @@ def visual_nouns(text,language='en'):
    # never blacklist the same spelling when it is a genuine plural noun.
    verb_lemma=wn.morphy(word.lower(),wn.VERB)
    common_predicates={'keep','make','show','get','become','remain','seem','grow','give','take','leave','hold','turn','send','bring'}
-   subject_before=prev[1].startswith('NN') or prev[1] in {'PRP','NNP','NNPS'}
+   # Multi-sentence narration can tag the subject noun itself as JJ
+   # ("The route keeps growing" -> route/JJ); a determiner + noun sense is a subject.
+   subject_before=prev[1].startswith('NN') or prev[1] in {'PRP','NNP','NNPS'} or (i>1 and tags[i-2][1] in {'DT','PRP$','CD'} and bool(wn.synsets(prev[0].lower(),pos=wn.NOUN)))
    next_is_predicate_tail=(nxt[1].startswith(('VB','JJ','RB')) or nxt[1] in {'DT','IN','TO','WRB','WP','WDT'})
    mistagged_predicate=(word.lower().endswith('s') and verb_lemma in common_predicates and
                         verb_lemma!=word.lower() and subject_before and
