@@ -18,6 +18,7 @@ import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYST
 import { goiCoDau, tyLeDau, tyLeDauBai, matDau, normYN, suaTenLa, YN, BAO_MAT_DAU, NHAC_DAU, NGUONG_DAU, SCHEMA } from "./js/ai.js";
 import { probeBridge, bridge, aiKey, store } from "./js/store.js";
 import { ROUTES } from "./js/views.js";
+import * as DT from "./dao-tao/dao-tao-core.js";
 import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai } from "./js/auto.js";
 import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK } from "./js/loi.js";
 
@@ -831,6 +832,82 @@ test("BoiAuto: gọi nhiều câu cùng lúc thì xếp hàng, câu nào xong c�
   const ok = auto.giai("Câu sau vẫn chạy?", { trai: "1la" });
   await assert.rejects(bad, /Thiếu câu hỏi/u);
   assert.match((await ok).maKhoa, /^[0-9a-f]{64}$/);
+});
+
+// ---- Trang Đào tạo nhắn tin ----
+test("đào tạo: 10 tình huống (8 khó + ai bốc bài + gặng lần 2), mẫu Chủ tịch qua cổng, gặng lần 2 chuyển người", () => {
+  assert.equal(DT.TINH_HUONG.length, 10);
+  for (const id of ["mien-phi", "mac-ca", "nghi-lua", "may-ai", "ngoai-goi", "hoan-tien", "nang-loi", "lan-man", "ai-boc", "gang-lan-2"]) assert.ok(DT.TINH_HUONG.find((t) => t.id === id), id);
+  assert.deepEqual(DT.TINH_HUONG.filter((t) => t.chuyen).map((t) => t.id), ["gang-lan-2"]);
+  const may = DT.TINH_HUONG.find((t) => t.id === "may-ai").mau, boc = DT.TINH_HUONG.find((t) => t.id === "ai-boc").mau;
+  assert.ok(may.startsWith("Mình là trợ lý của Tarot debaderlis, phụ trách trải bài và nhắn với bạn"));
+  assert.ok(boc.startsWith("Bài của bạn được xào mới và trải riêng cho đúng câu hỏi, theo cách trải của Tarot debaderlis"));
+  for (const t of DT.TINH_HUONG) if (t.mau) assert.ok(DT.kiemTraLoiAgent(t.mau).ok, t.id);
+  assert.equal(DT.NHAN_CHUYEN, "CHUYỂN CHỦ TỊCH TRẢ LỜI");
+  assert.deepEqual(DT.KENH, ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]);
+});
+
+test("đào tạo: cổng câu trả lời agent chặn “người thật”, “bốc tay”, “tự tay”, “không phải AI/máy”, chữ AI, web, tên công cụ", () => {
+  const chan = (t, re) => { const k = DT.kiemTraLoiAgent(t); assert.equal(k.ok, false, t); assert.match(k.loi.join(", "), re); };
+  chan("Mình là người thật mà bạn.", /người thật/u);
+  chan("Bài được bốc tay cẩn thận.", /bốc tay/u);
+  chan("Mình tự tay xào bài cho bạn.", /tự tay/u);
+  chan("Mình không phải AI đâu.", /không phải AI/u);
+  chan("Mình không phải là máy nha.", /không phải máy/u);
+  chan("Bên mình dùng AI để giải.", /AI/u);
+  chan("Bạn vào web của bên mình nhé.", /web/u);
+  chan("Lời giải soạn bằng Gemini.", /tên công cụ|AI/u);
+  chan("Bên mình dùng ChatGPT.", /tên công cụ/u);
+  chan("Đây là công cụ của mình.", /công cụ/u);
+  assert.ok(DT.kiemTraLoiAgent("Ai cũng có lúc thấy mệt mà bạn. Mình ở đây nghe bạn kể.").ok, "“Ai” đại từ không bị chặn");
+  // ô Lời gửi khách cũng chặn các chuỗi này
+  assert.match(kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Mình là người thật, nhìn chung"), db).loi.join(", "), /người thật/u);
+});
+
+test("đào tạo: gọi cầu nối đúng route/khuôn; cầu nối tắt → lỗi rõ, không rơi về AI khác; chuyển người hiện nhãn; mẫu sửa mới nhất trên đầu", async () => {
+  assert.equal(DT.goc("https://abc.trycloudflare.com/gemini"), "https://abc.trycloudflare.com");
+  assert.equal(DT.goc("http://127.0.0.1:8787/gemini"), "http://127.0.0.1:8787");
+  const lich = [{ vai: "khach", noi_dung: "Chào chị" }, { vai: "he_thong", noi_dung: "lỗi" }, { vai: "agent", noi_dung: "Chào bạn" }];
+  assert.deepEqual(DT.yeuCauTraLoi({ kenh: "03", goi: "3", cau_con: "2", lich_su: lich }), { kenh: "03", goi: 3, cau_con: 2, lich_su: [{ vai: "khach", noi_dung: "Chào chị" }, { vai: "agent", noi_dung: "Chào bạn" }] });
+  assert.deepEqual(Object.keys(DT.yeuCauMauSua({ kenh: "01", goi: 1, lich_su: lich, ban_agent: "a", ban_chu_tich: " b ", ly_do: " c " })), ["kenh", "goi", "lich_su", "ban_agent", "ban_chu_tich", "ly_do"]);
+  // cầu nối tắt
+  const calls = [];
+  const e1 = await DT.goiTroLy({ base: "", path: "/tro_ly/tra_loi", body: {}, fetchImpl: async (u) => { calls.push(u); } }).then(() => null, (e) => e);
+  assert.ok(e1?.tat && e1.message === DT.LOI_CAU_NOI_TAT);
+  assert.equal(calls.length, 0, "không gọi nơi nào khác khi cầu nối tắt");
+  const e2 = await DT.goiTroLy({ base: "http://127.0.0.1:8787", path: "/tro_ly/tra_loi", body: {}, fetchImpl: async () => { throw new TypeError("Failed to fetch"); } }).then(() => null, (e) => e);
+  assert.ok(e2?.tat);
+  const e3 = await DT.goiTroLy({ base: "http://x", path: "/tro_ly/mau_sua", method: "GET", fetchImpl: async () => new Response("{}", { status: 404 }) }).then(() => null, (e) => e);
+  assert.match(e3.message, /chưa có route \/tro_ly\/mau_sua/u);
+  const hang = (u, o) => new Promise((_, rej) => o.signal.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError"))));
+  const e4 = await DT.goiTroLy({ base: "http://x", path: "/tro_ly/tra_loi", body: {}, fetchImpl: hang, ms: 30 }).then(() => null, (e) => e);
+  assert.match(e4.message, /quá lâu/u);
+  // cầu nối sống: đúng route, đúng khuôn, kèm mã ghép
+  const seen = [];
+  const ok = await DT.goiTroLy({ base: "https://t.example", token: "MA", path: "/tro_ly/tra_loi", body: { kenh: "01" }, fetchImpl: async (u, o) => { seen.push({ u, o }); return new Response(JSON.stringify({ tra_loi: "Chào bạn, mình nghe đây.", ghi_chu_ky_thuat: "ok" }), { status: 200 }); } });
+  assert.equal(seen[0].u, "https://t.example/tro_ly/tra_loi");
+  assert.equal(seen[0].o.method, "POST");
+  assert.equal(seen[0].o.headers["x-boi-token"], "MA");
+  assert.deepEqual(JSON.parse(seen[0].o.body), { kenh: "01" });
+  assert.deepEqual(DT.docTraLoi(ok), { vai: "agent", noi_dung: "Chào bạn, mình nghe đây.", ghi_chu: "ok" });
+  // chuyển người: câu giữ khách mặc định, nhãn chuyển
+  const cn = DT.docTraLoi({ chuyen_nguoi: true, ly_do: "khách gặng lần 2" });
+  assert.deepEqual([cn.chuyen_nguoi, cn.noi_dung, cn.ly_do], [true, "Bạn đợi mình chút nhé.", "khách gặng lần 2"]);
+  // agent lỡ lộ chữ → BỊ CHẶN
+  assert.deepEqual(DT.docTraLoi({ tra_loi: "Mình là người thật, không phải AI." }).bi_chan, ["AI", "người thật", "không phải AI"]);
+  assert.throws(() => DT.docTraLoi({ tra_loi: "" }), /rỗng/u);
+  // mẫu sửa mới nhất trên đầu
+  assert.deepEqual(DT.sapMauSua([{ ban_chu_tich: "a", luc: "2026-10-28T01:00:00Z" }, { ban_chu_tich: "b", luc: "2026-10-28T03:00:00Z" }]).map((m) => m.ban_chu_tich), ["b", "a"]);
+  assert.deepEqual(DT.sapMauSua({ mau: [{ ban_chu_tich: "cũ" }, { ban_chu_tich: "mới" }] }).map((m) => m.ban_chu_tich), ["mới", "cũ"]);
+});
+
+test("đào tạo: trang noindex, không gắn link ở trang khách; service worker không chiếm trang đào tạo", () => {
+  const html = readFileSync(join(HERE, "dao-tao/index.html"), "utf8");
+  assert.match(html, /<meta name="robots" content="noindex/);
+  for (const f of ["index.html", "js/app.js", "js/views.js", "manifest.webmanifest"]) assert.ok(!readFileSync(join(HERE, f), "utf8").includes("dao-tao"), `${f} không được trỏ tới trang đào tạo`);
+  const sw = readFileSync(join(HERE, "sw.js"), "utf8");
+  assert.match(sw, /\/dao-tao\/"\)\) return;/);
+  assert.ok(!/dao-tao/.test(sw.slice(sw.indexOf("const CORE"), sw.indexOf("];"))), "không cache trang đào tạo");
 });
 
 export async function run(extra = []) {

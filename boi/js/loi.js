@@ -42,6 +42,14 @@ export const CHU_CAM = [
   ["thuật toán", new RegExp(B("thuật toán|algorithm"), "iu")],
   ["seed", new RegExp(B("seed"), "iu")],
   ["mã khoá", new RegExp(B("mã khoá|mã khóa|SHA"), "iu")],
+  // tên công cụ
+  ["tên công cụ", new RegExp(B("ChatGPT|OpenAI|Claude|Anthropic|Copilot|Google|Apps Script|Playwright|Python|LLM"), "iu")],
+  // không khẳng định là người, không chối là máy (lệnh Chủ tịch 28/10)
+  ["người thật", new RegExp(B("người thật"), "iu")],
+  ["bốc tay", new RegExp(B("bốc tay|bốc bằng tay|xào bằng tay"), "iu")],
+  ["tự tay", new RegExp(B("tự tay"), "iu")],
+  ["không phải AI", new RegExp(B("không phải (?:là )?(?:AI|A\\.I\\.?|trí tuệ nhân tạo|bot)"), "iu")],
+  ["không phải máy", new RegExp(B("không phải (?:là )?máy"), "iu")],
 ];
 export const chuCamTrong = (text) => CHU_CAM.filter(([, re]) => re.test(text)).map(([ten]) => ten);
 
@@ -105,8 +113,8 @@ export function loiGuiKhachLuat(db, session, rule, settings = {}) {
 
   // Đoạn 1: mở + câu trả lời chính
   const p1 = [];
-  // câu hỏi có chứa tên lá thì không trích nguyên văn
-  const q = tenLaTrong(session.cauHoi, db).length ? "" : ` “${session.cauHoi}”`;
+  // câu hỏi có tên lá hoặc quá dài (tin tâm sự) thì không trích nguyên văn
+  const q = tenLaTrong(session.cauHoi, db).length || demChu(session.cauHoi) > 18 ? "" : ` “${session.cauHoi}”`;
   p1.push(goi ? `${goi} ơi, mình đã đọc kỹ câu bạn hỏi${q}.` : `Về câu bạn hỏi${q}, mình đã đọc kỹ toàn bộ trải bài.`);
   p1.push(pick(MO[bk]));
   if (yesno) {

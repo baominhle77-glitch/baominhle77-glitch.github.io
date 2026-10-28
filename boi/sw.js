@@ -1,5 +1,5 @@
 // Service worker của boi/: chạy offline phần luật (trang, mã, dữ liệu lá). Gọi AI luôn đi thẳng mạng, không cache.
-const CACHE = "boi-v10";
+const CACHE = "boi-v11";
 const CORE = [
   "./", "index.html", "manifest.webmanifest", "css/app.css",
   "js/app.js", "js/views.js", "js/store.js", "js/state.js", "js/core.js", "js/parser.js", "js/spreads.js", "js/topic.js",
@@ -25,6 +25,8 @@ self.addEventListener("fetch", (e) => {
   const same = url.origin === self.location.origin && url.pathname.startsWith(new URL(self.registration.scope).pathname);
   const font = FONT_HOSTS.includes(url.hostname);
   if (!same && !font) return;
+  // Trang Đào tạo nhắn tin không nằm trong ứng dụng chính: đi thẳng mạng, không trả nhầm index.html
+  if (same && url.pathname.includes("/dao-tao/")) return;
   if (font) {
     e.respondWith(caches.open(CACHE).then(async (c) => (await c.match(req)) || fetch(req).then((r) => { if (r.ok || r.type === "opaque") c.put(req, r.clone()); return r; })));
     return;
