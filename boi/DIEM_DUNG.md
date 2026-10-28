@@ -22,5 +22,5 @@ Cập nhật: 28/10/2026 (GMT+7). Task-ID: BOI-20261028-01. Nhánh: `claude/slee
 - Sổ khoá `docs/handover/ACTIVE_TASKS.json` chưa ghi BOI-20261028-01 (lệnh chỉ sửa `boi/**`), nên `coordination-guard` đỏ trên các PR này.
 
 ## Lệnh chạy lại
-- `node boi/test.mjs` (47/47 đạt ngày 28/10/2026).
+- `node boi/test.mjs` (49/49 đạt ngày 28/10/2026).
 - Mở thử: https://baominhle77-glitch.github.io/boi/dao-tao/ (nút “Đào tạo nhắn tin” ở thanh tab dưới của web bói).
