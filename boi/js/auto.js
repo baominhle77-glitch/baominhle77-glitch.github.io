@@ -21,21 +21,38 @@ export function viTriNgauNhien(n, k, rand = globalThis.crypto) {
   return [...out];
 }
 
-// "1la" | "3la" | id mẫu trải có sẵn | "tu-chon" (gợi ý theo câu hỏi)
-export function chonTrai(cauHoi, trai = "3la") {
-  if (trai === "tu-chon" || trai === "auto") return spreadById(suggestSpread(cauHoi).id);
+// Khách không chọn kiểu trải: agent tự chọn theo câu hỏi ("tu-chon", mặc định). Vẫn nhận "1la" | "3la" | id mẫu trải
+// khi truyền tường minh (để test).
+export function chonTrai(cauHoi, trai = "tu-chon") {
+  if (!trai || trai === "tu-chon" || trai === "auto") return spreadById(suggestSpread(cauHoi).id);
   const sp = SPREADS.find((x) => x.id === trai);
   if (!sp) throw new Error(`Không có mẫu trải "${trai}". Dùng: ${SPREADS.map((x) => x.id).join(", ")}, tu-chon.`);
   return sp;
 }
 
+// Tham số trải do agent tự điền, không hỏi khách: năm (câu hỏi nêu năm thì theo năm đó, không thì năm mặc định),
+// bảng tiền (mẫu trải tiền hoặc câu hỏi về tiền), tên tầng Có/Không và trải tự do đặt theo chính câu hỏi.
+export function thamSoTrai(cauHoi, sp, goiY = suggestSpread(cauHoi)) {
+  const nam = sp.needsYear ? (goiY.year >= 1900 && goiY.year <= 2200 ? goiY.year : defaultYear()) : null;
+  let tiers = sp.tiers(nam || defaultYear()).map((t) => ({ ...t }));
+  const cau = cauHoi.trim().replace(/\s+/g, " ").slice(0, 120);
+  if (sp.id === "cokhong") tiers = [cau, "Làm theo hướng đó thì có thuận không?", "Kết quả có giữ được lâu không?"].map((ten, i) => ({ ...tiers[i], ten }));
+  if (sp.id === "tudo") tiers = [{ ten: cau, t: 3, l: 3, pos: ["Hiện trạng", "Diễn biến", "Kết quả"] }];
+  return { tiers, nam, money: !!(sp.money || goiY.money) };
+}
+
 // tenKhach: tên khách của riêng câu này (trống = gọi "bạn"); settings.xungHo KHÔNG được dùng để gọi khách
-export async function giaiTuDong({ db, cauHoi, trai = "3la", nguoc = false, tenKhach = "", settings = {}, key = null, fetchImpl, storage, onSession }) {
+// trai: mặc định "tu-chon" — mỗi câu (kể cả nhiều câu trong một gói) tự chọn trải riêng theo nội dung câu đó
+export async function giaiTuDong({ db, cauHoi, trai = "tu-chon", nguoc = false, tenKhach = "", settings = {}, key = null, fetchImpl, storage, onSession }) {
   const q = String(cauHoi || "").trim();
   if (!q) throw new Error("Thiếu câu hỏi.");
   if (!db) throw new Error("Bộ bài chưa tải xong.");
+  const goiY = suggestSpread(q);
   const sp = chonTrai(q, trai);
-  const s = await createSession({ cauHoi: q, tenKhach, spreadId: sp.id, tiers: sp.tiers(defaultYear()), money: !!sp.money, reversals: !!nguoc, nam: sp.needsYear ? defaultYear() : null });
+  const tuChon = sp.id === goiY.id && (!trai || trai === "tu-chon" || trai === "auto");
+  const lyDoTrai = tuChon ? goiY.why : `trải được chỉ định: ${sp.ten}`;
+  const ts = thamSoTrai(q, sp, goiY);
+  const s = await createSession({ cauHoi: q, tenKhach, spreadId: sp.id, tiers: ts.tiers, money: ts.money, reversals: !!nguoc, nam: ts.nam });
   // bản giải chi tiết của lượt tự động cũng gọi đúng khách (hoặc "bạn"), không dùng xưng hô đã lưu
   const caiDat = { ...settings, xungHo: s.tenKhach || "bạn" };
   await ensureMapping(s, 0);
@@ -59,7 +76,7 @@ export async function giaiTuDong({ db, cauHoi, trai = "3la", nguoc = false, tenK
   // lý do lời gửi rơi về bản luật, hoặc đường AI đã đi (trạm 429 → cầu nối) — để biết đường nào cần chữa
   const lyDo = lgk.nguon === "luat" ? (reading ? `${cuu ? `${cuu}; ` : ""}bị cổng trả lại: ${lgk.loi.join("; ")}` : key ? (aiLoi || "AI lỗi: không rõ") : "không gọi AI") : cuu;
   if (lyDo && key) console[lgk.nguon === "luat" ? "warn" : "info"]("[loi-gui-khach]", lgk.nguon === "luat" ? "bản theo luật vì:" : "đường AI:", lyDo);
-  return { loiGuiKhach: lgk.text, maKhoa: s.hash, nguon: lgk.nguon, lyDo, trai: sp.id, phien: s.id, tenKhach: s.tenKhach };
+  return { loiGuiKhach: lgk.text, maKhoa: s.hash, nguon: lgk.nguon, lyDo, trai: sp.id, tenTrai: sp.ten, lyDoTrai, phien: s.id, tenKhach: s.tenKhach };
 }
 
 // Hàng đợi: lời gọi sau chờ lời gọi trước xong (kể cả khi lời trước lỗi)

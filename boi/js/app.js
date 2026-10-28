@@ -83,7 +83,8 @@ const dbReady = Promise.all(["data/tarot.json", "data/lenormand.json"].map((u) =
     store.db = mergeKnowledge({ tarot, lenormand }, tThem, lThem);
   });
 
-// Cho trợ lý tự động: window.BoiAuto.giai(cauHoi, {trai:"1la"|"3la"|…}) → Promise<{loiGuiKhach, maKhoa}>
+// Cho trợ lý tự động: window.BoiAuto.giai(cauHoi, {tenKhach}) → Promise<{loiGuiKhach, maKhoa, trai, lyDoTrai, …}>;
+// kiểu trải agent tự chọn theo câu hỏi (trai chỉ truyền khi test)
 window.BoiAuto = taoBoiAuto(async () => {
   await dbReady;
   return { db: store.db, settings: store.settings, key: aiKey(), storage, onSession: (s) => { store.sessions.push(s); persist(); } };

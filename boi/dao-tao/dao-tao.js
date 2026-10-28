@@ -11,8 +11,12 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const th = (id) => TINH_HUONG.find((t) => t.id === id);
 
+// Khách không chọn kiểu trải: agent tự chọn theo câu hỏi. Dữ liệu cũ có "trai" thì bỏ qua.
 const st = (() => {
-  try { return { kenh: "01", goi: 0, cau_con: 0, trai: "3la", lich_su: [], ...JSON.parse(storage?.getItem(KEY) || "{}") }; } catch (_) { return { kenh: "01", goi: 0, cau_con: 0, trai: "3la", lich_su: [] }; }
+  let x = {};
+  try { x = JSON.parse(storage?.getItem(KEY) || "{}") || {}; } catch (_) { x = {}; }
+  const { trai: _boQua, ...con } = x;
+  return { kenh: "01", goi: 0, cau_con: 0, lich_su: [], ...con };
 })();
 const luu = () => { try { storage?.setItem(KEY, JSON.stringify(st)); } catch (_) { /* bỏ qua */ } };
 let thDangChon = null, dangGui = false, suaO = -1;
@@ -43,7 +47,6 @@ function veThanh() {
   $("kenh").innerHTML = KENH.map((k) => `<option ${k === st.kenh ? "selected" : ""}>${k}</option>`).join("");
   $("goi").innerHTML = GOI.map((g) => `<option value="${g.v}" ${g.v === Number(st.goi) ? "selected" : ""}>${esc(g.ten)}</option>`).join("");
   $("cauCon").value = st.cau_con;
-  $("trai").value = st.trai;
   $("tinhHuong").innerHTML = TINH_HUONG.map((t) => `<button type="button" class="chip${t.chuyen ? " chuyen" : ""}" data-th="${t.id}">${esc(t.ten)}</button>`).join("");
   veNutTrai();
 }
@@ -59,13 +62,15 @@ function veTin(m, i) {
     m.bi_chan?.length ? `<span class="nhan chan">BỊ CHẶN: ${esc(m.bi_chan.join(", "))}</span>` : "",
     m.loai === "loi_gui_khach" ? `<span class="nhan lgk">Lời gửi khách · mã ${esc((m.ma_khoa || "").slice(0, 10))}</span>` : "",
   ].filter(Boolean).join(" ");
+  // chỉ hiện ở trang đào tạo, không nằm trong lời gửi khách
+  const chon = m.loai === "loi_gui_khach" && m.ten_trai ? `<p class="note chon-trai">Agent chọn: ${esc(m.ten_trai)}${m.ly_do_trai ? ` — ${esc(m.ly_do_trai)}` : ""}</p>` : "";
   const sua = m.sua ? `<p class="note">✎ Bản Chủ tịch sửa: ${esc(m.sua.ban_chu_tich)}${m.sua.ly_do ? ` — ${esc(m.sua.ly_do)}` : ""}</p>` : "";
   const mau = th(m.tinh_huong)?.mau;
   const form = suaO === i ? `<form class="sua-form" data-sua="${i}">
       <label>Bản đúng<textarea name="ban" rows="3" required>${esc(m.sua?.ban_chu_tich || mau || m.noi_dung)}</textarea></label>
       <label>Lý do<input name="lydo" placeholder="Vì sao sửa"></label>
       <div class="btns"><button class="btn small primary" type="submit">Gửi mẫu sửa</button><button class="btn small ghost" type="button" data-huy>Huỷ</button></div></form>` : "";
-  return `<div class="msg assistant"><div class="who">Agent</div>${nhan ? `<div>${nhan}</div>` : ""}${m.noi_dung.split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}
+  return `<div class="msg assistant"><div class="who">Agent</div>${nhan ? `<div>${nhan}</div>` : ""}${m.noi_dung.split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}${chon}
     ${m.ghi_chu ? `<details><summary class="note">Ghi chú kỹ thuật</summary><p class="note">${esc(m.ghi_chu)}</p></details>` : ""}
     ${sua}${suaO === i ? form : `<button type="button" class="btn small ghost" data-sua-mo="${i}">Sửa câu này</button>`}</div>`;
 }
@@ -110,9 +115,9 @@ async function traiBai() {
   const b = $("traiBai");
   b.disabled = true; b.textContent = "Đang trải bài…";
   try {
-    const r = await auto.giai(q, { trai: st.trai });
+    const r = await auto.giai(q);
     const k = kiemTraLoiAgent(r.loiGuiKhach);
-    st.lich_su.push({ vai: "agent", noi_dung: r.loiGuiKhach, loai: "loi_gui_khach", ma_khoa: r.maKhoa, ...(k.ok ? {} : { bi_chan: k.loi }) });
+    st.lich_su.push({ vai: "agent", noi_dung: r.loiGuiKhach, loai: "loi_gui_khach", ma_khoa: r.maKhoa, ten_trai: r.tenTrai, ly_do_trai: r.lyDoTrai, ...(k.ok ? {} : { bi_chan: k.loi }) });
     st.cau_con = Math.max(0, Number(st.cau_con) - 1);
     $("cauCon").value = st.cau_con;
     luu(); veChat();
@@ -134,7 +139,6 @@ veThanh(); veChat();
 $("kenh").onchange = (e) => { st.kenh = e.target.value; luu(); };
 $("goi").onchange = (e) => { st.goi = Number(e.target.value); st.cau_con = st.goi; $("cauCon").value = st.cau_con; luu(); veNutTrai(); };
 $("cauCon").oninput = (e) => { st.cau_con = Math.max(0, Number(e.target.value) || 0); luu(); veNutTrai(); };
-$("trai").onchange = (e) => { st.trai = e.target.value; luu(); };
 $("thuLai").onclick = doCauNoi;
 $("taiMau").onclick = taiMau;
 $("traiBai").onclick = traiBai;

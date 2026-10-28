@@ -22,11 +22,14 @@ Cập nhật: 28/10/2026 (GMT+7). Task-ID: BOI-20261028-01. Nhánh: `claude/slee
 ## Trạm 429 → cầu nối (mục 34)
 - Trạm 429/quá giờ → dò cầu nối một lần (dù chưa bật cờ); có thì gọi lại qua cầu nối (nguồn “ai”, lyDo “trạm 429 → cầu nối”); không có → bản luật, lyDo “trạm 429, cầu nối không có → luật”.
 
+## Agent tự chọn kiểu trải (mục 35)
+- `BoiAuto.giai(q, {tenKhach})` không truyền trai → tự chọn theo câu hỏi (`suggestSpread`), trả `trai`, `tenTrai`, `lyDoTrai`. Trang đào tạo không còn ô Kiểu trải.
+
 ## Việc còn lại (ngoài `boi/`, phiên máy nhà làm)
 - Hai route `POST /tro_ly/tra_loi`, `POST/GET /tro_ly/mau_sua` trên cầu nối máy nhà (trang đào tạo đã gọi đúng khuôn, xem `boi/dao-tao/dao-tao-core.js`).
 - Agent máy nhà áp đúng cổng chặn chữ như `kiemTraLoiAgent` (danh sách `CHU_CAM` trong `boi/js/loi.js`) và trả `{chuyen_nguoi:true, ly_do}` khi khách đòi hoàn tiền hoặc có ý tự hại; khi khách gặng hỏi lần 2 có phải AI không thì trả lời thật theo mẫu phiếu v5.
 - Sổ khoá `docs/handover/ACTIVE_TASKS.json` chưa ghi BOI-20261028-01 (lệnh chỉ sửa `boi/**`), nên `coordination-guard` đỏ trên các PR này.
 
 ## Lệnh chạy lại
-- `node boi/test.mjs` (51/51 đạt ngày 28/10/2026).
+- `node boi/test.mjs` (55/55 đạt ngày 28/10/2026).
 - Mở thử: https://baominhle77-glitch.github.io/boi/dao-tao/ (nút “Đào tạo nhắn tin” ở thanh tab dưới của web bói).
