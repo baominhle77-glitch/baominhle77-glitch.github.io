@@ -1252,6 +1252,63 @@ test("trang đào tạo không còn ô “Kiểu trải”; nút Trải bài g�
   assert.deepEqual(req.lich_su, [{ vai: "agent", noi_dung: "Lan ơi…" }]);
 });
 
+// ---- v11 (28/10): đường hầm hỏng thoáng qua ở trang đào tạo → nối lại rồi gửi lại 1 lần ----
+test("đào tạo: lỗi mạng lần 1 → nối lại (dò lại cầu nối) rồi gửi lại đúng tin đó, hiện câu agent, không ⚠; hỏng cả 2 lần → báo lỗi", async () => {
+  let lan = 0, noiLai = 0;
+  const bat = [], gui = [];
+  const fetch1 = async (u, o) => { lan++; gui.push(o.body); if (lan === 1) throw new TypeError("Failed to fetch"); return new Response(JSON.stringify({ tra_loi: "Mình nghe bạn đây." }), { status: 200 }); };
+  const body = DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 3, lich_su: [{ vai: "khach", noi_dung: "Em mệt lắm rồi…" }] });
+  const j = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body, fetchImpl: fetch1 }), { noiLai: async () => { noiLai++; }, onNoiLai: (on) => bat.push(on) });
+  assert.equal(DT.docTraLoi(j).noi_dung, "Mình nghe bạn đây.");
+  assert.equal(lan, 2); assert.equal(noiLai, 1);
+  assert.equal(gui[0], gui[1], "gửi lại đúng tin đó");
+  assert.deepEqual(bat, [true, false], "dòng “Đang nối lại máy nhà…” bật rồi tắt");
+  // hỏng cả hai lần → lỗi (trang mới hiện ⚠)
+  let n = 0;
+  const e = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body, fetchImpl: async () => { n++; throw new TypeError("Failed to fetch"); } }), { noiLai: async () => {} }).then(() => null, (x) => x);
+  assert.equal(n, 2); assert.equal(e?.message, DT.LOI_CAU_NOI_TAT);
+  // chưa có địa chỉ cầu nối lúc đầu, nối lại thì có → chạy
+  let base = "";
+  const j2 = await DT.goiCoThuLai(() => DT.goiTroLy({ base, path: "/tro_ly/tra_loi", body, fetchImpl: async () => new Response(JSON.stringify({ tra_loi: "Có đây." }), { status: 200 }) }), { noiLai: async () => { base = "https://t2.example"; } });
+  assert.equal(j2.tra_loi, "Có đây.");
+  // hết giờ thì không gửi lại (tránh agent trả lời 2 lần)
+  let h = 0;
+  const hang = (u, o) => { h++; return new Promise((_, rej) => o.signal.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError")))); };
+  const eh = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/x", body, fetchImpl: hang, ms: 20 }), { noiLai: async () => {} }).then(() => null, (x) => x);
+  assert.equal(h, 1); assert.match(eh.message, /quá lâu/u);
+});
+
+test("đào tạo: cầu nối trả 429 → báo quá lượt, không báo “cầu nối tắt”, không nối lại", async () => {
+  let n = 0, noiLai = 0;
+  const e = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body: {}, fetchImpl: async () => { n++; return new Response(JSON.stringify({ error: "quota" }), { status: 429 }); } }), { noiLai: async () => { noiLai++; } }).then(() => null, (x) => x);
+  assert.equal(e.message, DT.LOI_QUA_LUOT);
+  assert.ok(e.quaLuot && !e.tat);
+  assert.notEqual(e.message, DT.LOI_CAU_NOI_TAT);
+  assert.equal(n, 1); assert.equal(noiLai, 0);
+});
+
+test("đào tạo: lưu “Sửa câu này” hỏng → bản Chủ tịch sửa nằm trong hàng chờ localStorage, cầu nối sống thì gửi lại được", async () => {
+  const mem = new Map(), storage = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, String(v)), removeItem: (k) => mem.delete(k) };
+  const body = DT.yeuCauMauSua({ kenh: "02", goi: 3, lich_su: [{ vai: "khach", noi_dung: "Em mệt lắm rồi…" }], ban_agent: "Bản agent", ban_chu_tich: "Bản Chủ tịch sửa", ly_do: "giọng chưa ấm" });
+  DT.themHangCho(storage, "m1", body);
+  const hong = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/mau_sua", body, fetchImpl: async () => { throw new TypeError("Failed to fetch"); } }), { noiLai: async () => {} }).then(() => null, (x) => x);
+  assert.ok(hong?.tat);
+  assert.equal(DT.docHangCho(storage).length, 1, "lưu hỏng vẫn còn trong hàng chờ");
+  assert.equal(DT.docHangCho(storage)[0].body.ban_chu_tich, "Bản Chủ tịch sửa");
+  // vẫn chết → giữ nguyên
+  let r = await DT.guiHangCho(storage, async () => { throw new TypeError("Failed to fetch"); });
+  assert.deepEqual(r, { daGui: [], con: 1 });
+  // cầu nối sống → gửi lại đúng bản đó, hàng chờ trống
+  const daNhan = [];
+  DT.themHangCho(storage, "m2", { ...body, ban_chu_tich: "Bản thứ hai" });
+  r = await DT.guiHangCho(storage, async (b) => { daNhan.push(b); return DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/mau_sua", body: b, fetchImpl: async () => new Response('{"ok":true}', { status: 200 }) }); });
+  assert.deepEqual(r, { daGui: ["m1", "m2"], con: 0 });
+  assert.deepEqual(daNhan.map((b) => b.ban_chu_tich), ["Bản Chủ tịch sửa", "Bản thứ hai"]);
+  assert.equal(storage.getItem(DT.HANG_CHO_KEY), null);
+  DT.themHangCho(storage, "m3", body); DT.boHangCho(storage, "m3");
+  assert.equal(DT.docHangCho(storage).length, 0);
+});
+
 export async function run(extra = []) {
   let fail = 0;
   for (const [name, fn] of [...tests, ...extra]) {

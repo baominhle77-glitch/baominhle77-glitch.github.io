@@ -4,7 +4,7 @@ import { probeBridge, bridge, aiKey, storage } from "../js/store.js";
 import { via } from "../js/ai.js";
 import { mergeKnowledge } from "../js/data.js";
 import { taoBoiAuto } from "../js/auto.js";
-import { KENH, GOI, TINH_HUONG, NHAN_CHUYEN, LOI_CAU_NOI_TAT, goc, yeuCauTraLoi, yeuCauMauSua, docTraLoi, sapMauSua, goiTroLy, kiemTraLoiAgent } from "./dao-tao-core.js";
+import { KENH, GOI, TINH_HUONG, NHAN_CHUYEN, LOI_CAU_NOI_TAT, DANG_NOI_LAI, goc, yeuCauTraLoi, yeuCauMauSua, docTraLoi, sapMauSua, goiTroLy, goiCoThuLai, kiemTraLoiAgent, themHangCho, guiHangCho, docHangCho, boHangCho } from "./dao-tao-core.js";
 
 const KEY = "boi.daotao.v1";
 const $ = (id) => document.getElementById(id);
@@ -19,28 +19,43 @@ const st = (() => {
   return { kenh: "01", goi: 0, cau_con: 0, lich_su: [], ...con };
 })();
 const luu = () => { try { storage?.setItem(KEY, JSON.stringify(st)); } catch (_) { /* bỏ qua */ } };
-let thDangChon = null, dangGui = false, suaO = -1;
+let thDangChon = null, dangGui = false, suaO = -1, noiLaiO = -1, dangGuiHang = false, dangLuuMau = 0;
 
 // ---------- Cầu nối ----------
 const cauNoi = () => (bridge.ok ? { base: goc(via.base), token: via.token } : { base: "", token: "" });
-async function doCauNoi() {
+async function doCauNoi({ guiHang = true } = {}) {
   $("cauNoi").textContent = "Đang dò cầu nối máy nhà…";
   $("thuLai").hidden = true;
   const ok = await probeBridge(globalThis.fetch, { on: true }).catch(() => false);
   $("cauNoi").innerHTML = ok ? `✓ Cầu nối máy nhà sẵn sàng${bridge.xa ? " (qua đường hầm)" : ""}.` : `<span class="err">${esc(LOI_CAU_NOI_TAT)}</span>`;
   $("thuLai").hidden = ok;
-  if (ok) taiMau();
+  if (ok) (guiHang ? guiLaiHangCho() : Promise.resolve()).then(taiMau);
   return ok;
+}
+// Lỗi mạng thoáng qua: dò lại cầu nối rồi gửi lại 1 lần; trong lúc đó dưới tin khách (ô i) hiện “Đang nối lại máy nhà…”
+const coThuLai = (goi, i, noiLai = () => doCauNoi()) => goiCoThuLai(goi, { noiLai, onNoiLai: (on) => { noiLaiO = on ? i : -1; veChat(); } });
+// Mẫu sửa đang chờ gửi (lưu hỏng lúc trước): cầu nối sống thì tự gửi lại, gửi được thì bỏ cờ chờ
+async function guiLaiHangCho() {
+  if (dangGuiHang || dangLuuMau || !docHangCho(storage).length) return; // đang lưu một mẫu thì để lượt đó tự gửi, tránh trùng
+  dangGuiHang = true;
+  try {
+    const { daGui } = await guiHangCho(storage, (body) => goiTroLy({ ...cauNoi(), path: "/tro_ly/mau_sua", body }));
+    for (const m of st.lich_su) if (m.sua && daGui.includes(m.sua.ma)) delete m.sua.cho;
+    if (daGui.length) { luu(); veChat(); }
+  } finally { dangGuiHang = false; }
 }
 
 // ---------- Trải bài (lời gửi khách đi vào luồng chat) ----------
-const dbReady = Promise.all(["../data/tarot.json", "../data/lenormand.json"].map((u) => fetch(u).then((r) => r.json())))
+// Tải bộ bài; mạng hỏng thì lần sau tải lại (không giữ lời hứa đã hỏng)
+let dbHua = null;
+const taiDb = () => (dbHua ||= Promise.all(["../data/tarot.json", "../data/lenormand.json"].map((u) => fetch(u).then((r) => r.json())))
   .then(async ([tarot, lenormand]) => {
     const opt = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
     const [a, b] = await Promise.all([opt("../data/tarot_them.json"), opt("../data/lenormand_them.json")]);
     return mergeKnowledge({ tarot, lenormand }, a, b);
-  });
-const auto = taoBoiAuto(async () => ({ db: await dbReady, settings: {}, key: aiKey(), storage }));
+  })
+  .catch((err) => { dbHua = null; const e = new Error(`không tải được bộ bài (${err.message})`); e.mang = true; throw e; }));
+const auto = taoBoiAuto(async () => ({ db: await taiDb(), settings: {}, key: aiKey(), storage }));
 
 // ---------- Vẽ ----------
 function veThanh() {
@@ -56,7 +71,7 @@ function veNutTrai() {
 }
 function veTin(m, i) {
   if (m.vai === "he_thong") return `<p class="loi-he" role="alert">⚠ ${esc(m.noi_dung)}</p>`;
-  if (m.vai === "khach") return `<div class="msg user"><div class="who">Khách${m.tinh_huong ? ` · ${esc(th(m.tinh_huong)?.ten || "")}` : ""}</div>${m.noi_dung.split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</div>`;
+  if (m.vai === "khach") return `<div class="msg user"><div class="who">Khách${m.tinh_huong ? ` · ${esc(th(m.tinh_huong)?.ten || "")}` : ""}</div>${m.noi_dung.split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}${noiLaiO === i ? `<p class="note noi-lai" role="status">${DANG_NOI_LAI}</p>` : ""}</div>`;
   const nhan = [
     m.chuyen_nguoi ? `<span class="nhan chuyen">${NHAN_CHUYEN}</span>${m.ly_do ? ` <span class="note">${esc(m.ly_do)}</span>` : ""}` : "",
     m.bi_chan?.length ? `<span class="nhan chan">BỊ CHẶN: ${esc(m.bi_chan.join(", "))}</span>` : "",
@@ -64,7 +79,7 @@ function veTin(m, i) {
   ].filter(Boolean).join(" ");
   // chỉ hiện ở trang đào tạo, không nằm trong lời gửi khách
   const chon = m.loai === "loi_gui_khach" && m.ten_trai ? `<p class="note chon-trai">Agent chọn: ${esc(m.ten_trai)}${m.ly_do_trai ? ` — ${esc(m.ly_do_trai)}` : ""}</p>` : "";
-  const sua = m.sua ? `<p class="note">✎ Bản Chủ tịch sửa: ${esc(m.sua.ban_chu_tich)}${m.sua.ly_do ? ` — ${esc(m.sua.ly_do)}` : ""}</p>` : "";
+  const sua = m.sua ? `<p class="note">✎ Bản Chủ tịch sửa: ${esc(m.sua.ban_chu_tich)}${m.sua.ly_do ? ` — ${esc(m.sua.ly_do)}` : ""}</p>${m.sua.cho ? `<p class="note cho-gui">⏳ Chưa gửi được về máy nhà — đã giữ lại trên máy này, cầu nối sống sẽ tự gửi.</p>` : ""}` : "";
   const mau = th(m.tinh_huong)?.mau;
   const form = suaO === i ? `<form class="sua-form" data-sua="${i}">
       <label>Bản đúng<textarea name="ban" rows="3" required>${esc(m.sua?.ban_chu_tich || mau || m.noi_dung)}</textarea></label>
@@ -99,23 +114,25 @@ async function guiTin(text) {
   const tinhHuong = thDangChon;
   thDangChon = null;
   luu(); veChat();
+  const iKhach = st.lich_su.length - 1;
   try {
-    const j = await goiTroLy({ ...cauNoi(), path: "/tro_ly/tra_loi", body: yeuCauTraLoi(st) });
+    const body = yeuCauTraLoi(st);
+    const j = await coThuLai(() => goiTroLy({ ...cauNoi(), path: "/tro_ly/tra_loi", body }), iKhach);
     st.lich_su.push({ ...docTraLoi(j), ...(tinhHuong ? { tinh_huong: tinhHuong } : {}) });
     luu(); veChat();
   } catch (e) {
-    if (e.tat) doCauNoi();
     baoLoi(e.message);
   } finally { dangGui = false; }
 }
 
 async function traiBai() {
-  const q = [...st.lich_su].reverse().find((m) => m.vai === "khach")?.noi_dung;
+  const iKhach = st.lich_su.map((m) => m.vai).lastIndexOf("khach");
+  const q = st.lich_su[iKhach]?.noi_dung;
   if (!q) return;
   const b = $("traiBai");
   b.disabled = true; b.textContent = "Đang trải bài…";
   try {
-    const r = await auto.giai(q);
+    const r = await coThuLai(() => auto.giai(q), iKhach);
     const k = kiemTraLoiAgent(r.loiGuiKhach);
     st.lich_su.push({ vai: "agent", noi_dung: r.loiGuiKhach, loai: "loi_gui_khach", ma_khoa: r.maKhoa, ten_trai: r.tenTrai, ly_do_trai: r.lyDoTrai, ...(k.ok ? {} : { bi_chan: k.loi }) });
     st.cau_con = Math.max(0, Number(st.cau_con) - 1);
@@ -128,9 +145,22 @@ async function traiBai() {
 async function guiMauSua(i, ban, lydo) {
   const m = st.lich_su[i];
   const body = yeuCauMauSua({ kenh: st.kenh, goi: st.goi, lich_su: st.lich_su.slice(0, i), ban_agent: m.noi_dung, ban_chu_tich: ban, ly_do: lydo });
-  await goiTroLy({ ...cauNoi(), path: "/tro_ly/mau_sua", body });
-  m.sua = { ban_chu_tich: body.ban_chu_tich, ly_do: body.ly_do };
+  // giữ bản sửa trước khi gửi: gửi hỏng (cả lần thử lại) thì nằm ở hàng chờ, cầu nối sống sẽ tự gửi
+  const ma = `${Date.now().toString(36)}-${i}`;
+  m.sua = { ban_chu_tich: body.ban_chu_tich, ly_do: body.ly_do, ma, cho: true };
+  themHangCho(storage, ma, body);
   suaO = -1;
+  luu(); veChat();
+  dangLuuMau++;
+  try {
+    // nối lại nhưng không xả hàng chờ cùng lúc (bản này đang được gửi lại, tránh gửi trùng)
+    await coThuLai(() => goiTroLy({ ...cauNoi(), path: "/tro_ly/mau_sua", body }), -1, () => doCauNoi({ guiHang: false }));
+  } catch (e) {
+    if (e.quaLuot) baoLoi(e.message);
+    return;
+  } finally { dangLuuMau--; }
+  boHangCho(storage, ma);
+  delete m.sua.cho;
   luu(); veChat(); taiMau();
 }
 
@@ -139,7 +169,7 @@ veThanh(); veChat();
 $("kenh").onchange = (e) => { st.kenh = e.target.value; luu(); };
 $("goi").onchange = (e) => { st.goi = Number(e.target.value); st.cau_con = st.goi; $("cauCon").value = st.cau_con; luu(); veNutTrai(); };
 $("cauCon").oninput = (e) => { st.cau_con = Math.max(0, Number(e.target.value) || 0); luu(); veNutTrai(); };
-$("thuLai").onclick = doCauNoi;
+$("thuLai").onclick = () => doCauNoi();
 $("taiMau").onclick = taiMau;
 $("traiBai").onclick = traiBai;
 $("phienMoi").onclick = () => { if (!st.lich_su.length || confirm("Xoá lịch sử chat của phiên này?")) { st.lich_su = []; suaO = -1; luu(); veChat(); } };
@@ -168,6 +198,10 @@ $("chat").addEventListener("submit", async (e) => {
   const btn = f.querySelector("button[type=submit]");
   btn.disabled = true;
   try { await guiMauSua(+f.dataset.sua, f.elements.ban.value, f.elements.lydo.value); }
-  catch (err) { btn.disabled = false; alert(err.message); if (err.tat) doCauNoi(); }
+  catch (err) { btn.disabled = false; alert(err.message); }
 });
 doCauNoi();
+// còn mẫu sửa chờ gửi: mỗi phút (và khi mạng có lại) dò lại cầu nối; sống thì tự gửi
+const thuGuiHang = () => { if (docHangCho(storage).length && !dangGuiHang && !dangLuuMau) doCauNoi(); };
+setInterval(thuGuiHang, 60000);
+addEventListener("online", thuGuiHang);
