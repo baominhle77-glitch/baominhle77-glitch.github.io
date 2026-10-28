@@ -59,13 +59,6 @@
           "do_cao": 0.62,
           "lia": -1,
           "lia_doc": 1
-        },
-        {
-          "t": 6.9,
-          "kieu": "camera",
-          "do_cao": 0.25,
-          "lia": 1,
-          "lia_doc": 1
         }
       ],
       "khoang_clip": [
@@ -199,7 +192,7 @@
       "optics_duoi": {
         "ellipse_ratio": 0.92,
         "section": false,
-        "environment": "bright"
+        "environment": "dark"
       },
       "khung": {
         "16x9": "toan"
@@ -394,7 +387,7 @@
       "optics_duoi": {
         "ellipse_ratio": 0.92,
         "section": false,
-        "environment": "bright"
+        "environment": "dark"
       },
       "khung": {
         "16x9": "toan"
@@ -1802,7 +1795,7 @@
       "optics_duoi": {
         "ellipse_ratio": 0.799926575322922,
         "section": false,
-        "environment": "bright",
+        "environment": "dark",
         "molecules": false
       },
       "khung": {
@@ -2082,7 +2075,7 @@
       "optics_duoi": {
         "ellipse_ratio": 0.92,
         "section": false,
-        "environment": "bright"
+        "environment": "dark"
       },
       "khung": {
         "16x9": "toan"
@@ -4621,7 +4614,7 @@
       "optics_duoi": {
         "ellipse_ratio": 0.7321901226502848,
         "section": false,
-        "environment": "bright"
+        "environment": "dark"
       },
       "khung": {
         "16x9": "toan"
@@ -4848,7 +4841,7 @@
       "optics_duoi": {
         "ellipse_ratio": 0.9492590267504598,
         "section": false,
-        "environment": "bright"
+        "environment": "dark"
       },
       "khung": {
         "16x9": "toan"
@@ -5473,7 +5466,7 @@
         {
           "t": 3.233333,
           "kieu": "camera",
-          "do_cao": 0.25,
+          "do_cao": 0.35,
           "lia": -1,
           "lia_doc": -1
         },
@@ -5492,7 +5485,7 @@
         {
           "t": 7.233333,
           "kieu": "camera",
-          "do_cao": 0.25,
+          "do_cao": 0.35,
           "lia": 1,
           "lia_doc": 1
         },
@@ -5506,7 +5499,7 @@
         {
           "t": 11.233333,
           "kieu": "camera",
-          "do_cao": 0.25,
+          "do_cao": 0.35,
           "lia": -1,
           "lia_doc": -1
         },
@@ -5525,7 +5518,7 @@
         {
           "t": 15.233333,
           "kieu": "camera",
-          "do_cao": 0.25,
+          "do_cao": 0.35,
           "lia": 1,
           "lia_doc": 1
         },
@@ -5539,7 +5532,7 @@
         {
           "t": 19.233333,
           "kieu": "camera",
-          "do_cao": 0.25,
+          "do_cao": 0.35,
           "lia": -1,
           "lia_doc": -1
         }
@@ -8428,7 +8421,7 @@
       "optics_duoi": {
         "ellipse_ratio": 0.7415845023790447,
         "section": false,
-        "environment": "bright"
+        "environment": "dark"
       },
       "khung": {
         "16x9": "can"
