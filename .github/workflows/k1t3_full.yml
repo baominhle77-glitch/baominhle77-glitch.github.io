@@ -1,0 +1,32 @@
+name: k1t3-full-source-preflight
+on:
+  push:
+    branches: [gpt/k1t3-full]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: k1t3-full-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source-preflight:
+    name: Source35 / immutable narration versus L6 and G4
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+          cache: pip
+          cache-dependency-path: gate_chung/requirements.txt
+      - run: python ci/kiem_khuon_sha.py
+      - run: python -m pip install -q -r gate_chung/requirements.txt
+      - name: Reject contradictory source before rendering
+        run: python ci/remotion_b/full_source_audit.py --out work/full/source_audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: K1t3-full-source-audit
+          path: work/full/source_audit.json
+          retention-days: 14

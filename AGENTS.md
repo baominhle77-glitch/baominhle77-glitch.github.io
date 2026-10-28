@@ -48,3 +48,10 @@ Lệnh Chủ tịch 27/10/2026: **từ nay mọi video dùng phương án B; b�
 - Thứ tự CI: `kiem_khuon_sha` → `kiem_ban_ve` → render → G12 hai khổ → `gate_chung` (giữ G1–G11 hiện có). Lỗi ở bước trước dừng bước sau; vẫn lưu artifact chẩn đoán.
 - Thử270p/15fps và kiểm bản vẽ trước khi đẩy. Mỗi lượt một commit; không đẩy chồng khi run trước chưa xong. Chi tiết L1–L8 và số đo ghi vào `CODEX_NOI.md`; trong chat chỉ trả một dòng SHA.
 - XONG cần cả CI, GĐ kiểm mắt và Chủ tịch chốt mẫu theo D17. Không merge, không dựng full trước chốt.
+
+## Chủ tịch chốt mẫu và giao FULL K1 t3 — 28/10
+
+- Mẫu60s PR149 @0c07c71c đã được Chủ tịch CHỐT theo tin GĐ28/10 06:5x. Quyền dựng full hiện đã có cho **K1 t3 Marangoni**,35beat h1–k2, hai khổ,>=480s; không tự mở rộng quyền này sang tập khác.
+- Làm trên nhánh mới `gpt/k1t3-full` từ0c07c71c, PR riêng vềmain; PR149 giữ làm mẫu đã chốt, không sửa hoặc merge.
+- KHUÔN v1 giữ nguyên SHA và tên `ci/remotion_b/ban_ve_B60.json`; khi nguồn full sẵn sàng, nội dung tệp đó là bản vẽ full. Giọng Andrew, không làm chậm để kéo dài.
+- Nguồn35beat được yêu cầu EN nguyên văn1441từ; nếu đối chiếu với L1–L8/G4 có mâu thuẫn, ghi đúng câu và mốc vào `CODEX_NOI.md`, không lén sửa nguồn hoặc nới cổng. XONG cần MP4 hai khổ,540p/1080p,>=480s và CI tất cả xanh.

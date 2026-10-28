@@ -1,3 +1,23 @@
+# CODEX NÓI — FULL K1 t3 / kẹt L6 và L8 trước render
+
+Đã ghi nhận Chủ tịch chốt mẫu PR149 @0c07c71c. Nhánh mới `gpt/k1t3-full` cắt đúng SHA này; PR149 và nhánh mẫu không sửa. Đã đọc lại QUY_TRINH_CHUAN L1–L8 và MUC_LUC trên codex-khung.
+
+| mã lỗi · beat | đã làm / mâu thuẫn cần giải quyết | số đo / bằng chứng |
+|---|---|---|
+| L8 · mở PR về main | GitHub từ chối tạo PR nháp: HTTP422 “The gpt/k1t3-full branch has no history in common with main”. Đã kiểm độc lập bằng git merge-base, exit1. PR149 thực tế có base `studio-dung`, không phải main. Không tự đổi base yêu cầu hoặc ghép hai lịch sử độc lập. | Nhánh full đúng gốc0c07c71c/root509adc37; main@f907f890/rootfe500531. Cần GĐ xác nhận base `studio-dung`, hoặc chỉ đạo tích hợp main có lịch sử độc lập. Chưa có PR full vì API từ chối. |
+| Nguồn full ·35beat | Xác minh storyboard đúng thứ tự h1–k2, EN nguyên văn; kiểm SHA của toàn bộ35audio và văn bản word-clock, không dùng các bản lời đã biên tập của mẫu. |1441từ;16601frame/30fps=553.366667s; AndrewNeural,+0%, không atempo. `plans/k1t3_full_source_audit.json` ghi đủ câu, mốc và SHA. w4 có event TTS nhiều từ; so văn bản chuẩn hóa khớp, không coi số event khác số từ là thiếu lời. |
+| L6/G4 · c1,p1,c2,v4,c3 | Nguồn nguyên văn yêu cầu “Zoom…”, “In our sketch…” và “Long orange arrows…”. Cổng G4 hiện có cấm chính các từ zoom/sketch/arrows/orange/drawn trong phụ đề. Pipeline mẫu ghép phụ đề trực tiếp theo từ TTS nên giữ nguyên lời và phụ đề khớp từ sẽ làm G4 đỏ. Không đổi G4 hoặc thêm miễn trừ. | c1:44.242s Zoom,54.579s sketch,56.429/56.967s drawn/arrows; p1:59.650/60.175/67.137s orange/arrows; c2:171.633s Zoom; v4:234.754s sketch; c3:287.829s Zoom. `phrase_error("Long orange arrows")` trả lỗi mô tả đồ họa. |
+| L6 · h4,p3,b1,r3,s8 | Quy trình vừa yêu cầu đọc lại cấm nhắc tập khác; bản EN bắt buộc nguyên văn vẫn nhắc episode ở5beat này. | Đối chiếu từng câu giữ nguyên trong audit. Ví dụ h4: “our soap from episode two”; s8: “Pull back through three episodes.” |
+| L6 · h4,w2,r2,s8 | Quy trình cấm35.54, trong khi4beat nguyên văn đọc “thirty five point five four”. Mẫu đã chốt sửa h4 thành36mN/m, bỏ nhắc tập trước; dùng lại bản đó sẽ không còn nguyên văn1441từ theo yêu cầu full. | Mâu thuẫn có thể tái hiện bằng `python ci/remotion_b/full_source_audit.py --out work/full/source_audit.json`: exit1,19dòng phát hiện, không render. |
+| Adslots · c2,c3,b1 | Đã xuất ứng viên mid-roll từ meta.adslots và mốc TTS thật; điểm cắt tại ranh giới beat, kèm cuối/đầu lời hai bên. |169.933333s,282.866667s,427.900000s; `plans/k1t3_full_adslots.json`. Tổng553.366667s đủ điều kiện>=480s. |
+| L8 · tiết kiệm CI | Workflow full hiện chỉ chạy SHA và audit nguồn, đỏ trước mọi render khi còn L6. Chưa dựng matrix35beat/Remotion/native1080p hoặc sửa bản vẽ60s thành full: các bước dựng chưa thể có kết quả hợp lệ với đầu vào hiện tại. Không báo full đã xong. |5tệp SHA khóa và bản sao thứ6 giữ nguyên; scene.py không sửa. Bản mẫu đã chốt không bị đổi. Không tiêu limit dựng9phút rồi mới phát hiện lời bị cổng từ chối. |
+
+**Điểm cần GĐ chốt để tiếp tục:** cung cấp bản EN full đã cập nhật theo cách sửa lời của mẫu (bỏ câu chỉ đạo dựng/mô tả đồ họa, xử lý episode và35.54), đồng thời thay yêu cầu “nguyên văn1441từ” bằng số từ của bản mới. Ví dụ đã có mẫu duyệt: p1 nói “Flow drags water outward.” thay “Long orange arrows…”. Chưa tự áp thay đổi vào storyboard/TTS hoặc hạ cổng. Nếu muốn giữ nguyên bản EN cũ, cần giải quyết rõ xung đột với L6 và G4 trước; không thể tuyên bố mọi ràng buộc đều đã đạt.
+
+Đây là nhánh đối chiếu nguồn và adslots, chưa phải bản triển khai full. Thử mở PR về main đã bị GitHub từ chối như hàng L8; không tự mở sang base khác. Khi nguồn thống nhất mới hoàn thiện bản vẽ full giữ nguyên tên, adapter35beat và dây chuyền full theo thứ tự đã giao. Run audit40606510236 đã kết thúc đỏ đúng tại nguồnL6 trước mọi render. Không có MP4 full, không báo XONG, không merge.
+
+---
+
 # CODEX NÓI — G1 progression9:16 / h4,c1
 
 | mã lỗi · beat | đã sửa gì | số đo bản vẽ / kiểm trước khi đẩy |
