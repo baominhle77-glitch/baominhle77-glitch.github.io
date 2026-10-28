@@ -8,6 +8,9 @@ from ci.layer_plan import measured_layers,nested_layers,measured_overlays
 from gate_chung.timeline import visibility_intervals
 from narration_source import for_beat
 H=Path(__file__).resolve().parent
+# All episode/subject terminology is data supplied by the genre registry.
+GENRE=json.loads((R/'the_loai/khoa_hoc_vat_ly.json').read_text())
+VISUAL_BINDINGS=GENRE.get('visual_noun_bindings',{})
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--video-root',type=Path,required=True);p.add_argument('--caption-alignment',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
@@ -88,6 +91,17 @@ def main():
      if cap:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[cap['id']+'-number'],attributes={}));continue
     aliases.update(tails='tail',light='surface',motion='flow',oil='tracer',solution='soap',pair='swirl',pumping='needle',pump='needle',injection='needle',field='flow',bottom='layer',loop='flow',atom='tail',trimethylammonium='head',interface='surface',rest='zone',start='ring',meniscus='edge',tip='needle',sheet='layer',household='soap',kitchen='bowl',liquid='water',mixture='soap',**{"zone's":'zone',"water's":'water'})
     target=aliases.get(key,target)
+    # The genre registry owns specialized visual entities and their beats.
+    # Normalization allows inflected nouns (micelles -> micelle).
+    explicit=VISUAL_BINDINGS.get(key,{}).get(bid)
+    if explicit is not None:target=explicit
+    if target=='caption':
+     cap=next((c for c in texts if c['role']=='caption' and c['start']-.2<=w['start']<c['end']+.2),None)
+     if cap:
+      beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[cap['id']+'-number'],attributes={}))
+     else:
+      beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[],attributes={}))
+     continue
     if bid=='k2' and key in ('wine','tear','tears','glass'):
      target='tears' if key in ('tear','tears') else key
     if bid=='k2' and target in ('wine','tears','glass'):
@@ -97,10 +111,10 @@ def main():
      if cap:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[cap['id']+'-number'],attributes={}))
      elif w['start']<duration:beat['nonvisual_terms'].append(dict(text=word,reason='Number in spoken connective/quantifier, no displayed measurement.'))
      continue
-    if target=='micelle' and not next(q for q in json.loads((H/'ban_ve_B60.json').read_text())['beats'] if q['id']==bid)['optics'].get('molecules') and any(norm(q['text']) in ('threshold','thresholds','concentration') for q in events[i+1:i+3]):
+    if explicit is None and target=='micelle' and not next(q for q in json.loads((H/'ban_ve_B60.json').read_text())['beats'] if q['id']==bid)['optics'].get('molecules') and any(norm(q['text']) in ('threshold','thresholds','concentration') for q in events[i+1:i+3]):
      cap=next((c for c in texts if c['role']=='caption' and c['start']-.2<=w['start']<c['end']+.2),None)
      if cap:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[cap['id']+'-number'],attributes={}));continue
-    if target in ('molecule','head','tail','micelle') and not next(q for q in json.loads((H/'ban_ve_B60.json').read_text())['beats'] if q['id']==bid)['optics'].get('molecules'):
+    if explicit is None and target in ('molecule','head','tail','micelle') and not next(q for q in json.loads((H/'ban_ve_B60.json').read_text())['beats'] if q['id']==bid)['optics'].get('molecules'):
      target=None
     if target is None:beat['nonvisual_terms'].append(dict(text=word,reason='Abstract narration/context term, not a separately drawn physical object.'));continue
     beat['visual_terms'].append(dict(text=word,noun=word,start=begin,end=min(duration,w['end']),object_ids=[bid+'-'+target],attributes=dict(color='#D1834F',size='long') if bid=='p1' and target=='arrows' else {}))

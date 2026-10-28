@@ -40,7 +40,18 @@ def visual_nouns(text,language='en'):
    plural=(prev[1] in {'NNS','NNPS'} and wn.morphy(word.lower(),wn.VERB)==word.lower() and (not nxt[0] or nxt[0].lower() in function))
    quantity_before=(i>1 and role(tags[i-2][0])=='data') or (i>2 and role(tags[i-3][0])=='data' and any(x.lexname()=='noun.quantity' for x in wn.synsets(tags[i-2][0].lower(),pos=wn.NOUN)))
    coordinated=(prev[1]=='CC' and quantity_before and word.lower().endswith('s') and wn.morphy(word.lower(),wn.VERB)!=word.lower() and nxt[1] in {'IN','TO','WRB'} and any(tg=='VBZ' for w,tg in tags[:i-1]))
-   if auxiliary or third or plural or coordinated:continue
+   # Taggers may call a finite third-person verb NNS when a short clause is
+   # followed by a participle or adjective ("The route keeps growing").
+   # Recognize the predicate by its syntactic position AND verb lemma;
+   # never blacklist the same spelling when it is a genuine plural noun.
+   verb_lemma=wn.morphy(word.lower(),wn.VERB)
+   common_predicates={'keep','make','show','get','become','remain','seem','grow','give','take','leave','hold','turn','send','bring'}
+   subject_before=prev[1].startswith('NN') or prev[1] in {'PRP','NNP','NNPS'}
+   next_is_predicate_tail=(nxt[1].startswith(('VB','JJ','RB')) or nxt[1] in {'DT','IN','TO','WRB','WP','WDT'})
+   mistagged_predicate=(word.lower().endswith('s') and verb_lemma in common_predicates and
+                        verb_lemma!=word.lower() and subject_before and
+                        nxt[1] not in {'CC','VBZ','VBD'} and (next_is_predicate_tail or nxt[1].startswith('NN')))
+   if auxiliary or third or plural or coordinated or mistagged_predicate:continue
   if i>0 and i+1<len(tags) and tags[i+1][0].lower() in {'to','toward','towards','through','across','over','into','along','outward'} and (tags[i-1][1].startswith('NN') or tags[i-1][1]=='PRP') and word.lower().endswith('s') and wn.morphy(word.lower(),wn.VERB) not in (None,word.lower()):continue
   modified=i>0 and tags[i-1][0].lower() in colors|sizes and bool(wn.synsets(word.lower(),pos=wn.NOUN))
   if not (tag.startswith('NN') or tag=='CD' or modified):continue

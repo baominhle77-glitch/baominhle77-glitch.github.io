@@ -69,6 +69,14 @@ class Regressions(unittest.TestCase):
  def test_preposition_does_not_remove_ship_or_boat(self):
   for sentence,noun in (('The ship across the ocean','ship'),('A boat to the island','boat')):
    self.assertIn(noun,[x['lemma'] for x in visual_nouns(sentence)])
+ def test_finite_verbs_are_not_visual_nouns_even_when_tagged_as_plurals(self):
+  cases=('The route keeps growing.', 'The pump makes droplets.',
+         'The model shows the flow.', 'The water gets warmer.')
+  for sentence in cases:
+   nouns=visual_nouns(sentence)
+   self.assertFalse({'keeps','makes','shows','gets'} & {x['word'].lower() for x in nouns},sentence)
+  self.assertIn('show',[x['lemma'] for x in visual_nouns('The shows have lights.')])
+  self.assertIn('head',[x['lemma'] for x in visual_nouns('The heads and tails are distinct.')])
  def test_direction_adverb_after_object_is_not_an_unmapped_image_noun(self):
   nouns=visual_nouns('Flow drags water outward.');self.assertNotIn('outward',[n['lemma'] for n in nouns]);self.assertIn('water',[n['lemma'] for n in nouns]);self.assertIn('flow',[n['lemma'] for n in nouns])
  def test_decimal_speech_is_screen_data_not_an_image_object(self):

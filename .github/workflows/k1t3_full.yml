@@ -162,6 +162,8 @@ jobs:
           python -m pip install -q -r gate_chung/requirements.txt
           python -m gate_chung.setup
           npx --prefix ci/remotion_b remotion browser ensure
+      - name: Generate verified 540p caption alignment on compose runner
+        run: python ci/remotion_b/semantic_captions.py --alignment-out work/B/caption_alignment.json
       - name: Remotion only, render both complete MP4s
         env:
           B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
@@ -344,6 +346,8 @@ jobs:
           echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
           python ci/remotion_b/gate_ffmpeg.py
           npx --prefix ci/remotion_b remotion browser ensure
+      - name: Generate native 1080p caption alignment before rendering
+        run: python ci/remotion_b/semantic_captions.py --alignment-out work/B1080/caption_alignment.json
       - name: Two native 1080p full episode MP4s
         env:
           B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
