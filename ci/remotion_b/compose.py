@@ -9,6 +9,7 @@ R=Path(__file__).resolve().parents[2];SHORT=int(os.environ.get('B_SHORT_SIDE','5
 parser=argparse.ArgumentParser();parser.add_argument('--caption-alignment',type=Path,required=True);args=parser.parse_args()
 data=enrich_assets(semantic_captions(source_data(),args.caption_alignment));stages=[];missing=[]
 alignment=json.loads(args.caption_alignment.read_text());assert alignment,'B_MISSING_CAPTION_ALIGNMENT'
+shutil.copy2(R/'plans/k1t3_full_adslots.json',O/'adslots.json')
 print('B_REPORT_READY '+json.dumps(dict(short_side=SHORT,root=str(O),alignment_path=str(args.caption_alignment.resolve()),aligned_phrases=len(alignment))),flush=True)
 for b in data['beats']:
  bid=b['id'];folder=R/'work/B_cache'/str(SHORT)/bid
@@ -30,6 +31,6 @@ stages.append(dict(stage='remotion',wall_s=time.perf_counter()-t,cpu_s=after.ru_
 if p.returncode:raise SystemExit(p.returncode)
 verification=[]
 for fmt in ('16x9','9x16'):
- f=O/f'B_60s_{fmt}.mp4';m=read_probe(f);assert int(m['nb_frames'])==1800 and abs(float(m['duration'])-60)<.04,m
+ f=O/f'B_full_{fmt}.mp4';m=read_probe(f);assert int(m['nb_frames'])==data['frames'] and abs(float(m['duration'])-data['duration'])<.04 and float(m['duration'])>=480,m
  verification.append(dict(file=f.name,bytes=f.stat().st_size,ffprobe=m))
 (O/'video_verification.json').write_text(json.dumps(verification,indent=2));print('B_VIDEO_VERIFIED '+json.dumps(verification),flush=True)

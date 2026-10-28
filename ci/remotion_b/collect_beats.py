@@ -2,7 +2,7 @@
 import argparse,json,shutil
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--short-side',type=int,default=540);a=p.parse_args();root=Path.cwd();download=root/'work/beat-download'
-for bid in ('h1','h2','h3','h4','c1','p1'):
+for bid in [b['id'] for b in json.loads((root/'ci/remotion_b/full_timeline.json').read_text())['beats']]:
  out=root/'work/B_cache'/str(a.short_side)/bid;out.mkdir(parents=True,exist_ok=True)
  for fmt in ('16x9','9x16'):
   found=list(download.rglob(f'{fmt}_{bid}.mp4'))

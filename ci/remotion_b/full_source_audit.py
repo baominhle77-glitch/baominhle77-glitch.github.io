@@ -25,33 +25,47 @@ def audit():
     storyboard = json.loads(source.read_text())
     plan = json.loads((R / 'ci/remotion_b/ke_hoach_A.json').read_text())
     tts = json.loads((R / 'out/M1_MARANGONI_DUNG/_build/tts.json').read_text())
+    from narration_source import for_beat
+    timeline = json.loads((R / 'ci/remotion_b/full_timeline.json').read_text())
+    overrides = json.loads((R / 'ci/remotion_b/narration_overrides.json').read_text())
+    allowed = {'h4','c1','p1','p3','c2','v4','c3','w2','b1','r2','r3','s8'}
+    assert set(overrides) <= allowed
+    assert all(q['tempo'] == 1.0 for q in overrides.values())
     beats = storyboard['beats']
     order = [b['id'] for b in beats]
     assert order == plan['thu_tu'] and len(order) == 35
     assert hashlib.sha256(source.read_bytes()).hexdigest() == plan['storyboard_sha256']
     word_count = sum(len(b['n'].split()) for b in beats)
     assert word_count == 1441
-    frames = sum(plan['beats'][bid]['so_khung'] for bid in order)
-    assert frames == plan['tong_khung'] and frames / 30 >= 480
+    original_frames = sum(plan['beats'][bid]['so_khung'] for bid in order)
+    assert original_frames == plan['tong_khung']
+    frames = timeline['frames']
+    assert frames / 30 >= 480
     assert tts['rate'] == '+0%' and tts['voice'] == 'en-US-AndrewNeural'
     rows, blockers, cursor = [], [], 0
     for beat in beats:
         bid = beat['id']
-        timing, voice = plan['beats'][bid], tts['beats'][bid]
-        audio = R / 'out/_tts_cache' / Path(voice['mp3']).name
-        word_path = R / 'out/_tts_cache' / Path(voice['words']).name
-        words = json.loads(word_path.read_text())
-        assert hashlib.sha256(audio.read_bytes()).hexdigest() == voice['mp3_sha256']
+        original_narration = beat['n']
+        effective = for_beat(bid)
+        beat = dict(beat, n=effective['narration'])
+        if bid not in allowed: assert beat['n'] == original_narration
+        timing = next(b for b in timeline['beats'] if b['id'] == bid)
+        voice = tts['beats'][bid]
+        audio = effective['audio']
+        words = effective['words']
+        word_path = R / timing['words_path']
+        expected_sha = overrides[bid]['audio_sha256'] if bid in overrides else voice['mp3_sha256']
+        assert hashlib.sha256(audio.read_bytes()).hexdigest() == expected_sha
         # Edge can return multiword events (e.g. w4), so compare normalized
         # spoken text rather than pretending one event always equals one word.
         assert normalized(' '.join(w['w'] for w in words)) == normalized(beat['n']), bid
         start = cursor / 30
-        end = (cursor + timing['so_khung']) / 30
-        offset = start + timing['t_chuyen']
-        row = dict(id=bid, start=start, end=end, frames=timing['so_khung'],
+        end = (cursor + timing['frames']) / 30
+        offset = effective['offset']
+        row = dict(id=bid, start=start, end=end, frames=timing['frames'],
                    audio_offset=offset, narration=beat['n'],
                    words=len(beat['n'].split()), tts_events=len(words),
-                   audio=str(audio.relative_to(R)), audio_sha256=voice['mp3_sha256'],
+                   audio=str(audio.relative_to(R)), audio_sha256=expected_sha,
                    word_clock=str(word_path.relative_to(R)), voice=tts['voice'], rate=tts['rate'])
         rows.append(row)
         for index, word in enumerate(words):
@@ -71,13 +85,13 @@ def audit():
             blockers.append(dict(code='L6', gate='QUY_TRINH_CHUAN L6', beat=bid,
                                  start=start, end=end, spoken=beat['n'],
                                  rejection='Verbatim source retains35.54; L6 explicitly forbids35.54.'))
-        cursor += timing['so_khung']
+        cursor += timing['frames']
     adslots = [dict(beat=bid, time=next(b['start'] for b in rows if b['id'] == bid),
                     kind='mid-roll candidate', cut='before beat; never inside narration')
                for bid in ('c2', 'c3', 'b1')]
     return dict(source=str(source.relative_to(R)), source_sha256=plan['storyboard_sha256'],
                 parent_sample='0c07c71c95234f20500dadf7d494931001a06dd2',
-                words=word_count, beat_count=len(rows), frames=frames, fps=30,
+                words=sum(b['words'] for b in rows), original_words=word_count, authorized_override_beats=sorted(overrides), beat_count=len(rows), frames=frames, fps=30,
                 duration_s=frames/30, voice=tts['voice'], rate=tts['rate'],
                 slowed_audio=False, source_adslots=storyboard['meta']['adslots'],
                 adslots=adslots, beats=rows, blockers=blockers,

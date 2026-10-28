@@ -16,7 +16,7 @@ for(const format of ['16x9','9x16']){
   for(const b of data.beats)for(const f of [b.start+4,b.start+Math.floor(b.frames/2),b.start+b.frames-4])await renderStill({...opts,frame:f,output:path.join(out,`frame_${format}_${b.id}_${f}.png`)});
  }else{
   let last=-1;
-  const renderOpts={...opts,codec:'h264',outputLocation:path.join(out,`B_60s_${format}.mp4`),concurrency:configuredConcurrency,onStart:s=>{effectiveConcurrency=s.resolvedConcurrency;console.log('B_CONCURRENCY_ACTUAL '+effectiveConcurrency)},crf:18,pixelFormat:'yuv420p',audioBitrate:'160k',enforceAudioTrack:true,onProgress:p=>{const bucket=Math.floor(p.progress*10);if(bucket>last){last=bucket;console.log(`B_REMOTION_PROGRESS ${format} ${Math.round(p.progress*100)}% frames=${p.renderedFrames}`)}}};
+  const renderOpts={...opts,codec:'h264',outputLocation:path.join(out,`B_full_${format}.mp4`),concurrency:configuredConcurrency,onStart:s=>{effectiveConcurrency=s.resolvedConcurrency;console.log('B_CONCURRENCY_ACTUAL '+effectiveConcurrency)},crf:18,pixelFormat:'yuv420p',audioBitrate:'160k',enforceAudioTrack:true,onProgress:p=>{const bucket=Math.floor(p.progress*10);if(bucket>last){last=bucket;console.log(`B_REMOTION_PROGRESS ${format} ${Math.round(p.progress*100)}% frames=${p.renderedFrames}`)}}};
   await renderMedia(renderOpts);if(effectiveConcurrency!==configuredConcurrency)throw Error('G8 actual concurrency mismatch');
  }
  fs.writeFileSync(path.join(out,`dom_${format}.json`),JSON.stringify(dom,null,2));

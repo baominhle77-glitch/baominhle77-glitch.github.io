@@ -20,20 +20,19 @@ class Specialize(ast.NodeTransformer):
 
 def key(beat,short_side=540):
  tree=Specialize(beat).visit(ast.parse((H/'scene.py').read_text()))
- methods={'construct','add_world','update',{'h1':'plate_scene','h2':'plate_scene','h3':'plate_scene','h4':'molecular_scene','c1':'molecular_scene','p1':'section_scene'}[beat]}
+ methods={'construct','add_world','update','construct'}
  for node in tree.body:
   if isinstance(node,ast.ClassDef) and node.name=='BScene':node.body=[x for x in node.body if not isinstance(x,ast.FunctionDef) or x.name in methods]
- plan=json.loads((H/'ke_hoach_A.json').read_text());b=plan['beats'][beat]
+ plan=json.loads((H/'full_timeline.json').read_text());b=next(b for b in plan['beats'] if b['id']==beat)
  digest=hashlib.sha256(ast.dump(tree,include_attributes=False).encode())
  for p in ('prepare.py','beat_cache.py','stage_spec.py','stage_khuon.py','../../ci_requirements.txt'):digest.update((H/p).resolve().read_bytes())
  for p in sorted((H/'../simulation').resolve().glob('*.py')):digest.update(p.read_bytes())
  bv=json.loads((H/'ban_ve_B60.json').read_text());content=next(b for b in bv['beats'] if b['id']==beat)
- digest.update(json.dumps([bv['bo_cuc_doc'],content],sort_keys=True).encode())
- digest.update(json.dumps(json.loads((H/'optics.json').read_text())[beat],sort_keys=True).encode())
- clip=next((c for c in json.loads((H/'gemini.json').read_text()) if c['simulation_beat']==beat),None)
- detail=clip['simulation_optics'] if clip else json.loads((H/'portrait_views.json').read_text())[beat]
- digest.update(json.dumps(detail,sort_keys=True).encode())
- digest.update(json.dumps([beat,b['so_khung'],b['t0'],short_side,30,'v3']).encode())
+ render_content={k:content[k] for k in ('optics','optics_duoi','khung','su_kien','goc_can','content_scene','aggregation_start','ring_content','ring_content_duoi') if k in content};digest.update(json.dumps([bv['bo_cuc_doc'],render_content],sort_keys=True).encode())
+ digest.update(json.dumps([beat,b['frames'],short_side,30,'full-v1']).encode())
+ content_scene=content.get('content_scene')
+ files={'wine_teaser':('wine_scene.py','wine_teaser.py'),'micelle_scene':('micelle_scene.py','ring_scene.py'),'diffusion_scene':('diffusion_scene.py',),'ring_scene':('ring_scene.py',)}.get(content_scene,())
+ for p in files:digest.update((H/p).read_bytes())
  return digest.hexdigest()
 if __name__=='__main__':
  import argparse

@@ -4,7 +4,7 @@ No episode identifiers or subject-specific object names are allowed here.
 import re
 CONTEXT_WORDS={'lab','laboratory','study','studies','research','researcher','report','reported','calculated','calculation','episode','chapter','example'}
 TIME_WORDS={'second','seconds','minute','minutes','hour','hours','day','days','month','months','year','years','century','centuries'}
-SI_BASES={'metre','meter','newton','joule','watt','pascal','kelvin','ampere','volt','ohm','hertz','tesla','gram','mole','molar','litre','liter','coulomb','farad','henry','siemens','weber','radian','steradian','becquerel','gray','sievert','katal','degree','percent','percentage'}
+SI_BASES={'metre','meter','newton','joule','watt','pascal','kelvin','ampere','volt','ohm','hertz','tesla','gram','mole','molar','litre','liter','coulomb','farad','henry','siemens','weber','radian','steradian','becquerel','gray','sievert','katal','degree','percent','percentage','cent'}
 PREFIXES=('deca','hecto','kilo','mega','giga','tera','peta','deci','centi','milli','micro','nano','pico','femto','atto')
 FUNCTIONS={'point','points'}
 SMALL_NUMBERS=('zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen')
@@ -12,7 +12,7 @@ TENS=('','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety
 NUMBER_WORDS=set(SMALL_NUMBERS)|set(TENS[2:])|{'hundred','thousand','million','billion','trillion'}
 def unit(word):
  w=word.lower().rstrip('s')
- return w in SI_BASES or any(w.startswith(p) and w[len(p):] in SI_BASES for p in PREFIXES)
+ return w in SI_BASES or w in {'megohm','kilohm'} or any(w.startswith(p) and w[len(p):] in SI_BASES for p in PREFIXES)
 def role(word):
  w=word.lower()
  if w in CONTEXT_WORDS:return 'context'

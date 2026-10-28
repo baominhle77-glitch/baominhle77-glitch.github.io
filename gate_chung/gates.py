@@ -134,7 +134,7 @@ def G5(video,plan):
   for w in beat.get('words',[]):
    if w['start']>=video.duration or role(w['text'].strip('.,;:!?'))!='data':continue
    token=w['text'].strip('.,;:!?');visible=' '.join(t['text'] for t in at(plan['texts'],min(video.duration-.01,w['start']+.1)));normalized=screen_data(visible);key=token.lower()
-   ok=key in normalized or (key in {'point','points'} and bool(re.search(r'\d+\.\d+',visible))) or (key in {'second','seconds','metre','meter'} and ('m/s' in visible or 'per second' in normalized)) or (key in {'year','years','century','centuries'} and bool(re.search(r'\d{3,4}',visible)))
+   ok=key in normalized or (key in {'point','points'} and bool(re.search(r'\d+\.\d+',visible))) or (key in {'second','seconds','metre','metres','meter','meters'} and ('m/s' in visible or 'per second' in normalized)) or (key in {'year','years','century','centuries'} and bool(re.search(r'\d{3,4}',visible)))
    rows.append(row(w['start'],min(video.duration,w['end']),ok,'measurement/time/symbol must map to visible screen data, not a physical-image noun',term=token,screen=visible))
   for term in terms:
    start,end=term['start'],min(video.duration,term['end'])

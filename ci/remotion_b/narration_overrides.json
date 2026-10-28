@@ -1,121 +1,534 @@
 {
-  "c1": {
-    "narration": "Every patch of that surface pulls on its neighbours. Over clean water the pull is strong; over the soapy spot it is weaker. A flow driven by a difference in pull like this is called a Marangoni flow.",
-    "audio_path": "assets/k1t3/narration_b/c1.wav",
-    "audio_sha256": "29daa8996169e0aa90bd31ac6c3151ed174f94ef3aec2d971f20a9071b2126e3",
-    "words_path": "assets/k1t3/narration_b/c1.words.json",
-    "offset": 44.1667,
-    "duration": 13.9,
-    "tempo": 0.8255395683453238,
-    "source_spans": [
-      {
-        "beat": "c1",
-        "audio_sha256": "bc7fbcfdf54a62b48b58e6b797347ed7f46dfe7f778c83cc8364fee4f616d009",
-        "source_start": 2.5755,
-        "source_end": 9.8055,
-        "word_first": 8,
-        "word_last": 30
-      },
-      {
-        "beat": "p1",
-        "audio_sha256": "8e806b9fb727d7d5f4f4192c5e6972dbfd7ef99ca450c2ccdcfc68a1a20f0cf1",
-        "source_start": 12.5255,
-        "source_end": 16.6305,
-        "word_first": 32,
-        "word_last": 46
-      }
-    ],
-    "voice": "en-US-AndrewNeural",
-    "method": "Original cached Andrew TTS; measured source spans, short silent joins, pitch-preserving atempo; word clocks transformed by the same tempo"
-  },
-  "p1": {
-    "narration": "Flow drags water outward.",
-    "audio_path": "assets/k1t3/narration_b/p1.wav",
-    "audio_sha256": "b4a81f288c8d4c2e1771ff012abfc230fcb380c21bfa989cb5d13243e96e6160",
-    "words_path": "assets/k1t3/narration_b/p1.words.json",
-    "offset": 58.4,
-    "duration": 1.55,
-    "tempo": 1.0925806451612903,
-    "source_spans": [
-      {
-        "beat": "p1",
-        "audio_sha256": "8e806b9fb727d7d5f4f4192c5e6972dbfd7ef99ca450c2ccdcfc68a1a20f0cf1",
-        "source_start": 12.6005,
-        "source_end": 12.968,
-        "word_first": 33,
-        "word_last": 33
-      },
-      {
-        "beat": "h2",
-        "audio_sha256": "81deddbb23880746cc27a93fd950de7fa5eaee64743829ee8be2a41c467bdd52",
-        "source_start": 4.588,
-        "source_end": 5.018,
-        "word_first": 14,
-        "word_last": 14
-      },
-      {
-        "beat": "h2",
-        "audio_sha256": "81deddbb23880746cc27a93fd950de7fa5eaee64743829ee8be2a41c467bdd52",
-        "source_start": 1.388,
-        "source_end": 1.768,
-        "word_first": 4,
-        "word_last": 4
-      },
-      {
-        "beat": "h2",
-        "audio_sha256": "81deddbb23880746cc27a93fd950de7fa5eaee64743829ee8be2a41c467bdd52",
-        "source_start": 5.588,
-        "source_end": 6.068,
-        "word_first": 17,
-        "word_last": 17
-      }
-    ],
-    "voice": "en-US-AndrewNeural",
-    "method": "Original cached Andrew TTS; measured source spans, short silent joins, pitch-preserving atempo; word clocks transformed by the same tempo"
-  },
   "h4": {
-    "narration": "Here is the engine. At twenty five degrees, clean water pulls harder than our soap, SDS at an inferred twenty five millimolar in water: a gap of thirty six millinewtons per metre, calculated. That gap, not the soap itself, does the pulling.",
-    "audio_path": "assets/k1t3/narration_b/h4.wav",
-    "audio_sha256": "c04ad7ba29ee658fe6a06d00387088835d83cc7b64144b92510046e73412fd03",
-    "words_path": "assets/k1t3/narration_b/h4.words.json",
-    "offset": 24.2667,
-    "duration": 17.784,
-    "tempo": 0.8220029239766082,
+    "narration": "Here is the engine. At twenty five degrees, clean water pulls harder than our soap, SDS at an inferred twenty five millimolar in water: a gap of about thirty six millinewtons per metre, calculated. That gap, not the soap itself, does the pulling.",
+    "audio_path": "assets/k1t3/narration_full/h4.wav",
+    "words_path": "assets/k1t3/narration_full/h4.words.json",
+    "audio_sha256": "2d0a0315136c449efc1c4384453c52755046545032c425d9c2572271fb2bb5ec",
+    "duration": 14.9675,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
     "source_spans": [
       {
         "beat": "h4",
-        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b",
-        "source_start": 0.1255,
-        "source_end": 4.680499999999999,
-        "word_first": 0,
-        "word_last": 14
+        "first": 0,
+        "last": 14,
+        "start": 0.1255,
+        "end": 4.680499999999999,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
       },
       {
         "beat": "h4",
-        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b",
-        "source_start": 6.238,
-        "source_end": 10.743,
-        "word_first": 18,
-        "word_last": 30
+        "first": 18,
+        "last": 29,
+        "start": 6.238,
+        "end": 10.393,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
+      },
+      {
+        "beat": "r1",
+        "first": 4,
+        "last": 4,
+        "start": 1.9005,
+        "end": 2.268,
+        "audio_sha256": "6476cac57b2fad8fd4fe6e6c807c4c574c26a2879ae149703d2d6404ee0cc1df"
+      },
+      {
+        "beat": "h4",
+        "first": 30,
+        "last": 30,
+        "start": 10.375499999999999,
+        "end": 10.743,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
       },
       {
         "beat": "w2",
-        "audio_sha256": "548d22ca37f0171fb1425de5fd2eab95a46ee68445da1a9e770c72b468aac903",
-        "source_start": 19.6755,
-        "source_end": 19.968,
-        "word_first": 50,
-        "word_last": 50
+        "first": 50,
+        "last": 50,
+        "start": 19.6755,
+        "end": 19.968,
+        "audio_sha256": "548d22ca37f0171fb1425de5fd2eab95a46ee68445da1a9e770c72b468aac903"
       },
       {
         "beat": "h4",
-        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b",
-        "source_start": 12.2005,
-        "source_end": 17.430500000000002,
-        "word_first": 35,
-        "word_last": 47
+        "first": 35,
+        "last": 47,
+        "start": 12.2005,
+        "end": 17.430500000000002,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
       }
     ],
+    "offset": 24.266666666666666
+  },
+  "c1": {
+    "narration": "Every patch of that surface pulls on its neighbours. Over clean water the pull is strong; over the soapy spot it is weaker.",
+    "audio_path": "assets/k1t3/narration_full/c1.wav",
+    "words_path": "assets/k1t3/narration_full/c1.words.json",
+    "audio_sha256": "1012edb5f31e59d88ce7d7d7c246959861aaac67e643ca5a31be1f232d305c0e",
+    "duration": 7.23,
     "voice": "en-US-AndrewNeural",
-    "method": "Original cached Andrew TTS; measured source spans, short silent joins, pitch-preserving atempo; word clocks transformed by the same tempo"
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "c1",
+        "first": 8,
+        "last": 30,
+        "start": 2.5755,
+        "end": 9.8055,
+        "audio_sha256": "bc7fbcfdf54a62b48b58e6b797347ed7f46dfe7f778c83cc8364fee4f616d009"
+      }
+    ],
+    "offset": 41.36666666666667
+  },
+  "p1": {
+    "narration": "Over clean water the pull is strong; over the soapy spot it is weaker. The surface is dragged outward, and the water just below is dragged along. A flow driven by a difference in pull like this is called a Marangoni flow.",
+    "audio_path": "assets/k1t3/narration_full/p1.wav",
+    "words_path": "assets/k1t3/narration_full/p1.words.json",
+    "audio_sha256": "d84e3531d2f5738f65f1af0fecdfebd60451f17249ea1c27a5c5deb2d7cadda7",
+    "duration": 13.19,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "c1",
+        "first": 17,
+        "last": 30,
+        "start": 5.575500000000001,
+        "end": 9.8055,
+        "audio_sha256": "bc7fbcfdf54a62b48b58e6b797347ed7f46dfe7f778c83cc8364fee4f616d009"
+      },
+      {
+        "beat": "p1",
+        "first": 15,
+        "last": 18,
+        "start": 5.9005,
+        "end": 7.143,
+        "audio_sha256": "8e806b9fb727d7d5f4f4192c5e6972dbfd7ef99ca450c2ccdcfc68a1a20f0cf1"
+      },
+      {
+        "beat": "p1",
+        "first": 23,
+        "last": 46,
+        "start": 8.913,
+        "end": 16.6305,
+        "audio_sha256": "8e806b9fb727d7d5f4f4192c5e6972dbfd7ef99ca450c2ccdcfc68a1a20f0cf1"
+      }
+    ],
+    "offset": 49.9
+  },
+  "p3": {
+    "narration": "They tested eight surfactants, bought ninety nine per cent pure, with different tails and heads. Their micelle thresholds span two orders of magnitude. One of them is SDS. Another study measured its threshold at twenty five degrees, with no salt added: eight point two three, in millimolar units.",
+    "audio_path": "assets/k1t3/narration_full/p3.wav",
+    "words_path": "assets/k1t3/narration_full/p3.words.json",
+    "audio_sha256": "66fb39eaa5ade2719e73dc5f3ccd1a04af9278bc1c3832066b6c874a888a6ecb",
+    "duration": 18.86,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "p3",
+        "first": 0,
+        "last": 27,
+        "start": 0.1005,
+        "end": 11.255500000000001,
+        "audio_sha256": "36808f1e729e492d5727f09bbae5d6ac62e11e451105f3599b4d15e33e773bf3"
+      },
+      {
+        "beat": "p3",
+        "first": 33,
+        "last": 52,
+        "start": 13.250499999999999,
+        "end": 20.9555,
+        "audio_sha256": "36808f1e729e492d5727f09bbae5d6ac62e11e451105f3599b4d15e33e773bf3"
+      }
+    ],
+    "offset": 83.2
+  },
+  "c2": {
+    "narration": "Under steady pumping, Roché saw three zones: the source at the needle, a clear zone around it where tracers are swept away, and an outer zone with pairs of swirls.",
+    "audio_path": "assets/k1t3/narration_full/c2.wav",
+    "words_path": "assets/k1t3/narration_full/c2.words.json",
+    "audio_sha256": "81b4b23be57b6f7d94084f24fe7a900dcb339254578ca436d5fe4ff8d1bcbe1e",
+    "duration": 9.6425,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "c2",
+        "first": 6,
+        "last": 35,
+        "start": 1.5005,
+        "end": 11.143,
+        "audio_sha256": "f3fc6a79e8e6c18c4aa6c193245d696325a4901064d3342f56795b9677d1b836"
+      }
+    ],
+    "offset": 155.96666666666667
+  },
+  "v4": {
+    "narration": "Where does the water go? It cannot pile up at the edge. Below the clear zone, the paper traces a flow that follows the bottom of the container back towards the source. Surface out and bottom back make one loop.",
+    "audio_path": "assets/k1t3/narration_full/v4.wav",
+    "words_path": "assets/k1t3/narration_full/v4.words.json",
+    "audio_sha256": "648e0a8588a1e9f3f12aa0785f56d67473e102e4b5ffa0610442e99fbff4238b",
+    "duration": 11.7975,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "v4",
+        "first": 0,
+        "last": 31,
+        "start": 0.08800000000000001,
+        "end": 9.2805,
+        "audio_sha256": "64ed15bd71dba6de5767f32a00be2de8557d5f6dd618e0752d4b8b55f363b677"
+      },
+      {
+        "beat": "v4",
+        "first": 35,
+        "last": 42,
+        "start": 10.6005,
+        "end": 13.2055,
+        "audio_sha256": "64ed15bd71dba6de5767f32a00be2de8557d5f6dd618e0752d4b8b55f363b677"
+      }
+    ],
+    "offset": 207.46666666666667
+  },
+  "c3": {
+    "narration": "Now the open question: why does the flow stop at a ring? Molecules leave the needle. Each one rides the surface outward, but it can also leave the surface and dissolve into the water below.",
+    "audio_path": "assets/k1t3/narration_full/c3.wav",
+    "words_path": "assets/k1t3/narration_full/c3.words.json",
+    "audio_sha256": "e7818df24bbb358a59d981fe22c8bc8a2492e5eba0ab53d72cb07ec17c9f3c3b",
+    "duration": 10.0,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "c3",
+        "first": 0,
+        "last": 11,
+        "start": 0.08800000000000001,
+        "end": 3.018,
+        "audio_sha256": "1ab44e2c5298d8c574457dde59edc135d746a684fac8d76ba9a95fcf4c49f9d7"
+      },
+      {
+        "beat": "c3",
+        "first": 16,
+        "last": 16,
+        "start": 4.188000000000001,
+        "end": 4.867999999999999,
+        "audio_sha256": "1ab44e2c5298d8c574457dde59edc135d746a684fac8d76ba9a95fcf4c49f9d7"
+      },
+      {
+        "beat": "c3",
+        "first": 30,
+        "last": 30,
+        "start": 8.9255,
+        "end": 9.243,
+        "audio_sha256": "1ab44e2c5298d8c574457dde59edc135d746a684fac8d76ba9a95fcf4c49f9d7"
+      },
+      {
+        "beat": "c3",
+        "first": 18,
+        "last": 19,
+        "start": 5.138000000000001,
+        "end": 5.643,
+        "audio_sha256": "1ab44e2c5298d8c574457dde59edc135d746a684fac8d76ba9a95fcf4c49f9d7"
+      },
+      {
+        "beat": "c3",
+        "first": 20,
+        "last": 38,
+        "start": 6.0255,
+        "end": 11.593,
+        "audio_sha256": "1ab44e2c5298d8c574457dde59edc135d746a684fac8d76ba9a95fcf4c49f9d7"
+      }
+    ],
+    "offset": 265.2666666666667
+  },
+  "w2": {
+    "narration": "How fast should the surface go? Roché's speed law, with its constant set to one, uses the pull gap, viscosity, density and patch size. Take our gap of about thirty six millinewtons per metre, water's viscosity at twenty five degrees, and Roché's own patch estimate of fifteen millimetres: zero point four six metres per second, calculated.",
+    "audio_path": "assets/k1t3/narration_full/w2.wav",
+    "words_path": "assets/k1t3/narration_full/w2.words.json",
+    "audio_sha256": "d2c2a91d16e75de6cef6484ad700b2a0272f642b741e4232cae55df9225a8fec",
+    "duration": 21.955,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "w2",
+        "first": 0,
+        "last": 27,
+        "start": 0.08800000000000001,
+        "end": 10.668000000000001,
+        "audio_sha256": "548d22ca37f0171fb1425de5fd2eab95a46ee68445da1a9e770c72b468aac903"
+      },
+      {
+        "beat": "r1",
+        "first": 4,
+        "last": 4,
+        "start": 1.9005,
+        "end": 2.268,
+        "audio_sha256": "6476cac57b2fad8fd4fe6e6c807c4c574c26a2879ae149703d2d6404ee0cc1df"
+      },
+      {
+        "beat": "h4",
+        "first": 30,
+        "last": 30,
+        "start": 10.375499999999999,
+        "end": 10.743,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
+      },
+      {
+        "beat": "w2",
+        "first": 50,
+        "last": 50,
+        "start": 19.6755,
+        "end": 19.968,
+        "audio_sha256": "548d22ca37f0171fb1425de5fd2eab95a46ee68445da1a9e770c72b468aac903"
+      },
+      {
+        "beat": "h4",
+        "first": 35,
+        "last": 37,
+        "start": 12.2005,
+        "end": 13.355500000000001,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
+      },
+      {
+        "beat": "w2",
+        "first": 33,
+        "last": 54,
+        "start": 12.6755,
+        "end": 21.868000000000002,
+        "audio_sha256": "548d22ca37f0171fb1425de5fd2eab95a46ee68445da1a9e770c72b468aac903"
+      }
+    ],
+    "offset": 294.2
+  },
+  "b1": {
+    "narration": "Time for the card on the bench. Three kinds of numbers appear on it: measured by Roché and colleagues, measured for SDS, and calculated from both.",
+    "audio_path": "assets/k1t3/narration_full/b1.wav",
+    "words_path": "assets/k1t3/narration_full/b1.words.json",
+    "audio_sha256": "273b343ad63e4f7db845071c10129f31efe6f47ed0de38a2b5e60ae5af647e8a",
+    "duration": 8.2375,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "b1",
+        "first": 0,
+        "last": 18,
+        "start": 0.1005,
+        "end": 5.668,
+        "audio_sha256": "5586f9ab2033fdf49739e74300d49c36b1f0629c0ee4dff67f46c0105a4d32a3"
+      },
+      {
+        "beat": "p3",
+        "first": 35,
+        "last": 35,
+        "start": 13.913,
+        "end": 14.3055,
+        "audio_sha256": "36808f1e729e492d5727f09bbae5d6ac62e11e451105f3599b4d15e33e773bf3"
+      },
+      {
+        "beat": "r2",
+        "first": 46,
+        "last": 46,
+        "start": 14.788,
+        "end": 14.968,
+        "audio_sha256": "97a754dbd366eaf2479bae6ee78d681237873a54c07dece58a29a239f3c238ef"
+      },
+      {
+        "beat": "p3",
+        "first": 27,
+        "last": 27,
+        "start": 10.488,
+        "end": 11.255500000000001,
+        "audio_sha256": "36808f1e729e492d5727f09bbae5d6ac62e11e451105f3599b4d15e33e773bf3"
+      },
+      {
+        "beat": "b1",
+        "first": 24,
+        "last": 27,
+        "start": 7.9755,
+        "end": 9.3055,
+        "audio_sha256": "5586f9ab2033fdf49739e74300d49c36b1f0629c0ee4dff67f46c0105a4d32a3"
+      }
+    ],
+    "offset": 408.06666666666666
+  },
+  "r2": {
+    "narration": "Calculated: a pull gap of about thirty six millinewtons per metre, a surface speed of zero point four six metres per second, a moving layer of zero point one seven millimetres, a soap layer a hundred times thinner, and a ring one point six eight times wider for double the pumping.",
+    "audio_path": "assets/k1t3/narration_full/r2.wav",
+    "words_path": "assets/k1t3/narration_full/r2.words.json",
+    "audio_sha256": "2dea60077f98244a4598f4ba2277e952cee4895d475fcee201b0e0e21a66fbf3",
+    "duration": 15.905,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "r2",
+        "first": 0,
+        "last": 4,
+        "start": 0.0755,
+        "end": 1.968,
+        "audio_sha256": "97a754dbd366eaf2479bae6ee78d681237873a54c07dece58a29a239f3c238ef"
+      },
+      {
+        "beat": "r1",
+        "first": 4,
+        "last": 4,
+        "start": 1.9005,
+        "end": 2.268,
+        "audio_sha256": "6476cac57b2fad8fd4fe6e6c807c4c574c26a2879ae149703d2d6404ee0cc1df"
+      },
+      {
+        "beat": "h4",
+        "first": 30,
+        "last": 30,
+        "start": 10.375499999999999,
+        "end": 10.743,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
+      },
+      {
+        "beat": "w2",
+        "first": 50,
+        "last": 50,
+        "start": 19.6755,
+        "end": 19.968,
+        "audio_sha256": "548d22ca37f0171fb1425de5fd2eab95a46ee68445da1a9e770c72b468aac903"
+      },
+      {
+        "beat": "h4",
+        "first": 35,
+        "last": 37,
+        "start": 12.2005,
+        "end": 13.355500000000001,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
+      },
+      {
+        "beat": "r2",
+        "first": 10,
+        "last": 49,
+        "start": 3.9005,
+        "end": 15.730500000000001,
+        "audio_sha256": "97a754dbd366eaf2479bae6ee78d681237873a54c07dece58a29a239f3c238ef"
+      }
+    ],
+    "offset": 433.03333333333336
+  },
+  "r3": {
+    "narration": "Our assumptions. Roché's constants are set to one, as in the paper. The patch size is Roché's estimate, not our measurement. The gap uses the SDS value at an inferred twenty five millimolar, while that estimate assumed a threshold of ten millimolar and a surface tension gap of its own.",
+    "audio_path": "assets/k1t3/narration_full/r3.wav",
+    "words_path": "assets/k1t3/narration_full/r3.words.json",
+    "audio_sha256": "1eed9ffeb06e9f5dddb29cc5f1100b01be388c8aa38670a5c59931e1f7a2e2e4",
+    "duration": 17.365,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "r3",
+        "first": 0,
+        "last": 23,
+        "start": 0.08800000000000001,
+        "end": 9.0555,
+        "audio_sha256": "5b0fd42e719ddfb20c335e3efcd8a95d023f0c9a39902c4cc89efc41fd8f4daa"
+      },
+      {
+        "beat": "r3",
+        "first": 12,
+        "last": 12,
+        "start": 4.7255,
+        "end": 4.818,
+        "audio_sha256": "5b0fd42e719ddfb20c335e3efcd8a95d023f0c9a39902c4cc89efc41fd8f4daa"
+      },
+      {
+        "beat": "r3",
+        "first": 26,
+        "last": 50,
+        "start": 10.125499999999999,
+        "end": 18.430500000000002,
+        "audio_sha256": "5b0fd42e719ddfb20c335e3efcd8a95d023f0c9a39902c4cc89efc41fd8f4daa"
+      }
+    ],
+    "offset": 450.26666666666665
+  },
+  "s8": {
+    "narration": "Water's capillary length at twenty degrees came to two point seven three, in millimetres. SDS opens a gap in pull of about thirty six millinewtons per metre. That gap drives the surface at zero point four six metres per second, calculated.",
+    "audio_path": "assets/k1t3/narration_full/s8.wav",
+    "words_path": "assets/k1t3/narration_full/s8.words.json",
+    "audio_sha256": "3f2bc7dd494d863b1bf3c445b6596a1437a8efcbee31ed99c37388bb219c8c53",
+    "duration": 14.5975,
+    "voice": "en-US-AndrewNeural",
+    "tempo": 1.0,
+    "method": "Original Andrew spans at native rate; no atempo or added silence",
+    "source_spans": [
+      {
+        "beat": "s8",
+        "first": 7,
+        "last": 20,
+        "start": 3.4505,
+        "end": 8.668000000000001,
+        "audio_sha256": "1f0ed91f2994d5d5303ca083fdb55a15c2b1b125d0010dc44d812391f4560e93"
+      },
+      {
+        "beat": "s8",
+        "first": 23,
+        "last": 29,
+        "start": 10.3505,
+        "end": 12.4305,
+        "audio_sha256": "1f0ed91f2994d5d5303ca083fdb55a15c2b1b125d0010dc44d812391f4560e93"
+      },
+      {
+        "beat": "r1",
+        "first": 4,
+        "last": 4,
+        "start": 1.9005,
+        "end": 2.268,
+        "audio_sha256": "6476cac57b2fad8fd4fe6e6c807c4c574c26a2879ae149703d2d6404ee0cc1df"
+      },
+      {
+        "beat": "h4",
+        "first": 30,
+        "last": 30,
+        "start": 10.375499999999999,
+        "end": 10.743,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
+      },
+      {
+        "beat": "w2",
+        "first": 50,
+        "last": 50,
+        "start": 19.6755,
+        "end": 19.968,
+        "audio_sha256": "548d22ca37f0171fb1425de5fd2eab95a46ee68445da1a9e770c72b468aac903"
+      },
+      {
+        "beat": "h4",
+        "first": 35,
+        "last": 37,
+        "start": 12.2005,
+        "end": 13.355500000000001,
+        "audio_sha256": "ab71ad47f32ff3399e83cd2b2ef5c636f33358e3742700d09314573234dd486b"
+      },
+      {
+        "beat": "s8",
+        "first": 37,
+        "last": 50,
+        "start": 15.788,
+        "end": 20.9055,
+        "audio_sha256": "1f0ed91f2994d5d5303ca083fdb55a15c2b1b125d0010dc44d812391f4560e93"
+      }
+    ],
+    "offset": 484.3666666666667
   }
 }

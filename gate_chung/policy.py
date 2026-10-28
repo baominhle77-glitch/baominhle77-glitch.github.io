@@ -23,6 +23,6 @@ GRAPHIC_CAPTION_WORDS=set('arrow arrows orange panel panels label labels diagram
 GRAPHIC_CAPTION_PHRASES=('mũi tên','đồ hoạ','đồ họa','ô phóng to','phóng to','hộp nhãn')
 TTS_TOLERANCE=.2
 LONG_WIDTH=.15
-BAD_END_EN=set('of the a an to and so not or but for with from than at in on by as that'.split())
+BAD_END_EN=set('of the a an to and so not or but for per onto into with from than at in on by as that'.split())
 BAD_END_VI=set('của và thì là những các một với từ tại tới đến mà hoặc nhưng về trong trên cho'.split())
 GENRE_KEYS={'id','name','simulation_types','main_scenes','palette','real_material_types'}

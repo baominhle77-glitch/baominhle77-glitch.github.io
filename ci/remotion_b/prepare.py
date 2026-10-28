@@ -4,39 +4,28 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from beat_cache import key as beat_key
 R=Path(__file__).resolve().parents[2];HERE=Path(__file__).resolve().parent
-FIRST=('h1','h2','h3','h4','c1','p1')
+FIRST=tuple(b['id'] for b in json.loads((HERE/'full_timeline.json').read_text())['beats'])
 SHORT=540
 def read(p):return json.loads(Path(p).read_text(encoding='utf-8'))
 def write(p,d):Path(p).parent.mkdir(parents=True,exist_ok=True);Path(p).write_text(json.dumps(d,ensure_ascii=False,indent=2),encoding='utf-8')
 def run(cmd,env=None,log=None):
- p=subprocess.run(list(map(str,cmd)),cwd=R,env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=1500)
+ p=subprocess.run(list(map(str,cmd)),cwd=R,env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=2400)
  if log:Path(log).write_bytes(p.stdout)
  if p.returncode:raise RuntimeError(p.stdout.decode('utf-8','replace')[-3500:])
  return p.stdout
 
 def source_data():
- plan=read(HERE/'ke_hoach_A.json');tts=read(R/'out/M1_MARANGONI_DUNG/_build/tts.json')
- assert hashlib.sha256((R/'out/M1_MARANGONI/storyboard.json').read_bytes()).hexdigest()==plan['storyboard_sha256']
- assert plan['tong_khung']==16601
- beats=[];caps=[];public=HERE/'public';public.mkdir(exist_ok=True)
- shutil.copy2(R/'ban_sac/fonts/NotoSans-Regular.ttf',public/'NotoSans-Regular.ttf')
- for bid in FIRST:
-  b=plan['beats'][bid];f0=round(b['t0']*30);frames=min(b['so_khung'],1800-f0)
-  raw=tts['beats'][bid];mp=R/'out/_tts_cache'/Path(raw['mp3']).name
-  assert hashlib.sha256(mp.read_bytes()).hexdigest()==raw['mp3_sha256'];shutil.copy2(mp,public/mp.name)
-  words=read(R/'out/_tts_cache'/Path(raw['words']).name);assert len(words)==len(b['n'].split());offset=b['t0']+b['t_chuyen'];i=0
-  while i<len(words):
-   take=min(3,len(words)-i)
-   if len(words)-i-take==1:take+=1
-   chunk=words[i:i+take];i+=take;assert 2<=len(chunk)<=5
-   caps.append(dict(text=' '.join(x['w'] for x in chunk),start=round((offset+chunk[0]['t0'])*30),end=min(1800,math.ceil((offset+chunk[-1]['t1']+.045)*30)),beat=bid))
-  beats.append(dict(id=bid,start=f0,frames=frames,audio=mp.name,audioStart=round(offset*30),narration=b['n']))
+ timeline=read(HERE/'full_timeline.json');public=HERE/'public';public.mkdir(exist_ok=True);shutil.copy2(R/'ban_sac/fonts/NotoSans-Regular.ttf',public/'NotoSans-Regular.ttf');beats=[]
+ from narration_source import for_beat
+ for b in timeline['beats']:
+  source=for_beat(b['id']);name='narration_'+b['id']+source['audio'].suffix;shutil.copy2(source['audio'],public/name)
+  beats.append(dict(id=b['id'],start=b['start'],frames=b['frames'],audio=name,audioStart=b['audioStart'],narration=b['narration'],title=b['title'],source=b['source']))
  clips=read(HERE/'gemini.json')
  for c in clips:
-  path=R/c['path'] if c.get('path') else None;c['available']=bool(path and path.is_file())
+  path=R/c['path'];c['available']=path.is_file()
   if c['available']:
    c['sha256']=hashlib.sha256(path.read_bytes()).hexdigest();dest='gemini_'+c['id']+'.mp4';shutil.copy2(path,public/dest);c['src']=dest
- data=dict(beats=beats,captions=[x for x in caps if x['start']<1800],clips=clips,sourceFrameCount=16601,fps=30,frames=1800)
+ data=dict(beats=beats,captions=[],clips=clips,sourceFrameCount=timeline['frames'],fps=30,frames=timeline['frames'],duration=timeline['duration'],full=True)
  write(public/'data.json',data);return data
 
 def read_probe(p):return json.loads(run(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height,nb_frames,duration,r_frame_rate','-of','json',p]))['streams'][0]
@@ -55,12 +44,13 @@ def render_one(item,force=False):
  cached.with_suffix('.layout.json').unlink(missing_ok=True)
  if at is not None:env['B_AT']=str(at)
  resolution=f'{SHORT},{round(SHORT*16/9)}' if fmt=='9x16' else f'{round(SHORT*16/9)},{SHORT}'
- args=[sys.executable,'-m','manim','render','--resolution',resolution,'--fps','30','--disable_caching','--progress_bar','none','-v','ERROR','--media_dir',folder,HERE/'scene.py','BScene']
+ content=next(q for q in read(HERE/'ban_ve_B60.json')['beats'] if q['id']==bid).get('content_scene');scene_name,scene_file={'wine_teaser':('WineScene','wine_scene.py'),'micelle_scene':('MicelleScene','micelle_scene.py'),'diffusion_scene':('DiffusionScene','diffusion_scene.py'),'ring_scene':('RingScene','ring_scene.py')}.get(content,('BScene','scene.py'));scene_path=HERE/scene_file
+ args=[sys.executable,'-m','manim','render','--resolution',resolution,'--fps','30','--disable_caching','--progress_bar','none','-v','ERROR','--media_dir',folder,scene_path,scene_name]
  if at is not None:args.insert(4,'-s')
  t=time.perf_counter();r0=resource.getrusage(resource.RUSAGE_CHILDREN);print(f'B_BEAT_START {fmt}/{bid} frames={b["frames"]} resolution={resolution} fps=30',flush=True)
  run(args,env,folder/'render.log')
  if at is not None:return dict(format=fmt,beat=bid,at=at,image=str(next((folder/'images').rglob('*.png'))),wall_s=time.perf_counter()-t)
- src=next((folder/'videos').rglob('BScene.mp4'))
+ src=next((folder/'videos').rglob(scene_name+'.mp4'))
  run(['ffmpeg','-nostdin','-y','-v','error','-i',src,'-frames:v',b['frames'],'-an','-c:v','libx264','-threads','2','-crf','18','-pix_fmt','yuv420p',cached]);validate(cached,fmt,b);shutil.copy2(cached,dest)
  r1=resource.getrusage(resource.RUSAGE_CHILDREN);row=dict(format=fmt,beat=bid,frames=b['frames'],wall_s=time.perf_counter()-t,cpu_s=r1.ru_utime+r1.ru_stime-r0.ru_utime-r0.ru_stime,bytes=dest.stat().st_size,source_digest=digest,cache_reused=False)
  write(meta_path,row);print('B_BEAT_END '+json.dumps(row),flush=True);return row
