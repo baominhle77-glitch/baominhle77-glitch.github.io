@@ -454,6 +454,7 @@ function moneyHTML(m) {
 async function runAI(s, el, ctx, rule) {
   const provider = "gemini";
   const key = aiKey();
+  let khoa = key; // trạm 429 đã chuyển sang cầu nối → lượt viết lại lời gửi đi thẳng cầu nối
   const prev = live.get(s.id);
   prev?.ctrl?.abort();
   const st = { text: "", model: "", err: "", ctrl: new AbortController() };
@@ -472,7 +473,7 @@ async function runAI(s, el, ctx, rule) {
   kick();
   try {
     const money = rule._money;
-    const { text, model } = await goiCoDau({
+    const { text, model, cuu } = await goiCoDau({
       provider, key, model: "", storage,
       system: SYSTEM_READING, json: true,
       messages: [{ role: "user", text: readingRequest(store.db, s, { reading: rule, money, settings: store.settings }) }],
@@ -480,8 +481,10 @@ async function runAI(s, el, ctx, rule) {
       onModel: (m) => { kick(); st.model = m; if (status) status.textContent = `Đang giải bằng ${m}…`; },
       onText: (full) => { kick(); st.text = full; if (!raf) raf = requestAnimationFrame(paint); },
       onFallback: () => { kick(); st.viaTram = true; st.text = ""; probeBridge(); if (status) status.textContent = "Cầu nối máy nhà không phản hồi — chuyển sang máy giải AI…"; },
+      onCuu: () => { kick(); if (status) status.textContent = "Máy giải đang đông — đang thử đường khác…"; },
     });
     clearTimeout(idle);
+    if (cuu) khoa = LOCAL_KEY;
     const obj = partialJSON(text);
     const reading = normalizeReading(obj, rule, { db: store.db, session: s });
     if (!reading || !reading.tang.length) throw new Error("AI trả về sai khuôn — thử lại hoặc dùng bản luật.");
@@ -490,10 +493,10 @@ async function runAI(s, el, ctx, rule) {
     kick();
     const lgk = await chotLoiGuiKhach({
       db: store.db, session: s, rule, reading, tenKhach: s.tenKhach, xungHo: store.settings.xungHo,
-      call: (system, msg) => goiCoDau({ provider, key, model: "", storage, system, json: false, messages: [{ role: "user", text: msg }], signal: st.ctrl.signal, onModel: () => kick() }).then((r) => r.text),
+      call: (system, msg) => goiCoDau({ provider, key: khoa, model: "", storage, system, json: false, messages: [{ role: "user", text: msg }], signal: st.ctrl.signal, onModel: () => kick() }).then((r) => r.text),
     });
     clearTimeout(idle);
-    s.ai = { provider, model, at: new Date().toISOString(), rounds: s.rounds.length, reading: { ...reading, _money: null }, raw: text, loiGuiKhach: lgk.text, loiNguon: lgk.nguon, loiLyDo: lgk.nguon === "luat" ? `bị cổng trả lại: ${lgk.loi.join("; ")}` : "" };
+    s.ai = { provider, model, at: new Date().toISOString(), rounds: s.rounds.length, reading: { ...reading, _money: null }, raw: text, loiGuiKhach: lgk.text, loiNguon: lgk.nguon, loiLyDo: lgk.nguon === "luat" ? `${cuu ? `${cuu}; ` : ""}bị cổng trả lại: ${lgk.loi.join("; ")}` : cuu || "" };
     delete s.lgkLyDo;
     if (lgk.nguon === "luat") console.warn("[loi-gui-khach] bản theo luật vì:", s.ai.loiLyDo);
     save();
@@ -506,7 +509,7 @@ async function runAI(s, el, ctx, rule) {
     if (st.timeout) e.timeout = true;
     if (key === LOCAL_KEY) probeBridge();
     // ghi lý do để biết đường AI nào cần chữa: cầu nối chết / 429 / quá giờ / mất dấu…
-    s.lgkLyDo = `AI lỗi: ${phanLoaiLoiAI(e, st.viaTram ? TRAM_KEY : key)}`;
+    s.lgkLyDo = e.cuu || `AI lỗi: ${phanLoaiLoiAI(e, st.viaTram ? TRAM_KEY : key)}`;
     save();
     console.warn("[loi-gui-khach] bản theo luật vì:", s.lgkLyDo, e);
     const ld = el.querySelector("#lgkLyDo");
