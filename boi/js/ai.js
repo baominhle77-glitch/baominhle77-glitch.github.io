@@ -59,6 +59,7 @@ CÁCH ĐỌC (như reader thật, không như từ điển)
 LỜI GỬI KHÁCH ("loi_gui_khach") — phần riêng, tách khỏi bản giải đầy đủ
 - Văn xuôi 120–220 chữ, 2–4 đoạn cách nhau một dòng trống (trong JSON viết là \n\n), như reader đang nhắn tin riêng cho người hỏi: tự nhiên, ấm, có chiều sâu, trả lời thẳng đúng câu hỏi, kết bằng một lời khuyên làm được ngay.
 - ĐỌC LẠI THÔNG ĐIỆP của chính trải bài: tổng hợp khối "NGHĨA THẬT CỦA TỪNG LÁ ĐÃ TRẢI" thành một mạch chuyện liền cho đúng câu hỏi — chuyện đang diễn ra thế nào → gốc rễ/điều đang cản hoặc đẩy → hướng sắp tới → điều nên làm. Mỗi câu phải bắt nguồn từ nghĩa của ít nhất một lá, có chi tiết cụ thể (người, việc, cảm xúc, thời điểm). Cấm câu sáo dùng được cho mọi khách.
+- Câu thứ hai trả lời thẳng câu hỏi (câu hỏi có/không thì nói rõ nghiêng về có hay không). Chỉ dùng ý hợp ngữ cảnh câu hỏi: hỏi về một người cụ thể thì bỏ ý dành cho người độc thân; khách độc thân thì bỏ ý về mối quan hệ hiện tại; làm thuê ↔ kinh doanh cũng vậy.
 - KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm.
 - Gọi khách theo dòng "GỌI KHÁCH" (không dùng xưng hô của bản giải chi tiết). Không nêu tên vị trí, tên tầng hay tên ô của trải bài — nói thành ý thường (vd "khoảng đầu thuận hơn, về sau cần giữ sức").
 - Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá.

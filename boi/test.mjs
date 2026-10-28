@@ -20,7 +20,7 @@ import { probeBridge, bridge, aiKey, store } from "./js/store.js";
 import { ROUTES } from "./js/views.js";
 import * as DT from "./dao-tao/dao-tao-core.js";
 import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai } from "./js/auto.js";
-import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK, tenViTriCua, chuCamTrong, yKhop, tyLeCauSao, viTriTrong } from "./js/loi.js";
+import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK, tenViTriCua, chuCamTrong, yKhop, tyLeCauSao, viTriTrong, traLoiThang, nguCanh, hopNguCanh } from "./js/loi.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const readJSON = (f) => JSON.parse(readFileSync(join(HERE, f), "utf8"));
@@ -1040,6 +1040,12 @@ test("cùng câu hỏi tình cảm, 2 trải khác nhau → 2 lời khác nhau r
   assert.ok(chung.length <= 2, `hai lời trùng ${chung.length} câu: ${chung.join(" | ")}`);
   // lời của trải A không khớp đủ ý với trải B (tức là thật sự đọc từ lá của mình)
   assert.ok(yKhop(ta, db, a).length > yKhop(ta, db, b).length);
+  // câu thứ hai trả lời thẳng câu hỏi; 0 câu "người độc thân" khi khách hỏi về người ấy
+  for (const t of [ta, tb]) {
+    const c2 = t.split(/(?<=[.!?])\s+/u)[1];
+    assert.match(c2, /^(Câu trả lời là còn|Câu trả lời nghiêng|Nói thẳng: tình cảm phía người ấy)/u, c2);
+    assert.ok(!/người độc thân|đang độc thân/iu.test(t), "không chen ý “người độc thân”");
+  }
   console.log(`\n  — Mẫu A —\n${ta}\n\n  — Mẫu B —\n${tb}\n`);
 });
 
@@ -1087,6 +1093,33 @@ test("ghi lý do đường AI hỏng (cầu nối chết / 429 / quá giờ / b�
   const r = await giaiTuDong({ db, cauHoi: "Người ấy còn thương em không?", key: TRAM_KEY, fetchImpl: async () => new Response(JSON.stringify({ ok: false, status: 429, error: "quota" }), { status: 200 }) });
   assert.equal(r.nguon, "luat");
   assert.equal(r.lyDo, "AI lỗi: 429 — trạm hết lượt/đang đông");
+});
+
+test("câu trả lời thẳng: “còn/có/nên … không” nói rõ nghiêng về đâu; Có/Không dùng đúng nhãn; câu hỏi mở nói gọn hướng chung", () => {
+  const ss = (q, spreadId = "3la") => ({ cauHoi: q, spreadId, money: false });
+  const t = (d) => [{ diem: d }];
+  assert.equal(traLoiThang(ss("Người ấy còn thương em không?"), t(7.5), { diem_tb: 7.5 }), "Câu trả lời là còn, và điều đó khá rõ.");
+  assert.match(traLoiThang(ss("Người ấy còn thương em không?"), t(5.5), { diem_tb: 5.5 }, { tu_khoa: "do dự, sợ hãi" }), /^Câu trả lời là còn, nhưng đang bị che bởi sự do dự\./u);
+  assert.equal(traLoiThang(ss("Người ấy còn thương em không?"), t(3), { diem_tb: 3 }), "Nói thẳng: tình cảm phía người ấy đang nguội đi nhiều.");
+  assert.equal(traLoiThang(ss("Em có nên nghỉ việc không?"), t(3), { diem_tb: 3 }), "Câu trả lời nghiêng về không, ít nhất là ở thời điểm này.");
+  assert.equal(traLoiThang(ss("Em có nên nghỉ việc không?"), t(8), { diem_tb: 8 }), "Câu trả lời nghiêng rõ về có.");
+  assert.equal(traLoiThang(ss("Có nên ký hợp đồng?", "cokhong"), [{ diem: 6, tra_loi: "CÓ, NHƯNG CÓ ĐIỀU KIỆN" }], {}), "Câu trả lời gọn là: có, nhưng có điều kiện.");
+  assert.equal(traLoiThang(ss("Tháng này công việc thế nào?"), t(7), { diem_tb: 7 }), "Nói gọn: chuyện này đang đi theo hướng thuận.");
+});
+
+test("lọc câu nghĩa theo ngữ cảnh câu hỏi; cổng chặn “người độc thân” khi hỏi về người ấy", async () => {
+  assert.deepEqual(nguCanh("Người ấy còn thương em không?"), { coNguoi: true, docThan: false, lamThue: false, kinhDoanh: false });
+  assert.equal(nguCanh("Bao giờ em có người yêu?").docThan, true);
+  assert.equal(hopNguCanh("Người độc thân có thể gặp được một người chững chạc.", nguCanh("Anh ấy có quay lại không?")), false);
+  assert.equal(hopNguCanh("Người có đôi cần vun đắp mối quan hệ hiện tại.", nguCanh("Bao giờ em có người yêu?")), false);
+  assert.equal(hopNguCanh("Doanh thu cửa hàng sẽ tăng.", nguCanh("Em có nên đổi việc ở công ty không?")), false);
+  assert.equal(hopNguCanh("Sếp sẽ để ý đến bạn.", nguCanh("Cửa hàng em tháng này buôn bán thế nào?")), false);
+  assert.equal(hopNguCanh("Người độc thân có thể gặp được một người chững chạc.", nguCanh("Tháng này tình cảm thế nào?")), true, "câu hỏi chung thì giữ");
+  const s = await trai3La("Người ấy còn thương em không?", 1);
+  const nen = loiGuiKhachLuat(db, s, analyze(db, s, {}), {});
+  const k = kiemLoiGuiKhach(nen.replace("\n\n", "\n\nNgười độc thân có thể gặp được một người mới. "), db, { session: s });
+  assert.equal(k.ok, false);
+  assert.match(k.loi.join("; "), /sai ngữ cảnh: nói “người độc thân”/u);
 });
 
 export async function run(extra = []) {

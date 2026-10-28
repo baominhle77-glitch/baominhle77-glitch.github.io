@@ -108,6 +108,7 @@ export function kiemLoiGuiKhach(text, db, opts = {}) {
     const y = yKhop(t, db, opts.session);
     if (y.length < Y_TOI_THIEU) loi.push(`chung chung: chỉ ${y.length} ý khớp nghĩa lá đã trải (cần ≥ ${Y_TOI_THIEU})`);
   }
+  if (opts.session && nguCanh(opts.session.cauHoi).coNguoi && RE_CAU_DOC_THAN.test(t)) loi.push("sai ngữ cảnh: nói “người độc thân” khi khách hỏi về một người cụ thể");
   const sao = tyLeCauSao(t);
   if (sao > SAO_TOI_DA) loi.push(`chung chung: ${Math.round(sao * 100)} % câu là câu sáo có sẵn`);
   return { ok: !loi.length, loi };
@@ -120,10 +121,33 @@ const cauCua = (text) => String(text || "").split(/(?<=[.!?…])\s+/u).map((x) =
 export const chuDeCua = (session) => { const m = mainTopic(session.cauHoi); return m === "chung" && session.money ? "tien" : m; };
 
 // Câu nghĩa viết lại cho khách: bỏ giọng "lá này/lá bài này nghĩa là", bỏ câu chứa tên lá hay chữ cấm
-function lamSach(text, db) {
+// Ngữ cảnh của câu hỏi để lọc câu nghĩa không hợp (hỏi về một người cụ thể ↔ đang độc thân; làm thuê ↔ kinh doanh)
+const RE_CO_NGUOI = /(?<![\p{L}])(?:người ấy|anh ấy|cô ấy|người kia|đối phương|người yêu|bạn trai|bạn gái|chồng|vợ|crush|người cũ|người yêu cũ|ex|anh ta|cô ta|người đó)(?![\p{L}])/iu;
+const RE_DOC_THAN = /(?<![\p{L}])(?:độc thân|chưa có người yêu|chưa có ai|tìm người yêu|tìm nửa kia|có người yêu|lấy chồng|lấy vợ|duyên mới|người mới|nửa kia)(?![\p{L}])/iu;
+const RE_LAM_THUE = /(?<![\p{L}])(?:đi làm|làm thuê|công ty|sếp|lương|nhân viên|đổi việc|nghỉ việc|xin việc|phỏng vấn|thăng chức|đồng nghiệp)(?![\p{L}])/iu;
+const RE_KINH_DOANH = /(?<![\p{L}])(?:kinh doanh|buôn bán|cửa hàng|shop|bán hàng|doanh thu|mở quán|khởi nghiệp|khách hàng)(?![\p{L}])/iu;
+export function nguCanh(cauHoi) {
+  const q = String(cauHoi || "");
+  // "bao giờ có người yêu" là hỏi khi còn độc thân, dù có chữ "người yêu"
+  const docThan = RE_DOC_THAN.test(q);
+  return { coNguoi: RE_CO_NGUOI.test(q) && !docThan, docThan, lamThue: RE_LAM_THUE.test(q), kinhDoanh: RE_KINH_DOANH.test(q) };
+}
+const RE_CAU_DOC_THAN = /(?<![\p{L}])(?:người độc thân|đang độc thân|nếu (?:bạn )?(?:còn |đang )?độc thân|cuộc sống độc thân)(?![\p{L}])/iu;
+const RE_CAU_CO_DOI = /(?<![\p{L}])(?:người có đôi|người đã có (?:đôi|gia đình|người yêu)|mối quan hệ hiện tại|nếu (?:bạn )?đã có (?:đôi|người yêu)|hai bạn|cả hai)(?![\p{L}])/iu;
+const RE_CAU_KINH_DOANH = /(?<![\p{L}])(?:kinh doanh|buôn bán|doanh nghiệp|cửa hàng|doanh thu)(?![\p{L}])/iu;
+const RE_CAU_LAM_THUE = /(?<![\p{L}])(?:sếp|cấp trên|đồng nghiệp|tăng lương|thăng chức|nhân viên)(?![\p{L}])/iu;
+export function hopNguCanh(cau, nc = {}) {
+  if (nc.coNguoi && RE_CAU_DOC_THAN.test(cau)) return false;
+  if (nc.docThan && RE_CAU_CO_DOI.test(cau)) return false;
+  if (nc.lamThue && !nc.kinhDoanh && RE_CAU_KINH_DOANH.test(cau)) return false;
+  if (nc.kinhDoanh && !nc.lamThue && RE_CAU_LAM_THUE.test(cau)) return false;
+  return true;
+}
+
+function lamSach(text, db, nc = {}) {
   return cauCua(text)
     .map((c) => c.replace(/^(?:Đây là )?(?:lá bài|lá này|quân bài)(?: này)?\s+(?:đại diện cho|tượng trưng cho|cho thấy|báo hiệu|là|nói về|của)\s+/iu, "").replace(/^Nó\s+(?:tượng trưng cho|đại diện cho|là)\s+/u, ""))
-    .filter((c) => c.length > 12 && !/lá bài|lá này|quân bài/iu.test(c) && !tenLaTrong(c, db).length && !chuCamTrong(c).length)
+    .filter((c) => c.length > 12 && !/lá bài|lá này|quân bài/iu.test(c) && !tenLaTrong(c, db).length && !chuCamTrong(c).length && hopNguCanh(c, nc))
     .map(capFirst);
 }
 
@@ -246,6 +270,26 @@ const bandKey = (x) => (x == null ? "mid" : x >= 6.5 ? "hi" : x >= 5 ? "mid" : "
 // Tên gọi khách chỉ lấy từ lượt này (tenKhach), KHÔNG BAO GIỜ lấy settings.xungHo
 export const tenKhachCua = (session, opts = {}) => String(opts.tenKhach ?? session?.tenKhach ?? "").trim().slice(0, 40);
 
+// ---------- Câu trả lời thẳng cho đúng câu hỏi (rút từ điểm/hướng của trải) ----------
+// Câu hỏi dạng "có/còn/nên/sẽ … không" → nói rõ nghiêng về có hay không; câu hỏi mở → nói gọn hướng chung.
+const RE_HOI_CN = /(?<![\p{L}])(còn|có|nên|sẽ|được|kịp|đỗ|thành)(?![\p{L}])[^?]*?(?<![\p{L}])(không|chưa)(?![\p{L}])\s*\??\s*$/iu;
+export function traLoiThang(session, tiers, rule, can = null) {
+  const yn = spreadById(session.spreadId).mode === "yesno" ? tiers.at(-1)?.tra_loi : null;
+  const tb = rule?.diem_tb ?? (tiers.length ? tiers.reduce((a, t) => a + (t.diem ?? 5), 0) / tiers.length : 5);
+  const bk = yn ? (yn === "CÓ" ? "hi" : yn.startsWith("CÓ,") ? "mid" : "lo") : bandKey(tb);
+  const vat = String(can?.tu_khoa || "").split(",")[0].trim();
+  const che = vat ? `sự ${vat.replace(/^sự\s+/u, "")}` : "những điều chưa nói ra";
+  const m = RE_HOI_CN.exec(String(session.cauHoi || "").trim());
+  const tinh = chuDeCua(session) === "tinh";
+  if (m) {
+    const dt = m[1].toLowerCase();
+    if (dt === "còn") return { hi: "Câu trả lời là còn, và điều đó khá rõ.", mid: `Câu trả lời là còn, nhưng đang bị che bởi ${che}.`, lo: tinh ? "Nói thẳng: tình cảm phía người ấy đang nguội đi nhiều." : "Nói thẳng: điều bạn hỏi đang nhạt dần, không còn như trước." }[bk];
+    return { hi: `Câu trả lời nghiêng rõ về có.`, mid: `Câu trả lời là có, nhưng có điều kiện: còn vướng ${che}.`, lo: "Câu trả lời nghiêng về không, ít nhất là ở thời điểm này." }[bk];
+  }
+  if (yn) return `Câu trả lời gọn là: ${yn.toLowerCase()}.`;
+  return { hi: "Nói gọn: chuyện này đang đi theo hướng thuận.", mid: `Nói gọn: có tiến triển, nhưng đang bị kéo chậm bởi ${che}.`, lo: "Nói gọn: giai đoạn này khó hơn bạn mong, cần giữ sức." }[bk];
+}
+
 // ---------- Bản theo luật: đọc lại thông điệp từ nghĩa thật của các lá ----------
 // Mạch: chuyện đang diễn ra → gốc rễ (điều đang cản/đẩy) → hướng sắp tới → điều nên làm.
 export function loiGuiKhachLuat(db, session, rule, opts = {}) {
@@ -273,18 +317,18 @@ export function loiGuiKhachLuat(db, session, rule, opts = {}) {
   const cap = tiers.flatMap((t) => t.cap.map((c) => ({ c, diem: t.diem ?? 5 }))).sort((a, b) => a.diem - b.diem);
   const lenX = conLai(len)[0];
 
-  const s1 = (x) => (x ? lamSach(x.nghia, db) : []);
+  const nc = nguCanh(session.cauHoi);
+  const s1 = (x) => (x ? lamSach(x.nghia, db, nc) : []);
   const ve = (x) => (x ? lowFirst(s1(x)[0] || "") : "");
   const ve2 = (x) => (x ? s1(x)[1] || "" : "");
-  const sach1 = (t) => (t ? lamSach(t, db)[0] || "" : "");
+  const sach1 = (t) => (t ? lamSach(t, db, nc)[0] || "" : "");
   const khi = (x, mac) => (nhieuTang && x ? (x.ti === 0 ? "khoảng đầu" : x.ti === lastTi ? "về sau" : "khoảng giữa") : mac);
 
   const q = tenLaTrong(session.cauHoi, db).length || demChu(session.cauHoi) > 18 ? "" : ` “${session.cauHoi}”`;
   const mo = goi ? `${goi} ơi, với câu bạn hỏi${q}, trải bài nói khá rõ về chuyện đang diễn ra.` : `Về câu bạn hỏi${q}, trải bài nói khá rõ về chuyện đang diễn ra.`;
-  const p1 = [mo];
+  // câu thứ hai luôn là câu trả lời gọn cho đúng câu hỏi
+  const p1 = [mo, traLoiThang(session, tiers, rule, can)];
   if (hien && ve(hien)) p1.push(`${capFirst(khi(hien, "lúc này"))}, ${ve(hien)}`);
-  const yn = tiers.at(-1)?.tra_loi;
-  if (yn && spreadById(session.spreadId).mode === "yesno") p1.push(`Nếu cần một câu trả lời gọn, thì đó là: ${yn.toLowerCase()}.`);
 
   const p2 = [];
   if (can && ve(can)) p2.push(`${pick(["Gốc rễ của chuyện này nằm ở chỗ", "Điều đang níu bạn lại là", "Cái khó nằm ở chỗ"])} ${ve(can)}`);
@@ -295,8 +339,8 @@ export function loiGuiKhachLuat(db, session, rule, opts = {}) {
 
   const p3 = [];
   if (huong && ve(huong)) p3.push(`${capFirst(khi(huong, "thời gian tới"))}, ${ve(huong)}`);
-  const khuyenX = [huong, can, hien].find((x) => x?.khuyen && lamSach(x.khuyen, db).length);
-  if (khuyenX) p3.push(`Điều nên làm lúc này: ${lowFirst(lamSach(khuyenX.khuyen, db)[0])}`);
+  const khuyenX = [huong, can, hien].find((x) => x?.khuyen && lamSach(x.khuyen, db, nc).length);
+  if (khuyenX) p3.push(`Điều nên làm lúc này: ${lowFirst(lamSach(khuyenX.khuyen, db, nc)[0])}`);
   else p3.push(KHUYEN[{ tien: "tien", tinh: "tinh", viec: "viec", suckhoe: "suckhoe" }[chuDeCua(session)] || "chung"][bandKey(rule?.diem_tb)]);
 
   // độ dài 120–220: thêm câu thứ hai của các lá, hoặc lá còn lại; quá dài thì bớt câu phụ
@@ -305,12 +349,13 @@ export function loiGuiKhachLuat(db, session, rule, opts = {}) {
   const rr = [can, hien, huong].find((x) => x?.rui_ro && x.diem <= 0) || [can, hien, huong].find((x) => x?.rui_ro);
   const them = [
     [p1, ve2(hien)], [p3, ve2(huong)], [p2, ve2(can)], [p2, ve2(day)],
-    [p2, hien?.chung && sach1(hien.chung) ? `Rộng hơn, ${lowFirst(sach1(hien.chung))}` : ""],
     [p2, ng && sach1(ng.nguoi) ? `Người đáng để ý trong chuyện này là ${lowFirst(sach1(ng.nguoi)).replace(/^một người/u, "một người")}` : ""],
     [p3, tg && sach1(tg.thoi_gian) ? `Về nhịp thời gian, ${lowFirst(sach1(tg.thoi_gian))}` : ""],
     [p2, rr && sach1(rr.rui_ro) ? `Điều cần để ý là ${lowFirst(sach1(rr.rui_ro))}` : ""],
-    [p3, huong?.chung && huong !== hien && sach1(huong.chung) ? `Nhìn rộng ra, ${lowFirst(sach1(huong.chung))}` : ""],
     ...conLai(tarot).concat(conLai(len)).map((x) => [p2, ve(x) ? `${pick(["Bên cạnh đó,", "Cũng cần thấy rằng", "Ở một góc khác,"], x.ti)} ${ve(x)}` : ""]),
+    // nghĩa chung (ngoài chủ đề câu hỏi) chỉ dùng sau cùng, khi còn thiếu độ dài
+    [p2, hien?.chung && sach1(hien.chung) ? `Rộng hơn, ${lowFirst(sach1(hien.chung))}` : ""],
+    [p3, huong?.chung && huong !== hien && sach1(huong.chung) ? `Nhìn rộng ra, ${lowFirst(sach1(huong.chung))}` : ""],
     [p3, pick(LOT, 2)],
   ];
   const paras = [p1, p2, p3];
@@ -322,7 +367,7 @@ export function loiGuiKhachLuat(db, session, rule, opts = {}) {
 }
 
 // ---------- Chốt: AI → viết lại 1 lần → luật ----------
-export const SYSTEM_LGK = `Bạn là tarot reader lão luyện đang nhắn tin riêng cho một khách. Gọi khách đúng tên được cho trong yêu cầu; không có tên thì gọi "bạn", không dùng tên riêng nào khác. Không nêu tên vị trí, tên tầng hay tên ô của trải bài. Lời gửi phải ĐỌC LẠI THÔNG ĐIỆP của chính trải bài cho đúng câu hỏi: tổng hợp nghĩa thật của các lá được cho thành một mạch chuyện liền — chuyện đang diễn ra thế nào → gốc rễ/điều đang cản hoặc đẩy → hướng sắp tới → điều nên làm. Mỗi câu phải bắt nguồn từ nghĩa của ít nhất một lá, có chi tiết cụ thể (người, việc, cảm xúc, thời điểm); cấm câu sáo dùng được cho mọi khách. Viết lời gửi bằng tiếng Việt CÓ DẤU đầy đủ: văn xuôi ${LGK_MIN}–${LGK_MAX} chữ, 2–4 đoạn cách nhau một dòng trống; giọng tự nhiên, ấm, có chiều sâu; trả lời thẳng đúng câu hỏi; kết bằng một lời khuyên làm được ngay. KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm, không emoji. Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá. Chỉ trả về đúng phần lời gửi.`;
+export const SYSTEM_LGK = `Bạn là tarot reader lão luyện đang nhắn tin riêng cho một khách. Gọi khách đúng tên được cho trong yêu cầu; không có tên thì gọi "bạn", không dùng tên riêng nào khác. Không nêu tên vị trí, tên tầng hay tên ô của trải bài. Lời gửi phải ĐỌC LẠI THÔNG ĐIỆP của chính trải bài cho đúng câu hỏi: tổng hợp nghĩa thật của các lá được cho thành một mạch chuyện liền — chuyện đang diễn ra thế nào → gốc rễ/điều đang cản hoặc đẩy → hướng sắp tới → điều nên làm. Mỗi câu phải bắt nguồn từ nghĩa của ít nhất một lá, có chi tiết cụ thể (người, việc, cảm xúc, thời điểm); cấm câu sáo dùng được cho mọi khách. Viết lời gửi bằng tiếng Việt CÓ DẤU đầy đủ: văn xuôi ${LGK_MIN}–${LGK_MAX} chữ, 2–4 đoạn cách nhau một dòng trống; giọng tự nhiên, ấm, có chiều sâu; trả lời thẳng đúng câu hỏi; kết bằng một lời khuyên làm được ngay. KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm, không emoji. Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá. Câu thứ hai phải trả lời thẳng câu hỏi (câu hỏi có/không thì nói rõ nghiêng về có hay không). Chỉ dùng ý hợp ngữ cảnh: khách hỏi về một người cụ thể thì bỏ ý dành cho người độc thân; khách độc thân thì bỏ ý về mối quan hệ hiện tại; làm thuê ↔ kinh doanh cũng vậy. Chỉ trả về đúng phần lời gửi.`;
 
 export const dongGoiKhach = (tenKhach) => (tenKhach ? `GỌI KHÁCH: gọi đúng tên “${tenKhach}”, không dùng tên nào khác.` : `GỌI KHÁCH: không có tên — gọi “bạn”, không dùng tên riêng nào.`);
 export function yeuCauVietLai(session, reading, loi, tenKhach = tenKhachCua(session), db = null, rule = null) {
