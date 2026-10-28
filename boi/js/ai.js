@@ -30,8 +30,8 @@ export const PROVIDERS = {
 export const YN = [yesNo(10), yesNo(5), yesNo(4), yesNo(0)];
 const S = { type: "STRING" }, N = { type: "NUMBER" }, A = { type: "ARRAY", items: { type: "STRING" } };
 const TIER_PROPS = { ten: S, diem: N, tra_loi: { type: "STRING", enum: YN }, tarot_doc: A, dong_chay: S, lenormand_cap: A, lenormand_bo_ba: A, lenormand_chuoi: S, lech: S, chot: S, diem_nghen: S, loi_khuyen: S };
-const ROOT_PROPS = { tong_quan: S, chu_de_troi: A, tang: { type: "ARRAY", items: { type: "OBJECT", properties: TIER_PROPS, required: ["ten", "diem", "tarot_doc", "dong_chay", "lenormand_cap", "chot", "diem_nghen", "loi_khuyen"], propertyOrdering: Object.keys(TIER_PROPS) } }, noi_tang: A, mau_thuan: A, tien: S, tong_ket: S, loi_khuyen: A, canh_bao: A };
-export const SCHEMA = { type: "OBJECT", properties: ROOT_PROPS, required: ["tong_quan", "chu_de_troi", "tang", "noi_tang", "mau_thuan", "tong_ket", "loi_khuyen"], propertyOrdering: Object.keys(ROOT_PROPS) };
+const ROOT_PROPS = { tong_quan: S, chu_de_troi: A, tang: { type: "ARRAY", items: { type: "OBJECT", properties: TIER_PROPS, required: ["ten", "diem", "tarot_doc", "dong_chay", "lenormand_cap", "chot", "diem_nghen", "loi_khuyen"], propertyOrdering: Object.keys(TIER_PROPS) } }, noi_tang: A, mau_thuan: A, tien: S, tong_ket: S, loi_khuyen: A, canh_bao: A, loi_gui_khach: S };
+export const SCHEMA = { type: "OBJECT", properties: ROOT_PROPS, required: ["tong_quan", "chu_de_troi", "tang", "noi_tang", "mau_thuan", "tong_ket", "loi_khuyen", "loi_gui_khach"], propertyOrdering: Object.keys(ROOT_PROPS) };
 
 // Văn phong rút từ bài giải của reader thật (Biddy Tarot, Labyrinthos, The Tarot Lady, reader chọn tụ…) — xem boi/VAN_PHONG_READER.md
 const DAU_LINE = "Mọi giá trị chuỗi phải là tiếng Việt CÓ DẤU đầy đủ; khoá JSON không dấu chỉ là tên trường, không được bắt chước.";
@@ -54,6 +54,11 @@ CÁCH ĐỌC (như reader thật, không như từ điển)
 8. Chấm điểm từng tầng x/10 (bước 0,5) dựa trên lá, có thể khác bản nháp luật nếu có lý do; với câu hỏi Có/Không, "tra_loi" là ĐÚNG MỘT trong bốn nhãn: ${YN.join(" / ")} (không viết nhãn khác, không thêm điểm số vào nhãn).
 9. "chot" 1–2 câu chốt hạ; "diem_nghen" là nút thắt cụ thể; "loi_khuyen" phải làm được ngay (hành động, thời điểm, con số, người cần hỏi).
 10. "tong_ket": kết luận chung cho cả trải — gọi người hỏi theo xưng hô, nói thẳng kết luận trước rồi điều kiện, khép bằng một việc cụ thể nên làm đầu tiên.
+
+LỜI GỬI KHÁCH ("loi_gui_khach") — phần riêng, tách khỏi bản giải đầy đủ
+- Văn xuôi 120–220 chữ, 2–4 đoạn cách nhau một dòng trống (trong JSON viết là \n\n), như reader đang nhắn tin riêng cho người hỏi: tự nhiên, ấm, có chiều sâu, trả lời thẳng đúng câu hỏi, kết bằng một lời khuyên làm được ngay.
+- KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm.
+- Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá.
 
 GIỌNG VĂN
 - Ấm, thẳng, như người có nghề đang nói chuyện: dùng "bạn" hoặc xưng hô được cho; lá khó thì nói cái khó trước, rõ ràng, không doạ, rồi chỉ lối ra. Không nịnh, không thổi kết quả.
@@ -117,7 +122,7 @@ export function buildContext(db, session, { reading = null, money = null, settin
 }
 
 export function readingRequest(db, session, opts) {
-  return `${buildContext(db, session, opts)}\n\nHãy giải như một tarot reader thật đang ngồi đối diện người hỏi, hoàn toàn bằng tiếng Việt: mở bài, rồi đọc lần lượt từng tầng (Tarot theo vị trí có tên lá + chi tiết hình ảnh, kể chuyện nối các lá, Lenormand thành câu), rồi nối các tầng (nêu rõ lá nào ra lại ở nhiều tầng là chủ đề lặp lại), rồi kết luận chung. Các lượt rút thêm (nếu có) gộp vào phần nối tầng/tổng kết. Trả về DUY NHẤT một đối tượng JSON đúng khuôn: tong_quan, chu_de_troi[], tang[{ten, diem, tra_loi, tarot_doc[], dong_chay, lenormand_cap[], lenormand_bo_ba[], lenormand_chuoi, lech, chot, diem_nghen, loi_khuyen}], noi_tang[], mau_thuan[], tien, tong_ket, loi_khuyen[], canh_bao[]. Số tầng trong "tang" bằng số tầng của trải chính; tarot_doc có đúng một câu/đoạn cho mỗi lá Tarot theo thứ tự.\n${DAU_LINE}`;
+  return `${buildContext(db, session, opts)}\n\nHãy giải như một tarot reader thật đang ngồi đối diện người hỏi, hoàn toàn bằng tiếng Việt: mở bài, rồi đọc lần lượt từng tầng (Tarot theo vị trí có tên lá + chi tiết hình ảnh, kể chuyện nối các lá, Lenormand thành câu), rồi nối các tầng (nêu rõ lá nào ra lại ở nhiều tầng là chủ đề lặp lại), rồi kết luận chung. Các lượt rút thêm (nếu có) gộp vào phần nối tầng/tổng kết. Trả về DUY NHẤT một đối tượng JSON đúng khuôn: tong_quan, chu_de_troi[], tang[{ten, diem, tra_loi, tarot_doc[], dong_chay, lenormand_cap[], lenormand_bo_ba[], lenormand_chuoi, lech, chot, diem_nghen, loi_khuyen}], noi_tang[], mau_thuan[], tien, tong_ket, loi_khuyen[], canh_bao[], loi_gui_khach. Số tầng trong "tang" bằng số tầng của trải chính; tarot_doc có đúng một câu/đoạn cho mỗi lá Tarot theo thứ tự.\n${DAU_LINE}`;
 }
 
 // Bản sao chép dán vào ChatGPT
@@ -545,6 +550,7 @@ export function normalizeReading(obj, ruleReading, ctx = {}) {
     }),
     noi_tang: arr(obj.noi_tang), mau_thuan: arr(obj.mau_thuan), tien: str(obj.tien) || ruleReading?.tien || "",
     tong_ket: str(obj.tong_ket), loi_khuyen: arr(obj.loi_khuyen), canh_bao: arr(obj.canh_bao),
+    loi_gui_khach: obj.loi_gui_khach == null ? "" : String(obj.loi_gui_khach),
     _money: ruleReading?._money || null,
   };
 }
