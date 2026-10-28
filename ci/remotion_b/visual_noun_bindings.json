@@ -18,5 +18,29 @@
   },
   "meniscus lab": {
     "k2": "caption"
+  },
+  "float": {
+    "p6": "pepper"
+  },
+  "sulfate": {
+    "v5": "caption"
+  },
+  "molecule": {
+    "w4": "molecule"
+  },
+  "molecules": {
+    "w4": "molecule"
+  },
+  "quarter": {
+    "w5": "caption"
+  },
+  "quarters": {
+    "w5": "caption"
+  },
+  "tail": {
+    "r1": "caption"
+  },
+  "tails": {
+    "r1": "caption"
   }
 }

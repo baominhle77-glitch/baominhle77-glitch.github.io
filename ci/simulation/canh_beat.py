@@ -906,7 +906,9 @@ class CanhStage:
             c0 = np.array(hex_rgb(self.pal['panel']), np.float32)
             c1 = np.array(hex_rgb(self.pal['panel2']), np.float32)
             g = (.6 * yy + .4 * xx)[..., None]
-            self._base_cache[key] = c0 * (1 - g) + c1 * g
+            # G10: keo dai dai sang panel->panel2 (goc ~5 dE qua hep, ca panel
+            # rơi vao mot quan the dE<3); he so sang .58..1.42 giu tong toi.
+            self._base_cache[key] = (c0 * (1 - g) + c1 * g) * (.58 + .84 * g)
         base = self._base_cache[key].copy()
         # caustic light: counter-drifting pairs, no coherent global motion
         lw, lh = max(8, tg.pw // 4), max(8, tg.ph // 4)
@@ -922,6 +924,29 @@ class CanhStage:
         base += cc * 44 * (np.array(hex_rgb(self.pal['caustic']), np.float32) / 255.0)
         return base
 
+    def _anh_sang_nuoc(self, img, t):
+        """Trường ánh sáng gợn nước toàn khung (sau khi ghép tầng, trước nhãn).
+
+        Mục đích kép: phá quần thể màu phẳng ΔE<3 của nền tối và các mảng tô
+        đặc (G10 cấm >35% suốt beat) và cho nền một chuyển động chậm liên tục
+        (C17). Trường trôi chậm, không đổi bố cục, nhãn vẽ sau nên vẫn sắc nét.
+        """
+        if '_asn' not in self._base_cache:
+            lw, lh = max(16, self.width // 6), max(16, self.height // 6)
+            x = np.linspace(0, self.width / 110., lw, dtype=np.float32)[None, :]
+            y = np.linspace(0, self.height / 110., lh, dtype=np.float32)[:, None]
+            g = (np.linspace(0, 1, lh, dtype=np.float32)[:, None] * .62
+                 + np.linspace(0, 1, lw, dtype=np.float32)[None, :] * .38)
+            self._base_cache['_asn'] = (x, y, g)
+        x, y, g = self._base_cache['_asn']
+        s = (np.sin(x * 1.00 + y * .55 + t * .23) + np.sin(x * .47 - y * .93 + 2.1 - t * .17)
+             + np.sin(x * 1.70 + y * 1.21 + 4.0 + t * .29)) / 3
+        s01 = np.clip(s * .5 + .5, 0, 1) * .72 + g * .28
+        field = np.asarray(Image.fromarray((s01 * 255).astype(np.uint8)).resize(
+            (self.width, self.height), Image.Resampling.BILINEAR), np.float32)[..., None] / 255.
+        tint = np.array(hex_rgb(self.pal['caustic']), np.float32) / 255.
+        return img * (.84 + .26 * field) + field * field * 46. * tint
+
     def frame(self, t):
         W, H = self.width, self.height
         img = np.empty((H, W, 3), np.float32)
@@ -933,6 +958,7 @@ class CanhStage:
             al = layer[..., 3:4] / 255.0
             comp = base * (1 - al) + layer[..., :3] * al
             img[tg.py:tg.py + tg.ph, tg.px:tg.px + tg.pw] = comp
+        img = self._anh_sang_nuoc(img, t)
         out = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
         self._ve_nhan(out, t)
         return np.asarray(out, np.uint8).copy()

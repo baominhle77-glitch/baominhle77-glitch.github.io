@@ -11,6 +11,10 @@ H=Path(__file__).resolve().parent
 # All episode/subject terminology is data supplied by the genre registry.
 GENRE=json.loads((R/'the_loai/khoa_hoc_vat_ly.json').read_text())
 VISUAL_BINDINGS=json.loads((H/'visual_noun_bindings.json').read_text())
+# SUA5: beats rendered by canh_scene (per-beat labelled pictures) have the canh
+# background, so their mainbox evidence declares the true base colour.
+CANH_BEATS=set(json.loads((H/'canh_k1t3.json').read_text())['beats'])
+BANVE={q['id']:q for q in json.loads((H/'ban_ve_B60.json').read_text())['beats']}
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--video-root',type=Path,required=True);p.add_argument('--caption-alignment',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
@@ -42,6 +46,10 @@ def main():
    if tts_span:item['tts_span']=tts_span
    if asset_id:item['asset_id']=asset_id
    texts.append(item);return item
+  def caption_objects(w0,w1):
+   # SUA5: a spoken word may straddle a caption boundary; bind EVERY caption
+   # overlapping [w0,w1] so some bound object is active at each G5 sample.
+   return [c['id']+'-number' for c in texts if c['role']=='caption' and c['start']-.2<=w1 and w0<c['end']+.2]
   for b in data['beats']:
    start=b['start']/30;end=(b['start']+b['frames'])/30;bid=b['id'];spoken=for_beat(bid);n=spoken['narration'];offset=spoken['offset'];raw=spoken['words'];events=[dict(text=w['w'],start=offset+w['t0'],end=offset+w['t1']) for w in raw]
    source_root=R/'work/B_cache'/str(short)/bid;layer_specs.append(dict(id='beat-'+bid,source=str(source_root/f'{fmt}_{bid}.mp4'),start=start,end=end,occluded=[] if doc else hidden))
@@ -53,7 +61,8 @@ def main():
     spans=[(start,end)] if name in ('title','source') else visibility_intervals(dom,name,text,start,end)
     for occurrence,(visible_start,visible_end) in enumerate(spans):add_text(bid+'-'+name+'-'+str(occurrence),name,text,visible_start,visible_end,'title' if name=='title' else ('source' if name=='source' else 'legend'))
    mainbox=[.03,.14,.94,.80] if doc else [.03,.1,.94,.85]
-   main=dict(id=bid+'-main',start=start,end=end,bbox=mainbox,label='wine glass and tears' if bid=='k2' else 'water surface, vessel and floating particles',primary=True,kind='model',evidence=dict(background='#8E969D',tolerance=24));objects.append(main)
+   beat_bg=GENRE.get('canh',{}).get('bang_mau',{}).get('nen','#0B0E12') if bid in CANH_BEATS and BANVE[bid].get('content_scene') in (None,'ring_scene') else '#8E969D'
+   main=dict(id=bid+'-main',start=start,end=end,bbox=mainbox,label='wine glass and tears' if bid=='k2' else 'water surface, vessel and floating particles',primary=True,kind='model',evidence=dict(background=beat_bg,tolerance=24));objects.append(main)
    simulation.append(dict(id=bid+'-material',start=start,end=end,bbox=mainbox,occluded=[] if doc else hidden))
    # Registered content entities refer to real regions; names/aliases are data,
    # not branches in any common gate. Individual arrows get separate ROIs.
@@ -87,8 +96,8 @@ def main():
     if key in citations and citation:
      beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[bid+'-citation'],attributes={}));continue
     if key in text_concepts:
-     cap=next((c for c in texts if c['role']=='caption' and c['start']-.2<=w['start']<c['end']+.2),None)
-     if cap:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[cap['id']+'-number'],attributes={}));continue
+     ids=caption_objects(w['start'],min(duration,w['end']))
+     if ids:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=ids,attributes={}));continue
     aliases.update(tails='tail',light='surface',motion='flow',oil='tracer',solution='soap',pair='swirl',pumping='needle',pump='needle',injection='needle',field='flow',bottom='layer',loop='flow',atom='tail',trimethylammonium='head',interface='surface',rest='zone',start='ring',meniscus='edge',tip='needle',sheet='layer',household='soap',kitchen='bowl',liquid='water',mixture='soap',**{"zone's":'zone',"water's":'water'})
     target=aliases.get(key,target)
     # Episode-local data (visual_noun_bindings.json) owns beat-specific entities.
@@ -96,25 +105,21 @@ def main():
     explicit=VISUAL_BINDINGS.get(key,{}).get(bid)
     if explicit is not None:target=explicit
     if target=='caption':
-     cap=next((c for c in texts if c['role']=='caption' and c['start']-.2<=w['start']<c['end']+.2),None)
-     if cap:
-      beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[cap['id']+'-number'],attributes={}))
-     else:
-      beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[],attributes={}))
+     beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=caption_objects(w['start'],min(duration,w['end'])),attributes={}))
      continue
     if bid=='k2' and key in ('wine','tear','tears','glass'):
      target='tears' if key in ('tear','tears') else key
     if bid=='k2' and target in ('wine','tears','glass'):
      beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=['k2-'+target],attributes={}));continue
     if term['tag']=='CD':
-     cap=next((c for c in texts if c['role']=='caption' and c['start']-.2<=w['start']<c['end']+.2),None)
-     if cap:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[cap['id']+'-number'],attributes={}))
+     ids=caption_objects(w['start'],min(duration,w['end']))
+     if ids:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=ids,attributes={}))
      elif w['start']<duration:beat['nonvisual_terms'].append(dict(text=word,reason='Number in spoken connective/quantifier, no displayed measurement.'))
      continue
-    if explicit is None and target=='micelle' and not next(q for q in json.loads((H/'ban_ve_B60.json').read_text())['beats'] if q['id']==bid)['optics'].get('molecules') and any(norm(q['text']) in ('threshold','thresholds','concentration') for q in events[i+1:i+3]):
-     cap=next((c for c in texts if c['role']=='caption' and c['start']-.2<=w['start']<c['end']+.2),None)
-     if cap:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=[cap['id']+'-number'],attributes={}));continue
-    if explicit is None and target in ('molecule','head','tail','micelle') and not next(q for q in json.loads((H/'ban_ve_B60.json').read_text())['beats'] if q['id']==bid)['optics'].get('molecules'):
+    if explicit is None and target=='micelle' and not BANVE[bid]['optics'].get('molecules') and any(norm(q['text']) in ('threshold','thresholds','concentration') for q in events[i+1:i+3]):
+     ids=caption_objects(w['start'],min(duration,w['end']))
+     if ids:beat['visual_terms'].append(dict(text=word,noun=word,start=w['start'],end=min(duration,w['end']),object_ids=ids,attributes={}));continue
+    if explicit is None and target in ('molecule','head','tail','micelle') and not BANVE[bid]['optics'].get('molecules'):
      target=None
     if target is None:beat['nonvisual_terms'].append(dict(text=word,reason='Abstract narration/context term, not a separately drawn physical object.'));continue
     beat['visual_terms'].append(dict(text=word,noun=word,start=begin,end=min(duration,w['end']),object_ids=[bid+'-'+target],attributes=dict(color='#D1834F',size='long') if bid=='p1' and target=='arrows' else {}))

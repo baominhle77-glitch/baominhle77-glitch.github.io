@@ -44,7 +44,10 @@ def render_one(item,force=False):
  cached.with_suffix('.layout.json').unlink(missing_ok=True)
  if at is not None:env['B_AT']=str(at)
  resolution=f'{SHORT},{round(SHORT*16/9)}' if fmt=='9x16' else f'{round(SHORT*16/9)},{SHORT}'
- content=next(q for q in read(HERE/'ban_ve_B60.json')['beats'] if q['id']==bid).get('content_scene');scene_name,scene_file={'wine_teaser':('WineScene','wine_scene.py'),'micelle_scene':('MicelleScene','micelle_scene.py'),'diffusion_scene':('DiffusionScene','diffusion_scene.py'),'ring_scene':('RingScene','ring_scene.py')}.get(content,('BScene','scene.py'));scene_path=HERE/scene_file
+ content=next(q for q in read(HERE/'ban_ve_B60.json')['beats'] if q['id']==bid).get('content_scene');scene_name,scene_file={'wine_teaser':('WineScene','wine_scene.py'),'micelle_scene':('MicelleScene','micelle_scene.py'),'diffusion_scene':('DiffusionScene','diffusion_scene.py'),'ring_scene':('RingScene','ring_scene.py')}.get(content,('BScene','scene.py'))
+ # SUA5: beat co buc tranh rieng trong canh_k1t3.json -> CanhScene (thay dia lap ring_scene/BScene); canh dac thu giu nguyen
+ if content in (None,'ring_scene') and bid in read(HERE/'canh_k1t3.json')['beats']:scene_name,scene_file='CanhScene','canh_scene.py'
+ scene_path=HERE/scene_file
  args=[sys.executable,'-m','manim','render','--resolution',resolution,'--fps','30','--disable_caching','--progress_bar','none','-v','ERROR','--media_dir',folder,scene_path,scene_name]
  if at is not None:args.insert(4,'-s')
  t=time.perf_counter();r0=resource.getrusage(resource.RUSAGE_CHILDREN);print(f'B_BEAT_START {fmt}/{bid} frames={b["frames"]} resolution={resolution} fps=30',flush=True)

@@ -32,6 +32,11 @@ def key(beat,short_side=540):
  digest.update(json.dumps([beat,b['frames'],short_side,30,'full-v1']).encode())
  content_scene=content.get('content_scene')
  files={'wine_teaser':('wine_scene.py','wine_teaser.py'),'micelle_scene':('micelle_scene.py','ring_scene.py'),'diffusion_scene':('diffusion_scene.py',),'ring_scene':('ring_scene.py',)}.get(content_scene,())
+ canh=json.loads((H/'canh_k1t3.json').read_bytes())['beats']
+ if content_scene in (None,'ring_scene') and beat in canh:
+  files=('canh_scene.py','canh_plan.py')  # canh_beat.py da nam trong glob ../simulation
+  digest.update(json.dumps(canh[beat],sort_keys=True).encode())
+  digest.update(json.dumps(json.loads((H/'../../the_loai/khoa_hoc_vat_ly.json').read_bytes()).get('canh',{}).get('bang_mau',{}),sort_keys=True).encode())
  for p in files:digest.update((H/p).read_bytes())
  return digest.hexdigest()
 if __name__=='__main__':
