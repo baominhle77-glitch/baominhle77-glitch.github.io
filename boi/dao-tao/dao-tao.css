@@ -1,0 +1,18 @@
+/* Trang Đào tạo nhắn tin — dùng chung app.css, chỉ thêm phần riêng */
+.dt-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.dt-bar label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); }
+.dt-th { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.dt-th .chip { cursor: pointer; }
+.dt-th .chip.chuyen { border-color: #ff9a9a; color: #ffbcbc; }
+.chat .msg { overflow-wrap: anywhere; }
+.chat .msg p { margin: .2em 0; white-space: pre-wrap; }
+.nhan { display: inline-block; margin: 4px 0; padding: 3px 8px; border-radius: 8px; font-size: .75rem; font-weight: 700; letter-spacing: .02em; }
+.nhan.chuyen { background: #5a1d2a; color: #ffd0d0; border: 1px solid #ff9a9a; }
+.nhan.chan { background: #4a2a00; color: #ffd9a0; border: 1px solid #e0a040; }
+.nhan.lgk { background: rgba(236, 208, 139, .15); color: var(--gold); border: 1px solid var(--line2); }
+.sua-form { display: grid; gap: 8px; margin-top: 8px; }
+.loi-he { color: #ffb4b4; font-size: .9rem; }
+.mau-item { padding: 10px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.mau-item .cu { color: var(--muted); text-decoration: line-through; }
+
+[hidden] { display: none !important; }

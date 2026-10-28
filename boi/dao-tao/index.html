@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="theme-color" content="#0b0817">
+<title>Đào tạo nhắn tin</title>
+<link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="./dao-tao.css">
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+<main id="app" tabindex="-1">
+  <h1>Đào tạo nhắn tin</h1>
+  <p class="lead">Chủ tịch đóng vai khách gõ tin; agent ở máy nhà trả lời bằng não tâm lý thật. Câu nào chưa đúng thì bấm “Sửa câu này”.</p>
+
+  <section class="card" aria-labelledby="thT">
+    <h2 id="thT">Tình huống</h2>
+    <div class="dt-bar">
+      <label>Kênh<select id="kenh"></select></label>
+      <label>Gói khách đã trả<select id="goi"></select></label>
+      <label>Số câu còn lại<input id="cauCon" type="number" inputmode="numeric" min="0" max="99"></label>
+      <label>Kiểu trải<select id="trai"><option value="3la">3 lá</option><option value="1la">1 lá</option><option value="tu-chon">Theo câu hỏi</option></select></label>
+    </div>
+    <p class="note" id="cauNoi" role="status">Đang dò cầu nối máy nhà…</p>
+    <div class="btns"><button type="button" class="btn small" id="thuLai" hidden>Thử lại</button><button type="button" class="btn small ghost" id="phienMoi">Phiên mới</button></div>
+  </section>
+
+  <section class="card" aria-labelledby="chatT">
+    <h2 id="chatT">Hội thoại</h2>
+    <div class="chat" id="chat" aria-live="polite"></div>
+    <p class="note">Tình huống khó — bấm để điền nhanh tin khách (vẫn sửa được):</p>
+    <div class="chips dt-th" id="tinhHuong"></div>
+    <form class="composer" id="fTin">
+      <label class="sr-only" for="tin">Tin của khách</label>
+      <textarea id="tin" rows="2" placeholder="Gõ tin của khách…" required></textarea>
+      <button class="btn primary" type="submit" aria-label="Gửi tin khách">➤</button>
+    </form>
+    <div class="btns"><button type="button" class="btn" id="traiBai" hidden>✦ Trải bài cho câu khách vừa hỏi</button></div>
+  </section>
+
+  <section class="card" aria-labelledby="mauT">
+    <div class="row wrap"><h2 class="grow" id="mauT" style="margin:0">Mẫu đã sửa</h2><button type="button" class="btn small" id="taiMau">Tải lại</button></div>
+    <p class="note" id="mauNote">Mới nhất ở trên.</p>
+    <ul class="list" id="mauList"></ul>
+  </section>
+</main>
+<script type="module" src="./dao-tao.js"></script>
+</body>
+</html>
