@@ -52,6 +52,16 @@ export const SPREADS = [
     tiers: () => ["Tổng quan", "Hao tài", "Khía cạnh khác", "4–6 tuần tới", "Điểm sáng"].map((ten) => ({ ten, t: 3, l: 3, pos: POS_VH })),
   },
   {
+    id: "1la", ten: "1 lá", money: false,
+    goiY: "1 lá Tarot cho một câu hỏi ngắn — thông điệp chính.",
+    tiers: () => [{ ten: "Thông điệp", t: 1, l: 0, pos: ["Thông điệp"] }],
+  },
+  {
+    id: "3la", ten: "3 lá", money: false,
+    goiY: "3 lá Tarot: hiện trạng → diễn biến → kết quả.",
+    tiers: () => [{ ten: "Câu hỏi", t: 3, l: 0, pos: ["Hiện trạng", "Diễn biến", "Kết quả"] }],
+  },
+  {
     id: "tudo", ten: "Tự do", money: false,
     goiY: "Số tầng, tên tầng và số lá mỗi tầng tuỳ ý.",
     tiers: () => [{ ten: "Tầng 1", t: 3, l: 3, pos: null }],

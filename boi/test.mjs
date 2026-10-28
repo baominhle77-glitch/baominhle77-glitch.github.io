@@ -18,6 +18,7 @@ import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYST
 import { goiCoDau, tyLeDau, tyLeDauBai, matDau, normYN, suaTenLa, YN, BAO_MAT_DAU, NHAC_DAU, NGUONG_DAU, SCHEMA } from "./js/ai.js";
 import { probeBridge, bridge, aiKey, store } from "./js/store.js";
 import { ROUTES } from "./js/views.js";
+import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai } from "./js/auto.js";
 import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK } from "./js/loi.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -784,6 +785,52 @@ test("lời gửi khách — màn giải có ô #loi-gui-khach riêng và nút c
   assert.ok(kiemLoiGuiKhach(txt, db).ok, "ô hiện bản qua cổng");
   assert.ok(html.indexOf('id="loi-gui-khach"') < html.indexOf('id="aiCard"'), "ô tách riêng, đứng trước bản giải đầy đủ");
   store.sessions.pop();
+});
+
+// ---- window.BoiAuto ----
+test("BoiAuto: mỗi câu một seed mới, bốc đúng số lá, mã khoá kiểm chứng được; AI đạt cổng → dùng; không AI → bản luật", async () => {
+  const vt = viTriNgauNhien(78, 12);
+  assert.equal(new Set(vt).size, 12);
+  assert.ok(vt.every((k) => k >= 1 && k <= 78));
+  assert.equal(chonTrai("Có nên ký hợp đồng không?", "tu-chon").id, "cokhong");
+  assert.throws(() => chonTrai("x", "khong-co"), /Không có mẫu trải/u);
+  const saved = [];
+  const a = await giaiTuDong({ db, cauHoi: "Tháng này tôi có nên đổi việc không?", trai: "3la", onSession: (s) => saved.push(s) });
+  const b = await giaiTuDong({ db, cauHoi: "Tháng này tôi có nên đổi việc không?", trai: "1la", onSession: (s) => saved.push(s) });
+  assert.match(a.maKhoa, /^[0-9a-f]{64}$/);
+  assert.notEqual(a.maKhoa, b.maKhoa, "mỗi câu một mã khoá");
+  assert.notEqual(saved[0].seed, saved[1].seed, "mỗi câu một seed mới");
+  assert.equal(saved[0].rounds[0].tarot[0].length, 3);
+  assert.equal(saved[1].rounds[0].tarot[0].length, 1);
+  assert.equal(a.nguon, "luat");
+  assert.ok(kiemLoiGuiKhach(a.loiGuiKhach, db).ok && kiemLoiGuiKhach(b.loiGuiKhach, db).ok);
+  const v = await reveal(saved[0]);
+  assert.ok(v.hashOk && v.mappingOk, "kiểm chứng được như bói tay");
+  // AI (trạm giả) trả bài có lời gửi khách đạt cổng → dùng bản AI
+  const sent = [];
+  const fakeTram = async (url, o) => {
+    sent.push(JSON.parse(o.body));
+    const t = JSON.stringify({ tong_quan: CO_DAU, chu_de_troi: [CO_DAU], tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, lenormand_cap: [], chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], noi_tang: [CO_DAU], mau_thuan: [CO_DAU], tong_ket: CO_DAU, loi_khuyen: [CO_DAU], loi_gui_khach: LGK_OK });
+    return tramReply(t, "gemini-x");
+  };
+  const c = await giaiTuDong({ db, cauHoi: "Công việc mới của tôi thế nào?", trai: "3la", key: TRAM_KEY, fetchImpl: fakeTram });
+  assert.deepEqual([c.nguon, c.loiGuiKhach], ["ai", LGK_OK]);
+  assert.equal(sent.length, 1);
+});
+
+test("BoiAuto: gọi nhiều câu cùng lúc thì xếp hàng, câu nào xong câu đó, kết quả độc lập", async () => {
+  const order = [];
+  const auto = taoBoiAuto(async () => ({ db, onSession: (s) => order.push(s.cauHoi) }));
+  const qs = ["Câu một về tình cảm?", "Câu hai về tiền bạc?", "Câu ba về công việc?"];
+  const res = await Promise.all(qs.map((q) => auto.giai(q, { trai: "1la" })));
+  assert.deepEqual(order, qs, "chạy lần lượt theo thứ tự gọi");
+  assert.equal(new Set(res.map((r) => r.maKhoa)).size, 3, "3 câu → 3 mã khoá khác nhau");
+  assert.ok(res.every((r) => kiemLoiGuiKhach(r.loiGuiKhach, db).ok));
+  // một câu lỗi không chặn câu sau
+  const bad = auto.giai("", {});
+  const ok = auto.giai("Câu sau vẫn chạy?", { trai: "1la" });
+  await assert.rejects(bad, /Thiếu câu hỏi/u);
+  assert.match((await ok).maKhoa, /^[0-9a-f]{64}$/);
 });
 
 export async function run(extra = []) {

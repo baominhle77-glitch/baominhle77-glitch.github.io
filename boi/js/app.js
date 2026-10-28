@@ -1,6 +1,7 @@
 // Khởi động SPA: tải dữ liệu lá, hash router, hiệu ứng chuyển trang, nút Back.
 import { ROUTES, NEEDS_DB, toast, esc } from "./views.js";
-import { store, probeBridge, setGhep, setCauNoiAn } from "./store.js";
+import { store, probeBridge, setGhep, setCauNoiAn, aiKey, storage, persist } from "./store.js";
+import { taoBoiAuto } from "./auto.js";
 import { mergeKnowledge } from "./data.js";
 
 const view = document.getElementById("view");
@@ -81,6 +82,12 @@ const dbReady = Promise.all(["data/tarot.json", "data/lenormand.json"].map((u) =
     const [tThem, lThem] = await Promise.all([opt("data/tarot_them.json"), opt("data/lenormand_them.json")]);
     store.db = mergeKnowledge({ tarot, lenormand }, tThem, lThem);
   });
+
+// Cho trợ lý tự động: window.BoiAuto.giai(cauHoi, {trai:"1la"|"3la"|…}) → Promise<{loiGuiKhach, maKhoa}>
+window.BoiAuto = taoBoiAuto(async () => {
+  await dbReady;
+  return { db: store.db, settings: store.settings, key: aiKey(), storage, onSession: (s) => { store.sessions.push(s); persist(); } };
+});
 
 async function init() {
   dbReady.catch((err) => {
