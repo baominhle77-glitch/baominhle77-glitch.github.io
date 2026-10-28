@@ -6,7 +6,7 @@ import { analyze, ruleFollowUp } from "./insight.js";
 import { suggestSpread } from "./topic.js";
 import { tarotSVG, lenormandSVG, backSVG } from "./cards.js";
 import { readingToMarkdown } from "./markdown.js";
-import { LOCAL_KEY, TRAM_KEY, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, goiCoDau, partialJSON, normalizeReading, friendlyError, aiFailNotice, suaTenLa, BAO_MAT_DAU } from "./ai.js";
+import { LOCAL_KEY, TRAM_KEY, SYSTEM_READING, SYSTEM_CHAT, readingRequest, buildContext, chatGptPrompt, goiCoDau, partialJSON, normalizeReading, friendlyError, aiFailNotice, suaTenLa, BAO_MAT_DAU, phanLoaiLoiAI } from "./ai.js";
 import { store, persist, saveSettings, aiKey, aiReady, bridge, cauNoiAn, probeBridge, getSession, newDraft, lockDraft, removeSession, routeFor, storage } from "./store.js";
 import { gmt7 } from "./core.js";
 import { chotLoiGuiKhach, loiGuiKhachLuat, doanVan } from "./loi.js";
@@ -105,6 +105,8 @@ function ask() {
     <form id="fAsk" class="stack card glow">
       <label for="q">Câu hỏi càng cụ thể, bài càng rõ</label>
       <textarea id="q" name="q" rows="3" required maxlength="500" placeholder="Vd: Thu nhập 3 tháng tới của tôi thế nào?"></textarea>
+      <label for="tenKhach">Tên khách (tuỳ chọn) — dùng để gọi trong “Lời gửi khách”; để trống thì gọi “bạn”</label>
+      <input id="tenKhach" name="tenKhach" maxlength="40" autocomplete="off" value="" placeholder="Vd: Lan">
       <div class="chips" aria-label="Câu hỏi mẫu">${EXAMPLES.map((e) => `<button type="button" class="chip" data-ex="${esc(e)}">${esc(e)}</button>`).join("")}</div>
       <p class="note" id="sug" aria-live="polite"></p>
       <button class="btn primary block" type="submit">Tiếp: chọn mẫu trải →</button>
@@ -118,7 +120,7 @@ function ask() {
         e.preventDefault();
         const v = q.value.trim();
         if (!v) return;
-        const d = newDraft(v, suggestSpread(v));
+        const d = newDraft(v, suggestSpread(v), el.querySelector("#tenKhach").value);
         ctx.go(`#/trai/${d.id}`);
       };
       setTimeout(() => q.focus(), 50);
@@ -487,11 +489,13 @@ async function runAI(s, el, ctx, rule) {
     if (status) status.textContent = "Đang hoàn thiện lời gửi khách…";
     kick();
     const lgk = await chotLoiGuiKhach({
-      db: store.db, session: s, rule, reading, settings: store.settings,
+      db: store.db, session: s, rule, reading, tenKhach: s.tenKhach, xungHo: store.settings.xungHo,
       call: (system, msg) => goiCoDau({ provider, key, model: "", storage, system, json: false, messages: [{ role: "user", text: msg }], signal: st.ctrl.signal, onModel: () => kick() }).then((r) => r.text),
     });
     clearTimeout(idle);
-    s.ai = { provider, model, at: new Date().toISOString(), rounds: s.rounds.length, reading: { ...reading, _money: null }, raw: text, loiGuiKhach: lgk.text, loiNguon: lgk.nguon };
+    s.ai = { provider, model, at: new Date().toISOString(), rounds: s.rounds.length, reading: { ...reading, _money: null }, raw: text, loiGuiKhach: lgk.text, loiNguon: lgk.nguon, loiLyDo: lgk.nguon === "luat" ? `bị cổng trả lại: ${lgk.loi.join("; ")}` : "" };
+    delete s.lgkLyDo;
+    if (lgk.nguon === "luat") console.warn("[loi-gui-khach] bản theo luật vì:", s.ai.loiLyDo);
     save();
     live.delete(s.id);
     ctx.rerender();
@@ -501,6 +505,12 @@ async function runAI(s, el, ctx, rule) {
     live.delete(s.id);
     if (st.timeout) e.timeout = true;
     if (key === LOCAL_KEY) probeBridge();
+    // ghi lý do để biết đường AI nào cần chữa: cầu nối chết / 429 / quá giờ / mất dấu…
+    s.lgkLyDo = `AI lỗi: ${phanLoaiLoiAI(e, st.viaTram ? TRAM_KEY : key)}`;
+    save();
+    console.warn("[loi-gui-khach] bản theo luật vì:", s.lgkLyDo, e);
+    const ld = el.querySelector("#lgkLyDo");
+    if (ld) ld.textContent = `Bản theo luật vì ${s.lgkLyDo}.`;
     const fail = aiFailNotice(e, st.viaTram ? TRAM_KEY : key);
     if (status) status.innerHTML = `<span class="err">${esc(fail.status)}</span>`;
     if (out) out.innerHTML = `<p class="note">${esc(fail.note)}</p>`;
@@ -510,11 +520,13 @@ async function runAI(s, el, ctx, rule) {
 
 // Ô "Lời gửi khách": văn xuôi riêng, nút chép chỉ chép đúng ô này
 const LGK_NGUON = { ai: "Bản AI, đã qua cổng kiểm.", "ai-viet-lai": "Bản AI viết lại một lần để qua cổng kiểm.", luat: "Bản theo luật (viết xuôi)." };
-function lgkHTML(s, { text, nguon }, cho) {
+function lgkHTML(s, { text, nguon, lyDo = "" }, cho) {
   return `<section class="card glow lgk-card" aria-labelledby="lgkT">
       <div class="row wrap"><h2 class="grow" id="lgkT" style="margin:0">Lời gửi khách</h2><button type="button" class="btn small primary" id="chepLgk">Chép lời gửi khách</button></div>
+      <p class="note">${s.tenKhach ? `Gọi khách: <b>${esc(s.tenKhach)}</b>` : "Không có tên khách — gọi “bạn”."}</p>
       <div id="loi-gui-khach" class="lgk" data-nguon="${esc(nguon)}" data-text="${esc(text)}">${doanVan(text).map((p) => `<p>${esc(p)}</p>`).join("")}</div>
       <p class="note">${esc(LGK_NGUON[nguon] || "")}${cho ? " Bản AI sẽ thay vào khi giải xong." : ""}</p>
+      <p class="note lgk-lydo" id="lgkLyDo">${nguon === "luat" && lyDo ? `Bản theo luật vì ${esc(lyDo)}.` : ""}</p>
     </section>`;
 }
 
@@ -536,7 +548,7 @@ function readView(id, query) {
     <p class="lead">“${esc(s.cauHoi)}”</p>
     <p class="note">${esc(spreadById(s.spreadId).ten)} · khoá lúc ${esc(s.lockedAtText)} · <a href="#/kiem-chung/${id}">Kiểm chứng mã khoá</a></p>
     ${tableHTML(s)}
-    ${lgkHTML(s, viewing === "ai" && s.ai?.loiGuiKhach ? { text: s.ai.loiGuiKhach, nguon: s.ai.loiNguon } : { text: loiGuiKhachLuat(store.db, s, rule, store.settings), nguon: "luat" }, !s.ai && hasKey && !query.get("ban"))}
+    ${lgkHTML(s, viewing === "ai" && s.ai?.loiGuiKhach ? { text: s.ai.loiGuiKhach, nguon: s.ai.loiNguon, lyDo: s.ai.loiLyDo } : { text: loiGuiKhachLuat(store.db, s, rule, { tenKhach: s.tenKhach }), nguon: "luat", lyDo: s.ai ? "đang xem bản luật" : s.lgkLyDo || "" }, !s.ai && hasKey && !query.get("ban"))}
     <section class="card glow" id="aiCard">
       <div class="row wrap"><h2 class="grow" style="margin:0">${viewing === "ai" ? "Giải sâu bằng AI" : "Giải theo luật"}</h2>
         <span class="src">${s.ai ? `<a class="btn small ${viewing === "ai" ? "primary" : ""}" href="#/giai/${id}">Bản AI</a><a class="btn small ${viewing === "luat" ? "primary" : ""}" href="#/giai/${id}?ban=luat">Bản luật</a>` : ""}</span></div>

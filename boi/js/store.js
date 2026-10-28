@@ -66,9 +66,9 @@ export const aiReady = () => !!aiKey();
 
 export const getSession = (id) => store.sessions.find((s) => s.id === id) || null;
 
-export function newDraft(cauHoi, suggestion) {
+export function newDraft(cauHoi, suggestion, tenKhach = "") {
   const now = new Date();
-  const d = { v: 1, draft: true, id: "q" + now.getTime().toString(36) + Math.random().toString(36).slice(2, 6), cauHoi: cauHoi.trim(), suggestion, createdAt: now.toISOString(), lockedAt: now.toISOString(), rounds: [] };
+  const d = { v: 1, draft: true, id: "q" + now.getTime().toString(36) + Math.random().toString(36).slice(2, 6), cauHoi: cauHoi.trim(), tenKhach: String(tenKhach || "").trim().slice(0, 40), suggestion, createdAt: now.toISOString(), lockedAt: now.toISOString(), rounds: [] };
   store.sessions.push(d);
   persist();
   return d;
@@ -76,7 +76,7 @@ export function newDraft(cauHoi, suggestion) {
 
 // Khoá nháp: sinh seed + xáo + mã khoá; giữ nguyên id để link cũ vẫn mở đúng câu hỏi
 export async function lockDraft(draft, cfg) {
-  const s = await createSession({ cauHoi: draft.cauHoi, ...cfg });
+  const s = await createSession({ cauHoi: draft.cauHoi, tenKhach: draft.tenKhach || "", ...cfg });
   s.id = draft.id;
   s.createdAt = draft.createdAt;
   const i = store.sessions.findIndex((x) => x.id === draft.id);

@@ -16,3 +16,6 @@
 .mau-item .cu { color: var(--muted); text-decoration: line-through; }
 
 [hidden] { display: none !important; }
+
+/* Trang này không có thanh tab dưới: ô gõ tin nằm yên trong khung chat, không nổi đè nội dung */
+.composer { position: static; }
