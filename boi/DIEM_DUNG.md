@@ -35,11 +35,14 @@ Cập nhật: 28/10/2026 (GMT+7). Task-ID: BOI-20261028-01. Nhánh: `claude/slee
 ## Trang đào tạo: mỗi tình huống một cuộc (mục 39)
 - Gửi cầu nối và mẫu sửa chỉ lịch sử từ tình huống gần nhất (`lichSuCuoc`); vạch “— Cuộc mới: … —” trên màn hình.
 
+## Trang đào tạo: thử lại 4 lần + đọc địa chỉ qua API (mục 40)
+- Lỗi mạng thử lại 2/5/10/20 s, đọc địa chỉ đường hầm qua API GitHub trước (Pages sau); tin lỗi giữ trong ô nhập + nút Thử lại; `ma_tin` mỗi tin để máy nhà chống trùng (máy nhà cần thêm cache theo `ma_tin`).
+
 ## Việc còn lại (ngoài `boi/`, phiên máy nhà làm)
 - Hai route `POST /tro_ly/tra_loi`, `POST/GET /tro_ly/mau_sua` trên cầu nối máy nhà (trang đào tạo đã gọi đúng khuôn, xem `boi/dao-tao/dao-tao-core.js`).
 - Agent máy nhà áp đúng cổng chặn chữ như `kiemTraLoiAgent` (danh sách `CHU_CAM` trong `boi/js/loi.js`) và trả `{chuyen_nguoi:true, ly_do}` khi khách đòi hoàn tiền hoặc có ý tự hại; khi khách gặng hỏi lần 2 có phải AI không thì trả lời thật theo mẫu phiếu v5.
 - Sổ khoá `docs/handover/ACTIVE_TASKS.json` chưa ghi BOI-20261028-01 (lệnh chỉ sửa `boi/**`), nên `coordination-guard` đỏ trên các PR này.
 
 ## Lệnh chạy lại
-- `node boi/test.mjs` (65/65 đạt ngày 28/10/2026).
+- `node boi/test.mjs` (69/69 đạt ngày 28/10/2026).
 - Mở thử: https://baominhle77-glitch.github.io/boi/dao-tao/ (nút “Đào tạo nhắn tin” ở thanh tab dưới của web bói).

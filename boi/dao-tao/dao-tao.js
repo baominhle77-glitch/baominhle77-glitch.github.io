@@ -4,7 +4,7 @@ import { probeBridge, bridge, aiKey, storage } from "../js/store.js";
 import { via } from "../js/ai.js";
 import { mergeKnowledge } from "../js/data.js";
 import { taoBoiAuto } from "../js/auto.js";
-import { KENH, GOI, TINH_HUONG, NHAN_CHUYEN, LOI_CAU_NOI_TAT, DANG_NOI_LAI, goc, yeuCauTraLoi, yeuCauMauSua, lichSuCuoc, docTraLoi, sapMauSua, goiTroLy, goiCoThuLai, kiemTraLoiAgent, themHangCho, guiHangCho, docHangCho, boHangCho } from "./dao-tao-core.js";
+import { KENH, GOI, TINH_HUONG, NHAN_CHUYEN, LOI_CAU_NOI_TAT, DANG_NOI_LAI, goc, yeuCauTraLoi, yeuCauMauSua, lichSuCuoc, taoMaTin, docTraLoi, sapMauSua, goiTroLy, goiCoThuLai, kiemTraLoiAgent, themHangCho, guiHangCho, docHangCho, boHangCho } from "./dao-tao-core.js";
 
 const KEY = "boi.daotao.v1";
 const $ = (id) => document.getElementById(id);
@@ -19,7 +19,7 @@ const st = (() => {
   return { kenh: "01", goi: 0, cau_con: 0, lich_su: [], ...con };
 })();
 const luu = () => { try { storage?.setItem(KEY, JSON.stringify(st)); } catch (_) { /* bỏ qua */ } };
-let thDangChon = null, dangGui = false, suaO = -1, noiLaiO = -1, dangGuiHang = false, dangLuuMau = 0;
+let thDangChon = null, dangGui = false, suaO = -1, noiLaiO = null, dangGuiHang = false, dangLuuMau = 0;
 
 // ---------- Cầu nối ----------
 const cauNoi = () => (bridge.ok ? { base: goc(via.base), token: via.token } : { base: "", token: "" });
@@ -33,7 +33,8 @@ async function doCauNoi({ guiHang = true } = {}) {
   return ok;
 }
 // Lỗi mạng thoáng qua: dò lại cầu nối rồi gửi lại 1 lần; trong lúc đó dưới tin khách (ô i) hiện “Đang nối lại máy nhà…”
-const coThuLai = (goi, i, noiLai = () => doCauNoi()) => goiCoThuLai(goi, { noiLai, onNoiLai: (on) => { noiLaiO = on ? i : -1; veChat(); } });
+// noiLaiO = {i, lan, tong}: dưới tin khách ô i hiện “Đang nối lại máy nhà… (lần k/4)”
+const coThuLai = (goi, i, noiLai = () => doCauNoi()) => goiCoThuLai(goi, { noiLai, onNoiLai: (x) => { noiLaiO = x ? { i, ...x } : null; veChat(); } });
 // Mẫu sửa đang chờ gửi (lưu hỏng lúc trước): cầu nối sống thì tự gửi lại, gửi được thì bỏ cờ chờ
 async function guiLaiHangCho() {
   if (dangGuiHang || dangLuuMau || !docHangCho(storage).length) return; // đang lưu một mẫu thì để lượt đó tự gửi, tránh trùng
@@ -70,10 +71,10 @@ function veNutTrai() {
   $("traiBai").hidden = !(Number(st.goi) > 0 && Number(st.cau_con) > 0 && coCau);
 }
 function veTin(m, i) {
-  if (m.vai === "he_thong") return `<p class="loi-he" role="alert">⚠ ${esc(m.noi_dung)}</p>`;
+  if (m.vai === "he_thong") return `<p class="loi-he" role="alert">⚠ ${esc(m.noi_dung)}${m.thu_lai && tinHong() >= 0 && i === st.lich_su.length - 1 ? ` <button type="button" class="btn small" data-thu-lai>Thử lại</button>` : ""}</p>`;
   // ghi chú chỉ cho trang đào tạo (không gửi agent, không gửi khách)
   if (m.vai === "ghi_chu") return `<p class="note ghi-chu">ℹ ${esc(m.noi_dung)}</p>`;
-  if (m.vai === "khach") return `<div class="msg user"><div class="who">Khách${m.tinh_huong ? ` · ${esc(th(m.tinh_huong)?.ten || "")}` : ""}</div>${m.noi_dung.split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}${noiLaiO === i ? `<p class="note noi-lai" role="status">${DANG_NOI_LAI}</p>` : ""}</div>`;
+  if (m.vai === "khach") return `<div class="msg user"><div class="who">Khách${m.tinh_huong ? ` · ${esc(th(m.tinh_huong)?.ten || "")}` : ""}</div>${m.noi_dung.split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}${noiLaiO?.i === i ? `<p class="note noi-lai" role="status">${DANG_NOI_LAI} (lần ${noiLaiO.lan}/${noiLaiO.tong})</p>` : ""}${m.loi_gui && noiLaiO?.i !== i ? `<p class="note">Chưa gửi được tới máy nhà.</p>` : ""}</div>`;
   const nhan = [
     m.chuyen_nguoi ? `<span class="nhan chuyen">${NHAN_CHUYEN}</span>${m.ly_do ? ` <span class="note">${esc(m.ly_do)}</span>` : ""}` : "",
     m.bi_chan?.length ? `<span class="nhan chan">BỊ CHẶN: ${esc(m.bi_chan.join(", "))}</span>` : "",
@@ -112,22 +113,47 @@ async function taiMau() {
 }
 function baoLoi(msg) { st.lich_su.push({ vai: "he_thong", noi_dung: msg }); luu(); veChat(); }
 
+// Tin khách gửi hỏng gần nhất (chưa có trả lời): gửi lại thì dùng chính dòng đó, không đẩy trùng vào lịch sử
+function tinHong() {
+  for (let k = st.lich_su.length - 1; k >= 0; k--) {
+    const m = st.lich_su[k];
+    if (m.vai === "he_thong" || m.vai === "ghi_chu") continue;
+    return m.vai === "khach" && m.loi_gui ? k : -1;
+  }
+  return -1;
+}
 async function guiTin(text) {
   if (dangGui) return;
   dangGui = true;
-  st.lich_su.push({ vai: "khach", noi_dung: text, ...(thDangChon ? { tinh_huong: thDangChon } : {}) });
-  const tinhHuong = thDangChon;
+  let iKhach = tinHong();
+  if (iKhach >= 0) {
+    const cu = st.lich_su[iKhach];
+    st.lich_su.splice(iKhach + 1); // bỏ dòng báo lỗi của lần trước
+    if (cu.noi_dung !== text) { cu.noi_dung = text; cu.ma_tin = taoMaTin(); } // sửa tin thì là tin mới
+    if (thDangChon) cu.tinh_huong = thDangChon;
+  } else {
+    st.lich_su.push({ vai: "khach", noi_dung: text, ma_tin: taoMaTin(), ...(thDangChon ? { tinh_huong: thDangChon } : {}) });
+    iKhach = st.lich_su.length - 1;
+  }
+  const m = st.lich_su[iKhach];
+  if (!m.ma_tin) m.ma_tin = taoMaTin();
+  const tinhHuong = m.tinh_huong;
   thDangChon = null;
   luu(); veChat();
-  const iKhach = st.lich_su.length - 1;
   try {
-    // chỉ gửi lịch sử của cuộc hiện tại (từ tình huống gần nhất), cau_con giữ nguyên
-    const body = yeuCauTraLoi({ ...st, lich_su: lichSuCuoc(st.lich_su, iKhach) });
+    // chỉ gửi lịch sử của cuộc hiện tại (từ tình huống gần nhất), cau_con giữ nguyên; ma_tin để máy nhà chống trùng
+    const body = yeuCauTraLoi({ ...st, lich_su: lichSuCuoc(st.lich_su, iKhach), ma_tin: m.ma_tin });
     const j = await coThuLai(() => goiTroLy({ ...cauNoi(), path: "/tro_ly/tra_loi", body }), iKhach);
+    delete m.loi_gui;
     st.lich_su.push({ ...docTraLoi(j), ...(tinhHuong ? { tinh_huong: tinhHuong } : {}) });
     luu(); veChat();
   } catch (e) {
-    baoLoi(e.message);
+    // không mất tin khách: giữ trong ô nhập, có nút Thử lại gửi lại đúng tin đó
+    m.loi_gui = true;
+    st.lich_su.push({ vai: "he_thong", noi_dung: e.message, thu_lai: true });
+    if (!$("tin").value.trim()) $("tin").value = m.noi_dung;
+    thDangChon = tinhHuong || null;
+    luu(); veChat();
   } finally { dangGui = false; }
 }
 
@@ -204,6 +230,7 @@ $("fTin").onsubmit = (e) => {
   guiTin(t);
 };
 $("chat").addEventListener("click", (e) => {
+  if (e.target.closest("[data-thu-lai]")) { const k = tinHong(); if (k >= 0) { $("tin").value = ""; guiTin(st.lich_su[k].noi_dung); } return; }
   const mo = e.target.closest("[data-sua-mo]");
   if (mo) { suaO = +mo.dataset.suaMo; veChat(); return; }
   if (e.target.closest("[data-huy]")) { suaO = -1; veChat(); }

@@ -40,6 +40,21 @@ async function ping(fetchImpl, base, token, ms) {
   const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
   try { const r = await fetchImpl(`${base}/ping`, { signal: c.signal, headers: token ? { "x-boi-token": token } : {} }); return r.ok; } finally { clearTimeout(t); }
 }
+// Địa chỉ đường hầm mới nhất (đường hầm đổi địa chỉ ~20 phút/lần): ưu tiên API GitHub (có ngay khi máy nhà ghi lên main,
+// không chờ Pages build); API lỗi hoặc 403 hết lượt thì đọc bản Pages kèm ?t= để khỏi dính bộ nhớ đệm. Không có → "".
+const CAU_NOI_PAGES = new URL("../cau_noi.json", import.meta.url).href;
+const laDiaChi = (u) => /^https:\/\/[\w.-]+$/.test(u);
+export async function docDiaChiCauNoi(fetchImpl = globalThis.fetch, ms = 5000) {
+  const lay = async (u, headers) => {
+    const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
+    try { const r = await fetchImpl(u, { headers, cache: "no-store", signal: c.signal }); return r.ok ? String((await r.json()).url || "") : ""; }
+    catch (_) { return ""; } finally { clearTimeout(t); }
+  };
+  const api = await lay(CAU_NOI_JSON, { accept: "application/vnd.github.raw" });
+  if (laDiaChi(api)) return api;
+  const pages = await lay(`${CAU_NOI_PAGES}?t=${Date.now()}`, {});
+  return laDiaChi(pages) ? pages : "";
+}
 // Mọi bước dò đều có hạn chờ: cầu nối tắt/treo hay GitHub chậm thì trả false, trang dùng trạm AI ngay.
 export async function probeBridge(fetchImpl = globalThis.fetch, { on = cauNoiAn(), localMs = 1200, listMs = 5000, xaMs = 6000 } = {}) {
   if (!on) { bridge.ok = false; bridge.xa = false; return false; }
@@ -48,17 +63,11 @@ export async function probeBridge(fetchImpl = globalThis.fetch, { on = cauNoiAn(
   } catch (_) { /* không ở máy nhà */ }
   const token = ghepToken();
   let ok = false;
-  {  // không có mã ghép vẫn dò: cầu nối nhận trang web bói theo Origin (25/10)
-    try {
-      const c = new AbortController(); const t = setTimeout(() => c.abort(), listMs);
-      let url = "";
-      try {
-        const r = await fetchImpl(CAU_NOI_JSON, { headers: { accept: "application/vnd.github.raw+json" }, cache: "no-store", signal: c.signal });
-        url = r.ok ? String((await r.json()).url || "") : "";
-      } finally { clearTimeout(t); }
-      if (/^https:\/\/[\w.-]+$/.test(url) && await ping(fetchImpl, url + "/gemini", token, xaMs)) { via.base = url + "/gemini"; via.token = token; ok = true; }
-    } catch (_) { ok = false; }
-  }
+  // không có mã ghép vẫn dò: cầu nối nhận trang web bói theo Origin (25/10)
+  try {
+    const url = await docDiaChiCauNoi(fetchImpl, listMs);
+    if (url && await ping(fetchImpl, url + "/gemini", token, xaMs)) { via.base = url + "/gemini"; via.token = token; ok = true; }
+  } catch (_) { ok = false; }
   bridge.ok = ok; bridge.xa = ok;
   return ok;
 }
