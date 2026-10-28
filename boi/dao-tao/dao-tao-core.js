@@ -46,6 +46,16 @@ export function yeuCauTraLoi({ kenh, goi, cau_con, lich_su }) {
   return { kenh: String(kenh), goi: Number(goi) || 0, cau_con: Math.max(0, Number(cau_con) || 0), lich_su: (lich_su || []).filter((m) => m.vai === "khach" || m.vai === "agent").map((m) => ({ vai: m.vai, noi_dung: String(m.noi_dung || "") })) };
 }
 
+// Trang đào tạo: mỗi lần bấm một tình huống (tin khách có tinh_huong) là một cuộc chat mới. Tin gõ tay sau đó thuộc
+// cuộc của tình huống gần nhất phía trên. Gửi cầu nối chỉ lịch sử của đúng cuộc đó, để tin của tình huống khác
+// (vd tự hại) không làm sai câu trả lời của tình huống sau. Chưa có tình huống nào thì cả lịch sử là một cuộc.
+export function dauCuoc(lich_su, i = (lich_su || []).length - 1) {
+  for (let k = Math.min(i, (lich_su || []).length - 1); k >= 0; k--) if (lich_su[k]?.vai === "khach" && lich_su[k].tinh_huong) return k;
+  return 0;
+}
+// Lịch sử của cuộc chứa tin thứ i, tính tới hết tin i (denCuoi: false → không lấy tin i, dùng cho mẫu sửa)
+export const lichSuCuoc = (lich_su, i = (lich_su || []).length - 1, { denCuoi = true } = {}) => (lich_su || []).slice(dauCuoc(lich_su, i), denCuoi ? i + 1 : i);
+
 export function yeuCauMauSua({ kenh, goi, lich_su, ban_agent, ban_chu_tich, ly_do }) {
   return { kenh: String(kenh), goi: Number(goi) || 0, lich_su: yeuCauTraLoi({ kenh, goi, lich_su }).lich_su, ban_agent: String(ban_agent || ""), ban_chu_tich: String(ban_chu_tich || "").trim(), ly_do: String(ly_do || "").trim() };
 }
