@@ -13,11 +13,14 @@ Cập nhật: 28/10/2026 (GMT+7). Task-ID: BOI-20261028-01. Nhánh: `claude/slee
 ## Tên khách (mục 30)
 - `window.BoiAuto.giai(cauHoi, {trai, tenKhach})`; trống thì gọi “bạn”. Lời gửi khách không bao giờ dùng xưng hô trong Cài đặt.
 
+## Lời gửi khách đọc từ nghĩa thật (mục 31) và nút Đào tạo (mục 32)
+- Đường AI đang hỏng phía trạm (thử 28/10: quá giờ 60 s, rồi 429). Lý do hiện dưới ô Lời gửi khách và trong console `[loi-gui-khach]`.
+
 ## Việc còn lại (ngoài `boi/`, phiên máy nhà làm)
 - Hai route `POST /tro_ly/tra_loi`, `POST/GET /tro_ly/mau_sua` trên cầu nối máy nhà (trang đào tạo đã gọi đúng khuôn, xem `boi/dao-tao/dao-tao-core.js`).
 - Agent máy nhà áp đúng cổng chặn chữ như `kiemTraLoiAgent` (danh sách `CHU_CAM` trong `boi/js/loi.js`) và trả `{chuyen_nguoi:true, ly_do}` khi khách đòi hoàn tiền hoặc có ý tự hại; khi khách gặng hỏi lần 2 có phải AI không thì trả lời thật theo mẫu phiếu v5.
 - Sổ khoá `docs/handover/ACTIVE_TASKS.json` chưa ghi BOI-20261028-01 (lệnh chỉ sửa `boi/**`), nên `coordination-guard` đỏ trên các PR này.
 
 ## Lệnh chạy lại
-- `node boi/test.mjs` (43/43 đạt ngày 28/10/2026).
-- Mở thử: https://baominhle77-glitch.github.io/boi/dao-tao/ (không có link từ trang khách).
+- `node boi/test.mjs` (47/47 đạt ngày 28/10/2026).
+- Mở thử: https://baominhle77-glitch.github.io/boi/dao-tao/ (nút “Đào tạo nhắn tin” ở thanh tab dưới của web bói).

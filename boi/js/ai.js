@@ -5,6 +5,7 @@ import { cardName, tarotCard, lenCard, yesNo } from "./reading.js";
 import { spreadById, posLabel, posKey } from "./spreads.js";
 import { cardYesNo } from "./data.js";
 import { drawsOf } from "./state.js";
+import { khoiNghiaChoAI } from "./loi.js";
 
 // Cầu nối máy nhà: tiến trình ở 127.0.0.1 tự gắn khoá Gemini từ tệp .env trên máy, trang không giữ khoá.
 export const LOCAL_KEY = "@may-nha";
@@ -57,6 +58,7 @@ CÁCH ĐỌC (như reader thật, không như từ điển)
 
 LỜI GỬI KHÁCH ("loi_gui_khach") — phần riêng, tách khỏi bản giải đầy đủ
 - Văn xuôi 120–220 chữ, 2–4 đoạn cách nhau một dòng trống (trong JSON viết là \n\n), như reader đang nhắn tin riêng cho người hỏi: tự nhiên, ấm, có chiều sâu, trả lời thẳng đúng câu hỏi, kết bằng một lời khuyên làm được ngay.
+- ĐỌC LẠI THÔNG ĐIỆP của chính trải bài: tổng hợp khối "NGHĨA THẬT CỦA TỪNG LÁ ĐÃ TRẢI" thành một mạch chuyện liền cho đúng câu hỏi — chuyện đang diễn ra thế nào → gốc rễ/điều đang cản hoặc đẩy → hướng sắp tới → điều nên làm. Mỗi câu phải bắt nguồn từ nghĩa của ít nhất một lá, có chi tiết cụ thể (người, việc, cảm xúc, thời điểm). Cấm câu sáo dùng được cho mọi khách.
 - KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm.
 - Gọi khách theo dòng "GỌI KHÁCH" (không dùng xưng hô của bản giải chi tiết). Không nêu tên vị trí, tên tầng hay tên ô của trải bài — nói thành ý thường (vd "khoảng đầu thuận hơn, về sau cần giữ sức").
 - Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá.
@@ -126,7 +128,7 @@ export function buildContext(db, session, { reading = null, money = null, settin
 }
 
 export function readingRequest(db, session, opts) {
-  return `${buildContext(db, session, opts)}\n\nHãy giải như một tarot reader thật đang ngồi đối diện người hỏi, hoàn toàn bằng tiếng Việt: mở bài, rồi đọc lần lượt từng tầng (Tarot theo vị trí có tên lá + chi tiết hình ảnh, kể chuyện nối các lá, Lenormand thành câu), rồi nối các tầng (nêu rõ lá nào ra lại ở nhiều tầng là chủ đề lặp lại), rồi kết luận chung. Các lượt rút thêm (nếu có) gộp vào phần nối tầng/tổng kết. Trả về DUY NHẤT một đối tượng JSON đúng khuôn: tong_quan, chu_de_troi[], tang[{ten, diem, tra_loi, tarot_doc[], dong_chay, lenormand_cap[], lenormand_bo_ba[], lenormand_chuoi, lech, chot, diem_nghen, loi_khuyen}], noi_tang[], mau_thuan[], tien, tong_ket, loi_khuyen[], canh_bao[], loi_gui_khach. Số tầng trong "tang" bằng số tầng của trải chính; tarot_doc có đúng một câu/đoạn cho mỗi lá Tarot theo thứ tự.\n${DAU_LINE}`;
+  return `${buildContext(db, session, opts)}\n\n${khoiNghiaChoAI(db, session, opts?.reading)}\n\nHãy giải như một tarot reader thật đang ngồi đối diện người hỏi, hoàn toàn bằng tiếng Việt: mở bài, rồi đọc lần lượt từng tầng (Tarot theo vị trí có tên lá + chi tiết hình ảnh, kể chuyện nối các lá, Lenormand thành câu), rồi nối các tầng (nêu rõ lá nào ra lại ở nhiều tầng là chủ đề lặp lại), rồi kết luận chung. Các lượt rút thêm (nếu có) gộp vào phần nối tầng/tổng kết. Trả về DUY NHẤT một đối tượng JSON đúng khuôn: tong_quan, chu_de_troi[], tang[{ten, diem, tra_loi, tarot_doc[], dong_chay, lenormand_cap[], lenormand_bo_ba[], lenormand_chuoi, lech, chot, diem_nghen, loi_khuyen}], noi_tang[], mau_thuan[], tien, tong_ket, loi_khuyen[], canh_bao[], loi_gui_khach. Số tầng trong "tang" bằng số tầng của trải chính; tarot_doc có đúng một câu/đoạn cho mỗi lá Tarot theo thứ tự.\n${DAU_LINE}`;
 }
 
 // Bản sao chép dán vào ChatGPT
@@ -369,6 +371,16 @@ export function friendlyError(e, key) {
   if (e?.status === 429) return "AI đang quá tải hoặc hết hạn mức — thử lại sau ít phút.";
   if (e?.status >= 500) return "Máy chủ AI đang lỗi tạm thời — thử lại sau.";
   return String(e?.message || "Lỗi không rõ.").slice(0, 160);
+}
+// Phân loại lỗi đường AI cho GĐ biết đường nào cần chữa (ghi console + chú thích dưới ô Lời gửi khách)
+export function phanLoaiLoiAI(e, key) {
+  if (e?.matDau) return "AI trả chữ không dấu";
+  if (e?.timeout) return key === LOCAL_KEY ? "cầu nối quá giờ" : "trạm quá giờ";
+  if (e?.status === 429) return "429 — trạm hết lượt/đang đông";
+  const net = e instanceof TypeError || /failed to fetch|networkerror|load failed|network/i.test(String(e?.message || ""));
+  if (net) return key === LOCAL_KEY ? "cầu nối chết" : "không tới được trạm (mạng)";
+  if (e?.status) return `trạm lỗi ${e.status}`;
+  return String(e?.message || "lỗi không rõ").slice(0, 120);
 }
 // AI lỗi → câu báo trên đầu và lời dẫn tới bản giải theo luật (động cơ luật giữ nguyên làm dự phòng)
 export function aiFailNotice(e, key) {

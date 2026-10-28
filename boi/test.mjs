@@ -14,13 +14,13 @@ import { analyze, allSentences, ruleFollowUp } from "./js/insight.js";
 import { suggestSpread, mainTopic } from "./js/topic.js";
 import { mergeKnowledge, tarotMeaning, capMeaning, cardYesNo } from "./js/data.js";
 import { friendlyError, LOCAL_KEY, TRAM_KEY, TRAM_URL, aiFailNotice } from "./js/ai.js";
-import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING, SYSTEM_CHAT, LOCAL_BASE } from "./js/ai.js";
+import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING, SYSTEM_CHAT, LOCAL_BASE, phanLoaiLoiAI } from "./js/ai.js";
 import { goiCoDau, tyLeDau, tyLeDauBai, matDau, normYN, suaTenLa, YN, BAO_MAT_DAU, NHAC_DAU, NGUONG_DAU, SCHEMA } from "./js/ai.js";
 import { probeBridge, bridge, aiKey, store } from "./js/store.js";
 import { ROUTES } from "./js/views.js";
 import * as DT from "./dao-tao/dao-tao-core.js";
 import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai } from "./js/auto.js";
-import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK, tenViTriCua } from "./js/loi.js";
+import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK, tenViTriCua, chuCamTrong, yKhop, tyLeCauSao, viTriTrong } from "./js/loi.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const readJSON = (f) => JSON.parse(readFileSync(join(HERE, f), "utf8"));
@@ -688,6 +688,21 @@ test("(f) màn chọn bài: không có ô gõ số, không lộ dải số 01–
 });
 
 // ---- Ô "Lời gửi khách" ----
+// AI giả: viết lời gửi khách từ khối "NGHĨA THẬT CỦA TỪNG LÁ" có trong prompt (như AI thật phải làm)
+function aiGiaTuNghia(prompt, ten = "") {
+  const khoi = String(prompt).slice(Math.max(0, String(prompt).indexOf("=== NGHĨA THẬT CỦA TỪNG LÁ")));
+  const nghia = [...khoi.matchAll(/^ {2}(?:Tarot \[[^\]]+\]|Lenormand) [^:]+: (.+)$/gmu)].map((m) => m[1].replace(" Lời khuyên của lá:", ""));
+  const cau = nghia.flatMap((t) => t.split(/(?<=[.!?])\s+/u)).filter((c) => c.length > 15 && !/lá bài|lá này|Lá /u.test(c) && !chuCamTrong(c).length && !tenLaTrong(c, db).length);
+  const out = [[], [], []];
+  out[0].push(ten ? `${ten} ơi, trải bài của bạn nói khá rõ.` : "Về câu bạn hỏi, trải bài nói khá rõ.");
+  let k = 0, n = 6;
+  for (const c of cau) { if (n + c.split(/\s+/).length > 190) break; out[Math.min(2, Math.floor(k / 2))].push(c); n += c.split(/\s+/).length; k++; }
+  out[2].push("Tuần này hãy làm một việc nhỏ đúng hướng đó.");
+  const dem = () => out.flat().join(" ").split(/\s+/).length;
+  const dem2 = ["Bạn hãy để ý những dấu hiệu nhỏ trong mấy ngày tới.", "Mỗi lựa chọn nhỏ hôm nay đều góp vào kết quả bạn muốn.", "Hãy giữ nhịp đều và đừng vội vàng kết luận."];
+  for (let i = 0; dem() < 128 && i < dem2.length; i++) out[1].push(dem2[i]);
+  return out.filter((p) => p.length).map((p) => p.join(" ")).join("\n\n");
+}
 const LGK_OK = [
   "Bạn ơi, mình đã đọc kỹ câu bạn hỏi về chuyện công việc mới. Nhìn chung con đường đang mở ra theo hướng thuận, nhưng không phải kiểu dễ dàng ngồi chờ. Cơ hội đến từ chính những gì bạn đã chuẩn bị trong mấy tháng qua, và người quyết định đang để ý đến bạn nhiều hơn bạn nghĩ.",
   "Điều mình thấy rõ nhất là bạn đang tự nghi ngờ mình hơi nhiều. Chính sự do dự đó làm bạn chậm một nhịp so với người khác. Nếu bạn nói rõ mong muốn của mình, mọi chuyện sẽ trôi hơn hẳn, và những lo lắng hiện giờ phần lớn sẽ tự tan khi bạn bắt tay vào việc.",
@@ -752,15 +767,18 @@ test("lời gửi khách — bản luật viết xuôi luôn qua cổng (nhiều
 test("lời gửi khách — AI đạt thì dùng; trượt thì viết lại đúng 1 lần; vẫn trượt thì bản luật", async () => {
   const s = await sessionNgauNhien("3thang", 2);
   const rule = analyze(db, s, {});
-  const ok = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: LGK_OK }, call: async () => assert.fail("không được gọi lại") });
-  assert.deepEqual([ok.nguon, ok.text], ["ai", LGK_OK]);
+  const tot = aiGiaTuNghia(readingRequest(db, s, { reading: rule }));
+  assert.ok(kiemLoiGuiKhach(tot, db, { session: s }).ok, kiemLoiGuiKhach(tot, db, { session: s }).loi.join("; "));
+  const ok = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: tot }, call: async () => assert.fail("không được gọi lại") });
+  assert.deepEqual([ok.nguon, ok.text], ["ai", tot]);
   const calls = [];
   const coTen = LGK_OK.replace("Nhìn chung", "Lá Vua Gậy cho thấy, nhìn chung");
-  const r2 = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: coTen, tong_quan: "x", tang: [] }, call: async (sys, msg) => { calls.push({ sys, msg }); return LGK_OK; } });
+  const r2 = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: coTen, tong_quan: "x", tang: [] }, call: async (sys, msg) => { calls.push({ sys, msg }); return aiGiaTuNghia(msg); } });
   assert.equal(calls.length, 1, "viết lại đúng 1 lần");
   assert.equal(calls[0].sys, SYSTEM_LGK);
   assert.match(calls[0].msg, /tên lá: Vua Gậy/u, "lời nhắc nói rõ lý do bị trả lại");
-  assert.deepEqual([r2.nguon, r2.text], ["ai-viet-lai", LGK_OK]);
+  assert.equal(r2.nguon, "ai-viet-lai");
+  assert.match(calls[0].msg, /NGHĨA THẬT CỦA TỪNG LÁ ĐÃ TRẢI/u, "viết lại có đủ nghĩa thật của các lá");
   let n = 0;
   const r3 = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: "- Mặt Trăng: lo âu" }, call: async () => { n++; return "1. Vua Gậy\n2. Con Rắn"; } });
   assert.equal(n, 1);
@@ -811,11 +829,12 @@ test("BoiAuto: mỗi câu một seed mới, bốc đúng số lá, mã khoá ki�
   const sent = [];
   const fakeTram = async (url, o) => {
     sent.push(JSON.parse(o.body));
-    const t = JSON.stringify({ tong_quan: CO_DAU, chu_de_troi: [CO_DAU], tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, lenormand_cap: [], chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], noi_tang: [CO_DAU], mau_thuan: [CO_DAU], tong_ket: CO_DAU, loi_khuyen: [CO_DAU], loi_gui_khach: LGK_OK });
+    const t = JSON.stringify({ tong_quan: CO_DAU, chu_de_troi: [CO_DAU], tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, lenormand_cap: [], chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], noi_tang: [CO_DAU], mau_thuan: [CO_DAU], tong_ket: CO_DAU, loi_khuyen: [CO_DAU], loi_gui_khach: aiGiaTuNghia(sent.at(-1).body.contents.at(-1).parts[0].text) });
     return tramReply(t, "gemini-x");
   };
   const c = await giaiTuDong({ db, cauHoi: "Công việc mới của tôi thế nào?", trai: "3la", key: TRAM_KEY, fetchImpl: fakeTram });
-  assert.deepEqual([c.nguon, c.loiGuiKhach], ["ai", LGK_OK]);
+  assert.equal(c.nguon, "ai");
+  assert.match(sent[0].body.contents.at(-1).parts[0].text, /NGHĨA THẬT CỦA TỪNG LÁ ĐÃ TRẢI/u, "prompt AI có nghĩa thật từng lá");
   assert.equal(sent.length, 1);
 });
 
@@ -904,10 +923,14 @@ test("đào tạo: gọi cầu nối đúng route/khuôn; cầu nối tắt → 
   assert.deepEqual(DT.sapMauSua({ mau: [{ ban_chu_tich: "cũ" }, { ban_chu_tich: "mới" }] }).map((m) => m.ban_chu_tich), ["mới", "cũ"]);
 });
 
-test("đào tạo: trang noindex, không gắn link ở trang khách; service worker không chiếm trang đào tạo", () => {
+test("đào tạo: trang noindex; web bói có nút “Đào tạo nhắn tin” cạnh Cài đặt, trang đào tạo có nút “← Về web bói”; service worker không chiếm trang đào tạo", () => {
   const html = readFileSync(join(HERE, "dao-tao/index.html"), "utf8");
   assert.match(html, /<meta name="robots" content="noindex/);
-  for (const f of ["index.html", "js/app.js", "js/views.js", "manifest.webmanifest"]) assert.ok(!readFileSync(join(HERE, f), "utf8").includes("dao-tao"), `${f} không được trỏ tới trang đào tạo`);
+  assert.match(html, /<a [^>]*href="\.\.\/"[^>]*>← Về web bói<\/a>/);
+  const idx = readFileSync(join(HERE, "index.html"), "utf8");
+  const nav = idx.slice(idx.indexOf('<nav class="tabbar"'), idx.indexOf("</nav>"));
+  assert.match(nav, /<a href="dao-tao\/"[^>]*>.*Đào tạo nhắn tin<\/a>/u);
+  assert.ok(nav.indexOf("Cài đặt") < nav.indexOf("Đào tạo nhắn tin"), "đặt cạnh Cài đặt");
   const sw = readFileSync(join(HERE, "sw.js"), "utf8");
   assert.match(sw, /\/dao-tao\/"\)\) return;/);
   assert.ok(!/dao-tao/.test(sw.slice(sw.indexOf("const CORE"), sw.indexOf("];"))), "không cache trang đào tạo");
@@ -928,19 +951,18 @@ test("tên khách theo từng lượt: “Lan” rồi “Hùng” → mỗi l�
   assert.ok(!/Lan/u.test(hung.loiGuiKhach) && !/Hùng/u.test(lan.loiGuiKhach), "tên lượt trước không lọt sang lượt sau");
   // đường AI: lời gửi gọi đúng tên thì nhận; prompt có dòng GỌI KHÁCH đúng tên lượt này
   const sent = [];
-  const lgkTen = (ten) => LGK_OK.replace("Bạn ơi", `${ten} ơi`);
-  const fake = async (u, o) => { const b = JSON.parse(o.body); sent.push(b.body.contents.at(-1).parts[0].text); const ten = /gọi đúng tên “([^”]+)”/u.exec(sent.at(-1))?.[1] || "Bạn"; return tramReply(JSON.stringify({ tong_quan: CO_DAU, tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], tong_ket: CO_DAU, loi_gui_khach: lgkTen(ten) }), "gemini-x"); };
+  const fake = async (u, o) => { const b = JSON.parse(o.body); sent.push(b.body.contents.at(-1).parts[0].text); const ten = /gọi đúng tên “([^”]+)”/u.exec(sent.at(-1))?.[1] || ""; if (!b.body.generationConfig?.responseMimeType) return tramReply(aiGiaTuNghia(sent.at(-1), ten), "gemini-x"); return tramReply(JSON.stringify({ tong_quan: CO_DAU, tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], tong_ket: CO_DAU, loi_gui_khach: aiGiaTuNghia(sent.at(-1), ten) }), "gemini-x"); };
   const autoAI = taoBoiAuto(async () => ({ db, settings: caiDat, key: TRAM_KEY, fetchImpl: fake }));
   const a1 = await autoAI.giai("Em có nên chuyển nhà không?", { tenKhach: "Lan" });
   const a2 = await autoAI.giai("Em có nên chuyển nhà không?", { tenKhach: "Hùng" });
-  assert.deepEqual([a1.nguon, a2.nguon], ["ai", "ai"]);
+  for (const a of [a1, a2]) assert.ok(["ai", "ai-viet-lai"].includes(a.nguon), a.lyDo);
   assert.match(a1.loiGuiKhach, /^Lan ơi/u);
   assert.match(a2.loiGuiKhach, /^Hùng ơi/u);
-  assert.match(sent[0], /GỌI KHÁCH TRONG "loi_gui_khach": gọi đúng tên “Lan”/u);
-  assert.match(sent[1], /GỌI KHÁCH TRONG "loi_gui_khach": gọi đúng tên “Hùng”/u);
+  assert.ok(sent.some((t) => /GỌI KHÁCH TRONG "loi_gui_khach": gọi đúng tên “Lan”/u.test(t)));
+  assert.ok(sent.some((t) => /GỌI KHÁCH TRONG "loi_gui_khach": gọi đúng tên “Hùng”/u.test(t)));
   assert.ok(!sent.some((t) => /Queen Linh/u.test(t)), "lượt tự động không gửi “Queen Linh” cho AI");
   // AI lỡ gọi "Queen Linh" → cổng chặn, viết lại 1 lần; vẫn sai → bản luật gọi đúng tên
-  const sai = async () => tramReply(JSON.stringify({ tong_quan: CO_DAU, tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], tong_ket: CO_DAU, loi_gui_khach: lgkTen("Queen Linh") }), "gemini-x");
+  const sai = async (u, o) => tramReply(JSON.stringify({ tong_quan: CO_DAU, tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], tong_ket: CO_DAU, loi_gui_khach: aiGiaTuNghia(JSON.parse(o.body).body.contents.at(-1).parts[0].text, "Queen Linh") }), "gemini-x");
   const a3 = await taoBoiAuto(async () => ({ db, settings: caiDat, key: TRAM_KEY, fetchImpl: sai })).giai("Em có nên chuyển nhà không?", { tenKhach: "Lan" });
   assert.equal(a3.nguon, "luat");
   assert.match(a3.loiGuiKhach, /^Lan ơi/u);
@@ -949,7 +971,7 @@ test("tên khách theo từng lượt: “Lan” rồi “Hùng” → mỗi l�
 test("không có tên khách → không gọi tên riêng nào (“Về câu bạn hỏi…”)", async () => {
   const r = await giaiTuDong({ db, cauHoi: "Tháng này em có nên nhận lời đi làm xa không?", trai: "3la", settings: { xungHo: "Queen Linh" } });
   assert.match(r.loiGuiKhach, /^Về câu bạn hỏi/u);
-  assert.ok(!/Queen Linh|ơi,/u.test(r.loiGuiKhach), "không gọi tên ai");
+  assert.ok(!/Queen Linh/u.test(r.loiGuiKhach) && !/^[^\s,.]+(?: [^\s,.]+)? ơi,/u.test(r.loiGuiKhach), "không gọi tên ai");
   assert.equal(r.tenKhach, "");
   // màn Hỏi mới có ô Tên khách trống; màn giải gọi theo tên của lượt đó
   const [, askView] = ROUTES.find(([re]) => re.test("/hoi-moi"));
@@ -972,12 +994,16 @@ test("cổng chặn “Queen Linh ơi” (khác tên khách) và tên vị trí 
   assert.ok(kiemLoiGuiKhach(LGK_OK.replace("Bạn ơi", "Queen Linh ơi"), db, { tenKhach: "Queen Linh", xungHo: "Queen Linh" }).ok, "khách đúng tên Queen Linh thì được gọi");
   const s = await sessionNgauNhien("vanhan", 4);
   assert.ok(tenViTriCua(s).includes("Hao tài") && tenViTriCua(s).includes("Khía cạnh khác"));
-  const kh = kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Ở phần Hao tài, nhìn chung"), db, { session: s });
+  // nền: một lời gửi thật của chính trải này (qua cổng), rồi chèn thêm một câu để thử
+  const nen = loiGuiKhachLuat(db, s, analyze(db, s, {}), {});
+  assert.ok(kiemLoiGuiKhach(nen, db, { session: s }).ok);
+  const chen = (cau) => nen.replace("\n\n", `\n\n${cau} `);
+  const kh = kiemLoiGuiKhach(chen("Ở phần Hao tài, mọi chuyện cũng vậy."), db, { session: s });
   assert.equal(kh.ok, false);
   assert.match(kh.loi.join("; "), /tên vị trí\/tầng: Hao tài/u);
-  assert.match(kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Về Khía cạnh khác, nhìn chung"), db, { session: s }).loi.join("; "), /Khía cạnh khác/u);
-  assert.match(kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Ô 2 cho thấy nhìn chung"), db, { session: s }).loi.join("; "), /tên tầng\/ô/u);
-  assert.ok(kiemLoiGuiKhach(LGK_OK.replace("Nhìn chung", "Bạn nên tránh hao tài, nhìn chung"), db, { session: s }).ok, "chữ thường “hao tài” trong câu không phải tên vị trí");
+  assert.match(kiemLoiGuiKhach(chen("Về Khía cạnh khác, mọi chuyện cũng vậy."), db, { session: s }).loi.join("; "), /Khía cạnh khác/u);
+  assert.match(kiemLoiGuiKhach(chen("Ô 2 cho thấy điều tương tự."), db, { session: s }).loi.join("; "), /tên tầng\/ô/u);
+  assert.ok(kiemLoiGuiKhach(chen("Bạn nên tránh hao tài lúc này."), db, { session: s }).ok, "chữ thường “hao tài” trong câu không phải tên vị trí");
   assert.ok(!tenViTriCua(s).includes("4–6 tuần tới"), "chữ có trong câu khách hỏi thì được nhắc lại");
   // bản luật: các mẫu nhiều tầng không nêu tên tầng/vị trí
   for (const [i, id] of ["vanhan", "3thang", "tinhcam", "12thang", "cokhong"].entries()) {
@@ -986,6 +1012,81 @@ test("cổng chặn “Queen Linh ơi” (khác tên khách) và tên vị trí 
     const kk = kiemLoiGuiKhach(t, db, { tenKhach: "Hùng", xungHo: "Queen Linh", session: ss });
     assert.ok(kk.ok, `${id}: ${kk.loi.join("; ")}\n${t}`);
   }
+});
+
+// ---- Lỗi khẩn số 2 (28/10): lời gửi khách phải đọc ra thông điệp của chính trải bài ----
+async function trai3La(q, i) {
+  const sp = spreadById("3la");
+  const s = await createSession({ cauHoi: q, spreadId: sp.id, tiers: sp.tiers(), money: false, seed: (i.toString(16) + "a").repeat(64).slice(0, 64) });
+  await ensureMapping(s, 0);
+  addPickedRound(s, [{ tarot: [1 + i, 20 + i, 50 + i], lenormand: [] }]);
+  return s;
+}
+
+test("cùng câu hỏi tình cảm, 2 trải khác nhau → 2 lời khác nhau rõ rệt, mỗi lời ≥ 3 ý khớp nghĩa lá thật, 0 tên lá, 0 tên vị trí", async () => {
+  const q = "Người ấy còn thương em không?";
+  const a = await trai3La(q, 1), b = await trai3La(q, 7);
+  assert.notDeepEqual(a.rounds[0].tarot[0].map((c) => c.card), b.rounds[0].tarot[0].map((c) => c.card), "hai trải khác nhau");
+  const ta = loiGuiKhachLuat(db, a, analyze(db, a, {}), {}), tb = loiGuiKhachLuat(db, b, analyze(db, b, {}), {});
+  for (const [s, t] of [[a, ta], [b, tb]]) {
+    assert.ok(kiemLoiGuiKhach(t, db, { session: s }).ok, kiemLoiGuiKhach(t, db, { session: s }).loi.join("; "));
+    assert.ok(yKhop(t, db, s).length >= 3, `chỉ ${yKhop(t, db, s).length} ý khớp`);
+    assert.deepEqual(tenLaTrong(t, db), []);
+    assert.deepEqual(viTriTrong(t, ["Hiện trạng", "Diễn biến", "Kết quả", ...tenViTriCua(s)]), []);
+  }
+  // khác nhau rõ rệt: ít câu chung
+  const cau = (t) => new Set(t.split(/(?<=[.!?])\s+/u).map((x) => x.trim()));
+  const chung = [...cau(ta)].filter((x) => cau(tb).has(x));
+  assert.ok(chung.length <= 2, `hai lời trùng ${chung.length} câu: ${chung.join(" | ")}`);
+  // lời của trải A không khớp đủ ý với trải B (tức là thật sự đọc từ lá của mình)
+  assert.ok(yKhop(ta, db, a).length > yKhop(ta, db, b).length);
+  console.log(`\n  — Mẫu A —\n${ta}\n\n  — Mẫu B —\n${tb}\n`);
+});
+
+test("bản theo luật của trải 3 lá đọc như một thông điệp liền, không còn câu sáo đóng sẵn", async () => {
+  const s = await trai3La("Tháng này công việc của em thế nào?", 3);
+  const t = loiGuiKhachLuat(db, s, analyze(db, s, {}), { tenKhach: "Lan" });
+  assert.ok(!t.includes("Nói thật lòng: chuyện này được hay không nằm nhiều ở cách bạn làm"));
+  assert.ok(tyLeCauSao(t) <= 0.2, `câu sáo ${tyLeCauSao(t)}`);
+  assert.ok(kiemLoiGuiKhach(t, db, { session: s, tenKhach: "Lan" }).ok);
+  // mạch: đang diễn ra → gốc rễ → hướng tới → điều nên làm
+  const iHien = t.search(/Lúc này,/u), iGoc = t.search(/Gốc rễ|Điều đang níu|Cái khó|Điều đang đẩy|Lực đẩy/u), iHuong = t.search(/Thời gian tới,/u), iLam = t.search(/Điều nên làm lúc này/u);
+  assert.ok(iHien >= 0 && iHuong > iHien && iLam > iHuong, t);
+  assert.ok(iGoc < 0 || (iGoc > iHien && iGoc < iHuong), t);
+  assert.ok(!/lá này|lá bài/iu.test(t), "không còn giọng “lá này nghĩa là”");
+});
+
+test("cổng chặn một lời toàn câu sáo / chung chung", async () => {
+  const s = await trai3La("Người ấy còn thương em không?", 2);
+  const sao = [
+    "Bạn ơi, bức tranh không xấu, nhưng cũng chưa đến mức yên tâm buông tay. Tin tốt là cửa đang mở, chỉ cần bạn bước đúng nhịp. Nói gọn trước: hướng đi đang thuận, và phần thuận này có cơ sở chứ không phải may rủi.",
+    "Điều quan trọng là bạn đã hỏi đúng lúc, khi mọi thứ vẫn còn trong tầm tay mình. Những gì bạn chuẩn bị bây giờ sẽ quyết định phần lớn kết quả về sau. Bạn không cần làm mọi thứ cùng lúc, chỉ cần làm đúng việc đầu tiên.",
+    "Hãy tin vào cảm nhận của bạn, nhưng kiểm lại bằng những con số và sự việc cụ thể. Thay vì đoán ý người kia, hãy hỏi thẳng một câu và lắng nghe đến hết trước khi trả lời. Cho mình vài ngày không nhắn trước, dành thời gian đó chăm sóc bản thân rồi mới quyết định bước tiếp.",
+  ].join("\n\n");
+  assert.ok(demChu(sao) >= 120 && demChu(sao) <= 220, `${demChu(sao)}`);
+  const k = kiemLoiGuiKhach(sao, db, { session: s });
+  assert.equal(k.ok, false);
+  assert.match(k.loi.join("; "), /chung chung: \d+ % câu là câu sáo/u);
+  assert.match(k.loi.join("; "), /chung chung: chỉ \d+ ý khớp nghĩa lá/u);
+  // AI trả lời sáo → viết lại đúng 1 lần có kèm nghĩa thật; vẫn sáo → bản luật mới từ nghĩa lá
+  const rule = analyze(db, s, {});
+  let n = 0, msg = "";
+  const r = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: sao }, call: async (sys, m) => { n++; msg = m; return sao; } });
+  assert.equal(n, 1);
+  assert.match(msg, /NGHĨA THẬT CỦA TỪNG LÁ ĐÃ TRẢI/u);
+  assert.equal(r.nguon, "luat");
+  assert.ok(yKhop(r.text, db, s).length >= 3);
+});
+
+test("ghi lý do đường AI hỏng (cầu nối chết / 429 / quá giờ / bị cổng trả lại)", async () => {
+  assert.equal(phanLoaiLoiAI(new TypeError("Failed to fetch"), LOCAL_KEY), "cầu nối chết");
+  assert.equal(phanLoaiLoiAI({ status: 429 }, TRAM_KEY), "429 — trạm hết lượt/đang đông");
+  assert.equal(phanLoaiLoiAI({ timeout: true }, TRAM_KEY), "trạm quá giờ");
+  assert.equal(phanLoaiLoiAI({ timeout: true }, LOCAL_KEY), "cầu nối quá giờ");
+  assert.equal(phanLoaiLoiAI({ matDau: true }, TRAM_KEY), "AI trả chữ không dấu");
+  const r = await giaiTuDong({ db, cauHoi: "Người ấy còn thương em không?", key: TRAM_KEY, fetchImpl: async () => new Response(JSON.stringify({ ok: false, status: 429, error: "quota" }), { status: 200 }) });
+  assert.equal(r.nguon, "luat");
+  assert.equal(r.lyDo, "AI lỗi: 429 — trạm hết lượt/đang đông");
 });
 
 export async function run(extra = []) {
