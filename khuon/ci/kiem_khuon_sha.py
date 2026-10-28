@@ -8,7 +8,7 @@ SHA = {
     'ci/simulation/stage_om.py': '27221a575e0a1625d46cb4c5eb138574c6a35ad79e7d69448707f5b78b17423f',
     'ci/remotion_b/stage_khuon.py': '68f62d0c4d3d2072c714494a7a305a7acba17dbceddd7b1c8c2c910d7446c419',
     'ci/kiem_ban_ve.py': '2b2a20392e7793769260f82531076017984dac78c1f19c8800db16ce9f2c0f36',
-    'ci/g12_vat_chinh.py': 'f315da0050c26bf1438a8dbd407edde58d00193d0fc600e64f3d47bd07e10b9c',
+    'ci/g12_vat_chinh.py': '0a2b102a605c55099fb8f4faed22812ba2a4ab68f556898b9db16e734fdc76c4',
     'ci/khuon_dung_thu.py': '5499d8c937883a2d6c1fe83f4f119ba7ca6f0f89975165f823ce35baf4e8a4e2',
 }
 
