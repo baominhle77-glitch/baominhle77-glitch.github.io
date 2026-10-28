@@ -16,7 +16,7 @@ import { mergeKnowledge, tarotMeaning, capMeaning, cardYesNo } from "./js/data.j
 import { friendlyError, LOCAL_KEY, TRAM_KEY, TRAM_URL, aiFailNotice } from "./js/ai.js";
 import { streamWithFallback, partialJSON, normalizeReading, readingRequest, SYSTEM_READING, SYSTEM_CHAT, LOCAL_BASE, phanLoaiLoiAI } from "./js/ai.js";
 import { goiCoDau, tyLeDau, tyLeDauBai, matDau, normYN, suaTenLa, YN, BAO_MAT_DAU, NHAC_DAU, NGUONG_DAU, SCHEMA } from "./js/ai.js";
-import { probeBridge, bridge, aiKey, store } from "./js/store.js";
+import { probeBridge, bridge, aiKey, store, docDiaChiCauNoi } from "./js/store.js";
 import { ROUTES } from "./js/views.js";
 import * as DT from "./dao-tao/dao-tao-core.js";
 import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai, thamSoTrai, laCauHoiBoi, tachCauHoi, HOI_LAI } from "./js/auto.js";
@@ -1256,28 +1256,28 @@ test("trang đào tạo không còn ô “Kiểu trải”; nút Trải bài g�
 });
 
 // ---- v11 (28/10): đường hầm hỏng thoáng qua ở trang đào tạo → nối lại rồi gửi lại 1 lần ----
-test("đào tạo: lỗi mạng lần 1 → nối lại (dò lại cầu nối) rồi gửi lại đúng tin đó, hiện câu agent, không ⚠; hỏng cả 2 lần → báo lỗi", async () => {
+test("đào tạo: lỗi mạng lần 1 → nối lại (dò lại cầu nối) rồi gửi lại đúng tin đó, hiện câu agent, không ⚠; hỏng cả 5 lần → báo lỗi", async () => {
   let lan = 0, noiLai = 0;
   const bat = [], gui = [];
   const fetch1 = async (u, o) => { lan++; gui.push(o.body); if (lan === 1) throw new TypeError("Failed to fetch"); return new Response(JSON.stringify({ tra_loi: "Mình nghe bạn đây." }), { status: 200 }); };
   const body = DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 3, lich_su: [{ vai: "khach", noi_dung: "Em mệt lắm rồi…" }] });
-  const j = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body, fetchImpl: fetch1 }), { noiLai: async () => { noiLai++; }, onNoiLai: (on) => bat.push(on) });
+  const j = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body, fetchImpl: fetch1 }), { noiLai: async () => { noiLai++; }, onNoiLai: (x) => bat.push(x), cho: async () => {} });
   assert.equal(DT.docTraLoi(j).noi_dung, "Mình nghe bạn đây.");
   assert.equal(lan, 2); assert.equal(noiLai, 1);
   assert.equal(gui[0], gui[1], "gửi lại đúng tin đó");
-  assert.deepEqual(bat, [true, false], "dòng “Đang nối lại máy nhà…” bật rồi tắt");
+  assert.deepEqual(bat, [{ lan: 1, tong: 4 }, null], "dòng “Đang nối lại máy nhà… (lần 1/4)” bật rồi tắt");
   // hỏng cả hai lần → lỗi (trang mới hiện ⚠)
   let n = 0;
-  const e = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body, fetchImpl: async () => { n++; throw new TypeError("Failed to fetch"); } }), { noiLai: async () => {} }).then(() => null, (x) => x);
-  assert.equal(n, 2); assert.equal(e?.message, DT.LOI_CAU_NOI_TAT);
+  const e = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body, fetchImpl: async () => { n++; throw new TypeError("Failed to fetch"); } }), { noiLai: async () => {}, cho: async () => {} }).then(() => null, (x) => x);
+  assert.equal(n, 5, "1 lần đầu + 4 lần thử lại"); assert.equal(e?.message, DT.LOI_CAU_NOI_TAT);
   // chưa có địa chỉ cầu nối lúc đầu, nối lại thì có → chạy
   let base = "";
-  const j2 = await DT.goiCoThuLai(() => DT.goiTroLy({ base, path: "/tro_ly/tra_loi", body, fetchImpl: async () => new Response(JSON.stringify({ tra_loi: "Có đây." }), { status: 200 }) }), { noiLai: async () => { base = "https://t2.example"; } });
+  const j2 = await DT.goiCoThuLai(() => DT.goiTroLy({ base, path: "/tro_ly/tra_loi", body, fetchImpl: async () => new Response(JSON.stringify({ tra_loi: "Có đây." }), { status: 200 }) }), { noiLai: async () => { base = "https://t2.example"; }, cho: async () => {} });
   assert.equal(j2.tra_loi, "Có đây.");
   // hết giờ thì không gửi lại (tránh agent trả lời 2 lần)
   let h = 0;
   const hang = (u, o) => { h++; return new Promise((_, rej) => o.signal.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError")))); };
-  const eh = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/x", body, fetchImpl: hang, ms: 20 }), { noiLai: async () => {} }).then(() => null, (x) => x);
+  const eh = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/x", body, fetchImpl: hang, ms: 20 }), { noiLai: async () => {}, cho: async () => {} }).then(() => null, (x) => x);
   assert.equal(h, 1); assert.match(eh.message, /quá lâu/u);
 });
 
@@ -1294,7 +1294,7 @@ test("đào tạo: lưu “Sửa câu này” hỏng → bản Chủ tịch sử
   const mem = new Map(), storage = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, String(v)), removeItem: (k) => mem.delete(k) };
   const body = DT.yeuCauMauSua({ kenh: "02", goi: 3, lich_su: [{ vai: "khach", noi_dung: "Em mệt lắm rồi…" }], ban_agent: "Bản agent", ban_chu_tich: "Bản Chủ tịch sửa", ly_do: "giọng chưa ấm" });
   DT.themHangCho(storage, "m1", body);
-  const hong = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/mau_sua", body, fetchImpl: async () => { throw new TypeError("Failed to fetch"); } }), { noiLai: async () => {} }).then(() => null, (x) => x);
+  const hong = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/mau_sua", body, fetchImpl: async () => { throw new TypeError("Failed to fetch"); } }), { noiLai: async () => {}, cho: async () => {} }).then(() => null, (x) => x);
   assert.ok(hong?.tat);
   assert.equal(DT.docHangCho(storage).length, 1, "lưu hỏng vẫn còn trong hàng chờ");
   assert.equal(DT.docHangCho(storage)[0].body.ban_chu_tich, "Bản Chủ tịch sửa");
@@ -1496,6 +1496,69 @@ test("đào tạo: mỗi tình huống một cuộc — tự hại → câu 115;
   assert.equal(DT.lichSuCuoc([{ vai: "khach", noi_dung: "a" }, { vai: "agent", noi_dung: "b" }, { vai: "khach", noi_dung: "c" }]).length, 3);
   // trang có vạch ngăn “— Cuộc mới: … —”
   assert.match(readFileSync(join(HERE, "dao-tao/dao-tao.js"), "utf8"), /— Cuộc mới: /u);
+});
+
+// ---- Lỗi gấp 28/10 11:39: đường hầm chập chờn — thử lại 4 lần + đọc địa chỉ qua API ----
+test("đào tạo: lỗi mạng 2 lần rồi được → hiện câu trả lời, không báo lỗi; chờ 2 s, 5 s rồi gửi lại; mỗi lần đọc lại địa chỉ", async () => {
+  let lan = 0, doc = 0;
+  const cho = [], bat = [];
+  const j = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body: {}, fetchImpl: async () => { lan++; if (lan <= 2) throw new TypeError("Failed to fetch"); return new Response(JSON.stringify({ tra_loi: "Mình nghe đây." }), { status: 200 }); } }),
+    { noiLai: async () => { doc++; }, onNoiLai: (x) => bat.push(x), cho: async (ms) => { cho.push(ms); } });
+  assert.equal(DT.docTraLoi(j).noi_dung, "Mình nghe đây.");
+  assert.equal(lan, 3); assert.equal(doc, 2, "mỗi lần thử lại đều đọc lại địa chỉ");
+  assert.deepEqual(cho, [2000, 5000]);
+  assert.deepEqual(bat, [{ lan: 1, tong: 4 }, { lan: 2, tong: 4 }, null]);
+  assert.deepEqual(DT.LICH_THU_LAI, [2000, 5000, 10000, 20000]);
+});
+
+test("đào tạo: lỗi mạng 5 lần → báo “cầu nối tắt” sau 4 lần thử lại; AbortError (quá 90 s) → không thử lại, báo “trả lời quá lâu”", async () => {
+  let n = 0;
+  const cho = [];
+  const e = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/tro_ly/tra_loi", body: {}, fetchImpl: async () => { n++; throw new TypeError("Failed to fetch"); } }), { noiLai: async () => {}, cho: async (ms) => { cho.push(ms); } }).then(() => null, (x) => x);
+  assert.equal(n, 5); assert.deepEqual(cho, [2000, 5000, 10000, 20000]);
+  assert.equal(e.message, DT.LOI_CAU_NOI_TAT);
+  let h = 0;
+  const hang = (u, o) => { h++; return new Promise((_, rej) => o.signal.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError")))); };
+  const eh = await DT.goiCoThuLai(() => DT.goiTroLy({ base: "https://t.example", path: "/x", body: {}, fetchImpl: hang, ms: 20 }), { noiLai: async () => {}, cho: async () => {} }).then(() => null, (x) => x);
+  assert.equal(h, 1); assert.match(eh.message, /trả lời quá lâu/u);
+});
+
+test("đào tạo: địa chỉ đường hầm đổi giữa chừng → lần thử sau dùng địa chỉ mới (đọc qua API GitHub, không chờ Pages)", async () => {
+  // máy nhà đổi địa chỉ sau lần gửi đầu: API trả địa chỉ mới, đường hầm cũ đã chết
+  let diaChi = "https://cu.lhr.life";
+  const goi = [];
+  const mang = async (u, o = {}) => {
+    if (u.startsWith("https://api.github.com/")) { assert.equal(o.headers.accept, "application/vnd.github.raw"); assert.equal(o.cache, "no-store"); return new Response(JSON.stringify({ url: diaChi }), { status: 200 }); }
+    if (u.startsWith("https://cu.lhr.life")) { goi.push("cu"); throw new TypeError("Failed to fetch"); }
+    if (u.startsWith("https://moi.lhr.life")) { goi.push("moi"); return new Response(JSON.stringify({ tra_loi: "Qua đường hầm mới." }), { status: 200 }); }
+    throw new TypeError("Failed to fetch");
+  };
+  let base = "https://cu.lhr.life";
+  diaChi = "https://moi.lhr.life";
+  const j = await DT.goiCoThuLai(() => DT.goiTroLy({ base, path: "/tro_ly/tra_loi", body: {}, fetchImpl: mang }), { noiLai: async () => { base = await docDiaChiCauNoi(mang, 200); }, cho: async () => {} });
+  assert.equal(j.tra_loi, "Qua đường hầm mới.");
+  assert.deepEqual(goi, ["cu", "moi"]);
+  // API lỗi/403 hết lượt → dùng bản Pages kèm ?t=
+  const seen = [];
+  const pages = async (u, o) => { seen.push(u); if (u.startsWith("https://api.github.com/")) return new Response('{"message":"API rate limit exceeded"}', { status: 403 }); return new Response(JSON.stringify({ url: "https://pages.lhr.life" }), { status: 200 }); };
+  assert.equal(await docDiaChiCauNoi(pages, 200), "https://pages.lhr.life");
+  assert.match(seen[1], /cau_noi\.json\?t=\d+$/);
+  // cả hai hỏng → ""
+  assert.equal(await docDiaChiCauNoi(async () => { throw new TypeError("x"); }, 50), "");
+  // service worker không giữ cau_noi.json trong bộ nhớ đệm
+  assert.match(readFileSync(join(HERE, "sw.js"), "utf8"), /cau_noi\.json"\)\) return;/);
+});
+
+test("đào tạo: gửi lại chống trùng — mỗi tin một ma_tin, gửi lại dùng đúng mã cũ; lỗi thì tin còn trong ô nhập và có nút Thử lại", () => {
+  const a = DT.taoMaTin(), b = DT.taoMaTin();
+  assert.ok(a && b && a !== b);
+  const body = DT.yeuCauTraLoi({ kenh: "01", goi: 3, cau_con: 2, lich_su: [{ vai: "khach", noi_dung: "x", ma_tin: a }], ma_tin: a });
+  assert.equal(body.ma_tin, a);
+  assert.deepEqual(body.lich_su, [{ vai: "khach", noi_dung: "x" }]);
+  const js = readFileSync(join(HERE, "dao-tao/dao-tao.js"), "utf8");
+  assert.match(js, /data-thu-lai/);
+  assert.match(js, /\$\("tin"\)\.value = m\.noi_dung/);
+  assert.match(js, /lần \$\{noiLaiO\.lan\}\/\$\{noiLaiO\.tong\}/);
 });
 
 export async function run(extra = []) {

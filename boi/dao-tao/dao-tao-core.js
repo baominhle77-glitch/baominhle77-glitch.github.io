@@ -42,8 +42,10 @@ export const CAU_GIU_KHACH = "Bạn đợi mình chút nhé.";
 // Địa chỉ gốc của cầu nối từ via.base (…/gemini) → bỏ đuôi /gemini
 export const goc = (viaBase) => String(viaBase || "").replace(/\/gemini\/?$/, "");
 
-export function yeuCauTraLoi({ kenh, goi, cau_con, lich_su }) {
-  return { kenh: String(kenh), goi: Number(goi) || 0, cau_con: Math.max(0, Number(cau_con) || 0), lich_su: (lich_su || []).filter((m) => m.vai === "khach" || m.vai === "agent").map((m) => ({ vai: m.vai, noi_dung: String(m.noi_dung || "") })) };
+// Mã riêng của một tin khách: gửi lại (sau lỗi mạng) dùng đúng mã cũ để máy nhà trả lại câu đã có, không chạy model lần hai
+export const taoMaTin = () => globalThis.crypto?.randomUUID?.() || `t${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+export function yeuCauTraLoi({ kenh, goi, cau_con, lich_su, ma_tin }) {
+  return { kenh: String(kenh), goi: Number(goi) || 0, cau_con: Math.max(0, Number(cau_con) || 0), ...(ma_tin ? { ma_tin: String(ma_tin) } : {}), lich_su: (lich_su || []).filter((m) => m.vai === "khach" || m.vai === "agent").map((m) => ({ vai: m.vai, noi_dung: String(m.noi_dung || "") })) };
 }
 
 // Trang đào tạo: mỗi lần bấm một tình huống (tin khách có tinh_huong) là một cuộc chat mới. Tin gõ tay sau đó thuộc
@@ -116,17 +118,25 @@ export async function goiTroLy({ fetchImpl = globalThis.fetch, base, token = "",
   return j;
 }
 
-// Lỗi mạng thoáng qua của đường hầm (fetch ném lỗi, không phải hết giờ; hoặc chưa có địa chỉ cầu nối):
-// nối lại (dò lại cầu nối, đọc lại cau_noi.json không cache) rồi gửi lại đúng yêu cầu đó 1 lần. Lần hai hỏng mới báo.
-// goi: hàm gọi lại từ đầu (lấy địa chỉ cầu nối mới nhất mỗi lần). onNoiLai(true/false): bật/tắt dòng “Đang nối lại…”.
-export async function goiCoThuLai(goi, { noiLai, onNoiLai } = {}) {
+// Lỗi mạng của đường hầm (fetch ném lỗi, không phải hết giờ; hoặc chưa có địa chỉ cầu nối): thử lại tối đa 4 lần, chờ
+// 2 s, 5 s, 10 s, 20 s; trước mỗi lần nối lại (dò lại cầu nối, đọc lại địa chỉ đường hầm) rồi gửi lại đúng yêu cầu đó.
+// Hết 4 lần mới báo lỗi. Hết giờ (90 s) hay 429 thì không thử lại.
+// goi: hàm gọi lại từ đầu (lấy địa chỉ mới nhất mỗi lần). onNoiLai({lan, tong}) khi đang nối lại, onNoiLai(null) khi xong.
+export const LICH_THU_LAI = [2000, 5000, 10000, 20000];
+const ngu = (ms) => new Promise((r) => setTimeout(r, ms));
+export async function goiCoThuLai(goi, { noiLai, onNoiLai, lich = LICH_THU_LAI, cho = ngu } = {}) {
   try { return await goi(); } catch (e) {
     if (!e?.mang || !noiLai) throw e;
-    onNoiLai?.(true);
+    let loi = e;
     try {
-      try { await noiLai(); } catch (_) { /* dò hỏng: lần gọi lại sẽ báo lỗi */ }
-      return await goi();
-    } finally { onNoiLai?.(false); }
+      for (let k = 0; k < lich.length; k++) {
+        onNoiLai?.({ lan: k + 1, tong: lich.length });
+        await cho(lich[k]);
+        try { await noiLai(); } catch (_) { /* dò hỏng: lần gọi lại sẽ báo lỗi */ }
+        try { return await goi(); } catch (e2) { loi = e2; if (!e2?.mang) throw e2; }
+      }
+      throw loi;
+    } finally { onNoiLai?.(null); }
   }
 }
 
