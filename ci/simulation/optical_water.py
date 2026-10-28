@@ -57,16 +57,15 @@ class WaterStage:
  def camera(self,t):
   o=self.optics;W,H=self.width,self.height
   # Eased optical motion; no independent x/y resizing of an image panel.
-  k=min(5,int(max(0,t)/3.2));ease=(1-math.cos(math.pi*min(1,max(0,(t-k*3.2)/3.2))))/2
-  elevation=[0,-.080,-.015,-.100,-.030,-.060,-.005]
-  delta=0 if o.lock_elevation else (1-ease)*elevation[k]+ease*elevation[k+1]
-  scale=(1+o.camera_motion*.5*math.sin(t*.52))*(1+o.dolly_amplitude*((k+ease)/3-1))
+  # SUA5: one eased, monotone move per beat (no sin breathing, no alternating pan/tilt/zoom).
+  q=(1-math.cos(math.pi*min(1,max(0,t)/19.2)))/2
+  delta=0 if o.lock_elevation else -.06*q
+  scale=1+o.dolly_amplitude*(q-1)
   progress=(1-math.cos(math.pi*min(1,max(0,t/.9))))/2
   optical_width=o.camera_width if not o.camera_width_start else o.camera_width_start+(o.camera_width-o.camera_width_start)*progress
   rx=W*((.425 if W/H>1.4 else .44) if o.shot=='wide' else .61)*scale*optical_width
   ry=rx*(o.ellipse_ratio+delta)
-  pan=[0,.8,-1.,.7,-.5,1.,-.7]
-  cx=W*(.50+.015*((1-ease)*pan[k]+ease*pan[k+1]));cy=H*(o.camera_y+o.camera_travel_y*(k+ease)/6)+H*.014*math.sin(t*.49)
+  cx=W*(.50+.015*(2*q-1));cy=H*(o.camera_y+o.camera_travel_y*q)
   if o.section:rx=W*.45*optical_width*scale;ry=rx*(o.ellipse_ratio+delta*.6)
   tx,ty=o.target_x,o.target_y
   if o.follow_soap:

@@ -5,7 +5,7 @@ from pathlib import Path
 R = Path(__file__).resolve().parents[1]
 
 SHA = {
-    'ci/simulation/stage_om.py': '27221a575e0a1625d46cb4c5eb138574c6a35ad79e7d69448707f5b78b17423f',
+    'ci/simulation/stage_om.py': '09ebf82754e81c68f77d182490bce3c487eb9f5c7f5240b5fc832a861eef3f86',
     'ci/remotion_b/stage_khuon.py': '68f62d0c4d3d2072c714494a7a305a7acba17dbceddd7b1c8c2c910d7446c419',
     'ci/kiem_ban_ve.py': '2b2a20392e7793769260f82531076017984dac78c1f19c8800db16ce9f2c0f36',
     'ci/g12_vat_chinh.py': '0a2b102a605c55099fb8f4faed22812ba2a4ab68f556898b9db16e734fdc76c4',

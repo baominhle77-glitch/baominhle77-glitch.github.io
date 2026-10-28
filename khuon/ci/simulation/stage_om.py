@@ -147,25 +147,28 @@ class StageOm(WaterStage):
 
     # ---------- camera ----------
     def _tham_so_cam(self, t):
+        # SUA5: nội suy LIÊN TỤC giữa các mốc camera (không dừng-chạy, không đảo chiều nếu mốc đơn điệu);
+        # bản vẽ đặt mốc lấy mẫu từ MỘT đường ease cho cả beat.
         cam = self._cam
-        i = max(j for j in range(len(cam)) if cam[j]['t'] <= max(0.0, t))
-        p = cam[i]
-        if i == 0:
-            return p
-        q = _ease((t - p['t']) / 1.2)  # mỗi lệnh camera chuyển êm trong 1,2 s
-        a = cam[i - 1] if q < 1 else p
-        return {k: a[k] + (p[k] - a[k]) * q for k in ('do_cao', 'lia', 'lia_doc', 'goc')}
+        t = max(0.0, t)
+        i = max(j for j in range(len(cam)) if cam[j]['t'] <= t)
+        a = cam[i]
+        if i + 1 >= len(cam):
+            return a
+        b = cam[i + 1]
+        q = (t - a['t']) / max(1e-9, b['t'] - a['t'])
+        return {k: a[k] + (b[k] - a[k]) * q for k in ('do_cao', 'lia', 'lia_doc', 'goc')}
 
     def camera(self, t):
         W, H, o = self.width, self.height, self.optics
         p = self._tham_so_cam(t)
-        tho = (1 + math.sin(0.9 * t)) / 2
+        tho = 0.0  # SUA5: bỏ camera "thở" hình sin (rung co giãn)
         if self.khung == 'toan':
             cx, cy, rx, ry, _ = giai_khung_toan(W, H, o, p['do_cao'], p['lia'], p['lia_doc'], tho, self.do_cao_max)
             return cx, cy, rx, ry
         # 'can': cửa sổ đặt quanh điểm mép vòng tiêu theo hướng 'goc'
         e = min(DO_CAO_MAX + 0.2, max(DO_CAO_MIN, p['do_cao']))
-        ry = H / (2 * CAN_NUA_CAO) * (1 + 0.01 * math.sin(0.7 * t))
+        ry = H / (2 * CAN_NUA_CAO)  # SUA5: bỏ dao động sin
         rx = ry / e
         hu, hv = W / (2 * rx), H / (2 * ry)
         R = self.ban_kinh_vong(t)

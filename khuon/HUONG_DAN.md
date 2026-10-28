@@ -9,12 +9,12 @@ Lấy từ nhánh `codex-khung`: `git fetch origin codex-khung && git checkout o
 
 | Tệp trong nhánh codex-khung | Đích trong repo | sha256 (nội dung LF) |
 |---|---|---|
-| khuon/ci/simulation/stage_om.py | ci/simulation/stage_om.py | 27221a575e0a1625d46cb4c5eb138574c6a35ad79e7d69448707f5b78b17423f |
+| khuon/ci/simulation/stage_om.py | ci/simulation/stage_om.py | 09ebf82754e81c68f77d182490bce3c487eb9f5c7f5240b5fc832a861eef3f86 |
 | khuon/ci/remotion_b/stage_khuon.py | ci/remotion_b/stage_khuon.py | 68f62d0c4d3d2072c714494a7a305a7acba17dbceddd7b1c8c2c910d7446c419 |
 | khuon/ci/kiem_ban_ve.py | ci/kiem_ban_ve.py | 2b2a20392e7793769260f82531076017984dac78c1f19c8800db16ce9f2c0f36 |
 | khuon/ci/g12_vat_chinh.py | ci/g12_vat_chinh.py | f315da0050c26bf1438a8dbd407edde58d00193d0fc600e64f3d47bd07e10b9c |
 | khuon/ci/khuon_dung_thu.py | ci/khuon_dung_thu.py | 5499d8c937883a2d6c1fe83f4f119ba7ca6f0f89975165f823ce35baf4e8a4e2 |
-| khuon/ci/kiem_khuon_sha.py | ci/kiem_khuon_sha.py | 713c5d75bed4ef7e2dccc47ec62ea2117b083a2ffe3129073542ffb43d760b54 |
+| khuon/ci/kiem_khuon_sha.py | ci/kiem_khuon_sha.py | f30f441975c3aa7783a38d2cd1530f30a0ce933dc560bbf0d8ce677a798b2bb6 |
 | khuon/ci/remotion_b/ban_ve_B60.json | ci/remotion_b/ban_ve_B60.json | 8fc5a345… (BẢN MẪU — Codex sửa, không khoá sha) |
 
 Năm tệp đầu được `ci/kiem_khuon_sha.py` khoá sha. Chỉ thêm tệp mới, không đụng `optical_water.py`, `transport.py`, `views.py`.

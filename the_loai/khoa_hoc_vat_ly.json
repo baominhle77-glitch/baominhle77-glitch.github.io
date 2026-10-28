@@ -1,10 +1,10 @@
 {
   "palette": {
-    "ink": "#1C232B",
-    "primary": "#3F6A9E",
-    "accent": "#D1834F",
-    "light": "#A7ADB3",
-    "background": "#8E969D"
+    "ink": "#05080B",
+    "primary": "#2FA8E0",
+    "accent": "#FF8A2A",
+    "light": "#F2F4F5",
+    "background": "#0B0E12"
   },
   "id": "khoa_hoc_vat_ly",
   "name": "Khoa học vật lý",
@@ -20,5 +20,28 @@
   "real_material_types": [
     "video thí nghiệm có nguồn",
     "clip AI có nhãn"
-  ]
+  ],
+  "canh": {
+    "mo_ta": "SUA5 high-contrast beat pictures: dark neutral ground, saturated objects, 2 px ink outlines, labels white on #0B1016 (>= 4.5:1).",
+    "bang_mau": {
+      "nen": "#0B0E12",
+      "panel": "#17212D",
+      "panel2": "#1F2C3B",
+      "muc": "#05080B",
+      "nuoc": "#2FA8E0",
+      "nuoc_sang": "#8FDCFF",
+      "tieu": "#3B2416",
+      "tieu_vien": "#E0B07A",
+      "vanh": "#F2F4F5",
+      "cam": "#FF8A2A",
+      "vang": "#FFD23F",
+      "do": "#E8434F",
+      "tim": "#B36BFF",
+      "xanh_la": "#3DDC84",
+      "ruou": "#9E1B32",
+      "caustic": "#5FCBFF",
+      "nhan_nen": "#0B1016",
+      "nhan_chu": "#FFFFFF"
+    }
+  }
 }

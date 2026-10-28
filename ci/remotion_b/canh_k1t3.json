@@ -1,0 +1,1418 @@
+{
+ "phien_ban": "sua5-v1",
+ "mo_ta": "One distinct labelled picture per beat (complaints 1-4). Topic content only; renderer is ci/simulation/canh_beat.py.",
+ "bang_mau": "the_loai/khoa_hoc_vat_ly.json#canh",
+ "tranh": {
+  "b1": {
+   "16x9": [
+    0.65,
+    0.18,
+    0.3,
+    0.14
+   ],
+   "9x16": [
+    0.55,
+    0.46,
+    0.4,
+    0.09
+   ]
+  }
+ },
+ "su_kien": {
+  "v_dinh": {
+   "gia_tri": "0.5",
+   "don_vi": "m/s",
+   "noi": [
+    "half a metre per second"
+   ],
+   "nguon": "Roche et al., PRL 112, 208302 (2014): measured peak surface speed"
+  },
+  "R_vung": {
+   "gia_tri": "15",
+   "don_vi": "mm",
+   "noi": [
+    "fifteen millimetres"
+   ],
+   "nguon": "Roche et al. 2014: clear-zone radius estimate used in w2/w5"
+  },
+  "gap": {
+   "gia_tri": "36",
+   "don_vi": "mN/m",
+   "noi": [
+    "thirty six millinewtons per metre"
+   ],
+   "nguon": "calculated: water vs SDS 25 mM at 25 C (beats h4, w2)"
+  },
+  "lop_nuoc": {
+   "gia_tri": "1",
+   "don_vi": "cm",
+   "noi": [
+    "centimetre-thick"
+   ],
+   "nguon": "Roche et al. 2014: centimetre-thick ultrapure water layers"
+  },
+  "cmc_sds": {
+   "gia_tri": "8.23",
+   "don_vi": "mM",
+   "noi": [
+    "eight point two three"
+   ],
+   "nguon": "measured SDS CMC at 25 C, no salt (beat p3)"
+  },
+  "giot_ve": {
+   "gia_tri": "5",
+   "don_vi": "tears",
+   "noi": [],
+   "nguon": "drawn count: five tears animated in this picture"
+  }
+ },
+ "beats": {
+  "h1": {
+   "chinh": {
+    "kieu": "bat_tren",
+    "mode": "giot"
+   },
+   "phu": {
+    "kieu": "ba_vung"
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.08
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "h1-n1",
+     "chu": "1 drop",
+     "gia_tri": "1",
+     "don_vi": "drop",
+     "thuat_ngu": "drop",
+     "neo": "tam",
+     "noi": [
+      "one drop"
+     ]
+    }
+   ]
+  },
+  "h2": {
+   "chinh": {
+    "kieu": "mat_cat",
+    "mode": "dong"
+   },
+   "phu": {
+    "kieu": "bat_tren",
+    "mode": "chay",
+    "r": 0.5
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     -0.025,
+     0
+    ],
+    "den": [
+     0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "h2-n1",
+     "chu": "surface up to 0.5 m/s",
+     "gia_tri": "0.5",
+     "don_vi": "m/s",
+     "thuat_ngu": "surface",
+     "neo": "lop",
+     "noi": [
+      "half a metre per second"
+     ]
+    }
+   ]
+  },
+  "h3": {
+   "chinh": {
+    "kieu": "bat_tren",
+    "mode": "kim",
+    "r": 0.5
+   },
+   "phu": {
+    "kieu": "mep_vong"
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.06
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "h3-n1",
+     "chu": "ring R ~15 mm",
+     "gia_tri": "15",
+     "don_vi": "mm",
+     "thuat_ngu": "ring",
+     "neo": "vong",
+     "su_kien": "R_vung"
+    }
+   ]
+  },
+  "h4": {
+   "chinh": {
+    "kieu": "cot_so",
+    "cot": [
+     72,
+     36
+    ],
+    "khoang": [
+     0,
+     1
+    ]
+   },
+   "phu": {
+    "kieu": "kim_bom"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     0.025,
+     0
+    ],
+    "den": [
+     -0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "h4-n1",
+     "chu": "gap 36 mN/m",
+     "gia_tri": "36",
+     "don_vi": "mN/m",
+     "thuat_ngu": "gap",
+     "neo": "khoang",
+     "noi": [
+      "thirty six millinewtons per metre"
+     ]
+    },
+    {
+     "id": "h4-n2",
+     "chu": "SDS 25 mM",
+     "gia_tri": "25",
+     "don_vi": "mM",
+     "thuat_ngu": "SDS",
+     "neo": "cot1",
+     "noi": [
+      "twenty five millimolar"
+     ]
+    },
+    {
+     "id": "h4-n3",
+     "chu": "water 25 °C",
+     "gia_tri": "25",
+     "don_vi": "°C",
+     "thuat_ngu": "degrees",
+     "neo": "cot0",
+     "noi": [
+      "twenty five degrees"
+     ]
+    }
+   ]
+  },
+  "c1": {
+   "chinh": {
+    "kieu": "keo_mat"
+   },
+   "phu": {
+    "kieu": "ba_vung"
+   },
+   "camera": {
+    "kieu": "dung"
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "c1-n1",
+     "chu": "pull gap 36 mN/m",
+     "gia_tri": "36",
+     "don_vi": "mN/m",
+     "thuat_ngu": "pull",
+     "neo": "bien",
+     "su_kien": "gap"
+    }
+   ]
+  },
+  "p1": {
+   "chinh": {
+    "kieu": "mat_cat",
+    "mode": "dong"
+   },
+   "phu": {
+    "kieu": "bat_tren",
+    "mode": "chay",
+    "r": 0.5
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.08
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "p1-n1",
+     "chu": "surface up to 0.5 m/s",
+     "gia_tri": "0.5",
+     "don_vi": "m/s",
+     "thuat_ngu": "surface",
+     "neo": "mat",
+     "su_kien": "v_dinh"
+    }
+   ]
+  },
+  "p2": {
+   "chinh": {
+    "kieu": "kim_bom"
+   },
+   "phu": {
+    "kieu": "mat_cat",
+    "mode": "vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     -0.025,
+     0
+    ],
+    "den": [
+     0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "p2-n1",
+     "chu": "layer 1 cm",
+     "gia_tri": "1",
+     "don_vi": "cm",
+     "thuat_ngu": "layers",
+     "neo": "lop",
+     "su_kien": "lop_nuoc"
+    },
+    {
+     "id": "p2-n2",
+     "chu": "oil drops 10 µm",
+     "gia_tri": "10",
+     "don_vi": "µm",
+     "thuat_ngu": "droplets",
+     "neo": "giot",
+     "noi": [
+      "ten micrometres"
+     ]
+    },
+    {
+     "id": "p2-n3",
+     "chu": "water 18.2 MΩ·cm",
+     "gia_tri": "18.2",
+     "don_vi": "MΩ·cm",
+     "thuat_ngu": "ultrapure water",
+     "neo": "nuoc",
+     "noi": [
+      "eighteen point two"
+     ]
+    }
+   ]
+  },
+  "p3": {
+   "chinh": {
+    "kieu": "cot_so",
+    "cot": [
+     0.9,
+     1.6,
+     2.6,
+     4.2,
+     8.23,
+     14,
+     40,
+     80
+    ],
+    "log": true,
+    "noi": [
+     4
+    ],
+    "mau": "xanh_la"
+   },
+   "phu": {
+    "kieu": "bat_tren",
+    "mode": "chay",
+    "r": 0.5
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.06
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "p3-n1",
+     "chu": "8 surfactants",
+     "gia_tri": "8",
+     "don_vi": "surfactants",
+     "thuat_ngu": "surfactants",
+     "neo": "cot1",
+     "noi": [
+      "eight surfactants"
+     ]
+    },
+    {
+     "id": "p3-n2",
+     "chu": "SDS 8.23 mM",
+     "gia_tri": "8.23",
+     "don_vi": "mM",
+     "thuat_ngu": "SDS",
+     "neo": "cot4",
+     "noi": [
+      "eight point two three"
+     ]
+    },
+    {
+     "id": "p3-n3",
+     "chu": "99 % pure",
+     "gia_tri": "99",
+     "don_vi": "%",
+     "thuat_ngu": "pure",
+     "neo": "cot7",
+     "noi": [
+      "ninety nine per cent"
+     ]
+    }
+   ]
+  },
+  "p4": {
+   "chinh": {
+    "kieu": "phan_tu",
+    "mode": "cmc"
+   },
+   "phu": {
+    "kieu": "mep_vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     0.025,
+     0
+    ],
+    "den": [
+     -0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "p4-n1",
+     "chu": "SDS CMC 8.23 mM",
+     "gia_tri": "8.23",
+     "don_vi": "mM",
+     "thuat_ngu": "threshold",
+     "neo": "mixen",
+     "su_kien": "cmc_sds"
+    }
+   ]
+  },
+  "p5": {
+   "chinh": {
+    "kieu": "can_bang"
+   },
+   "phu": {
+    "kieu": "kim_bom"
+   },
+   "camera": {
+    "kieu": "dung"
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "p5-n1",
+     "chu": "gap 36 mN/m",
+     "gia_tri": "36",
+     "don_vi": "mN/m",
+     "thuat_ngu": "gap",
+     "neo": "trai",
+     "su_kien": "gap"
+    },
+    {
+     "id": "p5-n2",
+     "chu": "patch R 15 mm",
+     "gia_tri": "15",
+     "don_vi": "mm",
+     "thuat_ngu": "patch radius",
+     "neo": "phai",
+     "su_kien": "R_vung"
+    }
+   ]
+  },
+  "p6": {
+   "chinh": {
+    "kieu": "bat_tren",
+    "mode": "vong",
+    "r": 0.35
+   },
+   "phu": {
+    "kieu": "ba_vung"
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.08
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "p6-n1",
+     "chu": "surface ~0.5 m/s",
+     "gia_tri": "0.5",
+     "don_vi": "m/s",
+     "thuat_ngu": "surface",
+     "neo": "hat",
+     "su_kien": "v_dinh"
+    }
+   ]
+  },
+  "c2": {
+   "chinh": {
+    "kieu": "ba_vung"
+   },
+   "phu": {
+    "kieu": "mat_cat",
+    "mode": "vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     -0.025,
+     0
+    ],
+    "den": [
+     0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "c2-n1",
+     "chu": "3 zones",
+     "gia_tri": "3",
+     "don_vi": "zones",
+     "thuat_ngu": "zones",
+     "neo": "trong",
+     "noi": [
+      "three zones"
+     ]
+    }
+   ]
+  },
+  "v1": {
+   "chinh": {
+    "kieu": "bat_tren",
+    "mode": "chay",
+    "r": 0.5
+   },
+   "phu": {
+    "kieu": "mep_vong"
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.06
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "v1-n1",
+     "chu": "clear zone R ~15 mm",
+     "gia_tri": "15",
+     "don_vi": "mm",
+     "thuat_ngu": "clear zone",
+     "neo": "vong",
+     "su_kien": "R_vung"
+    }
+   ]
+  },
+  "v2": {
+   "chinh": {
+    "kieu": "do_thi",
+    "ham": "v_r"
+   },
+   "phu": {
+    "kieu": "kim_bom"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     0.025,
+     0
+    ],
+    "den": [
+     -0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "v2-n1",
+     "chu": "near needle 1 cm/s",
+     "gia_tri": "1",
+     "don_vi": "cm/s",
+     "thuat_ngu": "needle",
+     "neo": "dau",
+     "noi": [
+      "one centimetre per second"
+     ]
+    },
+    {
+     "id": "v2-n2",
+     "chu": "peak 0.5 m/s",
+     "gia_tri": "0.5",
+     "don_vi": "m/s",
+     "thuat_ngu": "peak",
+     "neo": "dinh",
+     "noi": [
+      "half a metre per second"
+     ]
+    }
+   ]
+  },
+  "v3": {
+   "chinh": {
+    "kieu": "mep_vong"
+   },
+   "phu": {
+    "kieu": "ba_vung"
+   },
+   "camera": {
+    "kieu": "dung"
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "v3-n1",
+     "chu": "edge R ~15 mm",
+     "gia_tri": "15",
+     "don_vi": "mm",
+     "thuat_ngu": "edge",
+     "neo": "mep",
+     "su_kien": "R_vung"
+    }
+   ]
+  },
+  "v4": {
+   "chinh": {
+    "kieu": "mat_cat",
+    "mode": "vong"
+   },
+   "phu": {
+    "kieu": "bat_tren",
+    "mode": "chay",
+    "r": 0.5
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.08
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "v4-n1",
+     "chu": "water depth 1 cm",
+     "gia_tri": "1",
+     "don_vi": "cm",
+     "thuat_ngu": "bottom",
+     "neo": "sau",
+     "su_kien": "lop_nuoc"
+    }
+   ]
+  },
+  "v5": {
+   "chinh": {
+    "kieu": "do_thi",
+    "ham": "phang"
+   },
+   "phu": {
+    "kieu": "mat_cat",
+    "mode": "vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     -0.025,
+     0
+    ],
+    "den": [
+     0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "v5-n1",
+     "chu": "velocity ~0.5 m/s",
+     "gia_tri": "0.5",
+     "don_vi": "m/s",
+     "thuat_ngu": "velocity",
+     "neo": "diem",
+     "su_kien": "v_dinh"
+    }
+   ]
+  },
+  "v6": {
+   "chinh": {
+    "kieu": "cot_so",
+    "cot": [
+     1,
+     100
+    ],
+    "log": true,
+    "mau": "tim"
+   },
+   "phu": {
+    "kieu": "bat_tren",
+    "mode": "chay",
+    "r": 0.5
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.06
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "v6-n1",
+     "chu": "tail carbons ×2",
+     "gia_tri": "2",
+     "don_vi": "carbon atoms",
+     "thuat_ngu": "carbon atoms",
+     "neo": "cot0",
+     "noi": [
+      "double the number"
+     ]
+    },
+    {
+     "id": "v6-n2",
+     "chu": "zone radius ×100",
+     "gia_tri": "100",
+     "don_vi": "× radius",
+     "thuat_ngu": "radius",
+     "neo": "cot1",
+     "noi": [
+      "two orders of magnitude"
+     ]
+    }
+   ]
+  },
+  "v7": {
+   "chinh": {
+    "kieu": "phan_tu",
+    "mode": "dau"
+   },
+   "phu": {
+    "kieu": "mep_vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     0.025,
+     0
+    ],
+    "den": [
+     -0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "v7-n1",
+     "chu": "12 C tail",
+     "gia_tri": "12",
+     "don_vi": "C atoms",
+     "thuat_ngu": "tail",
+     "neo": "duoi",
+     "noi": [
+      "twelve carbon tail"
+     ]
+    }
+   ]
+  },
+  "c3": {
+   "chinh": {
+    "kieu": "mat_cat",
+    "mode": "nhay"
+   },
+   "phu": {
+    "kieu": "kim_bom"
+   },
+   "camera": {
+    "kieu": "dung"
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "c3-n1",
+     "chu": "ring R ~15 mm",
+     "gia_tri": "15",
+     "don_vi": "mm",
+     "thuat_ngu": "ring",
+     "neo": "phan_tu",
+     "su_kien": "R_vung"
+    }
+   ]
+  },
+  "w1": {
+   "chinh": {
+    "kieu": "do_thi",
+    "ham": "xa_phong"
+   },
+   "phu": {
+    "kieu": "ba_vung"
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.08
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "w1-n1",
+     "chu": "ring R 15 mm",
+     "gia_tri": "15",
+     "don_vi": "mm",
+     "thuat_ngu": "ring",
+     "neo": "R",
+     "su_kien": "R_vung"
+    }
+   ]
+  },
+  "w2": {
+   "chinh": {
+    "kieu": "cong_thuc"
+   },
+   "phu": {
+    "kieu": "mat_cat",
+    "mode": "vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     -0.025,
+     0
+    ],
+    "den": [
+     0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "w2-n1",
+     "chu": "Δγ 36 mN/m",
+     "gia_tri": "36",
+     "don_vi": "mN/m",
+     "thuat_ngu": "gap",
+     "neo": "vao_gap",
+     "noi": [
+      "thirty six millinewtons per metre"
+     ]
+    },
+    {
+     "id": "w2-n2",
+     "chu": "patch 15 mm",
+     "gia_tri": "15",
+     "don_vi": "mm",
+     "thuat_ngu": "patch",
+     "neo": "vao_R",
+     "noi": [
+      "fifteen millimetres"
+     ]
+    },
+    {
+     "id": "w2-n3",
+     "chu": "U 0.46 m/s",
+     "gia_tri": "0.46",
+     "don_vi": "m/s",
+     "thuat_ngu": "speed",
+     "neo": "ra",
+     "noi": [
+      "zero point four six"
+     ]
+    }
+   ]
+  },
+  "w3": {
+   "chinh": {
+    "kieu": "mat_cat",
+    "mode": "mong"
+   },
+   "phu": {
+    "kieu": "bat_tren",
+    "mode": "chay",
+    "r": 0.5
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.06
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "w3-n1",
+     "chu": "moving layer 0.17 mm",
+     "gia_tri": "0.17",
+     "don_vi": "mm",
+     "thuat_ngu": "moving layer",
+     "neo": "lop",
+     "noi": [
+      "zero point one seven"
+     ]
+    }
+   ]
+  },
+  "w4": {
+   "chinh": {
+    "kieu": "lop"
+   },
+   "phu": {
+    "kieu": "mep_vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     0.025,
+     0
+    ],
+    "den": [
+     -0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "w4-n1",
+     "chu": "Sc ~10 000",
+     "gia_tri": "10000",
+     "don_vi": "Sc",
+     "thuat_ngu": "Schmidt number",
+     "neo": "dong_luong",
+     "noi": [
+      "ten thousand"
+     ]
+    },
+    {
+     "id": "w4-n2",
+     "chu": "soap layer 1/100",
+     "gia_tri": "100",
+     "don_vi": "× thinner",
+     "thuat_ngu": "soap layer",
+     "neo": "chat_tan",
+     "noi": [
+      "a hundred times thinner"
+     ]
+    }
+   ]
+  },
+  "w5": {
+   "chinh": {
+    "kieu": "do_thi",
+    "ham": "mu34"
+   },
+   "phu": {
+    "kieu": "kim_bom"
+   },
+   "camera": {
+    "kieu": "dung"
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "w5-n1",
+     "chu": "pumping ×2: ring ×1.68",
+     "gia_tri": "1.68",
+     "don_vi": "× radius",
+     "thuat_ngu": "pumping",
+     "neo": "R",
+     "noi": [
+      "one point six eight"
+     ]
+    },
+    {
+     "id": "w5-n2",
+     "chu": "CMC 10 mM: R 15 mm",
+     "gia_tri": "15",
+     "don_vi": "mm",
+     "thuat_ngu": "threshold",
+     "neo": "diem",
+     "noi": [
+      "fifteen millimetres"
+     ]
+    }
+   ]
+  },
+  "w6": {
+   "chinh": {
+    "kieu": "kim_bom",
+    "mode": "dau"
+   },
+   "phu": {
+    "kieu": "ba_vung"
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.08
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "w6-n1",
+     "chu": "meniscus ~1 mm",
+     "gia_tri": "1",
+     "don_vi": "mm",
+     "thuat_ngu": "meniscus",
+     "neo": "men",
+     "noi": [
+      "millimetre long"
+     ]
+    }
+   ]
+  },
+  "w7": {
+   "chinh": {
+    "kieu": "bat_tren",
+    "mode": "vong",
+    "r": 0.55
+   },
+   "phu": {
+    "kieu": "mat_cat",
+    "mode": "vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     -0.025,
+     0
+    ],
+    "den": [
+     0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "w7-n1",
+     "chu": "ring R ~15 mm",
+     "gia_tri": "15",
+     "don_vi": "mm",
+     "thuat_ngu": "ring",
+     "neo": "vong",
+     "su_kien": "R_vung"
+    }
+   ]
+  },
+  "b1": {
+   "chinh": {
+    "kieu": "the_so",
+    "n": 3
+   },
+   "phu": {
+    "kieu": "bat_tren",
+    "mode": "chay",
+    "r": 0.5
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.06
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "b1-n1",
+     "chu": "3 kinds of numbers",
+     "gia_tri": "3",
+     "don_vi": "kinds",
+     "thuat_ngu": "numbers",
+     "neo": "the0",
+     "noi": [
+      "three kinds"
+     ]
+    }
+   ]
+  },
+  "r1": {
+   "chinh": {
+    "kieu": "do_thi",
+    "ham": "log_v"
+   },
+   "phu": {
+    "kieu": "mep_vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     0.025,
+     0
+    ],
+    "den": [
+     -0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "r1-n1",
+     "chu": "from 1 cm/s",
+     "gia_tri": "1",
+     "don_vi": "cm/s",
+     "thuat_ngu": "needle",
+     "neo": "dau",
+     "noi": [
+      "one centimetre per second"
+     ]
+    },
+    {
+     "id": "r1-n2",
+     "chu": "peak 0.5 m/s",
+     "gia_tri": "0.5",
+     "don_vi": "m/s",
+     "thuat_ngu": "peak",
+     "neo": "dinh",
+     "noi": [
+      "half a metre per second"
+     ]
+    }
+   ]
+  },
+  "r2": {
+   "chinh": {
+    "kieu": "cong_thuc",
+    "mode": "chuoi",
+    "nut": 5
+   },
+   "phu": {
+    "kieu": "kim_bom"
+   },
+   "camera": {
+    "kieu": "dung"
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "r2-n1",
+     "chu": "36 mN/m",
+     "gia_tri": "36",
+     "don_vi": "mN/m",
+     "thuat_ngu": "pull gap",
+     "neo": "n0",
+     "noi": [
+      "thirty six millinewtons per metre"
+     ]
+    },
+    {
+     "id": "r2-n2",
+     "chu": "0.46 m/s",
+     "gia_tri": "0.46",
+     "don_vi": "m/s",
+     "thuat_ngu": "surface speed",
+     "neo": "n1",
+     "noi": [
+      "zero point four six"
+     ]
+    },
+    {
+     "id": "r2-n3",
+     "chu": "0.17 mm",
+     "gia_tri": "0.17",
+     "don_vi": "mm",
+     "thuat_ngu": "moving layer",
+     "neo": "n2",
+     "noi": [
+      "zero point one seven"
+     ]
+    }
+   ]
+  },
+  "r3": {
+   "chinh": {
+    "kieu": "the_so",
+    "n": 3
+   },
+   "phu": {
+    "kieu": "ba_vung"
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.08
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "r3-n1",
+     "chu": "SDS 25 mM",
+     "gia_tri": "25",
+     "don_vi": "mM",
+     "thuat_ngu": "SDS",
+     "neo": "the0",
+     "noi": [
+      "twenty five millimolar"
+     ]
+    },
+    {
+     "id": "r3-n2",
+     "chu": "CMC 10 mM",
+     "gia_tri": "10",
+     "don_vi": "mM",
+     "thuat_ngu": "threshold",
+     "neo": "the2",
+     "noi": [
+      "ten millimolar"
+     ]
+    }
+   ]
+  },
+  "r4": {
+   "chinh": {
+    "kieu": "bat_tren",
+    "mode": "giot",
+    "dx": -0.02
+   },
+   "phu": {
+    "kieu": "mat_cat",
+    "mode": "vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     -0.025,
+     0
+    ],
+    "den": [
+     0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "r4-n1",
+     "chu": "1 drop, no pump",
+     "gia_tri": "1",
+     "don_vi": "drop",
+     "thuat_ngu": "drop",
+     "neo": "tam",
+     "noi": [
+      "one drop"
+     ]
+    }
+   ]
+  },
+  "s8": {
+   "chinh": {
+    "kieu": "mat_cat",
+    "mode": "men"
+   },
+   "phu": {
+    "kieu": "bat_tren",
+    "mode": "chay",
+    "r": 0.5
+   },
+   "camera": {
+    "kieu": "dolly",
+    "tu": 1.0,
+    "den": 1.06
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "s8-n1",
+     "chu": "2.73 mm at 20 °C",
+     "gia_tri": "2.73",
+     "don_vi": "mm",
+     "thuat_ngu": "capillary length",
+     "neo": "men",
+     "noi": [
+      "two point seven three"
+     ]
+    },
+    {
+     "id": "s8-n2",
+     "chu": "gap 36 mN/m",
+     "gia_tri": "36",
+     "don_vi": "mN/m",
+     "thuat_ngu": "gap",
+     "neo": "mat",
+     "noi": [
+      "thirty six millinewtons per metre"
+     ]
+    }
+   ]
+  },
+  "k1": {
+   "chinh": {
+    "kieu": "bat_tren",
+    "mode": "giot",
+    "dx": 0.02
+   },
+   "phu": {
+    "kieu": "mep_vong"
+   },
+   "camera": {
+    "kieu": "lia",
+    "zoom": 1.06,
+    "tu": [
+     0.025,
+     0
+    ],
+    "den": [
+     -0.025,
+     0
+    ]
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "k1-n1",
+     "chu": "1 drop",
+     "gia_tri": "1",
+     "don_vi": "drop",
+     "thuat_ngu": "drop",
+     "neo": "tam",
+     "noi": [
+      "one drop"
+     ]
+    }
+   ]
+  },
+  "k2": {
+   "chinh": {
+    "kieu": "ly_ruou"
+   },
+   "phu": {
+    "kieu": "kim_bom"
+   },
+   "camera": {
+    "kieu": "dung"
+   },
+   "camera_phu": {
+    "kieu": "dung"
+   },
+   "nhan": [
+    {
+     "id": "k2-n1",
+     "chu": "5 tears",
+     "gia_tri": "5",
+     "don_vi": "tears",
+     "thuat_ngu": "tears",
+     "neo": "giot_le",
+     "su_kien": "giot_ve"
+    }
+   ]
+  }
+ }
+}

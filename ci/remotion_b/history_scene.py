@@ -25,5 +25,5 @@ class HistoryProof(MovingCameraScene):
     x=((phase[i]+t*(.09+.015*(i%3)))%1-.5)*W*.86;y=lanes[i]*H+.13*math.sin(t+i);u.move_to(center+[x,y,0])
    extent=.08+.84*smooth((t%4)/4);route.set_points_smoothly([center+[W*(-.3+extent*q),H*(-.3+.5*extent*q),0] for q in np.linspace(0,1,30)])
    frontier.set_points_smoothly([center+[W*(-.40+.80*min(1,t/20)+.035*math.sin(y*8+t*.5)),H*y,0] for y in np.linspace(-.46,.46,60)])
-   key=int(t/3.6);u=smooth((t-key*3.6)/3.6);pan=(.30 if DOC else .55)*(math.sin(key*1.1)*(1-u)+math.sin((key+1)*1.1)*u);self.camera.frame.set(width=config.frame_width*(1.06+.025*math.cos(t*.8))).move_to([pan,.03*math.sin(t*.6),0])
+   pan=(.30 if DOC else .55)*(2*smooth(min(1.,t/20.))-1);self.camera.frame.set(width=config.frame_width*1.06).move_to([pan,0,0])  # SUA5: lia một chiều có ease, bỏ zoom/lia sin
   world=VGroup(*self.mobjects);self.clear();self.add(world);world.add_updater(update);self.wait(20,frozen_frame=False)

@@ -20,7 +20,7 @@ class DiffusionStage:
   self.optics=Optics(pepper_count=0,vessel='optical glass cell',ellipse_ratio=.5 if chemical else .3)
  def frame(self,t):
   W,H=self.width,self.height;x,y=self.x,self.y
-  panx=.009*W*math.sin(t*.7);pany=.009*H*math.cos(t*.6)
+  q=(1-math.cos(math.pi*min(1.,t/20.)))/2;panx=.009*W*(2*q-1);pany=0.  # SUA5: lia một chiều có ease, bỏ sin
   left,right=.055*W+panx,.945*W+panx;top,bottom=.085*H+pany,.915*H+pany
   u=(x-left)/(right-left);v=(y-top)/(bottom-top)
   light=148+30*(1-x/W)+25*(1-y/H)+3*np.sin(x*.04+y*.01)
