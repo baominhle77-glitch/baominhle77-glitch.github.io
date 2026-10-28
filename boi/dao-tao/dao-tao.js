@@ -71,11 +71,14 @@ function veNutTrai() {
 }
 function veTin(m, i) {
   if (m.vai === "he_thong") return `<p class="loi-he" role="alert">⚠ ${esc(m.noi_dung)}</p>`;
+  // ghi chú chỉ cho trang đào tạo (không gửi agent, không gửi khách)
+  if (m.vai === "ghi_chu") return `<p class="note ghi-chu">ℹ ${esc(m.noi_dung)}</p>`;
   if (m.vai === "khach") return `<div class="msg user"><div class="who">Khách${m.tinh_huong ? ` · ${esc(th(m.tinh_huong)?.ten || "")}` : ""}</div>${m.noi_dung.split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}${noiLaiO === i ? `<p class="note noi-lai" role="status">${DANG_NOI_LAI}</p>` : ""}</div>`;
   const nhan = [
     m.chuyen_nguoi ? `<span class="nhan chuyen">${NHAN_CHUYEN}</span>${m.ly_do ? ` <span class="note">${esc(m.ly_do)}</span>` : ""}` : "",
     m.bi_chan?.length ? `<span class="nhan chan">BỊ CHẶN: ${esc(m.bi_chan.join(", "))}</span>` : "",
-    m.loai === "loi_gui_khach" ? `<span class="nhan lgk">Lời gửi khách · mã ${esc((m.ma_khoa || "").slice(0, 10))}</span>` : "",
+    m.loai === "loi_gui_khach" ? `<span class="nhan lgk">Lời gửi khách · mã ${esc((m.ma_khoa || "").slice(0, 10))}</span>${m.cau_hoi ? ` <span class="note">cho câu “${esc(m.cau_hoi)}”</span>` : ""}` : "",
+    m.loai === "hoi_lai" ? `<span class="nhan lgk">Chưa trải — hỏi lại khách</span>${m.ly_do_hoi_lai ? ` <span class="note">${esc(m.ly_do_hoi_lai)}</span>` : ""}` : "",
   ].filter(Boolean).join(" ");
   // chỉ hiện ở trang đào tạo, không nằm trong lời gửi khách
   const chon = m.loai === "loi_gui_khach" && m.ten_trai ? `<p class="note chon-trai">Agent chọn: ${esc(m.ten_trai)}${m.ly_do_trai ? ` — ${esc(m.ly_do_trai)}` : ""}</p>` : "";
@@ -125,6 +128,8 @@ async function guiTin(text) {
   } finally { dangGui = false; }
 }
 
+// Trải theo gói: chốt câu hỏi thật trước (lời gọi/hỏi shop → hỏi lại khách; hoàn tiền/tự hại → chuyển Chủ tịch),
+// gói còn N câu thì chỉ trải N câu đầu, câu thừa ghi chú ở trang này (không gửi khách)
 async function traiBai() {
   const iKhach = st.lich_su.map((m) => m.vai).lastIndexOf("khach");
   const q = st.lich_su[iKhach]?.noi_dung;
@@ -132,11 +137,19 @@ async function traiBai() {
   const b = $("traiBai");
   b.disabled = true; b.textContent = "Đang trải bài…";
   try {
-    const r = await coThuLai(() => auto.giai(q), iKhach);
-    const k = kiemTraLoiAgent(r.loiGuiKhach);
-    st.lich_su.push({ vai: "agent", noi_dung: r.loiGuiKhach, loai: "loi_gui_khach", ma_khoa: r.maKhoa, ten_trai: r.tenTrai, ly_do_trai: r.lyDoTrai, ...(k.ok ? {} : { bi_chan: k.loi }) });
-    st.cau_con = Math.max(0, Number(st.cau_con) - 1);
-    $("cauCon").value = st.cau_con;
+    const soCau = Math.max(0, Number(st.cau_con) || 0);
+    const r = await coThuLai(() => auto.giaiGoi(q, { soCau }), iKhach);
+    if (r.chuyenNguoi) st.lich_su.push({ vai: "agent", noi_dung: r.loiGuiKhach, chuyen_nguoi: true, ly_do: r.lyDo });
+    else if (r.canHoiLai) st.lich_su.push({ vai: "agent", noi_dung: r.loiGuiKhach, loai: "hoi_lai", ly_do_hoi_lai: r.lyDo });
+    else {
+      for (const c of r.cau) {
+        const k = kiemTraLoiAgent(c.loiGuiKhach);
+        st.lich_su.push({ vai: "agent", noi_dung: c.loiGuiKhach, loai: "loi_gui_khach", ma_khoa: c.maKhoa, ten_trai: c.tenTrai, ly_do_trai: c.lyDoTrai, ...(r.cau.length > 1 ? { cau_hoi: c.cauHoi } : {}), ...(k.ok ? {} : { bi_chan: k.loi }) });
+      }
+      st.cau_con = Math.max(0, soCau - r.cau.length);
+      $("cauCon").value = st.cau_con;
+      if (r.thua.length) st.lich_su.push({ vai: "ghi_chu", noi_dung: `Khách gửi ${r.cau.length + r.thua.length} câu, gói còn ${soCau} câu: chỉ trải ${r.cau.length} câu đầu. Chưa trải: ${r.thua.map((x) => `“${x}”`).join("; ")}.` });
+    }
     luu(); veChat();
   } catch (e) { baoLoi(`Chưa trải được bài: ${e.message}`); }
   finally { b.disabled = false; b.textContent = "✦ Trải bài cho câu khách vừa hỏi"; }

@@ -4,7 +4,7 @@
 // câu nào xong câu đó, mỗi câu một kết quả độc lập.
 import { createSession, addPickedRound, ensureMapping } from "./state.js";
 import { spreadById, SPREADS, defaultYear } from "./spreads.js";
-import { suggestSpread } from "./topic.js";
+import { suggestSpread, detectTopics } from "./topic.js";
 import { analyze } from "./insight.js";
 import { chotLoiGuiKhach } from "./loi.js";
 import { goiCoDau, SYSTEM_READING, readingRequest, partialJSON, normalizeReading, phanLoaiLoiAI, LOCAL_KEY } from "./ai.js";
@@ -19,6 +19,59 @@ export function viTriNgauNhien(n, k, rand = globalThis.crypto) {
     if (buf[0] < limit) out.add((buf[0] % n) + 1);
   }
   return [...out];
+}
+
+// ---------- Chốt câu hỏi thật của khách trước khi trải (lệnh 28/10, mẫu sửa số 3) ----------
+// Không trải: lời gọi/giục ("ai à", "alo", "ok", "?", "shop ơi"), dưới 4 từ mà không có chủ đề, hỏi về shop/AI/giá,
+// tâm sự chưa thành câu hỏi. Đòi hoàn tiền và ý tự hại thì không trải mà chuyển Chủ tịch (như trang đào tạo).
+export const HOI_LAI = "Câu hỏi bạn muốn hỏi là gì ạ? Bạn viết rõ giúp shop";
+export const CAU_GIU = "Bạn đợi mình chút nhé.";
+const RE_GOI = /^(?:(?:ai|ad|admin|shop|chị|anh|em|bạn|bé|cô|chú|mọi người|có ai|ai đó)(?: ơi| à| ạ| đâu| không| hả| đó)*|alo+|a lô|al+o|ok+|oke+|okay|okie|ừ+|ừm+|uh+|ờ+|dạ+|vâng|ạ|hello|helo|hi|hey|chào(?: shop| chị| anh| bạn| em)?|xin chào|hihi+|haha+|hehe+|nhanh lên|lẹ lên|nhanh nha|sao rồi|rồi sao|thế nào rồi|ai vậy|ai thế|có ai không|còn đó không|online không|rep đi|trả lời đi)$/iu;
+const RE_HOI_SHOP = /(?<![\p{L}])(?:bot|chatbot|trả lời tự động|tự động|máy trả lời|bốc tay|ai bốc|ai trải|ai xem bài|người thật|chuyển khoản|số tài khoản|stk|bớt cho|giảm giá|bói thử|miễn phí|lừa đảo|lừa tiền|không lừa|uy tín không|hỏi thêm một câu|ngoài gói|không tính tiền|gói (?:\d+|mấy|bao nhiêu) câu|giá (?:gói|bói|xem|một câu|1 câu|vậy|này|cao|đắt)|nói nhảm)(?![\p{L}])/iu;
+const RE_AI = /(?<![\p{L}])(?:(?:là|phải|hay|dùng|bằng|hoặc)\s+AI|AI\s+(?:trả lời|bói|trải|viết|nhắn|à|hả|ạ))(?![\p{L}])/iu;
+const RE_AI_HOI = /(?<![\p{L}])(?:là|phải|có phải|hay)(?![\p{L}])[^?]{0,12}(?<![\p{L}])(?:ai|AI|bot|máy)(?![\p{L}])/u;
+const RE_HOAN_TIEN = /(?<![\p{L}])(?:hoàn tiền|hoàn lại tiền|trả lại tiền|trả tiền lại|refund|đòi lại tiền)(?![\p{L}])/iu;
+const RE_TU_HAI = /(?:(?:không|chẳng|chả)(?: còn)? (?:thiết|muốn) sống|muốn chết|tự tử|tự sát|quyên sinh|kết thúc cuộc đời|tự làm hại|tự hại|không muốn tồn tại)/iu;
+const RE_CHUA_HOI = /không biết (?:mình |em |tôi )?(?:muốn |nên )?hỏi gì|nghe (?:em|mình|tôi) kể/iu;
+const gon = (q) => String(q || "").toLowerCase().normalize("NFC").replace(/[^\p{L}\p{N}\s]+/gu, " ").replace(/\s+/g, " ").trim();
+// chủ đề thật (dạng câu "có … không" không tính là chủ đề)
+const coChuDe = (q) => { const t = detectTopics(q); return ["tien", "tinh", "viec", "suckhoe", "vanhan", "nam", "ba_thang"].some((k) => t[k]); };
+const boHet = (re, q) => q.replace(new RegExp(re.source, re.flags.includes("g") ? re.flags : re.flags + "g"), " ");
+// → { ok, lyDo, chuyen }  (chuyen: đòi hoàn tiền / ý tự hại → chuyển Chủ tịch)
+export function laCauHoiBoi(cauHoi) {
+  const q = String(cauHoi || "").trim();
+  const g = gon(q);
+  if (RE_TU_HAI.test(q)) return { ok: false, chuyen: true, lyDo: "khách có ý tự hại" };
+  if (RE_HOAN_TIEN.test(q)) return { ok: false, chuyen: true, lyDo: "khách đòi hoàn tiền" };
+  if (!g) return { ok: false, lyDo: "không có chữ" };
+  if (RE_GOI.test(g)) return { ok: false, lyDo: "chỉ là lời gọi/giục" };
+  if ((RE_HOI_SHOP.test(q) || RE_AI.test(q)) && !coChuDe(boHet(RE_AI, boHet(RE_HOI_SHOP, q)))) return { ok: false, lyDo: "hỏi về shop/AI/giá" };
+  if (RE_AI_HOI.test(q) && /(?<![\p{L}])(?:bạn|shop|chị|anh|em|ad|bên)(?![\p{L}])/u.test(q) && !coChuDe(q)) return { ok: false, lyDo: "hỏi về shop/AI/giá" };
+  if (RE_CHUA_HOI.test(q)) return { ok: false, lyDo: "tâm sự chưa thành câu hỏi" };
+  if (g.split(" ").length < 4 && !coChuDe(q)) return { ok: false, lyDo: "dưới 4 từ, không rõ chủ đề" };
+  return { ok: true, lyDo: "" };
+}
+
+// Tách tin khách thành các câu hỏi: theo dòng, theo đánh số (1. 2) Câu 3:), theo dấu "?". Đoạn không phải câu hỏi
+// (kể chuyện) ghép vào câu hỏi ngay sau làm bối cảnh; lời gọi và câu dẫn ("em hỏi 2 câu:") bỏ đi.
+const RE_DANG_HOI = /(?:\?|(?<![\p{L}])(?:không|chưa|sao|thế nào|ra sao|bao giờ|khi nào|nào|gì|mấy|bao nhiêu|được không|nhỉ|hả|à)\s*[.!]*)$/iu;
+const RE_CAU_DAN = /^(?:(?:em|mình|tôi|cho em|cho mình|cho tôi)\s+)?(?:xin\s+)?(?:hỏi|có)\s+(?:\d+|hai|ba|bốn|năm|vài|mấy)\s+câu\b.*$|:\s*$/iu;
+export function tachCauHoi(text) {
+  const doan = String(text || "")
+    .replace(/(?:^|\s)(?:câu\s*)?\d{1,2}\s*[.):/-]\s+/giu, "\n")
+    .replace(/\?\s*/g, "?\n")
+    .split(/\n+/).map((x) => x.trim()).filter(Boolean);
+  const cau = [];
+  let boiCanh = "";
+  for (const d of doan) {
+    if (RE_GOI.test(gon(d)) || RE_CAU_DAN.test(d)) continue;
+    if (RE_DANG_HOI.test(d)) { cau.push(`${boiCanh}${d}`.trim()); boiCanh = ""; }
+    else boiCanh += `${/[.!…]$/u.test(d) ? d : `${d}.`} `;
+  }
+  const du = boiCanh.trim();
+  // không có câu nào dạng hỏi → cả tin là một yêu cầu (vd "Xem giúp em 12 tháng năm 2027"); phần dư có chủ đề thì là một câu
+  if (du && (!cau.length || coChuDe(du))) cau.push(du.replace(/\.$/u, ""));
+  return cau;
 }
 
 // Khách không chọn kiểu trải: agent tự chọn theo câu hỏi ("tu-chon", mặc định). Vẫn nhận "1la" | "3la" | id mẫu trải
@@ -45,8 +98,12 @@ export function thamSoTrai(cauHoi, sp, goiY = suggestSpread(cauHoi)) {
 // trai: mặc định "tu-chon" — mỗi câu (kể cả nhiều câu trong một gói) tự chọn trải riêng theo nội dung câu đó
 export async function giaiTuDong({ db, cauHoi, trai = "tu-chon", nguoc = false, tenKhach = "", settings = {}, key = null, fetchImpl, storage, onSession }) {
   const q = String(cauHoi || "").trim();
-  if (!q) throw new Error("Thiếu câu hỏi.");
   if (!db) throw new Error("Bộ bài chưa tải xong.");
+  // chưa phải câu hỏi bói → hỏi lại khách (hoặc chuyển Chủ tịch), không bốc lá
+  const kt = laCauHoiBoi(q);
+  if (!kt.ok) return kt.chuyen
+    ? { chuyenNguoi: true, canHoiLai: false, loiGuiKhach: CAU_GIU, nguon: "chuyen", lyDo: kt.lyDo, maKhoa: null, trai: null, phien: null, tenKhach: String(tenKhach || "").trim() }
+    : { canHoiLai: true, loiGuiKhach: HOI_LAI, nguon: "hoi-lai", lyDo: kt.lyDo, maKhoa: null, trai: null, phien: null, tenKhach: String(tenKhach || "").trim() };
   const goiY = suggestSpread(q);
   const sp = chonTrai(q, trai);
   const tuChon = sp.id === goiY.id && (!trai || trai === "tu-chon" || trai === "auto");
@@ -87,5 +144,18 @@ export function taoBoiAuto(ctx) {
     hang = job.catch(() => {});
     return job;
   };
-  return { giai };
+  // Một tin của khách theo gói: tách đúng soCau câu hỏi đầu để trải (mỗi câu tự chọn trải riêng); câu thừa ghi ra để
+  // trang đào tạo báo; không có câu hỏi bói nào thì hỏi lại; đòi hoàn tiền/ý tự hại thì chuyển Chủ tịch.
+  const giaiGoi = async (tin, { soCau = Infinity, ...opts } = {}) => {
+    const kt = laCauHoiBoi(tin);
+    if (kt.chuyen) return { chuyenNguoi: true, lyDo: kt.lyDo, loiGuiKhach: CAU_GIU, cau: [], thua: [] };
+    const hop = tachCauHoi(tin).filter((q) => laCauHoiBoi(q).ok);
+    if (!hop.length) return { canHoiLai: true, lyDo: kt.lyDo || "chưa thấy câu hỏi bói", loiGuiKhach: HOI_LAI, cau: [], thua: [] };
+    const n = Math.max(0, Math.floor(Number(soCau)));
+    const lay = Number.isFinite(n) ? hop.slice(0, n) : hop;
+    const cau = [];
+    for (const q of lay) cau.push({ cauHoi: q, ...(await giai(q, opts)) });
+    return { cau, thua: hop.slice(lay.length) };
+  };
+  return { giai, giaiGoi };
 }
