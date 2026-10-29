@@ -807,9 +807,7 @@
    "phu": {
     "kieu": "kim_bom"
    },
-   "camera": {
-    "kieu": "dung"
-   },
+   "camera": {"kieu": "lia", "zoom": 1.1, "tu": [0.04, 0.02], "den": [-0.03, -0.02]},
    "camera_phu": {
     "kieu": "dung"
    },
@@ -999,9 +997,7 @@
    "phu": {
     "kieu": "kim_bom"
    },
-   "camera": {
-    "kieu": "dung"
-   },
+   "camera": {"kieu": "lia", "zoom": 1.1, "tu": [-0.035, 0.0], "den": [0.035, -0.02]},
    "camera_phu": {
     "kieu": "dung"
    },
@@ -1132,21 +1128,22 @@
   "r1": {
    "chinh": {
     "kieu": "do_thi",
-    "ham": "log_v"
+    "ham": "log_v",
+    "to": 150
    },
    "phu": {
     "kieu": "mep_vong"
    },
    "camera": {
     "kieu": "lia",
-    "zoom": 1.06,
+    "zoom": 1.12,
     "tu": [
-     0.025,
-     0
+     -0.04,
+     0.03
     ],
     "den": [
-     -0.025,
-     0
+     0.0,
+     0.0
     ]
    },
    "camera_phu": {

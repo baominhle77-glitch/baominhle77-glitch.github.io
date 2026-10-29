@@ -34,11 +34,30 @@ def ease(q):
     return (1 - math.cos(math.pi * q)) / 2
 
 
+TIEN_KHOI = .15  # phan dau beat (ti le) de tang toc em, sau do chay deu den HET beat
+
+
+def tien(t, T):
+    """Tien trinh 0..1 cua MOT beat: khoi dong em (dao ham 0 tai t=0) roi chay
+    DEU toi t=T, KHONG phang o cuoi.
+
+    D18 (29/10, G1 truot p3/p5/v6/c3/w5/r2/r1): cac kernel cu bao hoa som
+    (ease(t/(.4..8 T))) va camera cosine phang hai dau -> 4 s cuoi beat gan nhu
+    dung hinh (SSIM_4s > 0,97). Moi tien trinh hinh hoc trong bo dung canh phai
+    dung ham nay de mo phong chay den het beat; cam ease(t/(a*T)) voi a < 1.
+    """
+    u = min(1.0, max(0.0, t / max(1e-6, T)))
+    u0 = TIEN_KHOI
+    if u < u0:
+        return u * u / (2 * u0) / (1 - u0 / 2)
+    return (u - u0 / 2) / (1 - u0 / 2)
+
+
 def camera_at(spec, t, T):
     """(zoom, pan_x, pan_y) — monotone in t by construction."""
     spec = spec or {'kieu': 'dung'}
     kieu = spec.get('kieu', 'dung')
-    q = ease(t / max(1e-6, T))
+    q = tien(t, T)
     if kieu == 'dolly':
         a, b = float(spec.get('tu', 1.0)), float(spec.get('den', 1.08))
         return a + (b - a) * q, 0.0, 0.0
@@ -205,7 +224,7 @@ def k_bat_tren(d, t, T, k, st):
     elif mode == 'vong':
         Rr = Rw * k.get('r', .55) * (1 - .25 * math.exp(-t / 2.0))
     else:
-        Rr = Rw * k.get('r', .5) * min(1, .55 + .45 * ease(t / (.35 * T)))
+        Rr = Rw * k.get('r', .5) * (.55 + .45 * tien(t, T))
     if Rr > 2:
         d.tron(cx, cy, Rr, 'nuoc_sang', 150, vien=0)
         d.elip(cx, cy, Rr, Rr, 'vanh', 230, vien=1.0, net=2)
@@ -225,7 +244,7 @@ def k_bat_tren(d, t, T, k, st):
         rr = np.minimum(rr, Rw * .97)
     else:  # vong: grains pushed to the bowl edge / ring
         tgt = Rw * (.93 - .05 * sz)
-        q = ease(t / (.6 * T))
+        q = tien(t, T)
         rr = np.maximum(rr, Rr * 1.03)
         rr = rr + (tgt - rr) * q * (r0 > .2)
     xs, ys = cx + rr * np.cos(ang + .02 * ph), cy + rr * np.sin(ang + .02 * ph)
@@ -310,6 +329,15 @@ def k_mat_cat(d, t, T, k, st):
         d.duong([(x0, ys + dl), (x1, ys + dl)], 'cam', 2, vien=1)
         anchors.update(lop=(W * .78, ys + dl * .5))
     if mode == 'nhay':
+        # phan tu roi mat tich lai trong khoi nuoc: dam mo lan sau dan suot beat
+        # (tien trinh hinh hoc lon, khong chi cham nho chay vong)
+        p = tien(t, T)
+        for j, (dx, al0) in enumerate(((.0, 120), (.18, 90), (.36, 60))):
+            dep = (yb - ys) * (.06 + .80 * p) * (1 - dx)
+            xw = (x1 - xn) * (.25 + .7 * p) * (1 - .5 * dx)
+            d.elip(xn, ys + dep * .5, xw, dep * .5, 'tim', al0, vien=0)
+        xw0, dp0 = (x1 - xn) * (.25 + .7 * p), (yb - ys) * (.06 + .80 * p)
+        d.duong([(xn + xw0 * u, ys + dp0 * (1 - u * u)) for u in np.linspace(-1, 1, 41)], 'cam', 3, 220, vien=1)
         for i in range(min(n, 70)):
             u = (ph[i] + t * .09) % 1.0
             side = 1 if a[i] > .5 else -1
@@ -339,7 +367,7 @@ def k_cot_so(d, t, T, k, st):
     hi = max(vals)
     base, top = H * .88, H * .14
     gw = (W * .84) / n
-    q = ease(t / (.4 * T))
+    q = .15 + .85 * tien(t, T)
     anchors = {}
     hl = set(k.get('noi', []))
     for i, v in enumerate(vals):
@@ -428,7 +456,7 @@ def k_kim_bom(d, t, T, k, st):
     # pump: barrel with plunger moving one way (steady feed)
     px0, py0, px1, py1 = W * .04, H * .08, W * .30, H * .22
     d.hcn(px0, py0, px1, py1, 'panel2', bo=s * .015)
-    pl = px0 + (px1 - px0) * (.15 + .5 * ease(t / T))
+    pl = px0 + (px1 - px0) * (.15 + .5 * tien(t, T))
     d.hcn(px0 + s * .01, py0 + s * .015, pl, py1 - s * .015, 'tim', 230, vien=1)
     d.hcn(pl, py0 - s * .02, pl + s * .02, py1 + s * .02, 'vanh', bo=s * .005)
     xn = W * .55
@@ -473,15 +501,15 @@ def k_phan_tu(d, t, T, k, st):
             x = W * xr
             tip = _phan_tu_ve(d, x, ys - s * .03, math.pi / 2 + .05 * math.sin(t * .5 + side), dau, s, 12, to=2.2)
             tail = tip
-            R = s * (.08 if side < 0 else .13) * (.6 + .4 * ease(t / (.5 * T)))
+            R = s * (.08 if side < 0 else .13) * (.6 + .4 * tien(t, T))
             d.elip(x, H * .78, R, R * .45, 'nuoc_sang', 200, net=3)
         return dict(dau_trai=(W * .28, ys - s * .03), dau_phai=(W * .72, ys - s * .03), duoi=(W * .28, ys + s * .2),
                     vong_trai=(W * .28 + s * .08, H * .78), vong_phai=(W * .72 + s * .13, H * .78))
-    crowd = int(6 + 22 * ease(t / (.45 * T)))
+    crowd = int(6 + 22 * tien(t, .6 * T))
     for i in range(crowd):
         x = W * .07 + (W * .86) * (i + .5) / 28
         _phan_tu_ve(d, x, ys, math.pi / 2 + .25 * math.sin(i * 1.7 + t * .6), 'vang', s, 9)
-    nm = int(5 * ease((t - .4 * T) / (.4 * T)))
+    nm = int(5.999 * tien(t - .35 * T, .65 * T))
     cen = []
     for m in range(5):
         mx, my = W * (.18 + .16 * m), H * (.66 + .08 * math.sin(m * 1.9))
@@ -502,7 +530,8 @@ def k_can_bang(d, t, T, k, st):
     """Beam balance: surface pull gap / R against friction in the thin layer."""
     W, H, s = d.W, d.H, d.s
     cx, cy = W * .5, H * .40
-    th = .22 * (1 - ease(t / (.6 * T)))
+    # can nghieng dan ve thang bang suot beat, con dao dong tat dan quanh vi tri
+    th = .26 * (1 - tien(t, T)) + .035 * math.sin(t * 1.3) * (1 - .5 * tien(t, T))
     L = W * .36
     d.da_giac([(cx, cy), (cx - s * .07, H * .9), (cx + s * .07, H * .9)], 'vanh')
     ex, ey = math.cos(th) * L, math.sin(th) * L
@@ -577,7 +606,7 @@ def k_do_thi(d, t, T, k, st):
         yy = Y0 + (Y1 - Y0) * g / 4
         d.duong([(X0, yy), (X1, yy)], 'panel2', 2, vien=0)
     d.duong([(X0, Y1 - s * .03), (X0, Y0), (X1 + s * .02, Y0)], 'vanh', 3)
-    q = min(1, .25 + .75 * ease(t / (.7 * T)))
+    q = .25 + .75 * tien(t, T)
     curves = [(ham, 'cam', 1.0)]
     if ham == 'phang':
         curves = [('phang', 'cam', .85), ('phang', 'xanh_la', .65), ('phang', 'nuoc_sang', .45)]
@@ -591,10 +620,16 @@ def k_do_thi(d, t, T, k, st):
         m = xs <= q
         pts = [(X0 + (X1 - X0) * x, Y0 + (Y1 - Y0) * y) for x, y in zip(xs[m], ys[m])]
         if ci == 0 and len(pts) > 1:
-            d.da_giac([(pts[0][0], Y0)] + pts + [(pts[-1][0], Y0)], mau, 70, vien=0)
+            # 'to' (do dam vung duoi duong cong) la NOI DUNG: beat co do thi giong beat
+            # truoc doi do dam de bo cuc khac (G1 bo cuc >= 12)
+            d.da_giac([(pts[0][0], Y0)] + pts + [(pts[-1][0], Y0)], mau, int(k.get('to', 70)), vien=0)
         d.duong(pts, mau, 5)
+        if ci == 0 and len(pts) > 1:
+            # xung do chay doc duong cong (chu ky 5,3 s, lech 4 s = .75 chu ky)
+            j = int((len(pts) - 1) * ((t / 5.3) % 1.0))
+            d.tron(pts[j][0], pts[j][1], s * .055, 'vang', 110, vien=0)
+            d.tron(pts[j][0], pts[j][1], s * .026, 'vang', 230, vien=1)
         if ci == 0:
-            xm = q * (.55 + .45 * math.sin(t * .0))
             ym = float(_curve(h, np.array([q]))[0]) if h != 'phang' else .62
             d.tron(X0 + (X1 - X0) * q, Y0 + (Y1 - Y0) * ym, s * .018, 'vang')
             anchors['diem'] = (X0 + (X1 - X0) * q, Y0 + (Y1 - Y0) * ym)
@@ -645,11 +680,17 @@ def k_cong_thuc(d, t, T, k, st):
         cols = ['cam', 'nuoc', 'xanh_la', 'vang', 'tim', 'do']
         for i in range(nodes - 1):
             d.duong([(xs[i], ys[i]), (xs[i + 1], ys[i + 1])], 'vanh', 4)
-            u = (t * .3 + i * .2) % 1
-            d.tron(xs[i] + (xs[i + 1] - xs[i]) * u, ys[i] + (ys[i + 1] - ys[i]) * u, s * .016, 'vang')
-        lit = int(nodes * min(1, .3 + ease(t / (.8 * T))))
+            u = (t * .19 + i * .2) % 1
+            xx, yy = xs[i] + (xs[i + 1] - xs[i]) * u, ys[i] + (ys[i + 1] - ys[i]) * u
+            d.tron(xx, yy, s * .05, 'vang', 90, vien=0)
+            d.tron(xx, yy, s * .028, 'vang')
+        # nut sang dan LIEN TUC (dia mau lon dan trong nut) den het beat, khong bac thang roi dung
+        sang = nodes * (.3 + .7 * tien(t, T))
         for i in range(nodes):
-            d.tron(xs[i], ys[i], s * .065, cols[i % 6] if i < lit else 'panel2')
+            d.tron(xs[i], ys[i], s * .065, 'panel2')
+            f = min(1.0, max(0.0, sang - i))
+            if f > .02:
+                d.tron(xs[i], ys[i], s * .065 * math.sqrt(f), cols[i % 6], vien=2 if f > .5 else 1)
             d.tron(xs[i], ys[i], s * .03, 'vanh', 120, vien=0)
         return {'n%d' % i: (xs[i], ys[i]) for i in range(nodes)}
     tanks = [(W * .14, H * .22, 'cam'), (W * .14, H * .50, 'vang'), (W * .14, H * .78, 'nuoc')]
@@ -667,7 +708,7 @@ def k_cong_thuc(d, t, T, k, st):
         g = t * .9 + j * math.pi / 3
         d.duong([(rx, ry), (rx + s * .12 * math.cos(g), ry + s * .12 * math.sin(g))], 'vanh', 4, vien=1)
     d.tron(rx, ry, s * .03, 'vang')
-    fill = .2 + .75 * ease(t / (.8 * T))
+    fill = .2 + .75 * tien(t, T)
     ox0, oy0, ox1, oy1 = W * .78, H * .22, W * .94, H * .80
     d.hcn(ox0, oy0, ox1, oy1, 'panel2', bo=s * .02)
     d.hcn(ox0 + 3, oy1 - (oy1 - oy0) * fill, ox1 - 3, oy1 - 3, 'xanh_la', bo=s * .015)
@@ -684,7 +725,7 @@ def k_lop(d, t, T, k, st):
     ys = H * .22
     d.hcn(W * .04, ys, W * .96, H * .92, 'nuoc', 210, vien=2, bo=s * .02)
     d.duong([(W * .04, ys), (W * .96, ys)], 'vanh', 3)
-    g = math.sqrt(min(1, .15 + t / (.7 * T)))
+    g = math.sqrt(.15 + .85 * tien(t, T))
     dm = (H * .92 - ys) * .62 * g
     dc = max(3, dm / 10)
     d.hcn(W * .04, ys, W * .96, ys + dm, 'nuoc_sang', 120, vien=0)
@@ -709,7 +750,7 @@ def k_the_so(d, t, T, k, st):
     n = k.get('n', 3)
     cols = ['nuoc', 'cam', 'xanh_la', 'tim']
     out = {}
-    q = ease(t / (.5 * T))
+    q = tien(t, T)
     for i in range(n):
         x0 = W * (.06 + .88 * i / n) + s * .02
         x1 = W * (.06 + .88 * (i + 1) / n) - s * .02
@@ -750,7 +791,7 @@ def k_ly_ruou(d, t, T, k, st):
     wl = [(x, y) for x, y in left if y >= top + hh * lv]
     wr = [(x, y) for x, y in right if y >= top + hh * lv]
     d.da_giac(wl + wr[::-1], 'ruou', 245, vien=0)
-    film = lv - .45 * ease(t / (.5 * T))
+    film = lv - .45 * tien(t, T)
     fl = [(x + s * .006, y) for x, y in left if top + hh * film <= y <= top + hh * lv]
     fr = [(x - s * .006, y) for x, y in right if top + hh * film <= y <= top + hh * lv]
     if len(fl) > 1:
@@ -795,8 +836,9 @@ class Tang:
 
     def __init__(self, x, y, w, h, kind, k, cam, pal, T, seed, nhan=(), short=540):
         self.x, self.y, self.w, self.h = x, y, w, h
-        m = max(4, round(min(w, h) * .035))
-        self.px, self.py, self.pw, self.ph = x + m, y + m, w - 2 * m, h - 2 * m
+        # G12: le >= 3% MOI PHIA theo kich thuoc tang -> margin tinh theo tung truc
+        mx, my = max(4, round(w * .042)), max(4, round(h * .042))
+        self.px, self.py, self.pw, self.ph = x + mx, y + my, w - 2 * mx, h - 2 * my
         self.kind, self.k, self.cam, self.pal, self.T = kind, dict(k or {}), cam, pal, T
         self.st = dict(hat=_hat(seed, 300))
         self.nhan = list(nhan)
@@ -921,7 +963,8 @@ class CanhStage:
         c = ((1 - np.abs(np.sin(f1))) ** 4 + (1 - np.abs(np.sin(f2))) ** 4 + (1 - np.abs(np.sin(f3))) ** 4 + (1 - np.abs(np.sin(f4))) ** 4) / 4
         cimg = Image.fromarray(np.clip(c * 255, 0, 255).astype(np.uint8)).resize((tg.pw, tg.ph), Image.Resampling.BILINEAR)
         cc = np.asarray(cimg, np.float32)[..., None] / 255.0
-        base += cc * 44 * (np.array(hex_rgb(self.pal['caustic']), np.float32) / 255.0)
+        # G12: lech so voi mat bac 2 phai < 18 o nen (max kenh) -> bien do <= 10
+        base += cc * 6 * (np.array(hex_rgb(self.pal['caustic']), np.float32) / 255.0)
         return base
 
     def _anh_sang_nuoc(self, img, t):
@@ -933,19 +976,36 @@ class CanhStage:
         """
         if '_asn' not in self._base_cache:
             lw, lh = max(16, self.width // 6), max(16, self.height // 6)
-            x = np.linspace(0, self.width / 110., lw, dtype=np.float32)[None, :]
-            y = np.linspace(0, self.height / 110., lh, dtype=np.float32)[:, None]
+            # tan so cao hon de pha cum mot mau (G12 phang <=35%) ma khong doi bien do
+            x = np.linspace(0, self.width / 48., lw, dtype=np.float32)[None, :]
+            y = np.linspace(0, self.height / 48., lh, dtype=np.float32)[:, None]
             g = (np.linspace(0, 1, lh, dtype=np.float32)[:, None] * .62
                  + np.linspace(0, 1, lw, dtype=np.float32)[None, :] * .38)
             self._base_cache['_asn'] = (x, y, g)
         x, y, g = self._base_cache['_asn']
-        s = (np.sin(x * 1.00 + y * .55 + t * .23) + np.sin(x * .47 - y * .93 + 2.1 - t * .17)
-             + np.sin(x * 1.70 + y * 1.21 + 4.0 + t * .29)) / 3
-        s01 = np.clip(s * .5 + .5, 0, 1) * .72 + g * .28
+        # G12 can bang: bien do khong gian < 18 (max kenh, so mat bac 2) nhung
+        # pha troi nhanh de cap khung 0,5 s doi > 6 muc XAM (do do dong G12/C17
+        # dung anh xam: tint lam cu chi duoc tinh 11% -> doi sang tint trung tinh).
+        s = (np.sin(x * 1.00 + y * .55 + t * 3.8) + np.sin(x * .47 - y * .93 + 2.1 - t * 3.1)
+             + np.sin(x * 1.70 + y * 1.21 + 4.0 + t * 4.6)) / 3
+        # G10: gian phan bo (bien do .85, co clip) de pha quan the dE<3 tren
+        # vung vat lieu sang; G12 nen van trong ngan sach 18 (kiem lai h2).
+        s01 = np.clip(s * .85 + .5, 0, 1) * .72 + g * .28
         field = np.asarray(Image.fromarray((s01 * 255).astype(np.uint8)).resize(
             (self.width, self.height), Image.Resampling.BILINEAR), np.float32)[..., None] / 255.
-        tint = np.array(hex_rgb(self.pal['caustic']), np.float32) / 255.
-        return img * (.84 + .26 * field) + field * field * 46. * tint
+        tint = np.array([.88, .94, 1.], np.float32)
+        # he so nhan .12 pha cum mot mau tren vung sang (phang G12) ma van giu
+        # lech nen toi < 18 (nen ~15-84: .12*84*.36 + 15 ~ 18)
+        # G10: truong SAC (doi kenh, tong ~0) troi cham, chi tren vung sang
+        # (ti le field^2 nhu so hang cong) de pha quan the dE<3 cua vat lieu
+        # ma khong cham ngan sach lech nen toi (nen: field~.28 -> ^2*11 ~ 0.9).
+        c = np.sin(x * .62 + y * .81 + t * .9) * np.sin(x * .33 - y * .47 + 1.3 + t * .7)
+        chroma = np.asarray(Image.fromarray(((c * .5 + .5) * 255).astype(np.uint8)).resize(
+            (self.width, self.height), Image.Resampling.BILINEAR), np.float32)[..., None] / 255. - .5
+        shift = chroma * field * field * np.array([22., -6., -16.], np.float32)
+        # G10: them bien do nhan .11*field^2 — chi manh tren vung sang (vat lieu
+        # nuoc sang, L lech ~5-6 > dE3) con nen toi (field~.28) chi them ~0.9%.
+        return img * (.90 + .12 * field + .11 * field * field) + field * field * 15. * tint + shift
 
     def frame(self, t):
         W, H = self.width, self.height
