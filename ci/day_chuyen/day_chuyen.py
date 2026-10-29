@@ -21,6 +21,7 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
@@ -148,11 +149,11 @@ def bat_dau_tram(so, khuon, tram):
     return p, fh, b
 
 
-def ket_thuc_tram(so, khuon, tram, p, fh, b):
+def ket_thuc_tram(so, khuon, tram, p, fh, b, luc_xong=None):
     rc = p.wait()
     fh.close()
     st = so["tram"][tram]
-    giay = round(time.time() - st["bat_dau"], 1)
+    giay = round((luc_xong or time.time()) - st["bat_dau"], 1)
     thieu = []
     for mau in (khuon["tram"][tram].get("dau_ra") or []):
         duong = mau.format(**b)
@@ -220,10 +221,11 @@ def lo(taps):
         tai_khe.update(khuon_tap[t].get("khe", {}))
     tai_khe = {"render": 1, "gpt": 1, "nhe": 2, **tai_khe}
     dung = set()
+    xong_luc = {}  # pid -> giờ thoát thật (luồng chờ ghi), để sổ không lệch theo nhịp quét
     while True:
         for t, (tram, p, fh, b) in list(dang.items()):
             if p.poll() is not None:
-                if not ket_thuc_tram(so_tap[t], khuon_tap[t], tram, p, fh, b):
+                if not ket_thuc_tram(so_tap[t], khuon_tap[t], tram, p, fh, b, xong_luc.pop(p.pid, None)):
                     dung.add(t)
                 del dang[t]
         cho = [t for t in taps if t not in dang and t not in dung and tram_tiep(so_tap[t])]
@@ -248,6 +250,7 @@ def lo(taps):
                 dung.add(t)
                 continue
             dang[t] = (tram, *r)
+            threading.Thread(target=lambda q=r[0]: (q.wait(), xong_luc.__setitem__(q.pid, time.time())), daemon=True).start()
             dem[k] = dem.get(k, 0) + 1
             print(f"{t} BAT_DAU {tram} [{k}] commit {d['commit']}% RAM {d['ram_gb']} GB", flush=True)
         time.sleep(5)
