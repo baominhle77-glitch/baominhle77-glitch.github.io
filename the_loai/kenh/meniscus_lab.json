@@ -1,0 +1,95 @@
+{
+ "kenh": "meniscus_lab",
+ "ten_kenh": "Meniscus Lab",
+ "the_loai": "khoa_hoc_vat_ly",
+ "py": "E:/Studio/venv_manim/Scripts/python.exe",
+ "khe": {
+  "render": 1,
+  "gpt": 1,
+  "nhe": 2
+ },
+ "bien": {
+  "goc": "E:/Studio/out/_giam_doc/a1e_k1t3/wt_sua5",
+  "cwd": "{goc}",
+  "khung": "E:/Studio/out/_giam_doc/a1e_k1t3/sua5_khung",
+  "pv": "E:/Studio/out/_giam_doc/a1e_k1t3/venv_sua5/Scripts/python.exe",
+  "moi_truong": "export PYTHONUTF8=1 PYTHONPATH='E:\\Studio\\out\\_giam_doc\\a1e_k1t3\\sua5_khung\\shim' NLTK_DATA=work/gate_nlp",
+  "danh_sach": "h1 h2 h3 h4 c1 p1 p2 p3 p4 p5 p6 c2 v1 v2 v3 v4 v5 v6 v7 c3 w1 w2 w3 w4 w5 w6 w7 b1 r1 r2 r3 r4 s8 k1 k2",
+  "khoa_gpt": "{tap}",
+  "giao": "E:/Studio/out/_cho_chu_tich/COMBO_DANG/Meniscus Lab"
+ },
+ "tram": {
+  "nguon": {
+   "tai": "nhe",
+   "lenh": null,
+   "ghi_chu": "skill studio-nghien-cuu-nguon; dau ra {so}/nguon.md (chua tu dong — v2)"
+  },
+  "nhap_loi_gpt": {
+   "tai": "gpt",
+   "ram_gb": 0.5,
+   "lenh": "cd /e/Studio/tools && {py} gpt_chat.py gui '{khoa_gpt}' '{so}/de_bai_loi.md' && {py} gpt_chat.py cho '{khoa_gpt}' 40 > '{so}/nhap_loi.md'",
+   "dau_ra": [
+    "{so}/nhap_loi.md"
+   ],
+   "ghi_chu": "D19: GPT Chat nhap loi; de bai {so}/de_bai_loi.md do tram nguon sinh"
+  },
+  "cong_so_lieu": {
+   "tai": "nhe",
+   "lenh": null,
+   "ghi_chu": "cong tang 7 so lieu co ma nguon — v2"
+  },
+  "ho_so": {
+   "tai": "gpt",
+   "lenh": null,
+   "ghi_chu": "skill studio-ho-so-storyboard; ban ve ban_ve_*.json — v2"
+  },
+  "kiem_tinh": {
+   "tai": "nhe",
+   "lenh": null,
+   "ghi_chu": "ci/kiem_ban_ve.py + gate_chung.tien_kiem tren ban ve — v2"
+  },
+  "tts": {
+   "tai": "nhe",
+   "lenh": null,
+   "ghi_chu": "ci/remotion_b/build_full_voice.py — v2"
+  },
+  "manim_thu_540": {
+   "tai": "render",
+   "lenh": null,
+   "ghi_chu": "1 khung/beat + tu cham C13 — v2"
+  },
+  "render_du": {
+   "tai": "render",
+   "ram_gb": 2.5,
+   "lenh": "{moi_truong}; for b in {danh_sach}; do {py} -u ci/remotion_b/prepare.py --beat $b --jobs 1 && {py} ci/remotion_b/finish_beat.py --beat $b || exit 2; done",
+   "ghi_chu": "prepare.py da co cong MOT BAN (thay_the.truoc_render/sau_render); beat da co cache thi bo qua"
+  },
+  "compose": {
+   "tai": "render",
+   "ram_gb": 3.0,
+   "lenh": "{moi_truong}; {pv} -X utf8 ci/remotion_b/compose.py --caption-alignment work/B/caption_alignment.json --kho 16x9",
+   "dau_ra": [
+    "{goc}/work/B/B_full_16x9.mp4"
+   ],
+   "ghi_chu": "9x16 chi ghep sau khi 16x9 DAT cong (chay_gates_kho.sh)"
+  },
+  "gate_chung": {
+   "tai": "nhe",
+   "ram_gb": 1.5,
+   "lenh": "bash {khung}/chay_gates_kho.sh 16x9 && {moi_truong} && {pv} -X utf8 ci/remotion_b/compose.py --caption-alignment work/B/caption_alignment.json --kho 9x16 && bash {khung}/chay_gates_kho.sh 9x16",
+   "dau_ra": [
+    "{goc}/work/B/B_full_9x16.mp4"
+   ]
+  },
+  "d25": {
+   "tai": "nhe",
+   "lenh": "g=$(ffprobe -v error -show_entries format=duration -of csv=p=0 work/B/B_full_16x9.mp4 | cut -d. -f1); [ \"$g\" -ge 480 ] || exit 4; s=$(sha256sum work/B/B_full_16x9.mp4 | cut -c1-8); echo $s > '{so}/sha8'; {py} E:/Studio/out/_giam_doc/kiem_kenh_da_dang.py 'Meniscus Lab' $g $s",
+   "ghi_chu": "ffprobe >= 480 s + cong D25 kenh that"
+  },
+  "combo_dang": {
+   "tai": "nhe",
+   "lenh": "bash /e/Studio/out/_giam_doc/dong_bo_mau_dat.sh; ls \"{giao}\"/VIDEO_*_$(cat '{so}/sha8').mp4",
+   "ghi_chu": "chi script dong_bo_mau_dat.sh dua vao; can phieu KD co VIDEO_DAT truoc"
+  }
+ }
+}
