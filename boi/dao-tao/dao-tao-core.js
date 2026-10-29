@@ -39,8 +39,8 @@ export const TINH_HUONG = [
 export const NHAN_CHUYEN = "CHUYỂN CHỦ TỊCH TRẢ LỜI";
 export const CAU_GIU_KHACH = "Bạn đợi mình chút nhé.";
 
-// Địa chỉ gốc của cầu nối từ via.base (…/gemini) → bỏ đuôi /gemini
-export const goc = (viaBase) => String(viaBase || "").replace(/\/gemini\/?$/, "");
+// Địa chỉ gốc của cầu nối từ via.base (…/claude) → bỏ đuôi /claude
+export const goc = (viaBase) => String(viaBase || "").replace(/\/claude\/?$/, "");
 
 // Mã riêng của một tin khách: gửi lại (sau lỗi mạng) dùng đúng mã cũ để máy nhà trả lại câu đã có, không chạy model lần hai
 export const taoMaTin = () => globalThis.crypto?.randomUUID?.() || `t${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;

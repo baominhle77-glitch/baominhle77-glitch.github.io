@@ -894,8 +894,8 @@ test("đào tạo: cổng câu trả lời agent chặn “người thật”, �
 });
 
 test("đào tạo: gọi cầu nối đúng route/khuôn; cầu nối tắt → lỗi rõ, không rơi về AI khác; chuyển người hiện nhãn; mẫu sửa mới nhất trên đầu", async () => {
-  assert.equal(DT.goc("https://abc.trycloudflare.com/gemini"), "https://abc.trycloudflare.com");
-  assert.equal(DT.goc("http://127.0.0.1:8787/gemini"), "http://127.0.0.1:8787");
+  assert.equal(DT.goc("https://abc.trycloudflare.com/claude"), "https://abc.trycloudflare.com");
+  assert.equal(DT.goc("http://127.0.0.1:8787/claude"), "http://127.0.0.1:8787");
   const lich = [{ vai: "khach", noi_dung: "Chào chị" }, { vai: "he_thong", noi_dung: "lỗi" }, { vai: "agent", noi_dung: "Chào bạn" }];
   assert.deepEqual(DT.yeuCauTraLoi({ kenh: "03", goi: "3", cau_con: "2", lich_su: lich }), { kenh: "03", goi: 3, cau_con: 2, lich_su: [{ vai: "khach", noi_dung: "Chào chị" }, { vai: "agent", noi_dung: "Chào bạn" }] });
   assert.deepEqual(Object.keys(DT.yeuCauMauSua({ kenh: "01", goi: 1, lich_su: lich, ban_agent: "a", ban_chu_tich: " b ", ly_do: " c " })), ["kenh", "goi", "lich_su", "ban_agent", "ban_chu_tich", "ly_do"]);
