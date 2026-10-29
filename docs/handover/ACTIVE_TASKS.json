@@ -8,13 +8,15 @@
       "id": "BOI-20261030-01",
       "owner": "Claude Code (GĐ Studio, nick hiennhi)",
       "branch": "agent/BOI-20261030-01-doi-tuyen-claude",
-      "base_sha": "8ea6b9384cef5c337f735d221c29f96241fb796f",
+      "base_sha": "56178c950c0ff7766dc1810df80bfe3093e4673f",
       "paths": [
         "boi/js/ai.js",
         "boi/js/store.js",
         "boi/dao-tao/dao-tao-core.js",
         "boi/test.mjs",
-        "boi/sw.js"
+        "boi/sw.js",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
       ],
       "status": "completed",
       "started_at": "2026-10-30T01:30:00+07:00",
