@@ -8,6 +8,11 @@ from .aspect import G9
 from .appearance import G10,G11
 
 def main():
+ from .tien_kiem import kiem as tien_kiem
+ _ok,_loi=tien_kiem()
+ if _loi:
+  for d in _loi:print('TIEN_KIEM TRUOT|',d)
+  return 1
  p=argparse.ArgumentParser(description='D18 universal G1–G11. Same thresholds for every genre.');p.add_argument('--video',type=Path,required=True);p.add_argument('--plan',type=Path,required=True);p.add_argument('--genre',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True);plan=read(a.plan);genre=read(a.genre)
  for layer in plan.get('layers',[]):
   path=Path(layer['source']);layer['source']=str((a.plan.parent/path).resolve() if not path.is_absolute() else path)
