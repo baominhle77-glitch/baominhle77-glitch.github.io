@@ -3,6 +3,8 @@ import argparse,hashlib,json,math,os,resource,shutil,subprocess,sys,time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from beat_cache import key as beat_key
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
+from gate_chung import thay_the  # D18 cong 'mot ban' (29/10): ban cu -> Thung rac + bien ban
 R=Path(__file__).resolve().parents[2];HERE=Path(__file__).resolve().parent
 FIRST=tuple(b['id'] for b in json.loads((HERE/'full_timeline.json').read_text())['beats'])
 SHORT=540
@@ -40,6 +42,7 @@ def render_one(item,force=False):
  cached=cache/f'{fmt}_{bid}.mp4';meta_path=cache/f'{fmt}.json';dest=HERE/'public'/cached.name
  if at is None and not force and cached.exists() and meta_path.exists() and read(meta_path).get('source_digest')==digest:
   validate(cached,fmt,b);shutil.copy2(cached,dest);row=read(meta_path);row.update(cache_reused=True,wall_s=0.,cpu_s=0.);print('B_BEAT_CACHE_HIT '+fmt+'/'+bid,flush=True);return row
+ if at is None:thay_the.truoc_render(cache,fmt,bid);folder.mkdir(parents=True,exist_ok=True)
  env=dict(os.environ,B_FORMAT=fmt,B_BEAT=bid,B_DURATION=str(b['frames']/30),B_SHORT_SIDE=str(SHORT),PYTHONPATH=str(R/'ban_sac'),OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1');env.pop('B_AT',None)
  cached.with_suffix('.layout.json').unlink(missing_ok=True)
  if at is not None:env['B_AT']=str(at)
@@ -55,6 +58,7 @@ def render_one(item,force=False):
  if at is not None:return dict(format=fmt,beat=bid,at=at,image=str(next((folder/'images').rglob('*.png'))),wall_s=time.perf_counter()-t)
  src=next((folder/'videos').rglob(scene_name+'.mp4'))
  run(['ffmpeg','-nostdin','-y','-v','error','-i',src,'-frames:v',b['frames'],'-an','-c:v','libx264','-threads','2','-crf','18','-pix_fmt','yuv420p',cached]);validate(cached,fmt,b);shutil.copy2(cached,dest)
+ thay_the.sau_render(cache,fmt,bid)
  r1=resource.getrusage(resource.RUSAGE_CHILDREN);row=dict(format=fmt,beat=bid,frames=b['frames'],wall_s=time.perf_counter()-t,cpu_s=r1.ru_utime+r1.ru_stime-r0.ru_utime-r0.ru_stime,bytes=dest.stat().st_size,source_digest=digest,cache_reused=False)
  write(meta_path,row);print('B_BEAT_END '+json.dumps(row),flush=True);return row
 

@@ -48,7 +48,49 @@ def _id_beats(du_lieu):
  if isinstance(du_lieu,list):return [b.get('id') if isinstance(b,dict) else b for b in du_lieu]
  return []
 
-def kiem(ban_ve=None,danh_sach=None,doi_chieu=(),lenh=None,modun=(),tep=()):
+def kiem_chu_ky(du_lieu,cua_so=4.0,bien=1.0):
+ """CONG CHONG TAI PHAT (D18, 29/10) — chu ky lap tu the camera + trung bo cuc optics.
+
+ Lan 1 (k1t3 sua4) va lan 2 (sua5) cung mot goc: bo sinh ke hoach dao camera theo k%2 moi
+ 2,4 s nen TU THE LAP LAI MOI 4,8 s, dung bang cua so G1 (so khung t voi t-4 s) => G1 truot
+ o 6 beat; optics theo index%3 x index%4 (chu ky 12 beat) => beat 4/16/28 trung bo cuc => G1
+ bo cuc truot o r1. Luat vo 2 lan phai thanh cong: kiem ngay tren BAN VE, truoc khi render.
+
+ TRUOT khi: (a) hai moc camera trong cung beat cach nhau cua_so+-bien giay ma trung
+ (do_cao,lia) — du lia_doc khac van lam SSIM vuot han; (b) hai beat trung tron bo optics.
+ """
+ loi=[];ok=[]
+ beats=du_lieu.get('beats',du_lieu) if isinstance(du_lieu,dict) else du_lieu
+ if not isinstance(beats,list):return ok,loi
+ so_moc=0
+ for b in beats:
+  if not isinstance(b,dict):continue
+  bid=b.get('id');cam=[s for s in b.get('su_kien',()) if isinstance(s,dict) and s.get('kieu')=='camera']
+  so_moc+=len(cam)
+  def tu_the(s,day=False):
+   khoa=('do_cao','lia','lia_doc') if day else ('do_cao','lia')
+   return tuple(round(float(s.get(k,0.)),4) for k in khoa)
+  for i,a in enumerate(cam):
+   for c in cam[i+1:]:
+    dt=float(c.get('t',0.))-float(a.get('t',0.))
+    if dt>cua_so+bien:break
+    if abs(dt-cua_so)>bien:continue
+    if tu_the(a)==tu_the(c):
+     loi.append(f'chu_ky: beat {bid} tu the camera (do_cao,lia)={tu_the(a)} tai xuat sau {dt:.2f}s '
+                f'— trung cua so G1 {cua_so}s, SSIM se vuot han 0,97')
+ if not loi:ok.append(f'chu_ky: {so_moc} moc camera, khong tu the nao tai xuat trong {cua_so}+-{bien}s')
+ thay={}
+ for b in beats:
+  if not isinstance(b,dict):continue
+  o=b.get('optics') or {}
+  khoa=tuple(str(o.get(k)) for k in ('ellipse_ratio','vessel','environment','vessel_depth','shot','section','molecules'))
+  if khoa in thay:loi.append(f'chu_ky: beat {b.get("id")} trung tron bo optics voi beat {thay[khoa]} '
+                             f'— G1 bo cuc (lech xam >=12) se truot: {khoa}')
+  else:thay[khoa]=b.get('id')
+ if len(thay)==len([b for b in beats if isinstance(b,dict)]):ok.append(f'chu_ky: {len(thay)} beat, bo optics duy nhat tung beat')
+ return ok,loi
+
+def kiem(ban_ve=None,danh_sach=None,doi_chieu=(),lenh=None,modun=(),tep=(),mot_ban=()):
  loi=[];ok=[]
  da_them=va_path()
  if da_them:ok.append('path: tu va PATH tien trinh + '+', '.join(da_them[:4]))
@@ -72,6 +114,7 @@ def kiem(ban_ve=None,danh_sach=None,doi_chieu=(),lenh=None,modun=(),tep=()):
    du_lieu=json.loads(Path(ban_ve).read_text(encoding='utf-8'));id_chuan=_id_beats(du_lieu)
    if None in id_chuan or len(set(id_chuan))!=len(id_chuan):loi.append(f'schema: {ban_ve} id beat thieu/trung lap: {id_chuan}')
    else:ok.append(f'schema: {ban_ve} {len(id_chuan)} beat, id duy nhat')
+   ok2,loi2=kiem_chu_ky(du_lieu);ok+=ok2;loi+=loi2
   except Exception as e:loi.append(f'schema: {ban_ve} doc loi: {e}');id_chuan=None
  if danh_sach is not None:
   ds=[x for x in danh_sach if x]
@@ -92,6 +135,10 @@ def kiem(ban_ve=None,danh_sach=None,doi_chieu=(),lenh=None,modun=(),tep=()):
     else:ok.append(f'schema: {duong} ({len(ids)} id, deu thuoc ban ve)')
    else:ok.append(f'schema: {duong} doc duoc ({len(ids)} id)')
   except Exception as e:loi.append(f'schema: {duong} doc loi: {e}')
+ for goc in mot_ban:  # D18 cong 'mot ban' (29/10): moi beat 1 ban/kho, ban cu phai vao Thung rac
+  from gate_chung import thay_the
+  l=thay_the.kiem_mot_ban(goc,danh_sach)
+  (loi.extend('mot_ban: '+x for x in l) if l else ok.append(f'mot_ban: {goc} moi beat 1 ban/kho'))
  for duong in tep:
   (ok if Path(duong).exists() else loi).append(('tep: co '+str(duong)) if Path(duong).exists() else f'tep: THIEU {duong}')
  return ok,loi
@@ -101,9 +148,10 @@ def main(argv=None):
  p.add_argument('--ban-ve',type=Path);p.add_argument('--danh-sach',help='id beat sap render, phay cach')
  p.add_argument('--doi-chieu',action='append',default=[],help='file.json[:khoa] can khop id voi ban ve')
  p.add_argument('--lenh',default=','.join(LENH_MAC_DINH));p.add_argument('--modun',default='');p.add_argument('--tep',action='append',default=[])
+ p.add_argument('--mot-ban',action='append',default=[],help='thu muc B_cache/<res>: tu choi neu beat con >1 ban (D18)')
  a=p.parse_args(argv)
  ok,loi=kiem(ban_ve=a.ban_ve,danh_sach=a.danh_sach.split(',') if a.danh_sach else None,doi_chieu=a.doi_chieu,
-             lenh=[x for x in a.lenh.split(',') if x],modun=[x for x in a.modun.split(',') if x],tep=a.tep)
+             lenh=[x for x in a.lenh.split(',') if x],modun=[x for x in a.modun.split(',') if x],tep=a.tep,mot_ban=a.mot_ban)
  for d in ok:print('DAT  |',d)
  for d in loi:print('TRUOT|',d)
  print(f'TIEN_KIEM {"DAT" if not loi else "TRUOT"} ({len(ok)} dat, {len(loi)} truot)')
