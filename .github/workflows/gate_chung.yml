@@ -1,0 +1,171 @@
+name: D18 universal video gates
+on:
+  push:
+    branches: [gpt/k1t3-B-remotion]
+    paths: ['ci/analysis_video.py', 'tools/do_chuyen_dong_vung.py', 'ci/chuyen_dong_vung.py', 'ci/simulation/**', 'gate_chung/**', 'the_loai/**', 'ci/layer_plan.py', 'ci/remotion_b/components/**', 'ci/remotion_b/history/**', 'ci/remotion_b/history_scene.py', '.github/workflows/gate_chung.yml']
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      audit_round4:
+        description: Run the unchanged round4 MP4 through G1-G8 (expected red before fixes)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: D18-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: false
+env:
+  NLTK_DATA: ${{ github.workspace }}/work/gate_nlp
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+  PYTHONIOENCODING: utf-8
+jobs:
+  tests:
+    name: Common policy regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+          cache: pip
+          cache-dependency-path: gate_chung/requirements.txt
+      - run: python -m pip install -q -r gate_chung/requirements.txt
+      - uses: actions/cache@v4
+        with:
+          path: work/gate_nlp
+          key: D18-nlp-v1-${{ runner.os }}
+      - run: python -m gate_chung.setup
+      - uses: actions/cache@v4
+        with:
+          path: work/gate_ffmpeg_static
+          key: D18-full-ffmpeg-static-linux-amd64-v1
+      - name: Full FFmpeg and ffprobe for media regressions
+        run: |
+          if [ ! -x work/gate_ffmpeg_static/ffmpeg ] || [ ! -x work/gate_ffmpeg_static/ffprobe ]; then
+            mkdir -p work/gate_ffmpeg_static
+            curl -fL --retry 2 --connect-timeout 15 --max-time 150 https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -o work/gate_ffmpeg_static.tar.xz
+            tar -xJf work/gate_ffmpeg_static.tar.xz --strip-components=1 -C work/gate_ffmpeg_static
+          fi
+          echo "$GITHUB_WORKSPACE/work/gate_ffmpeg_static" >> "$GITHUB_PATH"
+          PATH="$GITHUB_WORKSPACE/work/gate_ffmpeg_static:$PATH" python -c "from gate_chung.video import capabilities; result=capabilities(); print(result); assert not result['missing']"
+      - run: python -m unittest discover -s gate_chung/tests -v
+  history:
+    name: History20s / same G1-G11 / both formats
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+          cache: pip
+          cache-dependency-path: |
+            ci_requirements.txt
+            gate_chung/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/cache@v4
+        with:
+          path: ci/remotion_b/node_modules
+          key: B-node-${{ runner.os }}-22-${{ hashFiles('ci/remotion_b/package-lock.json') }}
+      - uses: actions/cache@v4
+        id: media
+        with:
+          path: work/history_native
+          key: D18-history-native-${{ runner.os }}-${{ hashFiles('ci/remotion_b/history_scene.py','ci_requirements.txt') }}
+      - uses: actions/cache@v4
+        with:
+          path: work/gate_nlp
+          key: D18-nlp-v1-${{ runner.os }}
+      - name: Dependencies and full browser runtime
+        run: |
+          if [ '${{ steps.media.outputs.cache-hit }}' != 'true' ]; then bash ci/remotion_b/setup_native.sh manim; python -m pip install -q -r ci_requirements.txt; fi
+          bash ci/remotion_b/setup_native.sh browser
+          python -m pip install -q -r gate_chung/requirements.txt
+          python -m gate_chung.setup
+          if [ ! -x ci/remotion_b/node_modules/.bin/remotion ]; then npm ci --prefix ci/remotion_b --no-audit --no-fund; fi
+          echo "$GITHUB_WORKSPACE/ci/remotion_b/node_modules/@remotion/compositor-linux-x64-gnu" >> "$GITHUB_PATH"
+          npx --prefix ci/remotion_b remotion browser ensure
+      - name: Text-free history simulation at540p first
+        if: steps.media.outputs.cache-hit != 'true'
+        run: |
+          B_FORMAT=16x9 python -m manim render --resolution 960,540 --fps 30 --disable_caching --progress_bar none -v ERROR --media_dir work/history_native/16x9 ci/remotion_b/history_scene.py HistoryProof
+          B_FORMAT=9x16 python -m manim render --resolution 540,960 --fps 30 --disable_caching --progress_bar none -v ERROR --media_dir work/history_native/9x16 ci/remotion_b/history_scene.py HistoryProof
+      - name: Remotion typography, voice and measured concurrency
+        env:
+          B_CHROME: ${{ github.workspace }}/.remotion/chrome-headless-shell/linux64/chrome-headless-shell-linux64/chrome-headless-shell
+        run: |
+          mkdir -p ci/remotion_b/public
+          cp ban_sac/fonts/NotoSans-Regular.ttf ci/remotion_b/public/NotoSans-Regular.ttf
+          node ci/remotion_b/history/render.mjs
+      - name: Full measurement FFmpeg
+        if: always()
+        run: python ci/remotion_b/gate_ffmpeg.py
+      - name: Same G1-G11, no genre threshold changes
+        run: |
+          python ci/remotion_b/history/export_plan.py
+          set +e
+          python -m gate_chung --video work/D18_history/history_16x9.mp4 --plan work/D18_history/plan_16x9.json --genre the_loai/lich_su.json --out work/D18_history/gates_16x9
+          d18_land=$?
+          python -m gate_chung --video work/D18_history/history_9x16.mp4 --plan work/D18_history/plan_9x16.json --genre the_loai/lich_su.json --out work/D18_history/gates_9x16
+          d18_portrait=$?
+          exit $((d18_land || d18_portrait))
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: D18-history20s-540p
+          retention-days: 14
+          path: work/D18_history/
+  round4-audit:
+    name: Round4 original MP4 / before content fixes
+    if: github.event_name == 'workflow_dispatch' && inputs.audit_round4
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+      - uses: actions/cache@v4
+        with:
+          path: work/gate_nlp
+          key: D18-nlp-v1-${{ runner.os }}
+      - name: Audit dependencies
+        run: |
+          bash ci/remotion_b/setup_native.sh browser
+          python -m pip install -q -r gate_chung/requirements.txt
+          python -m gate_chung.setup
+      - name: Original round4 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: B-60s-540p
+          run-id: 40382935623
+          github-token: ${{ github.token }}
+          path: work/R4_CI
+      - run: python ci/remotion_b/gate_ffmpeg.py
+      - name: Export plan from original content and measured DOM
+        run: |
+          python ci/remotion_b/semantic_captions.py --alignment-out work/R4_CI/work/B/caption_alignment.json
+          python ci/remotion_b/export_gate_plan.py --video-root work/R4_CI/work/B --caption-alignment work/R4_CI/work/B/caption_alignment.json --out work/R4_plans
+      - name: Original MP4 quality verdict (a failure remains red)
+        run: |
+          set +e
+          python -m gate_chung --video work/R4_CI/work/B/B_60s_16x9.mp4 --plan work/R4_plans/16x9.json --genre the_loai/khoa_hoc_vat_ly.json --out work/R4_audit/16x9
+          d18_land=$?
+          python -m gate_chung --video work/R4_CI/work/B/B_60s_9x16.mp4 --plan work/R4_plans/9x16.json --genre the_loai/khoa_hoc_vat_ly.json --out work/R4_audit/9x16
+          d18_portrait=$?
+          exit $((d18_land || d18_portrait))
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: D18-round4-before-content-fixes
+          path: |
+            work/R4_audit/
+            work/R4_plans/

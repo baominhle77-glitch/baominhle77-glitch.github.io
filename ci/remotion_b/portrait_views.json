@@ -1,0 +1,43 @@
+{
+  "h4": {
+    "context": {
+      "camera_width": 1.0,
+      "camera_y": 0.45,
+      "dolly_amplitude": 0,
+      "camera_travel_y": 0
+    },
+    "detail": {
+      "shot": "macro",
+      "camera_width": 2.0,
+      "camera_width_start": 1.8,
+      "camera_y": 0.55,
+      "follow_soap": true
+    }
+  },
+  "c1": {
+    "context": {
+      "camera_width": 0.96,
+      "camera_y": 0.3
+    },
+    "detail": {
+      "camera_width": 2.3,
+      "camera_width_start": 2.0,
+      "camera_y": 0.2,
+      "target_x": 0.48,
+      "lock_elevation": true
+    }
+  },
+  "p1": {
+    "context": {
+      "camera_width": 0.96,
+      "camera_y": 0.3
+    },
+    "detail": {
+      "camera_width": 2.3,
+      "camera_width_start": 2.0,
+      "camera_y": 0.2,
+      "target_x": 0.48,
+      "lock_elevation": true
+    }
+  }
+}

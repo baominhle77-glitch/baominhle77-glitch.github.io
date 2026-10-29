@@ -1,0 +1,141 @@
+name: k1t3-mau-540
+on:
+  workflow_dispatch:
+    inputs:
+      beat:
+        description: "Beat ID (h1…k2) or all"
+        default: h1
+        required: true
+      format:
+        description: "Aspect ratio"
+        type: choice
+        options: [16x9, 9x16]
+        default: 16x9
+  pull_request:
+    branches: [studio-dung]
+    paths:
+      - "ban_sac/K1_canh/**"
+      - "ban_sac/fonts/**"
+      - "ci/review_k1t3.py"
+      - "ci/job_summary.py"
+      - "ci/publish_review_images.py"
+      - "ci/test_review_k1t3.py"
+      - "tools/nha_may_kenh.py"
+      - "out/M1_MARANGONI/storyboard.json"
+      - "tools/tap/ML_K1_t3.json"
+      - "ci/chay_mau_k1t3.py"
+      - "ci/chuyen_dong_vung.py"
+      - "ci/kiem_chuyen_dong_beat.py"
+      - ".github/workflows/k1t3_mau_540.yml"
+concurrency:
+  group: k1t3-mau-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  mau-540:
+    permissions:
+      contents: write
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'gpt/k1t3-c16-c17-01'
+    runs-on: windows-latest
+    timeout-minutes: 200
+    env:
+      PYTHONIOENCODING: utf-8
+      CLAUDE_OWNED_RUN_ROOT: D:/r
+      K1_MAU_540: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: Studio
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.9"
+      - name: Prepare Manim and ffmpeg
+        shell: pwsh
+        run: |
+          subst E: "$env:GITHUB_WORKSPACE"
+          New-Item -ItemType Directory -Force D:\r | Out-Null
+          New-Item -ItemType Directory -Force C:\Users\Admin\AppData\Local\Programs\Python | Out-Null
+          New-Item -ItemType Junction -Path C:\Users\Admin\AppData\Local\Programs\Python\Python311 -Target $env:pythonLocation | Out-Null
+          python -m pip install -q numpy==2.4.6 pillow==12.2.0
+          choco install ffmpeg -y --no-progress | Out-Null
+          python -m venv E:\Studio\venv_manim
+          E:\Studio\venv_manim\Scripts\python.exe -m pip install -q -r E:\Studio\ci_requirements.txt
+      - name: Regression checks for gates and exact frame clock
+        shell: pwsh
+        working-directory: E:\Studio
+        run: E:\Studio\venv_manim\Scripts\python.exe -m unittest discover -s ci -p "test_*.py" -v
+      - name: Dispatch one beat with native 3D render and gates
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        working-directory: E:\Studio
+        env:
+          REVIEW_BEAT: ${{ inputs.beat }}
+          REVIEW_FORMAT: ${{ inputs.format }}
+        run: |
+          E:\Studio\venv_manim\Scripts\python.exe ci\chay_ci.py --tap E:/Studio/tools/tap/ML_K1_t3.json --buoc ke_hoach,canh --bo-cuc ca_hai
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          E:\Studio\venv_manim\Scripts\python.exe ci\review_k1t3.py --beats $env:REVIEW_BEAT --formats $env:REVIEW_FORMAT
+      - name: Build 60s sample plus 35 native 3D middle stills and gates
+        if: github.event_name != 'workflow_dispatch'
+        shell: pwsh
+        working-directory: E:\Studio
+        run: |
+          E:\Studio\venv_manim\Scripts\python.exe ci\chay_mau_k1t3.py
+      - name: Host actual run sheets for inline Summary images
+        if: always()
+        shell: pwsh
+        working-directory: E:\Studio
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python ci/publish_review_images.py --root out/M1_MARANGONI_DUNG/_build
+      - name: Actual per-beat Job Summary
+        if: always()
+        shell: pwsh
+        working-directory: E:\Studio
+        run: python ci/job_summary.py --root out/M1_MARANGONI_DUNG/_build
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k1t3-mau-540
+          retention-days: 14
+          path: |
+            Studio/out/M1_MARANGONI_DUNG/_build/mau_540/
+            Studio/out/M1_MARANGONI_DUNG/_build/review_3d/
+            Studio/out/M1_MARANGONI_DUNG/_build/ke_hoach.json
+            Studio/out/M1_MARANGONI_DUNG/_build/published_images.json
+
+
+  chuyen-dong-vung:
+    name: chuyen-dong-vung (C17-8)
+    needs: mau-540
+    if: ${{ always() && github.event_name != 'workflow_dispatch' && github.head_ref == 'gpt/k1t3-c16-c17-01' }}
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.9"
+      - name: Dependencies for full-frame measurement
+        shell: pwsh
+        run: |
+          python -m pip install -q numpy==2.4.6
+          choco install ffmpeg -y --no-progress | Out-Null
+      - uses: actions/download-artifact@v4
+        with:
+          name: k1t3-mau-540
+          path: motion-input
+      - name: chuyen-dong-vung — all beats, both 540p formats
+        shell: pwsh
+        run: python ci/chuyen_dong_vung.py --root motion-input
+      - name: Full-frame Job Summary
+        if: always()
+        shell: pwsh
+        run: python ci/job_summary.py --root motion-input
+      - name: Upload chuyen_dong_vung.json even when gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k1t3-chuyen-dong-vung
+          retention-days: 14
+          path: motion-input/chuyen_dong_vung.json

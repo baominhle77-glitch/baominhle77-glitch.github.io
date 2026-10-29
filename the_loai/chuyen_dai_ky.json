@@ -1,0 +1,25 @@
+{
+  "palette": {
+    "ink": "#1C232B",
+    "primary": "#3F6A9E",
+    "accent": "#D1834F",
+    "light": "#A7ADB3",
+    "background": "#8E969D"
+  },
+  "id": "chuyen_dai_ky",
+  "name": "Chuyện dài kỳ",
+  "simulation_types": [
+    "nhân vật",
+    "bối cảnh",
+    "diễn biến trạng thái"
+  ],
+  "main_scenes": [
+    "cảnh nhân vật tương tác",
+    "thay đổi tình huống"
+  ],
+  "real_material_types": [
+    "tư liệu bối cảnh",
+    "minh hoạ có nguồn",
+    "clip AI có nhãn"
+  ]
+}

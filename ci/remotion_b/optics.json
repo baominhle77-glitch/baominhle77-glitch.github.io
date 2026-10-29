@@ -1,0 +1,68 @@
+{
+  "h1": {
+    "ellipse_ratio": 0.34,
+    "vessel": "ceramic",
+    "shot": "wide",
+    "impact": 1.0,
+    "seed": 219,
+    "environment": "dark"
+  },
+  "h2": {
+    "ellipse_ratio": 0.33,
+    "vessel": "glass",
+    "shot": "wide",
+    "impact": 0.05,
+    "feeding": true,
+    "camera_y": 0.48,
+    "seed": 220
+  },
+  "h3": {
+    "ellipse_ratio": 0.3,
+    "vessel": "glass",
+    "shot": "wide",
+    "impact": 0.1,
+    "feeding": true,
+    "nozzle": true,
+    "camera_width": 0.84,
+    "seed": 221,
+    "environment": "dark"
+  },
+  "h4": {
+    "ellipse_ratio": 0.43,
+    "vessel": "glass",
+    "shot": "wide",
+    "camera_width": 0.73,
+    "impact": 0.15,
+    "feeding": true,
+    "molecules": false,
+    "environment": "backlit",
+    "seed": 222,
+    "camera_y": 0.4,
+    "dolly_amplitude": 0.12,
+    "camera_travel_y": 0.18
+  },
+  "c1": {
+    "ellipse_ratio": 0.28,
+    "vessel": "glass",
+    "shot": "wide",
+    "impact": 0.15,
+    "feeding": true,
+    "molecules": false,
+    "section": true,
+    "environment": "dark",
+    "seed": 223,
+    "camera_y": 0.39,
+    "camera_width": 0.78
+  },
+  "p1": {
+    "ellipse_ratio": 0.28,
+    "vessel": "glass",
+    "shot": "wide",
+    "impact": 0.05,
+    "section": true,
+    "environment": "backlit",
+    "seed": 224,
+    "camera_y": 0.39,
+    "camera_width": 0.78
+  }
+}

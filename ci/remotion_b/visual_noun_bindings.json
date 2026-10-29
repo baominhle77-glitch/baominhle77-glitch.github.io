@@ -1,0 +1,22 @@
+{
+  "diffusion": {
+    "r1": "molecule",
+    "r2": "molecule",
+    "r3": "molecule",
+    "r4": "molecule"
+  },
+  "micelle": {
+    "p3": "caption",
+    "p4": "micelle",
+    "v6": "caption",
+    "w5": "caption",
+    "w7": "caption"
+  },
+  "meniscus": {
+    "w6": "edge",
+    "k2": "caption"
+  },
+  "meniscus lab": {
+    "k2": "caption"
+  }
+}

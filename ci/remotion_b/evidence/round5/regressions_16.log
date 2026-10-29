@@ -1,0 +1,21 @@
+test_actual_concurrency_must_equal_configuration (gate_chung.tests.test_regressions.Regressions.test_actual_concurrency_must_equal_configuration) ... ok
+test_blurred_crop_has_less_edge_frequency (gate_chung.tests.test_regressions.Regressions.test_blurred_crop_has_less_edge_frequency) ... ok
+test_caption_boundary_uses_the_decoded_frame_clock (gate_chung.tests.test_regressions.Regressions.test_caption_boundary_uses_the_decoded_frame_clock) ... ok
+test_caption_padding_cannot_create_two_simultaneous_boxes (gate_chung.tests.test_regressions.Regressions.test_caption_padding_cannot_create_two_simultaneous_boxes) ... ok
+test_color_size_is_inferred_without_self_declared_attributes (gate_chung.tests.test_regressions.Regressions.test_color_size_is_inferred_without_self_declared_attributes) ... ok
+test_core_has_no_episode_import (gate_chung.tests.test_regressions.Regressions.test_core_has_no_episode_import) ... ok
+test_decimal_speech_is_screen_data_not_an_image_object (gate_chung.tests.test_regressions.Regressions.test_decimal_speech_is_screen_data_not_an_image_object) ... ok
+test_foreign_object_crossing_label (gate_chung.tests.test_regressions.Regressions.test_foreign_object_crossing_label) ... ok
+test_four_second_repeat_despite_flicker (gate_chung.tests.test_regressions.Regressions.test_four_second_repeat_despite_flicker) ... ok
+test_genre_cannot_override_thresholds (gate_chung.tests.test_regressions.Regressions.test_genre_cannot_override_thresholds) ... ok
+test_meaningless_caption_boundaries (gate_chung.tests.test_regressions.Regressions.test_meaningless_caption_boundaries) ... ok
+test_measurement_context_and_predicates_are_shared_roles (gate_chung.tests.test_regressions.Regressions.test_measurement_context_and_predicates_are_shared_roles) ... ok
+test_positive_nouns_without_images_fail_g5 (gate_chung.tests.test_regressions.Regressions.test_positive_nouns_without_images_fail_g5) ... ok
+test_preposition_does_not_remove_ship_or_boat (gate_chung.tests.test_regressions.Regressions.test_preposition_does_not_remove_ship_or_boat) ... ok
+test_short_or_wrong_colored_arrow_cannot_hide_behind_plan_claim (gate_chung.tests.test_regressions.Regressions.test_short_or_wrong_colored_arrow_cannot_hide_behind_plan_claim) ... ok
+test_twenty_eight_of_thirty_is_acceptance (gate_chung.tests.test_regressions.Regressions.test_twenty_eight_of_thirty_is_acceptance) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 6.281s
+
+OK

@@ -1,0 +1,320 @@
+{
+  "scope": "270p single midpoint per beat, no captions, source footage included; content selection only, final G1 verdict remains CI",
+  "rows": [
+    {
+      "beat": "h1",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 255.0,
+        "9x16": 255.0
+      },
+      "passed": true
+    },
+    {
+      "beat": "h2",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 55.887191358024694,
+        "9x16": 27.628456790123458
+      },
+      "passed": true
+    },
+    {
+      "beat": "h3",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 22.094228395061727,
+        "9x16": 14.771018518518519
+      },
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 51.78364197530864,
+        "9x16": 58.995061728395065
+      },
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 14.505956790123458,
+        "9x16": 38.016604938271605
+      },
+      "passed": true
+    },
+    {
+      "beat": "p1",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 22.267654320987653,
+        "9x16": 26.26506172839506
+      },
+      "passed": true
+    },
+    {
+      "beat": "p2",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 18.85067901234568,
+        "9x16": 24.619629629629628
+      },
+      "passed": true
+    },
+    {
+      "beat": "p3",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 15.815,
+        "9x16": 20.550925925925927
+      },
+      "passed": true
+    },
+    {
+      "beat": "p4",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 24.55820987654321,
+        "9x16": 22.187283950617285
+      },
+      "passed": true
+    },
+    {
+      "beat": "p5",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 18.894166666666667,
+        "9x16": 32.4087037037037
+      },
+      "passed": true
+    },
+    {
+      "beat": "p6",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 39.36978395061728,
+        "9x16": 18.44996913580247
+      },
+      "passed": true
+    },
+    {
+      "beat": "c2",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 24.03033950617284,
+        "9x16": 22.981296296296296
+      },
+      "passed": true
+    },
+    {
+      "beat": "v1",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 24.55175925925926,
+        "9x16": 18.81283950617284
+      },
+      "passed": true
+    },
+    {
+      "beat": "v2",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 15.40925925925926,
+        "9x16": 18.30179012345679
+      },
+      "passed": true
+    },
+    {
+      "beat": "v3",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 31.316635802469136,
+        "9x16": 17.865925925925925
+      },
+      "passed": true
+    },
+    {
+      "beat": "v4",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 18.447561728395062,
+        "9x16": 18.267746913580247
+      },
+      "passed": true
+    },
+    {
+      "beat": "v5",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 34.55317901234568,
+        "9x16": 15.507932098765432
+      },
+      "passed": true
+    },
+    {
+      "beat": "v6",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 23.440956790123458,
+        "9x16": 19.85638888888889
+      },
+      "passed": true
+    },
+    {
+      "beat": "v7",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 32.56354938271605,
+        "9x16": 17.872530864197532
+      },
+      "passed": true
+    },
+    {
+      "beat": "c3",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 19.053148148148146,
+        "9x16": 16.746358024691357
+      },
+      "passed": true
+    },
+    {
+      "beat": "w1",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 18.63608024691358,
+        "9x16": 16.16438271604938
+      },
+      "passed": true
+    },
+    {
+      "beat": "w2",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 18.133086419753088,
+        "9x16": 21.075432098765432
+      },
+      "passed": true
+    },
+    {
+      "beat": "w3",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 18.71148148148148,
+        "9x16": 22.424814814814816
+      },
+      "passed": true
+    },
+    {
+      "beat": "w4",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 23.83219135802469,
+        "9x16": 22.493179012345678
+      },
+      "passed": true
+    },
+    {
+      "beat": "w5",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 35.865586419753086,
+        "9x16": 15.988765432098765
+      },
+      "passed": true
+    },
+    {
+      "beat": "w6",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 28.069166666666668,
+        "9x16": 15.911543209876543
+      },
+      "passed": true
+    },
+    {
+      "beat": "w7",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 26.091635802469135,
+        "9x16": 16.96530864197531
+      },
+      "passed": true
+    },
+    {
+      "beat": "b1",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 15.634598765432099,
+        "9x16": 16.897283950617282
+      },
+      "passed": true
+    },
+    {
+      "beat": "r1",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 15.883888888888889,
+        "9x16": 14.934074074074074
+      },
+      "passed": true
+    },
+    {
+      "beat": "r2",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 32.56135802469136,
+        "9x16": 15.497283950617284
+      },
+      "passed": true
+    },
+    {
+      "beat": "r3",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 20.714197530864197,
+        "9x16": 15.819845679012346
+      },
+      "passed": true
+    },
+    {
+      "beat": "r4",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 45.134413580246914,
+        "9x16": 30.657777777777778
+      },
+      "passed": true
+    },
+    {
+      "beat": "s8",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 24.059783950617284,
+        "9x16": 14.621635802469136
+      },
+      "passed": true
+    },
+    {
+      "beat": "k1",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 26.18725308641975,
+        "9x16": 16.85929012345679
+      },
+      "passed": true
+    },
+    {
+      "beat": "k2",
+      "attempts": 1,
+      "minimum_scene_difference": {
+        "16x9": 23.890462962962964,
+        "9x16": 22.381543209876543
+      },
+      "passed": true
+    }
+  ]
+}

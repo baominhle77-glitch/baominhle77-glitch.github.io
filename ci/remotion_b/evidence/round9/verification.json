@@ -1,0 +1,76 @@
+{
+  "render_sha": "dd2c9816f57c3d1c12bf70c6d8b5b7cbcf24ae6e",
+  "run": 40474973068,
+  "history_run": 40474752942,
+  "regression_tests": "gate_chung/tests/test_aspect.py",
+  "total_common_tests": 22,
+  "gate_summary": {
+    "K1 16x9": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT",
+      "G9": "DAT"
+    },
+    "lich_su 16x9": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT",
+      "G9": "DAT"
+    },
+    "K1 9x16": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT",
+      "G9": "DAT"
+    },
+    "lich_su 9x16": {
+      "G1": "DAT",
+      "G2": "DAT",
+      "G3": "DAT",
+      "G4": "DAT",
+      "G5": "DAT",
+      "G6": "DAT",
+      "G7": "DAT",
+      "G8": "DAT",
+      "G9": "DAT"
+    }
+  },
+  "runtime": [
+    {
+      "format": "16x9",
+      "shortSide": 540,
+      "wall_s": 208.335637117,
+      "desired_concurrency": 2,
+      "cpu_capacity": 1,
+      "configured_concurrency": 1,
+      "effective_concurrency": 1
+    },
+    {
+      "format": "9x16",
+      "shortSide": 540,
+      "wall_s": 233.728155922,
+      "desired_concurrency": 2,
+      "cpu_capacity": 1,
+      "configured_concurrency": 1,
+      "effective_concurrency": 1
+    }
+  ],
+  "C13_remaining": [],
+  "FREEZE_remaining": [],
+  "remaining_optional_work": "59.4s narration still describes arrows; retain original TTS this round. See ci/remotion_b/remaining_work.md."
+}

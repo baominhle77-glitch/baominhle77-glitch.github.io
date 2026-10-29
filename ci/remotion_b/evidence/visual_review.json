@@ -1,0 +1,38 @@
+{
+  "round": 14,
+  "pass_geometry": true,
+  "exposed_mesh_edges": 0,
+  "particle_limit": null,
+  "pepper_count": 640,
+  "pepper_size_range": [
+    0.6,
+    1.4
+  ],
+  "pepper_colors": "correlated brown/gray/black, no independent RGB green/purple flecks",
+  "samples_per_beat": 3,
+  "reviewed_images": 36,
+  "source_digest": "4c56814e86cbcd2eb0cf2a2ba636df3154df1dda01145062067d6c01b918985a",
+  "c13_errors": [],
+  "scope": "KHUON v1 content preflight: simulation-only 270p/15fps; 3 frames per beat per format reviewed. Actual 540p/1080p Remotion, G1-G11/G12 and GĐ eye review remain pending.",
+  "physical_geometry": "Verbatim GĐ StageOm fit; wide whole vessel and two native portrait cameras, upper40%/lower60%; no independent-axis scaling.",
+  "findings": [
+    "6 template Python files copied byte for byte from codex-khung 3dd997bb; source manifest in khuon_v1/sha256.json.",
+    "Blueprint true TTS/frame bounds cover0–60s; analytic main area min76.1%, margin min4.0%; event gap max2.8s.",
+    "Simulation preview G12 DAT both formats. Wide measured area min72.7%; portrait min70.0%; no static streak. These are270p previews, not final MP4 gate results.",
+    "No crop-only empty macro pane: portrait uses the two native StageOm views and source-specific lower panel with matched raster height.",
+    "L7 remains a content/template API issue: source reference color measured; Optics v1 has no water-color parameter. Protected renderer files were not edited.",
+    "Section return-cell detail is small in upper portrait pane; Chairman/GĐ eye review is still required."
+  ],
+  "tests_passed": 44,
+  "requested_MP4_contact_seconds": [
+    0.5,
+    5,
+    11.5,
+    17,
+    22,
+    30,
+    40,
+    50,
+    59.4
+  ]
+}

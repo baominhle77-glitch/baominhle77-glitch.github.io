@@ -1,0 +1,38 @@
+[
+  {
+    "beat": "h1",
+    "duration": 6,
+    "width": 540,
+    "height": 480,
+    "fps": 30,
+    "wall_s": 18.98135155700001,
+    "cpu_s": 21.694313,
+    "bytes": 224519,
+    "source_digest": "125440e4a62ffec2e5dee89f1cbbc6cd2150af2e26ebc55d2f0e5dd830f45b07",
+    "cache_reused": false
+  },
+  {
+    "beat": "h2",
+    "duration": 4,
+    "width": 540,
+    "height": 480,
+    "fps": 30,
+    "wall_s": 8.319989340999996,
+    "cpu_s": 9.693508999999999,
+    "bytes": 331688,
+    "source_digest": "d514d1e621225b92ae94a5544e6644005497c8c7d0f59f818e6c4109621501ee",
+    "cache_reused": false
+  },
+  {
+    "beat": "h3",
+    "duration": 7,
+    "width": 540,
+    "height": 480,
+    "fps": 30,
+    "wall_s": 21.632715684999994,
+    "cpu_s": 25.460196,
+    "bytes": 480405,
+    "source_digest": "f46c850a9229094aca15712606ac844feb75e11da711e122f71c74df23496a68",
+    "cache_reused": false
+  }
+]

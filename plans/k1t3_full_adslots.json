@@ -1,0 +1,34 @@
+{
+  "duration_s": 521.2666666666667,
+  "eligible_duration": true,
+  "source": "storyboard.meta.adslots; revised actual TTS",
+  "slots": [
+    {
+      "beat": "c2",
+      "time": 154.36666666666667,
+      "kind": "mid-roll candidate",
+      "cut": "before beat; never inside narration",
+      "previous_beat": "p6",
+      "previous_spoken_end": 153.47916666666666,
+      "following_spoken_start": 155.97866666666667
+    },
+    {
+      "beat": "c3",
+      "time": 263.6666666666667,
+      "kind": "mid-roll candidate",
+      "cut": "before beat; never inside narration",
+      "previous_beat": "v7",
+      "previous_spoken_end": 262.76666666666665,
+      "following_spoken_start": 265.2786666666667
+    },
+    {
+      "beat": "b1",
+      "time": 406.46666666666664,
+      "kind": "mid-roll candidate",
+      "cut": "before beat; never inside narration",
+      "previous_beat": "w7",
+      "previous_spoken_end": 405.575,
+      "following_spoken_start": 408.07866666666666
+    }
+  ]
+}

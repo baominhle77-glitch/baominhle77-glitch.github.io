@@ -1,0 +1,194 @@
+{
+  "scope": "270p/15fps simulation preview, h4/c1 only; fixed G1 coarse SSIM math at integer-second pairs, all blueprint text regions masked; final Remotion MP4 verdict remains CI",
+  "rows": [
+    {
+      "beat": "h4",
+      "start": 24,
+      "end": 28,
+      "ssim_4s": 0.925988,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 25,
+      "end": 29,
+      "ssim_4s": 0.936571,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 26,
+      "end": 30,
+      "ssim_4s": 0.956911,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 27,
+      "end": 31,
+      "ssim_4s": 0.916026,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 28,
+      "end": 32,
+      "ssim_4s": 0.929831,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 29,
+      "end": 33,
+      "ssim_4s": 0.959921,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 30,
+      "end": 34,
+      "ssim_4s": 0.947146,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 31,
+      "end": 35,
+      "ssim_4s": 0.86279,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 32,
+      "end": 36,
+      "ssim_4s": 0.861083,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 33,
+      "end": 37,
+      "ssim_4s": 0.93612,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 34,
+      "end": 38,
+      "ssim_4s": 0.941529,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 35,
+      "end": 39,
+      "ssim_4s": 0.868559,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 36,
+      "end": 40,
+      "ssim_4s": 0.826492,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 37,
+      "end": 41,
+      "ssim_4s": 0.865446,
+      "passed": true
+    },
+    {
+      "beat": "h4",
+      "start": 38,
+      "end": 42,
+      "ssim_4s": 0.916242,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 43,
+      "end": 47,
+      "ssim_4s": 0.928962,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 44,
+      "end": 48,
+      "ssim_4s": 0.929428,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 45,
+      "end": 49,
+      "ssim_4s": 0.953357,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 46,
+      "end": 50,
+      "ssim_4s": 0.891911,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 47,
+      "end": 51,
+      "ssim_4s": 0.868293,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 48,
+      "end": 52,
+      "ssim_4s": 0.932943,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 49,
+      "end": 53,
+      "ssim_4s": 0.948403,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 50,
+      "end": 54,
+      "ssim_4s": 0.899081,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 51,
+      "end": 55,
+      "ssim_4s": 0.873524,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 52,
+      "end": 56,
+      "ssim_4s": 0.948928,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 53,
+      "end": 57,
+      "ssim_4s": 0.885466,
+      "passed": true
+    },
+    {
+      "beat": "c1",
+      "start": 54,
+      "end": 58,
+      "ssim_4s": 0.901095,
+      "passed": true
+    }
+  ]
+}

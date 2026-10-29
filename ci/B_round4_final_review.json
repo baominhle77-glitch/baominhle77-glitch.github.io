@@ -1,0 +1,68 @@
+{
+  "render_sha": "c0baf264bc513158440729534f7ccc93b6579505",
+  "run": 40382935623,
+  "reviewed_at": "2026-10-26T19:15:38.869964+00:00",
+  "actual_ci_mp4_frames_reviewed": 36,
+  "samples_per_beat_per_format": 3,
+  "resolution": "native 540p",
+  "C13_errors": [],
+  "freeze_intervals": [
+    {
+      "format": "16x9",
+      "total_s": 0,
+      "max_s": 0,
+      "intervals": [],
+      "pass_freeze": true,
+      "command_ok": true
+    },
+    {
+      "format": "9x16",
+      "total_s": 0,
+      "max_s": 0,
+      "intervals": [],
+      "pass_freeze": true,
+      "command_ok": true
+    }
+  ],
+  "exposed_mesh_edges": 0,
+  "semantic_caption_alignment": "all immutable TTS words matched; phrases2–5 display words",
+  "portrait_Gemini": "focal crop covers the canvas, no letterbox",
+  "videos": [
+    {
+      "file": "B_60s_16x9.mp4",
+      "bytes": 15527330,
+      "sha256": "ea9b52cc82c4a8c2174bc46a32d9afb2168d928ad75727c36b99345054c79055",
+      "ffprobe": {
+        "width": 960,
+        "height": 540,
+        "r_frame_rate": "30/1",
+        "duration": "60.000000",
+        "nb_frames": "1800",
+        "side_data_list": [
+          {}
+        ]
+      }
+    },
+    {
+      "file": "B_60s_9x16.mp4",
+      "bytes": 14863383,
+      "sha256": "cfbde3fe3a835164411d0265cf5b9cf7d1a34ae9885bebc9363d8bed9b452c89",
+      "ffprobe": {
+        "width": 540,
+        "height": 960,
+        "r_frame_rate": "30/1",
+        "duration": "60.000000",
+        "nb_frames": "1800",
+        "side_data_list": [
+          {}
+        ]
+      }
+    }
+  ],
+  "findings": [
+    "Viewed all36 actual CI frames, plus both12-frame CI contact sheets.",
+    "Protected title/legend/caption panels, no molecules cutting text; portrait model fills the lower field.",
+    "Closed dish and water; no missing wedge, exposed grid or physically overlapping spheres.",
+    "Soap coverage evolves, flow is continuous, optical camera changes every3.6s; orange arrows match59s narration."
+  ]
+}

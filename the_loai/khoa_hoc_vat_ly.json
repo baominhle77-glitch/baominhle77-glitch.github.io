@@ -1,0 +1,24 @@
+{
+  "palette": {
+    "ink": "#1C232B",
+    "primary": "#3F6A9E",
+    "accent": "#D1834F",
+    "light": "#A7ADB3",
+    "background": "#8E969D"
+  },
+  "id": "khoa_hoc_vat_ly",
+  "name": "Khoa học vật lý",
+  "simulation_types": [
+    "mô hình vật chất",
+    "trường vận tốc",
+    "đồ thị quan hệ"
+  ],
+  "main_scenes": [
+    "thí nghiệm",
+    "mô hình cơ chế"
+  ],
+  "real_material_types": [
+    "video thí nghiệm có nguồn",
+    "clip AI có nhãn"
+  ]
+}

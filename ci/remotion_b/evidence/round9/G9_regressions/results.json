@@ -1,0 +1,224 @@
+{
+  "uniform": {
+    "passed": true,
+    "rows": [
+      {
+        "start": 0,
+        "end": 1,
+        "passed": true,
+        "detail": "G9 source-layer coverage",
+        "layers": [
+          "panel"
+        ]
+      },
+      {
+        "start": 0,
+        "end": 1,
+        "passed": true,
+        "detail": "G9 static source ratio / equal scales / explicit crop",
+        "layer": "panel",
+        "source_dimensions": [
+          400,
+          240
+        ],
+        "source_crop": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "scale_x": 1,
+        "scale_y": 1,
+        "scale_error": 0.0,
+        "aspect_error": 0.0,
+        "crop_declared": false,
+        "limit": 0.005
+      },
+      {
+        "start": 0.5,
+        "end": 1,
+        "passed": true,
+        "detail": "G9 pixel registration: source and rendered panel must have equal axis scales",
+        "layer": "panel",
+        "source_time": 0.5,
+        "limit": 0.01,
+        "axis_scale": [
+          1.0000115435499144,
+          0.9999643458653394
+        ],
+        "anisotropy": 4.7e-05,
+        "inliers": 1695,
+        "source_support": [
+          394.4135437011719,
+          234.82553100585938
+        ],
+        "measured_bbox": [
+          99.99756557711959,
+          99.99301900625105,
+          400.01210574033854,
+          240.00491637355745
+        ],
+        "matrix": [
+          [
+            1.0000115121962383,
+            -3.1253591013389453e-05,
+            0.005066438962799125
+          ],
+          [
+            3.366523465992712e-05,
+            0.9999643761653895,
+            -0.006980993748954223
+          ]
+        ]
+      }
+    ]
+  },
+  "stretch_1_3": {
+    "passed": false,
+    "rows": [
+      {
+        "start": 0,
+        "end": 1,
+        "passed": true,
+        "detail": "G9 source-layer coverage",
+        "layers": [
+          "panel"
+        ]
+      },
+      {
+        "start": 0,
+        "end": 1,
+        "passed": true,
+        "detail": "G9 static source ratio / equal scales / explicit crop",
+        "layer": "panel",
+        "source_dimensions": [
+          400,
+          240
+        ],
+        "source_crop": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "scale_x": 1,
+        "scale_y": 1,
+        "scale_error": 0.0,
+        "aspect_error": 0.0,
+        "crop_declared": false,
+        "limit": 0.005
+      },
+      {
+        "start": 0.5,
+        "end": 1,
+        "passed": false,
+        "detail": "G9 pixel registration: source and rendered panel must have equal axis scales",
+        "layer": "panel",
+        "source_time": 0.5,
+        "limit": 0.01,
+        "axis_scale": [
+          1.3001600705149285,
+          1.000049993115806
+        ],
+        "anisotropy": 0.300095,
+        "inliers": 1141,
+        "source_support": [
+          394.6204833984375,
+          234.0535430908203
+        ],
+        "measured_bbox": [
+          99.98202931576195,
+          100.06117104823596,
+          400.03771146297,
+          312.0491840190611
+        ],
+        "matrix": [
+          [
+            1.0000500013274325,
+            7.379554998750001e-05,
+            -0.017970684238054854
+          ],
+          [
+            2.6922952215853212e-05,
+            1.300160061825728,
+            0.0611710482359654
+          ]
+        ]
+      }
+    ]
+  },
+  "cover_crop": {
+    "passed": true,
+    "rows": [
+      {
+        "start": 0,
+        "end": 1,
+        "passed": true,
+        "detail": "G9 source-layer coverage",
+        "layers": [
+          "panel"
+        ]
+      },
+      {
+        "start": 0,
+        "end": 1,
+        "passed": true,
+        "detail": "G9 static source ratio / equal scales / explicit crop",
+        "layer": "panel",
+        "source_dimensions": [
+          400,
+          240
+        ],
+        "source_crop": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "scale_x": 1,
+        "scale_y": 1,
+        "scale_error": 0.0,
+        "aspect_error": 0.0,
+        "crop_declared": true,
+        "limit": 0.005
+      },
+      {
+        "start": 0.5,
+        "end": 1,
+        "passed": true,
+        "detail": "G9 pixel registration: source and rendered panel must have equal axis scales",
+        "layer": "panel",
+        "source_time": 0.5,
+        "limit": 0.01,
+        "axis_scale": [
+          1.0000957450696766,
+          0.9999764193805453
+        ],
+        "anisotropy": 0.000119,
+        "inliers": 984,
+        "source_support": [
+          233.41659545898438,
+          234.25045776367188
+        ],
+        "measured_bbox": [
+          19.97819082034806,
+          100.00242251098962,
+          400.04317787288346,
+          239.99600291398102
+        ],
+        "matrix": [
+          [
+            1.000094309286609,
+            -2.2725659332717272e-05,
+            -80.01635502141208
+          ],
+          [
+            -3.294243419724914e-06,
+            0.9999778550692214,
+            0.0037402083575035485
+          ]
+        ]
+      }
+    ]
+  }
+}
