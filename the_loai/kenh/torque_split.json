@@ -47,7 +47,7 @@
   "manim_thu_540": {
    "tai": "render",
    "ram_gb": 2.0,
-   "lenh": "{py} -X utf8 {dc}/tram_dau.py manim_thu --ra '{so}' --canh-dir '{canh_dir}'",
+   "lenh": "{py} -X utf8 {dc}/tram_dau.py manim_thu --ra '{so}' --canh-dir '{canh_dir}' --tap '{canh_dir}/tap/{ma}.json' --ve",
    "ghi_chu": "v2: kiem du lop Manim cho moi canh; render 1 khung/beat khi du lop (v3)"
   },
   "render_du": {

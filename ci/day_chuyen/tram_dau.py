@@ -7,7 +7,7 @@ storyboard.json (meta + beats) + lớp bổ sung HS (bo_sung.json) + .srt lời 
   python tram_dau.py ho_so     --sb S --bs B --ra DIR
   python tram_dau.py kiem_tinh --ra DIR [--soat soat_d16.py]
   python tram_dau.py tts       --sb S --srt F --audio A --ra DIR
-  python tram_dau.py manim_thu --ra DIR --canh-dir D     (1 khung/beat 540p; cảnh thiếu lớp Manim -> TRƯỢT, liệt kê)
+  python tram_dau.py manim_thu --ra DIR --canh-dir D [--ve --tap T]  (cảnh thiếu lớp Manim -> TRƯỢT; --ve: vẽ 1 khung/beat 540p hai khổ)
 
 Mỗi trạm ghi DIR/<tram>.json {"dat": bool, "loi": [...], ...} và thoát rc 0 khi ĐẠT, 1 khi TRƯỢT.
 Chỉ ĐỌC nguồn; mọi tệp ghi ra nằm trong DIR (sổ tập của dây chuyền).
@@ -119,6 +119,7 @@ def t_so_lieu(a):
 
 def t_ho_so(a):
     sb, bs = doc(a.sb), doc(a.bs)
+    bang = bang_nguon(bs)
     lop = bs.get("lop_theo_canh") or {}
     clip = {}
     for c in bs.get("clip_that") or []:
@@ -131,6 +132,9 @@ def t_ho_so(a):
             loi.append(f"{b['id']}: canh {b.get('scene')} chua co lop xa/gan + bong trong bo_sung.lop_theo_canh")
         if b["id"] in clip:
             b["clip_that"] = clip[b["id"]]
+        n = bang.get(b.get("source"))
+        if n and n.get("tren_man") and b.get("source_text") != n["tren_man"]:
+            b["source_text"] = n["tren_man"]  # chu nguon tren man luon theo bang nguon da kiem (tram nguon)
     sb.setdefault("meta", {})["bo_sung"] = Path(a.bs).as_posix()
     sb["meta"]["C7"] = bs.get("meta_bo_sung", {}).get("C7")
     ra = Path(a.ra)
@@ -178,14 +182,34 @@ def t_manim_thu(a):
         co |= set(re.findall(r"^class\s+(\w+)\s*\(", f.read_text(encoding="utf-8", errors="replace"), re.M))
     thieu = [c for c in canh if c not in co]
     loi = [f"canh {c}: chua co lop Manim trong {a.canh_dir} (khuon beat kenh)" for c in thieu]
-    return ket(a.ra, "manim_thu", loi, canh_can=canh, canh_co=sorted(co & set(canh)))
+    khung = []
+    if a.ve and not loi:
+        # D16: ve thu 540p MOT khung/beat (giua beat) ca hai kho; BelowNormal de khong lam cham hang render
+        ve = Path(a.canh_dir) / "ve_beat.py"
+        thu = Path(a.ra) / "manim_thu"
+        for b in sb["beats"]:
+            for kho in ("16x9", "9x16"):
+                lenh = [sys.executable, "-X", "utf8", str(ve), "--sb", str(Path(a.ra) / "storyboard_d16.json"), "--beat", b["id"],
+                        "--kho", kho, "--ra", str(thu), "--khung", str(a.u)]
+                if a.tap:
+                    lenh += ["--tap", a.tap]
+                r = subprocess.run(lenh, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                   creationflags=0x4000 if sys.platform == "win32" else 0)
+                tep = thu / f"{b['id']}_{kho}.png"
+                if r.returncode or not tep.exists():
+                    loi.append(f"{b['id']} {kho}: ve khung loi rc={r.returncode}: {(r.stderr or r.stdout).strip()[-300:]}")
+                else:
+                    khung.append(tep.as_posix())
+    return ket(a.ra, "manim_thu", loi, canh_can=canh, canh_co=sorted(co & set(canh)), khung=khung)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("tram", choices=["nguon", "loi", "so_lieu", "ho_so", "kiem_tinh", "tts", "manim_thu"])
-    for k in ("sb", "bs", "srt", "audio", "ra", "canh-dir"):
+    for k in ("sb", "bs", "srt", "audio", "ra", "canh-dir", "tap"):
         ap.add_argument(f"--{k}")
+    ap.add_argument("--ve", action="store_true", help="manim_thu: ve that 1 khung/beat 540p")
+    ap.add_argument("--u", type=float, default=0.5, help="manim_thu: vi tri khung trong beat (0..1)")
     ap.add_argument("--soat", default="E:/Studio/out/_ho_so/TS_K4_t3/_lam/soat_d16.py")
     a = ap.parse_args()
     sys.exit({"nguon": t_nguon, "loi": t_loi, "so_lieu": t_so_lieu, "ho_so": t_ho_so, "kiem_tinh": t_kiem_tinh,
