@@ -22,6 +22,13 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-30 01:35 GMT+7 — Claude Code (GĐ Studio) — BOI-20261030-01 — web bói: đổi tuyến cầu nối AI /gemini -> /claude
+
+- Lệnh Chủ tịch 30/10: não thật của cầu nối máy nhà là Claude haiku-5-5, đổi hết tên tuyến /gemini thành /claude, không giữ bí danh.
+- Sửa: `boi/js/ai.js` (LOCAL_BASE), `boi/js/store.js` (ping đường hầm), `boi/dao-tao/dao-tao-core.js` (goc), `boi/test.mjs`, `boi/sw.js` (CACHE boi-v20 để máy khách tải mã mới).
+- Cầu nối `E:/Studio/tools/boi_cau_noi_ai.mjs` và đường hầm đổi cùng lúc (ngoài repo). Tên nhà cung cấp "gemini" trong Cài đặt (khoá Google riêng) giữ nguyên vì đó đúng là Gemini.
+- Test: `node boi/test.mjs` 69/69 đạt; validate-coordination ok; check-public-content ok.
+
 ### 2026-10-27 11:48 GMT+7 — Claude Code — BOI-20261027-01 — web bói: chọn bài từng tầng, chống mất dấu (PR #151)
 - Lệnh chủ web + GĐ (vòng 1–3). Nhánh `claude/sleepy-babbage-z3mzgb` (base `676b33c`, đã merge `main` mới nhất). Sửa `boi/**` (`js/core.js`, `state.js`, `pick.js` mới, `views.js`, `ai.js`, `store.js`, `insight.js`, `reading.js`, `markdown.js`, `css/app.css`, `sw.js` → `boi-v8`, `test.mjs`, `MAU_GIAI.md`, `VAN_PHONG_READER.md` mới, `TIEN_DO.md` mục 23–24).
 - Lá úp một mặt sau không số; chọn bài từng tầng (Lưu → xáo lại đủ bộ → Giải bài); bảng ánh xạ mới mỗi câu hỏi và mỗi lần Rút thêm (seed `crypto.getRandomValues`, mỗi tầng Fisher–Yates riêng, không ghi localStorage); lá ra lại ở nhiều tầng = chủ đề lặp lại.

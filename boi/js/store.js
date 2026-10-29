@@ -66,7 +66,7 @@ export async function probeBridge(fetchImpl = globalThis.fetch, { on = cauNoiAn(
   // không có mã ghép vẫn dò: cầu nối nhận trang web bói theo Origin (25/10)
   try {
     const url = await docDiaChiCauNoi(fetchImpl, listMs);
-    if (url && await ping(fetchImpl, url + "/gemini", token, xaMs)) { via.base = url + "/gemini"; via.token = token; ok = true; }
+    if (url && await ping(fetchImpl, url + "/claude", token, xaMs)) { via.base = url + "/claude"; via.token = token; ok = true; }
   } catch (_) { ok = false; }
   bridge.ok = ok; bridge.xa = ok;
   return ok;

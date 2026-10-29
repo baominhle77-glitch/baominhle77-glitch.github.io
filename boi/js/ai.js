@@ -14,7 +14,7 @@ export const TRAM_KEY = "@tram";
 export const TRAM_URL = "https://script.google.com/macros/s/AKfycbzP8FRrraCnXh1mXJqvlR-FwoSJ5brshRFbWP_fj4MbzsX0bGT67M_Ot2GgirMpBIjW/exec";
 export const TRAM_MODEL = "gemini-flash-latest";
 const TRAM_TIMEOUT = 60000;
-export const LOCAL_BASE = "http://127.0.0.1:8787/gemini";
+export const LOCAL_BASE = "http://127.0.0.1:8787/claude";
 // Cầu nối máy nhà: trên máy chủ nhân gọi thẳng 127.0.0.1; ở máy khác (điện thoại) đi qua đường hầm kèm mã ghép
 export const via = { base: LOCAL_BASE, token: "" };
 const gBase = (key) => (key === LOCAL_KEY ? via.base : "https://generativelanguage.googleapis.com");

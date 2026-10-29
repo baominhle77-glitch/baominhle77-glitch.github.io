@@ -1,9 +1,26 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-27T12:57:00+07:00",
+  "updated_at": "2026-10-30T01:30:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
+    {
+      "id": "BOI-20261030-01",
+      "owner": "Claude Code (GĐ Studio, nick hiennhi)",
+      "branch": "agent/BOI-20261030-01-doi-tuyen-claude",
+      "base_sha": "8ea6b9384cef5c337f735d221c29f96241fb796f",
+      "paths": [
+        "boi/js/ai.js",
+        "boi/js/store.js",
+        "boi/dao-tao/dao-tao-core.js",
+        "boi/test.mjs",
+        "boi/sw.js"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-30T01:30:00+07:00",
+      "heartbeat_at": "2026-10-30T01:35:00+07:00",
+      "summary": "Chủ tịch 30/10: đổi tuyến cầu nối AI /gemini -> /claude (não thật Claude haiku-5-5), không giữ bí danh."
+    },
     {
       "id": "BOI-20261025-03",
       "owner": "Claude Code (phiên riêng web Bói, nick baominh)",
