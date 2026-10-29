@@ -111,6 +111,8 @@ def ghi_so(so):
 def bien_tap(so, khuon):
     b = {"tap": so["tap"], "kenh": so["kenh"], "repo": GOC_REPO.as_posix(),
          "so": duong_so(so["tap"]).parent.as_posix(), "py": khuon.get("py", sys.executable).replace("\\", "/")}
+    ma = "_".join(so["tap"].split("_")[1:])  # TS_K4_t3 -> K4_t3
+    b.update({"ma": ma, "ma_nho": ma.replace("_", "").lower(), "dc": Path(__file__).resolve().parent.as_posix()})
     b.update(khuon.get("bien", {}))
     b.update(so.get("bien", {}))
     for _ in range(3):

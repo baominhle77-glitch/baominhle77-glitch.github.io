@@ -1,0 +1,79 @@
+{
+ "kenh": "torque_split",
+ "ten_kenh": "Torque Split",
+ "the_loai": "khoa_hoc_vat_ly",
+ "py": "E:/Studio/venv_manim/Scripts/python.exe",
+ "khe": {
+  "render": 1,
+  "gpt": 1,
+  "nhe": 2
+ },
+ "bien": {
+  "sb": "E:/Studio/out/_giam_doc/do_lai/6tap/{ma}/storyboard.json",
+  "bs": "E:/Studio/out/_ho_so/{tap}/_lam/bo_sung.json",
+  "srt": "E:/Studio/out/_giam_doc/do_lai/6tap/{ma}/{ma_nho}_tts.srt",
+  "audio": "E:/Studio/out/_giam_doc/hs_{ma_nho}/{ma_nho}.mp3",
+  "canh_dir": "{repo}/khuon/manim/torque_split"
+ },
+ "tram": {
+  "nguon": {
+   "tai": "nhe",
+   "lenh": "{py} -X utf8 {dc}/tram_dau.py nguon --sb '{sb}' --bs '{bs}' --ra '{so}'"
+  },
+  "nhap_loi_gpt": {
+   "tai": "nhe",
+   "lenh": "{py} -X utf8 {dc}/tram_dau.py loi --sb '{sb}' --srt '{srt}' --ra '{so}'",
+   "ghi_chu": "loi khoa theo BAN_DO_TAP_3_4 thi dung nguyen; chua co srt -> GPT Chat (D19)"
+  },
+  "cong_so_lieu": {
+   "tai": "nhe",
+   "lenh": "{py} -X utf8 {dc}/tram_dau.py so_lieu --sb '{sb}' --srt '{srt}' --ra '{so}'"
+  },
+  "ho_so": {
+   "tai": "nhe",
+   "lenh": "{py} -X utf8 {dc}/tram_dau.py ho_so --sb '{sb}' --bs '{bs}' --ra '{so}'",
+   "dau_ra": [
+    "{so}/storyboard_d16.json"
+   ]
+  },
+  "kiem_tinh": {
+   "tai": "nhe",
+   "lenh": "{py} -X utf8 {dc}/tram_dau.py kiem_tinh --ra '{so}'"
+  },
+  "tts": {
+   "tai": "nhe",
+   "lenh": "{py} -X utf8 {dc}/tram_dau.py tts --sb '{sb}' --srt '{srt}' --audio '{audio}' --ra '{so}'"
+  },
+  "manim_thu_540": {
+   "tai": "render",
+   "ram_gb": 2.0,
+   "lenh": "{py} -X utf8 {dc}/tram_dau.py manim_thu --ra '{so}' --canh-dir '{canh_dir}'",
+   "ghi_chu": "v2: kiem du lop Manim cho moi canh; render 1 khung/beat khi du lop (v3)"
+  },
+  "render_du": {
+   "tai": "render",
+   "lenh": null,
+   "ghi_chu": "v3: prepare.py tong quat theo storyboard_d16 (hien prepare doc ban_ve K1t3)"
+  },
+  "compose": {
+   "tai": "render",
+   "lenh": null,
+   "ghi_chu": "v3"
+  },
+  "gate_chung": {
+   "tai": "nhe",
+   "lenh": null,
+   "ghi_chu": "v3"
+  },
+  "d25": {
+   "tai": "nhe",
+   "lenh": null,
+   "ghi_chu": "v3"
+  },
+  "combo_dang": {
+   "tai": "nhe",
+   "lenh": null,
+   "ghi_chu": "v3"
+  }
+ }
+}
