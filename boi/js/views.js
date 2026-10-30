@@ -569,9 +569,11 @@ function readView(id, query) {
   const rule = analyze(store.db, s, store.settings, 0);
   const extras = s.rounds.slice(1).map((_, i) => analyze(store.db, s, store.settings, i + 1));
   const hasKey = aiReady();
-  const aiStale = s.ai && s.ai.rounds !== s.rounds.length;
-  const viewing = s.ai && query.get("ban") !== "luat" ? "ai" : "luat";
-  const aiReading = s.ai ? { ...s.ai.reading, _money: rule._money } : null;
+  // bản gọn của bot (chỉ có lời gửi khách) không có bản giải đầy đủ → phần chi tiết hiện bản luật
+  const aiDay = s.ai && s.ai.reading ? s.ai : null;
+  const aiStale = aiDay && aiDay.rounds !== s.rounds.length;
+  const viewing = aiDay && query.get("ban") !== "luat" ? "ai" : "luat";
+  const aiReading = aiDay ? { ...aiDay.reading, _money: rule._money } : null;
   const shown = viewing === "ai" ? aiReading : rule;
   return {
     title: "Giải bài", step: 5,
@@ -582,7 +584,7 @@ function readView(id, query) {
     ${lgkHTML(s, s.ai?.loiGuiKhach && s.ai.loiNguon !== "luat" ? { text: s.ai.loiGuiKhach, nguon: s.ai.loiNguon, lyDo: s.ai.loiLyDo } : { text: loiGuiKhachLuat(store.db, s, rule, { tenKhach: s.tenKhach }), nguon: "luat", lyDo: s.ai ? "đang xem bản luật" : s.lgkLyDo || "" }, !s.ai && hasKey && !query.get("ban"))}
     <section class="card glow" id="aiCard">
       <div class="row wrap"><h2 class="grow" style="margin:0">${viewing === "ai" ? "Giải sâu bằng AI" : "Giải theo luật"}</h2>
-        <span class="src">${s.ai ? `<a class="btn small ${viewing === "ai" ? "primary" : ""}" href="#/giai/${id}">Bản AI</a><a class="btn small ${viewing === "luat" ? "primary" : ""}" href="#/giai/${id}?ban=luat">Bản luật</a>` : ""}</span></div>
+        <span class="src">${aiDay ? `<a class="btn small ${viewing === "ai" ? "primary" : ""}" href="#/giai/${id}">Bản AI</a><a class="btn small ${viewing === "luat" ? "primary" : ""}" href="#/giai/${id}?ban=luat">Bản luật</a>` : ""}</span></div>
       <p class="note" id="aiStatus">${viewing === "ai" ? `Giải bởi ${esc(s.ai.model)} · ${esc(gmt7(new Date(s.ai.at)))}${aiStale ? " · <span class='warn'>có lượt rút mới sau bản này — bấm Giải lại</span>" : ""}` : query.get("ban") === "luat" ? "Bản giải theo luật (chạy ngay trên máy, không cần mạng)." : aiKey() === LOCAL_KEY ? "Cầu nối AI máy nhà sẵn sàng — đang chuẩn bị giải bằng AI." : "Đang chuẩn bị giải bằng AI…"}</p>
       <div id="aiOut"></div>
       ${readingHTML(shown)}
@@ -594,7 +596,7 @@ function readView(id, query) {
       <div class="btns">
         <a class="btn primary" href="#/hoi-tiep/${id}">💬 Hỏi tiếp</a>
         <a class="btn" href="#/chon-so/${id}?them=1">＋ Rút thêm</a>
-        ${hasKey ? `<button type="button" class="btn" id="reAI">${s.ai ? "Giải lại bằng AI" : "Giải bằng AI"}</button>` : ""}
+        ${hasKey ? `<button type="button" class="btn" id="reAI">${aiDay ? "Giải lại bằng AI" : "Giải bằng AI"}</button>` : ""}
         <button type="button" class="btn" id="cp">Chép prompt cho ChatGPT</button>
         <button type="button" class="btn ghost" id="md">Tải bản giải (.md)</button>
       </div>

@@ -49,3 +49,4 @@ Spec gốc + bản bổ sung (SPA nhiều màn, thiết kế cao cấp, PWA, AI 
 Đã xong 40 phần. Lớp AI đã thử với khoá Gemini thật qua cầu nối máy nhà. Chạy test: `node boi/test.mjs` (69/69 đạt ngày 28/10/2026).
 
 | BOI-20261030-03. AI nhanh nhất, lời gửi khách luôn bản AI (lệnh GĐ 30/10) | xong: Worker cố định mặc định; cầu nối → thử lại 1,5 s → trạm → cứu cầu nối → luật; tự giải lại AI ở nền 5/15/45/60 s; nút chép khoá khi bản luật; BoiAuto thử lại AI 1 lượt; test 73/73 |
+| BOI-20261030-04. Bot bản gọn, low (Chủ tịch 30/10) | xong: BoiAuto.giai chỉ xin loi_gui_khach/tong_ket/tra_loi, maxOutputTokens 4096, cầu nối `&no_luc=low`, hẹn giờ 35 s, trả `moHinh`; web đầy đủ giữ nguyên (không no_luc); test 76/76 |

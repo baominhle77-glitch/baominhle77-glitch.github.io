@@ -34,9 +34,32 @@ const S = { type: "STRING" }, N = { type: "NUMBER" }, A = { type: "ARRAY", items
 const TIER_PROPS = { ten: S, diem: N, tra_loi: { type: "STRING", enum: YN }, tarot_doc: A, dong_chay: S, lenormand_cap: A, lenormand_bo_ba: A, lenormand_chuoi: S, lech: S, chot: S, diem_nghen: S, loi_khuyen: S };
 const ROOT_PROPS = { tong_quan: S, chu_de_troi: A, tang: { type: "ARRAY", items: { type: "OBJECT", properties: TIER_PROPS, required: ["ten", "diem", "tarot_doc", "dong_chay", "lenormand_cap", "chot", "diem_nghen", "loi_khuyen"], propertyOrdering: Object.keys(TIER_PROPS) } }, noi_tang: A, mau_thuan: A, tien: S, tong_ket: S, loi_khuyen: A, canh_bao: A, loi_gui_khach: S };
 export const SCHEMA = { type: "OBJECT", properties: ROOT_PROPS, required: ["tong_quan", "chu_de_troi", "tang", "noi_tang", "mau_thuan", "tong_ket", "loi_khuyen", "loi_gui_khach"], propertyOrdering: Object.keys(ROOT_PROPS) };
+// Chế độ gọn (bot BoiAuto, Chủ tịch chốt 30/10 "bot bản gọn, low"): chỉ lời gửi khách + kết luận ngắn + nhãn Có/Không
+const GON_PROPS = { loi_gui_khach: S, tong_ket: S, tra_loi: { type: "STRING", enum: YN } };
+export const SCHEMA_GON = { type: "OBJECT", properties: GON_PROPS, required: ["loi_gui_khach", "tong_ket"], propertyOrdering: Object.keys(GON_PROPS) };
+export const GON_MAX_TOKENS = 4096;
+export const GON_NO_LUC = "low";
+export const GON_HEN_GIO = 35000;
 
 // Văn phong rút từ bài giải của reader thật (Biddy Tarot, Labyrinthos, The Tarot Lady, reader chọn tụ…) — xem boi/VAN_PHONG_READER.md
 const DAU_LINE = "Mọi giá trị chuỗi phải là tiếng Việt CÓ DẤU đầy đủ; khoá JSON không dấu chỉ là tên trường, không được bắt chước.";
+const KHOI_LGK = `LỜI GỬI KHÁCH ("loi_gui_khach") — phần riêng, tách khỏi bản giải đầy đủ
+- Văn xuôi 120–220 chữ, 2–4 đoạn cách nhau một dòng trống (trong JSON viết là \n\n), như reader đang nhắn tin riêng cho người hỏi: tự nhiên, ấm, có chiều sâu, trả lời thẳng đúng câu hỏi, kết bằng một lời khuyên làm được ngay.
+- ĐỌC LẠI THÔNG ĐIỆP của chính trải bài: tổng hợp khối "NGHĨA THẬT CỦA TỪNG LÁ ĐÃ TRẢI" thành một mạch chuyện liền cho đúng câu hỏi — chuyện đang diễn ra thế nào → gốc rễ/điều đang cản hoặc đẩy → hướng sắp tới → điều nên làm. Mỗi câu phải bắt nguồn từ nghĩa của ít nhất một lá, có chi tiết cụ thể (người, việc, cảm xúc, thời điểm). Cấm câu sáo dùng được cho mọi khách.
+- Câu thứ hai trả lời thẳng câu hỏi (câu hỏi có/không thì nói rõ nghiêng về có hay không). Chỉ dùng ý hợp ngữ cảnh câu hỏi: hỏi về một người cụ thể thì bỏ ý dành cho người độc thân; khách độc thân thì bỏ ý về mối quan hệ hiện tại; làm thuê ↔ kinh doanh cũng vậy.
+- Sau câu trả lời thẳng, mọi câu phải cùng chiều với nó: đã nói còn/có thì không câu nào nói chia tay, tan vỡ, người mới hay thất bại; đã nói nghiêng về không thì không câu nào hứa chắc thành. Lá cản trở vẫn được nói, nhưng như điều đang che hoặc làm chậm câu trả lời, không phải ý đảo ngược.
+- KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm.
+- Gọi khách theo dòng "GỌI KHÁCH" (không dùng xưng hô của bản giải chi tiết). Không nêu tên vị trí, tên tầng hay tên ô của trải bài — nói thành ý thường (vd "khoảng đầu thuận hơn, về sau cần giữ sức").
+- Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá.
+
+`;
+const KHOI_GIONG = `GIỌNG VĂN
+- Ấm, thẳng, như người có nghề đang nói chuyện: dùng "bạn" hoặc xưng hô được cho; lá khó thì nói cái khó trước, rõ ràng, không doạ, rồi chỉ lối ra. Không nịnh, không thổi kết quả.
+- Câu ngắn dài xen kẽ, cụ thể, có hình ảnh; không lặp ý giữa các mục.
+- CẤM sáo rỗng kiểu AI: "hành trình", "vũ trụ gửi thông điệp", "năng lượng tích cực sẽ đến", "điều quan trọng là", "hãy nhớ rằng", "hãy cân nhắc kỹ lưỡng", "mọi chuyện sẽ ổn", "chắc chắn rồi", câu kết kiểu khẩu hiệu, mọi câu đều ba vế cân nhau.
+- Không emoji, không markdown trong giá trị JSON.
+- Gọi lá ĐÚNG tên tiếng Việt đã cho trong danh sách lá (có thể kèm tên tiếng Anh trong ngoặc), không tự dịch, không đổi tên.
+`;
 export const SYSTEM_READING = `Bạn là một tarot reader lão luyện hơn 20 năm, đọc cả Tarot lẫn Lenormand, đang ngồi đối diện người hỏi. Bạn LUÔN viết bằng tiếng Việt tự nhiên (kể cả khi kiến thức gốc của bạn là tiếng Anh): gọi tên lá bằng tiếng Việt, có thể kèm tên tiếng Anh trong ngoặc ở lần đầu.
 
 NGUYÊN TẮC BẤT DI BẤT DỊCH
@@ -57,31 +80,31 @@ CÁCH ĐỌC (như reader thật, không như từ điển)
 9. "chot" 1–2 câu chốt hạ; "diem_nghen" là nút thắt cụ thể; "loi_khuyen" phải làm được ngay (hành động, thời điểm, con số, người cần hỏi).
 10. "tong_ket": kết luận chung cho cả trải — gọi người hỏi theo xưng hô, nói thẳng kết luận trước rồi điều kiện, khép bằng một việc cụ thể nên làm đầu tiên.
 
-LỜI GỬI KHÁCH ("loi_gui_khach") — phần riêng, tách khỏi bản giải đầy đủ
-- Văn xuôi 120–220 chữ, 2–4 đoạn cách nhau một dòng trống (trong JSON viết là \n\n), như reader đang nhắn tin riêng cho người hỏi: tự nhiên, ấm, có chiều sâu, trả lời thẳng đúng câu hỏi, kết bằng một lời khuyên làm được ngay.
-- ĐỌC LẠI THÔNG ĐIỆP của chính trải bài: tổng hợp khối "NGHĨA THẬT CỦA TỪNG LÁ ĐÃ TRẢI" thành một mạch chuyện liền cho đúng câu hỏi — chuyện đang diễn ra thế nào → gốc rễ/điều đang cản hoặc đẩy → hướng sắp tới → điều nên làm. Mỗi câu phải bắt nguồn từ nghĩa của ít nhất một lá, có chi tiết cụ thể (người, việc, cảm xúc, thời điểm). Cấm câu sáo dùng được cho mọi khách.
-- Câu thứ hai trả lời thẳng câu hỏi (câu hỏi có/không thì nói rõ nghiêng về có hay không). Chỉ dùng ý hợp ngữ cảnh câu hỏi: hỏi về một người cụ thể thì bỏ ý dành cho người độc thân; khách độc thân thì bỏ ý về mối quan hệ hiện tại; làm thuê ↔ kinh doanh cũng vậy.
-- Sau câu trả lời thẳng, mọi câu phải cùng chiều với nó: đã nói còn/có thì không câu nào nói chia tay, tan vỡ, người mới hay thất bại; đã nói nghiêng về không thì không câu nào hứa chắc thành. Lá cản trở vẫn được nói, nhưng như điều đang che hoặc làm chậm câu trả lời, không phải ý đảo ngược.
-- KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm.
-- Gọi khách theo dòng "GỌI KHÁCH" (không dùng xưng hô của bản giải chi tiết). Không nêu tên vị trí, tên tầng hay tên ô của trải bài — nói thành ý thường (vd "khoảng đầu thuận hơn, về sau cần giữ sức").
-- Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá.
+${KHOI_LGK}${KHOI_GIONG}${DAU_LINE}`;
 
-GIỌNG VĂN
-- Ấm, thẳng, như người có nghề đang nói chuyện: dùng "bạn" hoặc xưng hô được cho; lá khó thì nói cái khó trước, rõ ràng, không doạ, rồi chỉ lối ra. Không nịnh, không thổi kết quả.
-- Câu ngắn dài xen kẽ, cụ thể, có hình ảnh; không lặp ý giữa các mục.
-- CẤM sáo rỗng kiểu AI: "hành trình", "vũ trụ gửi thông điệp", "năng lượng tích cực sẽ đến", "điều quan trọng là", "hãy nhớ rằng", "hãy cân nhắc kỹ lưỡng", "mọi chuyện sẽ ổn", "chắc chắn rồi", câu kết kiểu khẩu hiệu, mọi câu đều ba vế cân nhau.
-- Không emoji, không markdown trong giá trị JSON.
-- Gọi lá ĐÚNG tên tiếng Việt đã cho trong danh sách lá (có thể kèm tên tiếng Anh trong ngoặc), không tự dịch, không đổi tên.
-${DAU_LINE}`;
+// Lời nhắc hệ thống CHẾ ĐỘ GỌN: chỉ giữ phần phục vụ loi_gui_khach / tong_ket / tra_loi
+export const SYSTEM_GON = `Bạn là một tarot reader lão luyện hơn 20 năm, đọc cả Tarot lẫn Lenormand, đang nhắn tin riêng cho người hỏi. Bạn LUÔN viết bằng tiếng Việt tự nhiên.
+
+NGUYÊN TẮC
+- Chỉ dựa trên đúng các lá đã lật được cung cấp (cả Tarot lẫn Lenormand, mọi tầng). Không thêm, bớt, đổi lá, không đổi chiều xuôi/ngược; ô trống thì bỏ qua.
+- Lá "RA LẠI" ở nhiều tầng là chủ đề lặp lại; "LÁ LẶP CÙNG SỐ" chỉ là nhấn mạnh.
+- Không hứa chắc chắn; nêu điều kiện. Câu Có/Không của một lá phụ thuộc đúng câu hỏi. Có lá báo gian dối/hao hụt mà câu hỏi liên quan tiền thì nhắc cảnh giác cụ thể.
+
+CHỈ TRẢ VỀ BA TRƯỜNG
+- "loi_gui_khach": phần chính (khoảng 600–900 ký tự), theo đúng khung dưới đây.
+- "tong_ket": 1–2 câu kết luận ngắn cho cả trải, nói thẳng kết luận trước rồi điều kiện.
+- "tra_loi": với câu hỏi Có/Không, ĐÚNG MỘT trong bốn nhãn: ${YN.join(" / ")}; câu hỏi mở thì chọn nhãn gần nhất với chiều của trải.
+
+${KHOI_LGK}${KHOI_GIONG}${DAU_LINE}`;
 
 export const SYSTEM_CHAT = `Bạn là tarot reader lão luyện đang tiếp tục cùng một phiên bói (cùng một câu hỏi). Bạn nhớ toàn bộ các lá đã lật và các lần giải trước được cung cấp. Luôn trả lời bằng tiếng Việt, giọng ấm và thẳng như đang ngồi đối diện; dẫn đúng tên lá (kèm chi tiết hình ảnh trên lá khi giúp hiểu) và tầng làm căn cứ; không bịa lá mới; lời khuyên cụ thể, làm được ngay; tránh câu sáo rỗng. Lá ra lại ở nhiều tầng (mỗi tầng xáo lại đủ bộ) là chủ đề lặp lại xuyên các tầng. Nếu người hỏi muốn thêm lá, nhắc họ dùng nút "Rút thêm" — bộ bài sẽ được xáo lại hoàn toàn mới. Con số tiền chỉ lấy từ bảng quy đổi (quy đổi huyền học, không phải dự báo tài chính). Gọi lá đúng tên tiếng Việt đã cho, không tự dịch. Viết tiếng Việt CÓ DẤU đầy đủ. Được dùng markdown đơn giản (**đậm**, gạch đầu dòng).`;
 
 // ---------- Bối cảnh gửi AI ----------
-export function buildContext(db, session, { reading = null, money = null, settings = {} } = {}) {
+export function buildContext(db, session, { reading = null, money = null, settings = {}, gon = false } = {}) {
   const sp = spreadById(session.spreadId);
   const L = [];
   // Bản giải chi tiết (cho người dùng web) dùng xưng hô trong Cài đặt; lời gửi khách dùng tên khách của riêng lượt này
-  L.push(`XƯNG HÔ TRONG BẢN GIẢI CHI TIẾT (mọi trường trừ "loi_gui_khach"): gọi người hỏi là "${settings.xungHo || "bạn"}".`);
+  if (!gon) L.push(`XƯNG HÔ TRONG BẢN GIẢI CHI TIẾT (mọi trường trừ "loi_gui_khach"): gọi người hỏi là "${settings.xungHo || "bạn"}".`);
   const tenKhach = String(session.tenKhach || "").trim();
   L.push(tenKhach ? `GỌI KHÁCH TRONG "loi_gui_khach": gọi đúng tên “${tenKhach}”, không dùng tên nào khác.` : `GỌI KHÁCH TRONG "loi_gui_khach": không có tên — gọi “bạn”, không dùng tên riêng nào.`);
   L.push(`CÂU HỎI: ${session.cauHoi}`);
@@ -120,7 +143,7 @@ export function buildContext(db, session, { reading = null, money = null, settin
     money.rows.forEach((m) => L.push(`${m.ky} | khoảng ${m.low}–${m.high} | trung tâm ${m.center}`));
     L.push(`Tổng ${money.total}; bình quân ${money.perMonth}/tháng; mạnh nhất ${money.best.ky}; yếu nhất ${money.worst.ky}.${money.target ? ` Mục tiêu ${money.target}/tháng → ${money.targetPct} %, ${money.monthsHit}/${money.rows.length} kỳ chạm.` : ""}${money.prevYear ? ` So năm trước ${money.vsPrevPct} %.` : ""}`);
   }
-  if (reading) {
+  if (reading && !gon) {
     L.push("");
     L.push("=== BẢN NHÁP CỦA ĐỘNG CƠ LUẬT (tham khảo; bạn được đọc sâu hơn hoặc chấm khác nếu có lý do) ===");
     L.push(`Chủ đề trội: ${reading.chu_de_troi.join(" ")}`);
@@ -132,6 +155,11 @@ export function buildContext(db, session, { reading = null, money = null, settin
 
 export function readingRequest(db, session, opts) {
   return `${buildContext(db, session, opts)}\n\n${khoiNghiaChoAI(db, session, opts?.reading)}\n\nHãy giải như một tarot reader thật đang ngồi đối diện người hỏi, hoàn toàn bằng tiếng Việt: mở bài, rồi đọc lần lượt từng tầng (Tarot theo vị trí có tên lá + chi tiết hình ảnh, kể chuyện nối các lá, Lenormand thành câu), rồi nối các tầng (nêu rõ lá nào ra lại ở nhiều tầng là chủ đề lặp lại), rồi kết luận chung. Các lượt rút thêm (nếu có) gộp vào phần nối tầng/tổng kết. Trả về DUY NHẤT một đối tượng JSON đúng khuôn: tong_quan, chu_de_troi[], tang[{ten, diem, tra_loi, tarot_doc[], dong_chay, lenormand_cap[], lenormand_bo_ba[], lenormand_chuoi, lech, chot, diem_nghen, loi_khuyen}], noi_tang[], mau_thuan[], tien, tong_ket, loi_khuyen[], canh_bao[], loi_gui_khach. Số tầng trong "tang" bằng số tầng của trải chính; tarot_doc có đúng một câu/đoạn cho mỗi lá Tarot theo thứ tự.\n${DAU_LINE}`;
+}
+
+// Yêu cầu CHẾ ĐỘ GỌN: đủ bài đã rút + nghĩa thật từng lá, không bản nháp luật, chỉ xin 3 trường
+export function gonRequest(db, session, opts = {}) {
+  return `${buildContext(db, session, { ...opts, gon: true })}\n\n${khoiNghiaChoAI(db, session, opts?.reading)}\n\nViết lời gửi khách cho đúng câu hỏi, dựa trên toàn bộ lá đã rút ở trên. Trả về DUY NHẤT một đối tượng JSON: loi_gui_khach, tong_ket, tra_loi.\n${DAU_LINE}`;
 }
 
 // Bản sao chép dán vào ChatGPT
@@ -211,17 +239,21 @@ async function failOf(res) {
 }
 
 // messages: [{role: "user"|"assistant", text}]
-const geminiBody = (system, messages, json) => ({
+const geminiBody = (system, messages, json, gon = false) => ({
   systemInstruction: { parts: [{ text: system }] },
   contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.text }] })),
-  generationConfig: json ? { responseMimeType: "application/json", responseSchema: SCHEMA, temperature: 0.7 } : { temperature: 0.7 },
+  generationConfig: {
+    ...(json ? { responseMimeType: "application/json", responseSchema: gon ? SCHEMA_GON : SCHEMA } : {}),
+    temperature: 0.7,
+    ...(gon ? { maxOutputTokens: GON_MAX_TOKENS } : {}),
+  },
 });
 
 // Thân gửi trạm chỉ gồm ASCII: mọi ký tự ngoài ASCII viết thành \uXXXX (JSON vẫn hợp lệ, không phụ thuộc mã hoá đường truyền)
 export const asciiJSON = (x) => JSON.stringify(x).replace(/[\u007f-\uffff]/g, (c) => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"));
 
 // Một lượt gọi trạm: trả cả bài một lần; quá thời hạn thì dừng và báo lỗi có cờ timeout
-async function tramOnce({ model, system, messages, json, onText, signal, fetchImpl, timeoutMs = TRAM_TIMEOUT }) {
+async function tramOnce({ model, system, messages, json, gon, onText, signal, fetchImpl, timeoutMs = TRAM_TIMEOUT }) {
   const ctrl = new AbortController();
   const stop = () => ctrl.abort();
   if (signal?.aborted) ctrl.abort(); else signal?.addEventListener("abort", stop, { once: true });
@@ -231,7 +263,7 @@ async function tramOnce({ model, system, messages, json, onText, signal, fetchIm
     const res = await fetchImpl(TRAM_URL, {
       method: "POST", redirect: "follow", signal: ctrl.signal,
       headers: { "content-type": "text/plain;charset=utf-8" },
-      body: asciiJSON({ model, body: geminiBody(system, messages, json) }),
+      body: asciiJSON({ model, body: geminiBody(system, messages, json, gon) }),
     });
     let j = null;
     try { j = await res.json(); } catch (_) { /* trạm trả trang lỗi */ }
@@ -239,7 +271,7 @@ async function tramOnce({ model, system, messages, json, onText, signal, fetchIm
     if (!j.ok) throw new HttpError(Number(j.status) || 500, String(j.error || "Trạm lỗi"));
     const text = (j.data?.candidates?.[0]?.content?.parts || []).filter((p) => !p.thought).map((p) => p.text || "").join("");
     if (text) onText?.(text, text);
-    return { text, model: String(j.model || model) };
+    return { text, model: String(j.model || model), moHinh: String(j.data?.modelVersion || j.model || model) };
   } catch (e) {
     if (timedOut && !signal?.aborted) { const t = new Error("Trạm quá thời hạn"); t.timeout = true; throw t; }
     throw e;
@@ -249,12 +281,14 @@ async function tramOnce({ model, system, messages, json, onText, signal, fetchIm
   }
 }
 
-async function streamOnce({ provider, model, key, base, system, messages, json, onText, signal, fetchImpl }) {
+async function streamOnce({ provider, model, key, base, system, messages, json, gon, onText, signal, fetchImpl, moHinh = {} }) {
   let full = "";
   const push = (t) => { if (t) { full += t; onText?.(full, t); } };
   if (provider === "gemini") {
-    const body = geminiBody(system, messages, json);
-    const res = await fetchImpl(`${gBase(key, base)}/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
+    const body = geminiBody(system, messages, json, gon);
+    // chế độ gọn qua cầu nối Claude: no_luc=low (cầu nối mặc định high khi không có tham số)
+    const noLuc = gon && key === LOCAL_KEY ? `&no_luc=${GON_NO_LUC}` : "";
+    const res = await fetchImpl(`${gBase(key, base)}/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse${noLuc}`, {
       method: "POST", signal, headers: { "content-type": "application/json", ...gHead(key, base) }, body: JSON.stringify(body),
     });
     if (!res.ok) throw await failOf(res);
@@ -262,6 +296,7 @@ async function streamOnce({ provider, model, key, base, system, messages, json, 
       try {
         const j = JSON.parse(d);
         if (j.error) throw new HttpError(j.error.code || 500, j.error.message);
+        if (j.modelVersion) moHinh.v = String(j.modelVersion);
         for (const p of j.candidates?.[0]?.content?.parts || []) if (!p.thought) push(p.text);
       } catch (e) { if (e instanceof HttpError) throw e; }
     }
@@ -412,9 +447,9 @@ export function timedFetch(fetchImpl, ms) {
 }
 
 // Trạm: một lượt duy nhất (trạm tự chuyển model), model thật lấy từ phản hồi của trạm.
-async function viaTram({ system, messages, json, onText, onModel, signal, fetchImpl, tramTimeoutMs }) {
+async function viaTram({ system, messages, json, gon, onText, onModel, signal, fetchImpl, tramTimeoutMs }) {
   onModel?.(TRAM_MODEL);
-  const out = await tramOnce({ model: TRAM_MODEL, system, messages, json, onText, signal, fetchImpl, timeoutMs: tramTimeoutMs });
+  const out = await tramOnce({ model: TRAM_MODEL, system, messages, json, gon, onText, signal, fetchImpl, timeoutMs: tramTimeoutMs });
   if (!out.text.trim()) throw new HttpError(503, "Phản hồi rỗng");
   return out;
 }
@@ -441,18 +476,33 @@ const cho = (ms, signal) => new Promise((res, rej) => {
 });
 
 // Một lượt qua cầu nối ở một địa chỉ: chỉ model đầu danh sách (cầu nối tự chọn Claude) — lỗi là chuyển ngay, không lần từng model
-async function cauNoiOnce({ base, provider, system, messages, json, onText, onModel, signal, fetchImpl, storage }) {
+async function cauNoiOnce({ base, provider, system, messages, json, gon, onText, onModel, signal, fetchImpl, storage }) {
   const list = await discoverModels(provider, LOCAL_KEY, { fetchImpl, storage, base });
   const m = list[0];
   onModel?.(m);
-  const text = await streamOnce({ provider, model: m, key: LOCAL_KEY, base, system, messages, json, onText, signal, fetchImpl });
+  const mh = {};
+  const text = await streamOnce({ provider, model: m, key: LOCAL_KEY, base, system, messages, json, gon, onText, signal, fetchImpl, moHinh: mh });
   if (!text.trim()) throw new HttpError(503, "Phản hồi rỗng");
-  return { text, model: m };
+  return { text, model: mh.v || m, moHinh: mh.v || m };
+}
+
+// Hẹn giờ cả lượt (không chỉ chờ phần đầu): quá ms thì dừng, lỗi mang cờ timeout
+async function trongHan(ms, signal, fn) {
+  const c = new AbortController();
+  const stop = () => c.abort();
+  if (signal?.aborted) c.abort(); else signal?.addEventListener("abort", stop, { once: true });
+  let late = false;
+  const t = setTimeout(() => { late = true; c.abort(); }, ms);
+  try { return await fn(c.signal); }
+  catch (e) { if (late && !signal?.aborted) { const x = new Error("Cầu nối quá giờ"); x.timeout = true; throw x; } throw e; }
+  finally { clearTimeout(t); signal?.removeEventListener("abort", stop); }
 }
 
 // Qua cầu nối: thử lần lượt các địa chỉ; hỏng hết thì chờ thuLaiMs rồi thử lại 1 lần (thêm địa chỉ dự phòng).
 // soLan = 1 khi chỉ cứu nhanh sau trạm. Thành công → nhớ địa chỉ vào via.base cho lượt sau.
 export async function quaCauNoi({ soLan = 2, onThuLai, signal, fetchImpl, localTimeoutMs = 20000, ...o }) {
+  // chế độ gọn: mỗi lần gọi cầu nối có hẹn giờ cả lượt 35 s (không cắt ở 20 s)
+  const han = o.gon ? Math.max(localTimeoutMs, GON_HEN_GIO) : localTimeoutMs;
   let bases = uniq(dsCauNoi());
   let last = null;
   for (let lan = 1; lan <= soLan; lan++) {
@@ -465,7 +515,9 @@ export async function quaCauNoi({ soLan = 2, onThuLai, signal, fetchImpl, localT
     }
     for (const base of bases) {
       try {
-        const out = await cauNoiOnce({ ...o, base, signal, fetchImpl: timedFetch(fetchImpl, localTimeoutMs) });
+        const out = o.gon
+          ? await trongHan(han, signal, (sig) => cauNoiOnce({ ...o, base, signal: sig, fetchImpl }))
+          : await cauNoiOnce({ ...o, base, signal, fetchImpl: timedFetch(fetchImpl, han) });
         via.base = base;
         return { ...out, key: LOCAL_KEY, base, lan };
       } catch (e) {
@@ -482,9 +534,9 @@ export async function quaCauNoi({ soLan = 2, onThuLai, signal, fetchImpl, localT
 // TRAM_KEY (máy đã tắt cầu nối bằng ?cau-noi=0): trạm → lỗi bất kỳ thì cứu cầu nối → lỗi.
 // Kết quả có {key} = đường đã ra chữ; đi đường vòng thì có {cuu} mô tả đường đi. Lỗi cuối có e.cuu (ghi vào lyDo).
 // Khoá Google/OpenAI/Anthropic riêng (bản cũ) vẫn đi thẳng nhà cung cấp, đổi model khi 429/404.
-export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, onFallback, onCuu, onThuLai, signal, fetchImpl = globalThis.fetch, storage, tramTimeoutMs, localTimeoutMs = 20000 }) {
+export async function streamWithFallback({ provider, key, model, system, messages, json, gon = false, onText, onModel, onFallback, onCuu, onThuLai, signal, fetchImpl = globalThis.fetch, storage, tramTimeoutMs, localTimeoutMs = 20000 }) {
   if (!key) throw new Error("Chưa có khoá.");
-  const o = { provider, system, messages, json, onText, onModel, signal, fetchImpl, storage, localTimeoutMs, onThuLai };
+  const o = { provider, system, messages, json, gon, onText, onModel, signal, fetchImpl, storage, localTimeoutMs, onThuLai };
   const loai = (e, k) => phanLoaiLoiAI(e, k);
   if (key === LOCAL_KEY || key === TRAM_KEY) {
     let eCau = null;
@@ -493,7 +545,7 @@ export async function streamWithFallback({ provider, key, model, system, message
     }
     let eTram;
     try {
-      const out = await viaTram({ system, messages, json, onText, onModel, signal, fetchImpl, tramTimeoutMs });
+      const out = await viaTram({ system, messages, json, gon, onText, onModel, signal, fetchImpl, tramTimeoutMs });
       return { ...out, key: TRAM_KEY, ...(eCau ? { cuu: `cầu nối lỗi (${loai(eCau, LOCAL_KEY)}) → trạm` } : {}) };
     } catch (e) { if (signal?.aborted) throw e; eTram = e; }
     const dau = `${eCau ? `cầu nối lỗi (${loai(eCau, LOCAL_KEY)}) → ` : ""}trạm lỗi (${loai(eTram, TRAM_KEY)})`;
