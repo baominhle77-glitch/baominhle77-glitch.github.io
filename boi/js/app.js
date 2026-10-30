@@ -98,7 +98,7 @@ async function init() {
   // Link ghép một lần (?ghep=<mã>): lưu mã cầu nối máy nhà rồi xoá khỏi thanh địa chỉ
   const ghep = new URLSearchParams(location.search).get("ghep");
   if (ghep && /^[\w-]{20,}$/.test(ghep)) { setGhep(ghep); history.replaceState(null, "", location.pathname + location.hash); toast("Đã ghép cầu nối AI máy nhà."); }
-  // Lựa chọn ẩn cho chủ nhân: ?cau-noi=1 bật / ?cau-noi=0 tắt cầu nối máy nhà (mặc định dùng trạm AI)
+  // ?cau-noi=1 bật / ?cau-noi=0 tắt cầu nối Claude trên máy này (mặc định bật)
   const cau = new URLSearchParams(location.search).get("cau-noi");
   if (cau === "1" || cau === "0") { setCauNoiAn(cau === "1"); history.replaceState(null, "", location.pathname + location.hash); }
   syncIdx(true);

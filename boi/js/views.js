@@ -86,7 +86,7 @@ function home() {
     <section class="card features">
       <div class="feature"><span class="fi" aria-hidden="true">🔒</span><div><b>Khoá công bằng</b><p class="note">Mỗi câu hỏi một seed ngẫu nhiên 32 byte mới → xáo Fisher–Yates; mã SHA-256 hiện trước khi chọn bài. Trải xong bấm “Kiểm chứng” để tự tính lại.</p></div></div>
       <div class="feature"><span class="fi" aria-hidden="true">↻</span><div><b>Chọn bài từng tầng</b><p class="note">Lá úp giống hệt nhau, không đánh số. Chọn xong một tầng bấm Lưu, bộ bài xáo lại đủ lá cho tầng sau — lá nào ra lại ở nhiều tầng là chủ đề lặp lại.</p></div></div>
-      <div class="feature"><span class="fi" aria-hidden="true">✧</span><div><b>Giải sâu</b><p class="note">AI (Gemini) đọc như người có nghề — không phải cài hay nhập gì. Khi máy giải bận hoặc mất mạng: bản giải theo luật vẫn đọc vị trí, cặp, bộ ba, nối tầng và mâu thuẫn.</p></div></div>
+      <div class="feature"><span class="fi" aria-hidden="true">✧</span><div><b>Giải sâu</b><p class="note">AI Claude đọc như người có nghề — không phải cài hay nhập gì. Claude bận thì Gemini giải thay; mất mạng thì bản giải theo luật vẫn đọc vị trí, cặp, bộ ba, nối tầng và mâu thuẫn.</p></div></div>
     </section>
     <p class="foot">Mang tính chiêm nghiệm. Mọi con số tiền là quy đổi huyền học, không phải dự báo tài chính.</p>`,
   };
@@ -732,8 +732,8 @@ function settingsView() {
         <label>Tổng thu năm trước (để so khi trải cả năm)<input name="namTruoc" type="number" inputmode="decimal" step="0.1" min="0" value="${esc(st.namTruoc ?? "")}"></label>
       </fieldset>
       <section class="card"><h2>Giải sâu bằng AI</h2>
-        <p class="note">Bài được giải tự động bằng AI (Google Gemini) — không cần cài đặt hay nhập khoá. Để giải, câu hỏi và các lá đã lật được gửi tới máy giải AI. Khi máy giải bận hoặc mất mạng, trang tự dùng bản giải theo luật ngay trên máy.</p>
-        ${cauNoiAn() ? `<p class="note">${bridge.ok ? `✓ Đang dùng cầu nối AI máy nhà${bridge.xa ? " (qua đường hầm)" : ""}.` : "Cầu nối máy nhà chưa nối được — đang dùng máy giải AI mặc định."}</p>` : ""}
+        <p class="note">Bài được giải tự động bằng AI Claude (Anthropic); Claude bận thì Google Gemini giải thay — không cần cài đặt hay nhập khoá. Để giải, câu hỏi và các lá đã lật được gửi tới máy giải AI. Khi máy giải bận hoặc mất mạng, trang tự dùng bản giải theo luật ngay trên máy.</p>
+        ${cauNoiAn() ? `<p class="note">${bridge.ok ? `✓ Đang dùng Claude qua cầu nối máy nhà${bridge.xa ? " (qua đường hầm)" : ""}.` : "Cầu nối Claude chưa nối được — đang dùng Gemini dự phòng."}</p>` : ""}
       </section>
       <button class="btn primary block" type="submit">Lưu cài đặt</button>
     </form>`,
