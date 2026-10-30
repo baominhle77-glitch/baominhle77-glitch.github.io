@@ -1,9 +1,24 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-30T15:00:00+07:00",
+  "updated_at": "2026-10-30T15:30:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
+    {
+      "id": "BOI-20261030-05",
+      "owner": "Claude Code (session_01StJ4qUYrKmQ2u6zdJZ9mcA)",
+      "branch": "agent/BOI-20261030-05-ghim-ubuntu",
+      "base_sha": "fd1d08c3279f17898066cbe1a3b3320e4cf333d4",
+      "paths": [
+        ".github/workflows/*",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-30T15:15:00+07:00",
+      "completed_at": "2026-10-30T15:30:00+07:00",
+      "summary": "GĐ 30/10: ghim runs-on ubuntu-24.04 cho 3 workflow dùng Playwright 1.52 webkit (validate-role-system, e2e-reader-production, verify-admin-v9-return) vì ubuntu-latest đã lên 26.04, webkit không cài được."
+    },
     {
       "id": "BOI-20261030-04",
       "owner": "Claude Code (session_01StJ4qUYrKmQ2u6zdJZ9mcA)",

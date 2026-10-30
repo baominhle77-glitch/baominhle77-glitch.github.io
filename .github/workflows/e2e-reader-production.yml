@@ -15,7 +15,7 @@ concurrency:
 jobs:
   verify-reader:
     if: github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # ghim: Playwright 1.52 không cài được webkit trên ubuntu-latest (26.04)
     timeout-minutes: 15
     steps:
       - name: Checkout main để ghi trạng thái
