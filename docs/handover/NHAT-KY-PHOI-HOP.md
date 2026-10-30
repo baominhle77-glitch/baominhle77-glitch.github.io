@@ -22,6 +22,11 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-30 13:30 GMT+7 — Claude Code — BOI-20261030-03 — AI nhanh nhất, lời gửi khách luôn bản AI
+- Lỗi thật 30/10: "Bản theo luật vì AI lỗi: không tới được trạm (mạng)". Gốc: dò cầu nối hụt → rơi trạm Gemini; trạm lỗi mạng không được cứu; nút chép vẫn chép bản luật.
+- Sửa `boi/`: `store.js` dùng thẳng Worker `https://boi-cau-noi.hiennhi89.workers.dev/claude` (cau_noi.json chỉ là dự phòng), `aiKey()` mặc định cầu nối; `ai.js` chuỗi cầu nối (127.0.0.1 ở máy nhà → Worker) → thử lại 1 lần sau 1,5 s → trạm → trạm lỗi bất kỳ thì cứu lại cầu nối → luật; `views.js` tự giải lại AI ở nền 5/15/45 s rồi mỗi 60 s, nút "Chép lời gửi khách" khoá khi bản luật; `auto.js` BoiAuto thử lại AI 1 lượt trước khi trả luật, `nguon`/`lyDo` đúng; `sw.js` boi-v22.
+- Test: `node boi/test.mjs` 73/73; validate-coordination, check-public-content đạt; Playwright (mạng AI bị chặn) đúng thứ tự gọi, nút khoá, giải lại ở nền. Không thêm khoá/token.
+
 ### 2026-10-30 01:35 GMT+7 — Claude Code (GĐ Studio) — BOI-20261030-01 — web bói: đổi tuyến cầu nối AI /gemini -> /claude
 
 - Lệnh Chủ tịch 30/10: não thật của cầu nối máy nhà là Claude haiku-5-5, đổi hết tên tuyến /gemini thành /claude, không giữ bí danh.

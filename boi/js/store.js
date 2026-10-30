@@ -1,7 +1,7 @@
 // Kho dữ liệu dùng chung cho các màn: phiên câu hỏi, cài đặt (chỉ localStorage máy người dùng).
 // AI mặc định = cầu nối máy nhà (Claude haiku-5-5, D22 30/10); cầu nối chưa nối được thì dùng trạm Gemini dự phòng.
 import { loadSessions, saveSessions, createSession } from "./state.js";
-import { LOCAL_KEY, LOCAL_BASE, TRAM_KEY, via, datCuuTram } from "./ai.js";
+import { LOCAL_KEY, LOCAL_BASE, TRAM_KEY, via, datCauNoi } from "./ai.js";
 
 const SETTINGS_KEY = "boi.v1.settings";
 const AIKEY_KEY = "boi.v1.aikey";
@@ -20,8 +20,10 @@ export function saveSettings(next) {
   store.settings = { ...store.settings, ...next };
   try { storage?.setItem(SETTINGS_KEY, JSON.stringify(store.settings)); return true; } catch (_) { return false; }
 }
+// Mặc định đi cầu nối Claude (127.0.0.1 ở máy nhà, Worker cố định ở máy khác); trạm Gemini chỉ là dự phòng trong chuỗi gọi.
+// Máy đã tắt cầu nối bằng ?cau-noi=0 thì đi trạm trước (trạm lỗi vẫn được cứu sang cầu nối).
 export function aiKey() {
-  return cauNoiAn() && bridge.ok ? LOCAL_KEY : TRAM_KEY;
+  return cauNoiAn() ? LOCAL_KEY : TRAM_KEY;
 }
 // Khoá cũ từng dán ở bản trước không còn dùng → xoá khỏi máy (không còn nút xoá trong Cài đặt)
 try { for (const p of ["gemini", "openai", "anthropic"]) storage?.removeItem(`${AIKEY_KEY}.${p}`); } catch (_) { /* bỏ qua */ }
@@ -29,19 +31,21 @@ try { for (const p of ["gemini", "openai", "anthropic"]) storage?.removeItem(`${
 const CAU_NOI_KEY = "boi.v1.cau-noi";
 export const cauNoiAn = () => { try { return storage?.getItem(CAU_NOI_KEY) !== "0"; } catch (_) { return true; } };
 export function setCauNoiAn(on) { try { storage?.setItem(CAU_NOI_KEY, on ? "1" : "0"); return true; } catch (_) { return false; } }
-// Dò cầu nối máy nhà: trên máy chủ nhân gọi 127.0.0.1; máy khác đã ghép (mã trong localStorage) thì lấy địa chỉ
-// đường hầm mới nhất từ boi/cau_noi.json trên GitHub rồi gọi kèm mã. Không có thì im lặng dùng khoá hoặc động cơ luật.
+// Địa chỉ cầu nối cố định (Cloudflare Worker, D22: Claude haiku 5-5): dùng thẳng, không chờ đọc cau_noi.json.
+export const WORKER_BASE = "https://boi-cau-noi.hiennhi89.workers.dev/claude";
+via.base = WORKER_BASE;
+// local: null = chưa dò, true = đang ở máy nhà (127.0.0.1 trả lời), false = máy khác
+export const bridge = { ok: true, xa: true, local: null, daDo: null };
 const GHEP_KEY = "boi.v1.ghep";
 const CAU_NOI_JSON = "https://api.github.com/repos/baominhle77-glitch/baominhle77-glitch.github.io/contents/boi/cau_noi.json?ref=main";
-export const bridge = { ok: false, xa: false };
 export const ghepToken = () => { try { return storage?.getItem(GHEP_KEY) || ""; } catch (_) { return ""; } };
 export function setGhep(t) { try { if (t) { storage?.setItem(GHEP_KEY, t); setCauNoiAn(true); } else storage?.removeItem(GHEP_KEY); return true; } catch (_) { return false; } }
+via.token = ghepToken();
 async function ping(fetchImpl, base, token, ms) {
   const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
   try { const r = await fetchImpl(`${base}/ping`, { signal: c.signal, headers: token ? { "x-boi-token": token } : {} }); return r.ok; } finally { clearTimeout(t); }
 }
-// Địa chỉ đường hầm mới nhất (đường hầm đổi địa chỉ ~20 phút/lần): ưu tiên API GitHub (có ngay khi máy nhà ghi lên main,
-// không chờ Pages build); API lỗi hoặc 403 hết lượt thì đọc bản Pages kèm ?t= để khỏi dính bộ nhớ đệm. Không có → "".
+// Địa chỉ trong boi/cau_noi.json (chỉ dùng làm dự phòng khi Worker lỗi): ưu tiên API GitHub, lỗi thì bản Pages kèm ?t=.
 const CAU_NOI_PAGES = new URL("../cau_noi.json", import.meta.url).href;
 const laDiaChi = (u) => /^https:\/\/[\w.-]+$/.test(u);
 export async function docDiaChiCauNoi(fetchImpl = globalThis.fetch, ms = 5000) {
@@ -55,24 +59,28 @@ export async function docDiaChiCauNoi(fetchImpl = globalThis.fetch, ms = 5000) {
   const pages = await lay(`${CAU_NOI_PAGES}?t=${Date.now()}`, {});
   return laDiaChi(pages) ? pages : "";
 }
-// Mọi bước dò đều có hạn chờ: cầu nối tắt/treo hay GitHub chậm thì trả false, trang dùng trạm AI ngay.
-export async function probeBridge(fetchImpl = globalThis.fetch, { on = cauNoiAn(), localMs = 1200, listMs = 5000, xaMs = 6000 } = {}) {
-  if (!on) { bridge.ok = false; bridge.xa = false; return false; }
-  try {
-    if (await ping(fetchImpl, LOCAL_BASE, "", localMs)) { via.base = LOCAL_BASE; via.token = ""; bridge.ok = true; bridge.xa = false; return true; }
-  } catch (_) { /* không ở máy nhà */ }
-  const token = ghepToken();
-  let ok = false;
-  // không có mã ghép vẫn dò: cầu nối nhận trang web bói theo Origin (25/10)
-  try {
-    const url = await docDiaChiCauNoi(fetchImpl, listMs);
-    if (url && await ping(fetchImpl, url + "/claude", token, xaMs)) { via.base = url + "/claude"; via.token = token; ok = true; }
-  } catch (_) { ok = false; }
-  bridge.ok = ok; bridge.xa = ok;
-  return ok;
+// Dò máy nhà: chỉ ping 127.0.0.1 (tối đa localMs). Có → đi 127.0.0.1 trước Worker; không → đi thẳng Worker. Không bao giờ chờ GitHub.
+export function probeBridge(fetchImpl = globalThis.fetch, { on = cauNoiAn(), localMs = 1200 } = {}) {
+  const run = (async () => {
+    if (!on) { bridge.ok = false; bridge.xa = false; return false; }
+    let local = false;
+    try { local = await ping(fetchImpl, LOCAL_BASE, "", localMs); } catch (_) { local = false; }
+    bridge.local = local;
+    bridge.ok = true;
+    bridge.xa = !local;
+    if (local) via.base = LOCAL_BASE;
+    else if (via.base === LOCAL_BASE) via.base = WORKER_BASE;
+    return true;
+  })();
+  bridge.daDo = run;
+  return run;
 }
-// Trạm 429/quá giờ → dò cầu nối một lần dù chưa bật cờ (thứ tự thường không đổi: chưa bật cờ thì trạm vẫn đứng đầu)
-datCuuTram((fetchImpl) => probeBridge(fetchImpl, { on: true }));
+// Thứ tự địa chỉ cho chuỗi gọi AI: địa chỉ vừa chạy tốt → 127.0.0.1 (nếu là máy nhà) → Worker cố định
+export const diaChiCauNoi = () => [...new Set([via.base, bridge.local ? LOCAL_BASE : null, WORKER_BASE].filter(Boolean))].filter((b) => b !== LOCAL_BASE || bridge.local);
+datCauNoi({
+  ds: diaChiCauNoi,
+  duPhong: async (fetchImpl) => { const u = await docDiaChiCauNoi(fetchImpl, 4000); return u && `${u}/claude` !== WORKER_BASE ? [`${u}/claude`] : []; },
+});
 export const aiReady = () => !!aiKey();
 
 export const getSession = (id) => store.sessions.find((s) => s.id === id) || null;

@@ -451,10 +451,32 @@ function moneyHTML(m) {
     <details><summary>Công thức quy đổi</summary><p class="formula">${m.formula.map(esc).join("\n")}${m.rows.map((r) => `\n${r.ky}: S ${r.S} · V ${r.V} · hệ số ×${r.mult} · biên ±${Math.round(r.margin * 100)} %`).join("")}</p></details></section>`;
 }
 
-async function runAI(s, el, ctx, rule) {
+// Lời gửi khách phải là bản AI: bản luật (AI lỗi hoặc bị cổng trả lại) → tự giải lại AI ở nền
+// sau 5 s, 15 s, 45 s rồi mỗi 60 s khi trang còn mở; có bản AI là thay vào.
+export const NEN_LICH = [5000, 15000, 45000, 60000];
+const nen = new Map(); // id → {lan, timer}
+export const canAI = (s) => !s.ai || s.ai.loiNguon === "luat" || !s.ai.loiGuiKhach;
+export function huyNen(id) { const n = nen.get(id); if (n) clearTimeout(n.timer); nen.delete(id); }
+export function lichNen(s, ctx, rule, { lich = NEN_LICH, chay = runAI } = {}) {
+  const n = nen.get(s.id) || { lan: 0, timer: 0 };
+  clearTimeout(n.timer);
+  const ms = lich[Math.min(n.lan, lich.length - 1)];
+  n.lan++;
+  n.timer = setTimeout(async () => {
+    if (!getSession(s.id) || !canAI(s) || live.get(s.id)) { if (!canAI(s)) huyNen(s.id); return; }
+    const dangXem = typeof location !== "undefined" && location.hash.startsWith(`#/giai/${s.id}`);
+    const el = typeof document === "undefined" ? null : dangXem ? document.getElementById("view") : document.createElement("div");
+    const ok = await chay(s, el, { ...ctx, rerender: () => { if (typeof location === "undefined" || location.hash.startsWith(`#/giai/${s.id}`)) ctx.rerender(); } }, rule, { nen: true });
+    if (ok) huyNen(s.id); else if (nen.has(s.id)) lichNen(s, ctx, rule, { lich, chay });
+  }, ms);
+  nen.set(s.id, n);
+  return ms;
+}
+
+export async function runAI(s, el, ctx, rule, { nen: chayNen = false } = {}) {
   const provider = "gemini";
   const key = aiKey();
-  let khoa = key; // trạm 429 đã chuyển sang cầu nối → lượt viết lại lời gửi đi thẳng cầu nối
+  let khoa = key; // lượt viết lại lời gửi đi thẳng đường vừa ra chữ
   const prev = live.get(s.id);
   prev?.ctrl?.abort();
   const st = { text: "", model: "", err: "", ctrl: new AbortController() };
@@ -473,18 +495,19 @@ async function runAI(s, el, ctx, rule) {
   kick();
   try {
     const money = rule._money;
-    const { text, model, cuu } = await goiCoDau({
+    const { text, model, cuu, key: duong } = await goiCoDau({
       provider, key, model: "", storage,
       system: SYSTEM_READING, json: true,
       messages: [{ role: "user", text: readingRequest(store.db, s, { reading: rule, money, settings: store.settings }) }],
       signal: st.ctrl.signal,
       onModel: (m) => { kick(); st.model = m; if (status) status.textContent = `Đang giải bằng ${m}…`; },
       onText: (full) => { kick(); st.text = full; if (!raf) raf = requestAnimationFrame(paint); },
-      onFallback: () => { kick(); st.viaTram = true; st.text = ""; probeBridge(); if (status) status.textContent = "Cầu nối máy nhà không phản hồi — chuyển sang máy giải AI…"; },
-      onCuu: () => { kick(); if (status) status.textContent = "Máy giải đang đông — đang thử đường khác…"; },
+      onThuLai: () => { kick(); st.text = ""; if (status) status.textContent = "Cầu nối AI chưa trả lời — thử lại…"; },
+      onFallback: () => { kick(); st.viaTram = true; st.text = ""; if (status) status.textContent = "Cầu nối AI không phản hồi — chuyển sang máy giải dự phòng…"; },
+      onCuu: () => { kick(); st.viaTram = false; st.text = ""; if (status) status.textContent = "Máy giải dự phòng lỗi — thử lại cầu nối AI…"; },
     });
     clearTimeout(idle);
-    if (cuu) khoa = LOCAL_KEY;
+    if (duong) khoa = duong;
     const obj = partialJSON(text);
     const reading = normalizeReading(obj, rule, { db: store.db, session: s });
     if (!reading || !reading.tang.length) throw new Error("AI trả về sai khuôn — thử lại hoặc dùng bản luật.");
@@ -502,9 +525,10 @@ async function runAI(s, el, ctx, rule) {
     save();
     live.delete(s.id);
     ctx.rerender();
+    return lgk.nguon !== "luat";
   } catch (e) {
     clearTimeout(idle);
-    if (e.name === "AbortError" && !st.timeout) return;
+    if (e.name === "AbortError" && !st.timeout) return false;
     live.delete(s.id);
     if (st.timeout) e.timeout = true;
     if (key === LOCAL_KEY) probeBridge();
@@ -518,6 +542,8 @@ async function runAI(s, el, ctx, rule) {
     if (status) status.innerHTML = `<span class="err">${esc(fail.status)}</span>`;
     if (out) out.innerHTML = `<p class="note">${esc(fail.note)}</p>`;
     if (e.matDau && status) status.innerHTML = `<span class="err">${esc(BAO_MAT_DAU)}</span>`;
+    if (chayNen && status) status.innerHTML += ` <span class="note">Đang tự giải lại AI…</span>`;
+    return false;
   }
 }
 
@@ -525,10 +551,12 @@ async function runAI(s, el, ctx, rule) {
 const LGK_NGUON = { ai: "Bản AI, đã qua cổng kiểm.", "ai-viet-lai": "Bản AI viết lại một lần để qua cổng kiểm.", luat: "Bản theo luật (viết xuôi)." };
 function lgkHTML(s, { text, nguon, lyDo = "" }, cho) {
   return `<section class="card glow lgk-card" aria-labelledby="lgkT">
-      <div class="row wrap"><h2 class="grow" id="lgkT" style="margin:0">Lời gửi khách</h2><button type="button" class="btn small primary" id="chepLgk">Chép lời gửi khách</button></div>
+      <div class="row wrap"><h2 class="grow" id="lgkT" style="margin:0">Lời gửi khách</h2>${nguon === "luat"
+        ? `<button type="button" class="btn small" id="chepLgk" disabled aria-disabled="true">Đang chờ bản AI…</button><button type="button" class="btn small ghost" id="giaiLaiNgay">Giải AI lại ngay</button>`
+        : `<button type="button" class="btn small primary" id="chepLgk">Chép lời gửi khách</button>`}</div>
       <p class="note">${s.tenKhach ? `Gọi khách: <b>${esc(s.tenKhach)}</b>` : "Không có tên khách — gọi “bạn”."}</p>
       <div id="loi-gui-khach" class="lgk" data-nguon="${esc(nguon)}" data-text="${esc(text)}">${doanVan(text).map((p) => `<p>${esc(p)}</p>`).join("")}</div>
-      <p class="note">${esc(LGK_NGUON[nguon] || "")}${cho ? " Bản AI sẽ thay vào khi giải xong." : ""}</p>
+      <p class="note">${esc(LGK_NGUON[nguon] || "")}${nguon === "luat" ? " Chưa gửi khách bản này — bản AI sẽ tự thay vào khi giải xong." : cho ? " Bản AI sẽ thay vào khi giải xong." : ""}</p>
       <p class="note lgk-lydo" id="lgkLyDo">${nguon === "luat" && lyDo ? `Bản theo luật vì ${esc(lyDo)}.` : ""}</p>
     </section>`;
 }
@@ -551,7 +579,7 @@ function readView(id, query) {
     <p class="lead">“${esc(s.cauHoi)}”</p>
     <p class="note">${esc(spreadById(s.spreadId).ten)} · khoá lúc ${esc(s.lockedAtText)} · <a href="#/kiem-chung/${id}">Kiểm chứng mã khoá</a></p>
     ${tableHTML(s)}
-    ${lgkHTML(s, viewing === "ai" && s.ai?.loiGuiKhach ? { text: s.ai.loiGuiKhach, nguon: s.ai.loiNguon, lyDo: s.ai.loiLyDo } : { text: loiGuiKhachLuat(store.db, s, rule, { tenKhach: s.tenKhach }), nguon: "luat", lyDo: s.ai ? "đang xem bản luật" : s.lgkLyDo || "" }, !s.ai && hasKey && !query.get("ban"))}
+    ${lgkHTML(s, s.ai?.loiGuiKhach && s.ai.loiNguon !== "luat" ? { text: s.ai.loiGuiKhach, nguon: s.ai.loiNguon, lyDo: s.ai.loiLyDo } : { text: loiGuiKhachLuat(store.db, s, rule, { tenKhach: s.tenKhach }), nguon: "luat", lyDo: s.ai ? "đang xem bản luật" : s.lgkLyDo || "" }, !s.ai && hasKey && !query.get("ban"))}
     <section class="card glow" id="aiCard">
       <div class="row wrap"><h2 class="grow" style="margin:0">${viewing === "ai" ? "Giải sâu bằng AI" : "Giải theo luật"}</h2>
         <span class="src">${s.ai ? `<a class="btn small ${viewing === "ai" ? "primary" : ""}" href="#/giai/${id}">Bản AI</a><a class="btn small ${viewing === "luat" ? "primary" : ""}" href="#/giai/${id}?ban=luat">Bản luật</a>` : ""}</span></div>
@@ -572,14 +600,17 @@ function readView(id, query) {
       </div>
     </section>`,
     mount(el, ctx) {
-      el.querySelector("#chepLgk").onclick = () => copyText(el.querySelector("#loi-gui-khach").dataset.text, "Đã chép lời gửi khách.");
+      // chỉ chép khi ô đang là bản AI (nút bị khoá khi bản luật)
+      el.querySelector("#chepLgk").onclick = () => { const o = el.querySelector("#loi-gui-khach"); if (o.dataset.nguon !== "luat") copyText(o.dataset.text, "Đã chép lời gửi khách."); };
+      const ngay = el.querySelector("#giaiLaiNgay");
+      if (ngay) ngay.onclick = () => { if (live.get(id)) return toast("Đang giải AI…"); huyNen(id); ngay.disabled = true; runAI(s, el, ctx, rule).then((ok) => { if (!ok && hasKey) lichNen(s, ctx, rule); }); };
       el.querySelector("#cp").onclick = () => copyText(chatGptPrompt(store.db, s, { reading: rule, money: rule._money, settings: store.settings }), "Đã chép prompt — dán vào ChatGPT.");
       el.querySelector("#md").onclick = () => download(`giai-${id}.md`, readingToMarkdown(store.db, s, shown));
       const re = el.querySelector("#reAI");
       if (re) re.onclick = () => { delete s.ai; save(); ctx.go(`#/giai/${id}`, { replace: true, force: true }); };
-      if (hasKey && !s.ai && !query.get("ban")) {
-        const running = live.get(id);
-        if (!running) runAI(s, el, ctx, rule);
+      if (hasKey && canAI(s) && !live.get(id)) {
+        if (!s.ai && !query.get("ban") && !nen.has(id)) runAI(s, el, ctx, rule).then((ok) => { if (!ok) lichNen(s, ctx, rule); });
+        else if (!nen.has(id)) lichNen(s, ctx, rule);
       }
     },
   };
