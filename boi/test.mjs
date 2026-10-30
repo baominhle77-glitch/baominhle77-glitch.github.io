@@ -1626,6 +1626,75 @@ test("câu 12 tháng: AI trả ~380 chữ → vẫn nguon “ai” + cảnh báo
   } finally { datLaiCauNoi(); }
 });
 
+// ---- KHẨN 30/10: không nhập tên → "gọi sai tên: Bạn" chặn mọi lượt ----
+test("hồi quy: không có tên khách + lời “Bạn ơi…” → KHÔNG lỗi cứng, nguon “ai” (cả khi Cài đặt xưng hô là “Bạn”); tên “Lan” mà gọi “Hoa” → vẫn lỗi cứng", async () => {
+  const s = await trai3La("Người ấy còn thương em không?", 3);
+  const ban = "Bạn ơi, " + LGK_OK.slice(LGK_OK.indexOf(",") + 2);
+  for (const xungHo of ["", "bạn", "Bạn", "anh", "chị", "em"]) {
+    const k = kiemLoiGuiKhach(ban, db, { tenKhach: "", xungHo, session: s });
+    assert.ok(!k.loi.some((x) => /gọi sai tên/u.test(x)), `xungHo “${xungHo}”: ${k.loi.join("; ")}`);
+  }
+  // tên riêng khác tên khách vẫn bị chặn
+  const hoa = "Hoa ơi, " + LGK_OK.slice(LGK_OK.indexOf(",") + 2);
+  assert.ok(kiemLoiGuiKhach(hoa, db, { tenKhach: "Lan", session: s }).loi.includes("gọi sai tên: Hoa"));
+  assert.ok(kiemLoiGuiKhach(hoa, db, { tenKhach: "Lan", xungHo: "Hoa", session: s }).loi.some((x) => /gọi sai tên: Hoa/u.test(x)));
+  assert.ok(kiemLoiGuiKhach("Queen Linh ơi, " + LGK_OK.slice(LGK_OK.indexOf(",") + 2), db, { tenKhach: "", session: s }).loi.some((x) => /gọi sai tên: Queen Linh/u.test(x)));
+  assert.ok(!kiemLoiGuiKhach("Lan ơi, " + LGK_OK.slice(LGK_OK.indexOf(",") + 2), db, { tenKhach: "Lan", xungHo: "Bạn", session: s }).loi.some((x) => /gọi sai tên/u.test(x)));
+  // đường thật (bot + web dùng chung): không tên khách, AI viết “Bạn ơi…”, Cài đặt xưng hô “Bạn” → nguon “ai”, không gọi viết lại
+  datCuuTram(CUU_THAT);
+  try {
+    const goi = [];
+    const f = async (u, o = {}) => {
+      if (u === `${LOCAL_BASE}/ping`) throw new TypeError("Failed to fetch");
+      if (/\/v1beta\/models\?/.test(u)) return new Response(JSON.stringify({ models: [] }), { status: 200 });
+      if (u.startsWith(`${WORKER_BASE}/v1beta/models/`)) {
+        const b = JSON.parse(o.body);
+        goi.push(b);
+        const msg = b.contents.at(-1).parts[0].text;
+        const t = aiGiaTuNghia(msg, "").replace(/^Về câu bạn hỏi, /u, "Bạn ơi, ");
+        return new Response(sseMH(b.generationConfig?.responseMimeType ? JSON.stringify({ loi_gui_khach: t, tong_ket: CO_DAU }) : t, "claude-haiku-5-5"), { status: 200 });
+      }
+      throw new TypeError("Failed to fetch");
+    };
+    await probeBridge(f, { on: true });
+    for (const xungHo of ["Bạn", "Queen Linh"]) {
+      goi.length = 0;
+      const r = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", tenKhach: "", settings: { xungHo }, key: aiKey(), fetchImpl: f });
+      assert.equal(r.nguon, "ai", `${xungHo}: ${r.lyDo}`);
+      assert.match(r.loiGuiKhach, /^Bạn ơi/u);
+      assert.equal(goi.length, 1, "không gọi viết lại");
+    }
+  } finally { datLaiCauNoi(); }
+});
+
+test("trượt cổng → lượt mới KHÔNG xoá chữ đang hiện: chỉ lượt đầu chảy chữ, bản viết lại thay vào khi xong", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    let n = 0, dau = "";
+    const f = async (u, o = {}) => {
+      if (u === `${LOCAL_BASE}/ping`) throw new TypeError("Failed to fetch");
+      if (/\/v1beta\/models\?/.test(u)) return new Response(JSON.stringify({ models: [] }), { status: 200 });
+      if (u.startsWith(`${WORKER_BASE}/v1beta/models/`)) {
+        n++;
+        const b = JSON.parse(o.body);
+        const msg = b.contents.at(-1).parts[0].text;
+        const tot = aiGiaTuNghia(msg, "Lan");
+        if (b.generationConfig?.responseMimeType) { dau = tot.replace("Lan ơi,", "Lan ơi, lá Mặt Trăng cho thấy"); return new Response(sseMH(JSON.stringify({ loi_gui_khach: dau, tong_ket: CO_DAU }), "claude-haiku-5-5"), { status: 200 }); }
+        return new Response(sseMH(tot, "claude-haiku-5-5"), { status: 200 });
+      }
+      throw new TypeError("Failed to fetch");
+    };
+    await probeBridge(f, { on: true });
+    const s = await trai3La("Em có nên chuyển nhà không?", 4);
+    s.tenKhach = "Lan";
+    const chay = [];
+    const r = await giaiLoiGuiKhach({ db, session: s, rule: analyze(db, s, {}, 0), key: aiKey(), fetchImpl: f, onText: (t) => chay.push(t) });
+    assert.equal(r.nguon, "ai-viet-lai", r.lyDo);
+    assert.equal(n, 2);
+    assert.ok(chay.length >= 1 && chay.every((t) => dau.startsWith(t)), "chỉ lượt đầu chảy chữ — không có lượt nào xoá rồi viết lại từ đầu");
+  } finally { datLaiCauNoi(); }
+});
+
 // ---- Lệnh Chủ tịch 28/10: khách không chọn kiểu trải, agent tự chọn theo câu hỏi ----
 test("agent tự chọn trải theo câu hỏi: tinhcam / 3thang / canam / cokhong / tudo; mỗi ca ra lời gửi khách qua cổng", async () => {
   const ca = [["Người ấy còn thương em không?", "tinhcam"], ["Tháng sau có tăng lương không?", "3thang"], ["Năm 2027 của em thế nào?", "canam"], ["Có nên nghỉ việc không?", "cokhong"], ["Em nên làm gì bây giờ?", "tudo"]];

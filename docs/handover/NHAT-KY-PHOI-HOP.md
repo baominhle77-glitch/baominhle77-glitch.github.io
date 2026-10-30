@@ -22,6 +22,11 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-30 19:45 GMT+7 — Claude Code — BOI-20261030-08 — KHẨN: "gọi sai tên: Bạn" khi không nhập tên khách
+- Lỗi: không nhập tên → xưng hô "bạn" → cổng coi "Bạn ơi" là gọi sai tên (lỗi cứng) → mọi lượt AI + viết lại trượt → ô xoá–viết lại 5–6 lần rồi rơi bản luật; bot IB khách không tên cũng không gửi được.
+- `loi.js`: "gọi sai tên" chỉ khi là TÊN RIÊNG khác tên khách — bỏ qua đại từ (bạn, anh, chị, em, cậu, mình…); thêm kiểm câu gọi đầu "X ơi" với X là tên riêng khác tên khách. `auto.js`: chỉ lượt AI đầu chảy chữ; lượt thử lại / viết dài thêm thay vào khi xong. `views.js`: lượt giải lại ở nền không chảy chữ, ô không bao giờ bị thu ngắn giữa chừng. `sw.js` boi-v26.
+- Test `node boi/test.mjs` 83/83 (2 ca hồi quy mới). Chưa đo với cầu nối thật (mạng phiên bị chặn).
+
 ### 2026-10-30 19:00 GMT+7 — Claude Code — BOI-20261030-07 — câu nhiều mốc 600–800 chữ, vẫn < 30 s
 - Đo GĐ (bản 27cf626, Claude thật): câu 12 tháng 14,0 s nhưng chỉ 386 chữ, mỗi tháng 1–2 câu; câu ngắn 11,8 s / 234 chữ — đạt.
 - `loi.js`: dòng ĐỘ DÀI cho câu nhiều mốc nêu TỐI THIỂU 600 chữ, mỗi mốc 2–3 câu (thuận / cẩn trọng / việc nên làm) dựa đúng lá của mốc; `yeuCauVietDaiThem`. `ai.js`: SYSTEM_GON nêu rõ độ dài theo dòng ĐỘ DÀI; `GON_MAX_TOKENS_DAI` 8192 cho câu nhiều mốc (câu ngắn giữ 4096). `auto.js` (`giaiLoiGuiKhach`, dùng chung bot + web): bản AI < 600 chữ → một lượt viết dài thêm DUY NHẤT nếu còn kịp trong ngân sách 30 s (ước bằng thời gian lượt đầu), không thì giữ bản đang có + cảnh báo mềm. `sw.js` boi-v25.

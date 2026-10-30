@@ -1,9 +1,29 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-30T19:00:00+07:00",
+  "updated_at": "2026-10-30T19:45:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
+    {
+      "id": "BOI-20261030-08",
+      "owner": "Claude Code (session_01StJ4qUYrKmQ2u6zdJZ9mcA)",
+      "branch": "agent/BOI-20261030-08-goi-ban",
+      "base_sha": "a3ac9685d387739a22b31773c87bdebc03fd6095",
+      "paths": [
+        "boi/js/loi.js",
+        "boi/js/auto.js",
+        "boi/js/views.js",
+        "boi/test.mjs",
+        "boi/sw.js",
+        "boi/TIEN_DO.md",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-30T19:15:00+07:00",
+      "completed_at": "2026-10-30T19:45:00+07:00",
+      "summary": "KHẨN 30/10: không nhập tên khách → cổng chặn 'gọi sai tên: Bạn' mọi lượt. Cổng chỉ chặn tên riêng khác tên khách (bỏ qua đại từ); ô Lời gửi khách không còn xoá–viết lại."
+    },
     {
       "id": "BOI-20261030-07",
       "owner": "Claude Code (session_01StJ4qUYrKmQ2u6zdJZ9mcA)",
