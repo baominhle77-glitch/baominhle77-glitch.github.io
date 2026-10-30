@@ -1133,7 +1133,7 @@ test("lọc câu nghĩa theo ngữ cảnh câu hỏi; cổng chặn “người 
 const sseCuu = (text) => new ReadableStream({ start(c) { c.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text }] } }] })}\r\n\r\n`)); c.close(); } });
 const tra429 = () => new Response(JSON.stringify({ ok: false, status: 429, error: "quota" }), { status: 200 });
 
-test("trạm 429 + cầu nối sống → gọi lại đúng yêu cầu qua cầu nối, nguồn “ai”, lyDo “trạm 429 → cầu nối”; chưa bật cờ thì trạm vẫn đứng đầu", async () => {
+test("trạm 429 + cầu nối sống → gọi lại đúng yêu cầu qua cầu nối, nguồn “ai”, lyDo “trạm 429 → cầu nối”; cầu nối đã dò thấy thì lần sau đứng đầu", async () => {
   datCuuTram(CUU_THAT);
   const thuTu = [], noiDungTram = [], noiDungCauNoi = [];
   let ping = 0;
@@ -1164,7 +1164,7 @@ test("trạm 429 + cầu nối sống → gọi lại đúng yêu cầu qua cầ
     assert.equal(thuTu.filter((x) => x === "tram").length, 1, "đã chuyển cầu nối thì không gõ lại trạm");
     assert.equal(ping, 1, "dò cầu nối đúng một lần");
     assert.equal(noiDungCauNoi[0], noiDungTram[0], "gọi lại đúng yêu cầu đã gửi trạm");
-    assert.equal(aiKey(), TRAM_KEY, "dò thấy cầu nối nhưng chưa bật cờ → lần sau trạm vẫn đứng đầu");
+    assert.equal(aiKey(), LOCAL_KEY, "cờ cầu nối bật mặc định (30/10) → dò thấy cầu nối thì lần sau đi thẳng Claude");
     // trạm quá giờ cũng được cứu
     const hang = (url, o) => (url === TRAM_URL ? new Promise((_, rej) => o.signal.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError")))) : fake(url, o));
     const out = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages: [{ role: "user", text: "Tháng này thế nào?" }], fetchImpl: hang, tramTimeoutMs: 30 });

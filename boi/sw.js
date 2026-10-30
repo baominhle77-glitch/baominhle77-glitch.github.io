@@ -1,5 +1,5 @@
 // Service worker của boi/: chạy offline phần luật (trang, mã, dữ liệu lá). Gọi AI luôn đi thẳng mạng, không cache.
-const CACHE = "boi-v20";
+const CACHE = "boi-v21";
 const CORE = [
   "./", "index.html", "manifest.webmanifest", "css/app.css",
   "js/app.js", "js/views.js", "js/store.js", "js/state.js", "js/core.js", "js/parser.js", "js/spreads.js", "js/topic.js",

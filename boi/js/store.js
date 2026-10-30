@@ -1,5 +1,5 @@
 // Kho dữ liệu dùng chung cho các màn: phiên câu hỏi, cài đặt (chỉ localStorage máy người dùng).
-// AI mặc định đi qua trạm (không khoá trong web); cầu nối máy nhà chỉ dùng khi bật lựa chọn ẩn.
+// AI mặc định = cầu nối máy nhà (Claude haiku-5-5, D22 30/10); cầu nối chưa nối được thì dùng trạm Gemini dự phòng.
 import { loadSessions, saveSessions, createSession } from "./state.js";
 import { LOCAL_KEY, LOCAL_BASE, TRAM_KEY, via, datCuuTram } from "./ai.js";
 
@@ -25,10 +25,10 @@ export function aiKey() {
 }
 // Khoá cũ từng dán ở bản trước không còn dùng → xoá khỏi máy (không còn nút xoá trong Cài đặt)
 try { for (const p of ["gemini", "openai", "anthropic"]) storage?.removeItem(`${AIKEY_KEY}.${p}`); } catch (_) { /* bỏ qua */ }
-// Lựa chọn ẩn: bật bằng link ?cau-noi=1 (tắt: ?cau-noi=0) hoặc link ghép ?ghep=<mã>
+// Cầu nối Claude BẬT mặc định (30/10); tắt riêng máy này bằng link ?cau-noi=0, bật lại ?cau-noi=1
 const CAU_NOI_KEY = "boi.v1.cau-noi";
-export const cauNoiAn = () => { try { return storage?.getItem(CAU_NOI_KEY) === "1"; } catch (_) { return false; } };
-export function setCauNoiAn(on) { try { if (on) storage?.setItem(CAU_NOI_KEY, "1"); else storage?.removeItem(CAU_NOI_KEY); return true; } catch (_) { return false; } }
+export const cauNoiAn = () => { try { return storage?.getItem(CAU_NOI_KEY) !== "0"; } catch (_) { return true; } };
+export function setCauNoiAn(on) { try { storage?.setItem(CAU_NOI_KEY, on ? "1" : "0"); return true; } catch (_) { return false; } }
 // Dò cầu nối máy nhà: trên máy chủ nhân gọi 127.0.0.1; máy khác đã ghép (mã trong localStorage) thì lấy địa chỉ
 // đường hầm mới nhất từ boi/cau_noi.json trên GitHub rồi gọi kèm mã. Không có thì im lặng dùng khoá hoặc động cơ luật.
 const GHEP_KEY = "boi.v1.ghep";
