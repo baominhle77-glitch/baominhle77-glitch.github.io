@@ -1,9 +1,29 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-30T17:30:00+07:00",
+  "updated_at": "2026-10-30T19:00:00+07:00",
   "lock_timeout_hours": 24,
   "active_tasks": [],
   "recently_completed": [
+    {
+      "id": "BOI-20261030-07",
+      "owner": "Claude Code (session_01StJ4qUYrKmQ2u6zdJZ9mcA)",
+      "branch": "agent/BOI-20261030-07-lgk-dai",
+      "base_sha": "27cf6261b43d27ed7708508abe90d9c5523593cb",
+      "paths": [
+        "boi/js/loi.js",
+        "boi/js/ai.js",
+        "boi/js/auto.js",
+        "boi/test.mjs",
+        "boi/sw.js",
+        "boi/TIEN_DO.md",
+        "docs/handover/ACTIVE_TASKS.json",
+        "docs/handover/NHAT-KY-PHOI-HOP.md"
+      ],
+      "status": "completed",
+      "started_at": "2026-10-30T18:00:00+07:00",
+      "completed_at": "2026-10-30T19:00:00+07:00",
+      "summary": "GĐ 30/10 chiều: câu nhiều mốc 600–800 chữ, mỗi mốc 2–3 câu; maxOutputTokens 8192 cho câu nhiều mốc; một lượt viết dài thêm khi còn ngân sách 30 s; dùng chung giaiLoiGuiKhach cho bot và web."
+    },
     {
       "id": "BOI-20261030-06",
       "owner": "Claude Code (session_01StJ4qUYrKmQ2u6zdJZ9mcA)",

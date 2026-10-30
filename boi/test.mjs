@@ -722,6 +722,21 @@ function aiGiaTuNghia(prompt, ten = "") {
   for (let i = 0; dem() < 128 && i < dem2.length; i++) out[1].push(dem2[i]);
   return out.filter((p) => p.length).map((p) => p.join(" ")).join("\n\n");
 }
+// Lời gửi giả cho câu nhiều mốc: phần đầu dựng từ nghĩa thật (qua cổng ý khớp) + mỗi mốc 2–3 câu, thêm câu tới đủ số chữ
+function aiDaiTuNghia(prompt, ten = "", soChu = 650) {
+  const dau = aiGiaTuNghia(prompt, ten);
+  const moc = (/theo thứ tự: ([^.]+)\./u.exec(prompt)?.[1] || "").split(", ").filter(Boolean);
+  const loai = ["tiền vào đều tay", "có thêm một khoản nhỏ từ việc cũ", "chi tiêu dễ bị kéo lên", "công việc chính giữ nhịp ổn", "có người quen rủ góp vốn", "dòng tiền chậm lại một chút"];
+  const viec = ["ghi lại mọi khoản chi trong tuần đầu", "để riêng một phần cho quỹ dự phòng", "hỏi kỹ giấy tờ trước khi ký", "dồn sức cho việc đang mang lại thu nhập chính", "hẹn lại khách cũ", "rà lại các khoản trả góp"];
+  const them = ["Bạn nên giữ sổ thu chi gọn gàng để thấy rõ tiền đi đâu.", "Đừng để cảm xúc quyết định những khoản chi lớn.", "Một cuộc nói chuyện thẳng thắn với người cùng làm sẽ giúp bạn đỡ lo.", "Nhìn lại kế hoạch đầu năm để chỉnh cho sát.", "Những khoản nhỏ góp lại sẽ thành chỗ dựa cho tháng sau."];
+  const khoi = moc.map((m, i) => [`${m} ${loai[i % loai.length]}, đây là điểm thuận bạn nên tận dụng.`, `Việc nên làm: ${viec[i % viec.length]}.`]);
+  const ghep = () => [dau, ...Array.from({ length: Math.ceil(khoi.length / 3) }, (_, d) => khoi.slice(d * 3, d * 3 + 3).map((c) => c.join(" ")).join(" "))].join("\n\n");
+  for (let k = 0; demChu(ghep()) < soChu && k < 200; k++) {
+    const b = khoi[k % khoi.length];
+    b.splice(b.length - 1, 0, k < khoi.length ? "Điều cần cẩn trọng là đừng hứa chi tiền khi chưa chắc khoản thu." : them[k % them.length]);
+  }
+  return ghep();
+}
 const LGK_OK = [
   "Bạn ơi, mình đã đọc kỹ câu bạn hỏi về chuyện công việc mới. Nhìn chung con đường đang mở ra theo hướng thuận, nhưng không phải kiểu dễ dàng ngồi chờ. Cơ hội đến từ chính những gì bạn đã chuẩn bị trong mấy tháng qua, và người quyết định đang để ý đến bạn nhiều hơn bạn nghĩ.",
   "Điều mình thấy rõ nhất là bạn đang tự nghi ngờ mình hơi nhiều. Chính sự do dự đó làm bạn chậm một nhịp so với người khác. Nếu bạn nói rõ mong muốn của mình, mọi chuyện sẽ trôi hơn hẳn, và những lo lắng hiện giờ phần lớn sẽ tự tan khi bạn bắt tay vào việc.",
@@ -1436,13 +1451,15 @@ test("độ dài theo câu hỏi: câu ngắn 150–300 chữ; “Tài chính n�
   const dai = await createSession({ cauHoi: "Tài chính năm 2027 từng tháng", spreadId: sp.id, tiers: sp.tiers(2027), money: true, seed: SEED });
   const d = doDaiLgk(dai);
   assert.deepEqual([d.min, d.max, d.doanMin, d.doanMax, d.nhieu, d.moc.length], [600, 800, 4, 10, true, 12]);
-  assert.match(dongDoDai(dai), /600–800 chữ, 4–10 đoạn/u);
+  assert.match(dongDoDai(dai), /TỐI THIỂU 600 chữ .*4–10 đoạn/u);
+  assert.match(dongDoDai(dai), /MỖI mốc 2–3 câu/u);
+  assert.doesNotMatch(dongDoDai(ngan), /TỐI THIỂU/u, "câu ngắn giữ nguyên 150–300");
   assert.match(dongDoDai(dai), /Tháng 1\/2027, .*Tháng 12\/2027/u);
   assert.ok(laMocThoiGian("Tháng 3/2027") && laMocThoiGian("4–6 tuần tới") && !laMocThoiGian("Hao tài"));
   await ensureMapping(dai, 0);
   addPickedRound(dai, dai.tiers.map((t) => ({ tarot: viTriNgauNhien(78, t.t), lenormand: viTriNgauNhien(36, t.l) })));
   const msg = gonRequest(db, dai, { reading: analyze(db, dai, {}, 0) });
-  assert.match(msg, /ĐỘ DÀI LỜI GỬI: 600–800 chữ/u);
+  assert.match(msg, /ĐỘ DÀI LỜI GỬI: TỐI THIỂU 600 chữ/u);
   assert.match(SYSTEM_GON, /ĐỘ DÀI LỜI GỬI/u);
   // nhắc tên tháng trong lời gửi là được (không phải lỗi cứng “tên vị trí”)
   const thang = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}/2027 tiền vào đều, bạn giữ nhịp chi tiêu và để dành một phần nhỏ cho việc sắp tới.`).join("\n\n");
@@ -1514,6 +1531,98 @@ test("F: bot gửi khách khi chỉ có lỗi mềm — lời AI ngắn 1 đoạ
     assert.equal(r.loiGuiKhach, ngan);
     assert.ok(r.canhBao.some((x) => /dài \d+ chữ|đoạn/u.test(x)), r.canhBao.join("; "));
     assert.equal(goi.length, 1, "không gọi viết lại vì chỉ có lỗi mềm");
+  } finally { datLaiCauNoi(); }
+});
+
+// ---- GĐ 30/10 chiều: câu nhiều mốc 600–800 chữ, vẫn < 30 s ----
+function cauNoi12({ soChu = 650, soChuThem = 0, treMs = 0 } = {}) {
+  const goi = [];
+  const f = async (u, o = {}) => {
+    if (u === `${LOCAL_BASE}/ping`) throw new TypeError("Failed to fetch");
+    if (/\/v1beta\/models\?/.test(u)) return new Response(JSON.stringify({ models: [] }), { status: 200 });
+    if (u.startsWith(`${WORKER_BASE}/v1beta/models/`)) {
+      const b = JSON.parse(o.body);
+      goi.push({ u, b });
+      if (treMs) await new Promise((r) => setTimeout(r, treMs));
+      const msg = b.contents.at(-1).parts[0].text;
+      const ten = /gọi đúng tên “([^”]+)”/u.exec(msg)?.[1] || "";
+      const text = b.generationConfig?.responseMimeType
+        ? JSON.stringify({ loi_gui_khach: aiDaiTuNghia(msg, ten, soChu), tong_ket: CO_DAU, tra_loi: YN[1] })
+        : aiDaiTuNghia(msg, ten, soChuThem || soChu);
+      return new Response(sseMH(text, "claude-haiku-5-5"), { status: 200 });
+    }
+    throw new TypeError("Failed to fetch");
+  };
+  return { f, goi };
+}
+const CAU_12 = "Tài chính năm 2027 của tôi từng tháng thế nào?";
+
+test("câu 12 tháng: AI trả 650 chữ → nguon “ai”, không cảnh báo, không gọi thêm; lời nhắc đòi tối thiểu 600 chữ, mỗi tháng 2–3 câu, max token lớn hơn", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    const { f, goi } = cauNoi12({ soChu: 650 });
+    await probeBridge(f, { on: true });
+    const r = await giaiTuDong({ db, cauHoi: CAU_12, tenKhach: "Lan", key: aiKey(), fetchImpl: f });
+    assert.equal(r.trai, "12thang");
+    assert.equal(r.nguon, "ai", r.lyDo);
+    const n = demChu(r.loiGuiKhach);
+    assert.ok(n >= 600 && n <= 800, `${n} chữ`);
+    assert.deepEqual(r.canhBao, [], r.canhBao.join("; "));
+    assert.equal(goi.length, 1, "đủ dài thì không gọi viết dài thêm");
+    for (let m = 1; m <= 12; m++) assert.match(r.loiGuiKhach, new RegExp(`Tháng ${m}/2027`, "u"));
+    const msg = goi[0].b.contents.at(-1).parts[0].text;
+    assert.match(msg, /TỐI THIỂU 600 chữ/u);
+    assert.match(msg, /MỖI mốc 2–3 câu cụ thể/u);
+    assert.equal(goi[0].b.generationConfig.maxOutputTokens, 8192);
+    assert.match(goi[0].u, /&no_luc=low$/);
+    // câu ngắn giữ nguyên: 4096 token, không dòng TỐI THIỂU
+    const g = cauNoiGon();
+    await probeBridge(g.f, { on: true });
+    const ngan = await giaiTuDong({ db, cauHoi: "Người yêu cũ có quay lại với tôi không?", key: aiKey(), fetchImpl: g.f });
+    assert.ok(["ai", "ai-viet-lai"].includes(ngan.nguon));
+    assert.equal(g.goi[0].b.generationConfig.maxOutputTokens, 4096);
+    assert.doesNotMatch(g.goi[0].b.contents.at(-1).parts[0].text, /TỐI THIỂU/u);
+  } finally { datLaiCauNoi(); }
+});
+
+test("câu 12 tháng: AI trả ~380 chữ → vẫn nguon “ai” + cảnh báo mềm; còn ngân sách thì viết dài thêm 1 lượt duy nhất, hết ngân sách thì giữ bản đang có", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    // hết ngân sách: không gọi thêm, giữ bản ngắn, cảnh báo mềm
+    const a = cauNoi12({ soChu: 380 });
+    await probeBridge(a.f, { on: true });
+    const ra = await giaiTuDong({ db, cauHoi: CAU_12, tenKhach: "Lan", key: aiKey(), fetchImpl: a.f, nganSachMs: 0 });
+    assert.equal(ra.nguon, "ai", ra.lyDo);
+    const na = demChu(ra.loiGuiKhach);
+    assert.ok(na >= 300 && na < 600, `${na} chữ`);
+    assert.ok(ra.canhBao.some((x) => /dài \d+ chữ \(nên 600–800\)/u.test(x)), ra.canhBao.join("; "));
+    assert.ok(ra.canhBao.includes("không đủ thời gian viết dài thêm"));
+    assert.equal(a.goi.length, 1);
+    // còn ngân sách: đúng 1 lượt viết dài thêm (chữ thường, no_luc=low) → bản 700 chữ thay vào
+    const b = cauNoi12({ soChu: 380, soChuThem: 700 });
+    await probeBridge(b.f, { on: true });
+    const rb = await giaiTuDong({ db, cauHoi: CAU_12, tenKhach: "Lan", key: aiKey(), fetchImpl: b.f });
+    assert.equal(rb.nguon, "ai", rb.lyDo);
+    assert.equal(b.goi.length, 2, "đúng 1 lượt viết dài thêm");
+    assert.match(b.goi[1].u, /&no_luc=low$/);
+    assert.equal(b.goi[1].b.generationConfig.responseMimeType, undefined, "lượt thêm trả chữ thường");
+    assert.match(b.goi[1].b.contents.at(-1).parts[0].text, /BẢN ĐANG CÓ \(\d+ chữ — quá ngắn/u);
+    assert.ok(demChu(rb.loiGuiKhach) >= 600, `${demChu(rb.loiGuiKhach)} chữ`);
+    assert.equal(rb.vietDai, "đã viết dài thêm 1 lượt");
+    assert.ok(!rb.canhBao.some((x) => /dài \d+ chữ/u.test(x)), rb.canhBao.join("; "));
+    // lượt thêm vẫn ngắn → giữ bản cũ + cảnh báo, không gọi lần ba
+    const c = cauNoi12({ soChu: 380, soChuThem: 380 });
+    await probeBridge(c.f, { on: true });
+    const rc = await giaiTuDong({ db, cauHoi: CAU_12, key: aiKey(), fetchImpl: c.f });
+    assert.equal(rc.nguon, "ai");
+    assert.equal(c.goi.length, 2);
+    assert.ok(rc.canhBao.some((x) => /dài/u.test(x)));
+    // lượt đầu chậm (ước lượt sau không kịp trong 30 s) → không gọi thêm
+    const d = cauNoi12({ soChu: 380, treMs: 60 });
+    await probeBridge(d.f, { on: true });
+    const rd = await giaiTuDong({ db, cauHoi: CAU_12, key: aiKey(), fetchImpl: d.f, nganSachMs: 100 });
+    assert.equal(d.goi.length, 1, "lượt đầu 60 ms, ngân sách 100 ms → không đủ cho lượt thêm");
+    assert.equal(rd.nguon, "ai");
   } finally { datLaiCauNoi(); }
 });
 
