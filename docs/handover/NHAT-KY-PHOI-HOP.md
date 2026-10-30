@@ -22,6 +22,10 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-30 15:30 GMT+7 — Claude Code — BOI-20261030-05 — ghim runner ubuntu-24.04 cho workflow Playwright webkit
+- `ubuntu-latest` đã lên Ubuntu 26.04; Playwright 1.52.0 báo "does not support webkit on ubuntu26.04-x64" → check `validate` đỏ ở mọi PR (#168, #169).
+- Ghim `runs-on: ubuntu-24.04` trong `validate-role-system.yml`, `e2e-reader-production.yml`, `verify-admin-v9-return.yml` (cả 3 cài webkit). Không đổi bước nào khác. Chờ GĐ đo xong mới gộp.
+
 ### 2026-10-30 15:00 GMT+7 — Claude Code — BOI-20261030-04 — bot bản gọn, low
 - Đo GĐ 30/10: haiku 5-5 high hết 16.000 token suy nghĩ, không ra chữ → cầu nối báo rỗng → rơi GPT (mọi nguon=ai của bot trước nay là GPT). Chủ tịch chốt: bot bản gọn, low; web đầy đủ giữ high.
 - `boi/js/ai.js`: SYSTEM_GON + SCHEMA_GON (loi_gui_khach, tong_ket, tra_loi), maxOutputTokens 4096, `&no_luc=low` khi gọi cầu nối ở chế độ gọn, hẹn giờ cả lượt 35 s; đọc `modelVersion` → `moHinh`. SYSTEM_READING giữ nguyên từng chữ.
