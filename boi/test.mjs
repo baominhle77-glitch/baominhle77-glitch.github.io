@@ -26,7 +26,9 @@ import { datCuuTram, via, cauNoi, quaCauNoi } from "./js/ai.js";
 import { WORKER_BASE, diaChiCauNoi } from "./js/store.js";
 import { AI_THU_LAI } from "./js/auto.js";
 import { SYSTEM_GON, SCHEMA_GON, GON_MAX_TOKENS, GON_HEN_GIO, gonRequest } from "./js/ai.js";
-import { lichNen, huyNen, canAI, NEN_LICH } from "./js/views.js";
+import { lichNen, huyNen, canAI, NEN_LICH, runLGK, lgkCua } from "./js/views.js";
+import { doDaiLgk, dongDoDai, laMocThoiGian } from "./js/loi.js";
+import { giaiLoiGuiKhach } from "./js/auto.js";
 // chờ thử lại rút ngắn cho test (thật: cầu nối 1,5 s, BoiAuto 3 s)
 cauNoi.thuLaiMs = 5;
 AI_THU_LAI.ms = 5;
@@ -551,7 +553,7 @@ test("prompt AI: văn phong reader thật, luôn tiếng Việt, đọc từng t
   assert.match(readingRequest(db, s, {}), /hoàn toàn bằng tiếng Việt: mở bài, rồi đọc lần lượt từng tầng/u);
 });
 
-test("ngoài máy nhà: dò 127.0.0.1 trả về nhanh, đi thẳng Worker cố định (không đọc cau_noi.json); Worker chết/treo → trạm, không treo", async () => {
+test("ngoài máy nhà: dò 127.0.0.1 trả về nhanh, đi thẳng Worker cố định (không đọc cau_noi.json); Worker chết/treo → bản luật, KHÔNG rơi sang Gemini", async () => {
   const refused = async () => { throw new TypeError("Failed to fetch"); };
   const hang = (url, opts = {}) => new Promise((_, rej) => opts.signal?.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError"))));
   try {
@@ -570,24 +572,18 @@ test("ngoài máy nhà: dò 127.0.0.1 trả về nhanh, đi thẳng Worker cố 
     assert.ok(Date.now() - t0 < 1000, "127.0.0.1 treo vẫn dò xong nhanh");
     assert.equal(aiKey(), LOCAL_KEY);
     // Worker chết (cả 2 lượt) → trạm
-    const answer = JSON.stringify({ tong_quan: "Từ trạm.", tang: [] });
-    const tramOk = (url) => (url === TRAM_URL ? Promise.resolve(new Response(JSON.stringify({ ok: true, model: "gemini-x", data: { candidates: [{ content: { parts: [{ text: answer }] } }] } }), { status: 200 })) : null);
-    let fell = 0, thuLai = 0;
-    const outA = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, messages: [{ role: "user", text: "x" }],
-      fetchImpl: (url, o) => tramOk(url) || refused(url, o), onFallback: () => fell++, onThuLai: () => thuLai++ });
-    assert.equal(outA.text, answer);
-    assert.equal(outA.key, TRAM_KEY);
-    assert.equal(outA.cuu, "cầu nối lỗi (cầu nối chết) → trạm");
-    assert.equal(fell, 1);
-    assert.equal(thuLai, 1, "thử lại cầu nối đúng 1 lần trước khi sang trạm");
+    // Chỉ Claude (GĐ 30/10): Worker chết (cả 2 lượt) → lỗi cầu nối, không gọi trạm
+    let thuLai = 0, tram = 0;
+    const eA = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, messages: [{ role: "user", text: "x" }],
+      fetchImpl: (url, o) => { if (url === TRAM_URL) tram++; return refused(url, o); }, onThuLai: () => thuLai++ }).then(() => null, (e) => e);
+    assert.equal(eA.cuu, "cầu nối Claude lỗi (cầu nối chết) → luật");
+    assert.equal(thuLai, 1, "thử lại cầu nối đúng 1 lần");
+    assert.equal(tram, 0, "không gọi trạm Gemini");
     t0 = Date.now();
-    const outB = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, messages: [{ role: "user", text: "x" }], localTimeoutMs: 50,
-      fetchImpl: (url, o) => tramOk(url) || (url.startsWith(WORKER_BASE) ? hang(url, o) : refused(url, o)) });
-    assert.equal(outB.model, "gemini-x", "Worker treo → sau hạn chờ chuyển trạm");
+    const eB = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, messages: [{ role: "user", text: "x" }], localTimeoutMs: 50,
+      fetchImpl: (url, o) => (url.startsWith(WORKER_BASE) ? hang(url, o) : refused(url, o)) }).then(() => null, (e) => e);
+    assert.equal(eB.cuu, "cầu nối Claude lỗi (cầu nối quá giờ) → luật", "Worker treo → sau hạn chờ dừng, không treo");
     assert.ok(Date.now() - t0 < 2000);
-    // cầu nối lẫn trạm đều hỏng → lỗi có đường đi đầy đủ (trang hiện bản luật), không treo
-    const eAll = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", messages: [{ role: "user", text: "x" }], fetchImpl: refused }).then(() => null, (e) => e);
-    assert.equal(eAll.cuu, "cầu nối lỗi (cầu nối chết) → trạm lỗi (không tới được trạm (mạng)) → luật");
   } finally { datLaiCauNoi(); }
 });
 
@@ -732,10 +728,12 @@ const LGK_OK = [
   "Trong tuần này, bạn hãy viết ra ba điều bạn làm tốt nhất ở công việc cũ, rồi mang chúng vào buổi nói chuyện sắp tới. Đừng hạ giá bản thân, cứ bình tĩnh nói về những gì bạn đã làm được. Mình tin bạn sẽ thấy khác ngay sau buổi đó.",
 ].join("\n\n");
 
-test("lời gửi khách — cổng kiểm: đạt khi văn xuôi chuẩn; bắt tên lá, gạch đầu dòng, đánh số, tiêu đề, in đậm, độ dài, số đoạn, mất dấu", () => {
+test("lời gửi khách — cổng kiểm: CHẶN lỗi cứng (tên lá, đầu dòng, đánh số, tiêu đề, in đậm, mất dấu, chữ cấm); độ dài/số đoạn chỉ là cảnh báo", () => {
   assert.ok(demChu(LGK_OK) >= 120 && demChu(LGK_OK) <= 220, `mẫu dài ${demChu(LGK_OK)}`);
-  assert.deepEqual(kiemLoiGuiKhach(LGK_OK, db), { ok: true, loi: [] });
+  assert.equal(kiemLoiGuiKhach(LGK_OK, db).ok, true);
+  assert.deepEqual(kiemLoiGuiKhach(LGK_OK, db).loi, []);
   const bad = (t, re) => { const k = kiemLoiGuiKhach(t, db); assert.equal(k.ok, false, t.slice(0, 40)); assert.match(k.loi.join("; "), re); };
+  const mem = (t, re) => { const k = kiemLoiGuiKhach(t, db); assert.equal(k.ok, true, `lỗi mềm không chặn: ${k.loi}`); assert.match(k.canhBao.join("; "), re); };
   bad(LGK_OK.replace("Nhìn chung", "Lá Mặt Trăng cho thấy, nhìn chung"), /tên lá: Mặt Trăng/u);
   bad(LGK_OK.replace("Nhìn chung", "The Tower cho thấy"), /tên lá: The Tower/u);
   bad(LGK_OK.replace("Trong tuần này", "- Trong tuần này"), /đầu dòng/u);
@@ -744,9 +742,9 @@ test("lời gửi khách — cổng kiểm: đạt khi văn xuôi chuẩn; bắt
   bad(LGK_OK.replace("Trong tuần này", "## Lời khuyên\nTrong tuần này"), /tiêu đề/u);
   bad(LGK_OK.replace("Trong tuần này", "Lời khuyên:\nTrong tuần này"), /tiêu đề/u);
   bad(LGK_OK.replace("Mình tin bạn", "**Mình tin bạn**"), /in đậm/u);
-  bad(LGK_OK.split("\n\n")[0], /dài|đoạn/u);
-  bad(LGK_OK.replace(/\n\n/g, " "), /1 đoạn/u);
-  bad(LGK_OK + "\n\n" + LGK_OK, /dài/u);
+  mem(LGK_OK.split("\n\n")[0], /dài|đoạn/u);
+  mem(LGK_OK.replace(/\n\n/g, " "), /1 đoạn/u);
+  mem(LGK_OK + "\n\n" + LGK_OK + "\n\n" + LGK_OK, /dài/u);
   bad("Ban oi, minh da doc ky cau ban hoi. ".repeat(14) + "\n\nThang nay ban nen giu nhip.", /mất dấu/u);
   assert.deepEqual(tenLaTrong("căn ngôi nhà nhỏ và trái tim ấm", db), [], "chữ thường trong câu không bị coi là tên lá");
   for (const [w, re] of [["web", /web/], ["app", /app/], ["ứng dụng", /app/], ["AI", /AI/], ["hệ thống", /hệ thống/], ["máy", /máy/], ["công cụ", /công cụ/], ["bốc ngẫu nhiên", /ngẫu nhiên/], ["thuật toán", /thuật toán/], ["seed", /seed/], ["mã khoá", /mã khoá/]]) {
@@ -1109,17 +1107,22 @@ test("cổng chặn một lời toàn câu sáo / chung chung", async () => {
   ].join("\n\n");
   assert.ok(demChu(sao) >= 120 && demChu(sao) <= 220, `${demChu(sao)}`);
   const k = kiemLoiGuiKhach(sao, db, { session: s });
-  assert.equal(k.ok, false);
-  assert.match(k.loi.join("; "), /chung chung: \d+ % câu là câu sáo/u);
-  assert.match(k.loi.join("; "), /chung chung: chỉ \d+ ý khớp nghĩa lá/u);
-  // AI trả lời sáo → viết lại đúng 1 lần có kèm nghĩa thật; vẫn sáo → bản luật mới từ nghĩa lá
+  // GĐ 30/10: câu sáo / ít ý khớp là lỗi MỀM → vẫn dùng bản AI, chỉ ghi cảnh báo
+  assert.equal(k.ok, true);
+  assert.match(k.canhBao.join("; "), /chung chung: \d+ % câu là câu sáo/u);
+  assert.match(k.canhBao.join("; "), /chung chung: chỉ \d+ ý khớp nghĩa lá/u);
   const rule = analyze(db, s, {});
-  let n = 0, msg = "";
-  const r = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: sao }, call: async (sys, m) => { n++; msg = m; return sao; } });
+  let n = 0;
+  const r = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: sao }, call: async () => { n++; return sao; } });
+  assert.equal(n, 0, "lỗi mềm không gọi viết lại");
+  assert.equal(r.nguon, "ai");
+  assert.ok(r.canhBao.length >= 2);
+  // lỗi cứng (tên lá) → viết lại đúng 1 lần, kèm nghĩa thật
+  let msg = "";
+  const r2 = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: sao.replace("Bạn ơi", "Bạn ơi, lá Mặt Trăng cho thấy") }, call: async (sys, m) => { n++; msg = m; return sao; } });
   assert.equal(n, 1);
   assert.match(msg, /NGHĨA THẬT CỦA TỪNG LÁ ĐÃ TRẢI/u);
-  assert.equal(r.nguon, "luat");
-  assert.ok(yKhop(r.text, db, s).length >= 3);
+  assert.equal(r2.nguon, "ai-viet-lai");
 });
 
 test("ghi lý do đường AI hỏng (cầu nối chết / 429 / quá giờ / bị cổng trả lại)", async () => {
@@ -1156,8 +1159,8 @@ test("lọc câu nghĩa theo ngữ cảnh câu hỏi; cổng chặn “người 
   const s = await trai3La("Người ấy còn thương em không?", 1);
   const nen = loiGuiKhachLuat(db, s, analyze(db, s, {}), {});
   const k = kiemLoiGuiKhach(nen.replace("\n\n", "\n\nNgười độc thân có thể gặp được một người mới. "), db, { session: s });
-  assert.equal(k.ok, false);
-  assert.match(k.loi.join("; "), /sai ngữ cảnh: nói “người độc thân”/u);
+  assert.equal(k.ok, true, "sai ngữ cảnh là cảnh báo mềm");
+  assert.match(k.canhBao.join("; "), /sai ngữ cảnh: nói “người độc thân”/u);
 });
 
 // ---- Đường AI 28/10: trạm 429/quá giờ → dò cầu nối một lần (kể cả khi chưa bật cờ) ----
@@ -1232,41 +1235,29 @@ test("B: Worker lỗi mạng 1 lần rồi tốt → thử lại sau 1,5 s, ngu�
   } finally { datLaiCauNoi(); }
 });
 
-test("B: Worker chết 2 lượt → trạm; trạm lỗi MẠNG → cứu lại cầu nối → nguồn “ai” (không rơi về luật)", async () => {
+test("E: chỉ Claude — Worker chết 2 lượt → bản luật, không gọi trạm Gemini; Worker sống lại ở lượt thử lại của BoiAuto → nguồn “ai”", async () => {
   datCuuTram(CUU_THAT);
   try {
-    const { f, log } = mayGia({ worker: ["mang", "mang"], tram: "mang" });
+    const { f, log } = mayGia({ worker: ["mang", "mang"], tram: "tot" });
     await probeBridge(f, { on: true });
     const r = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", tenKhach: "Lan", key: aiKey(), fetchImpl: f });
     assert.ok(["ai", "ai-viet-lai"].includes(r.nguon), r.lyDo);
-    assert.equal(r.lyDo, "cầu nối lỗi (cầu nối chết) → trạm lỗi (không tới được trạm (mạng)) → cầu nối");
-    assert.deepEqual(log.filter((x) => x !== "github").slice(0, 5), ["ping-local", "worker", "worker", "tram", "worker"]);
-    // trạm 429 / quá giờ / 500 cũng cứu
-    for (const tram of ["429", "500"]) {
-      const g = mayGia({ worker: ["mang", "mang"], tram });
-      const out = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", messages: [{ role: "user", text: "Tháng này thế nào?" }], fetchImpl: g.f });
-      assert.equal(out.key, LOCAL_KEY, tram);
-      assert.match(out.cuu, /→ cầu nối$/u);
-    }
-    // máy đã tắt cầu nối (?cau-noi=0) → trạm trước; trạm lỗi mạng vẫn được cứu
-    const g = mayGia({ tram: "mang" });
-    const out = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages: [{ role: "user", text: "x" }], fetchImpl: g.f });
-    assert.equal(out.cuu, "trạm lỗi (không tới được trạm (mạng)) → cầu nối");
-    assert.deepEqual(g.log.slice(0, 2), ["tram", "worker"]);
+    assert.ok(!log.includes("tram"), log.join(","));
+    assert.deepEqual(log.filter((x) => x !== "github").slice(0, 4), ["ping-local", "worker", "worker", "worker"], "lượt 2 của BoiAuto gặp Worker sống lại");
   } finally { datLaiCauNoi(); }
 });
 
-test("B: hỏng hết (cầu nối, trạm, cứu) → bản luật, lyDo đủ đường đi; BoiAuto tự thử lại AI 1 lượt trước khi trả luật", async () => {
+test("B: cầu nối hỏng hết → bản luật, lyDo nói rõ; BoiAuto tự thử lại AI 1 lượt; không gọi trạm Gemini", async () => {
   datCuuTram(CUU_THAT);
   try {
-    const { f, log } = mayGia({ worker: Array(20).fill("mang"), tram: "mang" });
+    const { f, log } = mayGia({ worker: Array(20).fill("mang"), tram: "tot" });
     await probeBridge(f, { on: true });
     const r = await giaiTuDong({ db, cauHoi: "Người ấy còn thương em không?", tenKhach: "Lan", key: aiKey(), fetchImpl: f });
     assert.equal(r.nguon, "luat");
-    assert.equal(r.lyDo, "cầu nối lỗi (cầu nối chết) → trạm lỗi (không tới được trạm (mạng)) → cầu nối lỗi (cầu nối chết) → luật");
+    assert.equal(r.lyDo, "cầu nối Claude lỗi (cầu nối chết) → luật");
     assert.ok(kiemLoiGuiKhach(r.loiGuiKhach, db, { tenKhach: "Lan" }).ok, "bản luật vẫn qua cổng");
-    assert.equal(log.filter((x) => x === "tram").length, 2, "2 lượt AI (thử lại 1 lần)");
-    assert.equal(log.filter((x) => x === "worker").length, 6, "mỗi lượt: 2 lần cầu nối + 1 lần cứu");
+    assert.equal(log.filter((x) => x === "tram").length, 0);
+    assert.equal(log.filter((x) => x === "worker").length, 4, "2 lượt AI × (cầu nối + thử lại)");
   } finally { datLaiCauNoi(); }
 });
 
@@ -1387,13 +1378,13 @@ test("bot gọn: gửi no_luc=low + lược đồ gọn (3 trường) + maxOutpu
     assert.doesNotMatch(msg, /BẢN NHÁP CỦA ĐỘNG CƠ LUẬT|XƯNG HÔ TRONG BẢN GIẢI CHI TIẾT/u);
     assert.ok(msg.length < readingRequest(db, s0, { reading: analyze(db, s0, {}, 0) }).length, "lời nhắc gọn ngắn hơn bản đầy đủ");
     // phiên bot lưu bản gọn: web không coi là bản giải đầy đủ
-    assert.equal(s0.ai.gon, true);
-    assert.equal(s0.ai.reading, null);
-    assert.equal(s0.ai.moHinh, "claude-haiku-5-5");
+    assert.equal(s0.ai, undefined, "bot không tạo bản giải đầy đủ");
+    assert.equal(s0.lgk.nguon, r.nguon);
+    assert.equal(s0.lgk.moHinh, "claude-haiku-5-5");
   } finally { datLaiCauNoi(); }
 });
 
-test("bot gọn: 127.0.0.1 hỏng → Worker (vẫn no_luc=low); cầu nối chết hết → trạm, moHinh = gemini; hẹn giờ gọn 35 s không cắt bản chậm", async () => {
+test("bot gọn: 127.0.0.1 hỏng → Worker (vẫn no_luc=low); cầu nối chết hết → bản luật (không Gemini); hẹn giờ gọn 35 s không cắt bản chậm", async () => {
   datCuuTram(CUU_THAT);
   try {
     const a = cauNoiGon({ local: "hong", modelVersion: "cx/gpt-5" });
@@ -1403,14 +1394,14 @@ test("bot gọn: 127.0.0.1 hỏng → Worker (vẫn no_luc=low); cầu nối ch�
     assert.match(a.goi[1].u, /&no_luc=low$/);
     assert.equal(ra.moHinh, "cx/gpt-5", "cầu nối rơi GPT thì moHinh nói thật là GPT");
     datLaiCauNoi();
-    // cầu nối chết (127.0.0.1 không có, Worker hỏng) → trạm Gemini
-    const dead = async (u, o) => (u === TRAM_URL ? b.f(u, o) : u.includes("/v1beta/") || u.endsWith("/ping") ? Promise.reject(new TypeError("Failed to fetch")) : b.f(u, o));
+    // cầu nối chết (127.0.0.1 không có, Worker hỏng) → bản luật, không gọi trạm Gemini
     const b = cauNoiGon({ tram: "tot" });
+    const dead = async (u, o) => (u === TRAM_URL ? b.f(u, o) : u.includes("/v1beta/") || u.endsWith("/ping") ? Promise.reject(new TypeError("Failed to fetch")) : b.f(u, o));
     await probeBridge(dead, { on: true });
     const rb = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", key: aiKey(), fetchImpl: dead });
-    assert.ok(["ai", "ai-viet-lai"].includes(rb.nguon), rb.lyDo);
-    assert.equal(rb.moHinh, "gemini-2.5-flash");
-    assert.equal(b.goi[0].b.body.generationConfig.maxOutputTokens, 4096, "trạm cũng nhận bản gọn");
+    assert.equal(rb.nguon, "luat");
+    assert.equal(rb.moHinh, "");
+    assert.equal(b.goi.filter((g) => g.dich === "tram").length, 0, "không rơi sang Gemini");
     datLaiCauNoi();
     // hẹn giờ gọn = 35 s: phản hồi chậm hơn localTimeoutMs vẫn được nhận
     assert.equal(GON_HEN_GIO, 35000);
@@ -1433,10 +1424,96 @@ test("chế độ đầy đủ (web): không gửi no_luc, lược đồ đầy 
     assert.match(goi[0].u, /:streamGenerateContent\?alt=sse$/);
     assert.ok(goi[0].b.generationConfig.responseSchema.properties.tang, "lược đồ đầy đủ");
     assert.equal(goi[0].b.generationConfig.maxOutputTokens, undefined);
-    // BoiAuto vẫn chạy được chế độ đầy đủ khi tắt gọn
-    const r = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", key: aiKey(), fetchImpl: f, gon: false });
-    assert.ok(["ai", "ai-viet-lai"].includes(r.nguon), r.lyDo);
-    assert.ok(goi.slice(1).every((g) => !/no_luc/.test(g.u)));
+  } finally { datLaiCauNoi(); }
+});
+
+// ---- GĐ 30/10: ô Lời gửi khách = đúng đường bản gọn của bot; độ dài theo câu hỏi; cổng chỉ chặn lỗi cứng ----
+test("độ dài theo câu hỏi: câu ngắn 150–300 chữ; “Tài chính năm 2027 từng tháng” 600–800 chữ, 4–10 đoạn, đủ 12 tháng; tên tháng không bị coi là tên vị trí", async () => {
+  const ngan = await createSession({ cauHoi: "Em có nên chuyển nhà không?", spreadId: "3la", tiers: spreadById("3la").tiers(), seed: SEED });
+  assert.deepEqual([doDaiLgk(ngan).min, doDaiLgk(ngan).max, doDaiLgk(ngan).nhieu], [150, 300, false]);
+  const sp = chonTrai("Tài chính năm 2027 từng tháng", "tu-chon");
+  assert.equal(sp.id, "12thang");
+  const dai = await createSession({ cauHoi: "Tài chính năm 2027 từng tháng", spreadId: sp.id, tiers: sp.tiers(2027), money: true, seed: SEED });
+  const d = doDaiLgk(dai);
+  assert.deepEqual([d.min, d.max, d.doanMin, d.doanMax, d.nhieu, d.moc.length], [600, 800, 4, 10, true, 12]);
+  assert.match(dongDoDai(dai), /600–800 chữ, 4–10 đoạn/u);
+  assert.match(dongDoDai(dai), /Tháng 1\/2027, .*Tháng 12\/2027/u);
+  assert.ok(laMocThoiGian("Tháng 3/2027") && laMocThoiGian("4–6 tuần tới") && !laMocThoiGian("Hao tài"));
+  await ensureMapping(dai, 0);
+  addPickedRound(dai, dai.tiers.map((t) => ({ tarot: viTriNgauNhien(78, t.t), lenormand: viTriNgauNhien(36, t.l) })));
+  const msg = gonRequest(db, dai, { reading: analyze(db, dai, {}, 0) });
+  assert.match(msg, /ĐỘ DÀI LỜI GỬI: 600–800 chữ/u);
+  assert.match(SYSTEM_GON, /ĐỘ DÀI LỜI GỬI/u);
+  // nhắc tên tháng trong lời gửi là được (không phải lỗi cứng “tên vị trí”)
+  const thang = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}/2027 tiền vào đều, bạn giữ nhịp chi tiêu và để dành một phần nhỏ cho việc sắp tới.`).join("\n\n");
+  const k = kiemLoiGuiKhach(`Bạn ơi, năm 2027 nhìn chung khá ổn về tiền.\n\n${thang}`, db, { session: dai });
+  assert.ok(!k.loi.some((x) => /vị trí/u.test(x)), k.loi.join("; "));
+});
+
+test("ô Lời gửi khách trên web dùng ĐÚNG đường bản gọn của bot (no_luc=low, lược đồ gọn), chữ chảy dần; lỗi mềm vẫn là bản AI, nút chép mở", async () => {
+  datCuuTram(CUU_THAT);
+  const fetchCu = globalThis.fetch;
+  const s = await sessionNgauNhien("tinhcam", 5);
+  s.tenKhach = "Lan";
+  store.db = db;
+  store.sessions.push(s);
+  try {
+    const { f, goi } = cauNoiGon();
+    globalThis.fetch = f;
+    await probeBridge(f, { on: true });
+    const chu = [];
+    let ve = 0;
+    const ok = await runLGK(s, null, { rerender: () => ve++ }, analyze(db, s, {}, 0), { giai: (o) => giaiLoiGuiKhach({ ...o, onText: (t) => { chu.push(t); o.onText(t); } }) });
+    assert.equal(ok, true);
+    assert.ok(chu.length >= 1, "chữ lời gửi chảy ra trước khi xong");
+    assert.equal(goi[0].dich, "local");
+    assert.match(goi[0].u, /&no_luc=low$/, "cùng đường gọn với bot");
+    assert.deepEqual(goi[0].b.generationConfig.responseSchema, SCHEMA_GON);
+    assert.equal(goi[0].b.systemInstruction.parts[0].text, SYSTEM_GON);
+    assert.ok(["ai", "ai-viet-lai"].includes(s.lgk.nguon));
+    assert.equal(s.lgk.moHinh, "claude-haiku-5-5");
+    assert.equal(ve, 1);
+    assert.equal(canAI(s), false);
+    // màn giải: nút chép mở với bản AI, kể cả khi có cảnh báo mềm
+    s.lgk = { ...s.lgk, canhBao: ["dài 120 chữ (nên 150–300)"] };
+    const [, view] = ROUTES.find(([re]) => re.test(`/giai/${s.id}`));
+    const html = view(`/giai/${s.id}`.match(/^\/giai\/([\w-]+)$/), new URLSearchParams("ban=luat")).html;
+    assert.match(html, /id="chepLgk">Chép lời gửi khách</);
+    assert.match(html, /Lưu ý nhẹ \(vẫn gửi được\): dài 120 chữ/u);
+    assert.match(html, /Viết bởi claude-haiku-5-5/u);
+    assert.doesNotMatch(html, /đang xem bản luật/u);
+    // AI lỗi → dòng lý do là lý do THẬT
+    s.lgk = { text: "x", nguon: "luat", lyDo: "cầu nối Claude lỗi (cầu nối chết) → luật", canhBao: [] };
+    const h2 = view(`/giai/${s.id}`.match(/^\/giai\/([\w-]+)$/), new URLSearchParams("ban=luat")).html;
+    assert.match(h2, /Bản theo luật vì cầu nối Claude lỗi \(cầu nối chết\) → luật\./u);
+    assert.match(h2, /Đang chờ bản AI…/u);
+    assert.doesNotMatch(h2, /đang xem bản luật/u);
+    huyNen(s.id);
+  } finally { globalThis.fetch = fetchCu; store.sessions.pop(); datLaiCauNoi(); }
+});
+
+test("F: bot gửi khách khi chỉ có lỗi mềm — lời AI ngắn 1 đoạn vẫn nguon “ai” kèm cảnh báo; lỗi cứng (tên lá) mới viết lại", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    const ngan = "Lan ơi, chuyện chuyển nhà lần này nghiêng về có, nhưng đừng vội ký giấy tờ khi chưa xem kỹ chi phí phát sinh. Tuần này bạn nên đi xem thêm một chỗ nữa rồi mới chốt.";
+    const goi = [];
+    const f = async (u, o = {}) => {
+      if (u === `${LOCAL_BASE}/ping`) throw new TypeError("Failed to fetch");
+      if (/\/v1beta\/models\?/.test(u)) return new Response(JSON.stringify({ models: [] }), { status: 200 });
+      if (u.startsWith(`${WORKER_BASE}/v1beta/models/`)) {
+        const b = JSON.parse(o.body);
+        goi.push(b);
+        const text = b.generationConfig?.responseMimeType ? JSON.stringify({ loi_gui_khach: goi.length === 1 ? ngan : "x", tong_ket: CO_DAU }) : ngan;
+        return new Response(sseMH(text, "claude-haiku-5-5"), { status: 200 });
+      }
+      throw new TypeError("Failed to fetch");
+    };
+    await probeBridge(f, { on: true });
+    const r = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", tenKhach: "Lan", key: aiKey(), fetchImpl: f });
+    assert.equal(r.nguon, "ai", r.lyDo);
+    assert.equal(r.loiGuiKhach, ngan);
+    assert.ok(r.canhBao.some((x) => /dài \d+ chữ|đoạn/u.test(x)), r.canhBao.join("; "));
+    assert.equal(goi.length, 1, "không gọi viết lại vì chỉ có lỗi mềm");
   } finally { datLaiCauNoi(); }
 });
 
@@ -1559,7 +1636,7 @@ test("cùng chiều: mẫu chụp màn hình cũ bị cổng bắt câu “ngư�
   const phienCu = { cauHoi: "Người ấy còn thương em không?", spreadId: "tinhcam", tiers: spreadById("tinhcam").tiers(), rounds: [] };
   assert.deepEqual(cauTraiChieu(MAU_CU_TRAI_CHIEU, phienCu), ["Thêm một chi tiết đáng để ý: gặp được người mới tốt hơn sau khi tan vỡ."]);
   const k = kiemLoiGuiKhach(MAU_CU_TRAI_CHIEU, db, { session: phienCu });
-  assert.ok(!k.ok && k.loi.some((x) => /trái chiều câu trả lời \(đã nói có\/còn\)/u.test(x)), k.loi.join("; "));
+  assert.ok(k.canhBao.some((x) => /trái chiều câu trả lời \(đã nói có\/còn\)/u.test(x)), k.canhBao.join("; "));
   // dựng lại: trải tình cảm “Người ấy còn thương em không?”, câu trả lời “còn”, tầng đầu có cặp Lenormand Coffin + Clover
   const idLen = (en) => db.lenormand.la.findIndex((c) => c.en === en) + 1;
   let gap = 0;
@@ -1601,7 +1678,7 @@ test("cùng chiều: lá cản nói như điều đang che/làm chậm thì cho 
   assert.equal(chieuTrongLoi("Lan ơi, trải bài của bạn nói khá rõ. Tuần này hãy làm một việc nhỏ."), null);
 });
 
-test("cùng chiều: AI viết mâu thuẫn → cổng trả lại, viết lại 1 lần; bản viết lại cùng chiều thì nhận", async () => {
+test("cùng chiều: AI viết mâu thuẫn → cảnh báo mềm, vẫn dùng bản AI (GĐ 30/10); lỗi cứng mới viết lại 1 lần", async () => {
   let s, rule, dung;
   for (let lan = 0; lan < 40; lan++) {
     await giaiTuDong({ db, cauHoi: "Em có đỗ đại học không?", tenKhach: "Lan", onSession: (x) => (s = x) });
@@ -1612,13 +1689,19 @@ test("cùng chiều: AI viết mâu thuẫn → cổng trả lại, viết lại
   assert.notEqual(chieuTrongLoi(dung).chieu, "xau");
   const mauThuan = dung.replace(/\n\n/u, " Rồi cuối cùng kết quả sẽ thất bại.\n\n");
   const k = kiemLoiGuiKhach(mauThuan, db, { tenKhach: "Lan", session: s });
-  assert.ok(!k.ok && k.loi.some((x) => /trái chiều câu trả lời/u.test(x)), k.loi.join("; "));
+  assert.ok(k.ok && k.canhBao.some((x) => /trái chiều câu trả lời/u.test(x)), k.canhBao.join("; "));
   let n = 0, msg = "";
   const r = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: mauThuan }, tenKhach: "Lan", call: async (sys, m) => { n++; msg = m; return dung; } });
+  assert.equal(n, 0);
+  assert.equal(r.nguon, "ai");
+  assert.equal(r.text, mauThuan);
+  assert.ok(r.canhBao.some((x) => /trái chiều/u.test(x)));
+  // lỗi cứng (in đậm) → viết lại 1 lần, bản viết lại sạch thì nhận
+  const r2 = await chotLoiGuiKhach({ db, session: s, rule, reading: { loi_gui_khach: `**${mauThuan}**` }, tenKhach: "Lan", call: async (sys, m) => { n++; msg = m; return dung; } });
   assert.equal(n, 1, "viết lại đúng 1 lần");
-  assert.match(msg, /trái chiều câu trả lời/u);
-  assert.equal(r.nguon, "ai-viet-lai");
-  assert.equal(r.text, dung);
+  assert.match(msg, /in đậm/u);
+  assert.equal(r2.nguon, "ai-viet-lai");
+  assert.equal(r2.text, dung);
   assert.match(SYSTEM_LGK, /cùng chiều/u);
   assert.match(SYSTEM_READING, /cùng chiều/u);
 });

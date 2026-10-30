@@ -22,6 +22,11 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-30 17:30 GMT+7 — Claude Code — BOI-20261030-06 — ô Lời gửi khách = bản gọn của bot, < 30 s
+- Lỗi thật: ô khách đợi 3 phút vẫn "Bản theo luật… vì đang xem bản luật"; câu dài thì lời gửi sơ sài. Gốc: cổng quá chặt, trần 220 chữ, ô khách chờ bản đầy đủ, lý do bị che.
+- `auto.js`: `giaiLoiGuiKhach` — MỘT hàm dùng chung cho bot và web (SYSTEM_GON, lược đồ gọn, no_luc=low, cùng cổng). `views.js`: ô khách chạy song song bản đầy đủ ngay khi mở màn giải, chữ chảy dần; nút chép mở khi là bản AI (kể cả có cảnh báo nhẹ); dòng lý do hiện lý do thật. `loi.js`: cổng chỉ chặn lỗi cứng (tên lá, chữ cấm, mất dấu, đầu dòng/tiêu đề/in đậm, tên vị trí, gọi sai tên); độ dài/đoạn/câu sáo/ý khớp/trái chiều/ngữ cảnh là cảnh báo; độ dài theo câu hỏi (150–300 chữ; nhiều mốc 600–800, 4–10 đoạn, đủ từng mốc; tên tháng được nhắc). `ai.js`/`store.js`: chỉ Claude — cầu nối lỗi thì luật, không rơi trạm Gemini. `sw.js` boi-v24.
+- Test `node boi/test.mjs` 79/79; Playwright với cầu nối giả: ô khách ra bản AI ~1,3 s trong khi bản đầy đủ còn chạy, không lỗi trang.
+
 ### 2026-10-30 15:00 GMT+7 — Claude Code — BOI-20261030-04 — bot bản gọn, low
 - Đo GĐ 30/10: haiku 5-5 high hết 16.000 token suy nghĩ, không ra chữ → cầu nối báo rỗng → rơi GPT (mọi nguon=ai của bot trước nay là GPT). Chủ tịch chốt: bot bản gọn, low; web đầy đủ giữ high.
 - `boi/js/ai.js`: SYSTEM_GON + SCHEMA_GON (loi_gui_khach, tong_ket, tra_loi), maxOutputTokens 4096, `&no_luc=low` khi gọi cầu nối ở chế độ gọn, hẹn giờ cả lượt 35 s; đọc `modelVersion` → `moHinh`. SYSTEM_READING giữ nguyên từng chữ.
