@@ -52,3 +52,4 @@ Spec gốc + bản bổ sung (SPA nhiều màn, thiết kế cao cấp, PWA, AI 
 | BOI-20261030-04. Bot bản gọn, low (Chủ tịch 30/10) | xong: BoiAuto.giai chỉ xin loi_gui_khach/tong_ket/tra_loi, maxOutputTokens 4096, cầu nối `&no_luc=low`, hẹn giờ 35 s, trả `moHinh`; web đầy đủ giữ nguyên (không no_luc); test 76/76 |
 | BOI-20261030-06. Ô Lời gửi khách = bản gọn của bot (GĐ 30/10) | xong: giaiLoiGuiKhach dùng chung bot/web, chạy song song bản đầy đủ, chữ chảy dần; độ dài theo câu hỏi; cổng chỉ chặn lỗi cứng; lý do thật; chỉ Claude; test 79/79 |
 | BOI-20261030-07. Câu nhiều mốc 600–800 chữ, < 30 s (GĐ 30/10 chiều) | xong: prompt nêu tối thiểu 600 chữ, mỗi mốc 2–3 câu; 8192 token cho câu nhiều mốc; 1 lượt viết dài thêm khi còn ngân sách 30 s; câu ngắn giữ nguyên; test 81/81 |
+| BOI-20261030-08. KHẨN: không nhập tên → "gọi sai tên: Bạn" (30/10) | xong: cổng bỏ qua đại từ, chỉ chặn tên riêng khác tên khách; ô không còn xoá–viết lại; test 83/83 |

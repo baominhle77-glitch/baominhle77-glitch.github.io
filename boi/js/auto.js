@@ -129,7 +129,8 @@ export async function giaiLoiGuiKhach({ db, session: s, rule, settings = {}, key
           provider: "gemini", key, json: true, gon: true, maxTokens, fetchImpl, storage, signal,
           system: SYSTEM_GON,
           messages: [{ role: "user", text: gonRequest(db, s, { reading: rule, money: rule._money, settings: caiDat }) }],
-          onText: onText ? chay : undefined,
+          // chỉ lượt đầu được chảy chữ; lượt thử lại không xoá–viết lại ô đang hiện (lỗi 30/10)
+          onText: onText && lan === 1 ? chay : undefined,
         });
         cuu = res.cuu || "";
         msLuot = Date.now() - tLuot;
@@ -154,7 +155,7 @@ export async function giaiLoiGuiKhach({ db, session: s, rule, settings = {}, key
         const res = await goiCoDau({
           provider: "gemini", key, json: false, gon: true, maxTokens, fetchImpl, storage, signal, system: SYSTEM_LGK,
           messages: [{ role: "user", text: yeuCauVietDaiThem(s, lgk.text, s.tenKhach || "", db, rule) }],
-          onText: onText ? (full) => onText(full) : undefined,
+          // không chảy chữ: bản dài chỉ thay vào khi xong và qua cổng, ô giữ bản đang có
         });
         const moi = String(res.text || "").trim();
         const k = kiemLoiGuiKhach(moi, db, { tenKhach: s.tenKhach || "", xungHo: settings.xungHo || "", session: s });

@@ -113,6 +113,10 @@ export function viTriTrong(text, names) {
 
 // opts.tenKhach: tên khách của đúng lượt này ("" = gọi "bạn"); opts.xungHo: tên xưng hô đã lưu trong Cài đặt
 // (dùng cho bản giải chi tiết) — không được xuất hiện trong lời gửi khách nếu khác tenKhach; opts.session: để lấy tên vị trí.
+export const DAI_TU = ["bạn", "anh", "chị", "em", "cậu", "mình", "tớ", "cô", "chú", "bác", "ông", "bà", "dì", "cháu", "con", "quý khách", "khách", "người hỏi", "anh chị", "bạn thân mến"];
+export const laDaiTu = (x) => DAI_TU.includes(String(x || "").trim().toLowerCase().replace(/\s+/g, " "));
+// Tên được gọi ở câu mở đầu ("Lan ơi", "Queen Linh ơi") — "" khi không gọi tên
+export const tenGoiDau = (t) => (/^[ \t]*((?:[\p{Lu}][\p{L}]*)(?: [\p{Lu}][\p{L}]*){0,2})[ \t]+ơi(?![\p{L}])/u.exec(String(t || "")) || [])[1] || "";
 export function kiemLoiGuiKhach(text, db, opts = {}) {
   const t = String(text || "").trim();
   if (!t) return { ok: false, loi: ["trống"], canhBao: [] };
@@ -131,9 +135,16 @@ export function kiemLoiGuiKhach(text, db, opts = {}) {
   const cam = chuCamTrong(t);
   if (cam.length) loi.push(`có chữ cấm: ${cam.join(", ")}`);
   if (tyLeDau(t) < NGUONG_DAU) loi.push("mất dấu");
+  // "gọi sai tên" chỉ khi là TÊN RIÊNG khác tên khách — đại từ xưng hô (bạn, anh, chị, em…) không bao giờ là sai tên
+  // (lỗi 30/10: không nhập tên → xưng hô "bạn" → lời gửi gọi "Bạn ơi" bị chặn mọi lượt)
   const tenKhach = String(opts.tenKhach || "").trim();
   const xh = String(opts.xungHo || "").trim();
-  if (xh && xh.toLowerCase() !== tenKhach.toLowerCase() && new RegExp(`(?<![\\p{L}\\p{N}])${escRe(xh)}(?![\\p{L}\\p{N}])`, "iu").test(t)) loi.push(`gọi sai tên: ${xh}`);
+  const khacTen = (x) => x && !laDaiTu(x) && x.toLowerCase() !== tenKhach.toLowerCase();
+  if (khacTen(xh) && new RegExp(`(?<![\\p{L}\\p{N}])${escRe(xh)}(?![\\p{L}\\p{N}])`, "iu").test(t)) loi.push(`gọi sai tên: ${xh}`);
+  else {
+    const goi = tenGoiDau(t);
+    if (khacTen(goi)) loi.push(`gọi sai tên: ${goi}`);
+  }
   const vt = viTriTrong(t, tenViTriCua(opts.session));
   if (vt.length) loi.push(`có tên vị trí/tầng: ${vt.join(", ")}`);
   // Luật "chung chung" (28/10) — nay là cảnh báo mềm

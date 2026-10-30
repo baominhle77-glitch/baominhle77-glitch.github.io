@@ -488,16 +488,19 @@ export async function runLGK(s, el, ctx, rule, { nen: chayNen = false, giai = gi
   const nguonEl = oCua(s.id, el, "#lgkNguon");
   const t0 = Date.now();
   if (nguonEl) nguonEl.textContent = chayNen ? "Đang tự viết lại lời gửi bằng Claude…" : "Đang viết lời gửi bằng Claude…";
-  let raf = 0, cur = "";
+  let raf = 0, cur = "", daVe = "";
+  // chỉ cho chữ dài thêm (không bao giờ xoá/thu ngắn chữ đang hiện); lượt giải lại ở nền không chảy chữ,
+  // bản mới chỉ thay vào ô khi xong và qua cổng (lỗi 30/10: ô xoá–viết lại 5–6 lần)
   const paint = () => {
     raf = 0;
+    if (cur.length < daVe.length || !cur.startsWith(daVe.slice(0, Math.min(daVe.length, 40)))) return;
     const box = oCua(s.id, el, "#loi-gui-khach");
-    if (box && box.dataset.nguon === "luat") { box.innerHTML = doanVan(cur).map((p) => `<p>${esc(p)}</p>`).join(""); box.classList.add("streaming"); }
+    if (box && box.dataset.nguon === "luat") { box.innerHTML = doanVan(cur).map((p) => `<p>${esc(p)}</p>`).join(""); box.classList.add("streaming"); daVe = cur; }
   };
   try {
     const r = await giai({
       db: store.db, session: s, rule, settings: store.settings, key: aiKey(), storage, signal: ctrl.signal,
-      onText: (t) => { cur = t; if (!raf) raf = (globalThis.requestAnimationFrame || ((f) => setTimeout(f, 16)))(paint); },
+      onText: chayNen ? undefined : (t) => { cur = t; if (!raf) raf = (globalThis.requestAnimationFrame || ((f) => setTimeout(f, 16)))(paint); },
     });
     s.lgk = { text: r.text, nguon: r.nguon, lyDo: r.lyDo, moHinh: r.moHinh, canhBao: r.canhBao, at: new Date().toISOString(), rounds: s.rounds.length, giay: Math.round((Date.now() - t0) / 100) / 10 };
     delete s.lgkLyDo;
