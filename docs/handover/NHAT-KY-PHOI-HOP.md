@@ -22,6 +22,12 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-30 15:00 GMT+7 — Claude Code — BOI-20261030-04 — bot bản gọn, low
+- Đo GĐ 30/10: haiku 5-5 high hết 16.000 token suy nghĩ, không ra chữ → cầu nối báo rỗng → rơi GPT (mọi nguon=ai của bot trước nay là GPT). Chủ tịch chốt: bot bản gọn, low; web đầy đủ giữ high.
+- `boi/js/ai.js`: SYSTEM_GON + SCHEMA_GON (loi_gui_khach, tong_ket, tra_loi), maxOutputTokens 4096, `&no_luc=low` khi gọi cầu nối ở chế độ gọn, hẹn giờ cả lượt 35 s; đọc `modelVersion` → `moHinh`. SYSTEM_READING giữ nguyên từng chữ.
+- `boi/js/auto.js`: BoiAuto.giai mặc định chế độ gọn, trả thêm `moHinh`; `store.js` ping 127.0.0.1 1 s; `views.js` phiên gọn của bot mở trên web hiện bản luật ở phần chi tiết, ô lời gửi vẫn bản AI; `sw.js` boi-v23.
+- Test `node boi/test.mjs` 76/76. Chưa gọi Worker thật (mạng phiên bị chặn); mã Worker không nằm trong repo nên không kiểm/sửa được việc chuyển query string.
+
 ### 2026-10-30 13:30 GMT+7 — Claude Code — BOI-20261030-03 — AI nhanh nhất, lời gửi khách luôn bản AI
 - Lỗi thật 30/10: "Bản theo luật vì AI lỗi: không tới được trạm (mạng)". Gốc: dò cầu nối hụt → rơi trạm Gemini; trạm lỗi mạng không được cứu; nút chép vẫn chép bản luật.
 - Sửa `boi/`: `store.js` dùng thẳng Worker `https://boi-cau-noi.hiennhi89.workers.dev/claude` (cau_noi.json chỉ là dự phòng), `aiKey()` mặc định cầu nối; `ai.js` chuỗi cầu nối (127.0.0.1 ở máy nhà → Worker) → thử lại 1 lần sau 1,5 s → trạm → trạm lỗi bất kỳ thì cứu lại cầu nối → luật; `views.js` tự giải lại AI ở nền 5/15/45 s rồi mỗi 60 s, nút "Chép lời gửi khách" khoá khi bản luật; `auto.js` BoiAuto thử lại AI 1 lượt trước khi trả luật, `nguon`/`lyDo` đúng; `sw.js` boi-v22.

@@ -25,6 +25,7 @@ import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, ten
 import { datCuuTram, via, cauNoi, quaCauNoi } from "./js/ai.js";
 import { WORKER_BASE, diaChiCauNoi } from "./js/store.js";
 import { AI_THU_LAI } from "./js/auto.js";
+import { SYSTEM_GON, SCHEMA_GON, GON_MAX_TOKENS, GON_HEN_GIO, gonRequest } from "./js/ai.js";
 import { lichNen, huyNen, canAI, NEN_LICH } from "./js/views.js";
 // chờ thử lại rút ngắn cho test (thật: cầu nối 1,5 s, BoiAuto 3 s)
 cauNoi.thuLaiMs = 5;
@@ -1315,6 +1316,128 @@ test("C: bản luật vì AI lỗi → tự giải lại AI ở nền 5 s, 15 s,
     assert.equal(canAI(s), false);
     huyNen(s.id);
   } finally { store.sessions.pop(); }
+});
+
+// ---- Lệnh Chủ tịch 30/10: "bot bản gọn, low" — BoiAuto < 30 s bằng Claude ----
+const sseMH = (text, modelVersion) => new ReadableStream({ start(c) { c.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text }] } }], modelVersion })}\r\n\r\n`)); c.close(); } });
+function cauNoiGon({ local = "tot", modelVersion = "claude-haiku-5-5", treMs = 0, tram = "mang" } = {}) {
+  const goi = [];
+  const f = async (u, o = {}) => {
+    if (u === `${LOCAL_BASE}/ping`) { if (local === "chet") throw new TypeError("Failed to fetch"); return new Response("{}", { status: 200 }); }
+    if (/\/v1beta\/models\?/.test(u)) return new Response(JSON.stringify({ models: [] }), { status: 200 });
+    if (/\/v1beta\/models\/.+:streamGenerateContent/.test(u)) {
+      const laLocal = u.startsWith(LOCAL_BASE);
+      const b = JSON.parse(o.body);
+      goi.push({ u, b, dich: laLocal ? "local" : u.startsWith(WORKER_BASE) ? "worker" : "khac" });
+      if (laLocal && local !== "tot") throw new TypeError("Failed to fetch");
+      if (treMs) await new Promise((r) => setTimeout(r, treMs));
+      const msg = b.contents.at(-1).parts[0].text;
+      const ten = /gọi đúng tên “([^”]+)”/u.exec(msg)?.[1] || "";
+      const text = b.generationConfig?.responseMimeType
+        ? JSON.stringify(b.generationConfig.responseSchema.properties.tang
+          ? { tong_quan: CO_DAU, tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], tong_ket: CO_DAU, loi_gui_khach: aiGiaTuNghia(msg, ten) }
+          : { loi_gui_khach: aiGiaTuNghia(msg, ten), tong_ket: CO_DAU, tra_loi: YN[1] })
+        : aiGiaTuNghia(msg, ten);
+      return new Response(sseMH(text, modelVersion), { status: 200 });
+    }
+    if (u === TRAM_URL) {
+      goi.push({ u, b: JSON.parse(o.body), dich: "tram" });
+      if (tram === "mang") throw new TypeError("Failed to fetch");
+      const body = JSON.parse(o.body).body;
+      const msg = body.contents.at(-1).parts[0].text;
+      const ten = /gọi đúng tên “([^”]+)”/u.exec(msg)?.[1] || "";
+      const t = body.generationConfig?.responseMimeType ? JSON.stringify({ loi_gui_khach: aiGiaTuNghia(msg, ten), tong_ket: CO_DAU, tra_loi: YN[1] }) : aiGiaTuNghia(msg, ten);
+      return new Response(JSON.stringify({ ok: true, model: "gemini-flash-latest", data: { candidates: [{ content: { parts: [{ text: t }] } }], modelVersion: "gemini-2.5-flash" } }), { status: 200 });
+    }
+    throw new TypeError("Failed to fetch");
+  };
+  return { f, goi };
+}
+
+test("bot gọn: gửi no_luc=low + lược đồ gọn (3 trường) + maxOutputTokens 4096; đủ lá Tarot + Lenormand; moHinh = modelVersion cầu nối", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    const { f, goi } = cauNoiGon();
+    await probeBridge(f, { on: true });
+    assert.equal(bridge.local, true);
+    const saved = [];
+    const r = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", tenKhach: "Lan", trai: "tinhcam", key: aiKey(), fetchImpl: f, onSession: (x) => saved.push(x) });
+    assert.ok(["ai", "ai-viet-lai"].includes(r.nguon), r.lyDo);
+    assert.equal(r.moHinh, "claude-haiku-5-5", "nguồn phản ánh đúng mô hình đã viết");
+    assert.match(r.loiGuiKhach, /^Lan ơi/u);
+    assert.ok(kiemLoiGuiKhach(r.loiGuiKhach, db, { tenKhach: "Lan" }).ok, "cổng kiểm vẫn áp dụng cho bản gọn");
+    assert.deepEqual(Object.keys(r).filter((k) => ["loiGuiKhach", "maKhoa", "nguon", "lyDo", "moHinh"].includes(k)).sort(), ["loiGuiKhach", "lyDo", "maKhoa", "moHinh", "nguon"]);
+    const g = goi[0];
+    assert.equal(g.dich, "local", "127.0.0.1 trước");
+    assert.match(g.u, /:streamGenerateContent\?alt=sse&no_luc=low$/);
+    const gc = g.b.generationConfig;
+    assert.deepEqual(Object.keys(gc.responseSchema.properties), ["loi_gui_khach", "tong_ket", "tra_loi"]);
+    assert.deepEqual(gc.responseSchema, SCHEMA_GON);
+    assert.equal(gc.maxOutputTokens, 4096);
+    assert.equal(GON_MAX_TOKENS, 4096);
+    assert.equal(g.b.systemInstruction.parts[0].text, SYSTEM_GON);
+    assert.doesNotMatch(SYSTEM_GON, /tarot_doc|dong_chay|noi_tang|mau_thuan|lenormand_cap/u, "bỏ hướng dẫn cho các trường đã cắt");
+    assert.match(SYSTEM_GON, /LỜI GỬI KHÁCH/u);
+    // đủ bài đã rút: mọi lá Tarot + Lenormand của mọi tầng đều có trong lời nhắc
+    const msg = g.b.contents.at(-1).parts[0].text;
+    const s0 = saved[0];
+    const cells = s0.rounds[0].tarot.flat().map((c) => ["tarot", c]).concat(s0.rounds[0].lenormand.flat().map((c) => ["lenormand", c]));
+    assert.ok(cells.length >= 18);
+    for (const [deck, c] of cells) assert.ok(msg.includes(cardName(db, deck, c)), `thiếu lá ${cardName(db, deck, c)}`);
+    assert.doesNotMatch(msg, /BẢN NHÁP CỦA ĐỘNG CƠ LUẬT|XƯNG HÔ TRONG BẢN GIẢI CHI TIẾT/u);
+    assert.ok(msg.length < readingRequest(db, s0, { reading: analyze(db, s0, {}, 0) }).length, "lời nhắc gọn ngắn hơn bản đầy đủ");
+    // phiên bot lưu bản gọn: web không coi là bản giải đầy đủ
+    assert.equal(s0.ai.gon, true);
+    assert.equal(s0.ai.reading, null);
+    assert.equal(s0.ai.moHinh, "claude-haiku-5-5");
+  } finally { datLaiCauNoi(); }
+});
+
+test("bot gọn: 127.0.0.1 hỏng → Worker (vẫn no_luc=low); cầu nối chết hết → trạm, moHinh = gemini; hẹn giờ gọn 35 s không cắt bản chậm", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    const a = cauNoiGon({ local: "hong", modelVersion: "cx/gpt-5" });
+    await probeBridge(a.f, { on: true });
+    const ra = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", key: aiKey(), fetchImpl: a.f });
+    assert.deepEqual(a.goi.slice(0, 2).map((x) => x.dich), ["local", "worker"]);
+    assert.match(a.goi[1].u, /&no_luc=low$/);
+    assert.equal(ra.moHinh, "cx/gpt-5", "cầu nối rơi GPT thì moHinh nói thật là GPT");
+    datLaiCauNoi();
+    // cầu nối chết (127.0.0.1 không có, Worker hỏng) → trạm Gemini
+    const dead = async (u, o) => (u === TRAM_URL ? b.f(u, o) : u.includes("/v1beta/") || u.endsWith("/ping") ? Promise.reject(new TypeError("Failed to fetch")) : b.f(u, o));
+    const b = cauNoiGon({ tram: "tot" });
+    await probeBridge(dead, { on: true });
+    const rb = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", key: aiKey(), fetchImpl: dead });
+    assert.ok(["ai", "ai-viet-lai"].includes(rb.nguon), rb.lyDo);
+    assert.equal(rb.moHinh, "gemini-2.5-flash");
+    assert.equal(b.goi[0].b.body.generationConfig.maxOutputTokens, 4096, "trạm cũng nhận bản gọn");
+    datLaiCauNoi();
+    // hẹn giờ gọn = 35 s: phản hồi chậm hơn localTimeoutMs vẫn được nhận
+    assert.equal(GON_HEN_GIO, 35000);
+    const c = cauNoiGon({ local: "chet", treMs: 60 });
+    await probeBridge(c.f, { on: true });
+    const out = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, gon: true, json: true, system: SYSTEM_GON, messages: [{ role: "user", text: "x" }], fetchImpl: c.f, localTimeoutMs: 20 });
+    assert.equal(out.key, LOCAL_KEY);
+    assert.equal(out.moHinh, "claude-haiku-5-5");
+  } finally { datLaiCauNoi(); }
+});
+
+test("chế độ đầy đủ (web): không gửi no_luc, lược đồ đầy đủ, không giới hạn 4096", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    const { f, goi } = cauNoiGon();
+    await probeBridge(f, { on: true });
+    const out = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, json: true, system: SYSTEM_READING, messages: [{ role: "user", text: "x" }], fetchImpl: f });
+    assert.equal(out.moHinh, "claude-haiku-5-5");
+    assert.doesNotMatch(goi[0].u, /no_luc/);
+    assert.match(goi[0].u, /:streamGenerateContent\?alt=sse$/);
+    assert.ok(goi[0].b.generationConfig.responseSchema.properties.tang, "lược đồ đầy đủ");
+    assert.equal(goi[0].b.generationConfig.maxOutputTokens, undefined);
+    // BoiAuto vẫn chạy được chế độ đầy đủ khi tắt gọn
+    const r = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", key: aiKey(), fetchImpl: f, gon: false });
+    assert.ok(["ai", "ai-viet-lai"].includes(r.nguon), r.lyDo);
+    assert.ok(goi.slice(1).every((g) => !/no_luc/.test(g.u)));
+  } finally { datLaiCauNoi(); }
 });
 
 // ---- Lệnh Chủ tịch 28/10: khách không chọn kiểu trải, agent tự chọn theo câu hỏi ----

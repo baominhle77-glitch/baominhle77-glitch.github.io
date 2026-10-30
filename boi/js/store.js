@@ -59,8 +59,8 @@ export async function docDiaChiCauNoi(fetchImpl = globalThis.fetch, ms = 5000) {
   const pages = await lay(`${CAU_NOI_PAGES}?t=${Date.now()}`, {});
   return laDiaChi(pages) ? pages : "";
 }
-// Dò máy nhà: chỉ ping 127.0.0.1 (tối đa localMs). Có → đi 127.0.0.1 trước Worker; không → đi thẳng Worker. Không bao giờ chờ GitHub.
-export function probeBridge(fetchImpl = globalThis.fetch, { on = cauNoiAn(), localMs = 1200 } = {}) {
+// Dò máy nhà: chỉ ping 127.0.0.1 (tối đa 1 s). Có → đi 127.0.0.1 trước Worker; không → đi thẳng Worker. Không bao giờ chờ GitHub.
+export function probeBridge(fetchImpl = globalThis.fetch, { on = cauNoiAn(), localMs = 1000 } = {}) {
   const run = (async () => {
     if (!on) { bridge.ok = false; bridge.xa = false; return false; }
     let local = false;
