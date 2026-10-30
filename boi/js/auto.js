@@ -96,7 +96,10 @@ export function thamSoTrai(cauHoi, sp, goiY = suggestSpread(cauHoi)) {
 
 // tenKhach: tên khách của riêng câu này (trống = gọi "bạn"); settings.xungHo KHÔNG được dùng để gọi khách
 // trai: mặc định "tu-chon" — mỗi câu (kể cả nhiều câu trong một gói) tự chọn trải riêng theo nội dung câu đó
-export async function giaiTuDong({ db, cauHoi, trai = "tu-chon", nguoc = false, tenKhach = "", settings = {}, key = null, fetchImpl, storage, onSession }) {
+// AI_THU_LAI: số lượt gọi AI tối đa (mỗi lượt đã gồm chuỗi cầu nối → thử lại → trạm → cứu cầu nối); giữa hai lượt chờ thuLaiMs.
+// Bot chỉ gửi khách khi nguon là "ai"/"ai-viet-lai" → phải cố ra bản AI trước khi trả bản luật.
+export const AI_THU_LAI = { lan: 2, ms: 3000 };
+export async function giaiTuDong({ db, cauHoi, trai = "tu-chon", nguoc = false, tenKhach = "", settings = {}, key = null, fetchImpl, storage, onSession, thuLai = AI_THU_LAI.lan, thuLaiMs = AI_THU_LAI.ms }) {
   const q = String(cauHoi || "").trim();
   if (!db) throw new Error("Bộ bài chưa tải xong.");
   // chưa phải câu hỏi bói → hỏi lại khách (hoặc chuyển Chủ tịch), không bốc lá
@@ -115,18 +118,22 @@ export async function giaiTuDong({ db, cauHoi, trai = "tu-chon", nguoc = false, 
   await ensureMapping(s, 0);
   addPickedRound(s, s.tiers.map((t) => ({ tarot: viTriNgauNhien(78, t.t), lenormand: viTriNgauNhien(36, t.l) })));
   const rule = analyze(db, s, caiDat, 0);
-  let reading = null, model = "", aiLoi = "", cuu = "", khoa = key;
-  // trạm 429 đã phải chuyển sang cầu nối → lượt viết lại lời gửi đi thẳng cầu nối
+  let reading = null, model = "", aiLoi = "", cuu = "", khoa = key, lgk = null;
+  // lượt viết lại lời gửi đi thẳng đường vừa ra chữ (cầu nối hoặc trạm)
   const call = key ? (system, text) => goiCoDau({ provider: "gemini", key: khoa, system, json: false, messages: [{ role: "user", text }], fetchImpl, storage }).then((r) => r.text) : null;
-  if (key) {
-    try {
-      const res = await goiCoDau({ provider: "gemini", key, system: SYSTEM_READING, json: true, fetchImpl, storage, messages: [{ role: "user", text: readingRequest(db, s, { reading: rule, money: rule._money, settings: caiDat }) }] });
-      const r = normalizeReading(partialJSON(res.text), rule, { db, session: s });
-      if (res.cuu) { cuu = res.cuu; khoa = LOCAL_KEY; }
-      if (r && r.tang.length) { reading = r; model = res.model; }
-    } catch (e) { aiLoi = e.cuu || `AI lỗi: ${phanLoaiLoiAI(e, key)}`; /* AI lỗi → lời gửi theo luật */ }
+  for (let lan = 1; lan <= (key ? Math.max(1, thuLai) : 1); lan++) {
+    if (lan > 1) await new Promise((r) => setTimeout(r, thuLaiMs));
+    if (key) {
+      try {
+        const res = await goiCoDau({ provider: "gemini", key, system: SYSTEM_READING, json: true, fetchImpl, storage, messages: [{ role: "user", text: readingRequest(db, s, { reading: rule, money: rule._money, settings: caiDat }) }] });
+        const r = normalizeReading(partialJSON(res.text), rule, { db, session: s });
+        cuu = res.cuu || ""; khoa = res.key || key;
+        if (r && r.tang.length) { reading = r; model = res.model; aiLoi = ""; } else aiLoi = "AI lỗi: trả sai khuôn";
+      } catch (e) { aiLoi = e.cuu || `AI lỗi: ${phanLoaiLoiAI(e, key)}`; /* AI lỗi → thử lượt sau, hết lượt thì lời gửi theo luật */ }
+    }
+    lgk = await chotLoiGuiKhach({ db, session: s, rule, reading, tenKhach: s.tenKhach, xungHo: settings.xungHo || "", call: reading ? call : null });
+    if (lgk.nguon !== "luat") break;
   }
-  const lgk = await chotLoiGuiKhach({ db, session: s, rule, reading, tenKhach: s.tenKhach, xungHo: settings.xungHo || "", call: reading ? call : null });
   if (reading) s.ai = { provider: "gemini", model, at: new Date().toISOString(), rounds: 1, reading: { ...reading, _money: null }, raw: "", loiGuiKhach: lgk.text, loiNguon: lgk.nguon };
   s.tuDong = true;
   onSession?.(s);

@@ -1,6 +1,6 @@
 // Khởi động SPA: tải dữ liệu lá, hash router, hiệu ứng chuyển trang, nút Back.
 import { ROUTES, NEEDS_DB, toast, esc } from "./views.js";
-import { store, probeBridge, setGhep, setCauNoiAn, aiKey, storage, persist } from "./store.js";
+import { store, probeBridge, bridge, setGhep, setCauNoiAn, aiKey, storage, persist } from "./store.js";
 import { taoBoiAuto } from "./auto.js";
 import { mergeKnowledge } from "./data.js";
 
@@ -87,6 +87,8 @@ const dbReady = Promise.all(["data/tarot.json", "data/lenormand.json"].map((u) =
 // kiểu trải agent tự chọn theo câu hỏi (trai chỉ truyền khi test)
 window.BoiAuto = taoBoiAuto(async () => {
   await dbReady;
+  // đợi dò 127.0.0.1 xong (≤ 1,2 s) để bot trên máy nhà đi 127.0.0.1 → Worker → trạm
+  try { await (bridge.daDo || probeBridge()); } catch (_) { /* vẫn đi Worker */ }
   return { db: store.db, settings: store.settings, key: aiKey(), storage, onSession: (s) => { store.sessions.push(s); persist(); } };
 });
 

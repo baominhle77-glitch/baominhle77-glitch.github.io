@@ -17,8 +17,9 @@ const TRAM_TIMEOUT = 60000;
 export const LOCAL_BASE = "http://127.0.0.1:8787/claude";
 // Cầu nối máy nhà: trên máy chủ nhân gọi thẳng 127.0.0.1; ở máy khác (điện thoại) đi qua đường hầm kèm mã ghép
 export const via = { base: LOCAL_BASE, token: "" };
-const gBase = (key) => (key === LOCAL_KEY ? via.base : "https://generativelanguage.googleapis.com");
-const gHead = (key) => (key === LOCAL_KEY ? (via.token ? { "x-boi-token": via.token } : {}) : { "x-goog-api-key": key });
+const gBase = (key, base) => (key === LOCAL_KEY ? base || via.base : "https://generativelanguage.googleapis.com");
+// mã ghép chỉ gửi cho cầu nối ngoài máy (Worker/đường hầm), không gửi 127.0.0.1
+const gHead = (key, base) => (key === LOCAL_KEY ? (via.token && (base || via.base) !== LOCAL_BASE ? { "x-boi-token": via.token } : {}) : { "x-goog-api-key": key });
 
 export const PROVIDERS = {
   gemini: { ten: "Google Gemini", fallback: ["gemini-pro-latest", "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash"] },
@@ -248,13 +249,13 @@ async function tramOnce({ model, system, messages, json, onText, signal, fetchIm
   }
 }
 
-async function streamOnce({ provider, model, key, system, messages, json, onText, signal, fetchImpl }) {
+async function streamOnce({ provider, model, key, base, system, messages, json, onText, signal, fetchImpl }) {
   let full = "";
   const push = (t) => { if (t) { full += t; onText?.(full, t); } };
   if (provider === "gemini") {
     const body = geminiBody(system, messages, json);
-    const res = await fetchImpl(`${gBase(key)}/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
-      method: "POST", signal, headers: { "content-type": "application/json", ...gHead(key) }, body: JSON.stringify(body),
+    const res = await fetchImpl(`${gBase(key, base)}/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`, {
+      method: "POST", signal, headers: { "content-type": "application/json", ...gHead(key, base) }, body: JSON.stringify(body),
     });
     if (!res.ok) throw await failOf(res);
     for await (const d of sse(res)) {
@@ -324,7 +325,7 @@ function rankOpenAI(ids) {
   return ids.filter((id) => score(id) >= 0).sort((a, b) => score(b) - score(a));
 }
 
-export async function discoverModels(provider, key, { fetchImpl = globalThis.fetch, storage = globalThis.localStorage } = {}) {
+export async function discoverModels(provider, key, { fetchImpl = globalThis.fetch, storage = globalThis.localStorage, base } = {}) {
   const fb = PROVIDERS[provider].fallback;
   try {
     const cached = JSON.parse(storage?.getItem(MODEL_CACHE) || "{}")[provider];
@@ -333,7 +334,7 @@ export async function discoverModels(provider, key, { fetchImpl = globalThis.fet
   let list = [];
   try {
     if (provider === "gemini") {
-      const r = await fetchImpl(`${gBase(key)}/v1beta/models?pageSize=200`, { headers: gHead(key) });
+      const r = await fetchImpl(`${gBase(key, base)}/v1beta/models?pageSize=200`, { headers: gHead(key, base) });
       if (r.ok) list = rankGemini(((await r.json()).models || []).filter((m) => (m.supportedGenerationMethods || []).includes("generateContent")).map((m) => m.name.replace(/^models\//, "")));
     } else if (provider === "anthropic") {
       const r = await fetchImpl("https://api.anthropic.com/v1/models?limit=100", { headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" } });
@@ -418,50 +419,96 @@ async function viaTram({ system, messages, json, onText, onModel, signal, fetchI
   return out;
 }
 
-// Trạm 429 hoặc quá giờ → dò cầu nối máy nhà một lần (store.js đăng ký hàm dò, kể cả khi chưa bật cờ cầu nối);
-// dò thấy thì gọi lại đúng yêu cầu đó qua cầu nối. Dò hụt thì 60 giây sau mới dò lại, đỡ bắt khách chờ thêm.
-let cuuTram = null, cuuHongLuc = 0;
-const CUU_NGHI = 60000;
-export function datCuuTram(fn) { cuuTram = typeof fn === "function" ? fn : null; cuuHongLuc = 0; }
+// ---------- Chuỗi gọi AI (30/10, lệnh GĐ): cầu nối Claude → thử lại cầu nối 1 lần sau 1,5 s → trạm Gemini
+// → trạm lỗi bất kỳ (kể cả mạng) thì cứu lại cầu nối → hết mới về bản luật.
+// Danh sách địa chỉ cầu nối do store.js đăng ký: máy nhà [127.0.0.1, Worker cố định], máy khác [Worker cố định];
+// dự phòng (chỉ đọc khi các địa chỉ trên lỗi): địa chỉ trong boi/cau_noi.json.
+export const cauNoi = { thuLaiMs: 1500, tat: false };
+let dsCauNoi = () => [via.base];
+let duPhongCauNoi = async () => [];
+export function datCauNoi({ ds, duPhong } = {}) {
+  if (typeof ds === "function") dsCauNoi = ds;
+  if (typeof duPhong === "function") duPhongCauNoi = duPhong;
+}
+// Tắt/bật đường cứu trạm → cầu nối (test cũ tắt để fetch giả chỉ trả lời trạm). Giữ tên cũ cho tương thích.
+export function datCuuTram(fn) { cauNoi.tat = !fn; }
 
-async function tramRoiCauNoi({ provider, system, messages, json, onText, onModel, onCuu, signal, fetchImpl, storage, tramTimeoutMs, localTimeoutMs }) {
-  try {
-    return await viaTram({ system, messages, json, onText, onModel, signal, fetchImpl, tramTimeoutMs });
-  } catch (e) {
-    if (signal?.aborted || !cuuTram || !(e?.status === 429 || e?.timeout)) throw e;
-    const tag = e.status === 429 ? "trạm 429" : "trạm quá giờ";
-    let ok = false;
-    if (Date.now() - cuuHongLuc >= CUU_NGHI) {
-      onCuu?.(e);
-      try { ok = await cuuTram(fetchImpl); } catch (_) { ok = false; }
-      cuuHongLuc = ok ? 0 : Date.now();
-    }
-    if (signal?.aborted) throw e;
-    if (!ok) { e.cuu = `${tag}, cầu nối không có → luật`; throw e; }
-    try {
-      const out = await modelLoop({ provider, key: LOCAL_KEY, model: "", system, messages, json, onText, onModel, signal, fetchImpl: timedFetch(fetchImpl, localTimeoutMs), storage });
-      return { ...out, key: LOCAL_KEY, cuu: `${tag} → cầu nối` };
-    } catch (e2) {
-      if (!signal?.aborted) e2.cuu = `${tag} → cầu nối lỗi (${phanLoaiLoiAI(e2, LOCAL_KEY)}) → luật`;
-      throw e2;
-    }
-  }
+const uniq = (xs) => [...new Set(xs.filter(Boolean))];
+const cho = (ms, signal) => new Promise((res, rej) => {
+  if (signal?.aborted) return rej(new DOMException("aborted", "AbortError"));
+  const t = setTimeout(res, ms);
+  signal?.addEventListener("abort", () => { clearTimeout(t); rej(new DOMException("aborted", "AbortError")); }, { once: true });
+});
+
+// Một lượt qua cầu nối ở một địa chỉ: chỉ model đầu danh sách (cầu nối tự chọn Claude) — lỗi là chuyển ngay, không lần từng model
+async function cauNoiOnce({ base, provider, system, messages, json, onText, onModel, signal, fetchImpl, storage }) {
+  const list = await discoverModels(provider, LOCAL_KEY, { fetchImpl, storage, base });
+  const m = list[0];
+  onModel?.(m);
+  const text = await streamOnce({ provider, model: m, key: LOCAL_KEY, base, system, messages, json, onText, signal, fetchImpl });
+  if (!text.trim()) throw new HttpError(503, "Phản hồi rỗng");
+  return { text, model: m };
 }
 
-// Gọi lần lượt model (ưu tiên model người dùng chọn), chuyển dự phòng khi 429/404/quá tải.
-// Cầu nối máy nhà (127.0.0.1/đường hầm) lỗi hoặc không phản hồi trong localTimeoutMs → tự chuyển sang trạm AI, không treo.
-// Kết quả đi đường cứu trạm → cầu nối có thêm {key: LOCAL_KEY, cuu}; lỗi sau khi đã thử cứu có e.cuu (ghi vào lyDo).
-export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, onFallback, onCuu, signal, fetchImpl = globalThis.fetch, storage, tramTimeoutMs, localTimeoutMs = 10000 }) {
-  if (!key) throw new Error("Chưa có khoá.");
-  if (key === TRAM_KEY) return tramRoiCauNoi({ provider, system, messages, json, onText, onModel, onCuu, signal, fetchImpl, storage, tramTimeoutMs, localTimeoutMs });
-  const f = key === LOCAL_KEY ? timedFetch(fetchImpl, localTimeoutMs) : fetchImpl;
-  try {
-    return await modelLoop({ provider, key, model, system, messages, json, onText, onModel, signal, fetchImpl: f, storage });
-  } catch (e) {
-    if (key !== LOCAL_KEY || signal?.aborted) throw e;
-    onFallback?.(e);
-    return viaTram({ system, messages, json, onText, onModel, signal, fetchImpl, tramTimeoutMs });
+// Qua cầu nối: thử lần lượt các địa chỉ; hỏng hết thì chờ thuLaiMs rồi thử lại 1 lần (thêm địa chỉ dự phòng).
+// soLan = 1 khi chỉ cứu nhanh sau trạm. Thành công → nhớ địa chỉ vào via.base cho lượt sau.
+export async function quaCauNoi({ soLan = 2, onThuLai, signal, fetchImpl, localTimeoutMs = 20000, ...o }) {
+  let bases = uniq(dsCauNoi());
+  let last = null;
+  for (let lan = 1; lan <= soLan; lan++) {
+    if (lan > 1) {
+      onThuLai?.(last);
+      await cho(cauNoi.thuLaiMs, signal);
+    }
+    if (lan > 1 || !bases.length) {
+      try { bases = uniq([...bases, ...(await duPhongCauNoi(fetchImpl))]); } catch (_) { /* không đọc được dự phòng */ }
+    }
+    for (const base of bases) {
+      try {
+        const out = await cauNoiOnce({ ...o, base, signal, fetchImpl: timedFetch(fetchImpl, localTimeoutMs) });
+        via.base = base;
+        return { ...out, key: LOCAL_KEY, base, lan };
+      } catch (e) {
+        last = e;
+        if (signal?.aborted) throw e;
+      }
+    }
   }
+  throw last || Object.assign(new Error("Không có địa chỉ cầu nối"), { khongCo: true });
+}
+
+// Gọi AI theo khoá:
+// LOCAL_KEY (mặc định): cầu nối → thử lại cầu nối → trạm → cứu cầu nối → lỗi (trang về luật).
+// TRAM_KEY (máy đã tắt cầu nối bằng ?cau-noi=0): trạm → lỗi bất kỳ thì cứu cầu nối → lỗi.
+// Kết quả có {key} = đường đã ra chữ; đi đường vòng thì có {cuu} mô tả đường đi. Lỗi cuối có e.cuu (ghi vào lyDo).
+// Khoá Google/OpenAI/Anthropic riêng (bản cũ) vẫn đi thẳng nhà cung cấp, đổi model khi 429/404.
+export async function streamWithFallback({ provider, key, model, system, messages, json, onText, onModel, onFallback, onCuu, onThuLai, signal, fetchImpl = globalThis.fetch, storage, tramTimeoutMs, localTimeoutMs = 20000 }) {
+  if (!key) throw new Error("Chưa có khoá.");
+  const o = { provider, system, messages, json, onText, onModel, signal, fetchImpl, storage, localTimeoutMs, onThuLai };
+  const loai = (e, k) => phanLoaiLoiAI(e, k);
+  if (key === LOCAL_KEY || key === TRAM_KEY) {
+    let eCau = null;
+    if (key === LOCAL_KEY) {
+      try { return await quaCauNoi(o); } catch (e) { if (signal?.aborted) throw e; eCau = e; onFallback?.(e); }
+    }
+    let eTram;
+    try {
+      const out = await viaTram({ system, messages, json, onText, onModel, signal, fetchImpl, tramTimeoutMs });
+      return { ...out, key: TRAM_KEY, ...(eCau ? { cuu: `cầu nối lỗi (${loai(eCau, LOCAL_KEY)}) → trạm` } : {}) };
+    } catch (e) { if (signal?.aborted) throw e; eTram = e; }
+    const dau = `${eCau ? `cầu nối lỗi (${loai(eCau, LOCAL_KEY)}) → ` : ""}trạm lỗi (${loai(eTram, TRAM_KEY)})`;
+    if (cauNoi.tat) { eTram.cuu = `${dau} → luật`; throw eTram; }
+    onCuu?.(eTram);
+    try {
+      const out = await quaCauNoi({ ...o, soLan: 1 });
+      return { ...out, cuu: `${dau} → cầu nối` };
+    } catch (e3) {
+      if (signal?.aborted) throw e3;
+      e3.cuu = `${dau} → cầu nối lỗi (${e3.khongCo ? "không có địa chỉ" : loai(e3, LOCAL_KEY)}) → luật`;
+      throw e3;
+    }
+  }
+  return modelLoop({ provider, key, model, system, messages, json, onText, onModel, signal, fetchImpl, storage });
 }
 
 async function modelLoop({ provider, key, model, system, messages, json, onText, onModel, signal, fetchImpl, storage }) {
@@ -524,9 +571,9 @@ export async function goiCoDau(opts) {
   const last = msgs.length - 1;
   if (msgs[last]?.role === "user") msgs[last].text += `\n\n${NHAC_DAU}`;
   else msgs.push({ role: "user", text: NHAC_DAU });
-  // lượt đầu đã phải chuyển sang cầu nối thì lượt gọi lại đi thẳng cầu nối, không gõ lại trạm đang 429
-  const second = await streamWithFallback({ ...opts, ...(first.cuu ? { key: LOCAL_KEY } : {}), messages: msgs, onText });
-  if (!matDau(second.text)) return { ...second, lan: 2, ...(first.cuu ? { key: LOCAL_KEY, cuu: first.cuu } : {}) };
+  // lượt gọi lại đi thẳng đường vừa ra chữ (cầu nối hoặc trạm), không gõ lại đường vừa hỏng
+  const second = await streamWithFallback({ ...opts, key: first.key || opts.key, messages: msgs, onText });
+  if (!matDau(second.text)) return { ...second, lan: 2, key: second.key || first.key, ...(first.cuu && !second.cuu ? { cuu: first.cuu } : {}) };
   const e = new Error(BAO_MAT_DAU);
   e.matDau = true;
   e.tyLe = tyLeDauBai(second.text);

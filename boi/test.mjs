@@ -22,10 +22,17 @@ import * as DT from "./dao-tao/dao-tao-core.js";
 import { giaiTuDong, taoBoiAuto, viTriNgauNhien, chonTrai, thamSoTrai, laCauHoiBoi, tachCauHoi, HOI_LAI } from "./js/auto.js";
 import { cauTraiChieu, chieuTrongLoi, chieuTraLoi, traiChieu, nghiaTrai } from "./js/loi.js";
 import { kiemLoiGuiKhach, loiGuiKhachLuat, chotLoiGuiKhach, demChu, doanVan, tenLaTrong, SYSTEM_LGK, tenViTriCua, chuCamTrong, yKhop, tyLeCauSao, viTriTrong, traLoiThang, nguCanh, hopNguCanh } from "./js/loi.js";
-import { datCuuTram, via } from "./js/ai.js";
+import { datCuuTram, via, cauNoi, quaCauNoi } from "./js/ai.js";
+import { WORKER_BASE, diaChiCauNoi } from "./js/store.js";
+import { AI_THU_LAI } from "./js/auto.js";
+import { lichNen, huyNen, canAI, NEN_LICH } from "./js/views.js";
+// chờ thử lại rút ngắn cho test (thật: cầu nối 1,5 s, BoiAuto 3 s)
+cauNoi.thuLaiMs = 5;
+AI_THU_LAI.ms = 5;
 // store.js đăng ký đường cứu trạm → cầu nối khi được nạp; các test cũ dùng fetch giả trả 200 cho mọi địa chỉ nên tắt đi, test riêng tự bật
-const CUU_THAT = (f) => probeBridge(f, { on: true });
+const CUU_THAT = true;
 datCuuTram(null);
+const datLaiCauNoi = () => { datCuuTram(null); bridge.ok = true; bridge.xa = true; bridge.local = null; via.base = WORKER_BASE; via.token = ""; };
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const readJSON = (f) => JSON.parse(readFileSync(join(HERE, f), "utf8"));
@@ -543,34 +550,44 @@ test("prompt AI: văn phong reader thật, luôn tiếng Việt, đọc từng t
   assert.match(readingRequest(db, s, {}), /hoàn toàn bằng tiếng Việt: mở bài, rồi đọc lần lượt từng tầng/u);
 });
 
-test("cầu nối 127.0.0.1 không gọi được → dò trả về nhanh, dùng trạm AI; cầu nối chết giữa chừng → tự chuyển trạm, không treo", async () => {
+test("ngoài máy nhà: dò 127.0.0.1 trả về nhanh, đi thẳng Worker cố định (không đọc cau_noi.json); Worker chết/treo → trạm, không treo", async () => {
   const refused = async () => { throw new TypeError("Failed to fetch"); };
   const hang = (url, opts = {}) => new Promise((_, rej) => opts.signal?.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError"))));
-  let t0 = Date.now();
-  assert.equal(await probeBridge(refused, { on: true }), false);
-  assert.ok(Date.now() - t0 < 1000);
-  t0 = Date.now();
-  assert.equal(await probeBridge(hang, { on: true, localMs: 40, listMs: 40, xaMs: 40 }), false, "127.0.0.1 treo + GitHub treo vẫn trả lời");
-  assert.ok(Date.now() - t0 < 1500, "dò không treo");
-  assert.equal(bridge.ok, false);
-  assert.equal(aiKey(), TRAM_KEY, "không có cầu nối → trạm AI");
-  // đang dùng cầu nối thì nó chết: chuyển sang trạm
-  const answer = JSON.stringify({ tong_quan: "Từ trạm.", tang: [] });
-  const tramOk = (url) => (url === TRAM_URL ? Promise.resolve(new Response(JSON.stringify({ ok: true, model: "gemini-x", data: { candidates: [{ content: { parts: [{ text: answer }] } }] } }), { status: 200 })) : null);
-  const mem = new Map(), storage = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
-  let fell = 0;
-  const outA = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, storage, messages: [{ role: "user", text: "x" }],
-    fetchImpl: (url, o) => tramOk(url) || refused(url, o), onFallback: () => fell++ });
-  assert.equal(outA.text, answer);
-  assert.equal(fell, 1);
-  t0 = Date.now();
-  const outB = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, storage, messages: [{ role: "user", text: "x" }], localTimeoutMs: 50,
-    fetchImpl: (url, o) => tramOk(url) || (url.startsWith(LOCAL_BASE) ? hang(url, o) : refused(url, o)) });
-  assert.equal(outB.model, "gemini-x", "127.0.0.1 treo → sau hạn chờ chuyển trạm");
-  assert.ok(Date.now() - t0 < 2000);
-  // cả cầu nối lẫn trạm đều hỏng → báo lỗi dễ hiểu (trang hiện bản giải theo luật), không treo
-  const eAll = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", storage, messages: [{ role: "user", text: "x" }], fetchImpl: refused }).then(() => null, (e) => e);
-  assert.equal(friendlyError(eAll, TRAM_KEY), "Không kết nối được máy giải, kiểm tra mạng.");
+  try {
+    assert.equal(WORKER_BASE, "https://boi-cau-noi.hiennhi89.workers.dev/claude");
+    assert.equal(aiKey(), LOCAL_KEY, "mặc định đi cầu nối Claude, trạm chỉ là dự phòng");
+    let t0 = Date.now();
+    const goi = [];
+    assert.equal(await probeBridge(async (u, o) => { goi.push(u); return refused(u, o); }, { on: true }), true);
+    assert.ok(Date.now() - t0 < 1000);
+    assert.deepEqual(goi, [`${LOCAL_BASE}/ping`], "chỉ ping 127.0.0.1, không đọc cau_noi.json");
+    assert.equal(bridge.local, false);
+    assert.equal(via.base, WORKER_BASE);
+    assert.deepEqual(diaChiCauNoi(), [WORKER_BASE], "máy khác: chỉ Worker");
+    t0 = Date.now();
+    await probeBridge(hang, { on: true, localMs: 40 });
+    assert.ok(Date.now() - t0 < 1000, "127.0.0.1 treo vẫn dò xong nhanh");
+    assert.equal(aiKey(), LOCAL_KEY);
+    // Worker chết (cả 2 lượt) → trạm
+    const answer = JSON.stringify({ tong_quan: "Từ trạm.", tang: [] });
+    const tramOk = (url) => (url === TRAM_URL ? Promise.resolve(new Response(JSON.stringify({ ok: true, model: "gemini-x", data: { candidates: [{ content: { parts: [{ text: answer }] } }] } }), { status: 200 })) : null);
+    let fell = 0, thuLai = 0;
+    const outA = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, messages: [{ role: "user", text: "x" }],
+      fetchImpl: (url, o) => tramOk(url) || refused(url, o), onFallback: () => fell++, onThuLai: () => thuLai++ });
+    assert.equal(outA.text, answer);
+    assert.equal(outA.key, TRAM_KEY);
+    assert.equal(outA.cuu, "cầu nối lỗi (cầu nối chết) → trạm");
+    assert.equal(fell, 1);
+    assert.equal(thuLai, 1, "thử lại cầu nối đúng 1 lần trước khi sang trạm");
+    t0 = Date.now();
+    const outB = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", json: true, messages: [{ role: "user", text: "x" }], localTimeoutMs: 50,
+      fetchImpl: (url, o) => tramOk(url) || (url.startsWith(WORKER_BASE) ? hang(url, o) : refused(url, o)) });
+    assert.equal(outB.model, "gemini-x", "Worker treo → sau hạn chờ chuyển trạm");
+    assert.ok(Date.now() - t0 < 2000);
+    // cầu nối lẫn trạm đều hỏng → lỗi có đường đi đầy đủ (trang hiện bản luật), không treo
+    const eAll = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", messages: [{ role: "user", text: "x" }], fetchImpl: refused }).then(() => null, (e) => e);
+    assert.equal(eAll.cuu, "cầu nối lỗi (cầu nối chết) → trạm lỗi (không tới được trạm (mạng)) → luật");
+  } finally { datLaiCauNoi(); }
 });
 
 // ---- Vòng 2: chống mất dấu, nhãn phán một bộ, tên lá theo dữ liệu, bỏ ô nhập số ----
@@ -803,11 +820,24 @@ test("lời gửi khách — màn giải có ô #loi-gui-khach riêng và nút c
   const [, view] = ROUTES.find(([re]) => re.test(`/giai/${s.id}`));
   const { html } = view(`/giai/${s.id}`.match(/^\/giai\/([\w-]+)$/), new URLSearchParams("ban=luat"));
   assert.match(html, /id="loi-gui-khach"/);
-  assert.match(html, /id="chepLgk"[^>]*>Chép lời gửi khách</);
+  // bản đang hiện là luật → nút chép bị khoá, chờ bản AI, có nút giải AI lại ngay
+  assert.match(html, /id="chepLgk" disabled aria-disabled="true">Đang chờ bản AI…</);
+  assert.match(html, /id="giaiLaiNgay"[^>]*>Giải AI lại ngay</);
+  assert.doesNotMatch(html, />Chép lời gửi khách</);
   const m = html.match(/id="loi-gui-khach"[^>]*data-text="([^"]*)"/);
   const txt = m[1].replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'");
   assert.ok(kiemLoiGuiKhach(txt, db).ok, "ô hiện bản qua cổng");
   assert.ok(html.indexOf('id="loi-gui-khach"') < html.indexOf('id="aiCard"'), "ô tách riêng, đứng trước bản giải đầy đủ");
+  // có bản AI qua cổng → nút chép mở, chép đúng bản AI (kể cả khi đang xem bản luật)
+  s.ai = { provider: "gemini", model: "claude-haiku-5-5", at: new Date().toISOString(), rounds: s.rounds.length, reading: analyze(db, s, {}, 0), raw: "", loiGuiKhach: txt, loiNguon: "ai" };
+  const h2 = view(`/giai/${s.id}`.match(/^\/giai\/([\w-]+)$/), new URLSearchParams("ban=luat")).html;
+  assert.match(h2, /id="chepLgk">Chép lời gửi khách</);
+  assert.match(h2, /data-nguon="ai"/);
+  assert.doesNotMatch(h2, /giaiLaiNgay/);
+  // AI có nhưng lời gửi bị cổng trả về luật → vẫn khoá
+  s.ai.loiNguon = "luat";
+  assert.match(view(`/giai/${s.id}`.match(/^\/giai\/([\w-]+)$/), new URLSearchParams("")).html, /Đang chờ bản AI…/);
+  assert.equal(canAI(s), true);
   store.sessions.pop();
 });
 
@@ -1099,7 +1129,7 @@ test("ghi lý do đường AI hỏng (cầu nối chết / 429 / quá giờ / b�
   assert.equal(phanLoaiLoiAI({ matDau: true }, TRAM_KEY), "AI trả chữ không dấu");
   const r = await giaiTuDong({ db, cauHoi: "Người ấy còn thương em không?", key: TRAM_KEY, fetchImpl: async () => new Response(JSON.stringify({ ok: false, status: 429, error: "quota" }), { status: 200 }) });
   assert.equal(r.nguon, "luat");
-  assert.equal(r.lyDo, "AI lỗi: 429 — trạm hết lượt/đang đông");
+  assert.equal(r.lyDo, "trạm lỗi (429 — trạm hết lượt/đang đông) → luật");
 });
 
 test("câu trả lời thẳng: “còn/có/nên … không” nói rõ nghiêng về đâu; Có/Không dùng đúng nhãn; câu hỏi mở nói gọn hướng chung", () => {
@@ -1133,72 +1163,158 @@ test("lọc câu nghĩa theo ngữ cảnh câu hỏi; cổng chặn “người 
 const sseCuu = (text) => new ReadableStream({ start(c) { c.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text }] } }] })}\r\n\r\n`)); c.close(); } });
 const tra429 = () => new Response(JSON.stringify({ ok: false, status: 429, error: "quota" }), { status: 200 });
 
-test("trạm 429 + cầu nối sống → gọi lại đúng yêu cầu qua cầu nối, nguồn “ai”, lyDo “trạm 429 → cầu nối”; cầu nối đã dò thấy thì lần sau đứng đầu", async () => {
-  datCuuTram(CUU_THAT);
-  const thuTu = [], noiDungTram = [], noiDungCauNoi = [];
-  let ping = 0;
-  const fake = async (u, o = {}) => {
-    if (u === TRAM_URL) { thuTu.push("tram"); noiDungTram.push(JSON.parse(o.body).body.contents.at(-1).parts[0].text); return tra429(); }
-    if (u === `${LOCAL_BASE}/ping`) { ping++; return new Response("{}", { status: 200 }); }
-    if (u.startsWith(`${LOCAL_BASE}/v1beta/models?`)) return new Response(JSON.stringify({ models: [] }), { status: 200 });
-    if (u.startsWith(`${LOCAL_BASE}/v1beta/models/`)) {
-      thuTu.push("cau-noi");
-      const b = JSON.parse(o.body);
-      const msg = b.contents.at(-1).parts[0].text;
-      noiDungCauNoi.push(msg);
-      const ten = /gọi đúng tên “([^”]+)”/u.exec(msg)?.[1] || "";
-      const text = b.generationConfig?.responseMimeType
-        ? JSON.stringify({ tong_quan: CO_DAU, tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], tong_ket: CO_DAU, loi_gui_khach: aiGiaTuNghia(msg, ten) })
-        : aiGiaTuNghia(msg, ten);
-      return new Response(sseCuu(text), { status: 200 });
+// ---- Lệnh GĐ 30/10: AI nhanh nhất, lời gửi khách luôn là bản AI ----
+const baiCauNoi = (o) => {
+  const b = JSON.parse(o.body);
+  const msg = b.contents.at(-1).parts[0].text;
+  const ten = /gọi đúng tên “([^”]+)”/u.exec(msg)?.[1] || "";
+  const text = b.generationConfig?.responseMimeType
+    ? JSON.stringify({ tong_quan: CO_DAU, tang: [{ ten: "Câu hỏi", diem: 7, tarot_doc: [CO_DAU, CO_DAU, CO_DAU], dong_chay: CO_DAU, chot: CO_DAU, diem_nghen: CO_DAU, loi_khuyen: CO_DAU }], tong_ket: CO_DAU, loi_gui_khach: aiGiaTuNghia(msg, ten) })
+    : aiGiaTuNghia(msg, ten);
+  return new Response(sseCuu(text), { status: 200 });
+};
+// máy giả: nhật ký thứ tự gọi + kịch bản lỗi cho từng đích
+function mayGia({ local = "chet", worker = [], tram = "429" } = {}) {
+  const log = [];
+  let w = 0;
+  const f = async (u, o = {}) => {
+    if (u === `${LOCAL_BASE}/ping`) { log.push("ping-local"); if (local === "chet") throw new TypeError("Failed to fetch"); return new Response("{}", { status: 200 }); }
+    if (u.includes("api.github.com") || u.includes("cau_noi.json")) { log.push("github"); throw new TypeError("Failed to fetch"); }
+    if (/\/v1beta\/models\?/.test(u)) return new Response(JSON.stringify({ models: [] }), { status: 200 });
+    if (u.startsWith(`${LOCAL_BASE}/v1beta/models/`)) { log.push("local"); if (local !== "tot") throw new TypeError("Failed to fetch"); return baiCauNoi(o); }
+    if (u.startsWith(`${WORKER_BASE}/v1beta/models/`)) {
+      const kq = worker[w++] ?? "tot";
+      log.push("worker");
+      if (kq === "mang") throw new TypeError("Failed to fetch");
+      if (kq === "500") return new Response("{}", { status: 500 });
+      if (kq === "rong") return new Response(sseCuu(""), { status: 200 });
+      return baiCauNoi(o);
+    }
+    if (u === TRAM_URL) {
+      log.push("tram");
+      if (tram === "mang") throw new TypeError("Failed to fetch");
+      if (tram === "429") return tra429();
+      if (tram === "500") return new Response("<html>", { status: 500 });
+      return tramReply(BAI(CO_DAU));
     }
     throw new TypeError("Failed to fetch");
   };
+  return { f, log };
+}
+
+test("A: ngoài máy nhà lượt đầu đi thẳng Worker cố định — không chờ cau_noi.json, không gọi trạm", async () => {
+  datCuuTram(CUU_THAT);
   try {
-    assert.equal(aiKey(), TRAM_KEY, "chưa bật cờ → trạm đứng đầu như cũ");
-    const r = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", tenKhach: "Lan", key: aiKey(), fetchImpl: fake });
+    const { f, log } = mayGia();
+    await probeBridge(f, { on: true });
+    const r = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", tenKhach: "Lan", key: aiKey(), fetchImpl: f });
     assert.ok(["ai", "ai-viet-lai"].includes(r.nguon), r.lyDo);
-    assert.equal(r.lyDo, "trạm 429 → cầu nối");
+    assert.equal(r.lyDo, "");
     assert.match(r.loiGuiKhach, /^Lan ơi/u);
-    assert.equal(thuTu[0], "tram", "trạm được gọi trước");
-    assert.equal(thuTu.filter((x) => x === "tram").length, 1, "đã chuyển cầu nối thì không gõ lại trạm");
-    assert.equal(ping, 1, "dò cầu nối đúng một lần");
-    assert.equal(noiDungCauNoi[0], noiDungTram[0], "gọi lại đúng yêu cầu đã gửi trạm");
-    assert.equal(aiKey(), LOCAL_KEY, "cờ cầu nối bật mặc định (30/10) → dò thấy cầu nối thì lần sau đi thẳng Claude");
-    // trạm quá giờ cũng được cứu
-    const hang = (url, o) => (url === TRAM_URL ? new Promise((_, rej) => o.signal.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError")))) : fake(url, o));
-    const out = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages: [{ role: "user", text: "Tháng này thế nào?" }], fetchImpl: hang, tramTimeoutMs: 30 });
-    assert.equal(out.key, LOCAL_KEY);
-    assert.equal(out.cuu, "trạm quá giờ → cầu nối");
-  } finally { datCuuTram(null); bridge.ok = false; bridge.xa = false; via.base = LOCAL_BASE; via.token = ""; }
+    assert.deepEqual(log.slice(0, 2), ["ping-local", "worker"]);
+    assert.ok(!log.includes("tram") && !log.includes("github"), log.join(","));
+  } finally { datLaiCauNoi(); }
 });
 
-test("trạm 429 + cầu nối chết → nguồn “luat”, lyDo “trạm 429, cầu nối không có → luật”; dò hụt thì 60 giây sau mới dò lại", async () => {
+test("B: Worker lỗi mạng 1 lần rồi tốt → thử lại sau 1,5 s, nguồn “ai”, không sang trạm; lỗi 5xx / rỗng cũng thử lại", async () => {
   datCuuTram(CUU_THAT);
-  let ping = 0, tram = 0;
-  const chet = async (u) => {
-    if (u === TRAM_URL) { tram++; return tra429(); }
-    if (/\/ping$/.test(u)) ping++;
-    throw new TypeError("Failed to fetch");
-  };
   try {
-    const r = await giaiTuDong({ db, cauHoi: "Người ấy còn thương em không?", tenKhach: "Lan", key: TRAM_KEY, fetchImpl: chet });
+    for (const loi of ["mang", "500", "rong"]) {
+      const { f, log } = mayGia({ worker: [loi] });
+      await probeBridge(f, { on: true });
+      const r = await giaiTuDong({ db, cauHoi: "Công việc tháng này của tôi thế nào?", tenKhach: "Hùng", key: aiKey(), fetchImpl: f });
+      assert.ok(["ai", "ai-viet-lai"].includes(r.nguon), `${loi}: ${r.lyDo}`);
+      assert.deepEqual(log.filter((x) => x !== "github").slice(0, 3), ["ping-local", "worker", "worker"], `${loi}: ${log.join(",")}`);
+      assert.ok(!log.includes("tram"), `${loi}: không sang trạm`);
+    }
+    assert.equal(cauNoi.thuLaiMs, 5, "test rút ngắn; mặc định thật 1500 ms");
+  } finally { datLaiCauNoi(); }
+});
+
+test("B: Worker chết 2 lượt → trạm; trạm lỗi MẠNG → cứu lại cầu nối → nguồn “ai” (không rơi về luật)", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    const { f, log } = mayGia({ worker: ["mang", "mang"], tram: "mang" });
+    await probeBridge(f, { on: true });
+    const r = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", tenKhach: "Lan", key: aiKey(), fetchImpl: f });
+    assert.ok(["ai", "ai-viet-lai"].includes(r.nguon), r.lyDo);
+    assert.equal(r.lyDo, "cầu nối lỗi (cầu nối chết) → trạm lỗi (không tới được trạm (mạng)) → cầu nối");
+    assert.deepEqual(log.filter((x) => x !== "github").slice(0, 5), ["ping-local", "worker", "worker", "tram", "worker"]);
+    // trạm 429 / quá giờ / 500 cũng cứu
+    for (const tram of ["429", "500"]) {
+      const g = mayGia({ worker: ["mang", "mang"], tram });
+      const out = await streamWithFallback({ provider: "gemini", key: LOCAL_KEY, system: "s", messages: [{ role: "user", text: "Tháng này thế nào?" }], fetchImpl: g.f });
+      assert.equal(out.key, LOCAL_KEY, tram);
+      assert.match(out.cuu, /→ cầu nối$/u);
+    }
+    // máy đã tắt cầu nối (?cau-noi=0) → trạm trước; trạm lỗi mạng vẫn được cứu
+    const g = mayGia({ tram: "mang" });
+    const out = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages: [{ role: "user", text: "x" }], fetchImpl: g.f });
+    assert.equal(out.cuu, "trạm lỗi (không tới được trạm (mạng)) → cầu nối");
+    assert.deepEqual(g.log.slice(0, 2), ["tram", "worker"]);
+  } finally { datLaiCauNoi(); }
+});
+
+test("B: hỏng hết (cầu nối, trạm, cứu) → bản luật, lyDo đủ đường đi; BoiAuto tự thử lại AI 1 lượt trước khi trả luật", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    const { f, log } = mayGia({ worker: Array(20).fill("mang"), tram: "mang" });
+    await probeBridge(f, { on: true });
+    const r = await giaiTuDong({ db, cauHoi: "Người ấy còn thương em không?", tenKhach: "Lan", key: aiKey(), fetchImpl: f });
     assert.equal(r.nguon, "luat");
-    assert.equal(r.lyDo, "trạm 429, cầu nối không có → luật");
+    assert.equal(r.lyDo, "cầu nối lỗi (cầu nối chết) → trạm lỗi (không tới được trạm (mạng)) → cầu nối lỗi (cầu nối chết) → luật");
     assert.ok(kiemLoiGuiKhach(r.loiGuiKhach, db, { tenKhach: "Lan" }).ok, "bản luật vẫn qua cổng");
-    assert.equal(tram, 1);
-    assert.equal(ping, 1, "127.0.0.1 dò một lần (đường hầm không có địa chỉ)");
-    const e = await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages: [{ role: "user", text: "x" }], fetchImpl: chet }).then(() => null, (x) => x);
-    assert.equal(e.cuu, "trạm 429, cầu nối không có → luật");
-    assert.equal(ping, 1, "vừa dò hụt → không dò lại ngay");
-    assert.equal(phanLoaiLoiAI(e, TRAM_KEY), "trạm 429, cầu nối không có → luật");
-    assert.equal(bridge.ok, false);
-    assert.equal(aiKey(), TRAM_KEY);
-    // lỗi khác 429/quá giờ (vd. 500) → không dò cầu nối
-    datCuuTram(CUU_THAT);
-    await streamWithFallback({ provider: "gemini", key: TRAM_KEY, system: "s", messages: [{ role: "user", text: "x" }], fetchImpl: async (u) => (u === TRAM_URL ? new Response("<html>", { status: 500 }) : chet(u)) }).catch(() => {});
-    assert.equal(ping, 1, "trạm 500 không kích hoạt dò cầu nối");
-  } finally { datCuuTram(null); bridge.ok = false; bridge.xa = false; via.base = LOCAL_BASE; via.token = ""; }
+    assert.equal(log.filter((x) => x === "tram").length, 2, "2 lượt AI (thử lại 1 lần)");
+    assert.equal(log.filter((x) => x === "worker").length, 6, "mỗi lượt: 2 lần cầu nối + 1 lần cứu");
+  } finally { datLaiCauNoi(); }
+});
+
+test("C2: máy nhà — 127.0.0.1 hỏng (ping được, giải lỗi) → Worker → nguồn “ai”; 127.0.0.1 tốt thì đi 127.0.0.1", async () => {
+  datCuuTram(CUU_THAT);
+  try {
+    const a = mayGia({ local: "hong" });
+    await probeBridge(a.f, { on: true });
+    assert.equal(bridge.local, true);
+    assert.deepEqual(diaChiCauNoi(), [LOCAL_BASE, WORKER_BASE]);
+    const ra = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", key: aiKey(), fetchImpl: a.f });
+    assert.ok(["ai", "ai-viet-lai"].includes(ra.nguon), ra.lyDo);
+    assert.deepEqual(a.log.slice(0, 3), ["ping-local", "local", "worker"]);
+    assert.ok(!a.log.includes("tram"));
+    assert.equal(via.base, WORKER_BASE, "nhớ địa chỉ vừa chạy tốt");
+    datLaiCauNoi();
+    const b = mayGia({ local: "tot" });
+    await probeBridge(b.f, { on: true });
+    const rb = await giaiTuDong({ db, cauHoi: "Em có nên chuyển nhà không?", key: aiKey(), fetchImpl: b.f });
+    assert.ok(["ai", "ai-viet-lai"].includes(rb.nguon));
+    assert.deepEqual(b.log.slice(0, 2), ["ping-local", "local"]);
+    assert.ok(!b.log.includes("worker"));
+  } finally { datLaiCauNoi(); }
+});
+
+test("C: bản luật vì AI lỗi → tự giải lại AI ở nền 5 s, 15 s, 45 s rồi mỗi 60 s; có bản AI là dừng", async () => {
+  assert.deepEqual(NEN_LICH, [5000, 15000, 45000, 60000]);
+  const s = await sessionNgauNhien("tinhcam", 3);
+  store.db = db;
+  store.sessions.push(s);
+  try {
+    let lan = 0;
+    const lich = [3, 3, 3, 3];
+    const xong = new Promise((res) => {
+      const chay = async () => {
+        lan++;
+        if (lan < 4) return false;
+        s.ai = { loiGuiKhach: "x", loiNguon: "ai" };
+        res();
+        return true;
+      };
+      assert.equal(lichNen(s, { rerender: () => {} }, null, { lich, chay }), 3);
+    });
+    await xong;
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(lan, 4, "thử lại tới khi có bản AI");
+    assert.equal(canAI(s), false);
+    huyNen(s.id);
+  } finally { store.sessions.pop(); }
 });
 
 // ---- Lệnh Chủ tịch 28/10: khách không chọn kiểu trải, agent tự chọn theo câu hỏi ----
