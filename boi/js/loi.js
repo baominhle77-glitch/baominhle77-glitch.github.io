@@ -1,6 +1,8 @@
 // Ô "Lời gửi khách": đoạn văn xuôi gửi người hỏi, tách khỏi bản giải đầy đủ.
-// Cổng kiểm: 120–220 chữ, 2–4 đoạn, không tên lá, không gạch đầu dòng / đánh số / tiêu đề / in đậm, có dấu.
-// AI viết trước; trượt cổng → viết lại đúng 1 lần; vẫn trượt → bản theo luật viết xuôi (cũng không tên lá).
+// Cổng kiểm (GĐ 30/10): chỉ CHẶN lỗi cứng — tên lá, chữ cấm, mất dấu, đầu dòng/đánh số/tiêu đề/in đậm, tên vị trí, gọi sai tên.
+// Lỗi mềm (độ dài, số đoạn, câu sáo, ý khớp, trái chiều, ngữ cảnh) chỉ là cảnh báo: vẫn dùng bản AI.
+// Độ dài theo câu hỏi: câu ngắn 150–300 chữ; câu nhiều mốc (nhiều tháng/nhiều vế) 600–800 chữ, 4–10 đoạn.
+// AI lỗi cứng → viết lại đúng 1 lần; vẫn lỗi cứng hoặc AI trống/lỗi mạng → bản theo luật viết xuôi.
 import { tyLeDau, NGUONG_DAU } from "./ai.js";
 import { tarotCard, lenCard, SCAM, cardScore, lenPairs } from "./reading.js";
 import { spreadById, posLabel, posKey } from "./spreads.js";
@@ -9,6 +11,24 @@ import { tarotMeaning, lenMeaning, capMeaning } from "./data.js";
 
 export const LGK_MIN = 120;
 export const LGK_MAX = 220;
+// Độ dài lời gửi theo câu hỏi + danh sách mốc phải trả lời đủ (vd đủ 12 tháng)
+const RE_NHIEU_MOC = /(?<![\p{L}])(?:từng tháng|mỗi tháng|các tháng|12 tháng|mười hai tháng|cả năm|từng quý|các quý|từng giai đoạn|từng mốc|từng tuần)(?![\p{L}])/iu;
+export const laMocThoiGian = (ten) => /^(?:tháng|quý|tuần|năm|cả năm|\d+\s*[–-]\s*\d+\s*(?:tuần|tháng)|đầu năm|giữa năm|cuối năm)(?![\p{L}])/iu.test(String(ten || "").trim());
+export function doDaiLgk(session) {
+  const q = String(session?.cauHoi || "");
+  const tiers = session?.tiers || [];
+  const moc = tiers.map((t) => String(t.ten || "").trim()).filter(laMocThoiGian);
+  const veHoi = (q.match(/\?/g) || []).length;
+  const nhieu = tiers.length >= 4 || moc.length >= 4 || RE_NHIEU_MOC.test(q) || veHoi >= 3;
+  return nhieu
+    ? { min: 600, max: 800, doanMin: 4, doanMax: 10, nhieu: true, moc }
+    : { min: 150, max: 300, doanMin: 2, doanMax: 5, nhieu: false, moc };
+}
+export function dongDoDai(session) {
+  const d = doDaiLgk(session);
+  const moc = d.nhieu && d.moc.length ? ` Trả lời đủ TỪNG mốc khách hỏi, theo thứ tự: ${d.moc.join(", ")} — mỗi mốc ít nhất một câu cụ thể (được gọi tên tháng/mốc thời gian).` : d.nhieu ? " Trả lời đủ từng vế/mốc khách hỏi." : "";
+  return `ĐỘ DÀI LỜI GỬI: ${d.min}–${d.max} chữ, ${d.doanMin}–${d.doanMax} đoạn cách nhau một dòng trống.${moc}`;
+}
 export const demChu = (t) => (String(t || "").trim().match(/\S+/g) || []).length;
 export const doanVan = (t) => String(t || "").split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
 
@@ -60,7 +80,8 @@ const VI_TRI_CHUNG = new Set(["Kết quả", "Kết luận", "Diễn biến", "H
 export function tenViTriCua(session) {
   const out = new Set();
   for (const t of session?.tiers || []) {
-    if (t.ten) out.add(String(t.ten).trim());
+    // tên mốc thời gian (Tháng 3/2027, 4–6 tuần tới…) là điều khách hỏi → được nhắc lại
+    if (t.ten && !laMocThoiGian(t.ten)) out.add(String(t.ten).trim());
     for (const p of t.pos || []) if (p) out.add(String(p).trim());
   }
   // chữ có sẵn trong chính câu khách hỏi (vd "4–6 tuần tới") thì nhắc lại được
@@ -84,12 +105,14 @@ export function viTriTrong(text, names) {
 // (dùng cho bản giải chi tiết) — không được xuất hiện trong lời gửi khách nếu khác tenKhach; opts.session: để lấy tên vị trí.
 export function kiemLoiGuiKhach(text, db, opts = {}) {
   const t = String(text || "").trim();
-  if (!t) return { ok: false, loi: ["trống"] };
-  const loi = [];
+  if (!t) return { ok: false, loi: ["trống"], canhBao: [] };
+  const loi = [];      // lỗi cứng → chặn
+  const canhBao = [];  // lỗi mềm → vẫn dùng bản AI, chỉ ghi cảnh báo
+  const d = doDaiLgk(opts.session);
   const n = demChu(t);
-  if (n < LGK_MIN || n > LGK_MAX) loi.push(`dài ${n} chữ (cần ${LGK_MIN}–${LGK_MAX})`);
+  if (n < d.min || n > d.max) canhBao.push(`dài ${n} chữ (nên ${d.min}–${d.max})`);
   const p = doanVan(t).length;
-  if (p < 2 || p > 4) loi.push(`${p} đoạn (cần 2–4)`);
+  if (p < d.doanMin || p > d.doanMax) canhBao.push(`${p} đoạn (nên ${d.doanMin}–${d.doanMax})`);
   if (/^[ \t]*(?:[-–—•*+●▪◦·>]|\d+[ \t]*[.)/:]|[a-zA-Z][.)])[ \t]*/m.test(t)) loi.push("có ký tự đầu dòng hoặc đánh số");
   if (/^[ \t]*#{1,6}[ \t]/m.test(t) || /^[^\n.!?]{1,60}:[ \t]*$/m.test(t)) loi.push("có tiêu đề");
   if (/\*\*|__|<\/?(?:b|strong|h\d)\b/i.test(t)) loi.push("có in đậm");
@@ -103,18 +126,17 @@ export function kiemLoiGuiKhach(text, db, opts = {}) {
   if (xh && xh.toLowerCase() !== tenKhach.toLowerCase() && new RegExp(`(?<![\\p{L}\\p{N}])${escRe(xh)}(?![\\p{L}\\p{N}])`, "iu").test(t)) loi.push(`gọi sai tên: ${xh}`);
   const vt = viTriTrong(t, tenViTriCua(opts.session));
   if (vt.length) loi.push(`có tên vị trí/tầng: ${vt.join(", ")}`);
-  // Luật "chung chung" (lệnh 28/10): phải đọc ra thông điệp của chính trải này
+  // Luật "chung chung" (28/10) — nay là cảnh báo mềm
   if (opts.session && db && opts.session.rounds?.[0]) {
     const y = yKhop(t, db, opts.session);
-    if (y.length < Y_TOI_THIEU) loi.push(`chung chung: chỉ ${y.length} ý khớp nghĩa lá đã trải (cần ≥ ${Y_TOI_THIEU})`);
+    if (y.length < Y_TOI_THIEU) canhBao.push(`chung chung: chỉ ${y.length} ý khớp nghĩa lá đã trải (nên ≥ ${Y_TOI_THIEU})`);
   }
-  if (opts.session && nguCanh(opts.session.cauHoi).coNguoi && RE_CAU_DOC_THAN.test(t)) loi.push("sai ngữ cảnh: nói “người độc thân” khi khách hỏi về một người cụ thể");
-  // cùng chiều: đã trả lời thẳng thì mọi câu sau phải cùng chiều (lá cản nói như điều đang che/làm chậm)
+  if (opts.session && nguCanh(opts.session.cauHoi).coNguoi && RE_CAU_DOC_THAN.test(t)) canhBao.push("sai ngữ cảnh: nói “người độc thân” khi khách hỏi về một người cụ thể");
   const tc = cauTraiChieu(t, opts.session);
-  if (tc.length) loi.push(`trái chiều câu trả lời (${{ tot: "đã nói có/còn", giua: "đã nói có nhưng có điều kiện", xau: "đã nói nghiêng về không" }[chieuTrongLoi(t).chieu]}): “${tc[0].slice(0, 80)}”`);
+  if (tc.length) canhBao.push(`trái chiều câu trả lời (${{ tot: "đã nói có/còn", giua: "đã nói có nhưng có điều kiện", xau: "đã nói nghiêng về không" }[chieuTrongLoi(t).chieu]}): “${tc[0].slice(0, 80)}”`);
   const sao = tyLeCauSao(t);
-  if (sao > SAO_TOI_DA) loi.push(`chung chung: ${Math.round(sao * 100)} % câu là câu sáo có sẵn`);
-  return { ok: !loi.length, loi };
+  if (sao > SAO_TOI_DA) canhBao.push(`chung chung: ${Math.round(sao * 100)} % câu là câu sáo có sẵn`);
+  return { ok: !loi.length, loi, canhBao };
 }
 
 // ---------- Nghĩa thật của trải bài ----------
@@ -433,12 +455,12 @@ export function loiGuiKhachLuat(db, session, rule, opts = {}) {
 }
 
 // ---------- Chốt: AI → viết lại 1 lần → luật ----------
-export const SYSTEM_LGK = `Bạn là tarot reader lão luyện đang nhắn tin riêng cho một khách. Gọi khách đúng tên được cho trong yêu cầu; không có tên thì gọi "bạn", không dùng tên riêng nào khác. Không nêu tên vị trí, tên tầng hay tên ô của trải bài. Lời gửi phải ĐỌC LẠI THÔNG ĐIỆP của chính trải bài cho đúng câu hỏi: tổng hợp nghĩa thật của các lá được cho thành một mạch chuyện liền — chuyện đang diễn ra thế nào → gốc rễ/điều đang cản hoặc đẩy → hướng sắp tới → điều nên làm. Mỗi câu phải bắt nguồn từ nghĩa của ít nhất một lá, có chi tiết cụ thể (người, việc, cảm xúc, thời điểm); cấm câu sáo dùng được cho mọi khách. Viết lời gửi bằng tiếng Việt CÓ DẤU đầy đủ: văn xuôi ${LGK_MIN}–${LGK_MAX} chữ, 2–4 đoạn cách nhau một dòng trống; giọng tự nhiên, ấm, có chiều sâu; trả lời thẳng đúng câu hỏi; kết bằng một lời khuyên làm được ngay. KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm, không emoji. Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá. Câu thứ hai phải trả lời thẳng câu hỏi (câu hỏi có/không thì nói rõ nghiêng về có hay không). Chỉ dùng ý hợp ngữ cảnh: khách hỏi về một người cụ thể thì bỏ ý dành cho người độc thân; khách độc thân thì bỏ ý về mối quan hệ hiện tại; làm thuê ↔ kinh doanh cũng vậy. Sau câu trả lời thẳng, MỌI câu phải cùng chiều với nó: đã nói còn/có thì không câu nào nói chia tay, tan vỡ, người mới hay thất bại; đã nói nghiêng về không thì không câu nào hứa chắc thành. Lá cản trở vẫn được nói, nhưng như điều đang che hoặc làm chậm câu trả lời, không phải ý đảo ngược. Chỉ trả về đúng phần lời gửi.`;
+export const SYSTEM_LGK = `Bạn là tarot reader lão luyện đang nhắn tin riêng cho một khách. Gọi khách đúng tên được cho trong yêu cầu; không có tên thì gọi "bạn", không dùng tên riêng nào khác. Không nêu tên vị trí, tên tầng hay tên ô của trải bài. Lời gửi phải ĐỌC LẠI THÔNG ĐIỆP của chính trải bài cho đúng câu hỏi: tổng hợp nghĩa thật của các lá được cho thành một mạch chuyện liền — chuyện đang diễn ra thế nào → gốc rễ/điều đang cản hoặc đẩy → hướng sắp tới → điều nên làm. Mỗi câu phải bắt nguồn từ nghĩa của ít nhất một lá, có chi tiết cụ thể (người, việc, cảm xúc, thời điểm); cấm câu sáo dùng được cho mọi khách. Viết lời gửi bằng tiếng Việt CÓ DẤU đầy đủ: văn xuôi, độ dài và số đoạn theo dòng "ĐỘ DÀI LỜI GỬI" trong yêu cầu (câu hỏi nhiều mốc thì trả lời đủ từng mốc), các đoạn cách nhau một dòng trống; giọng tự nhiên, ấm, có chiều sâu; trả lời thẳng đúng câu hỏi; kết bằng một lời khuyên làm được ngay. KHÔNG nêu tên bất kỳ lá nào, KHÔNG giải nghĩa từng lá, KHÔNG gạch đầu dòng, KHÔNG đánh số, KHÔNG tiêu đề, KHÔNG in đậm, không emoji. Không nhắc tới web, ứng dụng, AI, công cụ, máy, hệ thống, thuật toán, sự ngẫu nhiên hay mã khoá. Câu thứ hai phải trả lời thẳng câu hỏi (câu hỏi có/không thì nói rõ nghiêng về có hay không). Chỉ dùng ý hợp ngữ cảnh: khách hỏi về một người cụ thể thì bỏ ý dành cho người độc thân; khách độc thân thì bỏ ý về mối quan hệ hiện tại; làm thuê ↔ kinh doanh cũng vậy. Sau câu trả lời thẳng, MỌI câu phải cùng chiều với nó: đã nói còn/có thì không câu nào nói chia tay, tan vỡ, người mới hay thất bại; đã nói nghiêng về không thì không câu nào hứa chắc thành. Lá cản trở vẫn được nói, nhưng như điều đang che hoặc làm chậm câu trả lời, không phải ý đảo ngược. Chỉ trả về đúng phần lời gửi.`;
 
 export const dongGoiKhach = (tenKhach) => (tenKhach ? `GỌI KHÁCH: gọi đúng tên “${tenKhach}”, không dùng tên nào khác.` : `GỌI KHÁCH: không có tên — gọi “bạn”, không dùng tên riêng nào.`);
 export function yeuCauVietLai(session, reading, loi, tenKhach = tenKhachCua(session), db = null, rule = null) {
   const nghia = db ? khoiNghiaChoAI(db, session, rule) : [reading?.tong_quan, reading?.tong_ket].filter(Boolean).join("\n");
-  return `${dongGoiKhach(tenKhach)}\nCÂU HỎI: ${session.cauHoi}\n\n${nghia}\n\n(Tên lá, tên tầng, tên vị trí ở trên chỉ để bạn nắm ý — KHÔNG chép vào lời gửi.)\n\nBản lời gửi trước bị trả lại vì: ${loi.join("; ")}. Hãy viết lại lời gửi khách đúng mọi yêu cầu, đọc ra thông điệp riêng của trải này.`;
+  return `${dongGoiKhach(tenKhach)}\nCÂU HỎI: ${session.cauHoi}\n${dongDoDai(session)}\n\n${nghia}\n\n(Tên lá, tên tầng, tên vị trí ở trên chỉ để bạn nắm ý — KHÔNG chép vào lời gửi.)\n\nBản lời gửi trước bị trả lại vì: ${loi.join("; ")}. Hãy viết lại lời gửi khách đúng mọi yêu cầu, đọc ra thông điệp riêng của trải này.`;
 }
 
 // call(system, text) → Promise<string>: gọi AI dạng chữ (đã qua cổng kiểm dấu)
@@ -449,16 +471,16 @@ export async function chotLoiGuiKhach({ db, session, rule, reading = null, tenKh
   const luat = () => loiGuiKhachLuat(db, session, rule, { tenKhach: ten });
   const first = String(reading?.loi_gui_khach || "").trim();
   const k1 = kiemLoiGuiKhach(first, db, opts);
-  if (k1.ok) return { text: first, nguon: "ai", loi: [] };
+  if (k1.ok) return { text: first, nguon: "ai", loi: [], canhBao: k1.canhBao };
   if (first && call) {
     try {
       const again = String(await call(SYSTEM_LGK, yeuCauVietLai(session, reading, k1.loi, ten, db, rule)) || "").trim();
       const k2 = kiemLoiGuiKhach(again, db, opts);
-      if (k2.ok) return { text: again, nguon: "ai-viet-lai", loi: k1.loi };
-      return { text: luat(), nguon: "luat", loi: k2.loi };
+      if (k2.ok) return { text: again, nguon: "ai-viet-lai", loi: k1.loi, canhBao: k2.canhBao };
+      return { text: luat(), nguon: "luat", loi: k2.loi, canhBao: [] };
     } catch (e) {
       if (e?.name === "AbortError") throw e;
     }
   }
-  return { text: luat(), nguon: "luat", loi: k1.loi };
+  return { text: luat(), nguon: "luat", loi: first ? k1.loi : ["AI trả trống"], canhBao: [] };
 }

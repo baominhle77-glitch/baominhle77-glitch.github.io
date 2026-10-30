@@ -5,7 +5,7 @@ import { cardName, tarotCard, lenCard, yesNo } from "./reading.js";
 import { spreadById, posLabel, posKey } from "./spreads.js";
 import { cardYesNo } from "./data.js";
 import { drawsOf } from "./state.js";
-import { khoiNghiaChoAI } from "./loi.js";
+import { khoiNghiaChoAI, dongDoDai } from "./loi.js";
 
 // Cầu nối máy nhà: tiến trình ở 127.0.0.1 tự gắn khoá Gemini từ tệp .env trên máy, trang không giữ khoá.
 export const LOCAL_KEY = "@may-nha";
@@ -44,7 +44,7 @@ export const GON_HEN_GIO = 35000;
 // Văn phong rút từ bài giải của reader thật (Biddy Tarot, Labyrinthos, The Tarot Lady, reader chọn tụ…) — xem boi/VAN_PHONG_READER.md
 const DAU_LINE = "Mọi giá trị chuỗi phải là tiếng Việt CÓ DẤU đầy đủ; khoá JSON không dấu chỉ là tên trường, không được bắt chước.";
 const KHOI_LGK = `LỜI GỬI KHÁCH ("loi_gui_khach") — phần riêng, tách khỏi bản giải đầy đủ
-- Văn xuôi 120–220 chữ, 2–4 đoạn cách nhau một dòng trống (trong JSON viết là \n\n), như reader đang nhắn tin riêng cho người hỏi: tự nhiên, ấm, có chiều sâu, trả lời thẳng đúng câu hỏi, kết bằng một lời khuyên làm được ngay.
+- Văn xuôi, độ dài và số đoạn theo dòng "ĐỘ DÀI LỜI GỬI" trong yêu cầu (câu hỏi ngắn khoảng 150–300 chữ; câu hỏi nhiều mốc/nhiều tháng/nhiều vế khoảng 600–800 chữ, trả lời đủ từng mốc), các đoạn cách nhau một dòng trống (trong JSON viết là \n\n), như reader đang nhắn tin riêng cho người hỏi: tự nhiên, ấm, có chiều sâu, trả lời thẳng đúng câu hỏi, kết bằng một lời khuyên làm được ngay.
 - ĐỌC LẠI THÔNG ĐIỆP của chính trải bài: tổng hợp khối "NGHĨA THẬT CỦA TỪNG LÁ ĐÃ TRẢI" thành một mạch chuyện liền cho đúng câu hỏi — chuyện đang diễn ra thế nào → gốc rễ/điều đang cản hoặc đẩy → hướng sắp tới → điều nên làm. Mỗi câu phải bắt nguồn từ nghĩa của ít nhất một lá, có chi tiết cụ thể (người, việc, cảm xúc, thời điểm). Cấm câu sáo dùng được cho mọi khách.
 - Câu thứ hai trả lời thẳng câu hỏi (câu hỏi có/không thì nói rõ nghiêng về có hay không). Chỉ dùng ý hợp ngữ cảnh câu hỏi: hỏi về một người cụ thể thì bỏ ý dành cho người độc thân; khách độc thân thì bỏ ý về mối quan hệ hiện tại; làm thuê ↔ kinh doanh cũng vậy.
 - Sau câu trả lời thẳng, mọi câu phải cùng chiều với nó: đã nói còn/có thì không câu nào nói chia tay, tan vỡ, người mới hay thất bại; đã nói nghiêng về không thì không câu nào hứa chắc thành. Lá cản trở vẫn được nói, nhưng như điều đang che hoặc làm chậm câu trả lời, không phải ý đảo ngược.
@@ -159,7 +159,7 @@ export function readingRequest(db, session, opts) {
 
 // Yêu cầu CHẾ ĐỘ GỌN: đủ bài đã rút + nghĩa thật từng lá, không bản nháp luật, chỉ xin 3 trường
 export function gonRequest(db, session, opts = {}) {
-  return `${buildContext(db, session, { ...opts, gon: true })}\n\n${khoiNghiaChoAI(db, session, opts?.reading)}\n\nViết lời gửi khách cho đúng câu hỏi, dựa trên toàn bộ lá đã rút ở trên. Trả về DUY NHẤT một đối tượng JSON: loi_gui_khach, tong_ket, tra_loi.\n${DAU_LINE}`;
+  return `${buildContext(db, session, { ...opts, gon: true })}\n${dongDoDai(session)}\n\n${khoiNghiaChoAI(db, session, opts?.reading)}\n\nViết lời gửi khách cho đúng câu hỏi, dựa trên toàn bộ lá đã rút ở trên. Trả về DUY NHẤT một đối tượng JSON: loi_gui_khach, tong_ket, tra_loi.\n${DAU_LINE}`;
 }
 
 // Bản sao chép dán vào ChatGPT
@@ -541,7 +541,13 @@ export async function streamWithFallback({ provider, key, model, system, message
   if (key === LOCAL_KEY || key === TRAM_KEY) {
     let eCau = null;
     if (key === LOCAL_KEY) {
-      try { return await quaCauNoi(o); } catch (e) { if (signal?.aborted) throw e; eCau = e; onFallback?.(e); }
+      // Chỉ Claude (GĐ 30/10): cầu nối 127.0.0.1 / Worker, thử lại 1 lần; không rơi sang trạm Gemini
+      try { return await quaCauNoi(o); } catch (e) {
+        if (signal?.aborted) throw e;
+        eCau = e;
+        e.cuu = `cầu nối Claude lỗi (${e.khongCo ? "không có địa chỉ" : loai(e, LOCAL_KEY)}) → luật`;
+        throw e;
+      }
     }
     let eTram;
     try {

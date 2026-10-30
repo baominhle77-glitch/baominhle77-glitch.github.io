@@ -1,5 +1,5 @@
 // Kho dữ liệu dùng chung cho các màn: phiên câu hỏi, cài đặt (chỉ localStorage máy người dùng).
-// AI mặc định = cầu nối máy nhà (Claude haiku-5-5, D22 30/10); cầu nối chưa nối được thì dùng trạm Gemini dự phòng.
+// AI = cầu nối Claude (haiku-5-5, D22 30/10): 127.0.0.1 ở máy nhà, Worker cố định ở máy khác; lỗi thì bản luật.
 import { loadSessions, saveSessions, createSession } from "./state.js";
 import { LOCAL_KEY, LOCAL_BASE, TRAM_KEY, via, datCauNoi } from "./ai.js";
 
@@ -20,10 +20,9 @@ export function saveSettings(next) {
   store.settings = { ...store.settings, ...next };
   try { storage?.setItem(SETTINGS_KEY, JSON.stringify(store.settings)); return true; } catch (_) { return false; }
 }
-// Mặc định đi cầu nối Claude (127.0.0.1 ở máy nhà, Worker cố định ở máy khác); trạm Gemini chỉ là dự phòng trong chuỗi gọi.
-// Máy đã tắt cầu nối bằng ?cau-noi=0 thì đi trạm trước (trạm lỗi vẫn được cứu sang cầu nối).
+// Chỉ Claude (GĐ 30/10): luôn đi cầu nối (127.0.0.1 ở máy nhà, Worker cố định ở máy khác); không còn đường trạm Gemini.
 export function aiKey() {
-  return cauNoiAn() ? LOCAL_KEY : TRAM_KEY;
+  return LOCAL_KEY;
 }
 // Khoá cũ từng dán ở bản trước không còn dùng → xoá khỏi máy (không còn nút xoá trong Cài đặt)
 try { for (const p of ["gemini", "openai", "anthropic"]) storage?.removeItem(`${AIKEY_KEY}.${p}`); } catch (_) { /* bỏ qua */ }
