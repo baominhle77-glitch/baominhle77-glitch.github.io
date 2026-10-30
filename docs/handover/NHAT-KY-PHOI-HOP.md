@@ -22,6 +22,11 @@
 
 ## Nhật ký thay đổi — mới nhất trên cùng
 
+### 2026-10-30 19:00 GMT+7 — Claude Code — BOI-20261030-07 — câu nhiều mốc 600–800 chữ, vẫn < 30 s
+- Đo GĐ (bản 27cf626, Claude thật): câu 12 tháng 14,0 s nhưng chỉ 386 chữ, mỗi tháng 1–2 câu; câu ngắn 11,8 s / 234 chữ — đạt.
+- `loi.js`: dòng ĐỘ DÀI cho câu nhiều mốc nêu TỐI THIỂU 600 chữ, mỗi mốc 2–3 câu (thuận / cẩn trọng / việc nên làm) dựa đúng lá của mốc; `yeuCauVietDaiThem`. `ai.js`: SYSTEM_GON nêu rõ độ dài theo dòng ĐỘ DÀI; `GON_MAX_TOKENS_DAI` 8192 cho câu nhiều mốc (câu ngắn giữ 4096). `auto.js` (`giaiLoiGuiKhach`, dùng chung bot + web): bản AI < 600 chữ → một lượt viết dài thêm DUY NHẤT nếu còn kịp trong ngân sách 30 s (ước bằng thời gian lượt đầu), không thì giữ bản đang có + cảnh báo mềm. `sw.js` boi-v25.
+- Test `node boi/test.mjs` 81/81. Chưa đo với cầu nối thật (mạng phiên bị chặn).
+
 ### 2026-10-30 17:30 GMT+7 — Claude Code — BOI-20261030-06 — ô Lời gửi khách = bản gọn của bot, < 30 s
 - Lỗi thật: ô khách đợi 3 phút vẫn "Bản theo luật… vì đang xem bản luật"; câu dài thì lời gửi sơ sài. Gốc: cổng quá chặt, trần 220 chữ, ô khách chờ bản đầy đủ, lý do bị che.
 - `auto.js`: `giaiLoiGuiKhach` — MỘT hàm dùng chung cho bot và web (SYSTEM_GON, lược đồ gọn, no_luc=low, cùng cổng). `views.js`: ô khách chạy song song bản đầy đủ ngay khi mở màn giải, chữ chảy dần; nút chép mở khi là bản AI (kể cả có cảnh báo nhẹ); dòng lý do hiện lý do thật. `loi.js`: cổng chỉ chặn lỗi cứng (tên lá, chữ cấm, mất dấu, đầu dòng/tiêu đề/in đậm, tên vị trí, gọi sai tên); độ dài/đoạn/câu sáo/ý khớp/trái chiều/ngữ cảnh là cảnh báo; độ dài theo câu hỏi (150–300 chữ; nhiều mốc 600–800, 4–10 đoạn, đủ từng mốc; tên tháng được nhắc). `ai.js`/`store.js`: chỉ Claude — cầu nối lỗi thì luật, không rơi trạm Gemini. `sw.js` boi-v24.

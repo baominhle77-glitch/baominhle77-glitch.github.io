@@ -6,8 +6,8 @@ import { createSession, addPickedRound, ensureMapping } from "./state.js";
 import { spreadById, SPREADS, defaultYear } from "./spreads.js";
 import { suggestSpread, detectTopics } from "./topic.js";
 import { analyze } from "./insight.js";
-import { chotLoiGuiKhach } from "./loi.js";
-import { goiCoDau, SYSTEM_GON, gonRequest, partialJSON, phanLoaiLoiAI, LOCAL_KEY } from "./ai.js";
+import { chotLoiGuiKhach, doDaiLgk, demChu, kiemLoiGuiKhach, yeuCauVietDaiThem, SYSTEM_LGK } from "./loi.js";
+import { goiCoDau, SYSTEM_GON, gonRequest, partialJSON, phanLoaiLoiAI, LOCAL_KEY, GON_MAX_TOKENS, GON_MAX_TOKENS_DAI } from "./ai.js";
 
 // k vị trí khác nhau trong 1..n, đều, không lệch (loại bỏ phần dư)
 export function viTriNgauNhien(n, k, rand = globalThis.crypto) {
@@ -99,15 +99,21 @@ export function thamSoTrai(cauHoi, sp, goiY = suggestSpread(cauHoi)) {
 // AI_THU_LAI: số lượt gọi AI tối đa (mỗi lượt đã gồm chuỗi cầu nối → thử lại → trạm → cứu cầu nối); giữa hai lượt chờ thuLaiMs.
 // Bot chỉ gửi khách khi nguon là "ai"/"ai-viet-lai" → phải cố ra bản AI trước khi trả bản luật.
 export const AI_THU_LAI = { lan: 2, ms: 3000 };
+// Ngân sách thời gian tới khi ô Lời gửi khách đầy đủ (GĐ 30/10): lượt "viết dài thêm" chỉ chạy khi còn kịp trong ngân sách
+export const NGAN_SACH_LGK = { ms: 30000, du: 1500 };
 
 // ---- Lời gửi khách bằng "bản giải gọn" — MỘT hàm dùng chung cho bot BoiAuto và ô Lời gửi khách trên web ----
 // Chỉ Claude qua cầu nối (no_luc=low, lược đồ gọn, ≤ 4096 token); cổng chỉ chặn lỗi cứng, lỗi mềm thành cảnh báo.
 // Bản luật chỉ khi AI lỗi mạng/trống (hoặc lỗi cứng cả sau lượt viết lại). onText(chữ lời gửi đang chảy).
 // → { text, nguon: "ai"|"ai-viet-lai"|"luat", lyDo, moHinh, canhBao[], tongKet, traLoi }
-export async function giaiLoiGuiKhach({ db, session: s, rule, settings = {}, key = LOCAL_KEY, fetchImpl, storage, signal, onText, thuLai = AI_THU_LAI.lan, thuLaiMs = AI_THU_LAI.ms }) {
+export async function giaiLoiGuiKhach({ db, session: s, rule, settings = {}, key = LOCAL_KEY, fetchImpl, storage, signal, onText, thuLai = AI_THU_LAI.lan, thuLaiMs = AI_THU_LAI.ms, nganSachMs = NGAN_SACH_LGK.ms }) {
   const caiDat = { ...settings, xungHo: s.tenKhach || "bạn" };
-  let obj = null, moHinh = "", moHinhVietLai = "", aiLoi = "", cuu = "", lgk = null;
-  const call = key ? (system, text) => goiCoDau({ provider: "gemini", key, system, json: false, gon: true, messages: [{ role: "user", text }], fetchImpl, storage, signal })
+  const t0 = Date.now();
+  const doDai = doDaiLgk(s);
+  // câu nhiều mốc cần nhiều chỗ ra hơn (600–800 chữ + khung JSON)
+  const maxTokens = doDai.nhieu ? GON_MAX_TOKENS_DAI : GON_MAX_TOKENS;
+  let obj = null, moHinh = "", moHinhVietLai = "", aiLoi = "", cuu = "", lgk = null, msLuot = 0;
+  const call = key ? (system, text) => goiCoDau({ provider: "gemini", key, system, json: false, gon: true, maxTokens, messages: [{ role: "user", text }], fetchImpl, storage, signal })
     .then((r) => { moHinhVietLai = r.moHinh || r.model || ""; return r.text; }) : null;
   const chay = (full) => {
     const t = partialJSON(full)?.loi_gui_khach;
@@ -117,14 +123,16 @@ export async function giaiLoiGuiKhach({ db, session: s, rule, settings = {}, key
     if (lan > 1) await new Promise((r) => setTimeout(r, thuLaiMs));
     if (signal?.aborted) throw new DOMException("aborted", "AbortError");
     if (key) {
+      const tLuot = Date.now();
       try {
         const res = await goiCoDau({
-          provider: "gemini", key, json: true, gon: true, fetchImpl, storage, signal,
+          provider: "gemini", key, json: true, gon: true, maxTokens, fetchImpl, storage, signal,
           system: SYSTEM_GON,
           messages: [{ role: "user", text: gonRequest(db, s, { reading: rule, money: rule._money, settings: caiDat }) }],
           onText: onText ? chay : undefined,
         });
         cuu = res.cuu || "";
+        msLuot = Date.now() - tLuot;
         const o = partialJSON(res.text);
         if (o && String(o.loi_gui_khach || "").trim()) { obj = o; moHinh = res.moHinh || res.model || ""; aiLoi = ""; }
         else aiLoi = "AI trả trống";
@@ -136,18 +144,45 @@ export async function giaiLoiGuiKhach({ db, session: s, rule, settings = {}, key
     lgk = await chotLoiGuiKhach({ db, session: s, rule, reading: obj ? { loi_gui_khach: String(obj.loi_gui_khach) } : null, tenKhach: s.tenKhach, xungHo: settings.xungHo || "", call: obj ? call : null });
     if (lgk.nguon !== "luat") break;
   }
+  // Câu nhiều mốc mà bản AI vẫn ngắn hơn mức tối thiểu → một lượt "viết dài thêm" duy nhất, CHỈ khi còn kịp
+  // trong ngân sách (ước lượt sau mất ngang lượt vừa rồi). Không kịp hoặc lượt thêm lỗi → giữ bản đang có (cảnh báo mềm).
+  let vietDai = "";
+  if (key && lgk.nguon !== "luat" && doDai.nhieu && demChu(lgk.text) < doDai.min) {
+    const conLai = nganSachMs - (Date.now() - t0);
+    if (conLai - NGAN_SACH_LGK.du >= Math.max(msLuot, 1)) {
+      try {
+        const res = await goiCoDau({
+          provider: "gemini", key, json: false, gon: true, maxTokens, fetchImpl, storage, signal, system: SYSTEM_LGK,
+          messages: [{ role: "user", text: yeuCauVietDaiThem(s, lgk.text, s.tenKhach || "", db, rule) }],
+          onText: onText ? (full) => onText(full) : undefined,
+        });
+        const moi = String(res.text || "").trim();
+        const k = kiemLoiGuiKhach(moi, db, { tenKhach: s.tenKhach || "", xungHo: settings.xungHo || "", session: s });
+        if (k.ok && demChu(moi) > demChu(lgk.text)) {
+          lgk = { ...lgk, text: moi, canhBao: k.canhBao };
+          moHinh = res.moHinh || res.model || moHinh;
+          if (lgk.nguon === "ai-viet-lai") moHinhVietLai = moHinh;
+          vietDai = "đã viết dài thêm 1 lượt";
+        } else vietDai = k.ok ? "lượt viết dài thêm không dài hơn — giữ bản cũ" : `lượt viết dài thêm lỗi cứng (${k.loi.join("; ")}) — giữ bản cũ`;
+      } catch (e) {
+        if (e?.name === "AbortError") throw e;
+        vietDai = "lượt viết dài thêm lỗi — giữ bản cũ";
+      }
+    } else vietDai = "không đủ thời gian viết dài thêm";
+    if (vietDai && !/^đã/u.test(vietDai)) lgk = { ...lgk, canhBao: [...(lgk.canhBao || []), vietDai] };
+  }
   const moHinhLoi = lgk.nguon === "ai" ? moHinh : lgk.nguon === "ai-viet-lai" ? (moHinhVietLai || moHinh) : "";
   const lyDo = lgk.nguon === "luat"
     ? (obj ? `${cuu ? `${cuu}; ` : ""}lỗi cứng sau khi viết lại: ${lgk.loi.join("; ")}` : key ? (aiLoi || "AI lỗi: không rõ") : "không gọi AI")
     : cuu;
   if (lyDo && key) console[lgk.nguon === "luat" ? "warn" : "info"]("[loi-gui-khach]", lgk.nguon === "luat" ? "bản theo luật vì:" : "đường AI:", lyDo);
   if (lgk.canhBao?.length) console.info("[loi-gui-khach] cảnh báo nhẹ (vẫn dùng bản AI):", lgk.canhBao.join("; "));
-  return { text: lgk.text, nguon: lgk.nguon, lyDo, moHinh: moHinhLoi, canhBao: lgk.canhBao || [], tongKet: String(obj?.tong_ket || ""), traLoi: obj?.tra_loi || null };
+  return { text: lgk.text, nguon: lgk.nguon, lyDo, moHinh: moHinhLoi, canhBao: lgk.canhBao || [], tongKet: String(obj?.tong_ket || ""), traLoi: obj?.tra_loi || null, vietDai, giay: Math.round((Date.now() - t0) / 100) / 10 };
 }
 
 // Bot: gửi khách khi nguon "ai" / "ai-viet-lai" (kể cả khi chỉ có cảnh báo mềm); "luat" thì không gửi.
 // moHinh = modelVersion của bên đã viết lời gửi (claude-haiku-5-5 …), "" khi bản luật.
-export async function giaiTuDong({ db, cauHoi, trai = "tu-chon", nguoc = false, tenKhach = "", settings = {}, key = null, fetchImpl, storage, onSession, thuLai = AI_THU_LAI.lan, thuLaiMs = AI_THU_LAI.ms }) {
+export async function giaiTuDong({ db, cauHoi, trai = "tu-chon", nguoc = false, tenKhach = "", settings = {}, key = null, fetchImpl, storage, onSession, thuLai = AI_THU_LAI.lan, thuLaiMs = AI_THU_LAI.ms, nganSachMs = NGAN_SACH_LGK.ms }) {
   const q = String(cauHoi || "").trim();
   if (!db) throw new Error("Bộ bài chưa tải xong.");
   // chưa phải câu hỏi bói → hỏi lại khách (hoặc chuyển Chủ tịch), không bốc lá
@@ -165,12 +200,12 @@ export async function giaiTuDong({ db, cauHoi, trai = "tu-chon", nguoc = false, 
   await ensureMapping(s, 0);
   addPickedRound(s, s.tiers.map((t) => ({ tarot: viTriNgauNhien(78, t.t), lenormand: viTriNgauNhien(36, t.l) })));
   const rule = analyze(db, s, caiDat, 0);
-  const r = await giaiLoiGuiKhach({ db, session: s, rule, settings, key, fetchImpl, storage, thuLai, thuLaiMs });
+  const r = await giaiLoiGuiKhach({ db, session: s, rule, settings, key, fetchImpl, storage, thuLai, thuLaiMs, nganSachMs });
   // web mở phiên này: ô Lời gửi khách hiện đúng bản bot đã gửi; phần giải chi tiết tự giải đầy đủ khi người bấm
   s.lgk = { text: r.text, nguon: r.nguon, lyDo: r.lyDo, moHinh: r.moHinh, canhBao: r.canhBao, at: new Date().toISOString(), rounds: s.rounds.length };
   s.tuDong = true;
   onSession?.(s);
-  return { loiGuiKhach: r.text, maKhoa: s.hash, nguon: r.nguon, moHinh: r.moHinh, lyDo: r.lyDo, canhBao: r.canhBao, trai: sp.id, tenTrai: sp.ten, lyDoTrai, phien: s.id, tenKhach: s.tenKhach };
+  return { loiGuiKhach: r.text, maKhoa: s.hash, nguon: r.nguon, moHinh: r.moHinh, lyDo: r.lyDo, canhBao: r.canhBao, vietDai: r.vietDai, giay: r.giay, trai: sp.id, tenTrai: sp.ten, lyDoTrai, phien: s.id, tenKhach: s.tenKhach };
 }
 
 // Hàng đợi: lời gọi sau chờ lời gọi trước xong (kể cả khi lời trước lỗi)

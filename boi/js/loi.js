@@ -26,8 +26,18 @@ export function doDaiLgk(session) {
 }
 export function dongDoDai(session) {
   const d = doDaiLgk(session);
-  const moc = d.nhieu && d.moc.length ? ` Trả lời đủ TỪNG mốc khách hỏi, theo thứ tự: ${d.moc.join(", ")} — mỗi mốc ít nhất một câu cụ thể (được gọi tên tháng/mốc thời gian).` : d.nhieu ? " Trả lời đủ từng vế/mốc khách hỏi." : "";
-  return `ĐỘ DÀI LỜI GỬI: ${d.min}–${d.max} chữ, ${d.doanMin}–${d.doanMax} đoạn cách nhau một dòng trống.${moc}`;
+  if (!d.nhieu) return `ĐỘ DÀI LỜI GỬI: ${d.min}–${d.max} chữ, ${d.doanMin}–${d.doanMax} đoạn cách nhau một dòng trống.`;
+  // câu nhiều mốc (GĐ 30/10 chiều): đo thật ra 386 chữ, mỗi tháng 1–2 câu → nêu rõ số chữ tối thiểu và số câu mỗi mốc
+  const moc = d.moc.length
+    ? ` Trả lời đủ TỪNG mốc khách hỏi, theo thứ tự: ${d.moc.join(", ")}. MỖI mốc 2–3 câu cụ thể dựa đúng lá của mốc đó: một điều thuận, một điều cần cẩn trọng, một việc nên làm (được gọi tên tháng/mốc thời gian). Có thể gộp 2–3 mốc liền nhau vào một đoạn.`
+    : " Trả lời đủ từng vế/mốc khách hỏi, mỗi vế 2–3 câu cụ thể: điều thuận, điều cần cẩn trọng, việc nên làm.";
+  return `ĐỘ DÀI LỜI GỬI: TỐI THIỂU ${d.min} chữ (nhắm khoảng ${Math.round((d.min + d.max) / 2)} chữ, không quá ${d.max}), ${d.doanMin}–${d.doanMax} đoạn cách nhau một dòng trống. Dưới ${d.min} chữ là CHƯA ĐẠT.${moc} Thêm một đoạn mở (trả lời thẳng cả năm/cả câu) và một đoạn kết (việc nên làm đầu tiên).`;
+}
+// Lượt "viết dài thêm" (một lần duy nhất, chỉ khi còn ngân sách thời gian): bản AI đúng ý nhưng ngắn hơn mức tối thiểu
+export function yeuCauVietDaiThem(session, banCu, tenKhach, db = null, rule = null) {
+  const d = doDaiLgk(session);
+  const nghia = db ? khoiNghiaChoAI(db, session, rule) : "";
+  return `${dongGoiKhach(tenKhach)}\nCÂU HỎI: ${session.cauHoi}\n${dongDoDai(session)}\n\n${nghia}\n\n(Tên lá, tên tầng, tên vị trí ở trên chỉ để bạn nắm ý — KHÔNG chép vào lời gửi.)\n\nBẢN ĐANG CÓ (${demChu(banCu)} chữ — quá ngắn, cần tối thiểu ${d.min} chữ):\n${banCu}\n\nHãy viết lại thành bản đầy đủ khoảng ${Math.round((d.min + d.max) / 2)} chữ: giữ nguyên câu trả lời thẳng và chiều của bản cũ, mở rộng để MỖI mốc có 2–3 câu cụ thể (điều thuận, điều cần cẩn trọng, việc nên làm) dựa đúng lá của mốc đó. Chỉ trả về lời gửi.`;
 }
 export const demChu = (t) => (String(t || "").trim().match(/\S+/g) || []).length;
 export const doanVan = (t) => String(t || "").split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
